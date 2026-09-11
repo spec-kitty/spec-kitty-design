@@ -127,11 +127,11 @@
     {
       "criterion_id": "FR-013",
       "description": "Verify FR-013 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "runtime string audit",
+      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T006] every rendered light-DOM text node and every aria-label/label/message value across all 11 stories is a string of the base or extension fixture or a fixture formatter output.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:43.467149+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
