@@ -232,9 +232,15 @@ success/denial, and terminal error — as composition and accessibility evidence
 page component and not a replica of all twelve Family 5 screens. Story 1 composes one native
 `<form>` with a labelled `sk-form-input` and one native `<button type="submit" class="sk-button
 sk-button--primary">`. Story 2 composes `sk-card`, native `.sk-facts`, one `sk-pill-tag` per
-supplied scope, and Approve/Deny as two native `<button type="submit">` inside one native
+supplied scope wrapped in a real `<ul>`/`<li>` list (the scopes are the security payload the
+user is consenting to, so they get list semantics the same way the client/account facts get a
+`<dl>` — `sk-pill-tag` itself is documented presentational, with no role or accessible-name
+contribution), and Approve/Deny as two native `<button type="submit">` inside one native
 `<form>` — Approve carries `class="sk-button sk-button--primary"`, Deny carries
-`class="sk-button sk-button--danger-secondary"` — DOM order Approve-then-Deny. Stories 3 and 4
+`class="sk-button sk-button--danger-secondary"` — DOM order Approve-then-Deny. Both actions also
+carry `name="decision"` with distinct `value`s (`"approve"`/`"deny"`), copied along with the
+class/DOM-order shape above: without them a consumer's real server-rendered submission cannot
+tell which action was pressed. Stories 3 and 4
 compose the public `sk-boundary-page` frame (`packages/styles/src/boundary-page/`, a styles-only
 pattern with no custom element): a consumer-owned `<main>` landmark around
 `.sk-boundary-page__stage` > `.sk-boundary-page__card` containing the heading

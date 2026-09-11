@@ -150,7 +150,9 @@ test("source is Storybook-only composition with no forbidden reader, private rea
   // <button type="submit" class="sk-button ...">, not the custom element.
   expect(code).not.toMatch(/<\s*sk-button(?:\s|>)/);
   expect(code).not.toMatch(/from\s*["']\.\.\/button\/sk-button\.js["']/);
-  expect(code).toMatch(/<button\s+type="submit"\s+class="sk-button sk-button--primary"/);
+  expect(code).toMatch(
+    /<button[^>]*\btype="submit"[^>]*\bclass="sk-button sk-button--primary"/,
+  );
   // IC-06's real compositions must be present — Deny's real class and sk-boundary-page's real
   // BEM classes, composed as markup, not merely referenced in comments.
   expect(code).toMatch(/class="sk-button sk-button--danger-secondary"/);
@@ -348,19 +350,41 @@ test("Story 2 renders the authorization fixture's facts, scopes, and Approve-the
     "Open pull requests",
   ]);
 
+  // List structure (squad pass 2, item 1): the scopes locator above is a descendant read that
+  // would match identically through a bare <div> — it enumerates AROUND the <ul>/<li> wrapper
+  // rather than asserting it exists. Assert the real list structure directly: three <li>, each
+  // holding one <sk-pill-tag>, inside the one <ul class="sk-cli-auth-pattern__scopes">.
+  await expect(
+    root.locator("ul.sk-cli-auth-pattern__scopes > li > sk-pill-tag"),
+  ).toHaveCount(3);
+
   const actionOrder = await root
     .locator("form button")
     .evaluateAll((elements) =>
       elements.map((el) => ({
         type: el.getAttribute("type"),
+        name: el.getAttribute("name"),
+        value: el.getAttribute("value"),
         classes: el.className,
         text: el.textContent?.trim(),
       })),
     );
+  // `name`/`value` (squad pass 2, item 1): the prior `{type, classes, text}` projection
+  // enumerated AROUND these two attributes — deleting them would leave every one of this
+  // test's checks green. Distinct `value`s are the actual security-relevant assertion: Approve
+  // and Deny must produce a differentiable request.
   expect(actionOrder).toEqual([
-    { type: "submit", classes: "sk-button sk-button--primary", text: "Approve" },
     {
       type: "submit",
+      name: "decision",
+      value: "approve",
+      classes: "sk-button sk-button--primary",
+      text: "Approve",
+    },
+    {
+      type: "submit",
+      name: "decision",
+      value: "deny",
       classes: "sk-button sk-button--danger-secondary",
       text: "Deny",
     },
