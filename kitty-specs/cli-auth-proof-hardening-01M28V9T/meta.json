@@ -1,5 +1,4 @@
 {
-  "accept_commit": "5f09eeaf8dac437d6d733f437edc3afabab54f12",
   "acceptance_history": [
     {
       "accept_commit": "9bcb5da81c0f56c27947e9732dfef033fdd93bda",
@@ -14,12 +13,18 @@
       "accepted_at": "2026-09-11T21:40:57.161427+00:00",
       "accepted_by": "jeroennouws",
       "accepted_from_commit": "321edce9d455bae12c6c5e5dc700008dad33cba2"
+    },
+    {
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-11T22:28:31.830678+00:00",
+      "accepted_by": "jeroennouws",
+      "accepted_from_commit": "2e59a671b327963993c832ffc53534c1970ddf23"
     }
   ],
   "acceptance_mode": "pr",
-  "accepted_at": "2026-09-11T21:40:57.161427+00:00",
+  "accepted_at": "2026-09-11T22:28:31.830678+00:00",
   "accepted_by": "jeroennouws",
-  "accepted_from_commit": "321edce9d455bae12c6c5e5dc700008dad33cba2",
+  "accepted_from_commit": "2e59a671b327963993c832ffc53534c1970ddf23",
   "created_at": "2026-09-11T18:22:28.277252+00:00",
   "flattened": false,
   "friendly_name": "cli auth proof hardening",
