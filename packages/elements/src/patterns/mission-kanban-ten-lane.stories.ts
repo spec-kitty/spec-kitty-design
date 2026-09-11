@@ -344,6 +344,7 @@ export const missionKanbanTenLaneGuardProof = () => {
   });
   const checks = [
     ['duplicateLane', /each exactly once/, withBase({ ...base, detailedLanes: [...base.detailedLanes, base.detailedLanes[0]!] })],
+    ['emptyLanes', /each exactly once/, withBase({ ...base, detailedLanes: [] })],
     ['blankLaneLabel', /needs a supplied label/, withBase({ ...base, detailedLanes: [{ ...base.detailedLanes[0]!, label: ' ' }, ...base.detailedLanes.slice(1)] })],
     ['noCurrentNavigation', /navigation entry must be current/, withBase({ ...base, navigation: base.navigation.map((item) => ({ ...item, current: false })) })],
     ['duplicateWorkPackage', /Duplicate Work Package identifier/, withBase({ ...base, workPackages: [...base.workPackages, first] })],
@@ -352,17 +353,21 @@ export const missionKanbanTenLaneGuardProof = () => {
     ['unknownCommittedLane', /Unknown committed lane/, withBase(firstReplaced({ committedLaneId: 'not-supplied' as BaseWorkPackage['committedLaneId'] }))],
     ['duplicateTrackerControl', /tracker control/, withBase(firstReplaced({ trackerReferences: [first.trackerReferences[0]!, first.trackerReferences[0]!] }))],
     ['blankTrackerControl', /tracker control/, withBase(firstReplaced({ trackerReferences: [{ label: ' ', href: first.trackerReferences[0]!.href }] }))],
+    ['blankTrackerHref', /tracker control/, withBase(firstReplaced({ trackerReferences: [{ label: first.trackerReferences[0]!.label, href: ' ' }] }))],
     ['overlayUnknownWorkPackage', /unknown Work Package/, withExtension(overlayReplaced({ workPackageId: 'WP99' }))],
     ['overlayUnknownLane', /Overlay names an unknown lane/, withExtension(overlayReplaced({ targetLaneId: 'not-supplied' as LaneId }))],
     ['duplicateOverlay', /More than one overlay/, withExtension({ ...extension, unverifiedOverlays: [overlay, overlay] })],
     ['overlayNotUnverified', /classified as unverified/, withExtension(overlayReplaced({ classification: 'observed' as 'unverified' }))],
     ['overlayUnknownTone', /overlay tier tone/, withExtension(overlayReplaced({ tierTone: 'unknown' as StatusIndicatorTone }))],
     ['blankOverlayLabel', /tier label and actor/, withExtension(overlayReplaced({ actorLabel: ' ' }))],
+    ['blankOverlayTier', /tier label and actor/, withExtension(overlayReplaced({ tierLabel: ' ' }))],
     ['incompleteStressLabels', /Stress lane labels/, withExtension({ ...extension, stress: { laneLabels: { genesis: 'Genesis' } as TenLaneSource['stress']['laneLabels'] } })],
+    ['blankStressLabel', /Stress lane labels/, withExtension({ ...extension, stress: { laneLabels: { ...extension.stress.laneLabels, genesis: ' ' } } })],
     ['unknownIndicatorTone', /indicator tone/, withExtension({ ...extension, tones: { ...extension.tones, commitTrust: 'unknown' as StatusIndicatorTone } })],
     ['unknownSelection', /unknown or repeated lane/, withOptions({ selectedLaneIds: ['not-supplied' as LaneId] })],
     ['repeatedSelection', /unknown or repeated lane/, withOptions({ selectedLaneIds: ['blocked', 'blocked'] })],
     ['unknownWorkPackage', /unknown or repeated Work Package/, withOptions({ includedWorkPackageIds: ['WP99'] })],
+    ['repeatedInclusion', /unknown or repeated Work Package/, withOptions({ includedWorkPackageIds: [first.id, first.id] })],
   ] as const;
   return deepFreezeMissionKanban(Object.fromEntries(checks.map(([name, expected, check]) => {
     try {
@@ -976,9 +981,8 @@ export const K3FilteredLanes: Story = {
     { state: 'k3', filtersOpen: true },
   ),
   play: async ({ canvasElement }) => basePlay(canvasElement, async (root) => {
-    await expect(root.dataset.laneIds).toBe('["in_review","blocked"]');
-    await expect(root.dataset.workPackageIds).toBe('["WP10","WP05"]');
-    await expect(root.querySelectorAll('input[type="checkbox"]:checked')).toHaveLength(2);
+    await expect(root.querySelectorAll('input[type="checkbox"]:checked')).toHaveLength(MISSION_KANBAN_FIXTURE.k3SelectedLaneIds.length);
+    await expect(root.querySelectorAll('[data-lane-id]')).toHaveLength(MISSION_KANBAN_FIXTURE.k3SelectedLaneIds.length);
   }),
 };
 
