@@ -197,11 +197,11 @@
     {
       "criterion_id": "FR-020",
       "description": "Verify FR-020 is satisfied",
-      "proof_type": "manual_inspection",
-      "evidence": "git log confirms the required separation: 2a9a9d95 'feat(storybook): add CLI Auth pattern stories, IC-01 through IC-05' (non-dependent scaffolding) is a distinct commit from 6ac345b9 'feat(storybook): finalize CLI Auth pattern IC-06 against landed deps' (dependent finalization). Reviewer confirmed via regex assertion (sk-cli-auth-pattern.spec.ts:164-165) and direct grep of the diff that every 'pending #NNN'/'TODO(#303)' marker is removed only in the finalization commit, none remain in HEAD.",
+      "proof_type": "automated_test",
+      "evidence": "CORRECTED (squad pass 2, item 3): the previous evidence cited 2a9a9d95 and 6ac345b9, both orphaned by this lane's rebase onto the train tip -- git merge-base --is-ancestor 2a9a9d95 HEAD and the same check for 6ac345b9 both return false, so a reader cannot verify the claim from this branch's history. Pointing at the surviving, rewritten SHAs instead: d0d9f2fc 'add CLI Auth pattern stories, IC-01 through IC-05' (non-dependent scaffolding) is a distinct commit from b845c3ab 'finalize CLI Auth pattern IC-06 against landed deps' (dependent finalization); both are ancestors of HEAD, verified. The previous evidence's closing claim, 'none remain in HEAD', was also broader than the truth: git grep 'pending #' HEAD returns expected-stories.json's own narrative ratchet log, e.g. Story 2's IC-01-05 entry recording 'Deny stays a plain secondary sk-button, pending #320's danger-secondary tone'. That is append-only historical prose describing a past state, not a stale code marker left behind by mistake, so it is not itself a defect -- but the evidence's own claim was not scoped to say so. Qualified claim, verified directly: no  or  marker remains in the mission's shipped source (sk-cli-auth-pattern.stories.ts, the spec files); the static regex assertion at sk-cli-auth-pattern.spec.ts (source.not.toMatch(/pending #(?:320|321|303)\\b/) and not.toContain('TODO(#303)')) enforces exactly that scope and passes at HEAD (CI run 34611601183, playwright job pass). expected-stories.json's narrative log entries are excluded from that scope by design -- they are the ratchet's own audit trail, not shipped code.",
       "pass_fail": "pass",
-      "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-11T12:09:32.343339+00:00",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T15:23:28.378199+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
