@@ -49,7 +49,7 @@
       "wp": "WP01"
     },
     "#321": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "#321's --sk-border-control contrast fix landed on train/elements-first before IC-06; consumed by Story 1 and verified by a real, falsifiable contrast assertion in sk-cli-auth-pattern.spec.ts (fed the pre-#321 color pair as a companion red case).",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -57,8 +57,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
