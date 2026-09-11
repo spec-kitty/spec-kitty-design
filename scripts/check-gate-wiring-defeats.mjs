@@ -160,17 +160,36 @@ const CASES = [
     step.shell = 'bash -c "true" #';
   }],
 
-  // ── REL1 (#362), contracts/ci-quality-integration.md §5: the two cases this mission adds ──
+  // ── REL1 (#362), contracts/ci-quality-integration.md §5: WP01's original two cases ──────
   ['REL1 pull_request.branches narrowed back to [main, train/**] (develop must still be flagged uncovered)', (wf) => {
     wf.on.pull_request.branches = ['main', 'train/**'];
   }],
   ['REL1 the gate\'s promote/* tolerance widened to apply unconditionally', (wf) => {
     const step = gateStep(wf);
     const anchor =
-      'if [[ "$head_ref" == promote/* ]]; then\n' +
+      'if [[ "$HEAD_REF" == promote/* && "$BASE_REF" == "develop" ]]; then\n' +
       '  sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"\n' +
       'fi';
     step.run = once(String(step.run), anchor, 'sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"');
+  }],
+
+  // ── B3/M5 (pre-merge squad, PR #429): three more cases the first pass missed ────────────
+  ['B3 the gate\'s promote/* tolerance drops the base_ref==develop conjunct (a promote/* PR into ANY base, e.g. main, would get tolerance)', (wf) => {
+    const step = gateStep(wf);
+    const anchor = 'if [[ "$HEAD_REF" == promote/* && "$BASE_REF" == "develop" ]]; then';
+    step.run = once(String(step.run), anchor, 'if [[ "$HEAD_REF" == promote/* ]]; then');
+  }],
+  ['B3 storybook-build\'s own if: drops the base_ref==develop conjunct', (wf) => {
+    const job = wf.jobs?.['storybook-build'];
+    if (!job) throw new Error('no storybook-build job');
+    const before = String(job.if);
+    const widened = "!(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')";
+    const narrow = "!startsWith(github.head_ref, 'promote/')";
+    if (!before.includes(widened)) throw new Error('anchor not found, probe would be vacuous');
+    job.if = before.replace(widened, narrow);
+  }],
+  ['M5 push.branches narrowed back to [main, train/**] (develop must still be flagged uncovered on the push side)', (wf) => {
+    wf.on.push.branches = ['main', 'train/**'];
   }],
 ];
 
@@ -179,7 +198,7 @@ const CASES = [
  * REMOVED by lowering it in the same commit, which is a reviewable edit rather than a deletion
  * that hides in a digit.
  */
-const MIN_CASES = 20;
+const MIN_CASES = 23;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });

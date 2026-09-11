@@ -34,15 +34,15 @@ const WORKFLOW = '.github/workflows/ci-quality.yml';
 // is how a step in that job is held to running — see #193's two entries there, and the
 // `lint-code` EDGE assertions below, which hold the job itself to being able to block a merge.
 const JOBS = ['test', 'release-gate'];
-// REL1 (#362): the relevant-change predicate gained a `promote/*`-skip conjunct
-// (research.md R15) so a promotion PR's already-fully-gated content doesn't redundantly
-// re-run the ~30-minute browser suite. Updated here WITH that edit, not left stale — a stale
-// exact-string comparison would have reported this job's `if:` as wrong forever, which is a
-// checker that reds on a correct file, exactly the failure mode this file's own header warns
-// about one level up.
+// REL1 (#362): the relevant-change predicate gained a `promote/*`-into-`develop`-skip conjunct
+// (research.md R15, base-scoped per B3/pre-merge squad PR #429) so a promotion PR's
+// already-fully-gated content doesn't redundantly re-run the ~30-minute browser suite. Updated
+// here WITH that edit, not left stale — a stale exact-string comparison would have reported
+// this job's `if:` as wrong forever, which is a checker that reds on a correct file, exactly
+// the failure mode this file's own header warns about one level up.
 const STORYBOOK_PREDICATE =
   "(needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true') && " +
-  "!startsWith(github.head_ref, 'promote/')";
+  "!(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')";
 const STORYBOOK_WRAPPER = 'node scripts/build-storybook-with-budget.mjs';
 
 // ── READING A `run:` BODY AS SHAPE RATHER THAN AS TEXT (#202, #205) ───────────────────
@@ -451,6 +451,55 @@ if (!hasPr) {
   }
 }
 
+// PUSH-SIDE BRANCH COVERAGE (M5, pre-merge squad, PR #429). WP01's own T001 Definition of Done
+// requires `develop` covered on BOTH `pull_request.branches` and `push.branches` — the
+// `pull_request` loop above asserted only the PR side; nothing asserted the push side, and
+// `promote-develop`'s ONLY trigger is a `push` to `train/elements-first`, so a push-side
+// regression there would silently starve the whole promotion mechanism with the PR-side
+// check still green. Same glob-matching shape as above (a narrowing to `develop` is refused,
+// an absent `branches:` — wider — is accepted), duplicated rather than shared across the two
+// independent `on.pull_request`/`on.push` blocks so a change to one cannot silently also
+// narrow the other's assertion.
+const hasPush = onKeys.includes('push');
+const pushTrigger = hasPush && on && typeof on === 'object' && !Array.isArray(on) ? (on.push ?? {}) : {};
+if (!hasPush) {
+  problems.push(
+    'the workflow has no `on.push` trigger — `promote-develop`\'s only trigger is a push to ' +
+      'train/elements-first, so a workflow with no push trigger at all can never run it',
+  );
+} else if ('branches' in pushTrigger) {
+  const globToRePush = (g) =>
+    new RegExp(
+      '^' +
+        String(g)
+          .replace(/[.+^${}()[\]\\]/g, '\\$&')
+          .replace(/\*\*/g, '\u0000')
+          .replace(/\*/g, '[^/]*')
+          .replace(/\u0000/g, '.*')
+          .replace(/\?/g, '[^/]') +
+        '$',
+    );
+  const pushEntries = Array.isArray(pushTrigger.branches) ? pushTrigger.branches.map(String) : [String(pushTrigger.branches)];
+  const pushCovers = (ref) => {
+    let hit = false;
+    for (const e of pushEntries) {
+      if (e.startsWith('!')) {
+        if (globToRePush(e.slice(1)).test(ref)) hit = false;
+      } else if (globToRePush(e).test(ref)) hit = true;
+    }
+    return hit;
+  };
+  for (const ref of ['main', 'train/elements-first', 'develop']) {
+    if (!pushCovers(ref)) {
+      problems.push(
+        `\`on.push.branches\` (${pushEntries.join(', ')}) does not match \`${ref}\` — a push to it ` +
+          `runs no job in this workflow (including, for \`train/elements-first\`, the ` +
+          `\`promote-develop\` job itself)`,
+      );
+    }
+  }
+}
+
 // The job's ABSENCE is a failure, not a pass. `wf.jobs?.[JOB] && 'if' in ...` evaluated to
 // false when the job was deleted, so the script printed green over a workflow with no test
 // job at all — the certifying-absence shape check-part-ratchet.mjs goes out of its way to
@@ -487,14 +536,17 @@ else {
   const script = String(step?.run ?? '');
 
   // REL1 (#362), contracts/ci-quality-integration.md §3: the gate's promote/* skip-tolerance
-  // exception may only fire INSIDE a conditional testing `head_ref` against a `promote/*`
-  // pattern — never unconditionally. A promotion PR's tree legitimately sets `sb_ok`/`a11y_ok`/
+  // exception may only fire INSIDE a conditional testing BOTH the head ref against a
+  // `promote/*` pattern AND the base ref against `develop` — never unconditionally, and never
+  // scoped to the head name alone (B3, pre-merge squad, PR #429: a head-name-only match let a
+  // `promote/*`-headed PR into ANY base, e.g. `main`, get this tolerance — nothing on GitHub
+  // reserves the namespace). A promotion PR's tree legitimately sets `sb_ok`/`a11y_ok`/
   // `vr_ok`/`pw_ok` to "success" regardless of the four heavy jobs' real result (research.md
-  // R15); widening that from a narrowly-scoped exception to an unconditional acceptance would
-  // silently readmit the exact green-by-skip bypass this file exists to refuse, for every PR,
-  // not only `promote/*` ones. This is real, new logic (plan.md names this the highest-risk
-  // single edit in this mission) — scoped as narrowly as possible to the one assignment line,
-  // never generalized into a check over every conditional in the step.
+  // R15); widening that from a narrowly-scoped exception to an unconditional (or base-
+  // unscoped) acceptance would silently readmit the exact green-by-skip bypass this file
+  // exists to refuse. This is real, new logic (plan.md names this the highest-risk single edit
+  // in this mission) — scoped as narrowly as possible to the one assignment line, never
+  // generalized into a check over every conditional in the step.
   const TOLERANCE_ASSIGNMENT = 'sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"';
   if (!script.includes(TOLERANCE_ASSIGNMENT)) {
     problems.push(
@@ -518,12 +570,19 @@ else {
       }
       if (/^fi\b/.test(line) && guardStack.length) guardStack.pop();
     }
-    if (!guardCondition || !/head_ref/.test(guardCondition) || !/promote\/\*/.test(guardCondition)) {
+    // B4 (pre-merge squad): the guard now reads `"$HEAD_REF"`/`"$BASE_REF"` (env-sourced),
+    // never `${{ github.head_ref }}` interpolated directly into the script — case-insensitive
+    // so this survives either spelling without treating the injection fix itself as a defeat.
+    const headRefOk = /head_ref/i.test(guardCondition ?? '');
+    const promotePatternOk = /promote\/\*/.test(guardCondition ?? '');
+    const baseRefOk = /base_ref/i.test(guardCondition ?? '') && /develop/.test(guardCondition ?? '');
+    if (!guardCondition || !headRefOk || !promotePatternOk || !baseRefOk) {
       problems.push(
         "the gate's promote/* skip-tolerance assignment is not scoped inside a conditional " +
-          `testing \`head_ref\` against a \`promote/*\` pattern (nearest enclosing guard: ` +
-          `${JSON.stringify(guardCondition ?? null)}) — this turns a narrowly-scoped exception ` +
-          'into an unconditional acceptance of a skip that should be a failure',
+          'testing the head ref against a `promote/*` pattern AND the base ref against ' +
+          `\`develop\` (nearest enclosing guard: ${JSON.stringify(guardCondition ?? null)}) — ` +
+          'this turns a narrowly-scoped exception into an unconditional, or base-unscoped, ' +
+          'acceptance of a skip that should be a failure',
       );
     }
   }
@@ -775,6 +834,11 @@ else {
     // still green — precisely the defect class every comment in this list records.
     [/node\s+scripts\/promote-develop\.mjs\s+--selftest(\s|$)/, "the develop-promotion mechanism's own probe table", 'scripts/promote-develop.mjs --selftest'],
     [/node\s+scripts\/check-develop-ruleset-parity\.mjs\s+--selftest(\s|$)/, "the ruleset-parity checker's own probe table", 'scripts/check-develop-ruleset-parity.mjs --selftest'],
+    // M6 (pre-merge squad, PR #429), both entries with the gate itself. Without an entry here,
+    // either the NFR-002/SC-003 trigger-parity check or its own probe table could be deleted
+    // from `lint-code` with this checker still green.
+    [/node\s+scripts\/check-ci-quality-trigger-parity\.mjs(?!\s*--selftest)(\s|$)/, 'the ci-quality.yml trigger-parity check (NFR-002, SC-003)', 'scripts/check-ci-quality-trigger-parity.mjs'],
+    [/node\s+scripts\/check-ci-quality-trigger-parity\.mjs\s+--selftest(\s|$)/, "the trigger-parity check's own probe table", 'scripts/check-ci-quality-trigger-parity.mjs --selftest'],
   ];
 
   /**
