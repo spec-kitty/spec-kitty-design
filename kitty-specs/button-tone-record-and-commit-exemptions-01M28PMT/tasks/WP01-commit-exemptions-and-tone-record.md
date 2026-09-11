@@ -1,6 +1,6 @@
 ---
 work_package_id: WP01
-title: 'spec-kitty commit exemptions and sk-button tone-flattening ADR'
+title: spec-kitty commit exemptions and sk-button tone-flattening ADR
 dependencies: []
 requirement_refs:
 - FR-001
@@ -17,15 +17,16 @@ requirement_refs:
 - C-003
 planning_base_branch: mission/button-tone-record-and-commit-exemptions
 merge_target_branch: mission/button-tone-record-and-commit-exemptions
-branch_strategy: Planning artifacts for this mission were generated on mission/button-tone-record-and-commit-exemptions; completed changes must merge back into mission/button-tone-record-and-commit-exemptions.
+branch_strategy: Planning artifacts for this mission were generated on mission/button-tone-record-and-commit-exemptions. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/button-tone-record-and-commit-exemptions unless the human explicitly redirects the landing branch.
 subtasks:
 - T001
 - T002
 - T003
 history: []
 agent_profile: node-norris
-authoritative_surface: commitlint.config.cjs, scripts/check-commitlint-config.mjs
-create_intent: []
+authoritative_surface: commitlint.config.cjs
+create_intent:
+- docs/architecture/decisions/2026-09-11-17-sk-button-tone-intensity-flattening.md
 execution_mode: code_change
 model: ''
 owned_files:
