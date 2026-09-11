@@ -55,30 +55,53 @@ and so on) beside a family that already scales." `BUTTON_VARIANTS` is not yet on
 has one occupied cell of a possible six (three intensities × two tones, once `neutral`/`danger`
 is named as the second axis) — but a second `danger-*` sibling would put it there.
 
-## The load-bearing fact: `BUTTON_VARIANTS` is a codegen source
+## The load-bearing fact: `BUTTON_VARIANTS` feeds ONE of two disconnected pipelines
 
-This is the single most useful thing this record can state, and it is read directly from
-`sk-button.markup.ts:14-18`'s own comment, not inferred:
+This is the single most useful thing this record can state, and it corrects an error present in
+an earlier draft of this same record (caught at review): the two pipelines below were conflated
+into one. Both are read directly from source, not inferred.
 
-> The generator treats this map as the component's VARIANTS and emits one static export per
-> entry.
+**Pipeline 1 — `BUTTON_VARIANTS` → static HTML → `index.ts`.** `sk-button.markup.ts:14-18`'s own
+comment: "The generator treats this map as the component's VARIANTS and emits one static export
+per entry." Confirmed in the generator itself, `scripts/build-element-markup.mjs:288-300`: it
+looks up `mod[`${screaming}_VARIANTS`]` by naming convention (`BUTTON_VARIANTS` for `sk-button`)
+and derives one static-HTML export per key — refusing to run if the export is missing or not an
+object, so a component "with genuinely no variants exports an empty object explicitly" rather
+than the generator silently emitting nothing. That per-key derivation produces
+`packages/styles/src/button/sk-button.html` and `index.ts`'s generated exports. **It stops
+there.**
 
-Confirmed in the generator itself, `scripts/build-element-markup.mjs:288-300`: it looks up
-`mod[`${screaming}_VARIANTS`]` by naming convention (`BUTTON_VARIANTS` for `sk-button`) and
-derives one static-HTML export per key — refusing to run if the export is missing or not an
-object, specifically so a component "with genuinely no variants exports an empty object
-explicitly" rather than the generator silently emitting nothing. That per-key derivation is what
-produces `packages/styles/src/button/sk-button.html` and `index.ts`'s generated exports and,
-downstream of the elements build, `packages/elements/custom-elements.json`'s `sk-button.variant`
-type and the generated React wrapper's prop type (`packages/react/src/**`).
+**Pipeline 2 — the hand-spelled union in `sk-button.ts` → `custom-elements.json` → the React
+wrapper.** `sk-button.ts:35` declares
+`declare variant: 'primary' | 'secondary' | 'ghost' | 'danger-secondary' | undefined;` by hand —
+derived from nothing. The custom-elements-manifest analyzer (`nx run elements:analyze`) reads
+this literal TypeScript type off the class field and writes it into
+`custom-elements.json`'s `SkButton.variant.type.text`, verbatim, confirmed identical to the
+`sk-button.ts` union in the committed manifest. `scripts/build-react-wrappers.mjs`'s own header
+comment states the wrappers are "GENERATED from custom-elements.json"; the generated
+`packages/react/src/SkButton.d.ts:42` reads `variant?: SkButtonElement["variant"]` — an indexed
+type read off the element class, which is this same hand-spelled union one layer removed. None of
+Pipeline 2 reads `BUTTON_VARIANTS`.
 
-**The consequence for a future axis split.** Splitting `BUTTON_VARIANTS` into two axes — a
-`tone` and an `intensity`/`variant` — is not a local edit to one TypeScript file. It changes what
-the generator derives one export per key *from*, which changes the generated static HTML
-exports, the manifest entry, and the generated React (and Vue) wrapper's prop surface in the same
-motion. Any mission that takes on this split must treat it as a generated-artifact change with
-the blast radius that implies — full regeneration, `--check` verification across every generated
-consumer, and a manifest diff review — not as a same-shape rename.
+`BUTTON_VARIANTS` does appear inside `custom-elements.json` — the analyzer globs
+`sk-button.markup.ts` too, so it is indexed as its own independent `variable` export
+(`kind: "variable"`, `name: "BUTTON_VARIANTS"`) — but nothing wires that entry to
+`SkButton.variant`'s type. The two sit side by side in the same manifest file, sourced from two
+different files, and nothing compares them.
+
+**The consequence — and the hazard, not just the cost.** Regenerating from `BUTTON_VARIANTS`
+(adding a `danger-primary` key and running the markup generator) updates the static HTML and
+`index.ts` exports correctly. It does **not** touch `sk-button.ts`'s union, does **not** touch
+`custom-elements.json`'s `variant` type, and does **not** touch the React or Vue wrapper's prop
+type. A contributor who stops at "`BUTTON_VARIANTS` is a codegen source" would add the key,
+regenerate, watch every currently wired `--check` gate pass, and ship: static markup and CSS
+would support `danger-primary` while the manifest and the generated consumer surface still
+advertised only the original four values. **This split is itself a standing drift risk.** No
+gate in this repository compares `BUTTON_VARIANTS`'s keys against `sk-button.ts`'s hand-spelled
+union — each pipeline's own `--check` only compares its generated output against its own source
+(the markup check against `BUTTON_VARIANTS`; the manifest check against the class declaration),
+so a two-thirds-complete `danger-primary` addition (styles + markup, manifest/wrapper untouched)
+would pass every gate wired today.
 
 ## Decision
 
@@ -93,24 +116,37 @@ sibling.**
   secondary" and "the success-tone secondary" as siblings of the same intensity without the
   string enum growing combinatorially). One additional flat sibling is tolerable; two is the
   point at which flattening stops paying for itself.
-- **The migration shape, if `danger-primary` is added.** Splitting into two axes means: (1)
-  `BUTTON_VARIANTS` (or its replacement) stops being the generator's sole per-key derivation
-  source — either the generator's `<COMPONENT>_VARIANTS` convention is extended to compose two
-  maps (a `BUTTON_TONES` × `BUTTON_INTENSITIES` product, generated combinatorially) or the
-  component keeps one flat map but the generator, the manifest, and the wrapper types are updated
-  to know that some keys are compounds; (2) `sk-button.ts`'s hand-spelled `variant` type union
-  (currently `'primary' | 'secondary' | 'ghost' | 'danger-secondary' | undefined`, not derived —
-  see `sk-button.ts`, widened by hand at #320) would need the same widening exercise repeated,
-  or the union derived from the map(s) instead of hand-spelled, closing the drift risk that
-  hand-spelling already carries; (3) every per-tone rule elsewhere in the component that is
-  keyed on a specific variant string rather than on `BUTTON_VARIANTS`'s keys generically must be
-  re-derived — see the next section, which is the live example of exactly this risk.
-- **Widening `BUTTON_VARIANTS` with a `danger-primary` sibling costs less than splitting the
-  axis** — one more map entry, one more generated export, one more manifest value, no generator
-  change — but it does not stop the underlying question from recurring at the next tone. This
+- **The migration shape if `danger-primary` is added — even as a same-shape widening, not a
+  full axis split.** Because Pipeline 1 and Pipeline 2 above are disconnected, adding the value
+  correctly requires touching both, by hand, in the same change — nothing propagates
+  automatically from one to the other:
+  1. Add `'danger-primary': 'sk-button--danger-primary'` to `BUTTON_VARIANTS` and run the markup
+     generator (Pipeline 1). This alone updates only the static HTML and `index.ts` exports.
+  2. **Separately, by hand**, widen `sk-button.ts`'s `variant` type union to include
+     `'danger-primary'` (Pipeline 2, widened by hand at #320 the same way). Nothing derives this
+     step from step 1 — skipping it is exactly the silent, gate-invisible drift this record names
+     above.
+  3. Regenerate `custom-elements.json` (`nx run elements:analyze`) and the React/Vue wrappers
+     from the now-widened union, and run every `--check` gate — none of which catches a *missed*
+     step 2, since each gate compares only within its own pipeline.
+  4. Every per-tone rule elsewhere in the component keyed on a specific variant string — the
+     busy-cue CSS is the live example, see #348 below — must be re-derived by hand; neither
+     pipeline touches CSS selectors.
+
+  A genuine two-axis split (rather than one more flat sibling) would need to restructure both
+  pipelines: the generator's `<COMPONENT>_VARIANTS` convention composing a `BUTTON_TONES` ×
+  `BUTTON_INTENSITIES` product (or an explicit compound-key convention), and `sk-button.ts`'s
+  union derived from that same source instead of hand-spelled — which is also the point at which
+  a single source feeding both pipelines would close the drift hazard above, rather than only
+  widening it by one more manually-synchronised value.
+- **Widening `BUTTON_VARIANTS` with a `danger-primary` sibling costs less than a full axis
+  split** — one more map entry, one more generated export, plus the mandatory hand-edit to
+  `sk-button.ts`'s union (step 2 above, never automatic) — but it is not the single-file edit it
+  looks like, and it does not stop the underlying question from recurring at the next tone. This
   record does not choose between "add the one sibling and defer the split again" and "split now";
-  it states the ceiling and the cost of each path so the mission that adds `danger-primary`, if
-  one is ever filed, does not have to re-derive this analysis.
+  it states the ceiling, the two-pipeline cost, and the drift hazard of each path so the mission
+  that adds `danger-primary`, if one is ever filed, does not have to re-derive this analysis or
+  rediscover the hazard by shipping it.
 
 ## Related: #348, the same defect family, not fixed here
 
@@ -122,17 +158,18 @@ silently inherits the wrong one. This is the identical root cause named above �
 concern (the busy-cue override, here; the enum's key shape, in this record) with nothing tying
 it back to the tone set as a first-class thing other rules can derive from — reached from a
 different file. **This record does not fix #348.** It is named here because both records are
-evidence for the same underlying claim: `BUTTON_VARIANTS`' four keys are a closed, hand-maintained
-list that multiple parts of this component (the type union, the busy-cue CSS, and — per the
-codegen-source fact above — every generated artifact) each independently assume stays small.
+evidence for the same underlying claim: `sk-button`'s tone set is spelled out independently in
+at least three places — `BUTTON_VARIANTS` (Pipeline 1), `sk-button.ts`'s hand-spelled union
+(Pipeline 2), and the busy-cue CSS's hardcoded selector — and nothing in this component ties the
+three together or checks that they agree.
 
 ## Consequences
 
 **Positive** — the question raised twice at #341 and dropped both times now has one indexed
 answer; a future `danger-primary` proposal can cite this record's ceiling and migration-cost
-analysis instead of re-deriving it, and the codegen-source fact is now written down where a
-contributor proposing an axis split will find it before scoping the change as "just a type
-change."
+analysis instead of re-deriving it, and the two-pipeline split — and the drift hazard it creates
+— is now written down where a contributor proposing an axis split, or even the one-sibling
+widening, will find it before scoping the change as "just a type change" or "just a map edit."
 
 **Negative** — none: this record makes no code change (C-002) and asserts no operator
 ratification it does not have.
@@ -150,8 +187,21 @@ fifth tone) is actually proposed.
 * Evidence read directly from source for this record: `packages/elements/src/button/
   sk-button.markup.ts:14-26` (the `BUTTON_VARIANTS` map and its generator-derivation comment),
   `scripts/build-element-markup.mjs:288-300` (the generator's per-key derivation and its
-  explicit-empty-object requirement), `packages/elements/src/button/sk-button.ts` (the
-  hand-spelled `variant` type union), `packages/styles/src/button/sk-button.css` (the
+  explicit-empty-object requirement), `packages/elements/src/button/sk-button.ts:35` (the
+  hand-spelled `variant` type union — Pipeline 2's actual source), `packages/elements/
+  custom-elements.json` (`SkButton.variant.type.text`, confirmed verbatim-identical to
+  `sk-button.ts`'s union, and `BUTTON_VARIANTS`'s own disconnected `variable` entry in the same
+  file), `scripts/build-react-wrappers.mjs:1-10` (its own header comment: wrappers are generated
+  from `custom-elements.json`, not from `BUTTON_VARIANTS`), `packages/react/src/SkButton.d.ts:42`
+  (`variant?: SkButtonElement["variant"]`, confirming the wrapper prop type is indexed off the
+  element class), `packages/styles/src/button/sk-button.css` (the
   `.sk-button--primary .sk-button__busy-cue` hardcoding #348 names), and
   `packages/tokens/src/tokens.css` (the tint-border N-components-x-M-variants comment, quoted
   accurately above rather than paraphrased).
+* **Correction note.** An earlier draft of this record stated that `BUTTON_VARIANTS`'s
+  per-key derivation reaches `custom-elements.json`'s `sk-button.variant` type and the generated
+  React wrapper's prop type "downstream of the elements build." That was wrong — caught at
+  review, before this record left Proposed status — and is corrected above: those two surfaces
+  are sourced from `sk-button.ts`'s hand-spelled union (Pipeline 2), entirely independent of
+  `BUTTON_VARIANTS` (Pipeline 1). The drift hazard this correction surfaces is now this record's
+  central claim, not a footnote.
