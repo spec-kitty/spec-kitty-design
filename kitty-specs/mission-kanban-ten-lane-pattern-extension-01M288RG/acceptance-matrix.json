@@ -2,7 +2,7 @@
   "mission_slug": "mission-kanban-ten-lane-pattern-extension-01M288RG",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pass",
+  "overall_verdict": "fail",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -155,5 +155,15 @@
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
-  "negative_invariants": []
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "No published Kanban/lane/card/overlay/filter element tag exists in package source.",
+      "verification_method": "grep_absence",
+      "verification_command": "<sk-mission-kanban|sk-kanban|customElements\\.define\\(['\"]sk-(mission-)?kanban",
+      "result": "verification_error",
+      "evidence": "grep verification failed (exit 2): grep: Unmatched ( or \\(",
+      "scope": "packages/elements/src packages/react/src packages/styles/src"
+    }
+  ]
 }
