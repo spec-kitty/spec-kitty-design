@@ -21,21 +21,42 @@
  * multiple runtime executions with the identical abort-on-first-failure hazard, invisible to a
  * gate that counts call sites rather than executions. Rather than teach the gate to understand
  * loop control flow (which a `while`, a `.forEach`, a recursive helper, or a loop body split
- * across a helper function would all defeat in a different way), the rule is now flat: no
- * `toHaveScreenshot` call site anywhere in the scanned files may be hard, full stop. A flat
- * invariant needs no control-flow reasoning and cannot be defeated by a new loop shape.
+ * across a helper function would all defeat in a different way), the rule is flat: no
+ * `toHaveScreenshot` call site anywhere in the scanned files may be hard, full stop.
  *
- * WHY THIS IS SAFE — CHECKED, NOT ASSUMED. Going soft only changes behaviour if some LATER
- * statement in the same test depended on an earlier screenshot's hard abort to avoid running
- * against a known-bad state (for example, a mutating action gated on "we only get here if the
- * page matched its baseline"). Every `toHaveScreenshot` call site in `visual.spec.ts` was
- * checked for a statement following it in the same test/loop body: the only sites with anything
- * after them are later setup for the NEXT screenshot in the same already-multi-screenshot test
- * (navigate to a new story, change viewport, hover/focus/press a key) — never a mutation whose
- * safety depends on the prior screenshot having passed. No exemption was needed. `EXEMPTIONS`
- * below stays empty as a named escape hatch for the future: if a test is ever written that
- * deliberately relies on a hard screenshot abort, add it there with a reason, rather than
- * weakening this rule.
+ * WHAT THIS GATE ACTUALLY GUARANTEES (tightened after a live pre-merge review defeated the
+ * first hardened attempt three ways — see below). The scan operates on a COPY of the source
+ * with every `//` line comment, `/* block *\/` comment, and single/double-quoted or template
+ * string BODY blanked out to spaces (newlines kept, so line numbers stay true; `${...}`
+ * template-interpolation code is kept live, since it is real code, not literal text) before it
+ * ever looks for `expect(`. That closes three classes at once: a comment sitting between the
+ * closing paren and `.toHaveScreenshot(`; a string or template literal that merely CONTAINS the
+ * text `expect(x).toHaveScreenshot(` (which must not be read as a call); and unbounded
+ * whitespace/indentation between the two, because the forward scan after the closing paren now
+ * skips arbitrary trivia to the next real token rather than trusting a fixed-width lookahead.
+ * Both `.toHaveScreenshot(` and `?.toHaveScreenshot(` (optional chaining) are matched.
+ *
+ * DEFEATED THREE WAYS BEFORE THIS HARDENING, ALL NOW PROBED IN --selftest:
+ *   1. `expect(root) /* eslint-disable-next-line *\/.toHaveScreenshot(...)` — a comment between
+ *      the close-paren and the dot. The old scan's 20-character lookahead window read the
+ *      comment text, not `.toHaveScreenshot(`, and reported nothing.
+ *   2. A hard call reformatted with more than 20 characters of intervening whitespace (deeper
+ *      indentation, or the closing paren and the property access on separate lines with a
+ *      comment or blank line between) slipped past the same fixed window.
+ *   3. `expect(root)?.toHaveScreenshot(...)` — optional chaining. The old scan matched a literal
+ *      `.` only.
+ *
+ * KNOWN REMAINING LIMIT — NOT CLOSED, STATED RATHER THAN LEFT SILENT. This gate matches the
+ * literal token `expect`. It has no type or binding information, so `expect` SHADOWED or
+ * ALIASED — `const check = expect; await check(root).toHaveScreenshot(...);`, or
+ * `import { expect as ex } from '@playwright/test'` used as `ex(root).toHaveScreenshot(...)` —
+ * passes through undetected. Closing this needs a real AST/scope analysis (e.g. via
+ * `@typescript-eslint` or TypeScript's own checker), which is a materially different tool than
+ * a text scan; it is out of scope for this gate. No such aliasing currently exists in the
+ * scanned files (checked by hand at the time this note was written) and `--selftest` below
+ * carries a live probe recording that this specific shape is NOT caught, so a future fix to
+ * this limit — or a regression that makes it matter — is visible rather than silently assumed
+ * away.
  *
  * Usage: node scripts/check-visual-screenshot-softness.mjs [--selftest]
  */
@@ -55,6 +76,100 @@ const EXEMPTIONS = new Map([
   // ['apps/storybook/src/tests/example.spec.ts:42', 'reason the hard abort is load-bearing here'],
 ]);
 
+/**
+ * A copy of `source`, same length and same newline positions (so line numbers computed from
+ * either string agree), with every comment and every plain string/template-literal BODY
+ * character replaced by a space. `${...}` interpolation inside a template literal is left as
+ * live code (recursively — an interpolation can itself contain a nested template literal),
+ * because it can legitimately contain a real `expect(...)` call; nothing else inside a string
+ * or comment can.
+ *
+ * A regex over raw text cannot do this correctly: a `//` inside a string, or a `*\/` inside a
+ * template literal, each defeat it in a different direction (see check-story-theme-wrapper.mjs
+ * and check-behaviour-fixture-imports.mjs's own `stripComments` for the same reasoning applied
+ * to a different rule). This is a small state walk instead, extended with a depth-tracked stack
+ * so template-literal interpolation nests correctly.
+ */
+export function maskNonCode(source) {
+  let out = '';
+  let i = 0;
+  const n = source.length;
+  // Stack entries: 'code' | 'line' | 'block' | 'sq' | 'dq' | 'tpl'.
+  // 'tpl-interp:<braceDepth>' tracks a ${...} interpolation's own brace depth so a nested
+  // object literal like `${ {a: 1} }` does not end the interpolation on its inner `}`.
+  const stack = ['code'];
+  const interpDepth = [];
+
+  const top = () => stack[stack.length - 1];
+
+  while (i < n) {
+    const c = source[i];
+    const next = source[i + 1];
+    const state = top();
+
+    if (state === 'code') {
+      if (c === '/' && next === '/') { stack.push('line'); out += '  '; i += 2; continue; }
+      if (c === '/' && next === '*') { stack.push('block'); out += '  '; i += 2; continue; }
+      if (c === "'") { stack.push('sq'); out += c; i++; continue; }
+      if (c === '"') { stack.push('dq'); out += c; i++; continue; }
+      if (c === '`') { stack.push('tpl'); out += c; i++; continue; }
+      if (interpDepth.length) {
+        if (c === '{') interpDepth[interpDepth.length - 1]++;
+        else if (c === '}') {
+          interpDepth[interpDepth.length - 1]--;
+          if (interpDepth[interpDepth.length - 1] === 0) {
+            interpDepth.pop();
+            stack.pop(); // leave the 'code' state pushed for this interpolation
+            out += c;
+            i++;
+            continue;
+          }
+        }
+      }
+      out += c;
+      i++;
+      continue;
+    }
+
+    if (state === 'line') {
+      if (c === '\n') { stack.pop(); out += '\n'; i++; continue; }
+      out += ' ';
+      i++;
+      continue;
+    }
+
+    if (state === 'block') {
+      if (c === '*' && next === '/') { stack.pop(); out += '  '; i += 2; continue; }
+      out += c === '\n' ? '\n' : ' ';
+      i++;
+      continue;
+    }
+
+    if (state === 'sq' || state === 'dq') {
+      const quote = state === 'sq' ? "'" : '"';
+      if (c === '\\') { out += '  '; i += 2; continue; }
+      if (c === quote) { stack.pop(); out += c; i++; continue; }
+      out += c === '\n' ? '\n' : ' ';
+      i++;
+      continue;
+    }
+
+    // state === 'tpl'
+    if (c === '\\') { out += '  '; i += 2; continue; }
+    if (c === '`') { stack.pop(); out += c; i++; continue; }
+    if (c === '$' && next === '{') {
+      stack.push('code');
+      interpDepth.push(1); // the '{' just consumed counts as depth 1
+      out += '${';
+      i += 2;
+      continue;
+    }
+    out += c === '\n' ? '\n' : ' ';
+    i++;
+  }
+  return out;
+}
+
 /** Index of the character matching the `(` at `openIdx`, tracking nested parens. */
 function findMatchingClose(text, openIdx) {
   let depth = 0;
@@ -69,31 +184,44 @@ function findMatchingClose(text, openIdx) {
   return -1;
 }
 
+/** First index at or after `idx` that is not ASCII whitespace. */
+function skipWhitespace(text, idx) {
+  let i = idx;
+  while (i < text.length && /\s/.test(text[i])) i++;
+  return i;
+}
+
 /**
  * `{ line, message }` offenders for one file's source: every HARD `toHaveScreenshot` call site
- * (`expect(...).toHaveScreenshot(...)`, not `expect.soft(...).toHaveScreenshot(...)`), anywhere
- * in the file — inside a test body, inside a `for`/`while` loop, inside a helper function, it
- * does not matter. This is deliberately NOT scoped to "tests with 2+ screenshot calls" — see
- * the file-level comment for why a flat rule is what closes the loop-execution gap.
+ * (`expect(...).toHaveScreenshot(...)` or `expect(...)?.toHaveScreenshot(...)`, never
+ * `expect.soft(...)`), anywhere in the file — inside a test body, inside a `for`/`while` loop,
+ * inside a helper function, it does not matter. Deliberately NOT scoped to "tests with 2+
+ * screenshot calls" — see the file-level comment for why a flat rule is what closes the
+ * loop-execution gap, and for what this scan does and does not guarantee.
  *
- * The scan walks every `expect(` in the file (not `expect.soft(`, since that substring cannot
- * match the literal text `expect(` followed immediately by `(`), finds its balanced closing
- * paren via `findMatchingClose` (so a locator argument with its own nested parens, e.g.
- * `root.locator('[data-x]')`, does not break the walk), and checks whether the very next thing
- * after that close is `.toHaveScreenshot(`.
+ * Matching happens against `maskNonCode(source)`, not the raw text, so a comment or a string
+ * containing the literal text `expect(x).toHaveScreenshot(` is never mistaken for a real call,
+ * and the trivia between the closing paren and the property access is skipped to the next real
+ * token rather than trusted to fit inside a fixed-width window. `EXPECT_CALL` allows (but does
+ * not require) whitespace between `expect` and its `(` — `expect (root)` is unusual but legal
+ * JS a plain `indexOf('expect(')` would silently miss.
  */
+const EXPECT_CALL = /\bexpect\s*\(/g;
+
 export function offenders(file, source) {
+  const masked = maskNonCode(source);
   const out = [];
-  let i = 0;
-  while (i < source.length) {
-    const idx = source.indexOf('expect(', i);
-    if (idx === -1) break;
-    const openParenIdx = idx + 'expect'.length;
-    const closeIdx = findMatchingClose(source, openParenIdx);
+  EXPECT_CALL.lastIndex = 0;
+  let m;
+  while ((m = EXPECT_CALL.exec(masked)) !== null) {
+    const idx = m.index;
+    const openParenIdx = m.index + m[0].length - 1; // the '(' EXPECT_CALL just matched
+    const closeIdx = findMatchingClose(masked, openParenIdx);
     if (closeIdx === -1) break;
-    const after = source.slice(closeIdx + 1, closeIdx + 1 + 20);
-    if (/^\s*\.toHaveScreenshot\(/.test(after)) {
-      const line = source.slice(0, idx).split('\n').length;
+    const afterTrivia = skipWhitespace(masked, closeIdx + 1);
+    const rest = masked.slice(afterTrivia, afterTrivia + '?.toHaveScreenshot('.length);
+    if (rest.startsWith('.toHaveScreenshot(') || rest.startsWith('?.toHaveScreenshot(')) {
+      const line = masked.slice(0, idx).split('\n').length;
       const key = `${file}:${line}`;
       if (!EXEMPTIONS.has(key)) {
         out.push(
@@ -103,7 +231,6 @@ export function offenders(file, source) {
         );
       }
     }
-    i = closeIdx + 1;
   }
   return out;
 }
@@ -170,6 +297,107 @@ if (process.argv.includes('--selftest')) {
         '});\n',
       2,
     ],
+    // ── The three live bypasses a pre-merge review defeated this gate with, each now a probe ──
+    [
+      'DEFEAT 1: a block comment between the close-paren and the dot',
+      "test('bypass-1', async ({ page }) => {\n" +
+        "  await expect(root) /* eslint-disable-next-line */.toHaveScreenshot('a.png', {});\n" +
+        '});\n',
+      1,
+    ],
+    [
+      'DEFEAT 1b: a line comment on its own line between the close-paren and the dot',
+      "test('bypass-1b', async ({ page }) => {\n" +
+        '  await expect(root) // why this locator\n' +
+        "    .toHaveScreenshot('a.png', {});\n" +
+        '});\n',
+      1,
+    ],
+    [
+      'DEFEAT 2: far more than 20 characters of whitespace/indentation before the dot',
+      "test('bypass-2', async ({ page }) => {\n" +
+        '  await expect(root)\n' +
+        '                                                                              \n' +
+        "    .toHaveScreenshot('a.png', {});\n" +
+        '});\n',
+      1,
+    ],
+    [
+      'DEFEAT 3: optional chaining — expect(root)?.toHaveScreenshot(...)',
+      "test('bypass-3', async ({ page }) => {\n" +
+        "  await expect(root)?.toHaveScreenshot('a.png', {});\n" +
+        '});\n',
+      1,
+    ],
+    // ── Hunted past the three reported findings, per the follow-up instruction ──────────────
+    [
+      'a LINE COMMENT containing the exact literal text of a hard call — must not be a false positive',
+      "test('comment-text', async ({ page }) => {\n" +
+        "  // old code used to read: await expect(root).toHaveScreenshot('a.png', {});\n" +
+        "  await expect.soft(root).toHaveScreenshot('a.png', {});\n" +
+        '});\n',
+      0,
+    ],
+    [
+      'a BLOCK COMMENT containing the exact literal text of a hard call — must not be a false positive',
+      "test('comment-text-block', async ({ page }) => {\n" +
+        "  /* await expect(root).toHaveScreenshot('a.png', {}); -- the old hard form */\n" +
+        "  await expect.soft(root).toHaveScreenshot('a.png', {});\n" +
+        '});\n',
+      0,
+    ],
+    [
+      'a STRING LITERAL containing the exact literal text of a hard call — must not be a false positive',
+      "test('string-text', async ({ page }) => {\n" +
+        "  const note = 'the old code said expect(root).toHaveScreenshot(\\'a.png\\', {})';\n" +
+        "  await expect.soft(root).toHaveScreenshot('a.png', {});\n" +
+        '});\n',
+      0,
+    ],
+    [
+      'a TEMPLATE LITERAL containing the exact literal text of a hard call — must not be a false positive',
+      "test('template-text', async ({ page }) => {\n" +
+        '  const note = `see also: expect(root).toHaveScreenshot(${name}, {})`;\n' +
+        "  await expect.soft(root).toHaveScreenshot('a.png', {});\n" +
+        '});\n',
+      0,
+    ],
+    [
+      'a TEMPLATE LITERAL whose ${...} interpolation contains a REAL hard call — must still be caught',
+      "test('template-interp', async ({ page }) => {\n" +
+        "  const label = `prefix-${(await expect(root).toHaveScreenshot('a.png', {}), 'x')}-suffix`;\n" +
+        '});\n',
+      1,
+    ],
+    [
+      'a call split across several lines mid-expression, including a blank line — must still be caught',
+      "test('split', async ({ page }) => {\n" +
+        '  await expect(\n' +
+        '    root\n' +
+        '  )\n' +
+        '\n' +
+        "    .toHaveScreenshot(\n" +
+        "      'a.png',\n" +
+        '      {},\n' +
+        '    );\n' +
+        '});\n',
+      1,
+    ],
+    [
+      'space between expect and its opening paren — unusual but legal JS, found while hunting past the reported findings',
+      "test('spaced-paren', async ({ page }) => {\n" +
+        "  await expect (root).toHaveScreenshot('a.png', {});\n" +
+        '});\n',
+      1,
+    ],
+    [
+      'KNOWN GAP, documented not closed: expect ALIASED to another name is not detected — this probe records that fact, it does not assert the gate is safe against it',
+      "test('aliased', async ({ page }) => {\n" +
+        '  const check = expect;\n' +
+        "  await check(root).toHaveScreenshot('a.png', {});\n" +
+        '});\n',
+      0,
+    ],
   ];
 
   let bad = 0;
@@ -204,11 +432,11 @@ if (process.argv.includes('--selftest')) {
     }
   }
 
-  // PROBE THE READER, NOT ONLY THE REGEX-SHAPED WALK. Write a real file to disk and run
-  // offenders() over it read back with readFileSync, the same path the real scan uses, so a
-  // broken glob, a broken file read, or a broken line-number computation cannot self-test green.
-  // This probe specifically plants the LOOP shape, since that is the shape the flat rule exists
-  // to catch that the previous per-test-count rule could not.
+  // PROBE THE READER, NOT ONLY THE MATCHER. Write a real file to disk and run offenders() over
+  // it read back with readFileSync, the same path the real scan uses, so a broken glob, a
+  // broken file read, or a broken line-number computation cannot self-test green. This probe
+  // specifically plants the LOOP shape, since that is the shape the flat rule exists to catch
+  // that the previous per-test-count rule could not.
   const dir = mkdtempSync(join(tmpdir(), 'screenshot-softness-selftest-'));
   const planted = join(dir, 'planted.spec.ts');
   writeFileSync(
