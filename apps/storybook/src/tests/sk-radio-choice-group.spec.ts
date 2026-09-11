@@ -1320,6 +1320,19 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     // index 0 against index 2 instead holds disabled/enabled constant (both disabled) so
     // checkedness is the only remaining variable — the `disabled` flags are asserted equal
     // immediately below so a later fixture edit cannot silently reintroduce the confound.
+    //
+    // MEASURED LIMIT OF THIS PROBE, recorded so it is not cited for more than it proves.
+    // Attempting the generalising red-first mutant -- `appearance: none` plus a fixed ring, so
+    // every control paints identically with no glyph -- did NOT turn this test red: it still
+    // measured 289 differing pixels, byte-identical to the unmutated run. Chromium's
+    // `forced-colors: active` emulation overrides `appearance` for a native radio and restores
+    // truthful checked/unchecked painting regardless of author CSS, so no CSS-only regression
+    // can reach this assertion. What this test therefore proves is that forced colors DOES
+    // paint a perceivable checked/unchecked difference -- which is the clause #336 requires --
+    // not that author CSS could ever break it. The assertion machinery was separately shown
+    // non-vacuous by comparing a control against itself: 0 px, correctly below the threshold.
+    // The load-bearing guard against an invisible `accent-color` is the NORMAL-colours probe
+    // below, which does go red (0 px) under that same mutant.
     await page.emulateMedia({ forcedColors: "active" });
     const { group } = await openStory(page, "forced-colors");
     const controls = group.getByRole("radio");
