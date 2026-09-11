@@ -168,10 +168,10 @@
       "criterion_id": "FR-017",
       "description": "Verify FR-017 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "node scripts/check-pattern-composition.mjs run directly by reviewer: '\u2705 Pattern composition: 11 fixture(s), 261 inline CSS rule(s), 23 composed element tag(s), every ::part() inside the 142-part public ratchet, no reach-through, no duplicated component CSS.' node scripts/check-pattern-composition.mjs --selftest: '\u2705 All 47 probes behaved as recorded (34 reject, 13 accept), all 8 input probes refused their own branch, both floor arms refused, and 19 planted violation(s) went red in a copy of the real patterns directory.' Zero code changes to the gate itself (git diff confirms scripts/check-pattern-composition.mjs untouched).",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:07:36.737260+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
