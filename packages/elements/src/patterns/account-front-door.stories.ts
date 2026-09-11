@@ -39,31 +39,28 @@ import "../page-header/sk-page-header.js";
 import "../pill-tag/sk-pill-tag.js";
 import "../site-footer/sk-site-footer.js";
 import "../theme-toggle/sk-theme-toggle.js";
-// `.sk-public-header`, `sk-boundary-page` and `.sk-radio-choice-group` are STYLES-ONLY families
-// (no custom element — ADR-10 §3) and are not among the classes `apps/storybook/.storybook/
-// preview.ts` loads globally (only `sk-form-field`/`sk-prose` and the other families it names
-// are). `packages/elements` may depend on `packages/styles` in the documented one-directional
-// order (tokens -> styles -> elements -> react), so this pattern imports their authored CSS via
-// the `@spec-kitty/styles/<name>/*` package specifier — a bare relative path across the project
-// boundary (`../../../styles/src/...`) is rejected by `@nx/enforce-module-boundaries` ("Projects
-// cannot be imported by a relative or absolute path"), measured directly. Without these four
-// imports every public-header/boundary-page/radio-choice-group/skip-link class in this file
-// paints with the browser's UNSTYLED default (measured: an unstyled `<a>` under a dark
-// `color-scheme` renders `rgb(158, 158, 255)`, which is exactly the axe color-contrast violation
-// this import fixes).
-import "@spec-kitty/styles/public-header/sk-public-header.css";
-import "@spec-kitty/styles/boundary-page/sk-boundary-page.css";
-import "@spec-kitty/styles/radio-choice-group/sk-radio-choice-group.css";
-import "@spec-kitty/styles/skip-link/sk-skip-link.css";
-// `sk-site-footer.css`'s base `.sk-site-footer__link` colour rule (site-footer.css:137) has no
-// `::slotted()` counterpart — only its `--compact` sizing modifier does (site-footer.css:233-234,
-// sizing only, no colour). The element's OWN adopted shadow stylesheet therefore never colours a
-// light-DOM compact link at all; a document-level import of the same sheet is what lets the bare
-// class rule reach it (measured: without this import, compact footer links render the browser's
-// default link colour and fail axe's colour-contrast check in `sk-light`, same root cause as the
-// public-header import above). This is a pre-existing gap in a dependency's sheet, not touched
-// here — C-004 forbids editing anything under packages/styles/src/.
-import "@spec-kitty/styles/site-footer/sk-site-footer.css";
+// WHERE THE STYLES-LAYER CSS FOR THIS PATTERN COMES FROM, since none of it is imported here.
+//
+// `.sk-public-header` (#353), `.sk-boundary-page` (#303), `.sk-radio-choice-group` and
+// `.sk-skip-link` are STYLES-ONLY families with no custom element (ADR-10 §3), so there is no
+// element module to import that would carry their CSS. This file cannot import the CSS either:
+// `scripts/check-no-css-in-source.mjs` rejects a bare stylesheet import anywhere under
+// packages/elements/src (FR-009, ADR-10 §1 Confirmation #4) — an earlier revision of this file
+// imported all four via `@spec-kitty/styles/<name>/*` and `lint-code` failed on it. The four are
+// registered in `apps/storybook/.storybook/preview.ts` instead, which is the documented route:
+// packages/styles may not import an element and packages/elements may not import a stylesheet, so
+// `scope:storybook` is the one project allowed to reach both. That comment block names the case.
+//
+// sk-site-footer is the different one — it HAS an element, so it has a generated constructed
+// sheet, and `sk-site-footer.stories.ts` already adopts that same module the same way. A document
+// copy is needed because the element's own adopted shadow sheet never colours a light-DOM compact
+// link: the base `.sk-site-footer__link` colour rule (sk-site-footer.css:137) ships no
+// `::slotted()` counterpart, and the `--compact` modifier that does (sk-site-footer.css:233-234)
+// is sizing only. Measured: without this, compact footer links render the browser's default link
+// colour and fail axe's colour-contrast check in `sk-light` — the same root cause as the four
+// above. That gap in the dependency's sheet is pre-existing and is NOT touched here; C-004 forbids
+// editing anything under packages/styles/src/.
+import siteFooterDocumentSheet from "../site-footer/sk-site-footer.css.js";
 import { isolateThemeStory } from "../theme-toggle/theme-story-environment.fixture.js";
 import {
   ACCOUNT_FRONT_DOOR_FIXTURES,
@@ -96,6 +93,10 @@ export {
   fixtureForAccountFrontDoorState,
   projectAccountFrontDoor,
 } from "./account-front-door.fixture.js";
+
+if (!document.adoptedStyleSheets.includes(siteFooterDocumentSheet)) {
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, siteFooterDocumentSheet];
+}
 
 // `ACCOUNT_FRONT_DOOR_PATTERN_STYLE_TEXT` is DEFINED in the fixture module and re-exported here
 // (not defined in this file) — it is pure string data with no `lit`/`@storybook/web-components`
