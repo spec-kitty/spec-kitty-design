@@ -7,11 +7,11 @@
     {
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "built index + browser test",
+      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T001] index lists exactly 11 patterns-mission-kanban-ten-lane--* and exactly the 10 #278 ids; git diff origin/train/elements-first...HEAD touches no #278 file; CI run 34604991224 visual job failed only on the 12 new missing snapshots (all #278 baselines passed).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:29.460244+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
