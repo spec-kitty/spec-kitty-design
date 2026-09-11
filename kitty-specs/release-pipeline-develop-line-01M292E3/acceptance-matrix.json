@@ -77,11 +77,11 @@
     {
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
+      "proof_type": "manual_review",
+      "evidence": "This is a process gate satisfied by the operator's own act, not by code in this PR: ci-quality.yml's promote-develop job needs:[gate] and runs no code until PROMOTE_DEVELOP_ENABLED is set post-merge; the operator's approval of the implemented PR itself (this mission's PR) is the satisfying event and has not happened yet at the time of this WP report",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T23:25:20.478697+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
