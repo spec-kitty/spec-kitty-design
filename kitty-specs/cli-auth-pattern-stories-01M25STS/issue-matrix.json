@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#319": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "#319 is the parent epic; per C-011 and the issue text this PR uses Refs #319 and explicitly must not close it -- epic closure is deferred until #320, #321, and this mission are all complete.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#321": {
       "evidence_ref": "<link or commit>",
