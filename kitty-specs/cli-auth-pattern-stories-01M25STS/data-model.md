@@ -18,8 +18,8 @@ This mission introduces no runtime or persisted application data model. The enti
 | Story 1 default | code-entry fixture, no error | Label/description/input/submit render from the fixture; no `aria-invalid` state is present. |
 | Story 1 invalid | code-entry fixture with error message | Input carries `aria-invalid="true"`; the supplied error text is associated as the control's description and announced. |
 | Story 2 | authorization fixture | Facts, scopes, Approve, and Deny render exactly once each from the fixture; Deny composes `#320`'s danger-secondary tone once landed. |
-| Story 3 success | terminal-outcome fixture, `outcome: 'success'`, no action | `sk-boundary-page` shows the supplied heading/body; no action group renders. |
-| Story 3 denial | terminal-outcome fixture, `outcome: 'denied'`, no action | Same frame, denial copy; no action group renders. |
+| Story 3 success | terminal-outcome fixture, `outcome: 'success'`, no action | `sk-boundary-page` shows the supplied heading/body; the required `.sk-boundary-page__action-group` container is always present (`sk-boundary-page.css`'s own anatomy never omits it) and renders zero action children. |
+| Story 3 denial | terminal-outcome fixture, `outcome: 'denied'`, no action | Same frame, denial copy; the action-group container renders present but empty, as above. |
 | Story 4 no-action | terminal-error fixture, no action | `sk-boundary-page` shows only the exact error heading/body; zero controls anywhere in the composition. |
 | Story 4 with-action | terminal-error fixture, one supplied action | Exactly the one supplied action renders, sourced only from the fixture. |
 
@@ -29,7 +29,7 @@ This mission introduces no runtime or persisted application data model. The enti
 2. The code-entry invalid branch renders if and only if the fixture supplies an error message; no other condition may trigger it.
 3. Authorization scopes preserve fixture order in both the rendered pill-tag row and any accessible-name enumeration.
 4. Approve and Deny are both present in every Story 2 render; DOM order is always Approve-then-Deny, matching the approved visual order.
-5. A terminal-outcome or terminal-error projection renders an action group only when the fixture supplies exactly one action (label + href); it never renders zero-or-more than one, and it never invents an action.
+5. A terminal-outcome or terminal-error projection's `.sk-boundary-page__action-group` container is always present — it is a required part of `sk-boundary-page`'s anatomy and is never omitted from the DOM, unlike the optional mark/footnote. It renders exactly one child action when the fixture supplies one (label + href), and zero child actions otherwise; it never renders more than one, and never invents one. (Corrected from an earlier "no action group renders" phrasing in the Story 3 rows above: the container itself always renders; only its child action is conditional.)
 6. `outcome: 'success'` and `outcome: 'denied'` share the same `sk-boundary-page` anatomy; only the supplied heading/body copy differs — no separate success/denial component or modifier is introduced.
 7. Keyboard tab order equals DOM order in every interactive story; no positive `tabindex` is used anywhere in the pattern.
 8. No projection infers session, permission, route, or request-lifecycle state; every conditional in the pattern branches on a fixture field, never on an application concern.
