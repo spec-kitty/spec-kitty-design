@@ -229,7 +229,7 @@ const longStringsMap: Readonly<Record<string, string>> = {
   "ada+team@example.com":
     "ada.constantina.lovelace.plus.team.notifications.workspace@example.com",
   "Re-send Verification": "Re-send Verification Re-send Verification Re-send Verification",
-  "Make primary": "Make primary Make primary Make primary",
+  "Make Primary": "Make Primary Make Primary Make Primary",
   Remove: "Remove Remove Remove",
   "A verification email was just sent. You can send another in 58 seconds.":
     "A verification email was just sent to your address. You can send another verification email in fifty-eight seconds, once the cooldown period has fully elapsed.",

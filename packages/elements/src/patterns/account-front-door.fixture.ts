@@ -368,7 +368,7 @@ const PASSWORD_FIELD: SignupFieldFixture = {
 
 const TEAM_NAME_FIELD: SignupFieldFixture = {
   id: "front-door-team-name",
-  label: "Team name (optional)",
+  label: "Team Name (Optional)",
   type: "text",
   autocomplete: "organization",
   required: false,
@@ -376,7 +376,7 @@ const TEAM_NAME_FIELD: SignupFieldFixture = {
 
 const TERMS_FIELD: TermsFieldFixture = {
   id: "front-door-terms",
-  label: "I agree to the Terms",
+  label: "I agree to the Terms and Conditions",
 };
 
 const ENTRY_FIELDS: SignupFields = [EMAIL_FIELD, PASSWORD_FIELD, TEAM_NAME_FIELD, TERMS_FIELD];
@@ -418,19 +418,41 @@ const RESEND_VERIFICATION: EmailActionFact = {
   href: "/accounts/email/resend/",
 };
 const REMOVE_EMAIL: EmailActionFact = { label: "Remove", href: "/accounts/email/remove/" };
-const MAKE_PRIMARY: EmailActionFact = { label: "Make primary", href: "/accounts/email/primary/" };
+const MAKE_PRIMARY: EmailActionFact = { label: "Make Primary", href: "/accounts/email/primary/" };
 
-const NEW_PASSWORD_FIELD: FormFieldFixture = {
+// P24's two states DO NOT share labels, so they do not share field constants. `COPY-CATALOG.md`
+// §P24 sources them separately and marks both rows "locked allauth 65.13.1 ... verified":
+// password CHANGE is "Current Password" / "New Password" / "New Password (again)"
+// (`account.passwordChange.field.*`), while password SET — which has no current-password field —
+// is "Password" / "Password (again)" (`account.passwordSet.field.*`). One shared pair rendered
+// "New password" / "Confirm new password" on both, which matched the corpus on neither screen.
+const CHANGE_NEW_PASSWORD_FIELD: FormFieldFixture = {
   id: "front-door-new-password",
-  label: "New password",
+  label: "New Password",
   type: "password",
   autocomplete: "new-password",
   required: true,
 };
 
-const REPEAT_PASSWORD_FIELD: FormFieldFixture = {
+const CHANGE_REPEAT_PASSWORD_FIELD: FormFieldFixture = {
   id: "front-door-repeat-password",
-  label: "Confirm new password",
+  label: "New Password (again)",
+  type: "password",
+  autocomplete: "new-password",
+  required: true,
+};
+
+const SET_PASSWORD_FIELD: FormFieldFixture = {
+  id: "front-door-new-password",
+  label: "Password",
+  type: "password",
+  autocomplete: "new-password",
+  required: true,
+};
+
+const SET_REPEAT_PASSWORD_FIELD: FormFieldFixture = {
+  id: "front-door-repeat-password",
+  label: "Password (again)",
   type: "password",
   autocomplete: "new-password",
   required: true,
@@ -438,7 +460,7 @@ const REPEAT_PASSWORD_FIELD: FormFieldFixture = {
 
 const CURRENT_PASSWORD_FIELD: FormFieldFixture = {
   id: "front-door-current-password",
-  label: "Current password",
+  label: "Current Password",
   type: "password",
   autocomplete: "current-password",
   required: true,
@@ -607,8 +629,8 @@ const ACCOUNT_FRONT_DOOR_FIXTURES_AUTHORED = {
     method: "post",
     action: "/account/password/change/",
     currentPassword: CURRENT_PASSWORD_FIELD,
-    newPassword: NEW_PASSWORD_FIELD,
-    repeatPassword: REPEAT_PASSWORD_FIELD,
+    newPassword: CHANGE_NEW_PASSWORD_FIELD,
+    repeatPassword: CHANGE_REPEAT_PASSWORD_FIELD,
     submitLabel: "Change password",
   } satisfies PasswordMaintenanceFixture,
 
@@ -619,8 +641,8 @@ const ACCOUNT_FRONT_DOOR_FIXTURES_AUTHORED = {
     method: "post",
     action: "/account/password/set/",
     currentPassword: undefined,
-    newPassword: NEW_PASSWORD_FIELD,
-    repeatPassword: REPEAT_PASSWORD_FIELD,
+    newPassword: SET_PASSWORD_FIELD,
+    repeatPassword: SET_REPEAT_PASSWORD_FIELD,
     submitLabel: "Set password",
   } satisfies PasswordMaintenanceFixture,
 } satisfies Record<FrontDoorState, unknown>;
