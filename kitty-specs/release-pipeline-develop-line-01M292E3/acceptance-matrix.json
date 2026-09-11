@@ -98,10 +98,10 @@
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "runCycle() calls writeStepSummary(renderDecisionSummary(decision)) unconditionally at entry (probe 19/20 exercise this path); every outcome (promoted/no-op/blocked-and-why) is written to GITHUB_STEP_SUMMARY and printed to stdout",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T23:25:22.477188+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
