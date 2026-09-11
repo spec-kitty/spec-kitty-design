@@ -1,5 +1,17 @@
 {
   "rows": {
+    "#155": {
+      "evidence_ref": "research.md names #155 as the pre-existing weak-border-token issue #320/#321 exist to fix once, coordinated; #321's real --sk-border-control (#81818B) landed on train/elements-first and is consumed/verified by this WP's contrast assertion in sk-cli-auth-pattern.spec.ts, not re-forked.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#286": {
       "evidence_ref": "Referenced only as the #286 DoD-pattern precedent for FR-018/C-006; this WP applies that pattern in tests/node/cli-auth-no-literal.test.ts, not a fix to #286 itself.",
       "fr": null,
