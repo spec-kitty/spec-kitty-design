@@ -25,7 +25,7 @@
       "wp": "WP01"
     },
     "#173": {
-      "evidence_ref": "FR-002 closes the #173-documented 1px vs var(--sk-border-width-1) spelling gap on .sk-input in the same change; the rename decision itself is explicitly NOT performed (C-002) and remains #173's own call -- verified by git diff: no class renamed",
+      "evidence_ref": "FR-002 closed the #173-documented 1px vs var(--sk-border-width-1) spelling gap on .sk-input in this mission's own diff (verified: no class renamed). The rename decision itself is explicitly NOT performed (C-002) and remains #173's own call to make -- this mission does not and cannot close #173. Verdict corrected from the pre-merge 'in-mission' placeholder (which was never accurate: WP01 is this mission's only WP and it did not touch the rename) to deferred-with-followup, per the evidence already recorded on this row at merge time.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,7 +33,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "in-mission",
+      "verdict": "deferred-with-followup",
       "wp": "WP01"
     },
     "#177": {
@@ -73,7 +73,7 @@
       "wp": "WP01"
     },
     "#319": {
-      "evidence_ref": "This mission is GAP-F5-02 of epic #319's Family 5 component-gap audit; WP01 delivers this gap's slice. Epic #319 remains open across its other gaps (e.g. GAP-F5-01/#320) -- not closed by this mission alone",
+      "evidence_ref": "This mission delivers GAP-F5-02, one slice of epic #319's Family 5 component-gap audit. Epic #319 remains open across its other gaps (e.g. GAP-F5-01/#320) and is not closed by this mission alone. Verdict corrected from the pre-merge 'in-mission' placeholder (inaccurate: WP01 is this mission's only WP and does not close the epic) to deferred-with-followup, per the evidence already recorded on this row at merge time -- the epic's remaining gaps are the follow-up.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -81,7 +81,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "in-mission",
+      "verdict": "deferred-with-followup",
       "wp": "WP01"
     },
     "#320": {
@@ -97,7 +97,7 @@
       "wp": "WP01"
     },
     "#321": {
-      "evidence_ref": "#321 IS this mission's own source issue; WP01 is its complete implementation (FR-001..FR-012, all 12 requirements delivered and independently verified by this review)",
+      "evidence_ref": "Mission's own source issue; WP01 delivers FR-001..FR-012 in full, independently verified by this post-merge review against the merged PR #339 diff (base bab211c9..head 95ee9e30): --sk-border-control landed as an independent literal in both theme blocks, .sk-input and .sk-form-input__control both adopt it plus the 44px min-block-size floor, all ten contrast ratios re-derived and clearing 3:1 (tightest 3.35:1 light vs muted), .sk-textarea/.sk-form-textarea__control/.sk-form-select confirmed untouched. Verdict corrected from the pre-merge 'in-mission' placeholder to match evidence already on record.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -105,7 +105,7 @@
       "scope": null,
       "source_file": null,
       "title": null,
-      "verdict": "in-mission",
+      "verdict": "fixed",
       "wp": "WP01"
     }
   },

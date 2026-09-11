@@ -25,7 +25,7 @@
       "wp": "WP01"
     },
     "#286": {
-      "evidence_ref": "Referenced only as the #286 DoD-pattern precedent for FR-018/C-006; this WP applies that pattern in tests/node/cli-auth-no-literal.test.ts, not a fix to #286 itself.",
+      "evidence_ref": "Not in this mission's scope to fix: #286 is a repo-wide DoD-pattern issue (still OPEN upstream) that this WP only cites as precedent for FR-018/C-006 and applies locally in tests/node/cli-auth-no-literal.test.ts (word-boundary literal-assertion pattern). This mission never committed to closing #286 itself; the row was scraped from spec.md's citation, not a real in-mission commitment. Follow-up tracking is #286 itself, already open and externally owned.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,7 +33,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "in-mission",
+      "verdict": "deferred-with-followup",
       "wp": "WP01"
     },
     "#300": {
