@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances theme toggle on mission/theme-toggle so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "theme toggle",
   "slug": "theme-toggle-01M25KMP",
+  "status_phase": "1",
   "target_branch": "mission/theme-toggle",
   "topology": "single_branch"
 }
