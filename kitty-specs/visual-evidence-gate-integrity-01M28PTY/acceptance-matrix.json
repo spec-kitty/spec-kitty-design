@@ -26,19 +26,19 @@
     },
     {
       "criterion_id": "FR-003",
-      "description": "All 16 multi-screenshot tests in visual.spec.ts (20 baselines) use expect.soft(...).toHaveScreenshot(...) for every screenshot call, with zero baseline PNG drift.",
+      "description": "Every `toHaveScreenshot` call site in visual.spec.ts (166 of 166 — the original 16 multi-call tests / 20 baselines, plus every loop-executed single-call site) uses expect.soft(...).toHaveScreenshot(...), with zero baseline PNG drift.",
       "proof_type": "automated_test",
-      "evidence": "WP01: 36 expect( -> expect.soft( conversions verified via a paren-balanced scan (shots==soft per target test); esbuild parse-check passed; diff review confirmed only expect(/expect.soft( tokens changed, no locator/story/viewport/threshold arguments touched. Full local visual.spec.ts run against CI baselines was NOT used as proof (known local/CI rendering drift, documented in-file at visual.spec.ts:29-31) -- CI is authoritative per repo convention.",
+      "evidence": "WP01, two passes: pass 1 converted the 16 multi-call tests (36 calls); pass 2 (operator ruling 2026-09-11, rejecting the loop-case exclusion as a deferral) converted the remaining 127 call sites, bringing the file to 166/166. Zero-pixel-drift proven mechanically, not just by diff review: a Python difflib.SequenceMatcher line comparison between the mission-base visual.spec.ts and the final file found 0 pure deletions, 3 pure insertions (all three are the #401 floor lines, verbatim), and 163 replaced line pairs every one of which is provably identical to its original except for the literal substring `expect(` -> `expect.soft(`. Before pass 2, every toHaveScreenshot call site with a statement following it in the same test/loop body (25 sites) was inspected for a later action whose safety depends on a prior hard abort; none found (all 25 are inside already-converted tests, and what follows is only setup for the next screenshot). Full local visual.spec.ts run against CI baselines was NOT used as proof (known local/CI rendering drift, documented in-file at visual.spec.ts:29-31 -- 312x38 local vs 336x34 CI for the sk-stub case) -- CI is authoritative per repo convention; a full local PW_INCLUDE_VISUAL=1 run showed 275 failures, all attributable to this drift, none investigated further or used to justify any baseline regeneration.",
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "Zero-pixel-drift claim rests on the diff review (assertion-mode-only change), not a local pixel-perfect run, per this repo's own CI-authoritative baseline policy. CI's actual run on the eventual PR is the real proof."
+      "notes": "Zero-pixel-drift claim rests on the difflib-based mechanical diff proof plus the local/CI drift reasoning above, not a local pixel-perfect run, per this repo's own CI-authoritative baseline policy. CI's actual run on the eventual PR is the real proof."
     },
     {
       "criterion_id": "FR-004",
-      "description": "scripts/check-visual-screenshot-softness.mjs detects a hard toHaveScreenshot call reintroduced into a multi-screenshot test, and its --selftest proves this against both in-memory probes and a real on-disk file.",
+      "description": "scripts/check-visual-screenshot-softness.mjs detects any hard toHaveScreenshot call site anywhere -- a multi-call test OR a single hard call inside a for loop -- and its --selftest proves both shapes against in-memory probes and a real on-disk file.",
       "proof_type": "automated_test",
-      "evidence": "WP01: `node scripts/check-visual-screenshot-softness.mjs --selftest` passes (7 shape probes, 4 must-catch, 1 on-disk reader probe). Real-repo scan passes post-fix. Red-first proof: reverted the W4 drawer test's two expect.soft(...) calls to hard in the real visual.spec.ts, ran `node scripts/check-visual-screenshot-softness.mjs` (no flag), observed exit 1 naming apps/storybook/src/tests/visual.spec.ts:2294 with '2 of 2 toHaveScreenshot call(s) are HARD'; reverted and confirmed green again.",
+      "evidence": "WP01: `node scripts/check-visual-screenshot-softness.mjs --selftest` passes (7 shape probes incl. a loop-hosted single-call case, 6 must-catch, 1 EXEMPTIONS-suppression probe, 1 on-disk reader probe that specifically plants the loop shape). Real-repo scan passes post-fix. Red-first proof 1 (multi-call shape): reverted the W4 drawer test's two expect.soft(...) calls to hard, ran the gate (no flag), observed exit 1 naming visual.spec.ts:2294; reverted, confirmed green. Red-first proof 2 (loop shape, addendum): reverted a single expect.soft(target) call inside the real SK-workflow-board for-loop (line 221) to hard, ran the gate (no flag), observed exit 1 naming visual.spec.ts:221 exactly; reverted, confirmed green again.",
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
@@ -48,11 +48,21 @@
       "criterion_id": "FR-005",
       "description": "The new gate is wired into .github/workflows/ci-quality.yml's lint-code job as two [ENFORCED] steps (--selftest then real scan), and does not desync check-gate-wiring.mjs / check-gate-wiring-defeats.mjs.",
       "proof_type": "automated_test",
-      "evidence": "WP01: `node scripts/check-gate-wiring.mjs` passed after the workflow edit; `node scripts/check-gate-wiring-defeats.mjs` passed all 18 defeat cases plus control after the edit.",
+      "evidence": "WP01: `node scripts/check-gate-wiring.mjs` passed after the workflow edit; `node scripts/check-gate-wiring-defeats.mjs` passed all 18 defeat cases plus control after the edit. Re-confirmed after the pass-2 gate rewrite (rule flattened, EXEMPTIONS added).",
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
       "notes": "Local script runs only; the workflow itself has not executed on CI (no PR opened yet, per instruction)."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Each of the four test.describe-level `test.skip(({ browserName }) => browserName !== 'chromium', ...)` predicates gets its own standalone, unconditional floor test, rather than relying on another test elsewhere in the file to cover the same risk.",
+      "proof_type": "automated_test",
+      "evidence": "WP01 (operator ruling 2026-09-11, rejecting the transitive-coverage reasoning as the same 'guard depends on something else covering it' shape this mission exists to close): added `test('the chromium project the describe below depends on still exists', ...)` immediately before each of the four test.describe(...) blocks in sk-context-nav.spec.ts:262, sk-collection.spec.ts:274, sk-section-nav.spec.ts:316, sk-form-select.spec.ts:101. Ran all four under --project=chromium --project=firefox --project=webkit: 12/12 passed, confirming unconditional execution (not swallowed by the describe's own skip predicate). Red-first proof: renamed chromium to chromium-renamed in a scratch config, ran the sk-collection.spec.ts floor test, observed it fail naming the project list (['chromium-renamed','firefox','webkit'] does not contain 'chromium'); reverted, confirmed git diff playwright.config.ts empty.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Locally verified by the implementer; awaiting reviewer/CI confirmation."
     }
   ],
   "negative_invariants": [
@@ -60,7 +70,13 @@
       "id": "NI-001",
       "description": "No baseline PNG under apps/storybook/src/tests/visual.spec.ts-snapshots/ changes as a result of this mission.",
       "status": "held",
-      "evidence": "git diff shows zero binary/PNG changes; only .spec.ts, .mjs, and .yml text files touched."
+      "evidence": "git diff shows zero binary/PNG changes; only .spec.ts, .mjs, and .yml text files touched. Mechanically reinforced by the difflib line-comparison proof recorded under FR-003."
+    },
+    {
+      "id": "NI-002",
+      "description": "No toHaveScreenshot call site in visual.spec.ts relies on a preceding hard abort as a safety mechanism (the one thing that would make the flat expect.soft conversion actively wrong).",
+      "status": "held",
+      "evidence": "All 25 toHaveScreenshot call sites in the file with a statement following them in the same test/loop body were inspected; every one is inside a test already converted in the first pass, and every followup is only setup for the next screenshot (navigate, resize, hover/focus/press). The gate's EXEMPTIONS map remains empty."
     }
   ]
 }

@@ -14,11 +14,11 @@
       "note": "Cited only as background context in #367's body (the PR where the missed-baseline incident occurred, already merged). Not a scope item of this mission; no action taken or required here."
     },
     "#367": {
-      "evidence_ref": "WP01: apps/storybook/src/tests/visual.spec.ts (16 tests converted to expect.soft), scripts/check-visual-screenshot-softness.mjs, .github/workflows/ci-quality.yml",
+      "evidence_ref": "WP01: apps/storybook/src/tests/visual.spec.ts (166/166 toHaveScreenshot call sites now soft, both multi-call and loop-executed, operator ruling 2026-09-11), scripts/check-visual-screenshot-softness.mjs (flat rule + EXEMPTIONS), .github/workflows/ci-quality.yml",
       "fr": "FR-003, FR-004, FR-005",
-      "nfr": "NFR-001, NFR-002",
+      "nfr": "NFR-001, NFR-002, NFR-004, NFR-005",
       "repo": "spec-kitty/spec-kitty-design",
-      "sc": "SC-003, SC-004",
+      "sc": "SC-003, SC-004, SC-006",
       "scope": "in-mission",
       "source_file": "spec.md",
       "title": "20 visual baselines sit behind a preceding hard toHaveScreenshot and can be silently missed at harvest",
@@ -26,8 +26,8 @@
       "wp": "WP01"
     },
     "#401": {
-      "evidence_ref": "WP01: 31 chromium-project floor assertions across 18 files under apps/storybook/src/tests/",
-      "fr": "FR-001, FR-002",
+      "evidence_ref": "WP01: 31 per-test chromium-project floor assertions across 18 files, PLUS 4 standalone floor tests for the describe-level predicate skips (operator ruling 2026-09-11) under apps/storybook/src/tests/",
+      "fr": "FR-001, FR-002, FR-006",
       "nfr": "NFR-003",
       "repo": "spec-kitty/spec-kitty-design",
       "sc": "SC-001, SC-002",
