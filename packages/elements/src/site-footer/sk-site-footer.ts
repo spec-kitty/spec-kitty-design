@@ -1,7 +1,7 @@
 import { LitElement, html, nothing } from 'lit';
 import { define } from '../define.js';
 import sheet from './sk-site-footer.css.js';
-import { SITE_FOOTER_CLASSES } from './sk-site-footer.markup.js';
+import { SITE_FOOTER_CLASSES, siteFooterClasses } from './sk-site-footer.markup.js';
 
 // Doc comments below are PUBLISHED API — the analyzer copies them into custom-elements.json and
 // the React generator into the consumer's editor hover. Maintainer rationale goes in `//`.
@@ -18,6 +18,7 @@ import { SITE_FOOTER_CLASSES } from './sk-site-footer.markup.js';
  * @element sk-site-footer
  * @slot column-one - `<li>` items for the first link column
  * @slot column-two - `<li>` items for the second link column
+ * @slot compact-links - the compact presentation's links, as native `<a>` elements
  *
  * The slot NAMES keep their hyphens — a slot name is a string, not a property key, so the
  * constraint that shaped `headingOne`/`headingTwo` does not reach them.
@@ -41,6 +42,7 @@ export class SkSiteFooter extends LitElement {
     // `ribbonColour` -> `accent`. `headingOne` observes `headingone`, which round-trips.
     headingOne: { type: String, reflect: true },
     headingTwo: { type: String, reflect: true },
+    presentation: { type: String, reflect: true },
   };
 
   /** The brand wordmark. */
@@ -58,7 +60,16 @@ export class SkSiteFooter extends LitElement {
   /** Heading for the second link column. */
   declare headingTwo: string | undefined;
 
+  /** Selects the compact, server-renderable presentation. Omit for the full presentation. */
+  declare presentation: 'full' | 'compact' | undefined;
+
   render() {
+    // BRANCHED FIRST, on the property alone — `undefined` and any unsupported string both fall
+    // through to the full presentation below, which is otherwise completely untouched by this
+    // mission: nothing here edits its template literal or its `#column()` helper.
+    if (this.presentation === 'compact') {
+      return this.#renderCompact();
+    }
     // EVERY STRING IS A PROPERTY AND EVERY LIST IS A SLOT — the operator's ruling on #77.
     //
     // The `<ul>` is the element's, so `::slotted(li)` reaches the items a consumer supplies: they
@@ -101,6 +112,33 @@ export class SkSiteFooter extends LitElement {
         <slot name=${slot}></slot>
       </ul>
     </nav>`;
+  }
+
+  // THE COMPACT PRESENTATION (#354, plan.md D-4) — a bare `<slot>` for the links, NOT a `<ul>`.
+  // No `<nav>`, no heading, no `<ul>` under any input: a slot with no assigned nodes and no
+  // fallback content contributes nothing to the accessibility tree and paints nothing, so zero
+  // links needs no conditional — there is nothing to be empty, structurally.
+  //
+  // `wordmark`/`tagline`/`legal` are each rendered only when set, so a consumer who supplies the
+  // Family 6 shape (tagline + legal, no wordmark) gets exactly that tree and nothing else.
+  #renderCompact() {
+    const legal = (this.legal ?? '').trim();
+    return html`<footer part="footer" class=${siteFooterClasses(this.presentation)}>
+      <div class=${SITE_FOOTER_CLASSES.row}>
+        <div class=${SITE_FOOTER_CLASSES.meta}>
+          ${this.wordmark
+            ? html`<div class=${SITE_FOOTER_CLASSES.brand}>
+                <span class=${SITE_FOOTER_CLASSES.wordmark}>${this.wordmark}</span>
+              </div>`
+            : nothing}
+          ${this.tagline
+            ? html`<p class=${SITE_FOOTER_CLASSES.tagline}>${this.tagline}</p>`
+            : nothing}
+          ${legal ? html`<p part="legal" class=${SITE_FOOTER_CLASSES.legal}>${legal}</p>` : nothing}
+        </div>
+        <slot name="compact-links"></slot>
+      </div>
+    </footer>`;
   }
 }
 

@@ -18,7 +18,9 @@ import skSiteFooterSheet from '../../../packages/elements/src/site-footer/sk-sit
 import {
   PLACEHOLDER_LEGAL,
   siteFooterStaticHtml,
+  SITE_FOOTER_AXES,
 } from '../../../packages/elements/src/site-footer/sk-site-footer.markup.js';
+import type { SiteFooterLink } from '../../../packages/elements/src/site-footer/sk-site-footer.markup.js';
 import { installTokenSheet } from './token-sheet.js';
 import { contrast, assertThemesDiffered } from './contrast.js';
 
@@ -61,6 +63,56 @@ const adoptSheetIntoDocument = () => {
     document.adoptedStyleSheets = [...document.adoptedStyleSheets, skSiteFooterSheet];
   }
 };
+
+// COMPACT PRESENTATION FIXTURES (#354). The consumer writes real `<a>` DOM — nothing is parsed,
+// nothing is interpolated — mirroring the Terms-anchor contract exactly.
+const COMPACT_ATTRS = {
+  tagline: 'One sentence on what you do.',
+  legal: '© 2026 Example · Free private beta',
+} as const;
+
+const compactLinkHtml = (l: SiteFooterLink) =>
+  `<a slot="compact-links" class="sk-site-footer__link sk-site-footer__link--compact" href="${l.href}">${l.label}</a>`;
+
+const mountCompact = async (
+  links: readonly SiteFooterLink[] = [{ label: 'Terms', href: '/terms/' }],
+  attrs: Record<string, string> = COMPACT_ATTRS,
+) => {
+  const el = document.createElement('sk-site-footer');
+  el.setAttribute('presentation', 'compact');
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  el.innerHTML = links.map(compactLinkHtml).join('');
+  document.body.append(el);
+  await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  return el;
+};
+
+/** No `<nav>`, no heading, no `<ul>`, no `<hr>` — the zero-scaffolding claim, checked structurally. */
+const NO_LANDMARK_SELECTOR = 'nav, ul, ol, li, h1, h2, h3, h4, h5, h6, hr';
+
+// FIRST TEST IN THE FILE, DELIBERATELY. `document.adoptedStyleSheets` is never unwound between
+// cases here, so once any later test calls `adoptSheetIntoDocument()` the document carries the
+// sheet for the rest of the run and this measurement stops proving anything. It must observe a
+// document that has NOT adopted it.
+test('[NFR-006] a slotted compact link meets the 44px floor from the SHADOW sheet alone', async () => {
+  expect(
+    document.adoptedStyleSheets.includes(skSiteFooterSheet),
+    'this case must run before any adoptSheetIntoDocument() call',
+  ).toBe(false);
+
+  const element = await mountCompact();
+  const anchor = element.querySelector('a.sk-site-footer__link--compact')!;
+  const box = anchor.getBoundingClientRect();
+
+  // The whole point. The anchor is a DIRECTLY ASSIGNED light-DOM node, so before the rule carried
+  // its `::slotted()` half the shipped element reached it with nothing and this box was ~20px —
+  // while every existing test stayed green, because the stories and the equivalence test adopt the
+  // sheet into `document` and supplied the rule the element did not. Delete the `::slotted()` half
+  // and this reds; nothing else in the suite does.
+  expect(box.height, 'block-size floor').toBeGreaterThanOrEqual(44);
+  expect(box.width, 'inline-size floor').toBeGreaterThanOrEqual(44);
+  element.remove();
+});
 
 test('[SC-013] every declared part is targetable from outside', async () => {
   const el = await mount();
@@ -153,6 +205,15 @@ test('the generated form does not read the clock', async () => {
     siteFooterStaticHtml(),
     'no four-digit year may reach the generated markup',
   ).not.toMatch(/\d{4}/);
+
+  // EXTENDED (#354) to iterate every _AXES entry, not just the base form — the compact axis's
+  // own placeholder link (label/href) must be as year-free as the base placeholder.
+  for (const [name, opts] of Object.entries(SITE_FOOTER_AXES)) {
+    expect(
+      siteFooterStaticHtml(opts),
+      `the ${name} axis form must not contain a four-digit year`,
+    ).not.toMatch(/\d{4}/);
+  }
 });
 
 test('every ink meets AA in BOTH themes', async () => {
@@ -210,4 +271,263 @@ test('every ink meets AA in BOTH themes', async () => {
   }
 
   assertThemesDiffered(surfaces);
+});
+
+// ==========================================================================================
+// THE COMPACT PRESENTATION (#354, plan.md D-4/D-5/D-6/D-7/D-9). Everything below is NEW.
+// ==========================================================================================
+
+test('compact renders no landmark, no heading and no list — at zero, one and several links', async () => {
+  const cases: readonly (readonly [string, SiteFooterLink[]])[] = [
+    ['zero', []],
+    ['one', [{ label: 'Terms', href: '/terms/' }]],
+    [
+      'several',
+      [
+        { label: 'Terms', href: '/terms/' },
+        { label: 'Privacy', href: '/privacy/' },
+        { label: 'Status', href: '/status/' },
+      ],
+    ],
+  ];
+
+  for (const [caseName, links] of cases) {
+    const el = await mountCompact(links);
+    expect(
+      el.shadowRoot!.querySelectorAll(NO_LANDMARK_SELECTOR).length,
+      `element path, ${caseName} link(s)`,
+    ).toBe(0);
+    el.remove();
+
+    const doc = new DOMParser().parseFromString(
+      siteFooterStaticHtml({ presentation: 'compact', ...COMPACT_ATTRS, links }),
+      'text/html',
+    );
+    expect(
+      doc.querySelectorAll(NO_LANDMARK_SELECTOR).length,
+      `static path, ${caseName} link(s)`,
+    ).toBe(0);
+  }
+});
+
+test('compact draws no divider, with or without a legal line', async () => {
+  const withLegal = await mountCompact();
+  expect(
+    withLegal.shadowRoot!.querySelector('hr, .sk-site-footer__divider'),
+    'element path, with legal',
+  ).toBe(null);
+  withLegal.remove();
+
+  const withoutLegal = await mountCompact([{ label: 'Terms', href: '/terms/' }], {
+    tagline: COMPACT_ATTRS.tagline,
+  });
+  expect(
+    withoutLegal.shadowRoot!.querySelector('hr, .sk-site-footer__divider'),
+    'element path, without legal',
+  ).toBe(null);
+  withoutLegal.remove();
+
+  const links: SiteFooterLink[] = [{ label: 'Terms', href: '/terms/' }];
+  const staticWithLegal = new DOMParser().parseFromString(
+    siteFooterStaticHtml({ presentation: 'compact', ...COMPACT_ATTRS, links }),
+    'text/html',
+  );
+  // Queried by CLASS, not by `[part="divider"]`. The static path writes
+  // `<hr class="sk-site-footer__divider" />` with no `part` attribute at all (markup.ts), so a
+  // part-selector here returns null for every static output, compact or full — including the
+  // realistic regression of pasting the full path's <hr> into the compact branch.
+  expect(
+    staticWithLegal.querySelector('hr, .sk-site-footer__divider'),
+    'static path, with legal',
+  ).toBe(null);
+
+  const staticWithoutLegal = new DOMParser().parseFromString(
+    siteFooterStaticHtml({ presentation: 'compact', tagline: COMPACT_ATTRS.tagline, links }),
+    'text/html',
+  );
+  expect(
+    staticWithoutLegal.querySelector('hr, .sk-site-footer__divider'),
+    'static path, without legal',
+  ).toBe(null);
+});
+
+test('[FR-007] the compact element and the compact static form are the same component', async () => {
+  adoptSheetIntoDocument();
+
+  /**
+   * `tagName + sorted class list + part attribute`, depth-first, with the element path's
+   * `<slot>` replaced by its `assignedElements()` — so the two trees compare like for like.
+   */
+  const signature = (node: Element): string => {
+    if (node.tagName === 'SLOT') {
+      return (node as HTMLSlotElement).assignedElements().map(signature).join(',');
+    }
+    const classes = Array.from(node.classList).sort().join('.');
+    const part = node.getAttribute('part');
+    const own = `${node.tagName}${classes ? `.${classes}` : ''}${part ? `[part=${part}]` : ''}`;
+    // `.filter(Boolean)` drops an empty `<slot>` signature — a slot with no assigned nodes
+    // contributes nothing structurally (no comma either), matching the static path, which has
+    // no node there at all when there are zero links.
+    const kids = Array.from(node.children).map(signature).filter(Boolean).join(',');
+    return kids ? `${own}(${kids})` : own;
+  };
+
+  const scenarios: readonly (readonly [string, SiteFooterLink[]])[] = [
+    ['zero links', []],
+    ['one link', [{ label: 'Terms', href: '/terms/' }]],
+    [
+      'three links',
+      [
+        { label: 'Terms', href: '/terms/' },
+        { label: 'Privacy', href: '/privacy/' },
+        { label: 'Status', href: '/status/' },
+      ],
+    ],
+  ];
+
+  for (const [caseName, links] of scenarios) {
+    const opts = {
+      presentation: 'compact' as const,
+      wordmark: 'Your Brand',
+      tagline: COMPACT_ATTRS.tagline,
+      legal: COMPACT_ATTRS.legal,
+      links,
+    };
+
+    const container = document.createElement('div');
+    container.style.width = '400px';
+    document.body.append(container);
+    const el = document.createElement('sk-site-footer');
+    el.setAttribute('presentation', 'compact');
+    el.setAttribute('wordmark', opts.wordmark);
+    el.setAttribute('tagline', opts.tagline);
+    el.setAttribute('legal', opts.legal);
+    el.innerHTML = links.map(compactLinkHtml).join('');
+    container.append(el);
+    await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+
+    const staticContainer = document.createElement('div');
+    staticContainer.style.width = '400px';
+    staticContainer.innerHTML = siteFooterStaticHtml(opts);
+    document.body.append(staticContainer);
+
+    const elFooter = el.shadowRoot!.querySelector('footer')!;
+    const staticFooter = staticContainer.querySelector('footer')!;
+
+    expect(signature(elFooter), `${caseName}: structural signature`).toEqual(
+      signature(staticFooter),
+    );
+
+    const elRow = elFooter.querySelector('.sk-site-footer__row')!;
+    const staticRow = staticFooter.querySelector('.sk-site-footer__row')!;
+    const elFooterRect = elFooter.getBoundingClientRect();
+    const staticFooterRect = staticFooter.getBoundingClientRect();
+    const elRowRect = elRow.getBoundingClientRect();
+    const staticRowRect = staticRow.getBoundingClientRect();
+
+    // Compared against EACH OTHER, never against a literal.
+    expect(elRowRect.width, `${caseName}: row width`).toBeCloseTo(staticRowRect.width, 0);
+    expect(elRowRect.height, `${caseName}: row height`).toBeCloseTo(staticRowRect.height, 0);
+    expect(
+      elRowRect.x - elFooterRect.x,
+      `${caseName}: row x relative to root`,
+    ).toBeCloseTo(staticRowRect.x - staticFooterRect.x, 0);
+    expect(
+      elRowRect.y - elFooterRect.y,
+      `${caseName}: row y relative to root`,
+    ).toBeCloseTo(staticRowRect.y - staticFooterRect.y, 0);
+
+    const elStyle = getComputedStyle(elRow);
+    const staticStyle = getComputedStyle(staticRow);
+    for (const prop of ['display', 'flexDirection', 'justifyContent', 'alignItems'] as const) {
+      expect(elStyle[prop], `${caseName}: computed ${prop}`).toBe(staticStyle[prop]);
+    }
+
+    container.remove();
+    staticContainer.remove();
+  }
+});
+
+test('[FR-010] no library-authored link reaches a footer that supplied none', () => {
+  // `links` is deliberately absent from DEFAULTS so no library destination can ship. Nothing
+  // asserted that: add `links: PLACEHOLDER_COMPACT_LINKS` to DEFAULTS and every other test here
+  // stays green, because each one passes an explicit `links` key that `{...DEFAULTS, ...opts}`
+  // overrides. This is the one input shape that exposes the leak.
+  const bare = siteFooterStaticHtml({ presentation: 'compact' });
+  expect(bare, 'a compact footer given no links emits no anchor').not.toContain('<a');
+  expect(bare, 'and no href').not.toContain('href');
+});
+
+test('[FR-001] the compact root carries the modifier class in both paths', async () => {
+  // The only other mention of this class is FR-009's NEGATIVE assertion, which passes harder if
+  // the modifier is emptied — so `SITE_FOOTER_PRESENTATIONS.compact.modifier` was deletable with
+  // the whole suite green. The class carries no declarations by design; it exists to be targeted.
+  const element = await mountCompact();
+  const root = element.shadowRoot!.querySelector('[part="footer"]')!;
+  expect(root.classList.contains('sk-site-footer'), 'element path, base class').toBe(true);
+  expect(
+    root.classList.contains('sk-site-footer--compact'),
+    'element path, compact modifier',
+  ).toBe(true);
+  element.remove();
+
+  const staticForm = siteFooterStaticHtml({
+    presentation: 'compact',
+    ...COMPACT_ATTRS,
+    links: [{ label: 'Terms', href: '/terms/' }],
+  });
+  expect(staticForm, 'static path').toContain('sk-site-footer--compact');
+});
+
+test("[FR-009] the full presentation's static form is untouched by the compact branch", () => {
+  const full = siteFooterStaticHtml();
+  expect((full.match(/<nav/g) ?? []).length, 'exactly two <nav>').toBe(2);
+  expect((full.match(/<hr/g) ?? []).length, 'exactly one <hr>').toBe(1);
+  expect(full, 'must not contain the compact modifier class').not.toContain(
+    'sk-site-footer--compact',
+  );
+});
+
+test("compact ignores the full presentation's headings and column slots, and vice versa", async () => {
+  // compact + headingOne/headingTwo + a column-one <li> — none of it is read.
+  const compact = document.createElement('sk-site-footer');
+  compact.setAttribute('presentation', 'compact');
+  compact.setAttribute('headingone', 'Product');
+  compact.setAttribute('headingtwo', 'Connect');
+  compact.setAttribute('tagline', COMPACT_ATTRS.tagline);
+  compact.innerHTML =
+    '<li slot="column-one"><a href="#" class="sk-site-footer__link">Docs</a></li>' +
+    compactLinkHtml({ label: 'Terms', href: '/terms/' });
+  document.body.append(compact);
+  await (compact as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  const csr = compact.shadowRoot!;
+  expect(
+    csr.querySelectorAll('nav, ul, li, .sk-site-footer__heading').length,
+    'compact renders no heading/column scaffolding even when headingOne/headingTwo are set',
+  ).toBe(0);
+  const compactSlot = csr.querySelector('slot[name="compact-links"]') as HTMLSlotElement;
+  expect(
+    compactSlot.assignedElements().length,
+    'the compact-links slot still receives its own content',
+  ).toBe(1);
+  compact.remove();
+
+  // full + a compact-links <a> — it is not read either.
+  const full = document.createElement('sk-site-footer');
+  full.setAttribute('wordmark', 'Your Brand');
+  full.setAttribute('headingone', 'Product');
+  full.setAttribute('headingtwo', 'Connect');
+  full.innerHTML = compactLinkHtml({ label: 'Terms', href: '/terms/' });
+  document.body.append(full);
+  await (full as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  const fsr = full.shadowRoot!;
+  expect(
+    fsr.querySelectorAll('.sk-site-footer__row, .sk-site-footer__meta').length,
+    'the full presentation renders no compact row/meta scaffolding',
+  ).toBe(0);
+  expect(
+    fsr.querySelector('slot[name="compact-links"]'),
+    'the full presentation renders no compact-links slot at all',
+  ).toBe(null);
+  full.remove();
 });

@@ -27,6 +27,9 @@ export interface SkSiteFooterProps extends Pick<
   /** The copyright line. Omit it and the divider above it is not rendered either. */
   legal?: SkSiteFooterElement["legal"];
 
+  /** Selects the compact, server-renderable presentation. Omit for the full presentation. */
+  presentation?: SkSiteFooterElement["presentation"];
+
   /** One sentence under the wordmark. */
   tagline?: SkSiteFooterElement["tagline"];
 
@@ -69,6 +72,7 @@ export interface SkSiteFooterProps extends Pick<
  * - `headingOne`: Heading for the first link column.
  * - `headingTwo`: Heading for the second link column.
  * - `legal`: The copyright line. Omit it and the divider above it is not rendered either.
+ * - `presentation`: Selects the compact, server-renderable presentation. Omit for the full presentation.
  * - `tagline`: One sentence under the wordmark.
  * - `wordmark`: The brand wordmark.
  *
@@ -77,7 +81,8 @@ export interface SkSiteFooterProps extends Pick<
  * Areas where markup can be added to the component.
  *
  * - `column-one`: `<li>` items for the first link column
- * - `column-two`: `<li>` items for the second link column The slot NAMES keep their hyphens — a slot name is a string, not a property key, so the constraint that shaped `headingOne`/`headingTwo` does not reach them.
+ * - `column-two`: `<li>` items for the second link column
+ * - `compact-links`: the compact presentation's links, as native `<a>` elements The slot NAMES keep their hyphens — a slot name is a string, not a property key, so the constraint that shaped `headingOne`/`headingTwo` does not reach them.
  *
  * ## CSS Parts
  *

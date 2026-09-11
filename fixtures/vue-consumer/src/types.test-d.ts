@@ -49,6 +49,12 @@ const appShellTrigger: NonNullable<AppShell['compactTrigger']> = document.create
 // @ts-expect-error wide is not a public presentation
 const badAppShellPresentation: AppShell['presentation'] = 'wide';
 
+// [#354] The generated Vue prop carries the literal union, not a bare `string`.
+const footerFullPresentation: Footer['presentation'] = 'full';
+const footerCompactPresentation: Footer['presentation'] = 'compact';
+// @ts-expect-error 'sticky' is not a declared sk-site-footer presentation
+const badFooterPresentation: Footer['presentation'] = 'sticky';
+
 // @ts-expect-error 'chartreuse' is not one of the declared variants
 const bad: PillTag['variant'] = 'chartreuse';
 
