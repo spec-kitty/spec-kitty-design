@@ -35,6 +35,18 @@
       "title": "<fill at WP-implementation time>",
       "verdict": "deferred-with-followup",
       "wp": "WP01"
+    },
+    "#364": {
+      "evidence_ref": "Fold-in comment POSTED on #364: https://github.com/spec-kitty/spec-kitty-design/issues/364#issuecomment-5640831499 - REL3 owns registry-routing docs, including the using-components.md install section REL1 deliberately does not touch.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
