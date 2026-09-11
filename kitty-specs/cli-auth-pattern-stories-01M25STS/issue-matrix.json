@@ -12,6 +12,18 @@
       "verdict": "verified-already-fixed",
       "wp": "WP01"
     },
+    "#183": {
+      "evidence_ref": "#183 is the epic behind scripts/check-pattern-composition.mjs, already delivered by a prior mission (composition-fixture-public-surfaces-01M1Y34S, closing #259). This WP places its fixtures inside the existing scanned directory with zero gate changes; node scripts/check-pattern-composition.mjs and --selftest both verified green in this review.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#286": {
       "evidence_ref": "Referenced only as the #286 DoD-pattern precedent for FR-018/C-006; this WP applies that pattern in tests/node/cli-auth-no-literal.test.ts, not a fix to #286 itself.",
       "fr": null,
