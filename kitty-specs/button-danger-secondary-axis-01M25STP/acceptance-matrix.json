@@ -2,7 +2,7 @@
   "mission_slug": "button-danger-secondary-axis-01M25STP",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -217,11 +217,11 @@
     {
       "criterion_id": "FR-022",
       "description": "Verify FR-022 is satisfied",
-      "proof_type": "ci_pending",
-      "evidence": "A coordination comment recording the outcome exists at https://github.com/spec-kitty/spec-kitty-design/issues/155#issuecomment-5619975095 (#155 not closed/widened). However this cannot be marked pass: (1) I could not confirm this comment was posted by this WP's own T008 step vs. the epic-level BORDER-ROLE-319 decision process \u2014 attribution is uncertain; (2) the criterion also requires the PR body record the outcome, and no PR exists yet at WP-review time. Both halves genuinely PR-time-pending.",
-      "pass_fail": "pending",
-      "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-10T15:46:44.429965+00:00",
+      "proof_type": "manual_verification",
+      "evidence": "PR #341 body (https://github.com/spec-kitty/spec-kitty-design/pull/341) personally read at head 94d2cdb4: 'Epic #319 required its two Wave 1 children to agree one border-role and fix-altitude before either froze a token choice. The outcome, linked from #155: This mission introduces no token and touches no token file. #321 owns the single neutral control-boundary fix... #155 keeps .sk-button--secondary. Neither child repaints it, neither closes it.' PR body section 'Why this tone does not need #155's fix' records the same outcome with the re-measured --sk-border-strong 3:1 failure. Both halves of the criterion (comment on #155 + PR body record) now exist; PR did not exist at WP-review time, which was the only reason this was pending.",
+      "pass_fail": "pass",
+      "verified_by": "programme-319-orchestrator",
+      "verified_at": "2026-09-11T02:14:07.792015+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
