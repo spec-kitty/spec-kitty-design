@@ -13,7 +13,7 @@
       "wp": null
     },
     "#409": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "#409 is a PR, not an issue (state: MERGED, 2026-09-11T15:54:01Z, confirmed via gh api repos/spec-kitty/spec-kitty-design/pulls/409) - noted here so it is not miscounted as an open issue again",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,7 +21,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#417": {
