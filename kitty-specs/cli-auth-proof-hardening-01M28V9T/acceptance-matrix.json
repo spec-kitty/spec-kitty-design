@@ -28,10 +28,10 @@
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-cli-auth-pattern.spec.ts's inventory arm replaced: the five-name regex denylist is gone. New test 'rendered DOM contains only known custom elements and owned/local sk- classes across the story's rendered lifetime (#418, runtime ground truth)' uses a MutationObserver-based runtime watch (pattern-composition-lib.mjs: startSkPrimitiveWatch/stopSkPrimitiveWatch) that walks the live rendered DOM (incl. shadow roots and same-origin iframes) and asserts every observed sk-tag/class is a known custom element (knownElementTags(), from the generated Custom Elements Manifest) or an owned class (ownedClasses()/tokensOwnedClasses()/BEM-block-root via isBemMemberOf()). An unlisted invented primitive can no longer silently pass a fixed enumeration; it fails by not matching any derived source of truth. Red-first proof executed for #418 across 7 reviewer rounds (see FR-006).",
+      "pass_fail": "pass",
+      "verified_by": "claude-implementer",
+      "verified_at": "2026-09-11T21:33:03.946453+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
