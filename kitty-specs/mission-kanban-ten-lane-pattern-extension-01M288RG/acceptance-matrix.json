@@ -7,11 +7,11 @@
     {
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
-      "proof_type": "built index + browser test + CI visual log",
-      "evidence": "product head 8986d38f (rebased on train 16948194); sk-mission-kanban-ten-lane-pattern.spec.ts [T001] index lists exactly 11 ten-lane ids and exactly the 10 #278 ids; NI-002 re-executed: #278 files byte-identical to the train; CI run 34604991224 visual job failed only on the 12 new missing snapshots, all existing baselines passed; local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
+      "proof_type": "built index + browser test + CI visual",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T001]: the index lists exactly 11 ten-lane ids and exactly the 10 #278 ids; NI-002 re-executed; visual-regression green at 0be840ae with the 12 new baselines and every existing one; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T14:11:04.592846+00:00",
+      "verified_at": "2026-09-11T16:39:26.892973+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
