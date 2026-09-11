@@ -29,6 +29,38 @@ const SPEC_KITTY_AUTO_COMMIT_PATTERNS = [
       msg,
     ),
   (msg) => /^chore\(spec-kitty\): record WP\d+ remediation state\s*(\n|$)/.test(msg),
+  // A third `chore(spec-kitty)` shape (zoom-emulation-and-cli-commit-scopes-01M28YQ6): the CLI's
+  // `BookkeepingTransaction.__exit__` (specify_cli/coordination/transaction.py:561, installed
+  // spec-kitty-cli 3.2.6rc4) emits `f"chore(spec-kitty): {self.operation}"` whenever a
+  // transaction is never explicitly `.commit()`/`.commit_idempotent()`-ed, and `operation` is a
+  // free-form `str` at that API boundary -- not an enum. Reading every call site that reaches
+  // this fallback (status_transition.py's three `operation or f"..."` defaults) confirms the
+  // three patterns above already cover everything the CLI's CURRENT shipped call sites can
+  // default to. This fourth pattern is NOT one of those three: it is bound to the real message
+  // observed failing `lint-code` this round (`chore(spec-kitty): materialize WP01 approval note
+  // into status.json`, reworded by the sibling mission that hit it). Unlike the three patterns
+  // above and the tracer/retrospective pair below (each matched to a literal f-string template
+  // read directly from the installed CLI), this one's source template could NOT be re-derived
+  // from a literal match anywhere in that CLI despite reading transaction.py,
+  // status_transition.py, workflow_executor.py, workflow.py, status/aggregate.py, implement.py,
+  // review/cycle.py, tasks_verdict_persistence.py and tasks_move_task.py -- so it rests on the
+  // real observed message, bound exactly as narrowly as that evidence supports (the fixed verb
+  // phrase plus the `WP\d+` token, never a generalized category), not an independently
+  // re-derived source match. If this needs extending, look for the actual originating commit/CLI
+  // version rather than assume this comment's audit already found it.
+  (msg) => /^chore\(spec-kitty\): materialize WP\d+ approval note into status\.json\s*(\n|$)/.test(msg),
+  // KNOWN LIMITATION, STATED RATHER THAN LEFT SILENT (matching this repo's own convention, e.g.
+  // scripts/check-visual-screenshot-softness.mjs's own doc comment). The same audit above found
+  // `specify_cli/status/aggregate.py`'s `MissionStatusAggregate.save(*, operation: str)` -- a
+  // documented "low-level escape hatch" that calls `txn.commit(operation)` directly: the
+  // caller's string becomes the ENTIRE commit message, not a `chore(spec-kitty):`-prefixed
+  // suffix at all. It currently has ZERO callers anywhere in `specify_cli` (confirmed by
+  // grepping every `.save(operation=` call site), so no message from it has ever been observed
+  // -- but it is a real, shipped, structurally unbounded surface: no closed regex could honestly
+  // cover arbitrary caller-supplied text without becoming exactly the blanket exemption the
+  // anchoring comments throughout this file warn against. This file deliberately does NOT
+  // exempt it. If a future CLI version wires a caller to it and that caller's real output fails
+  // lint, that is this config working as intended, not a gap in it.
   (msg) => /^chore: Record review-cycle-\d+ \([a-z-]+\) for WP\d+ on \S+\s*(\n|$)/.test(msg),
   (msg) => /^chore: update issue-matrix for \S+\s*(\n|$)/.test(msg),
   // `acceptance-verdict` owns these messages. Criterion/result vocabulary and
