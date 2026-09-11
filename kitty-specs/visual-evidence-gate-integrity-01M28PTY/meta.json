@@ -1,4 +1,16 @@
 {
+  "acceptance_history": [
+    {
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-11T18:20:57.749358+00:00",
+      "accepted_by": "claude",
+      "accepted_from_commit": "2b251927347273839d3ccef3575abdf573a9f036"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-11T18:20:57.749358+00:00",
+  "accepted_by": "claude",
+  "accepted_from_commit": "2b251927347273839d3ccef3575abdf573a9f036",
   "created_at": "2026-09-11T17:04:26.537062+00:00",
   "flattened": false,
   "friendly_name": "visual evidence gate integrity",
