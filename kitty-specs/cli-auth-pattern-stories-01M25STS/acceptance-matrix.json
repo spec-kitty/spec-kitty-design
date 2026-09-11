@@ -107,11 +107,11 @@
     {
       "criterion_id": "FR-011",
       "description": "Verify FR-011 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
+      "proof_type": "code_review",
+      "evidence": "Assertion verified: sk-cli-auth-pattern.spec.ts:288-293 (Story1 input >=24px, WCAG 2.5.8 AA), :369-376 (Story2 both actions >=24px), :499-503 (terminal action >=44px) all via real getBoundingClientRect() measurement, not assumed from CSS. Execution outcome pending CI.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:09:05.626327+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
