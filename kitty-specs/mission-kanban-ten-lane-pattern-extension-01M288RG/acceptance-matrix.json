@@ -2,7 +2,7 @@
   "mission_slug": "mission-kanban-ten-lane-pattern-extension-01M288RG",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -147,11 +147,11 @@
     {
       "criterion_id": "FR-015",
       "description": "Verify FR-015 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "index + generated checks",
+      "evidence": "head 4f301f83; excludeStories lists all 4 helper exports and the index shows only the 11 stories; elements:analyze leaves custom-elements.json, vue.d.ts and packages/react/src unchanged; SIZES.md --check green.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:45.560768+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
