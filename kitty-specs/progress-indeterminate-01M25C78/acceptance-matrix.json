@@ -88,7 +88,7 @@
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "packages/styles/src/progress/sk-progress.css:257-303 (forced-colors block); sk-progress.spec.ts:315-344 (fill legible at two distinct animation-cycle points)",
+      "evidence": "packages/styles/src/progress/sk-progress.css:257-336 (forced-colors block, #328/#345 fixes); sk-progress.spec.ts:344-364 (determinate: boundary vs page AND vs indicator) and sk-progress.spec.ts:369-437 (indeterminate: boundary vs page, indicator vs page, AND boundary vs indicator, at two animation-cycle points, non-full-width, non-motion) and sk-progress.spec.ts:440-454 (forced-colors + prefers-reduced-motion combination). #344/#345 (GitHub) revised this evidence: the boundary-vs-indicator half of FR-009/SC-006 was previously unasserted for both fixtures, and the indeterminate fixture's forced-colors fill was previously a full-width, non-motion solid block pixel-identical to the determinate Complete fixture (a false completion claim) once #328's selector-list fix let Complete's own fill receive its Highlight override too — fixed via clip-path (MEASURED: background-image/gradient techniques do not survive forced-colors).",
       "pass_fail": "pass",
       "verified_by": "claude",
       "verified_at": "2026-09-10T13:10:53.293511+00:00",
@@ -98,10 +98,10 @@
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "packages/styles/src/progress/sk-progress-indeterminate-narrow.html; sk-progress.spec.ts:269-277 (narrow composition preserved)",
+      "evidence": "packages/styles/src/progress/sk-progress-indeterminate-narrow.html; sk-progress.spec.ts:279-287 (narrow composition preserved). #346 (GitHub) added the compact half this criterion's own text names: packages/styles/src/progress/sk-progress-indeterminate-compact.html, the IndeterminateCompact story, sk-progress.spec.ts:295-315 (compact composition preserved AND a real row-layout assertion), and expected-stories.json (primitives-skprogress-html--indeterminate-compact opted into the story ratchet).",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-10T13:10:54.410158+00:00",
+      "verified_at": "2026-09-10T23:45:00.000000+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
