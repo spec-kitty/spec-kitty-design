@@ -19,8 +19,10 @@
   "work_packages": {
     "WP01": {
       "actor": "claude",
+      "agent": "claude",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "claude-implementer",
       "force_count": 0,
       "lane": "in_progress",
       "last_event_id": "01M271B6DBP58KD5Q3BXHH2P52",
