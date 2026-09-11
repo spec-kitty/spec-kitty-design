@@ -2,7 +2,7 @@
   "mission_slug": "cli-auth-pattern-stories-01M25STS",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -157,11 +157,11 @@
     {
       "criterion_id": "FR-016",
       "description": "Verify FR-016 is satisfied",
-      "proof_type": "manual_inspection",
-      "evidence": "16 baselines harvested by reviewer from PR #409's visual-regression run (34596232715, job 103252824447, artifact visual-regression-diffs, whole-zip sha256 08e545a63e8f40b4ea8230ae778f53ac261180950189044054c0eef58a5015ab verified byte-identical to CI's own logged upload digest). Each PNG's content independently verified against its own sha1-hash filename inside the artifact (Playwright blob-storage convention: all 16 self-consistent, zero mismatches). Each PNG opened and visually confirmed to show its claimed story/theme/viewport (dark genuinely dark, light genuinely light, forced-colors genuinely high-contrast bordered, zoom genuinely 2x and unclipped, 390px genuinely narrow with equal gutters) before staging -- none shot locally. Committed at apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-*-chromium-linux.png (16 files) and pushed (commit fb6c495d). PENDING, not pass, until CI's visual-regression job at the new head confirms green -- not yet observed by reviewer as of this verdict.",
-      "pass_fail": "pending",
-      "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-11T12:09:30.377031+00:00",
+      "proof_type": "automated_test",
+      "evidence": "16 baselines committed at fb6c495d, harvested from PR #409 visual-regression run 34596232715 job 103252824447 artifact visual-regression-diffs. I independently re-downloaded that artifact (gh run download 34596232715 --name visual-regression-diffs; api digest sha256:08e545a63e8f...015ab matched exactly) and sha1-compared all 16 committed PNGs byte-for-byte against the artifact's content-addressed files: 16/16 identical, none locally shot. I opened all 16 committed PNGs myself and confirmed each renders its claimed story/theme/viewport (dark genuinely dark; light genuinely cream-ground/dark-text; forced-colors genuinely white/high-contrast bordered; zoom-200 genuinely enlarged; 390 genuinely narrow with equal gutters). Confirmed per-assertion harvesting, not per-test: read visual.spec.ts:2593-2632 directly -- each of the 16 baselines has its own dedicated test() block with exactly one toHaveScreenshot call (12 cliAuthFullCases + 2 forced-colors + 2 zoom = 16), so no downstream snapshot could be masked behind a first failure; cross-checked against the artifact's 16 distinct test-name .md error-context files, one per baseline, all reading 'snapshot doesn't exist ... writing actual'. Execution outcome now observed at the new head: CI run 34597608929 job 103257371288 (visual-regression) at head eb2db6ad = pass (6m11s), confirmed via gh pr checks 409.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:43:23.943144+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
