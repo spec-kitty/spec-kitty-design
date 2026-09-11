@@ -39,9 +39,9 @@
       "description": "scripts/check-visual-screenshot-softness.mjs detects any hard toHaveScreenshot call site anywhere -- a multi-call test OR a single hard call inside a for loop -- and its --selftest proves both shapes against in-memory probes and a real on-disk file.",
       "proof_type": "automated_test",
       "evidence": "WP01, hardened after review finding H2 (3 live bypasses demonstrated against the real modified visual.spec.ts, not fixtures): (1) a comment between the close-paren and .toHaveScreenshot( -- old fixed-20-char lookahead read comment text; (2) whitespace/indentation longer than 20 chars; (3) optional chaining expect(root)?.toHaveScreenshot(. Fixed via maskNonCode() (a comment/string/template-literal-aware state-walk masking everything but real code and live ${} interpolation before any match is attempted) plus a forward scan past arbitrary whitespace to the next real token, matching both .toHaveScreenshot( and ?.toHaveScreenshot(. All 3 bypasses re-verified fixed against the real file (planted at visual.spec.ts:1581, each caught by name+line, each reverted). --selftest now carries 19 probes incl. all 3 defeats, 2 false-positive-prevention probes (comment/string/template literal containing the literal text must NOT be flagged), a template-interpolation-contains-a-real-call probe (must still be caught), a split-across-lines-with-blank-line probe, a space-before-paren probe (found during self-hunting), and one KNOWN-GAP probe (expect aliased/shadowed to another identifier -- documented as an accepted, AST-requiring limitation in the header, not silently left undocumented, per instruction). check-gate-wiring.mjs and check-gate-wiring-defeats.mjs both re-run and pass; eslint clean.",
-      "pass_fail": "pending",
+      "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T17:55:44.592038+00:00",
+      "verified_at": "2026-09-11T18:20:44.501984+00:00",
       "notes": "Locally verified by the implementer; awaiting reviewer/CI confirmation."
     },
     {
