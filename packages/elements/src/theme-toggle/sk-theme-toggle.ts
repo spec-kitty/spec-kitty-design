@@ -1,4 +1,5 @@
 import { LitElement, html, nothing } from 'lit';
+import { live } from 'lit/directives/live.js';
 import { define } from '../define.js';
 import sheet from './sk-theme-toggle.css.js';
 import {
@@ -7,6 +8,7 @@ import {
   readThemePreference,
   resolveTheme,
   THEME_DARK_SCHEME_QUERY,
+  THEME_STORAGE_KEY,
   writeThemePreference,
   type ResolvedTheme,
   type ThemePreference,
@@ -40,6 +42,22 @@ const storage = (): ThemeStorage | undefined => {
   }
 };
 
+/**
+ * Whether storage can currently answer a read. A denied `localStorage` getter throws here in
+ * `storage()` already; this additionally catches a `Storage` instance that throws from
+ * `getItem` itself (both are exercised by the theme fixture) without treating "no stored key" as
+ * denial — that case is a normal, readable miss and must not fall back to dormant memory.
+ */
+const canReadStorage = (store: ThemeStorage | undefined): boolean => {
+  if (!store) return false;
+  try {
+    store.getItem(THEME_STORAGE_KEY);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 /** How a connected control is told the document's preference without publishing it again. */
 type ThemeControl = (preference: ThemePreference) => void;
 
@@ -50,18 +68,29 @@ type ThemeControl = (preference: ThemePreference) => void;
  * The root and the OS listener are document-global, so they have one owner. Per-control listeners
  * were the defect this replaces: a sibling left in System kept its own listener after another
  * control chose Light or Dark, and overwrote that manual root theme on the next OS change. Module
- * scope holds only a WeakMap of these, so importing the element stays DOM-free.
+ * scope holds only a WeakMap of these, so importing the element stays DOM-free — the WeakMap key
+ * ties a dormant coordinator's lifetime to the document, not to how many controls are connected.
+ *
+ * A dormant document — briefly zero connected controls — keeps its established preference, but
+ * only as a fallback: a control connecting into an empty document prefers its OWN freshly-read
+ * value whenever storage can actually answer that read, exactly as a genuinely fresh page load
+ * would. Only when storage cannot be read at all does the dormant in-memory preference survive
+ * the gap. The `#initialized` flag distinguishes a never-connected document (whose first control
+ * always sets the preference, storage or no) from a dormant one, because `#controls.size === 0`
+ * is true in both. Deleting the coordinator on the last disconnect was the defect this replaces —
+ * a manual choice made while storage was denied was lost the moment the page briefly had zero
+ * connected controls, because the next control's own storage-denied default (System) won instead.
  */
 class DocumentTheme {
   readonly #document: Document;
   readonly #controls = new Set<ThemeControl>();
   #preference: ThemePreference = 'system';
+  #initialized = false;
   #media: MediaQueryList | undefined;
   #listenerMechanism: 'modern' | 'legacy' | undefined;
 
   constructor(document: Document) {
     this.#document = document;
-    this.#media = mediaQuery();
   }
 
   get resolved(): ResolvedTheme {
@@ -69,23 +98,33 @@ class DocumentTheme {
   }
 
   /**
-   * Register a connected control and return the preference it must show. The first control, or
-   * one assigned a preference while disconnected, sets the document's preference; any other
-   * adopts the live one — which may exist only on this page, when storage is denied.
+   * Register a connected control and return the preference it must show.
+   *
+   * One assigned a preference while disconnected always sets the document's preference. A control
+   * joining a still-populated document always adopts the live, sibling-synchronized preference —
+   * a stronger signal than storage. A control joining an EMPTY document (never initialized, or
+   * dormant after every prior control disconnected) prefers its own freshly-read value, matching
+   * a genuine fresh load, unless storage cannot be read at all — then only the dormant in-memory
+   * preference survived the gap, and discarding it for a storage-denied System default is the M1
+   * defect this method fixes. A control connecting from empty re-queries `matchMedia` too, so a
+   * dormant System remount resolves against the environment's current state rather than whatever
+   * `MediaQueryList` the last connect captured.
    */
   connect(control: ThemeControl, preference: ThemePreference, assigned: boolean): ThemePreference {
-    const first = this.#controls.size === 0;
+    const wasEmpty = this.#controls.size === 0;
+    if (wasEmpty) this.#media = mediaQuery();
+    const first = !this.#initialized;
+    const useOwn = assigned || (wasEmpty && (first || canReadStorage(storage())));
+    this.#initialized = true;
     this.#controls.add(control);
-    this.#publish(first || assigned ? preference : this.#preference, control);
+    this.#publish(useOwn ? preference : this.#preference, control);
     return this.#preference;
   }
 
+  /** The last control's disconnect releases the System listener but keeps the preference. */
   disconnect(control: ThemeControl): void {
     this.#controls.delete(control);
-    if (this.#controls.size === 0) {
-      this.#stopListening();
-      documentThemes.delete(this.#document);
-    }
+    if (this.#controls.size === 0) this.#stopListening();
   }
 
   select(control: ThemeControl, preference: ThemePreference): void {
@@ -165,8 +204,10 @@ const documentThemeFor = (document: Document): DocumentTheme => {
  *
  * Every control connected to one document shows one shared preference: a choice on any of them
  * selects it on all of them, and exactly one System listener exists while that preference is
- * System. A control connected later adopts the page's current preference unless it was given
- * an explicit `preference` before connecting.
+ * System. A control connecting alongside another control adopts the page's current preference; a
+ * control connecting alone re-reads storage, unless storage cannot be read — then it adopts
+ * whatever preference the page last showed. Either is skipped for a control given an explicit
+ * `preference` before connecting, which always wins.
  *
  * @element sk-theme-toggle
  * @csspart control - The native fieldset containing the three radio choices.
@@ -287,7 +328,7 @@ export class SkThemeToggle extends LitElement {
               type="radio"
             name="theme-preference"
             value=${value}
-            .checked=${this.preference === value}
+            .checked=${live(this.preference === value)}
             @change=${this.#select}
           >
           <span>${label}</span>

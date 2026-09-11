@@ -2135,8 +2135,8 @@
       "id": "SC-012",
       "arm": "the last disconnected control releases the shared System listener",
       "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
-      "from": "    if (this.#controls.size === 0) {\n      this.#stopListening();",
-      "to": "    if (this.#controls.size === 0) {",
+      "from": "    if (this.#controls.size === 0) this.#stopListening();",
+      "to": "    if (false) this.#stopListening();",
       "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
     },
     {
@@ -2153,6 +2153,30 @@
       "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
       "from": "    const next = isThemePreference(value) ? value : 'system';",
       "to": "    const next = value;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a dormant document trusts storage over the last in-memory preference",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "const useOwn = assigned || (wasEmpty && (first || canReadStorage(storage())));",
+      "to": "const useOwn = assigned || (wasEmpty && (first || true));",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the last disconnected control's coordinator is forgotten rather than kept dormant",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "  disconnect(control: ThemeControl): void {\n    this.#controls.delete(control);\n    if (this.#controls.size === 0) this.#stopListening();\n  }",
+      "to": "  disconnect(control: ThemeControl): void {\n    this.#controls.delete(control);\n    if (this.#controls.size === 0) {\n      this.#stopListening();\n      documentThemes.delete(this.#document);\n    }\n  }",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the radio checked binding trusts Lit's cache instead of the live DOM property",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": ".checked=${live(this.preference === value)}",
+      "to": ".checked=${this.preference === value}",
       "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
     }
   ]

@@ -761,8 +761,10 @@ declare module 'vue' {
      *
      * Every control connected to one document shows one shared preference: a choice on any of them
      * selects it on all of them, and exactly one System listener exists while that preference is
-     * System. A control connected later adopts the page's current preference unless it was given
-     * an explicit `preference` before connecting.
+     * System. A control connecting alongside another control adopts the page's current preference; a
+     * control connecting alone re-reads storage, unless storage cannot be read — then it adopts
+     * whatever preference the page last showed. Either is skipped for a control given an explicit
+     * `preference` before connecting, which always wins.
      */
     'sk-theme-toggle': SkElement<{
       /** Visible label for the Dark choice. */

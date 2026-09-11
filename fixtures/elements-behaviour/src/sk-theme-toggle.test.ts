@@ -718,6 +718,77 @@ test('[SC-012] with storage denied a newly connected control adopts the current-
   expect(checkedValues(second)).toEqual(['dark']);
 });
 
+test('[SC-012] a manual preference survives a zero-control gap when storage is denied', async () => {
+  vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+    throw new DOMException('blocked', 'SecurityError');
+  });
+  vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    throw new DOMException('blocked', 'SecurityError');
+  });
+  installMedia(false);
+  const first = await mount();
+  await choose(first, 'dark');
+  expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+  expect(media.listenerCount).toBe(0);
+
+  first.remove();
+
+  const second = await mount();
+  expect(second.preference).toBe('dark');
+  expect(checkedValues(second)).toEqual(['dark']);
+  expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+  expect(media.listenerCount).toBe(0);
+});
+
+test('[SC-012] a System preference reconnects to the live OS state after a zero-control gap', async () => {
+  installMedia(false);
+  const first = await mount();
+  expect(media.listenerCount).toBe(1);
+  expect(rootTheme()).toEqual({ theme: 'light', colorScheme: 'light' });
+
+  first.remove();
+  expect(media.listenerCount).toBe(0);
+  media.setDark(true);
+
+  const second = await mount();
+  expect(second.preference).toBe('system');
+  expect(media.listenerCount).toBe(1);
+  expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+
+  media.setDark(false);
+  expect(rootTheme()).toEqual({ theme: 'light', colorScheme: 'light' });
+});
+
+test('[SC-012] a synchronous change-handler revert leaves exactly the reverted radio checked', async () => {
+  const element = await mount();
+  await choose(element, 'dark');
+
+  // Reads the element's own live preference, not the event's `detail` — the latter is SC-006/
+  // SC-007/SC-008's mutation surface, and coupling this trigger to it would make an unrelated
+  // event-contract mutation collaterally red this test.
+  let reverted = false;
+  const revertOnce = () => {
+    if (!reverted && element.preference === 'light') {
+      reverted = true;
+      (element as unknown as { preference: ThemePreference }).preference = 'dark';
+    }
+  };
+  element.addEventListener('sk-theme-change', revertOnce);
+  await choose(element, 'light');
+  element.removeEventListener('sk-theme-change', revertOnce);
+
+  expect(element.preference).toBe('dark');
+  expect(checkedValues(element)).toEqual(['dark']);
+});
+
+test('[SC-010] a connected invalid markup preference attribute canonicalizes to System', async () => {
+  const element = await mount({ preference: 'sepia' });
+
+  expect(element.preference).toBe('system');
+  expect(element.getAttribute('preference')).toBe('system');
+  expect(checkedValues(element)).toEqual(['system']);
+});
+
 test.each(['sepia', '', 'SYSTEM', null, undefined, 42])(
   'a direct invalid preference assignment (%s) normalizes to System at the property boundary',
   async (invalid) => {

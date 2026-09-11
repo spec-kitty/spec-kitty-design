@@ -75,15 +75,29 @@ Every `sk-theme-toggle` connected to one document shows one shared preference. A
 control selects it on every connected control, persists once, and resolves one root theme; while
 that preference is System exactly one live `prefers-color-scheme` listener exists, and none
 exists in Light or Dark, so a second control can never apply the operating system over a manual
-choice. A control connected later adopts the page's current preference — including a choice
-that could not be persisted because storage is denied — unless it was given an explicit
-`preference` before connecting, which then becomes every control's preference. The last control
-to disconnect releases the listener. Coordination is per document only; there is no cross-tab
-synchronization.
+choice. A control connecting while another remains connected always adopts that live,
+sibling-synchronized preference — including a choice that could not be persisted because storage
+is denied — unless it was given an explicit `preference` before connecting, which then becomes
+every control's preference. The last control to disconnect releases the listener but keeps the
+preference in memory: a control that connects later, after every other control has briefly
+disconnected (an SPA remounting a header during navigation, for example), still adopts that
+retained preference whenever storage cannot be read — otherwise it re-reads storage itself, so a
+genuinely fresh page load, or a same-tab write from other code, is not shadowed by stale memory.
+Coordination is per document only; there is no cross-tab synchronization.
+
+Most applications should omit the `preference` attribute and property entirely. The element
+already resolves the stored preference (or System) on its own, matching the pre-paint bootstrap,
+so supplying `preference` is an explicit *initial* override — appropriate only when a consumer
+intentionally seeds a first-visit choice — and it does not itself persist that override to
+storage, so an authored value that disagrees with the stored one can produce a bootstrap-to-
+upgrade theme change.
 
 The `preference` property and attribute accept only `system`, `light`, and `dark`. Any other
-value assigned from JavaScript or markup becomes `system`: it is never reflected, never leaves
-the group without a selected choice, and never reaches the root.
+value assigned from JavaScript, or assigned directly to an already-upgraded element's property,
+becomes `system` immediately and is reflected back onto the attribute. A raw invalid string
+written directly onto a connected element's `preference` *attribute* is likewise corrected to
+`system` once the element next updates; it does not persist as the literal invalid string. In
+every case the value never leaves the group without a selected choice and never reaches the root.
 
 Degradation is deliberate:
 

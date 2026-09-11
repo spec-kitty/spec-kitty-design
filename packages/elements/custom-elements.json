@@ -6104,7 +6104,7 @@
         },
         {
           "kind": "class",
-          "description": "A three-state theme-preference control that resolves System, Light, or Dark on the root.\n\nConsumer-supplied labels are required so the package never ships untranslated fallback copy.\nIf any label is absent or blank, the element renders no interactive control. The pre-paint\nbootstrap is independent of this presentation and continues to provide system-default theming.\n\nEvery control connected to one document shows one shared preference: a choice on any of them\nselects it on all of them, and exactly one System listener exists while that preference is\nSystem. A control connected later adopts the page's current preference unless it was given\nan explicit `preference` before connecting.",
+          "description": "A three-state theme-preference control that resolves System, Light, or Dark on the root.\n\nConsumer-supplied labels are required so the package never ships untranslated fallback copy.\nIf any label is absent or blank, the element renders no interactive control. The pre-paint\nbootstrap is independent of this presentation and continues to provide system-default theming.\n\nEvery control connected to one document shows one shared preference: a choice on any of them\nselects it on all of them, and exactly one System listener exists while that preference is\nSystem. A control connecting alongside another control adopts the page's current preference; a\ncontrol connecting alone re-reads storage, unless storage cannot be read — then it adopts\nwhatever preference the page last showed. Either is skipped for a control given an explicit\n`preference` before connecting, which always wins.",
           "name": "SkThemeToggle",
           "cssParts": [
             {

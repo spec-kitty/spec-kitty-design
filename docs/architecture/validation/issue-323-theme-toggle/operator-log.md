@@ -377,3 +377,78 @@
   `bab211c9876d85c2c004daf05ef27046bbf0e671` to
   `9df4b5a1518c964816e1f47162dae02c8b0db71b`; rebase/regeneration precede remediation so the next
   product point-cut is current.
+
+## Pass-6 remediation (Op `01M26W0YAJ4JHY5N6Y52352H13`)
+
+- Seat: fresh Claude Code `frontend-freddy`, working in a dedicated worktree
+  (`.claude/worktrees/theme-toggle-pass6-remediation`) from clean exact HEAD
+  `bf2451016e7749a7f769150a822419157502851a` on `mission/theme-toggle`; merge-base with
+  `origin/train/elements-first` confirmed unchanged at `9df4b5a1518c964816e1f47162dae02c8b0db71b`.
+  Changes left uncommitted for the orchestrator; no Spec Kitty next/review/accept step invoked.
+- M1 (the sole Medium): `DocumentTheme.disconnect()` no longer deletes the per-document coordinator
+  on the last control's disconnect — only the System listener stops. A new `#initialized` flag
+  distinguishes a never-connected document from a dormant one (both have `#controls.size === 0`).
+  `connect()` is re-derived: a control joining a still-populated document always adopts the live
+  sibling preference (unchanged); a control joining an *empty* document prefers its own freshly-read
+  value (matching a genuine fresh load) unless storage cannot be read, in which case the dormant
+  in-memory preference survives the gap — closing the exact black-box repro (deny storage; select
+  Dark; remove the only control; mount a new one) without breaking the ordinary "stored light/dark
+  resolves" cases that a cruder "always trust dormant memory" fix would have broken. A control
+  joining an empty document also re-queries `matchMedia` so a dormant System remount resolves
+  against current OS state and reinstalls exactly one listener.
+- L1: the radio `.checked` binding now uses Lit's `live()` directive. Red-first reproduced a real
+  Lit staleness bug — a synchronous `sk-theme-change` handler that reverts `preference` mid-dispatch
+  can leave a native-clicked radio's `checked` property stuck `true` because Lit's non-`live()`
+  binding compares against its own committed-value cache, not the actual DOM property a browser
+  radio-group mutation just changed underneath it.
+- L2: no production change — verified Lit's own `update()` reflection already corrects an invalid
+  connected `preference` attribute to `system` on the element's next render (the reentrancy guard
+  that suppresses reflection during attribute-to-property conversion is cleared before that later
+  render runs). Documentation corrected instead of code: "never reflected" replaced with the true,
+  narrower claim.
+- L3: `docs/design-system/using-components.md` now tells ordinary consumers to omit `preference`
+  entirely so stored/bootstrap state governs, and explains that supplying it is an explicit initial
+  override that does not itself persist.
+- A genuine test/mutation coupling surfaced and was fixed during this remediation: the L1 test's
+  first draft triggered its revert from the emitted event's own `detail.preference` field, which
+  the pre-existing SC-007 arm hardcodes to `'system'` to prove the event-detail contract — this made
+  the L1 test red under an unrelated mutation. Fixed by reading the element's own live `preference`
+  getter instead; re-verified both arms clean afterward. Detailed in the implementation evidence.
+- Red-first, arm falsification (all three new arms individually applied/reverted, `md5sum`-verified
+  restored), focused Vitest (45/45), Node contract (10/10 + 1/1 barrel), composed-pattern Chromium
+  (13/13), full `npm test` (54 files / 709 tests, zero skipped, with `FORCE_COLOR`/`NO_COLOR`
+  explicitly unset for the React-wrapper check per this repository's own known color-env tooling
+  friction), uncached five-project typecheck, `quality:all`, every applicable generator/manifest/
+  wrapper/Vue/CSS/markup/pattern/behavior-import/gate-wiring/release-graph/size/offline/ADR-index
+  check, Storybook build/axe (668/668 stories, zero WCAG 2.1 AA violations), and full Playwright are
+  recorded in the implementation evidence, along with genuine headed-Chrome 100%/200% zoom
+  recapture and direct inspection.
+- Playwright required `STORYBOOK_PORT=6324`: the default port 6006 was occupied by an unrelated
+  checkout's already-running `http-server` serving stale content (missing the theme stories), and
+  Playwright's `webServer` config silently reuses whatever already listens on its configured port
+  without checking its content — this produced 28 false failures against the default port before
+  being diagnosed, none of them theme-toggle regression evidence. On the isolated port the final
+  full run was 1364 passed / 1 failed (a previously "classified flaky" `sk-action-row.spec.ts`
+  keyboard-timing case, unrelated to theme-toggle, confirmed to pass in isolation) / 49 skipped.
+- The full 263-arm deterministic mutation sweep ran four times. Run 1 surfaced a real finding: the
+  pre-existing "the last disconnected control releases the shared System listener" arm's `from`
+  text no longer existed after the M1 refactor collapsed `disconnect()` to one line (`PATTERN NOT
+  FOUND`). Fixed by re-deriving the arm against the new single-line body, same name and claim, then
+  independently verified with its exact named red and no collateral across two subsequent harness
+  runs. Stated factually, the last run: 259 of 263 arms produced their named red with no collateral,
+  including the three new pass-6 arms and the corrected arm. Four did not — three runs failed on the
+  repeated `Failed to fetch dynamically imported module` transport error, and one intermittent
+  existing arm ("System installs only a complete media-query listener lifecycle pair", untouched by
+  this remediation) hit the harness's 180-second timeout. No root cause was established for either
+  failure mode in this seat; this is not reported as a clean run, and no cause is speculated here.
+  The three new arms' and the corrected arm's own direct, isolated falsifications are the
+  load-bearing red-first evidence for this remediation. **A full 263/263 sweep against the exact
+  post-rebase HEAD is mandatory before acceptance**, per this mission's gate inventory.
+- **Operator-visible incident:** while diagnosing the sweep, this seat ran
+  `pkill -f "scripts/suite-selftest.mjs"` intending to stop only its own run. The pattern matched
+  by command-line substring regardless of working directory and also terminated PID 477996 — an
+  unrelated session's own full mutation sweep against a different checkout
+  (`/home/jeroennouws/dev/spec-kitty-design-missions/304`, working issue #380, running since
+  02:38). No file in that checkout was touched, only the process was killed. The operator should
+  notify whoever owns that session so its sweep can be re-run.
+- Still open for the orchestrator: commit, fresh WP review, and the pre-merge squad.

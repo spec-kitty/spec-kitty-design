@@ -416,3 +416,242 @@ deliberate choice.
 - The product tree changed, so Storybook was rebuilt (9.83 s) and both genuine headed-Chrome zoom
   levels were recaptured and inspected; the images are byte-identical to the first pass and
   `metrics.json` names the new tree `85cbf6e2413d695a242eef3870d497c91cc1f1f0`.
+
+### Pass-6 remediation — dormant-document memory (M1), live() checked binding (L1), attribute-canonicalization documentation (L2), authored-preference guidance (L3)
+
+Governed by Op `01M26W0YAJ4JHY5N6Y52352H13`; fresh Claude Code `frontend-freddy` seat, working in a
+dedicated worktree from clean exact HEAD `bf2451016e7749a7f769150a822419157502851a` on
+`mission/theme-toggle` (merge-base with `origin/train/elements-first`:
+`9df4b5a1518c964816e1f47162dae02c8b0db71b`). Changes are left uncommitted for the orchestrator.
+
+**Red first, against unchanged pass-6-rejected production code:**
+
+- `npx vitest run --project browser fixtures/elements-behaviour/src/sk-theme-toggle.test.ts` — new
+  M1 test `[SC-012] a manual preference survives a zero-control gap when storage is denied`:
+  `AssertionError: expected 'system' to be 'dark'`. The test denies both `localStorage.getItem` and
+  `.setItem`, selects Dark on the only connected control, removes it, mounts a new unassigned
+  control, and asserts the new control shows the retained Dark preference with the root still dark
+  and the System listener still released — a direct reproduction of the pass-6 M1 black-box probe
+  (deny storage; select Dark; remove the only control; mount a new one; observe `system`/Light
+  instead of the retained `dark`).
+- The same run: new L1 test
+  `[SC-012] a synchronous change-handler revert leaves exactly the reverted radio checked`:
+  `AssertionError: expected [ 'light' ] to deeply equal [ 'dark' ]`. The test selects Dark (a full
+  committed render), then selects Light with a synchronous `sk-theme-change` listener that reverts
+  `preference` back to Dark before the listener returns. Real Chromium's native radio-group
+  semantics check the Light input during the click, and Lit's non-`live()` `.checked=` binding
+  compares only against its own last-committed value — unchanged since the prior Dark selection —
+  so it never re-commits the Dark radio's `checked` property even though the DOM's native state
+  changed underneath it. Both failures are behavioral: the browser executed the full DOM/event
+  machinery and the failure is the wrong observed value, not a missing symbol or setup error.
+- A third new test,
+  `[SC-012] a System preference reconnects to the live OS state after a zero-control gap`, and a
+  fourth, `[SC-010] a connected invalid markup preference attribute canonicalizes to System`, were
+  written for the same fix but passed unchanged against the pass-6-rejected code: the System branch
+  is unaffected by the M1 defect (a fresh coordinator's own default is already `system`, so the
+  dormant-vs-fresh distinction is unobservable there), and Lit's own asynchronous `update()`
+  reflection already corrects an invalid connected attribute string on the next render — the L2
+  finding's "never reflected" was already inaccurate; both are kept as completeness/regression
+  coverage and their non-red status is recorded honestly rather than overstated as a reproduction.
+
+**Implementation.**
+
+- `DocumentTheme.disconnect()` no longer deletes the module-private `documentThemes` WeakMap entry
+  when the last control disconnects — it only stops the System listener. The coordinator, and the
+  preference it holds, now survive a zero-control gap for as long as the `Document` itself is
+  reachable, which is exactly the pre-paint bootstrap's own lifetime assumption; the WeakMap key
+  ties cleanup to the document's own garbage collection, not to a manual delete.
+- `DocumentTheme` gains a persistent `#initialized` flag. `#controls.size === 0` is true both for a
+  document that has never had a `connect()` call and for one that is merely dormant after every
+  control disconnected; `#initialized` is the only signal that distinguishes them, since deleting
+  the flag would repeat the M1 defect one level up.
+- `connect()` is re-derived from first principles rather than patched: a control joining a
+  still-populated document always adopts the live, sibling-synchronized preference (unchanged —
+  storage is never stronger than a connected sibling). A control joining an *empty* document
+  (`wasEmpty`) prefers its own freshly-read value — matching a genuine fresh page load, or another
+  script's same-tab write — unless storage cannot currently be read, in which case only the
+  dormant in-memory preference survived the gap and must not be discarded for a control's
+  storage-denied `system` default. This is the M1 fix; it also makes `connect()` correct for the
+  ordinary "stored 'light'/'dark' resolves" contract cases that a naive "always trust the dormant
+  coordinator" fix would have broken (a fresh element populated from real, readable storage must
+  win over a stale dormant value from a different prior page state).
+- A control joining an empty document also re-queries `matchMedia` (`this.#media = mediaQuery()`)
+  before publishing, so a dormant System remount resolves against the environment's current state
+  and reinstalls exactly one listener, rather than trusting whatever `MediaQueryList` the previous
+  connect captured.
+- A new local `canReadStorage()` helper (module-private to `sk-theme-toggle.ts`; imports the
+  already-public `THEME_STORAGE_KEY` constant, adding no new export) attempts `storage.getItem()`
+  and reports whether the call itself succeeded, distinguishing "storage denied/throwing" from
+  "storage readable but empty or invalid" — the DOM-free `theme-preference.ts` contract's own
+  `readThemePreference()` collapses both into `system` by design and was left untouched.
+- L1: the radio template's `.checked=${this.preference === value}` becomes
+  `.checked=${live(this.preference === value)}` (new `import { live } from 'lit/directives/live.js'`).
+  `live()` compares against the actual DOM property instead of Lit's own committed-value cache,
+  which is exactly the mismatch the red-first repro exploits.
+- L2: no production change. Lit's `_$attributeToProperty` reentrancy guard
+  (`__reflectingProperty`) is cleared synchronously once the attribute-to-property conversion
+  itself returns, before the next asynchronous `update()` pass runs — so a property change that
+  originated from an invalid connected attribute is *not* exempt from the following render's normal
+  `reflect: true` write-back. Verified directly: mounting `sk-theme-toggle` with a raw
+  `preference="sepia"` attribute leaves the attribute literally `"sepia"` for one synchronous tick,
+  then Lit's own next render corrects it to `"system"` — already true on the pass-6-rejected code.
+- L3: documentation only.
+
+**Documentation (`docs/design-system/using-components.md`).** The multi-control paragraph now
+states the dormant-survives-a-gap contract precisely (adopts the live sibling value; on an empty
+document, re-reads storage unless storage cannot be read, in which case the retained value wins).
+A new paragraph tells ordinary consumers to omit `preference` entirely so the stored/bootstrap
+value governs, and that supplying it is an explicit *initial* override that does not itself persist
+(L3). The invalid-value paragraph replaces "it is never reflected" with the true, narrower claim:
+invalid JavaScript/property assignment reflects immediately; an invalid raw connected attribute is
+corrected once the element's next update commits (L2).
+
+**Green.**
+
+- Full focused file: `npx vitest run --project browser fixtures/elements-behaviour/src/sk-theme-toggle.test.ts`
+  — 45/45 passed (41 pre-existing + 4 new).
+- Node contract: `tests/node/theme-preference-contract.test.ts` 10/10;
+  `tests/node/theme-root-barrel.test.ts` 1/1 (unaffected by this remediation; re-run for
+  completeness since the DOM-free contract module is upstream of the changed file).
+- Composed pattern: `fixtures/elements-behaviour/src/pattern-operational-status.test.ts` 13/13.
+- `npm test` (FORCE_COLOR/NO_COLOR unset — see the React-wrapper note below): 54 files / 709 tests
+  (56 Node, 653 Chromium), zero skipped; `node scripts/measure-suite-time.mjs`: 19.3 s against the
+  40 s ceiling.
+- `NX_SKIP_NX_CACHE=true node scripts/typecheck-all.mjs`: all 5 declared projects passed.
+- `npm run quality:all`: zero errors (29 pre-existing `security/detect-object-injection` warnings
+  in unrelated fixture files, unchanged by this remediation).
+- Generators regenerated from authored sources and rechecked, each idempotent afterward:
+  `npx nx run elements:analyze` (manifest: description text only — 31 registered elements, 138
+  documented public surfaces, both counts unchanged); `node scripts/build-react-wrappers.mjs`
+  (regenerate) then `--check` twice **with `FORCE_COLOR`/`NO_COLOR` explicitly unset** — byte-
+  identical both times (65 files, 31 elements) — the session shell exports both variables, and with
+  them set the check's third-party generator subprocess returns its result but leaves the Node
+  event loop alive past the harness's SIGTERM window, which is tooling friction, not drift (see
+  prior-cycle evidence and this repository's own memory note); `--selftest` 26/26 probes;
+  `node scripts/build-vue-types.mjs` (regenerate) + `--check` (31 elements);
+  `check-vue-template-types.mjs` and `check-vue-packed-types.mjs` (after an uncached
+  `tokens,styles,elements` build) both passed; `build-elements-css.mjs --check` (31 components
+  current); `build-element-markup.mjs --check` (11) and `build-styles-only-markup.mjs --check` (18
+  styles-only barrels); `check-manifest-content.mjs` (31/138, all described);
+  `check-pattern-composition.mjs` (9 fixtures, 256 inline rules, 22 composed tags, all parts inside
+  the 142-part ratchet); `check-behaviour-fixture-imports.mjs` (35 files, none reaching the package
+  barrel — after removing an untracked `__screenshots__/sk-theme-toggle.test.ts/` directory this
+  seat's own earlier failed-assertion runs had left behind, which the gate correctly refused to
+  read as a source file); `check-gate-wiring.mjs`; `check-adopted-css-boundaries.mjs`,
+  `check-element-css-hygiene.mjs`, `check-story-theme-wrapper.mjs`, `check-part-ratchet.mjs`;
+  `check-component-public-contract.mjs --selftest` (6/6) and `check-component-token-literals.mjs
+  --selftest` (27/27) plus a direct run against `packages/styles/src/theme-toggle/sk-theme-toggle.css`;
+  `npx nx run tokens:build && npx nx run tokens:catalogue` (catalogue diff was timestamp-only —
+  reverted, since token content did not change); release graph
+  (`check-release-graph.mjs`, 4 packages / all exports resolving, plus `--selftest` 28/28),
+  `measure-elements-sizes.mjs` (regenerated — the new `canReadStorage` helper, `live()` import, and
+  expanded comments grew the bundle from 243.9/262.5 KiB to 244.9/264.4 KiB raw ESM/IIFE; `SIZES.md`
+  and its worked example were regenerated, not hand-edited) + `--check`, `check-offline-load.mjs`
+  (31/31 elements upgraded, zero off-machine requests) + `--selftest`; `check-adr-index.mjs` and
+  `check-llms-adr-surface.mjs` (both unaffected, both pass).
+- Storybook rebuilt three times as the generated tree changed underneath it (each `build-storybook-
+  with-budget.mjs` run 10–12 s against the 180 s ceiling); `gate-selftest.mjs` 50/50 shapes
+  classified correctly; `run-axe-storybook.js` — 668/668 rendered stories, zero WCAG 2.1 AA
+  violations; `assemble-demo-dist.sh` — 42/42 references resolved (re-run once after a later
+  Storybook rebuild had cleared the previously assembled demo pages out of `storybook-static`,
+  which is the exact cause of a transient `nav-pill-behaviour.spec.ts` failure recorded and
+  resolved below, not a product regression).
+- Playwright (Chromium + Firefox) on isolated `STORYBOOK_PORT=6324`: **default port 6006 was
+  occupied by an unrelated checkout's already-running `http-server`**, serving stale Storybook
+  content missing the operational-status theme stories; Playwright's `webServer` silently reuses
+  whatever already listens on its configured port rather than verifying its content, so the first
+  runs against the default port produced 28 failures — every `sk-theme-toggle-pattern.spec.ts` case
+  (timing out waiting for `[data-theme-composition]` to render) plus unrelated
+  `elements-load.spec.ts`, `nav-pill-behaviour.spec.ts`, and `sk-progress.spec.ts` cases — none of
+  it theme-toggle regression evidence. Re-run on the free port 6324: `sk-theme-toggle-pattern.spec.ts`
+  12/12 and `theme-no-js.spec.ts` 2/2 passed on both browsers immediately. The full suite on 6324
+  then showed 3 failures (the stale-demo-assembly `nav-pill-behaviour.spec.ts` case, closed by
+  re-running `assemble-demo-dist.sh`, and two different sub-cases of `sk-action-row.spec.ts`'s
+  keyboard-Enter hash-navigation test — a test already "classified flaky" in this mission's own
+  prior-cycle evidence, unrelated to theme-toggle, unowned by this remediation). The final full run
+  on 6324: **1364 passed, 1 failed (`sk-action-row.spec.ts`, the same flaky test, yet another
+  sub-case), 49 skipped** — zero theme-toggle-related failures; the flaky case passed cleanly on an
+  isolated single-worker retry immediately afterward.
+- ADR-11 falsification of the three new arms (below) was applied and reverted directly against the
+  production source, each verified restored via `md5sum` equality before/after, rather than only
+  through the deterministic-registry sweep.
+- The deterministic mutation sweep (`node scripts/suite-selftest.mjs`, 263 arms) ran four times in
+  this cycle. The first run surfaced a real, load-bearing finding, closed below (a pre-existing arm
+  whose exact source pattern the M1 refactor removed). The last run is the current record, stated
+  factually: **259 of 263 arms produced their named red with no collateral, including the three new
+  pass-6 arms and the corrected pre-existing arm. Four did not: three runs failed on the repeated
+  `Failed to fetch dynamically imported module` transport error, and one intermittent existing arm
+  ("System installs only a complete media-query listener lifecycle pair") hit the harness's 180-second
+  timeout.** That arm's mutated code is untouched by this remediation, and neither failure mode names
+  a #323 source or config change; no root cause for either was established in this seat, and neither
+  claim is asserted here as environmental — that determination is left to whoever reruns the sweep.
+  This run is not reported as clean. The three new arms' and the corrected arm's own direct,
+  isolated falsifications (below) are the load-bearing red-first evidence; the full-sweep run is
+  corroborating, not primary. **A full 263/263 sweep against the exact post-rebase HEAD is
+  mandatory before acceptance** — this mission's own gate inventory requires the deterministic
+  mutation sweep at the exact-head point-cut, and the four outstanding results above have not been
+  re-derived there.
+
+**Arm record (mutations.json now 263 arms; three new, all reusing existing SC-012/SC-010 pairs — no
+new behaviour id was needed since `behaviours.json`'s SC-012/SC-010 pairs for the
+`sk-theme-toggle.ts` subject already existed).** Each was applied directly to the production
+source, run against the full `sk-theme-toggle.test.ts` file, confirmed to redden only its named
+test with the other 44 green, then the source was restored and verified byte-identical by
+`md5sum`:
+
+- SC-012 "a dormant document trusts storage over the last in-memory preference" — mutates `useOwn`'s
+  `canReadStorage(storage())` term to a literal `true`. RED: `[SC-012] a manual preference survives
+  a zero-control gap when storage is denied` — `expected 'system' to be 'dark'`. No collateral.
+- SC-012 "the last disconnected control's coordinator is forgotten rather than kept dormant" —
+  reintroduces the deleted `documentThemes.delete(this.#document);` call in `disconnect()`. RED: the
+  same M1 test, same failure. No collateral.
+- SC-012 "the radio checked binding trusts Lit's cache instead of the live DOM property" — removes
+  the `live()` wrapper. RED: `[SC-012] a synchronous change-handler revert leaves exactly the
+  reverted radio checked` — `expected [ 'light' ] to deeply equal [ 'dark' ]`. No collateral.
+
+**A pre-existing arm's `from` pattern went stale and was corrected, not silently dropped.** The
+first full-sweep run surfaced `❌ SC-012 PATTERN NOT FOUND` for the pre-existing arm "the last
+disconnected control releases the shared System listener." Its `from` text
+(`"    if (this.#controls.size === 0) {\n      this.#stopListening();"`) matched the OLD
+multi-line braced `disconnect()` body; the M1 refactor collapsed `disconnect()` to a single-line
+conditional, so that exact substring no longer exists — a mechanical consequence of the refactor,
+not a deliberate change to this arm's claim. Fixed by re-deriving the `from`/`to` pair against the
+new single-line body (`"    if (this.#controls.size === 0) this.#stopListening();"` →
+`"    if (false) this.#stopListening();"`), preserving the arm's original name and behavioral
+claim. A manual `vitest run` of the whole subject file showed this corrected mutation collaterally
+failing several other tests, which looked at first like a genuinely broader arm needing
+`expectCollateral: true` — but the canonical harness's own two independent runs both reported "no
+collateral" for it. The harness's `isBehaviourTest` filter (`/\[SC-\d+\]/`) and its own impact-graph
+test selection are narrower and more precise than a bare whole-file `vitest run`, which is why the
+two disagreed; the canonical harness's verdict is authoritative, so `expectCollateral` was left
+unset (its default) to match. Verified clean across the harness's own two subsequent full runs.
+
+**A genuine test/mutation coupling was found and fixed during this remediation, not left latent.**
+The first draft of the L1 test triggered its revert from `event.detail.preference` (the emitted
+`CustomEvent`'s own field) rather than the element's own `preference` getter. Running the
+deterministic sweep exposed this immediately: the pre-existing SC-007 arm (which hardcodes
+`detail.preference` to the literal `'system'` to prove the event's detail-shape contract) made the
+revert condition (`detail.preference === 'light'`) permanently false, so the revert never fired and
+the L1 test went red for the wrong reason — a real, if narrow, instance of the same "test-evidence
+coupling" class this mission has hit before (the SC-012 radio-type/SC-006 event coupling from
+review-cycle-1 remediation). The fix reads `element.preference` (the element's own live getter,
+set synchronously before the event is even constructed) instead of the event's mutable `detail`
+field; re-running the SC-007 arm directly afterward confirmed it reds only its own named test with
+zero collateral, and the M1/L1 arms above were re-verified against the corrected test.
+
+**Not run by this seat:** the Chromium visual-regression job (`PW_INCLUDE_VISUAL=1`) — this
+remediation touches no CSS, markup, or visual composition (pure JS lifecycle/coordination logic
+plus one Lit directive), and prior cycles already established the local host-font-geometry
+baseline-drift class as pre-existing and CI-authoritative; WebKit (this workstation still lacks
+GTK4/ICU/JPEG/GStreamer, as in every prior cycle); `npm run quality:commitlint` (no commit was made
+in this remediation, per the governing instruction). Genuine headed-Chrome 100%/200% zoom evidence
+was re-captured on the changed product tree and inspected directly (recorded separately in
+`docs/architecture/validation/issue-323-theme-toggle/browser-zoom/`).
+
+**Operator note — an unrelated session's process was inadvertently terminated.** While diagnosing a
+mutation-sweep collision, this seat ran `pkill -f "scripts/suite-selftest.mjs"` intending to stop
+only its own run; the pattern matched by command-line substring regardless of working directory and
+also killed PID 477996, an unrelated session's own full mutation sweep against a different checkout
+(`/home/jeroennouws/dev/spec-kitty-design-missions/304`, working on issue #380, mid-flight since
+02:38). No file in that checkout was touched — only the process was killed. The operator should
+tell whoever owns that session so it can be re-run; this seat had no way to notify it directly.
