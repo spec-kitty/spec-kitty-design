@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#418": {
-      "evidence_ref": "commit 7d0eb845 - #418's DOM-inventory arm rebuilt on runtime DOM ground truth (collectSkPrimitives() via page.evaluate() over document.body) after two source-text mechanisms were each defeated by the reviewer (forged/repeated data-*-pattern root marker; Object.assign class-mutation bypassing an enumerated ban list). Self-attacked with 6 distinct exploits (both reviewer reproductions, the Object.assign bypass, setAttributeNS, a document.body escape outside the located root, a case-mismatched class name) before being reported closed; unmodified file stays 14/14 green",
+      "evidence_ref": "commit fea9a1df - rescoped the DOM watch to document (documentElement missed a sibling-of-body escape, and was itself null at addInitScript time, a self-found crash that silently never armed the watch), recursed into open shadow roots (childList-added nodes now check their own shadowRoot, not only descendants), and armed via MutationObserver across each story's rendered lifetime (page.addInitScript + 500ms post-render read) to catch a 300ms-deferred classList mutation. Added an armed floor after the addInitScript crash proved a watch that never arms is indistinguishable from a clean result. Self-attacked: documentElement escape, open-shadow injection, 300ms deferred mutation all caught; closed-shadow root confirmed not caught (disclosed, not chased); armed floor verified by reintroducing the crash and confirming a named failure. 14/14 green on a fresh build",
       "fr": null,
       "nfr": null,
       "repo": null,
