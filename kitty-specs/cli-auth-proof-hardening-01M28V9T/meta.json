@@ -2,18 +2,18 @@
   "accept_commit": "38ed1eb20fc987168077c0f7b830cb456a7441a0",
   "acceptance_history": [
     {
-      "accept_commit": "9bcb5da81c0f56c27947e9732dfef033fdd93bda",
+      "accept_commit": "88c1d920f52f25fe985b58d1b5fc74d729c450f7",
       "acceptance_mode": "pr",
       "accepted_at": "2026-09-11T21:33:42.218980+00:00",
       "accepted_by": "jeroennouws",
-      "accepted_from_commit": "68514a7c01bf931ae1fe67e66189cd42515b49d8"
+      "accepted_from_commit": "2f08d5efc234cddc91be8c8f2844d0b851933c0c"
     },
     {
-      "accept_commit": "5f09eeaf8dac437d6d733f437edc3afabab54f12",
+      "accept_commit": "c13cf70acf08adc4eea87bb2a2c67fa3f0fbc13a",
       "acceptance_mode": "pr",
       "accepted_at": "2026-09-11T21:40:57.161427+00:00",
       "accepted_by": "jeroennouws",
-      "accepted_from_commit": "321edce9d455bae12c6c5e5dc700008dad33cba2"
+      "accepted_from_commit": "3e72371439d43e8f49ef1cb945feea0f83ae075c"
     },
     {
       "accept_commit": "38ed1eb20fc987168077c0f7b830cb456a7441a0",
