@@ -37,7 +37,7 @@
       "wp": null
     },
     "#420": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "commitlint.config.cjs (3 new anchored exemptions) + scripts/check-commitlint-config.mjs; node scripts/check-commitlint-config.mjs passes, real messages proven ignored+valid, near-misses proven not-ignored (red-first verified)",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
