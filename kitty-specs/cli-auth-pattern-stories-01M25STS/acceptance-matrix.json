@@ -178,10 +178,10 @@
       "criterion_id": "FR-018",
       "description": "Verify FR-018 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "npx vitest run tests/node/cli-auth-no-literal.test.ts (run by reviewer, hermetic Node-only, no browser/shared-lane dependency): 4/4 passed, incl. 'no CLI Auth fixture copy string appears as a literal inside the composed elements' own source' (tests/node/cli-auth-no-literal.test.ts:93-116). Word-boundary regex fix confirmed sound: getBoundingClientRect() false-positive documented and resolved (same file, lines 100-115).",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:07:28.483022+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
