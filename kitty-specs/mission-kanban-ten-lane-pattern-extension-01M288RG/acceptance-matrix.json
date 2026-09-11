@@ -58,10 +58,10 @@
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
       "proof_type": "browser + keyboard tests",
-      "evidence": "product head 8986d38f (rebased on train 16948194); sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K3: open disclosure, 10 name=lanes choices with counts, exactly in_review+blocked checked, lanes in_review(WP10) then blocked(WP05), board unchanged after toggling and Apply/Clear; [T007] Tab order equals DOM order summary->10 choices->Apply->Clear->WP10->WP05->#1054 with visible unclipped rings; local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K3: open disclosure; 10 name=lanes choices with counts; exactly in_review and blocked checked; lanes in_review (WP10) then blocked (WP05); the board is unchanged after toggling a choice or pressing Apply or Clear. [T007]: Tab order equals DOM order summary->10 choices->Apply->Clear->WP10->WP05->#1054, every ring visible and unclipped, including WebKit in CI; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T14:11:10.112513+00:00",
+      "verified_at": "2026-09-11T16:39:32.025471+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
