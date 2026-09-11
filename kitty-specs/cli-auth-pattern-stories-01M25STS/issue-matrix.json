@@ -13,7 +13,7 @@
       "wp": "WP01"
     },
     "#300": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Scraped from spec.md's dependency table naming #300 as #303's owning epic (context only); this WP does not act on #300 in any way and defers to that epic's own tracking.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#303": {
       "evidence_ref": "<link or commit>",
