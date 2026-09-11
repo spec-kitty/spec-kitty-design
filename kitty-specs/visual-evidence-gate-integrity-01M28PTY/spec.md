@@ -111,11 +111,16 @@ that too, naming the loop's line; restore it. Confirm the gate is green again af
   site, flat" specifically so it does not need to understand loop control flow to catch this
   shape. See operator ruling below.
 - A `test.describe`-level `test.skip(({ browserName }) => browserName !== 'chromium', ...)`
-  predicate (four sites: `sk-context-nav.spec.ts`, `sk-collection.spec.ts`,
-  `sk-section-nav.spec.ts`, `sk-form-select.spec.ts`) shares the surface pattern but gates
-  browser-independent contract tests, not a rendering capability. A standalone, unskipped
+  predicate (**eight** sites: `sk-context-nav.spec.ts:267`, `sk-collection.spec.ts:279`,
+  `sk-section-nav.spec.ts:321`, `sk-form-select.spec.ts:106`, `sk-checkbox-choice-group.spec.ts:181`,
+  `sk-public-header.spec.ts:209`, `sk-segmented-choice.spec.ts:173`,
+  `sk-radio-choice-group.spec.ts:392` — the first four are single-line calls, the last four
+  wrap the predicate and reason onto their own lines, which is why an initial single-line-only
+  scan during this same mission found only four; see the review-correction note below) shares
+  the surface pattern but gates browser-independent contract tests, not a rendering
+  capability. A standalone, unskipped
   `test('the chromium project the describe below depends on still exists', ...)` is added
-  immediately before each of the four `test.describe(...)` blocks, so the guard does not
+  immediately before each of the eight `test.describe(...)` blocks, so the guard does not
   depend on reasoning about what else happens to cover it elsewhere in the file — see
   operator ruling below.
 - A screenshot assertion converted to `expect.soft` could, in principle, change test
@@ -129,21 +134,41 @@ that too, naming the loop's line; restore it. Confirm the gate is green again af
 
 ### Operator ruling (2026-09-11, mid-mission)
 
-The first pass of this WP left two exclusions: the four `test.describe`-level predicate
-skips, and `for`-loop-executed `toHaveScreenshot` call sites (documented as a known gate
-limitation rather than fixed). The operator's directive for this round is explicit —
+The first pass of this WP left two exclusions: the `test.describe`-level predicate skips,
+and `for`-loop-executed `toHaveScreenshot` call sites (documented as a known gate limitation
+rather than fixed). The operator's directive for this round is explicit —
 *"all work needs to be finished no more deferrals, we are here to create features not
 issues"* — and both a documented limitation and a follow-up issue are deferrals. Both
 exclusions are now fixed in this same WP:
 
-1. The four describe-level skips each get their own unconditional floor test, rather than
-   relying on another test elsewhere in the file happening to cover the same risk.
+1. Every describe-level skip gets its own unconditional floor test, rather than relying on
+   another test elsewhere in the file happening to cover the same risk. The first attempt at
+   this fixed only 4 of the true 8 (found by a single-line-only grep — see the
+   review-correction note below); the reviewer's independent enumeration found the other 4,
+   and all 8 are now fixed.
 2. `check-visual-screenshot-softness.mjs`'s rule widened from "2+ `toHaveScreenshot` call
    sites per test" to "every `toHaveScreenshot` call site, anywhere, must be soft" — a flat
    invariant that needs no control-flow reasoning and so cannot miss a loop, a `while`, a
    `.forEach`, or a helper-function shape the way a call-site-count rule can. All 127
    remaining hard call sites in `visual.spec.ts` (166 total minus the 39 already soft after
    the first pass) were converted.
+
+### Review-correction note (2026-09-11, WP01 rejected on re-review, both findings fixed)
+
+The population write-up above and the FR-006/C-001 rows below originally stated the
+describe-level count as **four**, found by `grep -n "test.skip((.*browserName" ...` — a
+single-line-only pattern. The reviewer's independent enumeration (using its own parser
+against the live files, not fixtures) found **eight**: the four above plus
+`sk-checkbox-choice-group.spec.ts:181`, `sk-public-header.spec.ts:209`,
+`sk-segmented-choice.spec.ts:173`, `sk-radio-choice-group.spec.ts:392`, each of which wraps
+the predicate and reason onto their own lines — the exact same multi-line-blind-spot shape
+that undercounted the per-test `browserName !== 'chromium'` skips earlier in this mission
+(14 claimed vs. 31 actual). All eight are now fixed and this document has been corrected to
+state eight throughout, rather than leaving the undercount as a permanent record. The
+reviewer also demonstrated three live bypasses of `check-visual-screenshot-softness.mjs`
+(a comment between the closing paren and `.toHaveScreenshot(`, a lookahead window shorter
+than real indentation, and optional chaining `?.`) — see FR-004's updated description and
+the gate's own header comment for the fix and its documented remaining limits.
 
 ## Requirements
 
@@ -154,9 +179,9 @@ exclusions are now fixed in this same WP:
 | FR-001 | Chromium-project floor on every per-test `browserName !== 'chromium'` skip | As a maintainer, I want every Chromium-only-capability test to assert the `chromium` project still exists before it can be skipped, so that a rename or drop cannot silently empty the test everywhere. | High | Implemented |
 | FR-002 | Floor assertion matches file quote/line-wrap convention | As a reviewer, I want the inserted floor line to read as authored in each file, so that the diff does not read as a mechanical, unreviewed sed pass. | Medium | Implemented |
 | FR-003 | Every `toHaveScreenshot` call site in `visual.spec.ts` uses `expect.soft` | As a maintainer harvesting baselines from a red CI run, I want every screenshot — whatever test or loop it sits in — to execute regardless of an earlier one's failure, so that the `unexpected` count and the diff artifact are complete. | High | Implemented |
-| FR-004 | A standalone, self-testing gate detects a hard call reintroduced anywhere, including inside a loop | As a maintainer, I want CI to fail immediately if a future edit adds back any hard `toHaveScreenshot` call, in a multi-call test or inside a loop, so that #367 cannot silently recur in either shape. | High | Implemented |
+| FR-004 | A standalone, self-testing gate detects a hard call reintroduced anywhere — a multi-call test, inside a loop, past a comment, past deep indentation, or via optional chaining | As a maintainer, I want CI to fail immediately if a future edit adds back any hard `toHaveScreenshot` call, however it is written, so that #367 cannot silently recur through a parser gap. | High | Implemented |
 | FR-005 | The new gate is wired into `ci-quality.yml`'s `lint-code` job with a `--selftest` step ahead of the real scan | As a maintainer, I want the gate's own probe table proven before its real scan is trusted, matching this repo's established convention for every other `check-*.mjs` gate. | High | Implemented |
-| FR-006 | Each `test.describe`-level `browserName !== 'chromium'` predicate skip gets its own unconditional floor | As a maintainer, I want the four describe-level skips guarded locally, not by reasoning that something else in the file happens to cover them, so the invariant survives someone later deleting that other coverage. | High | Implemented |
+| FR-006 | Each `test.describe`-level `browserName !== 'chromium'` predicate skip gets its own unconditional floor | As a maintainer, I want all eight describe-level skips guarded locally, not by reasoning that something else in the file happens to cover them, so the invariant survives someone later deleting that other coverage. | High | Implemented |
 
 ### Non-Functional Requirements
 
@@ -167,12 +192,13 @@ exclusions are now fixed in this same WP:
 | NFR-003 | Red-first proof for the #401 floor, on both a per-test and a describe-level site | At least one per-test floor assertion AND at least one describe-level floor test must be shown to fail when the `chromium` project is renamed in a scratch copy of `playwright.config.ts`, with the real config restored immediately after and confirmed unchanged by `git diff`. | Reliability | High | Implemented |
 | NFR-004 | Red-first proof for the loop-shape gate coverage | A hard `toHaveScreenshot` call must be planted inside a real `for` loop in `visual.spec.ts` (not a synthetic selftest string), the non-`--selftest` gate run and shown to fail naming that exact line, then reverted with the gate confirmed green again. | Reliability | High | Implemented |
 | NFR-005 | No test relies on a hard-abort as a safety mechanism | Before converting every remaining hard call to soft, every `toHaveScreenshot` call site with a statement following it in the same test/loop body must be inspected for a later action whose safety depends on the prior screenshot's hard abort; any such case must be listed in the gate's `EXEMPTIONS` with a named reason instead of silently converted. | Reliability | High | Implemented — none found, `EXEMPTIONS` empty |
+| NFR-006 | The gate's parser survives the shapes a real edit could take, not only the shapes fixtures happened to cover | Fixed 20-char lookahead replaced with a forward scan past whitespace and comments to the next real token; `?.toHaveScreenshot(` matched alongside `.toHaveScreenshot(`; each bypass gets a named `--selftest` probe; the header comment states what the gate guarantees and names any remaining bypass rather than overclaiming completeness. | Reliability | High | Implemented |
 
 ### Constraints
 
 | ID | Title | Constraint | Category | Priority | Status |
 |----|-------|------------|----------|----------|--------|
-| C-001 | Scope: every `browserName !== 'chromium'` skip, per-test AND describe-level | The #401 fix covers every per-test `test.skip(browserName !== 'chromium'/"chromium", ...)` call site regardless of line-wrapping or quote style (31 sites across 18 files, a superset of the "14 across 9 files" initial triage count), AND the four `test.describe`-level predicate skips (each gets its own standalone floor test). Per operator ruling 2026-09-11, no exclusion remains. | Technical | High | Satisfied |
+| C-001 | Scope: every `browserName !== 'chromium'` skip, per-test AND describe-level | The #401 fix covers every per-test `test.skip(browserName !== 'chromium'/"chromium", ...)` call site regardless of line-wrapping or quote style (31 sites across 18 files, a superset of the "14 across 9 files" initial triage count), AND all eight `test.describe`-level predicate skips (each gets its own standalone floor test) — corrected from an initial four found by a single-line-only scan (see Review-correction note). Per operator ruling 2026-09-11, no exclusion remains. | Technical | High | Satisfied |
 | C-002 | Scope: every `toHaveScreenshot` call site, flat, no loop exclusion | The #367 fix and its gate cover every `toHaveScreenshot` call site in `visual.spec.ts` — the original 16 multi-call tests (20 baselines) AND every single-hard-call-per-loop-iteration site (~27 loops). Per operator ruling 2026-09-11, the gate's rule is flat ("every call site must be soft") specifically so no loop-shape exclusion remains or can recur. | Technical | High | Satisfied |
 | C-003 | No baseline regeneration | This mission must not run `--update-snapshots` locally under any circumstance; CI is the sole source of truth for `visual.spec.ts` baselines. A full local `PW_INCLUDE_VISUAL=1` run was executed and showed 275 failures; this is pre-existing, documented local/CI rendering drift (see `visual.spec.ts:29-31`'s own comment: "312x38 local vs 336x34 CI for the stub"), not a regression from this mission, and was correctly NOT treated as an acceptance signal and NOT used to justify regenerating anything. | Process | High | Satisfied |
 
@@ -186,7 +212,7 @@ exclusions are now fixed in this same WP:
 ### Measurable Outcomes
 
 - **SC-001**: All 31 per-test `browserName !== 'chromium'` skip sites across 18 spec files
-  carry an immediately-preceding chromium-project floor assertion, AND all 4
+  carry an immediately-preceding chromium-project floor assertion, AND all 8
   `test.describe`-level predicate-skip sites carry their own standalone floor test.
 - **SC-002**: A red-first proof (chromium project renamed, floor assertion observed to fail,
   config reverted, `git diff playwright.config.ts` empty) is recorded for at least one
@@ -207,3 +233,9 @@ exclusions are now fixed in this same WP:
 - **SC-006**: No `toHaveScreenshot` call site relies on a preceding hard abort as a safety
   mechanism — checked by inspecting every call site with a following statement in the same
   test/loop body; none found; `EXEMPTIONS` in the gate remains empty.
+- **SC-007**: `check-visual-screenshot-softness.mjs`'s parser survives a comment between the
+  closing paren and `.toHaveScreenshot(`, arbitrary whitespace/indentation depth, and
+  `?.toHaveScreenshot(` (optional chaining) — the three live bypasses the reviewer
+  demonstrated against the real file. Each has a `--selftest` regression probe. The header
+  comment states what the gate actually guarantees, including any bypass found during
+  hardening that could not be closed.
