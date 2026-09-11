@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import ts from 'typescript';
 
 // #395 — ten-lane Mission Kanban pattern. The #278 five-stage family is asserted here only to prove
 // it is still exactly what it was; its own suite (sk-mission-kanban-pattern.spec.ts) is unchanged.
@@ -68,11 +69,12 @@ const TRACKERS: Readonly<Record<string, string>> = {
 };
 const REGION_NAME = 'Kanban lanes. Scroll horizontally to see all lanes.';
 const GUARDS = [
-  'duplicateLane', 'blankLaneLabel', 'noCurrentNavigation', 'duplicateWorkPackage', 'blankRoute',
-  'duplicateRoute', 'unknownCommittedLane', 'duplicateTrackerControl', 'blankTrackerControl',
-  'overlayUnknownWorkPackage', 'overlayUnknownLane', 'duplicateOverlay', 'overlayNotUnverified',
-  'overlayUnknownTone', 'blankOverlayLabel', 'incompleteStressLabels', 'unknownIndicatorTone',
-  'unknownSelection', 'repeatedSelection', 'unknownWorkPackage',
+  'duplicateLane', 'emptyLanes', 'blankLaneLabel', 'noCurrentNavigation', 'duplicateWorkPackage',
+  'blankRoute', 'duplicateRoute', 'unknownCommittedLane', 'duplicateTrackerControl',
+  'blankTrackerControl', 'blankTrackerHref', 'overlayUnknownWorkPackage', 'overlayUnknownLane',
+  'duplicateOverlay', 'overlayNotUnverified', 'overlayUnknownTone', 'blankOverlayLabel',
+  'blankOverlayTier', 'incompleteStressLabels', 'blankStressLabel', 'unknownIndicatorTone',
+  'unknownSelection', 'repeatedSelection', 'unknownWorkPackage', 'repeatedInclusion',
 ] as const;
 
 const DESKTOP = { width: 1440, height: 1024 } as const;
@@ -277,8 +279,11 @@ test('[T002] both fixtures stay frozen and single-source, counts are derived, an
       unverifiedOverlays: unknown[];
     };
     type Seam = {
-      base: Json & { workPackages: Array<Json & { id: string; href: string }> };
-      extension: Json;
+      base: Json & {
+        detailedLanes: Array<{ id: string }>;
+        workPackages: Array<Json & { id: string; href: string; committedLaneId: string }>;
+      };
+      extension: Json & { stress: { laneLabels: Record<string, string> } };
       projection: Projection;
       derive: (base: unknown, extension: unknown, options?: unknown) => Projection;
     };
@@ -310,11 +315,7 @@ test('[T002] both fixtures stay frozen and single-source, counts are derived, an
         workPackage.id === 'WP04' ? { ...workPackage, committedLaneId: 'genesis' } : workPackage),
     }, seam.extension);
     const reversedSelection = seam.derive(seam.base, seam.extension, { selectedLaneIds: ['blocked', 'in_review'] });
-    const base = seam.base as unknown as Json & {
-      detailedLanes: Array<{ id: string }>;
-      workPackages: Array<{ id: string; committedLaneId: string }>;
-    };
-    const extension = seam.extension as unknown as Json & { stress: { laneLabels: Record<string, string> } };
+    const { base, extension } = seam;
     const subsetIds = ['canceled', 'blocked', 'done'];
     const subset = seam.derive({
       ...base,
@@ -383,6 +384,8 @@ test('[T006] the module stays story-only, owns no application machinery, and imp
     /\battributes\s*:\s*true/,
     /(?:animation|transition)[\w-]*\s*:|scroll-behavior\s*:/,
     /\bobservedActivity\b/,
+    /\.style\b/,
+    /(?:^|[\s;{])(?:order|direction)\s*:|-reverse\b/m,
   ]) {
     expect(source, `forbidden ten-lane source surface: ${forbidden}`).not.toMatch(forbidden);
   }
@@ -391,8 +394,8 @@ test('[T006] the module stays story-only, owns no application machinery, and imp
   expect(styles).not.toMatch(/(?:^|[\s;{])(?:left|right|top|bottom|(?:margin|padding|border)-(?:left|right|top|bottom)[a-z-]*|(?:min-|max-)?(?:width|height))\s*:/m);
   // Single-quantifier patterns only (security/detect-unsafe-regex): `\d(?:px|...)` still catches
   // `1.5rem` through its `5rem` tail, and `border[a-z-]*-color` still covers the logical longhands.
-  expect(styles).not.toMatch(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|oklch\(|oklab\(|\blab\(|\blch\(|hwb\(|color-mix\(|\d(?:px|rem|em|pt)\b/i);
-  expect(styles).not.toMatch(/(?:^|[\s;{])(?:float|clear)\s*:|text-align\s*:\s*(?:left|right)|(?:scroll-margin|scroll-padding|inset)-(?:left|right|top|bottom)/m);
+  expect(styles).not.toMatch(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|oklch\(|oklab\(|\blab\(|\blch\(|hwb\(|color-mix\(|\d(?:px|rem|em|pt|ch|ex|vw|vi|vb|vmin|vmax)\b/i);
+  expect(styles).not.toMatch(/(?:^|[\s;{])(?:float|clear)\s*:|text-align\s*:\s*(?:left|right)|(?:scroll-margin|scroll-padding)-(?:left|right|top|bottom)/m);
   const [ordinaryStyles, forcedStyles = ''] = styles.split('@media (forced-colors: active)');
   const colourDeclarations = (block: string) => [...block.matchAll(
     /(?:^|[\s;{])(background(?:-color)?|color|fill|stroke|outline-color|caret-color|accent-color|text-decoration-color|border[a-z-]*-color)\s*:\s*([^;}]+)/g,
@@ -404,9 +407,17 @@ test('[T006] the module stays story-only, owns no application machinery, and imp
   for (const [property, value] of colourDeclarations(forcedStyles)) {
     expect(value, `${property} under forced colors`).toMatch(/^(?:var\(--sk-[\w-]+\)|CanvasText|Canvas|Highlight|HighlightText|LinkText|ButtonText|ButtonBorder|GrayText)$/);
   }
+  // Typography and stacking come from tokens too. Colour-bearing and physical multi-value
+  // shorthands are refused outright: a shorthand can smuggle a raw colour or a single side.
+  for (const [, property, value] of styles.matchAll(/(?:^|[\s;{])(font-weight|font-size|line-height|letter-spacing|z-index)\s*:\s*([^;}]+)/g)) {
+    expect(value!.trim(), `${property} must be a token`).toMatch(/^var\(--sk-[\w-]+\)$/);
+  }
+  expect(styles).not.toMatch(/(?:^|[\s;{])(?:outline|border|border-block|border-inline|border-block-start|border-block-end|border-inline-start|border-inline-end|box-shadow|text-decoration)\s*:/m);
+  expect(styles).not.toMatch(/(?:^|[\s;{])(?:margin|padding|inset)\s*:\s*[^\s;}]+\s+[^\s;}]+\s+[^\s;}]+/m);
+  expect([...new Set(styles.match(/\d+vh\b/g) ?? [])]).toEqual(['100vh']);
   expect(styles).not.toMatch(/\.sk-(?:action-row|app-shell|workflow-board|workflow-lane|notice|status-indicator|pill-tag|button|context-nav|breadcrumbs|disclosure|checkbox-choice-group|empty-state)[\w-]*\s*[{,:]/);
   // Only #278's shared overlay id (by reference) and the guard's deliberate unknown id may appear.
-  expect([...new Set(source.match(/'WP\d{2}'/g))].sort()).toEqual(["'WP03'", "'WP99'"]);
+  expect([...new Set(source.match(/['"]WP\d{2}['"]/g))].sort()).toEqual(["'WP03'", "'WP99'"]);
 });
 
 test('[T006] every rendered string and accessible name is supplied by a fixture', async ({ page }) => {
@@ -459,7 +470,7 @@ test('[T006] every rendered string and accessible name is supplied by a fixture'
         const value = (text.textContent ?? '').trim();
         if (value && !allowed.has(value)) found.push(value);
       }
-      const userFacing = ['aria-label', 'aria-description', 'label', 'message', 'title', 'alt', 'placeholder'];
+      const userFacing = ['aria-label', 'aria-description', 'aria-roledescription', 'label', 'message', 'title', 'alt', 'placeholder'];
       for (const element of node.querySelectorAll(userFacing.map((attribute) => `[${attribute}]`).join(', '))) {
         for (const attribute of userFacing) {
           const value = element.getAttribute(attribute);
@@ -472,97 +483,92 @@ test('[T006] every rendered string and accessible name is supplied by a fixture'
   }
 });
 
-// Static half of the copy boundary (#286). The runtime audit cannot tell a hard-coded
-// 'Presence · unverified' from the fixture value it duplicates; this walks every html``
-// template, nested ones included, and allows no text between tags and no literal in a
-// user-facing attribute.
-function htmlTemplates(source: string): string[] {
-  const templates: string[] = [];
-  let index = 0;
-  const skipQuoted = (quote: string): void => {
-    index += 1;
-    while (index < source.length && source[index] !== quote) index += source[index] === '\\' ? 2 : 1;
-    index += 1;
-  };
-  const readTemplate = (isHtml: boolean): void => {
-    let text = '';
-    while (index < source.length) {
-      const char = source[index]!;
-      if (char === '\\') {
-        text += source.slice(index, index + 2);
-        index += 2;
-        continue;
-      }
-      if (char === '`') {
-        index += 1;
-        if (isHtml) templates.push(text);
-        return;
-      }
-      if (char === '$' && source[index + 1] === '{') {
-        text += '§';
-        index += 2;
-        readExpression();
-        continue;
-      }
-      text += char;
-      index += 1;
+// Static half of the copy boundary (#286), read with the TypeScript parser rather than a hand
+// lexer. For every html-tagged template it checks the static markup (no text between tags, no
+// literal or partly literal user-facing attribute, no style attribute) and every string literal
+// inside its ${} expressions; attribute writes from script are held to the same rule. The runtime
+// audit cannot tell a hard-coded 'Presence · unverified' from the fixture value it duplicates.
+const ALLOWED_EXPRESSION_LITERALS = new Set(['', ' sk-light', 'rtl', 'page']);
+const ALLOWED_ATTRIBUTE_WRITES = new Set(['role', 'region', 'aria-label', 'tabindex', '0']);
+
+function scanRenderCode(text: string): { templates: number; offenders: string[] } {
+  const file = ts.createSourceFile('scan.ts', text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const markup: string[] = [];
+  const offenders: string[] = [];
+  const isHtml = (node: ts.Node): node is ts.TaggedTemplateExpression =>
+    ts.isTaggedTemplateExpression(node) && ts.isIdentifier(node.tag) && node.tag.text === 'html';
+  const literalsIn = (node: ts.Node): void => {
+    if (isHtml(node)) return;
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+      if (!ALLOWED_EXPRESSION_LITERALS.has(node.text)) offenders.push(`literal in expression: ${node.text}`);
+      return;
     }
-  };
-  const readExpression = (): void => {
-    let depth = 1;
-    while (index < source.length && depth > 0) {
-      const char = source[index]!;
-      if (char === '`') {
-        const isHtml = source.slice(Math.max(0, index - 4), index) === 'html';
-        index += 1;
-        readTemplate(isHtml);
-        continue;
-      }
-      if (char === "'" || char === '"') {
-        skipQuoted(char);
-        continue;
-      }
-      if (char === '{') depth += 1;
-      else if (char === '}') depth -= 1;
-      index += 1;
+    if (ts.isTemplateExpression(node)) {
+      offenders.push(`template literal in expression: ${node.getText().slice(0, 60)}`);
+      return;
     }
+    ts.forEachChild(node, literalsIn);
   };
-  for (let start = source.indexOf('html`'); start !== -1; start = source.indexOf('html`', index)) {
-    index = start + 'html`'.length;
-    readTemplate(true);
+  const visit = (node: ts.Node): void => {
+    if (isHtml(node)) {
+      const template = node.template;
+      if (ts.isNoSubstitutionTemplateLiteral(template)) {
+        markup.push(template.text);
+      } else {
+        markup.push([template.head.text, ...template.templateSpans.map((span) => span.literal.text)].join('§'));
+        for (const span of template.templateSpans) literalsIn(span.expression);
+      }
+    }
+    if (
+      ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) &&
+      ['setAttribute', 'removeAttribute', 'toggleAttribute'].includes(node.expression.name.text)
+    ) {
+      for (const argument of node.arguments) {
+        if ((ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument)) && !ALLOWED_ATTRIBUTE_WRITES.has(argument.text)) {
+          offenders.push(`${node.expression.name.text} literal: ${argument.text}`);
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(file);
+  for (const template of markup) {
+    const html = template.replace(/<style>[\s\S]*?<\/style>/g, '');
+    const text = html.replace(/<[^>]*>/g, ' ').replace(/§/g, ' ').trim();
+    if (text) offenders.push(`text: ${text.slice(0, 80)}`);
+    for (const tag of html.match(/<[^>]*>/g) ?? []) {
+      if (/\sstyle\s*=/.test(tag)) offenders.push(`style attribute in ${tag.slice(0, 40)}`);
+      for (const match of tag.matchAll(/\b(aria-label|aria-description|aria-roledescription|title|alt|placeholder|label|message)\s*=\s*(?:"([^"]*)"|([^\s>]*))/g)) {
+        const value = match[2] ?? match[3] ?? '';
+        if (value !== '§') offenders.push(`${match[1]}=${value}`);
+      }
+    }
   }
-  return templates;
+  return { templates: markup.length, offenders };
 }
 
-function templateOffenders(source: string): string[] {
-  return htmlTemplates(source).flatMap((template) => {
-    const markup = template.replace(/<style>[\s\S]*?<\/style>/g, '');
-    const found: string[] = [];
-    const text = markup.replace(/<[^>]*>/g, ' ').replace(/§/g, ' ').trim();
-    if (text) found.push(`text: ${text.slice(0, 80)}`);
-    for (const tag of markup.match(/<[^>]*>/g) ?? []) {
-      if (/\sstyle\s*=/.test(tag)) found.push(`style attribute in ${tag.slice(0, 40)}`);
-      for (const [, name, value] of tag.matchAll(/\b(aria-label|aria-description|title|alt|placeholder|label|message)\s*=\s*"?([^"\s>]*)/g)) {
-        if (value !== '§') found.push(`${name}=${value}`);
-      }
-    }
-    return found;
-  });
-}
-
-test('[T006] render templates carry no literal text and no literal user-facing attribute', () => {
+test('[T006] render code holds no copy: template text, attributes, expression literals, attribute writes', () => {
   for (const probe of [
     'html`<p>Literal copy</p>`',
     'html`<a aria-label="Home" href=${route}>${label}</a>`',
     'html`<div>${ready ? html`<span>Nested copy</span>` : nothing}</div>`',
     'html`<div style="margin-left:1px">${label}</div>`',
+    "html`<span>${'Clear'}</span>`",
+    "html`<span>${overlay.tierLabel || 'Presence · unverified'}</span>`",
+    "html`<h2>${ready ? 'Live now' : nothing}</h2>`",
+    'html`<span aria-label="${count} work packages">${count}</span>`',
+    'html`<span>${`Mission ${id}`}</span>`',
+    "html`<i aria-roledescription=${'lane'}></i>`",
+    "element.setAttribute('aria-label', 'Kanban lanes');",
   ]) {
-    expect(templateOffenders(probe), `self-probe must go red: ${probe}`).not.toEqual([]);
+    expect(scanRenderCode(probe).offenders, `self-probe must go red: ${probe}`).not.toEqual([]);
   }
-  expect(templateOffenders('html`<p class="x" aria-label=${name}>${copy.label}</p>`')).toEqual([]);
+  expect(scanRenderCode("html`<p class=\"x${light ? ' sk-light' : ''}\" dir=${rtl ? 'rtl' : nothing} aria-label=${name}>${copy.label}</p>`").offenders).toEqual([]);
   const source = readFileSync(SOURCE, 'utf8');
-  expect(htmlTemplates(source).length, 'the scan must reach the render templates').toBeGreaterThan(10);
-  expect(templateOffenders(source)).toEqual([]);
+  const { templates, offenders } = scanRenderCode(source);
+  expect(templates, 'every html template in the module is reached').toBe((source.match(/\bhtml`/g) ?? []).length);
+  expect(templates).toBeGreaterThan(10);
+  expect(offenders).toEqual([]);
 });
 
 async function focusedControl(page: Page): Promise<string> {
@@ -922,17 +928,19 @@ test('[T007] one mounted board follows a content change that resizes neither the
   await expectFittingWithoutTriad(scroller);
   const boxes = () => scroller.evaluate((node) => ({
     width: node.clientWidth,
+    height: node.clientHeight,
     lanes: [...node.children].map((lane) => (lane as HTMLElement).getBoundingClientRect().width),
   }));
   const before = await boxes();
   await scroller.evaluate((node) => {
     const clone = node.querySelector(':scope > section')!.cloneNode(true) as HTMLElement;
+    clone.querySelector('ol')?.replaceChildren();
     clone.setAttribute('data-content-change-probe', '');
     node.append(clone);
   });
   await expect.poll(() => triad(scroller)).toEqual(['region', REGION_NAME, '0']);
   const during = await boxes();
-  expect({ width: during.width, lanes: during.lanes.slice(0, before.lanes.length) }).toEqual(before);
+  expect({ width: during.width, height: during.height, lanes: during.lanes.slice(0, before.lanes.length) }).toEqual(before);
   await scroller.evaluate((node) => node.querySelector('[data-content-change-probe]')?.remove());
   await expect.poll(() => triad(scroller)).toEqual([null, null, null]);
   expect(await boxes()).toEqual(before);
@@ -954,6 +962,25 @@ test('[T007] the triad flips exactly at the measured board-fit width', async ({ 
   await expect.poll(() => triad(scroller)).toEqual(['region', REGION_NAME, '0']);
   await board.evaluate((node, width) => { (node as HTMLElement).style.inlineSize = `${width}px`; }, fitWidth);
   await expect.poll(() => triad(scroller)).toEqual([null, null, null]);
+  await expectNoDocumentOverflow(page);
+});
+
+test('[T007] the triad flips at the viewport width where K3 stops fitting, with the document contained', async ({ page }) => {
+  const root = await openStory(page, 'k-3-filtered-lanes', NARROW);
+  const scroller = scrollerOf(root);
+  const fitWidth = await measuredFitWidth(scroller);
+  // In the compact shell the scroller is the viewport minus a fixed gutter, so the flip sits at the
+  // fit width plus that gutter, and both sides of it stay inside the compact range.
+  const gutter = NARROW.width - (await scroller.evaluate((node) => node.clientWidth));
+  const flip = fitWidth + gutter;
+  expect(flip).toBeGreaterThan(NARROW.width);
+  expect(flip).toBeLessThanOrEqual(860);
+  await page.setViewportSize({ width: flip, height: NARROW.height });
+  await expect.poll(() => scroller.evaluate((node) => node.clientWidth)).toBe(fitWidth);
+  await expect.poll(() => triad(scroller)).toEqual([null, null, null]);
+  await expectNoDocumentOverflow(page);
+  await page.setViewportSize({ width: flip - 1, height: NARROW.height });
+  await expect.poll(() => triad(scroller)).toEqual(['region', REGION_NAME, '0']);
   await expectNoDocumentOverflow(page);
 });
 
