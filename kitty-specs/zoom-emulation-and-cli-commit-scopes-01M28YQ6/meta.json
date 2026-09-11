@@ -1,0 +1,36 @@
+{
+  "accept_commit": "d7e9d05f3cc91cc99107972f41928eb267411fbe",
+  "acceptance_history": [
+    {
+      "accept_commit": "a5f5be8ac61e1e554d1c388df659644f500a1a18",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-11T20:02:08.795533+00:00",
+      "accepted_by": "claude",
+      "accepted_from_commit": "df4f99f24b222320443b8a2378005e494b10fa73"
+    },
+    {
+      "accept_commit": "d7e9d05f3cc91cc99107972f41928eb267411fbe",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-11T20:28:30.224482+00:00",
+      "accepted_by": "claude",
+      "accepted_from_commit": "ffcd3914dbd87b6d41736731ed2f326225a9f8cb"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-11T20:28:30.224482+00:00",
+  "accepted_by": "claude",
+  "accepted_from_commit": "ffcd3914dbd87b6d41736731ed2f326225a9f8cb",
+  "created_at": "2026-09-11T19:22:12.314944+00:00",
+  "flattened": false,
+  "friendly_name": "zoom emulation and cli commit scopes",
+  "mission_id": "01M28YQ6YTQM18RY405H5DADPJ",
+  "mission_number": null,
+  "mission_slug": "zoom-emulation-and-cli-commit-scopes-01M28YQ6",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances zoom emulation and cli commit scopes on mission/zoom-emulation-and-cli-commit-scopes so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "zoom emulation and cli commit scopes",
+  "slug": "zoom-emulation-and-cli-commit-scopes-01M28YQ6",
+  "status_phase": "1",
+  "target_branch": "mission/zoom-emulation-and-cli-commit-scopes",
+  "topology": "single_branch"
+}

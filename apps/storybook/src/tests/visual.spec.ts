@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { test, expect, type Locator, type Page } from '@playwright/test';
 
 test.setTimeout(60000);
@@ -1917,6 +1918,11 @@ test('Mission Reading forced colors unavailable entry — visual baseline', asyn
 
 // This is an additional rendering stress baseline only. The mission's actual 200% browser-UI
 // zoom evidence is captured separately with headed Chrome UI and native Ctrl+Plus key chords.
+//
+// #422 sweep classification: NOT the #422 defect. The name already says "CSS zoom stress", not
+// "200% zoom" — it makes no claim that a breakpoint was crossed — and `mission-reading.stories.ts`
+// declares no `@media`/`@container` rule of its own for `style.zoom` emulation to fail to
+// exercise. Left as-is.
 test('Mission Reading long content CSS zoom stress — visual baseline', async ({ page }) => {
   const root = await missionReadingStory(page, 'long-content', { width: 780, height: 1000 });
   await page.evaluate(() => { document.documentElement.style.zoom = '2'; });
@@ -2142,6 +2148,17 @@ test('Repository Dossier reduced motion indexing — visual baseline', async ({ 
   });
 });
 
+// #422 sweep classification: NOT the #422 defect, verified empirically (not just by title).
+// This pattern's own responsive rule is `@container (max-width: 720px)` (a CONTAINER query),
+// not a `@media` viewport query — and unlike `@media`, a container query reads the LOCAL
+// container box's own rendered size, which `zoom` genuinely does scale. Probed directly against
+// this story (`patterns-repository-dossier--zoom-200`, `.sk-repository-dossier-pattern__setup-
+// item`'s computed `grid-template-columns`): at width 780 with no zoom the container query does
+// not fire (two-column `230px 461px`); with `style.zoom = '2'` applied it fires (`322px`
+// single-column) — the IDENTICAL result to a genuinely halved 390px viewport at
+// `deviceScaleFactor: 2`. The title already says "CSS zoom stress", not "200%/400% zoom"
+// unqualified, and the mechanism was independently confirmed to actually exercise the
+// breakpoint here. Left as-is.
 for (const zoom of [
   { id: 'zoom-200', value: '2', width: 780, name: 'sk-repository-dossier-zoom-200.png' },
   { id: 'zoom-400', value: '4', width: 1280, name: 'sk-repository-dossier-zoom-400.png' },
@@ -2430,6 +2447,10 @@ test("Work Explorer long supplied labels remain contained — visual baseline", 
   });
 });
 
+// #422 sweep classification: NOT the #422 defect. The name already says "effective ... CSS
+// zoom stress", not "200% zoom" unqualified, and `work-explorer.stories.ts` declares no
+// `@media`/`@container` rule of its own for `style.zoom` emulation to fail to exercise. Left
+// as-is.
 test("Work Explorer effective 200 percent CSS zoom stress — visual baseline", async ({
   page,
 }) => {
@@ -2726,20 +2747,85 @@ for (const forcedColors of [
   });
 }
 
+// #422 — a CSS `zoom` style multiplies rendering uniformly but never narrows the *CSS*
+// viewport a `max-width` media query reads, so the mechanism this loop used to use (setting
+// the viewport once, then `document.documentElement.style.zoom = '2'`) proved "survives
+// uniform magnification", not "survives 200% zoom": decoding the old baselines showed padding
+// scaling 24px -> 48px, the UNbreakpointed `--sk-space-6` doubled, never the 16px -> 32px pair
+// that would appear if the pattern's own `@media (max-width: …)` rule had actually fired.
+//
+// Fixed per the issue's own preferred option: drive "200% zoom" with a REAL halved CSS
+// viewport (a fresh browser context at `deviceScaleFactor: 2`, viewport width halved) rather
+// than the CSS `zoom` property — this genuinely moves the CSS viewport and crosses the
+// breakpoint, the same way a real Ctrl+Plus 200% browser zoom does.
+//
+// The breakpoint's own pixel value (and its padding token) is read out of
+// `cli-auth.stories.ts`'s real source at run time, never hardcoded: a sibling mission is
+// migrating it from 390px to 480px (to mirror `sk-boundary-page`) and has not merged as of
+// this writing, and this test must pass unchanged on either side of that landing.
+const cliAuthStylesSource = readFileSync('packages/elements/src/patterns/cli-auth.stories.ts', 'utf8');
+const cliAuthBreakpointMatch = cliAuthStylesSource.match(
+  /@media \(max-width:\s*(\d+)px\)\s*{\s*\.sk-cli-auth-pattern\s*{\s*padding:\s*var\((--sk-space-\d+)\)/,
+);
+if (!cliAuthBreakpointMatch) {
+  throw new Error(
+    "CLI Auth zoom test (#422) could not find the pattern's own breakpoint rule " +
+      '(`@media (max-width: …px) { .sk-cli-auth-pattern { padding: var(--sk-space-N) } }`) in ' +
+      'packages/elements/src/patterns/cli-auth.stories.ts. The regex above must be updated to ' +
+      'match its current source before this test can be trusted.',
+  );
+}
+const cliAuthBreakpointWidth = Number(cliAuthBreakpointMatch[1]);
+// Comfortably on either side of the breakpoint, whatever its current pixel value — computed
+// from the source read above, never independently hardcoded, so this stays correct across the
+// 390px -> 480px migration.
+const cliAuthZoomedWidth = Math.floor(cliAuthBreakpointWidth / 2);
+const cliAuthUnzoomedWidth = cliAuthBreakpointWidth * 2;
+
 for (const zoom of [
   { id: 'code-entry-default', name: 'sk-cli-auth-code-entry-zoom-200.png' },
   { id: 'authorization-decision', name: 'sk-cli-auth-authorization-decision-zoom-200.png' },
 ] as const) {
-  test(`CLI Auth ${zoom.name} — 200% CSS zoom baseline`, async ({ page }) => {
-    const root = await cliAuthStory(page, zoom.id, { width: 780, height: 1000 });
-    await page.evaluate(() => {
-      document.documentElement.style.zoom = '2';
-    });
-    await expect.soft(root).toHaveScreenshot(zoom.name, {
-      threshold: 0.02,
-      maxDiffPixelRatio: 0.02,
-      timeout: 20000,
-    });
+  test(`CLI Auth ${zoom.name} — 200% zoom (halved viewport, deviceScaleFactor 2) crosses the pattern's own breakpoint`, async ({
+    page,
+    browser,
+    baseURL,
+  }) => {
+    // Reference: the pattern's padding OUTSIDE the breakpoint, ordinary deviceScaleFactor.
+    const unzoomedRoot = await cliAuthStory(page, zoom.id, { width: cliAuthUnzoomedWidth, height: 1000 });
+    const unzoomedPadding = await unzoomedRoot.evaluate(
+      (element) => parseFloat(getComputedStyle(element).paddingLeft),
+    );
+
+    // deviceScaleFactor is fixed at browser-context creation, so a real "200% zoom" state
+    // requires a fresh context — `page.context()` cannot change it after the fact. A manually
+    // created context does not inherit `playwright.config.ts`'s `use.baseURL`, so it is passed
+    // through explicitly from the `baseURL` fixture.
+    const zoomContext = await browser.newContext({ baseURL, deviceScaleFactor: 2 });
+    try {
+      const zoomPage = await zoomContext.newPage();
+      const root = await cliAuthStory(zoomPage, zoom.id, { width: cliAuthZoomedWidth, height: 1000 });
+      const zoomedPadding = await root.evaluate(
+        (element) => parseFloat(getComputedStyle(element).paddingLeft),
+      );
+      // The load-bearing assertion (#422): if the breakpoint stops firing — a reverted fix, a
+      // wrong selector, a deleted media query — the halved viewport's padding no longer
+      // narrows below the unzoomed reference, and this goes red independent of the (CI-
+      // authoritative) screenshot baseline below. A direction check (`toBeLessThan`), not just
+      // a difference check, because the property under test is specifically that the NARROW
+      // padding token applies, not merely that zooming changed something.
+      expect(
+        zoomedPadding,
+        "CLI Auth's own breakpoint must fire under a real halved CSS viewport (#422)",
+      ).toBeLessThan(unzoomedPadding);
+      await expect.soft(root).toHaveScreenshot(zoom.name, {
+        threshold: 0.02,
+        maxDiffPixelRatio: 0.02,
+        timeout: 20000,
+      });
+    } finally {
+      await zoomContext.close();
+    }
   });
 }
 
@@ -2906,7 +2992,30 @@ test('Connectors RTL — C2 operating index baseline', async ({ page }) => {
   await expect.soft(root).toHaveScreenshot('sk-connectors-rtl.png', { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
 });
 
-test('Connectors 200% zoom — C8 project routing baseline, no document-level horizontal overflow', async ({ page }) => {
+// #422 sweep — REVERTED to the CSS-zoom mechanism, RENAMED to what it actually proves.
+//
+// This test briefly used a real halved-viewport + `deviceScaleFactor: 2` browser context (the
+// same fix as CLI Auth), because `document.documentElement.scrollWidth`/`clientWidth` at width
+// 1440 read 1440/1440 whether or not `style.zoom = '2'` was applied — the "no overflow" claim
+// was, in practice, reading the exact same document dimensions an unzoomed 1440px check would.
+// That mechanism change turned out to introduce a real, CI-only render instability: the SAME
+// element, SAME page, inside a SINGLE `toHaveScreenshot` stability-retry loop, captured
+// 688x1165 then 688x1150 device px seconds apart (CI's own log) — a 15px oscillation Playwright
+// could not settle. Full root-cause investigation, what was ruled out (web-font swap, by
+// source — nothing on this page ever loads a custom webfont), the unconfirmed structural theory
+// (`.sk-data-table__scroller`'s `overflow-x: auto` with no height cap, possibly right at its
+// 640px boundary under CI's font rendering), and why local reproduction is not possible (a
+// measured ~1224 vs ~575-582 CSS-px local/CI rendering gap) are all recorded in `research.md`.
+//
+// `connectors.stories.ts` declares no `@media`/`@container` rule of its own, so — unlike CLI
+// Auth — there was never a known concrete regression this gap had been shown to miss (a
+// synthetic injected-overflow probe was caught by both mechanisms, because `zoom` scales
+// injected content proportionally too). A stable test proving a slightly weaker property beats
+// a flaky test proving a stronger one, so per #422's OWN second option ("keep the current
+// emulation and rename the evidence to what it actually establishes") this reverts to the
+// CSS-zoom mechanism and is renamed to say "CSS zoom stress", matching the honest-naming
+// convention this same sweep already used for Mission Reading and Work Explorer.
+test('Connectors 200% CSS zoom stress — C8 project routing baseline, no document-level horizontal overflow', async ({ page }) => {
   const root = await connectorsStory(page, 'c-8-project-routing-populated', { width: 1440, height: 900 });
   await page.evaluate(() => {
     (document.documentElement.style as CSSStyleDeclaration & { zoom?: string }).zoom = '2';
@@ -2914,7 +3023,7 @@ test('Connectors 200% zoom — C8 project routing baseline, no document-level ho
   const overflowsX = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
   );
-  expect(overflowsX, 'no document-level horizontal overflow at 200% zoom').toBe(false);
+  expect(overflowsX, 'no document-level horizontal overflow at 200% CSS zoom').toBe(false);
   await expect.soft(root).toHaveScreenshot('sk-connectors-zoom-200.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,

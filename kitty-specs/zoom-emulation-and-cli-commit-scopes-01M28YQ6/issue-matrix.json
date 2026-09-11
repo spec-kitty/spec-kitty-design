@@ -1,0 +1,29 @@
+{
+  "rows": {
+    "#420": {
+      "evidence_ref": "Merged prior to this mission; referenced only in spec.md/research.md prose as the precedent for why exempting a hand-authored, caller-supplied commit message would have weakened the anchored-pattern discipline #420 established. This mission's own commitlint work (which would have touched #420's neighboring patterns) was withdrawn in full once the coordinator established the observed message was never CLI-emitted -- see research.md's Correction section. Not touched by WP01.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#422": {
+      "evidence_ref": "32ba25a620c0e250330a53653eb1eaed8ea91f76",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

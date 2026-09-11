@@ -1,0 +1,69 @@
+{
+  "mission_slug": "zoom-emulation-and-cli-commit-scopes-01M28YQ6",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/visual.spec.ts CLI Auth zoom tests (commit 32ba25a6) drive '200% zoom' via a fresh browser.newContext({baseURL, deviceScaleFactor: 2}) at a halved viewport width, replacing document.documentElement.style.zoom. Proven to actually cross the breakpoint (not just change dsf): the paired padding assertion passed against the real mechanism and failed with 'Expected: < 24, Received: 24' when the test was deliberately run at a viewport that does not cross the breakpoint (forced cliAuthZoomedWidth past the breakpoint), then passed again on revert. The reviewer independently reproduced the identical failure by feeding the zoomed context an unzoomed width (review-cycle-1.md, WP01 approval note).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T20:01:15.306701+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "The zoom test reads the CLI Auth breakpoint (@media max-width rule + padding token) out of packages/elements/src/patterns/cli-auth.stories.ts at run time via a regex over the real source text, never a hardcoded 390/480 (commit 32ba25a6). If the regex does not match the source, the test throws a descriptive error rather than silently defaulting. Reviewer independently tested the regex against 8 source-shape variants, including the real pending 390px->480px sibling migration, and confirmed it throws on malformed/reformatted input rather than silently defaulting -- 'fails loudly on bad input' is the verified property, not merely 'it parses' (review-cycle-1.md).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T20:01:22.070663+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "visual.spec.ts's CLI Auth zoom tests (commit 32ba25a6) assert getComputedStyle(...).paddingLeft narrows under the halved-viewport zoom state vs an un-zoomed reference (toBeLessThan, a direction check, not just a difference check), independent of the toHaveScreenshot call below it. Red-first executed: with the zoomed viewport width deliberately forced past the breakpoint, the assertion failed 'Expected: < 24, Received: 24'; reverted, it passed. The reviewer reproduced this exact failure independently by feeding the zoomed context an unzoomed width, without reading my implementation notes first (review-cycle-1.md, WP01 status.events.jsonl).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T20:01:27.925112+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "node scripts/check-visual-screenshot-softness.mjs output (re-run after all zoom-test edits, commit 32ba25a6): '50 spec file(s) scanned; every toHaveScreenshot call site uses expect.soft(...).' Exit 0. All rewritten/added toHaveScreenshot calls (CLI Auth x2, Connectors) keep expect.soft(...); reviewer independently confirmed this gate passes as part of its own verification pass.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T20:01:33.144955+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "All 5 style.zoom sites in visual.spec.ts classified inline. Mission Reading (~L1919) and Work Explorer (~L2450): already honestly named 'CSS zoom stress' with no breakpoint of their own (no @media/@container in their stories.ts) -- left as-is. Repository Dossier (~L2151): has @container (max-width: 720px); measured empirically via a Playwright probe against the live story -- grid-template-columns='322px' identical between style.zoom='2' at 780px and a genuine halved 390px viewport at deviceScaleFactor:2, both diverging from the 780px-unzoomed baseline -- left as-is, correctly; reviewer independently re-derived this same result. Connectors (~L2975): initially fixed with the real halved-viewport+deviceScaleFactor:2 mechanism (matching FR-001), which CI then showed introduces a genuine CI-only render instability (688x1150 then 688x1165 device px within a single toHaveScreenshot stability loop, same element/page). Root-caused as far as possible without CI access: web-font swap ruled out BY SOURCE (no @font-face is ever applied to visible text -- --sk-font-sans/--sk-font-mono both resolve to pure system-font stacks, confirmed by grep), no other cause confirmed, local reproduction impossible (measured ~1224 vs CI's ~575-582 CSS-px rendering gap) -- full record in research.md. Resolved per #422's own second option: mechanism reverted to style.zoom, test renamed to 'Connectors 200% CSS zoom stress -- C8 project routing baseline, no document-level horizontal overflow', landing it in the same honestly-scoped state as Mission Reading/Work Explorer. Locally re-verified stable (3/3 runs, single-capture, no retry oscillation) after the revert.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T20:28:08.815464+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "code_review",
+      "evidence": "kitty-specs/zoom-emulation-and-cli-commit-scopes-01M28YQ6/research.md documents specify_cli/status/aggregate.py:164's MissionStatus class (save() at line 797, *, operation: str), confirmed via that module's own __all__ export list. txn.commit(operation) makes the caller's string the entire commit message, not a chore(spec-kitty): suffix. Confirmed zero callers anywhere in specify_cli 3.2.6rc4 via grep -rn '.save(operation=' and a broader operation= sweep, reviewed call-by-call. Deliberately NOT exempted by any commitlint pattern, since no bounded regex could honestly cover arbitrary caller text. Class name corrected post-review (reviewer Medium finding): originally misrecorded everywhere as MissionStatusAggregate, an identifier with zero grep hits anywhere in the installed CLI; corrected to MissionStatus across research.md, spec.md, plan.md, tasks.md, and the WP01 task file (commits 5d57d219/6de3e14b).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T20:01:50.462347+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}
