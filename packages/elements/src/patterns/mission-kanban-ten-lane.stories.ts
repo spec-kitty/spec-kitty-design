@@ -467,7 +467,7 @@ const PATTERN_STYLES = html`<style>
     border-style: solid;
     border-color: var(--sk-border-default);
     border-radius: var(--sk-radius-md);
-    text-decoration: none;
+    text-decoration-line: none;
     overflow-wrap: anywhere;
   }
   .sk-mission-kanban-ten-lane-pattern__rail-link:focus-visible,
