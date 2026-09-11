@@ -105,5 +105,15 @@
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
-  "negative_invariants": []
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "No ruleset bypass actor is ever introduced for develop (C-005)",
+      "verification_method": "grep_absence",
+      "verification_command": "bypass_mode",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": ".github/rulesets"
+    }
+  ]
 }
