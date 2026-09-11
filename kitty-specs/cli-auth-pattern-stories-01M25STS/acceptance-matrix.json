@@ -77,11 +77,11 @@
     {
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
-      "proof_type": "code_review",
-      "evidence": "Assertion verified: sk-cli-auth-pattern.spec.ts:241-254 reads the real shadow DOM (label[for] === input.id, aria-describedby contains 'description'), not merely the host's label/description attributes. Execution outcome pending CI.",
-      "pass_fail": "pending",
-      "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-11T12:08:55.771053+00:00",
+      "proof_type": "automated_test",
+      "evidence": "Assertion confirmed by direct read: sk-cli-auth-pattern.spec.ts:241-254 reads the real shadow DOM (label[for]===input.id, aria-describedby contains 'description'), not merely the host's label/description attributes. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:43:02.469128+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
