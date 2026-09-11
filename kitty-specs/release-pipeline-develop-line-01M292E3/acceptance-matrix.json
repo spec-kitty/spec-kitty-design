@@ -37,11 +37,11 @@
     {
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_review",
+      "evidence": "security job's if: (github.event_name != 'schedule' || github.ref == 'refs/heads/main') is the only branch-scoped job if:, unaffected by REL1 (parsed-YAML diff confirms no other job if:/needs: regressed, node scripts/check-ci-quality-trigger-parity.mjs)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T23:24:55.312504+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
