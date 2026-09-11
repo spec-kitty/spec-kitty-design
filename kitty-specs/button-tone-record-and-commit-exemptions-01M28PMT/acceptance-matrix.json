@@ -18,10 +18,10 @@
       "criterion_id": "FR-002",
       "description": "Verify FR-002 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Each new pattern closed over TRACER_CATEGORIES' real 3 values and the established -01<ULID> mission-slug shape, never \\S+ or an open class; verified via node -e probing config.ignores against both real and near-miss messages",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:11:48.364889+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
