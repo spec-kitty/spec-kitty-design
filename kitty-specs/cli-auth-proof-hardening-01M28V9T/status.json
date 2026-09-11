@@ -19,6 +19,7 @@
   "work_packages": {
     "WP01": {
       "actor": "claude-implementer",
+      "agent": "claude-implementer",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
@@ -26,6 +27,9 @@
       "last_event_id": "01M295N1JC718YCHVKT2N99CG7",
       "last_transition_at": "2026-09-11T21:23:21.292879+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "Backfilling agent metadata post-approval (accept diagnose: missing agent in canonical runtime state)"
+      ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
         "reference": "7 review passes, WP01 cli-auth-proof-hardening: source-text mechanism replaced by MutationObserver-based runtime watch with frozen liveness canary and same-origin iframe recursion; four disclosed floors (deferred-past-window, closed shadow roots, cross-origin iframes, whole-page appendChild patch) verified accurate and complete",
