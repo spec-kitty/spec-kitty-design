@@ -178,10 +178,10 @@
       "criterion_id": "FR-018",
       "description": "Verify FR-018 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "npx vitest run tests/node/cli-auth-no-literal.test.ts (run by reviewer, hermetic Node-only, no browser/shared-lane dependency): 4/4 passed, incl. 'no CLI Auth fixture copy string appears as a literal inside the composed elements' own source' (tests/node/cli-auth-no-literal.test.ts:93-116). Word-boundary regex fix confirmed sound: getBoundingClientRect() false-positive documented and resolved (same file, lines 100-115).",
+      "evidence": "CORRECTED (squad pass 1, item 5): the previous evidence's 'word-boundary regex fix confirmed sound' was false, falsified by squad finding 2 -- the original backslash-b-bounded pattern silently failed to detect a planted literal for any copy string ending in punctuation (every terminal body string, codeEntryDefault.description, codeEntryInvalid.errorMessage -- six of the assertion's strings) because a trailing word-boundary anchor demands a word character after it while a real source literal is followed by a closing quote, itself non-word. States what the fix does and does not cover: fixed to a non-word-or-string-edge boundary on both sides (tests/node/cli-auth-no-literal.test.ts, pattern at line 120), which keeps the same getBoundingClientRect() false-positive rejection (re-verified: the character preceding 'Client' in that identifier is the word character g, so neither boundary alternative matches) while accepting a non-word character, not only a word-to-non-word transition, on either side. Re-verified directly, not merely asserted: planted a literal copy of codeEntryDefault.description into a scratch buffer -- the old pattern missed it, the new pattern caught it. npx vitest run tests/node/cli-auth-no-literal.test.ts (run directly): 4/4 passed. Execution outcome now observed at the rebased head: CI run 34608397407 job 103292725697 (test) baseline line reads 'baseline: 677 assertion(s), all passed' before the unrelated mutation-harness time-ceiling failure (filed as #408, not this file); this file's assertions are part of that green baseline.",
       "pass_fail": "pass",
-      "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-11T12:07:28.483022+00:00",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T14:40:43.658898+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
