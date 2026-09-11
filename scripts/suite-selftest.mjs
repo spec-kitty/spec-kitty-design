@@ -44,6 +44,7 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative, sep } from 'node:path';
 import { createVitest } from 'vitest/node';
+import { computeSelftestCeilingSeconds } from './lib/selftest-budget.mjs';
 
 const selftestMode = process.argv.includes('--selftest');
 const LIST = selftestMode ? 'mutations.selftest.json' : 'mutations.json';
@@ -58,6 +59,12 @@ const controlBytes = new Map([
 const list = JSON.parse(controlBytes.get(LIST).toString('utf8'));
 const mutations = list.mutations ?? [];
 const budget = JSON.parse(controlBytes.get('suite-budget.json').toString('utf8'));
+// Computed, not read, from #419/#408: a flat selftestCeilingSeconds could not survive corpus
+// growth (armCount rose, the ceiling did not) and could not absorb the runner variance #419
+// measured on an UNCHANGED corpus (1346.6-1949.7s, 44.8%, across eight identical-input CI
+// runs). Resolved before the loop runs, so a malformed budget fails fast rather than after a
+// ~27-minute run. See scripts/lib/selftest-budget.mjs and suite-budget.json's own history.
+const selftestCeilingSeconds = computeSelftestCeilingSeconds(budget.selftestBudget, mutations.length);
 // APPLICABLE behaviours only, matching floor-reporter.mjs:121.
 //
 // The two consumers of behaviours.json disagreed about what `applicable` means: the floor
@@ -1004,20 +1011,26 @@ if (failures) {
 const elapsed = Math.round(((Date.now() - harnessStarted) / 1000) * 10) / 10;
 console.log(
   `\n✅ All ${mutations.length} ${selftestMode ? 'guard self-checks passed' : 'mutations produced their named red, with a green baseline'}.` +
-    `  (${elapsed}s, ceiling ${budget.selftestCeilingSeconds}s)`
+    `  (${elapsed}s, ceiling ${selftestCeilingSeconds}s for ${mutations.length} arm(s))`
 );
 // The harness resolves every mutated source through Vitest's dependency graph before applying any
 // arm, then checks the complete affected assertion multiset. Broad package barrels deliberately
 // remain broad; graph errors fall back to the full suite rather than reducing evidence. Since #225
 // guard 9 binds that selection to mutations.json: a narrowed set that cannot carry the arm's named
 // test is rejected before the loop instead of surfacing later as guard 4's "absent".
-// `selftestCeilingSeconds` was described in suite-budget.json as an enforced ceiling and was
-// read by nothing — an inert key documented as a gate, which is the class this mission
-// exists to close, introduced by its own fold. Found at the second gate pass.
-if (elapsed > budget.selftestCeilingSeconds) {
+// `selftestCeilingSeconds` USED to be a flat constant, described in suite-budget.json as an
+// enforced ceiling and read by nothing — an inert key documented as a gate. It is now computed
+// from armCount (#419, #408; see scripts/lib/selftest-budget.mjs), which closes a second,
+// related defect the flat number could not: corpus growth alone used to breach it, and this
+// gate exists to catch a GENUINE slowdown, not to red on ordinary variance or ordinary growth.
+if (elapsed > selftestCeilingSeconds) {
   console.error(
-    `❌ the harness took ${elapsed}s, over its committed ceiling of ${budget.selftestCeilingSeconds}s.\n` +
-      `   Raise it deliberately in suite-budget.json with the run that justifies it.`
+    `❌ the harness took ${elapsed}s, over its committed ceiling of ${selftestCeilingSeconds}s ` +
+      `for ${mutations.length} arm(s) (suite-budget.json#selftestBudget:` +
+      ` ${budget.selftestBudget?.fixedSeconds}s fixed + ${budget.selftestBudget?.perArmSeconds}s/arm).\n` +
+      '   This ceiling already scales with arm count and absorbs the runner variance this\n' +
+      '   repository has measured, so a breach is evidence of a genuine slowdown, not corpus\n' +
+      '   growth or ordinary noise. Investigate before recalibrating — see suite-budget.json.'
   );
   process.exit(1);
 }
