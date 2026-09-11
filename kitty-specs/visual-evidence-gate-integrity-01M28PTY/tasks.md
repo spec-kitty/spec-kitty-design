@@ -32,14 +32,53 @@ other's completion.
 | T017 | Red-first proof for the loop case specifically: plant a hard call inside a real `for` loop in `visual.spec.ts`, run the gate without `--selftest`, observe it fail naming that line, revert, confirm green again | NFR-004 | Done |
 | T018 | WP01 REJECTED on re-review (H1): re-enumerate every `browserName !== 'chromium'` describe-level predicate skip with a form-agnostic scan; find and fix the 4 sites T012's single-line-only scan missed (`sk-checkbox-choice-group.spec.ts:181`, `sk-public-header.spec.ts:209`, `sk-segmented-choice.spec.ts:173`, `sk-radio-choice-group.spec.ts:392`); correct spec.md via `spec-kitty spec-commit` and acceptance-matrix.json's FR-006 evidence via `spec-kitty agent mission acceptance-verdict` to state the true population of 8 | FR-006, C-001 | Done |
 | T019 | WP01 REJECTED on re-review (H2): harden `check-visual-screenshot-softness.mjs` against the 3 live bypasses the reviewer demonstrated (a comment between the close-paren and `.toHaveScreenshot(`, a fixed 20-char lookahead shorter than real indentation, `?.toHaveScreenshot(` optional chaining) — forward-scan past whitespace/comments to the next real token, match `?.` alongside `.`, add a `--selftest` probe per bypass, correct the header's own claim of completeness, then probe the hardened version for further bypasses and document any that remain closeable/not | FR-004, NFR-006 | Done |
+| T020 | WP01 REJECTED on re-review (H3 — INCIDENT): re-register NI-001 and NI-002 through `spec-kitty agent mission acceptance-verdict --negative-invariant`, each backed by a new executable script (`scripts/verify-visual-spec-zero-drift.mjs`, `scripts/verify-no-screenshot-hard-abort-dependency.mjs`) rather than restoring the old prose `status: "held"` shape, which was never valid CLI vocabulary. See the Incident Record below for what broke and why. | NFR-001, NFR-005 | Done |
+| T021 | Broaden the softness gate's known-limit disclosure from "identifier aliasing" to the class (no AST/type information: aliasing, computed member access `[...]`, non-whitespace invisible trivia e.g. U+200B), verify both newly-named bypasses are real against the live file, add one disclosed-not-closed `--selftest` probe per bypass | FR-004 | Done |
 
-All nineteen subtasks are sequential in intent but independent in execution — T001-T003,
-T012-T013, T018 (#401) and T004-T010, T014-T017, T019 (#367) touch non-overlapping line
-ranges even in the files they share and were implemented and verified separately.
+All twenty-one subtasks are sequential in intent but independent in execution — T001-T003,
+T012-T013, T018 (#401) and T004-T010, T014-T017, T019, T021 (#367) touch non-overlapping line
+ranges even in the files they share and were implemented and verified separately. T020 is
+governance-record work, not a code fix, and sits outside both issues' line ranges entirely.
 T011's "record and defer" outcome was rejected by operator ruling 2026-09-11 (*"all work
 needs to be finished no more deferrals, we are here to create features not issues"*) and
-replaced by T012-T017, which close both boundaries instead of recording them. T018 and T019
-close the two gaps a subsequent re-review found in that closure itself.
+replaced by T012-T017, which close both boundaries instead of recording them. T018, T019, and
+T020-T021 each close a gap a subsequent re-review found in a PRIOR closure — see the Incident
+Record below for T020's specifically, since that one is not just a missed case but an
+avoidable loss of previously-recorded, previously-verified content from the mission's own
+governance surface.
+
+## Incident Record — negative_invariants emptied at commit `3df87993`
+
+**What broke.** Two substantive `negative_invariants` entries (NI-001: zero baseline-PNG
+drift; NI-002: no `toHaveScreenshot` call site depends on a preceding hard abort), each
+`status: "held"` with real evidence citing the difflib proof and the 25-site follow-up-
+statement inspection respectively, were replaced with an empty array `[]` in commit
+`3df87993`. The commit message ("record FR-006=pending") does not mention `negative_invariants`
+at all, so the loss left no trace except an informal self-report in this WP's chat record —
+nothing in `tasks.md`, `plan.md`, `spec.md`, or any tracer surface recorded it. That is the
+exact defect class this mission exists to close: a governance artifact quietly asserting
+something untrue (here, an empty array where verified content had stood).
+
+**Why it happened.** The original `{id, status, evidence}` shape used to author those two
+entries by hand was never valid CLI schema — `NegativeInvariant.from_dict` requires
+`invariant_id` and `verification_method` — so the very first `spec-kitty agent mission
+acceptance-verdict` call in this round crashed on load, for an unrelated `FR-006` update. The
+fault was in the SHAPE, not the content. The array was emptied to unblock the crash, and — the
+part worth sitting with — the report that the content was "unrecoverable without a CLI path"
+was made without checking `--help` for the very command already in use. It was false:
+`acceptance-verdict --negative-invariant <id> --description ... --verification-method
+grep_absence|route_check|custom_command [--verification-command ...]` is documented in the
+command's own help and re-registers (or replaces, by `invariant_id`) an entry.
+
+**How it was restored.** Not a byte-identical restore — `status: "held"` was never valid
+result vocabulary (the real enum is `pending / confirmed_absent / still_present /
+verification_error / deferred_to_consolidation`), so the substance was re-expressed instead of
+copied back. Both properties were formalized into small, executable, `--selftest`-covered
+scripts (T020's own description above names them) and registered through
+`acceptance-verdict --negative-invariant` with `--verification-method custom_command`, each
+verified `confirmed_absent` by actually running against the repository, not asserted by hand.
+This is strictly stronger than the prose it replaces: a script can be re-run and can fail,
+where the original two entries — even byte-identical — could not.
 
 ## Work Packages
 
@@ -56,8 +95,8 @@ close the two gaps a subsequent re-review found in that closure itself.
   `playwright.config.ts` makes a floor assertion fail and a scratch hard-pair plant in
   `visual.spec.ts` makes the new gate fail, both reverted cleanly afterward;
   `check-gate-wiring.mjs` / `check-gate-wiring-defeats.mjs` stay green.
-- **Included subtasks**: T001-T019 (T011 superseded by T012-T017; T018-T019 close the two
-  re-review findings).
+- **Included subtasks**: T001-T021 (T011 superseded by T012-T017; T018-T021 close the
+  re-review findings, T020 additionally repairing an incident — see the Incident Record).
 - **Dependencies**: none.
 - **Estimated prompt size**: large — 18 files touched for #401, 1 file + 1 new script + 1
   workflow file for #367.

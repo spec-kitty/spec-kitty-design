@@ -277,3 +277,43 @@ Result: 0 pure deletions, 3 pure insertions (all three are the #401 floor-assert
 verbatim), and 163 replaced line pairs — every one of which is provably identical to its
 original except for the literal substring `expect(` → `expect.soft(`. No locator, story id,
 viewport, or threshold argument differs anywhere in the file.
+
+### IC-06 — Formalize NI-001/NI-002 as executable checks, after an incident emptied them
+
+A one-off `spec-kitty agent mission acceptance-verdict --criterion FR-006` call crashed on an
+unrelated malformed `negative_invariants` block (hand-authored with the wrong field names —
+`{id, status, evidence}` instead of `NegativeInvariant`'s real `invariant_id` /
+`verification_method` / `result` / `evidence`). The two entries it held (NI-001: zero
+baseline-PNG drift; NI-002: no screenshot call depends on a preceding hard abort) were real,
+previously-verified content, not scaffolding. Repairing the SHAPE would have unblocked the
+call without losing them; instead the array was emptied to `[]` in commit `3df87993`, whose
+message gives no indication `negative_invariants` was touched — an undocumented loss of a
+governance artifact's real content, discovered only on re-review. Full account: `tasks.md`'s
+Incident Record.
+
+- **Purpose**: Restore both properties as durable, re-runnable, sanctioned-surface-registered
+  invariants — not a byte-identical restore (the old `status: "held"` value was never valid
+  CLI vocabulary), but a strictly stronger re-expression: prose evidence that could only ever
+  be checked once, by eye, replaced by a script that can be re-run and can fail.
+- **Relevant requirements**: NFR-001, NFR-005
+- **Affected surfaces**: `scripts/verify-visual-spec-zero-drift.mjs` (new — parses a `git diff
+  -U0` against a base ref into removed/added line blocks and asserts every block is either the
+  known #401 floor-insertion shape or a clean `expect(`→`expect.soft(` 1:1 substitution, with
+  a `--selftest` table); `scripts/verify-no-screenshot-hard-abort-dependency.mjs` (new —
+  reuses `maskNonCode` from the softness gate, walks every statement after a
+  `toHaveScreenshot` call until the block ends or the next screenshot call, and flags any
+  statement not matching a small ALLOWLIST of recognized safe shapes); both registered via
+  `spec-kitty agent mission acceptance-verdict --negative-invariant NI-00{1,2}
+  --verification-method custom_command --verification-command "node scripts/verify-...mjs"
+  --execute`, both recorded `confirmed_absent`.
+- **Sequencing/depends-on**: None.
+- **Risks**: A first version of the NI-002 walk only inspected the FIRST statement after a
+  screenshot call, which would have missed an allowlisted statement (e.g. `page.evaluate(...)`)
+  followed by an unrecognized one — caught by a dedicated `--selftest` probe and a red-first
+  plant against the real file before this was trusted; the walk now continues past every
+  recognized-safe statement until the block ends or another screenshot call is met. Both
+  scripts also needed a run-as-CLI guard (`process.argv[1] === fileURLToPath(import.meta.url)`,
+  matching `check-adr-index.mjs`'s own convention) once `verify-no-screenshot-hard-abort-dependency.mjs`
+  started importing `maskNonCode` from the softness gate — without the guard, the import alone
+  re-ran the softness gate's own `--selftest`/scan logic and called `process.exit` as a side
+  effect of merely loading a function from it.

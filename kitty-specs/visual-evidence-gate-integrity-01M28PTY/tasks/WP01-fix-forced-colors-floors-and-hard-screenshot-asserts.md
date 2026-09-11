@@ -44,6 +44,8 @@ subtasks:
 - T017
 - T018
 - T019
+- T020
+- T021
 phase: Phase 1 - Fix and gate
 history:
 - timestamp: '2026-09-11T19:30:00Z'
@@ -55,12 +57,17 @@ history:
 - timestamp: '2026-09-11T22:30:00Z'
   agent: system
   action: 'WP01 REJECTED on re-review, two High findings: H1 the describe-level sweep was 4/8 (single-line-only scan), H2 the flat softness gate had 3 live parser bypasses (comment before the dot, short lookahead, optional chaining). T018-T019 added to close both.'
+- timestamp: '2026-09-11T23:45:00Z'
+  agent: system
+  action: 'WP01 REJECTED on re-review again, one new High finding (H3, an incident, not a miss): negative_invariants NI-001/NI-002 -- real, previously-verified content -- were replaced with [] in commit 3df87993 while unblocking an unrelated malformed-schema crash, undocumented anywhere but an informal self-report; the claimed lack of a re-registration CLI path was false. T020 re-registers both via acceptance-verdict --negative-invariant, backed by new executable scripts, and records the incident in tasks.md/plan.md. T021 additionally broadens the softness gate known-limit disclosure to two more reviewer-found bypasses (computed member access, U+200B zero-width space), same treatment as the aliasing gap.'
 authoritative_surface: apps/storybook/src/tests/
 create_intent: []
 execution_mode: code_change
 owned_files:
 - apps/storybook/src/tests/**
 - scripts/check-visual-screenshot-softness.mjs
+- scripts/verify-visual-spec-zero-drift.mjs
+- scripts/verify-no-screenshot-hard-abort-dependency.mjs
 - .github/workflows/ci-quality.yml
 tags: []
 tracker_refs: []
