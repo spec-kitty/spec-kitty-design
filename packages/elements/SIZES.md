@@ -35,7 +35,7 @@ What a consumer downloads, from a real `npm pack` of each package in the derived
 | package | files | unpacked |
 |---|---:|---:|
 | `@spec-kitty/tokens` | 37 | 5765.6 KiB |
-| `@spec-kitty/styles` | 268 | 784.6 KiB |
+| `@spec-kitty/styles` | 268 | 784.9 KiB |
 | `@spec-kitty/elements` | 52 | 959.0 KiB |
 | `@spec-kitty/react` | 64 | 170.9 KiB |
 
