@@ -87,11 +87,11 @@
     {
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "browser test",
+      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K6: 10 lanes count 0, empty ol with sibling 'No work packages in this lane.', exactly 10 empty states, no a/button/sk-button in the board, reported panel shows the base empty sentence.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:37.813669+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
