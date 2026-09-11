@@ -5,10 +5,11 @@
 
 ## Summary
 
-Two independent harness/config fixes, one bounded Work Package:
+One bounded Work Package, #422 only.
 
 1. Rewrite the CLI Auth pattern's two "200% CSS zoom" Playwright tests in `apps/storybook/src/tests/visual.spec.ts` so "200% zoom" is driven by a real halved CSS viewport (fresh browser context, `deviceScaleFactor: 2`) instead of `document.documentElement.style.zoom = '2'`, which never narrows the CSS viewport a `max-width` media query reads (#422). Read the pattern's real breakpoint from `packages/elements/src/patterns/cli-auth.stories.ts` at test run time (never hardcode 390 or 480 — a sibling mission is migrating that value and has not merged). Assert the resolved padding narrows under the zoomed state relative to an un-zoomed reference, so the test fails on its own merits if the breakpoint stops firing. Sweep every other `style.zoom` use in the same file and fix any that share the same mis-naming defect (unqualified "N% zoom" claim proven only by uniform magnification).
-2. Add one new bounded, anchored pattern to `commitlint.config.cjs`'s `SPEC_KITTY_AUTO_COMMIT_PATTERNS` for the CLI's `chore(spec-kitty): materialize WP\d+ approval note into status.json` auto-commit shape (observed failing `lint-code` this round), following the exact discipline of the four patterns #420 already established (fixed verb phrase + bounded `WP\d+` token, anchored to end-of-line). Add `generatedMessages`/`nearMisses` regression cases to `scripts/check-commitlint-config.mjs`. Document, but deliberately do not exempt, the confirmed-unbounded `MissionStatusAggregate.save()` escape hatch found during the source audit.
+
+> **CORRECTION.** This plan originally carried a second item: add a new bounded `commitlint.config.cjs` pattern for `chore(spec-kitty): materialize WP\d+ approval note into status.json`, believed to be a CLI-emitted auto-commit shape uncovered by #420's existing patterns. IC-03's own audit (below, preserved) could not re-derive that literal message from the installed CLI's source. The coordinator then established the true origin: `spec-kitty safe-commit --message`/`-m` is a caller-supplied argument, and the message was hand-authored by a sibling mission's implementer, not CLI-emitted. The commitlint pattern and its regression tests were reverted to the pre-mission state; see `research.md` for the full correction and the preserved `MissionStatusAggregate.save()` finding (kept as documentation only, per the coordinator, since it is real and independent of the false premise). This mission is #422 only.
 
 ## Technical Context
 
@@ -19,8 +20,8 @@ Two independent harness/config fixes, one bounded Work Package:
 **Target Platform**: CI (GitHub Actions `ubuntu-latest` runner) is baseline-authoritative for visual PNGs; local runs are for mechanism verification only.
 **Project Type**: Single repo, monorepo-style (`apps/storybook`, `packages/elements`, `packages/tokens`, root-level `commitlint.config.cjs` + `scripts/`).
 **Performance Goals**: N/A.
-**Constraints**: See spec.md Constraints C-001..C-006 (no breakpoint hardcoding across the sibling-mission dependency, no `scope-enum` widening, no unanchored `chore(spec-kitty)` regex, never `nx run storybook:lint`, port 6006 hygiene, CLI source read-only).
-**Scale/Scope**: 1 test file edit (2 tests rewritten, N other zoom sites audited/fixed per sweep), 1 config file edit (1 new pattern + 1 comment), 1 self-test script edit (generatedMessages/nearMisses cases).
+**Constraints**: See spec.md Constraints C-001, C-004, C-005 (no breakpoint hardcoding across the sibling-mission dependency, never `nx run storybook:lint`, port 6006 hygiene). C-002/C-003/C-006 governed the withdrawn commitlint work and no longer apply to any live deliverable.
+**Scale/Scope**: 1 test file edit (2 zoom tests rewritten for real viewport-halving, 1 more — Connectors — fixed the same way per the sweep, 3 others read and left as-is with the classification recorded inline). The `commitlint.config.cjs`/`check-commitlint-config.mjs` edit was reverted; see the correction note above.
 
 ## Charter Check
 
@@ -33,7 +34,9 @@ No `charter.md` gate gap identified: this mission touches test source and lint c
 ```
 kitty-specs/zoom-emulation-and-cli-commit-scopes-01M28YQ6/
 ├── plan.md              # This file
-├── spec.md              # Requirements (FR-001..FR-008, NFR-001..003, C-001..006)
+├── spec.md              # Requirements (FR-001..FR-005, FR-008; FR-006/FR-007 withdrawn — see spec.md prose)
+├── research.md          # CLI operation-vocabulary audit, the correction, and the preserved
+│                         # MissionStatusAggregate.save() finding
 └── tasks/                # Phase 2 output (spec-kitty tasks) — single WP
 ```
 
@@ -41,12 +44,13 @@ kitty-specs/zoom-emulation-and-cli-commit-scopes-01M28YQ6/
 
 ```
 apps/storybook/src/tests/visual.spec.ts   # FR-001..FR-005: CLI Auth zoom tests rewritten;
-                                            # other style.zoom sites audited, fixed where defect shared
+                                            # other style.zoom sites audited, one (Connectors) fixed
+
 packages/elements/src/patterns/cli-auth.stories.ts   # READ ONLY — breakpoint source of truth
 packages/tokens/src/tokens.css                       # READ ONLY — --sk-space-4/-6 token values
 
-commitlint.config.cjs                      # FR-006, FR-008: new pattern + escape-hatch comment
-scripts/check-commitlint-config.mjs        # FR-007: generatedMessages/nearMisses regression cases
+commitlint.config.cjs                      # REVERTED to pre-mission state — see correction above
+scripts/check-commitlint-config.mjs        # REVERTED to pre-mission state — see correction above
 ```
 
 **Structure Decision**: Single project, no new directories. Both fixes are localized edits to existing files; no `Option 2/3` layout applies.
@@ -73,10 +77,11 @@ Not applicable — no Charter Check violations.
 - **Sequencing/depends-on**: IC-01 (same fix mechanism, applied only where warranted).
 - **Risks**: A test named honestly today could still be re-scoped by a future reader as "the" 200%-zoom evidence if nothing marks the distinction — the WP's report is the record of this classification, not a code change, for sites that stay as-is.
 
-### IC-03 — `chore(spec-kitty)` commitlint gap audit + closure
+### IC-03 — `chore(spec-kitty)` commitlint gap audit — WITHDRAWN, preserved for the record
 
-- **Purpose**: Read the installed CLI's `BookkeepingTransaction` implicit-commit mechanism exhaustively, enumerate every call site that reaches `chore(spec-kitty): {operation}` without an explicit `.commit()`, confirm the three already-covered shapes, and add one new bounded pattern for the shape observed failing this round — without widening `scope-enum` or unanchoring the regex.
-- **Relevant requirements**: FR-006, FR-007, FR-008, C-002, C-003, C-006.
-- **Affected surfaces**: `commitlint.config.cjs` (`SPEC_KITTY_AUTO_COMMIT_PATTERNS` array + surrounding comments), `scripts/check-commitlint-config.mjs` (`generatedMessages`/`nearMisses` arrays).
-- **Sequencing/depends-on**: none (independent of IC-01/IC-02).
-- **Risks**: The specific observed message (`materialize WP01 approval note into status.json`) could not be matched to a literal source string in the installed CLI despite an exhaustive read (`transaction.py`, `status_transition.py`, `workflow_executor.py`, `workflow.py`, `status/aggregate.py`, `implement.py`, `review/cycle.py`, `tasks_verdict_persistence.py`, `tasks_move_task.py` all read). The new pattern is therefore bound to the exact observed text (not a generalized category) and the report states plainly that this one rests on the operator-relayed real message, distinct from the three patterns whose source template I verified directly. `MissionStatusAggregate.save(*, operation: str)` is flagged as a confirmed, currently-uncalled, genuinely unbounded escape hatch and is deliberately NOT exempted.
+- **Purpose (as originally planned)**: Read the installed CLI's `BookkeepingTransaction` implicit-commit mechanism exhaustively, enumerate every call site that reaches `chore(spec-kitty): {operation}` without an explicit `.commit()`, confirm the three already-covered shapes, and add one new bounded pattern for the shape observed failing this round — without widening `scope-enum` or unanchoring the regex.
+- **What the audit actually found**: exactly 3 call sites reach the implicit-commit fallback, all 3 already covered by the existing 4 patterns. The specific observed message (`chore(spec-kitty): materialize WP01 approval note into status.json`) could not be matched to a literal source string anywhere in the installed CLI despite an exhaustive read (`transaction.py`, `status_transition.py`, `workflow_executor.py`, `workflow.py`, `status/aggregate.py`, `implement.py`, `review/cycle.py`, `tasks_verdict_persistence.py`, `tasks_move_task.py` all read) — stated plainly rather than shipping unverified coverage.
+- **Why withdrawn**: that "could not find it" finding was the thread the coordinator pulled. `spec-kitty safe-commit --message`/`-m` is a **caller-supplied, required** argument — the CLI does not generate this text. The message was hand-authored by a sibling mission's implementer and passed to `safe-commit`; it was never CLI-emitted, so no #420-class allowlist gap exists. A commitlint pattern was added, then reverted in full once this was established (confirmed byte-identical to `git show 9c269b3c:commitlint.config.cjs` / `:scripts/check-commitlint-config.mjs`).
+- **Preserved finding**: `specify_cli/status/aggregate.py`'s `MissionStatusAggregate.save(*, operation: str)` is a confirmed, currently-uncalled, genuinely unbounded commit-message escape hatch (`txn.commit(operation)` — the caller's string becomes the entire message). Kept as documentation in `research.md`, deliberately NOT exempted by any commitlint pattern, since no pattern was added for anything in this area at all.
+- **Relevant requirements**: FR-008 only (documentation). FR-006/FR-007 withdrawn — see spec.md.
+- **Affected surfaces**: none, after revert. `commitlint.config.cjs` and `scripts/check-commitlint-config.mjs` are back at their pre-mission (`9c269b3c`) content.
