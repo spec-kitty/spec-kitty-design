@@ -18,7 +18,7 @@ requirement_refs:
 - C-006
 planning_base_branch: mission/cli-auth-proof-hardening
 merge_target_branch: mission/cli-auth-proof-hardening
-branch_strategy: Planning artifacts for this mission were generated on mission/cli-auth-proof-hardening; completed changes must merge back into mission/cli-auth-proof-hardening.
+branch_strategy: Planning artifacts for this mission were generated on mission/cli-auth-proof-hardening. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/cli-auth-proof-hardening unless the human explicitly redirects the landing branch.
 subtasks:
 - T001
 - T002
@@ -27,7 +27,7 @@ subtasks:
 - T005
 history: []
 agent_profile: node-norris
-authoritative_surface: packages/elements/src/patterns/cli-auth.stories.ts, apps/storybook/src/tests/sk-cli-auth-pattern.spec.ts, scripts/check-pattern-composition.mjs
+authoritative_surface: apps/storybook/src/tests/sk-cli-auth-pattern.spec.ts
 create_intent: []
 execution_mode: code_change
 model: ''
