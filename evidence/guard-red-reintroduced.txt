@@ -1,0 +1,155 @@
+
+ RUN  v4.1.11 /home/jeroennouws/dev/spec-kitty-design-missions/350
+
+ ❯ |node| tests/node/form-input-border-control-contrast.test.ts (47 tests | 10 failed) 10ms
+   ✓ discovery: the invalid-boundary declaration set is non-empty and single-valued 2ms
+   ✓ discovery: the error-copy declaration set is non-empty and single-valued 0ms
+   ✓ [FR-012] dark theme: --sk-border-control vs --sk-surface-page clears 3:1 0ms
+   ✓ [FR-002] dark theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-page clears 3:1 0ms
+   ✓ [FR-003] dark theme: invalid boundary vs resting boundary on --sk-surface-page 0ms
+   ✓ [FR-004] dark theme: invalid boundary vs --sk-surface-page does not regress below the pre-fix measurement 0ms
+   ✓ [error-copy] dark theme: error copy (--sk-fg-error) vs --sk-surface-page clears 4.5:1 0ms
+   ✓ [FR-012] dark theme: --sk-border-control vs --sk-surface-card clears 3:1 0ms
+   ✓ [FR-002] dark theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-card clears 3:1 0ms
+   ✓ [FR-003] dark theme: invalid boundary vs resting boundary on --sk-surface-card 0ms
+   ✓ [FR-004] dark theme: invalid boundary vs --sk-surface-card does not regress below the pre-fix measurement 0ms
+   ✓ [error-copy] dark theme: error copy (--sk-fg-error) vs --sk-surface-card clears 4.5:1 0ms
+   ✓ [FR-012] dark theme: --sk-border-control vs --sk-surface-input clears 3:1 0ms
+   ✓ [FR-002] dark theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-input clears 3:1 0ms
+   ✓ [FR-003] dark theme: invalid boundary vs resting boundary on --sk-surface-input 0ms
+   ✓ [FR-004] dark theme: invalid boundary vs --sk-surface-input does not regress below the pre-fix measurement 0ms
+   ✓ [error-copy] dark theme: error copy (--sk-fg-error) vs --sk-surface-input clears 4.5:1 0ms
+   ✓ [FR-012] dark theme: --sk-border-control vs --sk-surface-muted clears 3:1 0ms
+   ✓ [FR-002] dark theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-muted clears 3:1 0ms
+   ✓ [FR-003] dark theme: invalid boundary vs resting boundary on --sk-surface-muted 0ms
+   ✓ [FR-004] dark theme: invalid boundary vs --sk-surface-muted does not regress below the pre-fix measurement 0ms
+   ✓ [error-copy] dark theme: error copy (--sk-fg-error) vs --sk-surface-muted clears 4.5:1 0ms
+   ✓ [FR-012] dark theme: --sk-border-control vs --sk-surface-pill clears 3:1 0ms
+   ✓ [FR-002] dark theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-pill clears 3:1 0ms
+   ✓ [FR-003] dark theme: invalid boundary vs resting boundary on --sk-surface-pill 0ms
+   ✓ [FR-004] dark theme: invalid boundary vs --sk-surface-pill does not regress below the pre-fix measurement 0ms
+   ✓ [error-copy] dark theme: error copy (--sk-fg-error) vs --sk-surface-pill clears 4.5:1 0ms
+   ✓ [FR-012] light theme: --sk-border-control vs --sk-surface-page clears 3:1 0ms
+   × [FR-002] light theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-page clears 3:1 2ms
+   × [FR-003] light theme: invalid boundary vs resting boundary on --sk-surface-page 0ms
+   ✓ [error-copy] light theme: error copy (--sk-fg-error) vs --sk-surface-page clears 4.5:1 0ms
+   ✓ [FR-012] light theme: --sk-border-control vs --sk-surface-card clears 3:1 0ms
+   × [FR-002] light theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-card clears 3:1 0ms
+   × [FR-003] light theme: invalid boundary vs resting boundary on --sk-surface-card 0ms
+   ✓ [error-copy] light theme: error copy (--sk-fg-error) vs --sk-surface-card clears 4.5:1 0ms
+   ✓ [FR-012] light theme: --sk-border-control vs --sk-surface-input clears 3:1 0ms
+   × [FR-002] light theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-input clears 3:1 0ms
+   × [FR-003] light theme: invalid boundary vs resting boundary on --sk-surface-input 0ms
+   ✓ [error-copy] light theme: error copy (--sk-fg-error) vs --sk-surface-input clears 4.5:1 0ms
+   ✓ [FR-012] light theme: --sk-border-control vs --sk-surface-muted clears 3:1 0ms
+   × [FR-002] light theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-muted clears 3:1 0ms
+   × [FR-003] light theme: invalid boundary vs resting boundary on --sk-surface-muted 0ms
+   ✓ [error-copy] light theme: error copy (--sk-fg-error) vs --sk-surface-muted clears 4.5:1 0ms
+   ✓ [FR-012] light theme: --sk-border-control vs --sk-surface-pill clears 3:1 0ms
+   × [FR-002] light theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-pill clears 3:1 0ms
+   × [FR-003] light theme: invalid boundary vs resting boundary on --sk-surface-pill 0ms
+   ✓ [error-copy] light theme: error copy (--sk-fg-error) vs --sk-surface-pill clears 4.5:1 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |node| tests/node/form-input-border-control-contrast.test.ts > [FR-002] light theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-page clears 3:1
+AssertionError: light theme, --sk-surface-page: --sk-border-control-invalid (#E97373) vs --sk-surface-page (#F8F5EC) = 2.69:1, below the 3:1 floor: expected 2.6887095984269678 to be greater than or equal to 3
+ ❯ tests/node/form-input-border-control-contrast.test.ts:320:9
+    318|         invalidRatio,
+    319|         `${themeName} theme, ${surfaceToken}: ${BOUNDARY_TOKEN} (${inv…
+    320|       ).toBeGreaterThanOrEqual(CONTRAST_FLOOR);
+       |         ^
+    321|     });
+    322|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  |node| tests/node/form-input-border-control-contrast.test.ts > [FR-003] light theme: invalid boundary vs resting boundary on --sk-surface-page
+AssertionError: light theme, --sk-surface-page: invalid boundary ratio 2.69:1 is below the resting --sk-border-control ratio 3.98:1 — the invalid state would be LESS visible than the resting state, exactly #350's inversion: expected 2.6887095984269678 to be greater than or equal to 3.9829495028479682
+ ❯ tests/node/form-input-border-control-contrast.test.ts:327:9
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  |node| tests/node/form-input-border-control-contrast.test.ts > [FR-002] light theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-card clears 3:1
+AssertionError: light theme, --sk-surface-card: --sk-border-control-invalid (#E97373) vs --sk-surface-card (#FFFFFF) = 2.93:1, below the 3:1 floor: expected 2.9310851306136234 to be greater than or equal to 3
+ ❯ tests/node/form-input-border-control-contrast.test.ts:320:9
+    318|         invalidRatio,
+    319|         `${themeName} theme, ${surfaceToken}: ${BOUNDARY_TOKEN} (${inv…
+    320|       ).toBeGreaterThanOrEqual(CONTRAST_FLOOR);
+       |         ^
+    321|     });
+    322|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  |node| tests/node/form-input-border-control-contrast.test.ts > [FR-003] light theme: invalid boundary vs resting boundary on --sk-surface-card
+AssertionError: light theme, --sk-surface-card: invalid boundary ratio 2.93:1 is below the resting --sk-border-control ratio 4.34:1 — the invalid state would be LESS visible than the resting state, exactly #350's inversion: expected 2.9310851306136234 to be greater than or equal to 4.341995160285329
+ ❯ tests/node/form-input-border-control-contrast.test.ts:327:9
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  |node| tests/node/form-input-border-control-contrast.test.ts > [FR-002] light theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-input clears 3:1
+AssertionError: light theme, --sk-surface-input: --sk-border-control-invalid (#E97373) vs --sk-surface-input (#F5F1E6) = 2.60:1, below the 3:1 floor: expected 2.597115679900068 to be greater than or equal to 3
+ ❯ tests/node/form-input-border-control-contrast.test.ts:320:9
+    318|         invalidRatio,
+    319|         `${themeName} theme, ${surfaceToken}: ${BOUNDARY_TOKEN} (${inv…
+    320|       ).toBeGreaterThanOrEqual(CONTRAST_FLOOR);
+       |         ^
+    321|     });
+    322|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  |node| tests/node/form-input-border-control-contrast.test.ts > [FR-003] light theme: invalid boundary vs resting boundary on --sk-surface-input
+AssertionError: light theme, --sk-surface-input: invalid boundary ratio 2.60:1 is below the resting --sk-border-control ratio 3.85:1 — the invalid state would be LESS visible than the resting state, exactly #350's inversion: expected 2.597115679900068 to be greater than or equal to 3.847265845351432
+ ❯ tests/node/form-input-border-control-contrast.test.ts:327:9
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  |node| tests/node/form-input-border-control-contrast.test.ts > [FR-002] light theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-muted clears 3:1
+AssertionError: light theme, --sk-surface-muted: --sk-border-control-invalid (#E97373) vs --sk-surface-muted (#E8E2D0) = 2.26:1, below the 3:1 floor: expected 2.2639864600057282 to be greater than or equal to 3
+ ❯ tests/node/form-input-border-control-contrast.test.ts:320:9
+    318|         invalidRatio,
+    319|         `${themeName} theme, ${surfaceToken}: ${BOUNDARY_TOKEN} (${inv…
+    320|       ).toBeGreaterThanOrEqual(CONTRAST_FLOOR);
+       |         ^
+    321|     });
+    322|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  |node| tests/node/form-input-border-control-contrast.test.ts > [FR-003] light theme: invalid boundary vs resting boundary on --sk-surface-muted
+AssertionError: light theme, --sk-surface-muted: invalid boundary ratio 2.26:1 is below the resting --sk-border-control ratio 3.35:1 — the invalid state would be LESS visible than the resting state, exactly #350's inversion: expected 2.2639864600057282 to be greater than or equal to 3.353781215572687
+ ❯ tests/node/form-input-border-control-contrast.test.ts:327:9
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  |node| tests/node/form-input-border-control-contrast.test.ts > [FR-002] light theme: invalid boundary (--sk-border-control-invalid) vs --sk-surface-pill clears 3:1
+AssertionError: light theme, --sk-surface-pill: --sk-border-control-invalid (#E97373) vs --sk-surface-pill (#ECE7D8) = 2.37:1, below the 3:1 floor: expected 2.371179835105062 to be greater than or equal to 3
+ ❯ tests/node/form-input-border-control-contrast.test.ts:320:9
+    318|         invalidRatio,
+    319|         `${themeName} theme, ${surfaceToken}: ${BOUNDARY_TOKEN} (${inv…
+    320|       ).toBeGreaterThanOrEqual(CONTRAST_FLOOR);
+       |         ^
+    321|     });
+    322|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  |node| tests/node/form-input-border-control-contrast.test.ts > [FR-003] light theme: invalid boundary vs resting boundary on --sk-surface-pill
+AssertionError: light theme, --sk-surface-pill: invalid boundary ratio 2.37:1 is below the resting --sk-border-control ratio 3.51:1 — the invalid state would be LESS visible than the resting state, exactly #350's inversion: expected 2.371179835105062 to be greater than or equal to 3.5125732994445458
+ ❯ tests/node/form-input-border-control-contrast.test.ts:327:9
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  10 failed | 37 passed (47)
+   Start at  03:37:54
+   Duration  218ms (transform 38ms, setup 0ms, import 62ms, tests 10ms, environment 0ms)
+
