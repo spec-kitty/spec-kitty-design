@@ -25,7 +25,7 @@
       "wp": "WP01"
     },
     "#363": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "plan.md Fold-ins (Named exclusions): REL2 (#363) owns the rc-publish workflow and its own trigger choice; fold-in comments naming M11/M14 corrections are drafted for #363. C-004/spec.md Recorded Decision.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,8 +33,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
