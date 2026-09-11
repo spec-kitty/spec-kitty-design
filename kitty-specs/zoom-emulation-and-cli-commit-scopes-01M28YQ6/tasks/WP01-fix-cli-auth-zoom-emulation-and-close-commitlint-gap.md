@@ -36,7 +36,10 @@ history:
   action: WP authored by hand following the visual-evidence-gate-integrity-01M28PTY precedent, per instruction that spec-kitty tasks --json overwrites hand-authored tasks.md prose
 - timestamp: '2026-09-11T22:10:00Z'
   agent: system
-  action: 'CORRECTION: the commitlint half (Part C/D, T005-T007 below, FR-006/FR-007/NFR-002/C-002/C-003/C-006) is WITHDRAWN. The mission brief asserted chore(spec-kitty): materialize WP01 approval note into status.json was CLI-emitted; this WPs own source audit could not re-derive it from the installed CLI despite an exhaustive read, and said so rather than shipping unverified coverage. The coordinator then established the true origin: spec-kitty safe-commit --message/-m is a caller-supplied argument -- the message was hand-authored by a sibling missions implementer and passed to safe-commit, never CLI-emitted. Exempting it would have weakened the exact rule #420 exists to uphold. commitlint.config.cjs and scripts/check-commitlint-config.mjs were reverted to their pre-mission (9c269b3c) content, confirmed byte-identical via diff. The MissionStatusAggregate.save(*, operation: str) finding (FR-008) is kept, relocated to research.md as documentation only, per the coordinators explicit instruction. Mission is #422 only.'
+  action: 'CORRECTION: the commitlint half (Part C/D, T005-T007 below, FR-006/FR-007/NFR-002/C-002/C-003/C-006) is WITHDRAWN. The mission brief asserted chore(spec-kitty): materialize WP01 approval note into status.json was CLI-emitted; this WPs own source audit could not re-derive it from the installed CLI despite an exhaustive read, and said so rather than shipping unverified coverage. The coordinator then established the true origin: spec-kitty safe-commit --message/-m is a caller-supplied argument -- the message was hand-authored by a sibling missions implementer and passed to safe-commit, never CLI-emitted. Exempting it would have weakened the exact rule #420 exists to uphold. commitlint.config.cjs and scripts/check-commitlint-config.mjs were reverted to their pre-mission (9c269b3c) content, confirmed byte-identical via diff. The MissionStatus.save(*, operation: str) finding (specify_cli/status/aggregate.py:164,797, FR-008) is kept, relocated to research.md as documentation only, per the coordinators explicit instruction. Mission is #422 only.'
+- timestamp: '2026-09-11T22:45:00Z'
+  agent: system
+  action: 'SECOND CORRECTION (reviewer Medium finding, APPROVE-WITH-FINDINGS): the retained escape-hatch class was misrecorded everywhere in this mission as MissionStatusAggregate. Reviewer confirmed zero hits for that identifier anywhere in the installed CLI; the real class is MissionStatus (specify_cli/status/aggregate.py:164, exported via that modules __all__; save() itself at line 797). Behavioral claim (uncalled, unbounded, correctly un-exempted) verified correct by the reviewer independently; only the identifier was wrong. Corrected across research.md, spec.md, plan.md, tasks.md, and this file (including this history log and Part C, left as historical record of the withdrawn commitlint work but not of a wrong class name).'
 authoritative_surface: apps/storybook/src/tests/visual.spec.ts
 create_intent: []
 execution_mode: code_change
@@ -173,7 +176,7 @@ no breakpoint for the mechanism difference to matter to.
 > #420-class allowlist gap exists. The `commitlint.config.cjs` pattern this Part describes (and
 > Part D's regression coverage for it) were implemented, then **reverted in full** — confirmed
 > byte-identical to `git show 9c269b3c:commitlint.config.cjs` /
-> `:scripts/check-commitlint-config.mjs` via `diff`. The `MissionStatusAggregate.save()` finding
+> `:scripts/check-commitlint-config.mjs` via `diff`. The `MissionStatus.save()` finding
 > below is real and is kept, relocated to `research.md` as documentation only. The text below
 > this note is preserved unedited as the historical record of the (mistaken) work, per this
 > repo's convention of correcting forward rather than erasing — see the WP frontmatter `history`
@@ -205,7 +208,7 @@ packages/specify_cli/` — READ ONLY, never write) and tracing each call site's 
 - `implement.py:839` and `workflow_executor.py:884/1095/1762` pass `operation=` but always call
   `txn.commit_idempotent(message)` explicitly with a *different*, non-`chore(spec-kitty)`
   message — the `operation` string never reaches a real commit there.
-- `status/aggregate.py`'s `MissionStatusAggregate.save(*, operation: str)` is a documented
+- `status/aggregate.py:164`'s `MissionStatus.save(*, operation: str)` (`save` at line 797) is a documented
   "low-level escape hatch" that calls `txn.commit(operation)` — the caller's string becomes
   the **entire** commit message (not a `chore(spec-kitty):` suffix at all). It currently has
   **zero callers** anywhere in `specify_cli`. This is a confirmed, structurally unbounded
@@ -228,10 +231,10 @@ from a source match despite the audit above — so if a future reader needs to v
 it, they should look for the actual originating commit/CLI version rather than assume this
 audit found it.
 
-**Also add, as a comment near `MissionStatusAggregate.save`'s mention** (or in a suitable spot
+**Also add, as a comment near `MissionStatus.save`'s mention** (or in a suitable spot
 in the same block), a "known limitation, stated rather than left silent" note — matching this
 repo's own convention (see `scripts/check-visual-screenshot-softness.mjs`'s "KNOWN REMAINING
-LIMIT" doc comment) — that `MissionStatusAggregate.save(*, operation: str)` is a confirmed,
+LIMIT" doc comment) — that `MissionStatus.save(*, operation: str)` is a confirmed,
 currently-uncalled, structurally unbounded commit-message surface that this config deliberately
 does NOT exempt, because no bounded pattern could honestly cover arbitrary caller text; if a
 future CLI version wires a caller to it and its real output fails lint, that is expected and
@@ -276,7 +279,7 @@ failing lint as expected. Record both runs' real output.
       reverted in full once the coordinator established the underlying message was
       hand-authored and passed to `spec-kitty safe-commit --message`, not CLI-emitted.
       `commitlint.config.cjs` confirmed byte-identical to its pre-mission (`9c269b3c`) content.
-- [x] T006: `MissionStatusAggregate.save` escape hatch documented as a known, deliberately
+- [x] T006: `MissionStatus.save` (`specify_cli/status/aggregate.py:164,797`) escape hatch documented as a known, deliberately
       un-exempted limitation — **relocated** to `research.md` (not a `commitlint.config.cjs`
       comment, since no pattern exists there for it to sit beside).
 - [ ] T007: **WITHDRAWN.** `generatedMessages`/`nearMisses` cases for the withdrawn pattern —

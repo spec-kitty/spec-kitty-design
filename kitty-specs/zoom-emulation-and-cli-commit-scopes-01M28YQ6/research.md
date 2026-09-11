@@ -61,13 +61,22 @@ the installed CLI's *current* shipped call sites can default to through this spe
 mechanism. No fourth pattern was warranted by this audit alone — see the Correction above for
 how the (mistaken) fourth pattern actually got added and then reverted.
 
-## `MissionStatusAggregate.save(*, operation: str)` — a real, currently-uncalled, unbounded escape hatch
+## `MissionStatus.save(*, operation: str)` — a real, currently-uncalled, unbounded escape hatch
+
+> **CORRECTION (post-review, Medium finding).** This section originally named the class
+> `MissionStatusAggregate` throughout. The reviewer verified that identifier does not exist
+> anywhere in the installed CLI (`grep -rn "MissionStatusAggregate"` across the whole package:
+> zero hits) — the real class is `MissionStatus`, defined at
+> `specify_cli/status/aggregate.py:164` and exported via that module's `__all__`. The
+> behavioral claim below (uncalled, structurally unbounded, correctly un-exempted) was verified
+> correct by the reviewer independently; only the identifier was wrong, consistently, everywhere
+> it appeared. Corrected here and everywhere else it appeared in this mission's artifacts.
 
 Kept as documentation per the coordinator's explicit instruction ("you were right not to exempt
 it... record it wherever this mission's notes live, so that if it ever does get called, the
 next person knows the shape").
 
-`specify_cli/status/aggregate.py`'s `MissionStatusAggregate.save(*, operation: str)` is a
+`specify_cli/status/aggregate.py:164`'s `MissionStatus.save(*, operation: str)` is a
 documented "low-level escape hatch" (its own docstring: *"Human-readable operation label for the
 commit message"*) that calls `txn.commit(operation)` directly:
 
@@ -97,7 +106,7 @@ it. Confirmed via `grep -rn "\.save(operation=" specify_cli/` (and a broader `gr
 
 This is nonetheless a real, shipped, structurally unbounded surface: if a future CLI version (or
 an external caller of the CLI's public API, e.g. `orchestrator-api`) wires a caller to
-`MissionStatusAggregate.save()`, whatever string that caller passes becomes a real git commit
+`MissionStatus.save()` (`specify_cli/status/aggregate.py:797`), whatever string that caller passes becomes a real git commit
 message with no template constraint at all — commitlint has no way to distinguish it from an
 arbitrary human sentence, because structurally it *is* one. No closed regex could honestly
 cover it without becoming exactly the blanket exemption `commitlint.config.cjs`'s own anchoring

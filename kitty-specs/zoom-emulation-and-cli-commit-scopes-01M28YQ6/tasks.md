@@ -18,7 +18,7 @@ correction below the table. The mission is #422 only.
 | T004 | Sweep every other `style.zoom` use in `visual.spec.ts` (Mission Reading, Repository Dossier ×2, Work Explorer, Connectors); classify each against #422's defect and record the classification inline as a code comment; empirically probed (not just read by title) — Repository Dossier's `@container` query genuinely crosses under CSS zoom (verified identical result to a real halved viewport), Connectors' overflow check does not (verified `clientWidth`/`scrollWidth` unchanged under CSS zoom at the same width) | FR-005 | Done |
 | T005 | Fix the Connectors 200%-zoom test the same way as T001 (halved viewport, `deviceScaleFactor: 2`); no breakpoint token to assert on, so the fix is the mechanism change plus the existing overflow assertion, now reading real narrowed-viewport dimensions | FR-005 | Done |
 | T006 | ~~Add the new bounded, end-of-line-anchored `chore(spec-kitty): materialize WP\d+ approval note into status\.json` pattern to `commitlint.config.cjs`'s `SPEC_KITTY_AUTO_COMMIT_PATTERNS`~~ | ~~FR-006, C-002, C-003, C-006~~ | **Withdrawn** — implemented, then reverted in full; the underlying message was hand-authored and passed to `spec-kitty safe-commit --message`, not CLI-emitted. `commitlint.config.cjs` confirmed byte-identical to pre-mission (`9c269b3c`) |
-| T007 | Document, without exempting, `MissionStatusAggregate.save(*, operation: str)` as a confirmed, currently-uncalled, structurally unbounded commit-message escape hatch (`txn.commit(operation)` — the caller's string becomes the entire message) | FR-008 | Done — **relocated** to `research.md` (no commitlint pattern remains for a code comment to sit beside) |
+| T007 | Document, without exempting, `MissionStatus.save(*, operation: str)` (`specify_cli/status/aggregate.py:164,797`) as a confirmed, currently-uncalled, structurally unbounded commit-message escape hatch (`txn.commit(operation)` — the caller's string becomes the entire message) | FR-008 | Done — **relocated** to `research.md` (no commitlint pattern remains for a code comment to sit beside); class name corrected post-review from a misrecorded `MissionStatusAggregate` (reviewer Medium finding, zero source hits for that identifier) |
 | T008 | ~~Add `generatedMessages`/`nearMisses` cases to `scripts/check-commitlint-config.mjs` for the new pattern~~ | ~~FR-007~~ | **Withdrawn** along with T006 — implemented, then reverted; `check-commitlint-config.mjs` confirmed byte-identical to pre-mission (`9c269b3c`) and still passes |
 
 ## Correction — the commitlint half (T006, T008) was withdrawn
@@ -35,10 +35,16 @@ sibling mission's implementer and passed to `safe-commit`; it was never CLI-emit
 hand-authored, caller-supplied sentence would have weakened the exact rule #420 exists to
 uphold. T006 and T008's changes were reverted in full (confirmed byte-identical to
 `git show 9c269b3c:commitlint.config.cjs` / `:scripts/check-commitlint-config.mjs`). T007's
-`MissionStatusAggregate.save()` finding is real and independent of the false premise, so it is
-kept — relocated to `research.md` as documentation only, per the coordinator's explicit
-instruction. Full detail: `research.md`, `spec.md`'s correction note, and this WP file's own
-`history` frontmatter entry and Part C/D withdrawal notes.
+`MissionStatus.save()` (`specify_cli/status/aggregate.py:164,797`) finding is real and
+independent of the false premise, so it is kept — relocated to `research.md` as documentation
+only, per the coordinator's explicit instruction. Full detail: `research.md`, `spec.md`'s
+correction note, and this WP file's own `history` frontmatter entry and Part C/D withdrawal
+notes.
+
+**Second correction (post-review, Medium finding)**: the class above was first recorded
+everywhere as `MissionStatusAggregate` — the reviewer verified that identifier has zero hits
+anywhere in the installed CLI; the real class is `MissionStatus`. Corrected across `research.md`,
+`spec.md`, `plan.md`, this file, and the WP01 task file.
 
 `npm run quality:lint` (never `nx run storybook:lint`) run clean (0 errors, pre-existing
 `security/detect-object-injection` warnings only, unrelated to this mission's files). Port
