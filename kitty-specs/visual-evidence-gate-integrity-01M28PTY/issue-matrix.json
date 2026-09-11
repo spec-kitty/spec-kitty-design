@@ -13,7 +13,7 @@
       "wp": null
     },
     "#367": {
-      "evidence_ref": "WP01: apps/storybook/src/tests/visual.spec.ts (166/166 toHaveScreenshot call sites now soft, both multi-call and loop-executed, operator ruling 2026-09-11), scripts/check-visual-screenshot-softness.mjs (flat rule + EXEMPTIONS), .github/workflows/ci-quality.yml",
+      "evidence_ref": "WP01: apps/storybook/src/tests/visual.spec.ts (166/166 toHaveScreenshot call sites soft), scripts/check-visual-screenshot-softness.mjs (flat rule + EXEMPTIONS, hardened after review finding H2 against 3 live parser bypasses: comment-before-dot, short lookahead, optional chaining -- all re-verified fixed against the real file), .github/workflows/ci-quality.yml",
       "fr": "FR-003, FR-004, FR-005",
       "nfr": "NFR-001, NFR-002, NFR-004, NFR-005",
       "repo": "spec-kitty/spec-kitty-design",
