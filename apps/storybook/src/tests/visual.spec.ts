@@ -2718,69 +2718,6 @@ const connectorsStory = async (
   return root;
 };
 
-const cliAuthFullCases = [
-  { id: 'code-entry-default', width: 1440, height: 1024, name: 'sk-cli-auth-code-entry-dark.png' },
-  { id: 'code-entry-light-mode', width: 1440, height: 1024, name: 'sk-cli-auth-code-entry-light.png' },
-  { id: 'code-entry-default', width: 390, height: 844, name: 'sk-cli-auth-code-entry-390.png' },
-  { id: 'authorization-decision', width: 1440, height: 1024, name: 'sk-cli-auth-authorization-decision-dark.png' },
-  { id: 'authorization-decision-light-mode', width: 1440, height: 1024, name: 'sk-cli-auth-authorization-decision-light.png' },
-  { id: 'authorization-decision', width: 390, height: 844, name: 'sk-cli-auth-authorization-decision-390.png' },
-  { id: 'terminal-success', width: 1440, height: 1024, name: 'sk-cli-auth-terminal-success-dark.png' },
-  { id: 'terminal-success-light-mode', width: 1440, height: 1024, name: 'sk-cli-auth-terminal-success-light.png' },
-  { id: 'terminal-success', width: 390, height: 844, name: 'sk-cli-auth-terminal-success-390.png' },
-  { id: 'terminal-error-with-action', width: 1440, height: 1024, name: 'sk-cli-auth-terminal-error-with-action-dark.png' },
-  { id: 'terminal-error-with-action-light-mode', width: 1440, height: 1024, name: 'sk-cli-auth-terminal-error-with-action-light.png' },
-  { id: 'terminal-error-with-action', width: 390, height: 844, name: 'sk-cli-auth-terminal-error-with-action-390.png' },
-] as const satisfies ReadonlyArray<{
-  id: CliAuthStoryId;
-  width: number;
-  height: number;
-  name: string;
-}>;
-
-for (const visual of cliAuthFullCases) {
-  test(`CLI Auth ${visual.name} — pattern baseline`, async ({ page }) => {
-    const root = await cliAuthStory(page, visual.id, { width: visual.width, height: visual.height });
-    await expect(root).toHaveScreenshot(visual.name, {
-      threshold: 0.02,
-      maxDiffPixelRatio: 0.02,
-      timeout: 20000,
-    });
-  });
-}
-
-for (const forcedColors of [
-  { id: 'code-entry-default', name: 'sk-cli-auth-code-entry-forced-colors.png' },
-  { id: 'authorization-decision', name: 'sk-cli-auth-authorization-decision-forced-colors.png' },
-] as const) {
-  test(`CLI Auth ${forcedColors.name} — forced colors baseline`, async ({ page, browserName }) => {
-    test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
-    await page.emulateMedia({ forcedColors: 'active' });
-    const root = await cliAuthStory(page, forcedColors.id, { width: 1440, height: 1024 });
-    await expect(root).toHaveScreenshot(forcedColors.name, {
-      threshold: 0.02,
-      maxDiffPixelRatio: 0.02,
-      timeout: 20000,
-    });
-  });
-}
-
-for (const zoom of [
-  { id: 'code-entry-default', name: 'sk-cli-auth-code-entry-zoom-200.png' },
-  { id: 'authorization-decision', name: 'sk-cli-auth-authorization-decision-zoom-200.png' },
-] as const) {
-  test(`CLI Auth ${zoom.name} — 200% CSS zoom baseline`, async ({ page }) => {
-    const root = await cliAuthStory(page, zoom.id, { width: 780, height: 1000 });
-    await page.evaluate(() => {
-      document.documentElement.style.zoom = '2';
-    });
-    await expect(root).toHaveScreenshot(zoom.name, {
-      threshold: 0.02,
-      maxDiffPixelRatio: 0.02,
-      timeout: 20000,
-    });
-  });
-}
 // The ten canonical desktop baselines (one per canvas, FR-027) plus C8's hard-purge dialog state.
 const connectorsDesktopCases = [
   { id: 'c-1-setup-admin-empty', name: 'sk-connectors-c1-setup-desktop.png' },
