@@ -581,7 +581,7 @@ test("every story introduces no motion of its own under prefers-reduced-motion",
   }
 });
 
-test("forced colors keep the input boundary, both button tones, scope pill-tags, and the boundary-page card visible", async ({
+test("forced colors keep both button tones, scope pill-tags, and the boundary-page card visible", async ({
   page,
   browserName,
 }) => {
@@ -592,11 +592,6 @@ test("forced colors keep the input boundary, both button tones, scope pill-tags,
   await page.emulateMedia({ forcedColors: "active" });
 
   const authRoot = await openStory(page, "authorization-decision");
-  const pillBorder = await authRoot
-    .locator("sk-pill-tag")
-    .first()
-    .evaluate((element) => getComputedStyle(element).borderWidth);
-  expect(pillBorder).toBeDefined();
   const buttons = await authRoot
     .locator("form button")
     .evaluateAll((elements) =>
@@ -617,6 +612,22 @@ test("forced colors keep the input boundary, both button tones, scope pill-tags,
     .locator("form button")
     .nth(1)
     .evaluate((el) => getComputedStyle(el).borderTopWidth);
+  // The scope pill-tags carry no `status` attribute (this story's fixture never sets one), so
+  // sk-pill-tag.css's own forced-colors block (`.sk-pill-tag--status-*` only) declares nothing
+  // for them — a status-less pill's protection is the UA's own forced-colors remap of
+  // `background`/`color` to the system Canvas/CanvasText pair, not authored CSS (that file's own
+  // header comment). Read from the shadow root's real `.sk-pill-tag` span, not the host: the host
+  // carries none of `pillTagClasses()`'s classes — they render on the slotted `<span>`.
+  const normalPillColors = await normalRoot
+    .locator("sk-pill-tag")
+    .first()
+    .evaluate((element) => {
+      const span = (element as Element & { shadowRoot: ShadowRoot }).shadowRoot.querySelector(
+        ".sk-pill-tag",
+      );
+      const style = span ? getComputedStyle(span) : null;
+      return { background: style?.backgroundColor, color: style?.color };
+    });
   await page.emulateMedia({ forcedColors: "active" });
   const forcedRoot = await openStory(page, "authorization-decision");
   const forcedDenyBorder = await forcedRoot
@@ -626,6 +637,24 @@ test("forced colors keep the input boundary, both button tones, scope pill-tags,
   expect(Number.parseFloat(forcedDenyBorder)).toBeGreaterThan(
     Number.parseFloat(normalDenyBorder),
   );
+
+  // Assert the UA remap actually happened — a real, falsifiable check, not merely that a
+  // computed value exists (`getComputedStyle(...).borderWidth` always returns a string,
+  // `"0px"` included, which is why a bare `toBeDefined()` here could never fail): the
+  // status-less pill's background/text colours must differ from their normal-mode values once
+  // forced colors are active.
+  const forcedPillColors = await forcedRoot
+    .locator("sk-pill-tag")
+    .first()
+    .evaluate((element) => {
+      const span = (element as Element & { shadowRoot: ShadowRoot }).shadowRoot.querySelector(
+        ".sk-pill-tag",
+      );
+      const style = span ? getComputedStyle(span) : null;
+      return { background: style?.backgroundColor, color: style?.color };
+    });
+  expect(forcedPillColors.background).not.toBe(normalPillColors.background);
+  expect(forcedPillColors.color).not.toBe(normalPillColors.color);
 
   // sk-boundary-page's own card carries no border normally (a surface/background distinction
   // only) but declares one under forced colors as the first and only place its edge exists

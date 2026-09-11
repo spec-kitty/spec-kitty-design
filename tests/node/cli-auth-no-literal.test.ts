@@ -103,9 +103,21 @@ test("no CLI Auth fixture copy string appears as a literal inside the composed e
     // is a real English word that can legitimately appear as a SUBSTRING of an unrelated
     // identifier in a maintainer comment — measured directly, `sk-button.css` contains
     // `getBoundingClientRect()`, which a bare `.includes("Client")` flags as a false positive.
-    // `\b<escaped copy>\b` only matches the fixture's value as a whole word/phrase, which is
-    // what "hardcoded as a default inside the element's own source" actually means.
-    const pattern = new RegExp(`\\b${escapeRegExp(copy)}\\b`);
+    //
+    // NOT `\b<escaped copy>\b` — a real `\b` boundary needs a WORD character on one side and a
+    // non-word character (or string edge) on the other. A copy string that ends in punctuation
+    // (every terminal `body` string, `codeEntryDefault.description`,
+    // `codeEntryInvalid.errorMessage` — all end in `.`) is realistically embedded as a source
+    // literal `"...ends in a period."` — the character immediately after the closing `.` is the
+    // string's own closing `"`, which is ALSO non-word, so no `\b` exists there and a planted
+    // copy of that literal goes silently undetected (measured: a lens planted
+    // `const DEFAULT = "Enter the 8-character code shown on your other device.";` into a scanned
+    // file and this assertion did not go red). `(?:^|\W)`/`(?:\W|$)` keeps the same
+    // false-positive rejection (the char immediately before "Client" in
+    // `getBoundingClientRect` is the word character "g", so neither alternative matches) while
+    // accepting non-word characters — including another non-word character, as `".` is — on
+    // either side, not only a word-vs-non-word transition.
+    const pattern = new RegExp(`(?:^|\\W)${escapeRegExp(copy)}(?:\\W|$)`);
     for (const { file, text } of sources) {
       if (pattern.test(text)) {
         violations.push(`"${copy}" appears as a literal inside ${file}`);

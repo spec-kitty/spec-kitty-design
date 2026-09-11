@@ -95,6 +95,12 @@ const patternStyles = html`<style>
     display: flex;
     flex-wrap: wrap;
     gap: var(--sk-space-2);
+    /* Reset the <ul>'s UA defaults (margin, padding, disc marker) so wrapping the scope
+       pill-tags in real list semantics (item 4, squad pass 1) leaves the rendered flex row
+       pixel-unchanged. */
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
   @media (max-width: 390px) {
@@ -155,7 +161,21 @@ const renderCodeEntry = (
  *  `train/elements-first` (`packages/styles/src/button/sk-button.css`, verified: `grep -n
  *  danger-secondary` matches 7 times). Not forked: this is exactly `#320`'s own published
  *  modifier class, reusing the secondary shape with the danger role's own boundary
- *  (`--sk-on-status-danger`), the same class every other consumer of that tone uses. */
+ *  (`--sk-on-status-danger`), the same class every other consumer of that tone uses.
+ *
+ *  APPROVE AND DENY CARRY `name="decision"` / distinct `value`s — structural form attributes,
+ *  not user-visible copy (#286 untouched), added because a consumer copying this composition
+ *  into a real server-rendered submit would otherwise get two buttons with no `name` and no
+ *  `value`: an identical, undifferentiated request whichever one is pressed, on the one screen
+ *  in this family where failing open is a security outcome.
+ *
+ *  SCOPES RENDER INSIDE A `<ul>`/`<li>`, not bare `<sk-pill-tag>` siblings — `sk-pill-tag` is
+ *  documented presentational (no role, no accessible-name contribution), so without list
+ *  semantics the three scope labels — the security payload the user is consenting to — would be
+ *  orphan text fragments while the less-critical client/account facts correctly get a `<dl>`.
+ *  `.sk-cli-auth-pattern__scopes` resets the `<ul>`'s UA margin/padding/list-style below so the
+ *  rendered result is unchanged; the flex row layout is unaffected because it already targeted
+ *  this class, not the element name. */
 const renderAuthorizationDecision = (light = false): TemplateResult => {
   const fixture = CLI_AUTH_FIXTURES.authorizationDecision;
   return html`<div
@@ -173,14 +193,14 @@ const renderAuthorizationDecision = (light = false): TemplateResult => {
               <dd class="sk-facts__value">${fact.value}</dd>`,
         )}
       </dl>
-      <div class="sk-cli-auth-pattern__scopes">
+      <ul class="sk-cli-auth-pattern__scopes">
         ${fixture.scopes.map(
-          (scope) => html`<sk-pill-tag>${scope}</sk-pill-tag>`,
+          (scope) => html`<li><sk-pill-tag>${scope}</sk-pill-tag></li>`,
         )}
-      </div>
+      </ul>
       <form class="sk-cli-auth-pattern__decision-actions" novalidate>
-        <button type="submit" class="sk-button sk-button--primary">${fixture.approveLabel}</button>
-        <button type="submit" class="sk-button sk-button--danger-secondary">${fixture.denyLabel}</button>
+        <button type="submit" name="decision" value="approve" class="sk-button sk-button--primary">${fixture.approveLabel}</button>
+        <button type="submit" name="decision" value="deny" class="sk-button sk-button--danger-secondary">${fixture.denyLabel}</button>
       </form>
     </sk-card>
   </div>`;
