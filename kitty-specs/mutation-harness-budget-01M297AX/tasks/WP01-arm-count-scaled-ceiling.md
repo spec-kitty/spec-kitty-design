@@ -18,7 +18,7 @@ requirement_refs:
 - C-004
 planning_base_branch: mission/mutation-harness-budget
 merge_target_branch: mission/mutation-harness-budget
-branch_strategy: Planning artifacts for this mission were generated on mission/mutation-harness-budget. Completed changes must merge back into mission/mutation-harness-budget unless the human explicitly redirects the landing branch.
+branch_strategy: Planning artifacts for this mission were generated on mission/mutation-harness-budget. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/mutation-harness-budget unless the human explicitly redirects the landing branch.
 subtasks:
 - T001
 - T002
@@ -29,13 +29,13 @@ phase: Phase 1 - mutation harness budget
 history: []
 agent_profile: backend-benny
 authoritative_surface: scripts/suite-selftest.mjs
-create_intent: []
+create_intent:
+- scripts/lib/selftest-budget.mjs
+- tests/node/selftest-budget.test.ts
 execution_mode: code_change
 model: ''
 owned_files:
-- scripts/lib/selftest-budget.mjs
 - scripts/suite-selftest.mjs
-- tests/node/selftest-budget.test.ts
 - suite-budget.json
 role: implementer
 tags:
