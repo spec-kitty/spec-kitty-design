@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances visual evidence gate integrity on mission/visual-evidence-gate-integrity so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "visual evidence gate integrity",
   "slug": "visual-evidence-gate-integrity-01M28PTY",
+  "status_phase": "1",
   "target_branch": "mission/visual-evidence-gate-integrity",
   "topology": "single_branch"
 }
