@@ -368,6 +368,19 @@ export function isBemMemberOf(name, roots) {
  * are disclosed limits of what a rendered-DOM check can prove, not silent gaps.
  */
 export function startSkPrimitiveWatch() {
+  // Captured HERE, before any story script has run (`addInitScript` fires before the page's
+  // own scripts) — SELF-ATTACKED, a real bug this round: `(Set.prototype as any).has =
+  // function () { return true; }` patches the GLOBAL lookup `stopSkPrimitiveWatch()`'s canary
+  // check uses, for every `Set` on the page, including `seen.classes` itself. Reading
+  // `Set.prototype.has` FRESH at stop time (after the story's own script — and therefore this
+  // patch — has already run) reads the always-true version; `state.seen.classes.has(canary)`
+  // then reported `armed: true` over a COMPLETELY EMPTY decoy `Set`, not merely an unfed real
+  // one. Capturing the pristine method reference now, before any story script exists to patch
+  // it, and calling THROUGH that captured reference later, is immune to the patch — the same
+  // shape as `Node.prototype.appendChild.call(...)` in `stopSkPrimitiveWatch()`, applied to the
+  // one lookup in the canary's own verification path that had been left as a plain instance
+  // call.
+  const hasMethod = Set.prototype.has;
   const record = (el, seen) => {
     const tag = el.tagName.toLowerCase();
     if (tag.startsWith('sk-')) seen.tags.add(tag);
@@ -434,7 +447,34 @@ export function startSkPrimitiveWatch() {
   // `querySelectorAll()` (via `ParentNode`) and `MutationObserver.observe()` (it is a `Node`)
   // identically to an Element root.
   watch(document);
-  window.__skPrimitiveWatch = { seen, observers };
+  // `Object.freeze` + a non-configurable, non-writable window property, NOT a plain assignment
+  // — SELF-ATTACKED, a real bug in the `hasMethod` fix above: storing the captured reference
+  // AS A FIELD of the same plain object a story script can reassign wholesale does not protect
+  // it. A decoy anticipating the fix — `window.__skPrimitiveWatch = { seen: {...}, observers:
+  // [], hasMethod: () => true }` — supplies ITS OWN fake `hasMethod` and passed, because
+  // `state.hasMethod.call(...)` in `stopSkPrimitiveWatch()` reads `hasMethod` OFF `state`, and
+  // `state` IS whatever object `window.__skPrimitiveWatch` currently points to. Freezing the
+  // state object (blocks `state.hasMethod = X`, `state.seen = X` — reassigning any OWN
+  // property — while still allowing `seen.classes.add(...)`/`observers.push(...)`, which mutate
+  // what those properties point to, not the properties themselves) and defining the WINDOW
+  // property itself as `configurable: false, writable: false` (blocks `window.__skPrimitiveWatch
+  // = anotherDecoy` outright — reassigning the window property to a DIFFERENT object entirely,
+  // which an object-level freeze cannot prevent) closes both directions at once, and — unlike
+  // choosing an obscure property name — does not rely on the attacker failing to read this
+  // file's own source, which is committed, public, and reused by design.
+  const frozenState = Object.freeze({ seen, observers, hasMethod });
+  try {
+    Object.defineProperty(window, '__skPrimitiveWatch', {
+      value: frozenState,
+      writable: false,
+      configurable: false,
+      enumerable: true,
+    });
+  } catch {
+    // Extremely defensive fallback only — `defineProperty` on a fresh `window` property should
+    // never throw here; if it somehow does, a plain assignment is no worse than the prior round.
+    window.__skPrimitiveWatch = frozenState;
+  }
 }
 
 /**
@@ -481,8 +521,18 @@ export function startSkPrimitiveWatch() {
  * decoySeen.add(t); return realAdd(...tokens); }`) while leaving a REAL payload on a different
  * element (`sk-form-input.classList.add('sk-consent-row')`) completely untouched by the patch —
  * the canary passed, the payload went unrecorded. See `Node.prototype.appendChild.call(...)`
- * below for why the canary now goes through the PROTOTYPE method instead, and what residual
- * that still leaves (a whole-page prototype patch, disclosed rather than chased).
+ * below for why the canary now goes through the PROTOTYPE method instead.
+ *
+ * SELF-ATTACKED A THIRD TIME, and this one found a gap in the VERIFICATION READ ITSELF, not the
+ * mutation: `(Set.prototype as any).has = function () { return true; }`, then a decoy of the
+ * exact earlier shape (`{ seen: { tags: new Set(), classes: new Set() }, observers: [] }`) with
+ * NO further selectivity needed. `state.seen.classes.has(canary)` reported `true` over a
+ * completely EMPTY decoy `Set`, because the LOOKUP had been made to always return `true`, not
+ * because the canary was actually recorded. See `state.hasMethod.call(...)` below — the same
+ * capture-then-call-through shape as `appendChild`, applied to the one remaining plain instance
+ * call in this function's own verification path. Once both are captured early, the residual is
+ * exactly what the `appendChild` paragraph below states and no more: a whole-page PROTOTYPE
+ * patch, disclosed rather than chased.
  */
 export async function stopSkPrimitiveWatch() {
   const state = window.__skPrimitiveWatch;
@@ -502,17 +552,54 @@ export async function stopSkPrimitiveWatch() {
     // different, unpatched element (`sk-form-input.classList.add('sk-consent-row')`). The
     // canary passed; the payload went unrecorded. Calling the PROTOTYPE method explicitly
     // bypasses any such instance-level shadow, because it never does a property lookup on the
-    // instance at all. Only a PROTOTYPE-level patch — `Node.prototype.appendChild` itself,
-    // intercepting EVERY node's own appends across the ENTIRE page, including Lit's and
-    // Storybook's own rendering — could still intercept this, and to avoid visibly breaking the
-    // page it would have to relay every real append faithfully, at which point it is a real
-    // observer and would also relay the actual attack payload; it would no longer be hiding
-    // anything. That residual is disclosed, not chased further — the same class of limit as
-    // `mode: 'closed'` shadow roots, above.
+    // instance at all.
     Node.prototype.appendChild.call(document.documentElement, probe);
     await Promise.resolve();
     await Promise.resolve();
-    armed = state.seen.classes.has(canary);
+    // `state.hasMethod.call(...)`, NOT `state.seen.classes.has(canary)` — SELF-ATTACKED A THIRD
+    // TIME, and this one falsified the disclosure two paragraphs above rather than just adding
+    // to it. `(Set.prototype as any).has = function () { return true; }` patches the LOOKUP
+    // itself, globally, for every `Set` on the page — including `seen.classes`. It needs no
+    // selectivity and does not care which element the real payload lands on: `state.seen.
+    // classes.has(canary)` returned `true` over a COMPLETELY EMPTY decoy `Set`, because `.has()`
+    // itself had been made to always return `true`, not because anything was actually recorded.
+    // `startSkPrimitiveWatch()` captures `Set.prototype.has` before any story script can run and
+    // stores it as `hasMethod`; calling THROUGH that captured reference is immune to the global
+    // patch for the same reason the `appendChild` call above is immune to an instance shadow —
+    // neither reads a property off anything the page can still influence at call time.
+    //
+    // THE EARLIER VERSION OF THIS COMMENT CLAIMED ONLY A WHOLE-PAGE `Node.prototype.appendChild`
+    // PATCH COULD STILL INTERCEPT THIS CANARY. That was WRONG, not merely incomplete: `Set.
+    // prototype.has` needed no page-breaking selectivity trade-off at all — a blanket `() =>
+    // true` sufficed, and the composition test gave zero signal (it surfaced only as an
+    // incidental failure in an unrelated test, because Playwright's own injected machinery also
+    // uses `Set`).
+    //
+    // CAPTURING `hasMethod` WAS ITSELF NOT ENOUGH ON ITS OWN, FOUND BY SELF-ATTACK, NOT REPORTED:
+    // storing the captured reference as a plain field of the SAME object a story script can
+    // reassign wholesale does not protect it. A decoy anticipating this exact fix —
+    // `window.__skPrimitiveWatch = { seen: {...}, observers: [], hasMethod: () => true }` —
+    // supplies its OWN fake `hasMethod`, and `state.hasMethod.call(...)` reads whatever `state`
+    // (i.e. `window.__skPrimitiveWatch`, whatever it currently points to) says `hasMethod` is.
+    // See `startSkPrimitiveWatch()`'s own tail: the state object is now `Object.freeze`d AND
+    // installed via `Object.defineProperty(window, '__skPrimitiveWatch', { writable: false,
+    // configurable: false, ... })`, so `window.__skPrimitiveWatch = anything` and
+    // `window.__skPrimitiveWatch.hasMethod = anything` both fail outright — the assignment
+    // never takes effect, the ORIGINAL state (real observers, real captured `hasMethod`) stays
+    // in place, and the real observer chain simply keeps recording, catching the real payload
+    // directly rather than needing `armed` to catch a decoy at all.
+    //
+    // With BOTH closed, the original argument is true again: the remaining residual is a
+    // PROTOTYPE-level patch of `Node.prototype.appendChild` ITSELF, intercepting every node's
+    // own appends across the entire page (Lit's and Storybook's own rendering included), which
+    // — to avoid visibly breaking the page — would have to relay every real append faithfully,
+    // at which point it is a real observer and would also relay the actual attack payload. That
+    // residual is disclosed, not chased further, the same class of limit as `mode: 'closed'`
+    // shadow roots, above. Two weaker candidates were probed and could NOT exploit this canary:
+    // a patched `document.createElement` returning a non-genuine node throws on the
+    // `appendChild.call` above (a safe failure, caught below) rather than silently passing, and
+    // `Math.random` predictability alone grants no write access to the accumulated state.
+    armed = state.hasMethod.call(state.seen.classes, canary);
     state.seen.classes.delete(canary);
   } catch {
     armed = false;
@@ -528,7 +615,16 @@ export async function stopSkPrimitiveWatch() {
       if (observer instanceof MutationObserver) observer.disconnect();
     }
   }
-  delete window.__skPrimitiveWatch;
+  try {
+    // Best-effort only, now that `startSkPrimitiveWatch()` defines this as
+    // `configurable: false` — `delete` on a non-configurable property fails (silently in
+    // sloppy mode, throws in strict mode) rather than removing it. Harmless either way: the
+    // next story's `page.goto()` is a full navigation, discarding this `window` object and
+    // everything on it regardless of whether this line succeeded.
+    delete window.__skPrimitiveWatch;
+  } catch {
+    // See above — not security-relevant, the property is inert either way once disarmed.
+  }
   if (!armed) return { tags: [], classes: [], armed: false };
   return { tags: [...state.seen.tags], classes: [...state.seen.classes], armed: true };
 }
