@@ -13,7 +13,7 @@
       "wp": null
     },
     "#168": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "168's central technical claim (harness runs the whole suite once per mutation, O(mutations x tests)) is stale: PR #249 (closes #225, merged f9fd570e on 2026-09-07, 3 days after #168 was filed) made the dependency-graph filter effective. Verified independently: every one of the 8 CI runs measured for this mission reports 'impact graph: 47 source(s), 0 full-suite fallback(s)' at HEAD. Recommend closing as stale.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,7 +21,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#225": {
