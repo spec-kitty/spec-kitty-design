@@ -57,6 +57,7 @@ export * from './nav-pill/index';
 export * from './pill-tag/index';
 export * from './progress/index';
 export * from './prose/index';
+export * from './public-header/index';
 export * from './ribbon-card/index';
 export * from './section-banner/index';
 export * from './segmented-choice/index';

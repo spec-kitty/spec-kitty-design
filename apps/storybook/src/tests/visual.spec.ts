@@ -1330,6 +1330,30 @@ test('SK-context-nav unavailable forced colors — visual baseline', async ({
   );
 });
 
+const publicHeaderStory = async (page: Page, id: string): Promise<Locator> => {
+  await page.setViewportSize({ width: 1120, height: 720 });
+  await page.goto(
+    `/iframe.html?id=navigation-skpublicheader-html--${id}&viewMode=story`,
+  );
+  const target = page.locator('[data-public-header-story-frame]').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target.locator('header.sk-public-header')).toBeVisible();
+  return target;
+};
+
+for (const [id, snapshot] of [
+  ['default', 'sk-public-header-two-actions-dark.png'],
+  ['light-mode', 'sk-public-header-light.png'],
+] as const) {
+  test(`SK-public-header ${id} — visual baseline`, async ({ page }) => {
+    const target = await publicHeaderStory(page, id);
+    await expect(target).toHaveScreenshot(snapshot, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+}
+
 type TeamOverviewStoryId =
   | 'default'
   | 'light-mode'
