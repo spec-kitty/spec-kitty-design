@@ -10,8 +10,21 @@
   min-inline-size: 0;
   max-inline-size: 100%;
   overflow-x: auto;
-  overflow-y: visible;
-  overflow-wrap: anywhere;
+  /* Keeps EVERY link — not only the one at either end — fully revealed when a real sequential
+     Tab walk focuses it, in both Chromium and Firefox. Measured, not guessed: `scroll-margin-inline`
+     on __link alone (the first attempt) protects the link that ends the walk (scroll clamps to its
+     max), but Chromium was measured leaving MIDDLE links up to 103px outside the scroller
+     regardless of that margin's size — margin size had zero effect on that specific defect.
+     `scroll-padding-inline` on the CONTAINER, sized calc(--sk-space-9 + --sk-space-2) = 56px,
+     was the value that cleared every link in both engines at every frame width this family's own
+     stories exercise (240px, 320px, 1280px viewport); __link therefore carries no
+     scroll-margin-inline of its own — this single declaration replaces it. See
+     "every link scrolls fully into view on Tab focus..." in sk-section-nav.spec.ts,
+     which now asserts every link visited during the walk, not only the last. */
+  scroll-padding-inline: calc(var(--sk-space-9) + var(--sk-space-2));
+  /* border-block-end-width sets this element's own bottom border; __link's margin-block-end
+     below must stay numerically equal (currently: both var(--sk-border-width-1)) so the
+     current-route accent bar sits flush against it rather than leaving a gap or overlap. */
   border-block-end-color: var(--sk-border-strong);
   border-block-end-style: solid;
   border-block-end-width: var(--sk-border-width-1);
@@ -27,6 +40,9 @@
   align-items: center;
   min-inline-size: var(--sk-space-9);
   min-block-size: var(--sk-space-9);
+  /* Pulls this link back over .sk-section-nav's own border-block-end (above, same token) so the
+     current-route accent bar below sits flush against it instead of leaving a gap. Keep both
+     numerically equal if either changes. */
   margin-block-end: calc(var(--sk-border-width-1) * -1);
   padding-block: var(--sk-space-2);
   padding-inline: var(--sk-space-4);
@@ -37,7 +53,6 @@
   border-block-end-width: var(--sk-border-width-4);
   font-weight: var(--sk-weight-normal);
   line-height: normal;
-  scroll-margin-inline: var(--sk-space-9);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -62,6 +77,12 @@
 
 .sk-section-nav__link:focus-visible {
   outline-color: var(--sk-color-accent);
+  /* NEGATIVE, unlike sk-context-nav's positive outline-offset: .sk-section-nav is itself the
+     overflow-x scroll container and clips at its own padding box, and __link stretches to the
+     strip's full cross size, so an outward-drawn outline would be clipped at that edge. Drawing
+     it inward keeps it fully painted regardless of scroll position — this is what
+     "every link scrolls fully into view on Tab focus..." in sk-section-nav.spec.ts exists to
+     prove; do not "align" this with context-nav's sign without re-reading that test first. */
   outline-offset: calc(var(--sk-border-width-2) * -1);
   outline-style: solid;
   outline-width: var(--sk-border-width-2);

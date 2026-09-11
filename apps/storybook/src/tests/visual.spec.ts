@@ -1482,7 +1482,7 @@ for (const [id, snapshot] of [
 const sectionNavStory = async (
   page: Page,
   id: string,
-  viewport: { width: number; height: number } = { width: 720, height: 720 },
+  viewport: { width: number; height: number },
 ): Promise<Locator> => {
   await page.setViewportSize(viewport);
   await page.goto(`/iframe.html?id=navigation-sksectionnav-html--${id}&viewMode=story`);
@@ -1506,6 +1506,12 @@ for (const [id, snapshot, viewport] of sectionNavVisuals) {
   });
 }
 
+// This baseline focuses the CURRENT link, so the current-location border and the focus outline
+// land on the same element and this one PNG cannot by itself evidence that the two cues are
+// visually distinct from each other. That distinction is covered — by the live DOM assertions in
+// "forced colours preserve the current-location border and the focus outline..." in
+// sk-section-nav.spec.ts, which samples the current link and an ordinary (non-current) focused
+// link separately — not by this screenshot.
 test('SK-section-nav forced colors — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   const target = await sectionNavStory(page, 'forced-colors', { width: 390, height: 720 });

@@ -25,9 +25,14 @@ const withCurrent = (html: string, href: string): string =>
 
 const storyFrame = (
   html: string,
-  { light = false, narrow = false, rtl = false }: { light?: boolean; narrow?: boolean; rtl?: boolean } = {},
+  {
+    light = false,
+    narrow = false,
+    veryNarrow = false,
+    rtl = false,
+  }: { light?: boolean; narrow?: boolean; veryNarrow?: boolean; rtl?: boolean } = {},
 ): string => `
-  <div data-section-nav-story-frame${light ? ' class="sk-light"' : ''}${rtl ? ' dir="rtl"' : ''} style="box-sizing: border-box; inline-size: 100%; max-inline-size: ${narrow ? '240px' : '320px'}; padding: var(--sk-space-4); color: var(--sk-fg-body); background: var(--sk-surface-page);">
+  <div data-section-nav-story-frame${light ? ' class="sk-light"' : ''}${rtl ? ' dir="rtl"' : ''} style="box-sizing: border-box; inline-size: 100%; max-inline-size: ${veryNarrow ? '200px' : narrow ? '240px' : '320px'}; padding: var(--sk-space-4); color: var(--sk-fg-body); background: var(--sk-surface-page);">
     ${html}
   </div>
 `;
@@ -68,10 +73,18 @@ export const LongLabels: Story = {
   render: () => storyFrame(SkSectionNavLongLabelsHTML, { narrow: true }),
 };
 
-/** A 240 CSS-pixel composition inside a 390 CSS-pixel browser viewport. */
+// `parameters.viewport` is INERT in this repo: `apps/storybook/.storybook/main.ts` registers only
+// addon-docs and addon-a11y, and the viewport feature is applied by the manager resizing the
+// preview iframe — which nothing here goes through, since every consumer loads `/iframe.html`
+// directly. #353 (sk-public-header) diagnosed and fixed the identical defect: a story that only
+// set an inert `viewport` parameter rendered byte-identically to another and was still frozen into
+// `expected-stories.json` as independent evidence it did not carry. The fix here follows #353's
+// own remedy — constrain the FRAME instead, at a width genuinely narrower than ManyRoutes' 240px,
+// so this id proves tighter local-overflow containment than any other fixture in this family
+// rather than duplicating ManyRoutes' own render. The Playwright layer sets its own viewport and
+// remains the behavioural proof; this makes the story list honest to a human reviewer opening it.
 export const Narrow: Story = {
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
-  render: () => storyFrame(SkSectionNavManyRoutesHTML, { narrow: true }),
+  render: () => storyFrame(SkSectionNavManyRoutesHTML, { veryNarrow: true }),
 };
 
 /** Browser tests activate forced-colours emulation for this current-route composition. */

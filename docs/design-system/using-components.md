@@ -1090,14 +1090,20 @@ router, URL matching, route-discovery, counter, badge, or generated copy anywher
 
 Every native anchor behaviour keeps working exactly as the browser already provides: modified-click
 (Ctrl/Cmd/Shift/middle), copy-link, open-in-new-tab, `:visited` history, and ordinary back/forward
-navigation. The family attaches no listener capable of intercepting default anchor activation, and
-`:link`/`:visited` are not required to differ — no distinct visited treatment is forced.
+navigation. The family attaches no listener capable of intercepting default anchor activation. It
+neutralises visited colouring on purpose — both `:link` and `:visited` resolve to `color: inherit`
+— rather than leaving it merely unforced; a consumer who wants a distinct visited style overrides a
+`(0,2,0)`-specificity selector to get it.
 
 The strip fits its content inline when the content fits its available space. When constrained, the
 strip itself — never the document — becomes the horizontal-scroll container; a link that receives
 keyboard focus scrolls fully into view inside that container without its focus outline being
 clipped. Long, unbroken labels remain fully available rather than wrapping or being clipped, even
-inside a narrow (~320px) host.
+inside a narrow (~320px) host. The family has no way to scroll the *current* route into view at
+initial paint — that would require JavaScript it does not own — so when the strip is constrained,
+the consumer scrolls the `aria-current` link into view itself (e.g.
+`link.scrollIntoView({ inline: 'nearest' })` once it renders); the family reserves
+`scroll-padding-inline` on the strip itself for exactly that call.
 
 Rest, hover, active, focus-visible, and current-location presentations are each distinguishable by
 more than colour: hover adds an underline, active and current add a `border-block-end` change, and

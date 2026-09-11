@@ -229,14 +229,62 @@ async function focusViaKeyboard(page: Page, href: string, maxPresses: number): P
   return false;
 }
 
+type TabWalkStep = { href: string; withinScroller: boolean; overflowPx: number };
+
+/**
+ * Presses Tab from a neutral reset, recording — for EVERY native anchor that receives focus
+ * during the walk, not only the last one — whether it sits fully within `scrollerSelector`'s own
+ * box at the moment it is focused. Stops as soon as `expectedAnchors` anchors have been recorded
+ * (or `maxPresses` is exhausted), deliberately NOT pressing further: this repo measured that Tab
+ * past the last link can wrap back around to the first one with nothing else on the page to
+ * receive focus, and a generous fixed press budget risks silently re-recording wrapped entries.
+ *
+ * This is the guard that actually exercises the family's scroll-into-view claim. An earlier
+ * version of this test checked only the LAST link, and that check passed even with the CSS fix
+ * fully deleted: a Tab walk that ends AT the last scrollable item leaves the scroller clamped at
+ * its own maxScrollLeft regardless of any scroll-margin/scroll-padding value, so "the last link
+ * ends up flush" is a property of the scroll limit, not of the fix. Measured directly: with
+ * `scroll-padding-inline` removed entirely, Chromium's real Tab walk through six links left
+ * route-3 103px and route-5 45px outside the scroller on focus — INTERMEDIATE links, which a
+ * last-link-only check can never see failing. Checking every visited link closes that hole.
+ */
+async function tabWalkContainment(
+  page: Page,
+  scrollerSelector: string,
+  expectedAnchors: number,
+  maxPresses: number,
+): Promise<TabWalkStep[]> {
+  await page.mouse.click(600, 600);
+  const steps: TabWalkStep[] = [];
+  for (let index = 0; index < maxPresses && steps.length < expectedAnchors; index += 1) {
+    await page.keyboard.press('Tab');
+    const info = await page.evaluate((selector) => {
+      const active = document.activeElement;
+      if (!(active instanceof HTMLAnchorElement)) return null;
+      const scroller = active.closest(selector);
+      if (scroller === null) return null;
+      const linkRect = active.getBoundingClientRect();
+      const scrollerRect = scroller.getBoundingClientRect();
+      return {
+        href: active.getAttribute('href') ?? '',
+        withinScroller: linkRect.left >= scrollerRect.left - 1 && linkRect.right <= scrollerRect.right + 1,
+        overflowPx: Math.max(0, linkRect.right - scrollerRect.right, scrollerRect.left - linkRect.left),
+      };
+    }, scrollerSelector);
+    if (info !== null) steps.push(info);
+  }
+  return steps;
+}
+
 /**
  * HOST-PREFERENCE LIMITATION, NOT A LIBRARY ONE — read before touching any Tab-entry assertion
  * below.
  *
  * WebKit (Safari) ships with sequential-focus navigation scoped to text fields and lists by
  * default; anchors are excluded unless the user's own OS "Full Keyboard Access" preference is on.
- * `playwright.config.ts:28-38` already carries the precedent for exactly this class of gap —
- * `firefoxUserPrefs: { 'accessibility.tabfocus': 7 }` widens Firefox's own default the same way —
+ * playwright.config.ts's `firefox` project already carries the precedent for exactly this class
+ * of gap — its `firefoxUserPrefs: { 'accessibility.tabfocus': 7 }` widens Firefox's own default
+ * the same way —
  * but Playwright exposes no equivalent override for WebKit, and this shared config is not the
  * place to invent one (every other family's WebKit lane would inherit it unreviewed). So a real
  * `page.keyboard.press('Tab')` walk that expects to land on `.sk-section-nav__link` never will on
@@ -271,16 +319,27 @@ test.describe('sk-section-nav source, markup, and distribution contract', () => 
     const source = readFileSync(SECTION_NAV_CSS, 'utf8');
     const code = stripComments(source);
     expect(classSelectorInventory(source)).toEqual([...PUBLIC_CLASSES].sort());
-    expect(code).toContain('.sk-section-nav__link[aria-current]:not([aria-current="false"])');
-    expect(code).not.toMatch(/\.is-current\b/);
+    // The exact-equality check above already subsumes both an explicit '.is-current' absence
+    // check and a bare toContain() for the current-selector string: PUBLIC_CLASSES has no
+    // '.is-current' entry, and the Set-equality check on currentSelectors below pins the exact
+    // current-selector string more precisely than a substring match could.
     expect(code).not.toMatch(/(?:^|[;{])\s*(?:content|order|transition|animation|scroll-behavior)\s*:/m);
     expect(code).not.toMatch(/(?:\.sk-light|data-theme|:root|:host-context)/);
     expect(code).not.toMatch(/(?:margin|padding|border)-(?:left|right)|(?:left|right)\s*:/);
+    // NOT subsumed by the token-literal-checker audit below: scroll-padding-inline (an existing
+    // declaration in this file) is outside that checker's governed property classes, so this is
+    // the only gate that would catch a literal 44px creeping in there.
     expect(code).not.toMatch(/44px/i);
+    // PINNED explicitly: this exact declaration is what keeps every link fully revealed during a
+    // real sequential Tab walk in both Chromium and Firefox — see the comment beside it in
+    // sk-section-nav.css and "every link scrolls fully into view on Tab focus..." below.
+    // The token cross-check further down cannot catch this declaration's removal on its own:
+    // --sk-space-9 and --sk-space-2 are each also used elsewhere in this file, so the documented
+    // token SET stays unchanged even if this specific declaration vanishes.
+    expect(code).toContain('scroll-padding-inline: calc(var(--sk-space-9) + var(--sk-space-2));');
     expect(code).not.toMatch(/\brole\s*[:=]/);
     expect(code).not.toMatch(/tablist|tabpanel|aria-controls|aria-selected/);
     expect(code).toMatch(/min-inline-size\s*:\s*0/);
-    expect(code).toMatch(/overflow-wrap\s*:\s*anywhere/);
     expect(code).toMatch(/overflow-x\s*:\s*auto/);
     expect(unpairedVisitedSelectors(source)).toEqual([]);
     expect((code.match(/:visited/g) ?? []).length).toBe(1);
@@ -330,7 +389,7 @@ test.describe('sk-section-nav source, markup, and distribution contract', () => 
     const combined = fixtures.map(({ html }) => html).join('\n');
     expect(combined).toMatch(/aria-current="page"/);
     expect(combined).toMatch(/aria-current="false"/);
-    // Six links across six fixtures carry no aria-current at all — a fully valid absent form.
+    // Across the fixture set, links with no aria-current at all are a fully valid absent form.
     const linksWithoutCurrent = combined.match(/<a\b(?![^>]*aria-current)[^>]*class="sk-section-nav__link"[^>]*>/g) ?? [];
     expect(linksWithoutCurrent.length).toBeGreaterThan(0);
   });
@@ -440,7 +499,11 @@ test.describe('sk-section-nav live native semantics', () => {
   });
 
   test('six routes overflow locally without widening the document, and Tab reaches every link once in DOM order', async ({ page, browserName }) => {
-    await page.setViewportSize({ width: 1280, height: 720 });
+    // 390 wide, not 1280: at 1280 the 240px frame sits centred with room either side, so
+    // document.scrollWidth === clientWidth would hold even with overflow-x forced to visible on
+    // the nav — the assertion would be true by construction, not by the family's own containment.
+    // At 390 the frame's local overflow genuinely would reach the document edge if it escaped.
+    await page.setViewportSize({ width: 390, height: 720 });
     const { nav } = await openStory(page, 'many-routes');
     const geometry = await documentGeometry(page);
     expect(geometry.scrollWidth).toBe(geometry.clientWidth);
@@ -480,52 +543,58 @@ test.describe('sk-section-nav live native semantics', () => {
     expect(sequence).toEqual([...hrefs, 'sentinel']);
   });
 
-  test('the last, off-screen-at-rest link scrolls fully into view on focus with an unclipped outline', async ({ page, browserName }) => {
-    const { nav } = await openStory(page, 'narrow');
+  test('every link scrolls fully into view on Tab focus, including links in the middle of the walk', async ({ page, browserName }) => {
+    // 'many-routes', fixed at 240px: this specific width is not load-bearing for the fix itself
+    // (the container-level scroll-padding-inline fix is what closes the gap; see sk-section-nav.css)
+    // but the composition needs enough routes, at a constrained-enough width, to force local
+    // overflow at all — 'many-routes' already exists for exactly that and is reused here rather
+    // than adding a seventh fixture.
+    const { nav } = await openStory(page, 'many-routes');
     const links = nav.locator('.sk-section-nav__link');
     const count = await links.count();
     expect(count).toBeGreaterThan(1);
     const lastLink = links.nth(count - 1);
-    const lastHref = await lastLink.getAttribute('href');
 
     if (browserName === 'webkit') {
       // See the WEBKIT TAB-ENTRY note above: a real Tab walk never reaches an anchor on WebKit, so
-      // reach the target directly instead. The SCROLL/GEOMETRY half of this claim is proven here —
-      // .focus() triggers the same native "scroll the newly focused element into view" behaviour
-      // regardless of how focus was requested, so withinScroller below is real evidence on this
-      // engine. The FOCUS-RING half is deliberately NOT asserted here: this repo has not verified
-      // that a bare .focus() reliably produces :focus-visible on WebKit (unlike Chromium/Firefox,
-      // where collectAnchorTabSequence's real Tab walk supplies the keyboard-modality signal
-      // :focus-visible's heuristic looks for), and guessing would be exactly the speculative,
-      // unverified assertion this family's own review has already refused once for a different
-      // engine. That half stays scoped to chromium/firefox below.
-      await lastLink.evaluate((node) => (node as HTMLElement).focus());
-      await expect(lastLink).toBeFocused();
-      const withinScrollerWebkit = await lastLink.evaluate((node) => {
-        const scroller = node.closest('.sk-section-nav')!;
-        const linkRect = node.getBoundingClientRect();
-        const scrollerRect = scroller.getBoundingClientRect();
-        return linkRect.left >= scrollerRect.left - 1 && linkRect.right <= scrollerRect.right + 1;
-      });
-      expect(withinScrollerWebkit).toBe(true);
+      // this branch cannot exercise the defect class the chromium/firefox branch below is built to
+      // catch (a real sequential walk leaving an INTERMEDIATE link outside the scroller). A bare
+      // .focus() call jumps straight to the target and was measured to clamp the scroller to its
+      // limit regardless of whether the fix is present at all — an unfalsifiable proxy for that
+      // specific claim, not weak evidence of it. So this branch narrows what it asserts to what
+      // .focus() CAN actually falsify: the anchor is real and individually focusable (the DOM-order
+      // fact itself is already proven above, browser-independently, via the `hrefs` check). The
+      // scroll-into-view and focus-ring claims stay chromium/firefox-only below — a known,
+      // disclosed engine-asymmetric gap, not a silent drop.
+      for (const link of await links.all()) {
+        await link.evaluate((node) => (node as HTMLElement).focus());
+        await expect(link).toBeFocused();
+      }
       return;
     }
 
-    const reached = await focusViaKeyboard(page, lastHref!, count + 3);
-    expect(reached, `Tab never reached the last link (${lastHref})`).toBe(true);
+    // THE REAL GUARD: every anchor visited during a genuine Tab walk must be fully within the
+    // scroller's own box at the moment it is focused — not only the one the walk happens to end
+    // on. See tabWalkContainment's own comment for why a last-link-only check cannot catch this
+    // family's actual regression class.
+    const steps = await tabWalkContainment(page, '.sk-section-nav', count, count + 3);
+    const visitedHrefs = steps.map((step) => step.href);
+    expect(visitedHrefs, 'the walk must visit every link exactly once, in DOM order').toEqual(
+      await links.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href') ?? '')),
+    );
+    for (const step of steps) {
+      expect(step.withinScroller, `${step.href} was ${step.overflowPx.toFixed(1)}px outside the scroller when focused`).toBe(true);
+    }
+
     await expect(lastLink).toBeFocused();
     const facts = await focusVisibility(lastLink);
     expect(facts.outlineStyle).not.toBe('none');
     expect(facts.outlineWidth).toBeGreaterThan(0);
-    expect(facts.withinViewport).toBe(true);
-    expect(facts.clippedByAncestor).toBe(false);
-    const withinScroller = await lastLink.evaluate((node) => {
-      const scroller = node.closest('.sk-section-nav')!;
-      const linkRect = node.getBoundingClientRect();
-      const scrollerRect = scroller.getBoundingClientRect();
-      return linkRect.left >= scrollerRect.left - 1 && linkRect.right <= scrollerRect.right + 1;
-    });
-    expect(withinScroller).toBe(true);
+    // clippedByAncestor/withinViewport are NOT the load-bearing check here: this family's
+    // :focus-visible outline uses a NEGATIVE outline-offset exactly equal to its outline-width
+    // (sk-section-nav.css), so focusVisibility's own expansion computation is always 0 and these
+    // two fields can never observe an outline-specific clip. The per-step withinScroller assertion
+    // above is what actually proves the link (and therefore its flush-inset outline) is unclipped.
   });
 
   test('no arrow-key, roving-tabindex, or activation script exists: ArrowRight/ArrowLeft/Home/End move no focus', async ({ page }) => {
@@ -572,16 +641,20 @@ test.describe('sk-section-nav live native semantics', () => {
     await expect(page).toHaveURL(/#members$/);
   });
 
-  test('visited history remains presentation-neutral: :visited is not forced to differ from :link', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 720 });
+  test('a followed link keeps native browser-history and navigation behaviour', async ({ page }) => {
+    // NOT asserted here: that :link and :visited compute to the same style after the click.
+    // getComputedStyle deliberately reports the UNVISITED style in every evergreen engine
+    // (a privacy protection against history-sniffing), so no :visited rule — forced-neutral or
+    // not — can ever move anything linkCue() samples; expect(after).toEqual(before) held with
+    // .sk-section-nav__link:visited{color:red;text-decoration-line:line-through} injected and
+    // navigated, identically to the unmodified stylesheet. That source-level contract (:link and
+    // :visited both resolve to `color: inherit`, never overridden) is already pinned by
+    // unpairedVisitedSelectors()/the :visited count check in "the public selector inventory..."
+    // above; this test's real job is the navigation itself.
     const { nav } = await openStory(page, 'default');
     const visitedCandidate = nav.locator('a[href="#members"]');
-    const before = await linkCue(visitedCandidate);
     await visitedCandidate.click();
     await expect(page).toHaveURL(/#members$/);
-    await page.mouse.move(0, 0);
-    const after = await linkCue(visitedCandidate);
-    expect(after).toEqual(before);
   });
 });
 
@@ -640,7 +713,9 @@ test.describe('sk-section-nav state and resilience contract', () => {
     for (const id of ['default', 'two-route', 'many-routes', 'narrow'] as const) {
       if (id === 'narrow') await page.setViewportSize({ width: 390, height: 720 });
       const { nav } = await openStory(page, id);
-      for (const link of await nav.locator('.sk-section-nav__link').all()) {
+      const links = nav.locator('.sk-section-nav__link');
+      expect(await links.count(), id).toBeGreaterThan(0);
+      for (const link of await links.all()) {
         const box = await link.boundingBox();
         expect(box).not.toBeNull();
         expect(box!.width).toBeGreaterThanOrEqual(44);
@@ -655,7 +730,9 @@ test.describe('sk-section-nav state and resilience contract', () => {
       const { nav } = await openStory(page, id);
       const geometry = await documentGeometry(page);
       expect(geometry.scrollWidth).toBe(geometry.clientWidth);
-      for (const link of await nav.locator('.sk-section-nav__link').all()) {
+      const links = nav.locator('.sk-section-nav__link');
+      expect(await links.count(), id).toBeGreaterThan(0);
+      for (const link of await links.all()) {
         const text = (await link.innerText()).trim().replace(/\s+/g, ' ');
         expect(text).not.toBe('');
         await expect(link).toHaveAccessibleName(text);
@@ -675,6 +752,53 @@ test.describe('sk-section-nav state and resilience contract', () => {
     expect(await nav.evaluate((node) => getComputedStyle(node).direction)).toBe('rtl');
     const geometry = await documentGeometry(page);
     expect(geometry.scrollWidth).toBe(geometry.clientWidth);
+
+    // A real mirroring fact, not only the computed direction: the first link in DOM/source order
+    // must render visually to the RIGHT of the last one under dir="rtl" — logical properties (no
+    // physical left/right in this file, already asserted in the source-inventory test) plus a
+    // native flex row under RTL lay out inline-start-to-inline-end, which is right-to-left here.
+    // A stylesheet that silently reintroduced a physical left/right property would leave
+    // `direction: rtl` computed correctly while the visual order stayed LTR; this catches that.
+    const links = nav.locator('.sk-section-nav__link');
+    const count = await links.count();
+    expect(count).toBeGreaterThan(1);
+    const firstBox = await links.first().boundingBox();
+    const lastBox = await links.nth(count - 1).boundingBox();
+    expect(firstBox).not.toBeNull();
+    expect(lastBox).not.toBeNull();
+    expect(firstBox!.x, 'first link should sit to the right of the last link under RTL').toBeGreaterThan(lastBox!.x);
+  });
+
+  // A GENUINE short viewport, not merely a narrow one: every other setViewportSize in this file
+  // is 720 or 900 tall, and NFR-005/the edge-case list both require "a documented short viewport
+  // height" as its own, distinct proof — width alone does not exercise it.
+  test('a short (390×400) viewport does not clip the strip or a focused link', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 400 });
+    const { nav } = await openStory(page, 'default');
+    const documentHeight = await page.evaluate(() => {
+      const scroller = document.scrollingElement ?? document.documentElement;
+      return { scrollHeight: scroller.scrollHeight, clientHeight: scroller.clientHeight };
+    });
+    expect(documentHeight.scrollHeight).toBeLessThanOrEqual(documentHeight.clientHeight);
+
+    const links = nav.locator('.sk-section-nav__link');
+    expect(await links.count()).toBeGreaterThan(0);
+    for (const link of await links.all()) {
+      // .focus() (not a Tab walk): this test's claim is static vertical fit at a short viewport
+      // height, not the sequential-Tab-walk containment "every link scrolls fully into view..."
+      // above already proves; .focus() is a faithful, falsifiable way to sample it here — the
+      // gap that made .focus() unfalsifiable elsewhere was specific to the horizontal scroller's
+      // own scroll-into-view behaviour clamping at its limit, which does not apply to a link that
+      // is not horizontally off-screen in this (unconstrained-width) 'default' composition.
+      await link.evaluate((node) => (node as HTMLElement).focus());
+      await expect(link).toBeFocused();
+      const rect = await link.evaluate((node) => {
+        const box = node.getBoundingClientRect();
+        return { top: box.top, bottom: box.bottom };
+      });
+      expect(rect.top, 'link top edge clipped above the short viewport').toBeGreaterThanOrEqual(0);
+      expect(rect.bottom, 'link bottom edge clipped below the short viewport').toBeLessThanOrEqual(400);
+    }
   });
 
   test('forced colours preserve the current-location border and the focus outline via border/outline recolor', async ({ page, browserName }) => {
@@ -697,7 +821,9 @@ test.describe('sk-section-nav state and resilience contract', () => {
   test('the component owns no motion under reduced-motion emulation', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     const { nav } = await openStory(page, 'default');
-    for (const link of await nav.locator('.sk-section-nav__link').all()) {
+    const links = nav.locator('.sk-section-nav__link');
+    expect(await links.count()).toBeGreaterThan(0);
+    for (const link of await links.all()) {
       expect(await link.evaluate((node) => getComputedStyle(node).transitionDuration)).toBe('0s');
       expect(await link.evaluate((node) => getComputedStyle(node).animationName)).toBe('none');
     }
@@ -762,23 +888,26 @@ test.describe('sk-section-nav state and resilience contract', () => {
           mobile: false,
         });
         const { nav } = await openStory(page, 'many-routes');
-        const containment = await nav.evaluate((node) => {
-          const frame = node.closest('[data-section-nav-story-frame]');
-          if (frame === null) throw new Error('section-nav story frame is missing');
-          const navRect = node.getBoundingClientRect();
-          const frameRect = frame.getBoundingClientRect();
-          return {
-            navWithinFrame: navRect.right <= frameRect.right + 1 && navRect.left >= frameRect.left - 1,
-            navOwnsItsOverflow: node.scrollWidth >= node.clientWidth,
-          };
-        });
-        expect(containment.navWithinFrame, `scaleFactor=${scaleFactor}: strip exceeded its own container`).toBe(true);
-        expect(containment.navOwnsItsOverflow, `scaleFactor=${scaleFactor}`).toBe(true);
+        // navOwnsItsOverflow uses `>`, not `>=`: CSSOM defines scrollWidth as at least clientWidth
+        // for every element in every state (max(content edge, padding box)), so `>=` held
+        // vacuously at every scale factor tested, including non-overflowing compositions where it
+        // proved nothing. `>` is a real signal that this six-route composition genuinely overflows
+        // its own shrunken viewport at each simulated scale, matching the check at line ~500.
+        const navOwnsItsOverflow = await nav.evaluate((node) => node.scrollWidth > node.clientWidth);
+        expect(navOwnsItsOverflow, `scaleFactor=${scaleFactor}`).toBe(true);
         const links = nav.locator('.sk-section-nav__link');
         expect(await links.count(), `scaleFactor=${scaleFactor}`).toBe(6);
         for (const link of await links.all()) {
           const text = (await link.innerText()).trim();
           expect(text, `scaleFactor=${scaleFactor}`).not.toBe('');
+          // Real containment fact, not the box-model tautology "the nav's border box never
+          // exceeds inline-size:100% of its parent" (true by CSS construction regardless of this
+          // family's own CSS, measured true even with overflow-x forced to visible): every link
+          // actually renders with nonzero size at this simulated scale, rather than collapsing.
+          const box = await link.boundingBox();
+          expect(box, `scaleFactor=${scaleFactor}`).not.toBeNull();
+          expect(box!.width, `scaleFactor=${scaleFactor}`).toBeGreaterThan(0);
+          expect(box!.height, `scaleFactor=${scaleFactor}`).toBeGreaterThan(0);
         }
       }
     } finally {
