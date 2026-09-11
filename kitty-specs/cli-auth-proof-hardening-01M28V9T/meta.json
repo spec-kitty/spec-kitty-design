@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances cli auth proof hardening on mission/cli-auth-proof-hardening so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "cli auth proof hardening",
   "slug": "cli-auth-proof-hardening-01M28V9T",
+  "status_phase": "1",
   "target_branch": "mission/cli-auth-proof-hardening",
   "topology": "single_branch"
 }
