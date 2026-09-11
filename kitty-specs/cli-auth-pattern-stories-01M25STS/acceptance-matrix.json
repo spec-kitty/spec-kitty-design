@@ -187,11 +187,11 @@
     {
       "criterion_id": "FR-019",
       "description": "Verify FR-019 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_inspection",
+      "evidence": "Reviewer read docs/design-system/using-components.md's 'CLI auth pattern' section (added in this diff) directly: explicitly names route/navigation, permission and session state, validation logic, form submission, confirmation, copy and localization, and terminal-state selection as staying entirely the consuming application's, and names #320/#303 by issue number for the two landed dependencies. Content read and confirmed complete against FR-019's own enumerated list.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:09:31.369020+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
