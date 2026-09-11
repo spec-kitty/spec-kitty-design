@@ -4,10 +4,11 @@ import { getViolations, injectAxe } from "axe-playwright";
 import esbuild from "esbuild";
 import {
   bemBlockRoots,
-  collectSkPrimitives,
   isBemMemberOf,
   knownElementTags,
   ownedClasses,
+  startSkPrimitiveWatch,
+  stopSkPrimitiveWatch,
   tokensOwnedClasses,
   // #418's DOM-inventory arm primitives, co-located here (this directory, not scripts/) for two
   // independently MEASURED reasons: `check-pattern-composition.mjs`'s CLI tail uses
@@ -19,12 +20,16 @@ import {
   // is literally the same function `check-pattern-composition.mjs`'s R3 already uses, so the
   // property stays derived rather than becoming a second hand-maintained list.
   //
-  // `collectSkPrimitives()` is the RUNTIME mechanism (WP01's second reject fix — see its own
-  // header comment in pattern-composition-lib.mjs for the two mechanisms it replaces and why
-  // each was defeated): it reads the LIVE rendered DOM via `Locator.evaluate()`, not source
-  // text, so it cannot be fooled by a forged root-marker attribute or a runtime class mutation
-  // spelled any way at all. Reusable by the four other pattern missions in flight (their spec
-  // files land in this same directory), not re-implemented per spec file.
+  // `startSkPrimitiveWatch()`/`stopSkPrimitiveWatch()` are the RUNTIME mechanism (WP01's third
+  // reject fix — see `startSkPrimitiveWatch()`'s own header comment in pattern-composition-lib.mjs
+  // for the full history: three mechanisms tried, three self-attack rounds, what each attack
+  // found, and the PRECISE guarantee this one buys — including what it does NOT catch, stated
+  // rather than implied). It watches the LIVE rendered page across the story's own rendered
+  // lifetime, not a single instant, so it cannot be fooled by a forged root-marker attribute, a
+  // runtime class mutation spelled any way, an element appended outside the story's own root, an
+  // element placed in an open shadow root, or a mutation deferred a realistic amount past initial
+  // render. Reusable by the four other pattern missions in flight (their spec files land in this
+  // same directory), not re-implemented per spec file.
 } from "./pattern-composition-lib.mjs";
 
 /**
@@ -166,11 +171,12 @@ test("source is Storybook-only composition with no forbidden reader, private rea
 
   // #418's derived tag/class-inventory check MOVED to runtime — see the
   // "rendered DOM contains only known custom elements..." test below, and
-  // `collectSkPrimitives()`'s own header comment for why a source-text version of this specific
-  // check was retired rather than kept (WP01 was rejected twice on the source-text mechanism:
-  // once for a forgeable root-marker credential, once for an enumerable class-mutation-API ban
-  // list). What remains here is genuinely SOURCE-only concerns — "does this file's CODE contain
-  // a forbidden construct" — which a rendered DOM cannot answer either way.
+  // `startSkPrimitiveWatch()`'s own header comment for why a source-text version of this
+  // specific check was retired rather than kept (WP01 was rejected on the source-text
+  // mechanism, then twice more on progressively-hardened runtime drafts, before landing on an
+  // observer that watches the story's rendered lifetime rather than reading a single instant).
+  // What remains here is genuinely SOURCE-only concerns — "does this file's CODE contain a
+  // forbidden construct" — which a rendered DOM cannot answer either way.
   //
   // No custom element is DEFINED by this fixture (it composes, it does not build).
   expect(code).not.toMatch(/customElements\.define\s*\(/);
@@ -243,21 +249,25 @@ test("every story is non-empty, story-error-free, and axe-clean", async ({ page 
   expect(errors).toEqual([]);
 });
 
-// #418's DERIVED DOM-inventory arm, RUNTIME mechanism (WP01's second reject fix). Every
-// `sk`-prefixed tag/class the LIVE, rendered PAGE actually carries anywhere in `document.body`
-// — read via `collectSkPrimitives()` through `page.evaluate()`, after every `ref()` callback has
-// already run — must resolve to real ground truth: a registered custom element (the generated,
-// CI drift+content-gated Custom Elements Manifest), a class `packages/styles` or
+// #418's DERIVED DOM-inventory arm, RUNTIME mechanism, OBSERVED ACROSS THE STORY'S RENDERED
+// LIFETIME (WP01's third reject fix). Every `sk`-prefixed tag/class the LIVE page carries
+// anywhere in `document.documentElement` — including inside any OPEN shadow root — from just
+// before the story's own script runs through a realistic post-render window, watched via
+// `startSkPrimitiveWatch()`/`stopSkPrimitiveWatch()` (see that pair's own header comment for the
+// full three-mechanism history, every self-attack, and the PRECISE guarantee this buys, stated
+// rather than implied) — must resolve to real ground truth: a registered custom element (the
+// generated, CI drift+content-gated Custom Elements Manifest), a class `packages/styles` or
 // `packages/tokens` owns (or a BEM root of one of those, covering a rule-less block-hook class
 // like the bare `sk-boundary-page`), or a class that is a BEM member of `LOCAL_BLOCK` — this
-// file's own hardcoded, non-forgeable knowledge of which family it tests, never derived from
-// the rendition itself. An unlisted invented name — planted as markup, as a runtime mutation
-// spelled any way, behind a forged root-marker attribute, or appended outside the story's own
-// root entirely — has no bucket to land in and fails BY NAME. See the mission report for the
-// full attack log this was red-first-proofed against.
-test("rendered DOM contains only known custom elements and owned/local sk- classes (#418, runtime ground truth)", async ({
+// file's own hardcoded, non-forgeable knowledge of which family it tests, never derived from the
+// rendition itself. An unlisted invented name — planted as markup, as a runtime mutation spelled
+// any way, behind a forged root-marker attribute, appended anywhere in the document (not merely
+// inside a located root), placed in an open shadow root, or deferred a realistic amount past
+// initial render — has no bucket to land in and fails BY NAME.
+test("rendered DOM contains only known custom elements and owned/local sk- classes across the story's rendered lifetime (#418, runtime ground truth)", async ({
   page,
 }) => {
+  await page.addInitScript(startSkPrimitiveWatch);
   const knownTags = knownElementTags();
   // FR-004's local floor: the manifest must actually describe something HERE, not only rely on
   // check-manifest-content.mjs's CI-side anti-vacuity gate elsewhere.
@@ -274,10 +284,23 @@ test("rendered DOM contains only known custom elements and owned/local sk- class
 
   for (const storyId of STORY_IDS) {
     await openStory(page, storyId);
-    // `document.body`-scoped (not the located root's own subtree) — see
-    // `collectSkPrimitives()`'s header for the self-attack (a `document.body.insertAdjacentHTML`
-    // escape from a `ref()` callback) this specifically closes.
-    const { tags, classes } = await page.evaluate(collectSkPrimitives);
+    // A realistic deferred-mutation window — comfortably past a plausible timer/microtask delay
+    // a `ref()` callback might use (the reviewer's own probe used 300ms) — before reading and
+    // disarming the watch `startSkPrimitiveWatch()` armed on this navigation. This is what
+    // upgrades the guarantee from "no unknown primitive at the instant of a single read" to
+    // "none during this window of the story's rendered lifetime" — see that function's header
+    // for the floor that remains beyond this window, stated explicitly rather than implied.
+    await page.waitForTimeout(500);
+    const { tags, classes, armed } = await page.evaluate(stopSkPrimitiveWatch);
+    // The floor this mission's own self-attack found necessary: a crashed
+    // `startSkPrimitiveWatch()` used to return indistinguishably from "genuinely clean" (empty
+    // arrays either way). `armed` must be asserted, not merely read, or that exact silent
+    // degeneration reopens invisibly. See `stopSkPrimitiveWatch()`'s own header for the bug this
+    // closes.
+    expect(
+      armed,
+      `${storyId}: startSkPrimitiveWatch() never armed for this navigation — the DOM-inventory check ran over an unverified, empty result`,
+    ).toBe(true);
     const unknownTags = tags.filter((tag) => !knownTags.has(tag));
     const unknownClasses = classes.filter(
       (cls) => !isBemMemberOf(cls, acceptedClasses) && !isBemMemberOf(cls, localRoots),

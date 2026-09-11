@@ -291,67 +291,175 @@ export function isBemMemberOf(name, roots) {
 }
 
 /**
- * Walks the LIGHT DOM of the WHOLE rendered page (`document.body`, not merely a located "root"
- * element's own subtree) and returns every `sk`-prefixed tag name and class name ACTUALLY
- * PRESENT — never crossing into any composed element's shadow root, because
- * `Element.querySelectorAll('*')` structurally cannot.
+ * Arms a MutationObserver-based watch covering the WHOLE document (`document` itself, not
+ * `document.body` and not `document.documentElement` — see the `watch(document)` call below for
+ * why even the latter is unsafe here) and recursing into every OPEN shadow root it can reach,
+ * that accumulates every `sk`-prefixed tag name and class name seen from the moment it starts
+ * until
+ * `stopSkPrimitiveWatch()` reads and disarms it. Paired with that function; state bridges the
+ * two via `window.__skPrimitiveWatch` because each is a SEPARATE `page.evaluate()`/
+ * `addInitScript()` invocation with no shared closure.
  *
- * DESIGNED TO RUN INSIDE THE BROWSER: pass this function DIRECTLY to Playwright's
- * `page.evaluate()` (e.g. `await page.evaluate(collectSkPrimitives)`), which serializes it into
- * the page. It therefore has NO closure over any outer variable and imports nothing — only
- * `document`/`Element`/`Set`, which exist in both runtimes.
+ * DESIGNED TO RUN INSIDE THE BROWSER: register with `page.addInitScript(startSkPrimitiveWatch)`
+ * — NOT `page.evaluate()` — so it re-arms on EVERY subsequent navigation (`openStory()`'s own
+ * `page.goto()`), before that page's own scripts run. Has no closure over any outer variable and
+ * imports nothing — only `document`/`Element`/`MutationObserver`/`Set`/`window`, which exist in
+ * the browser.
  *
- * THIS REPLACES THE SOURCE-TEXT MECHANISM (`skPrimitivesIn()` + `ownBlockRoots()`, both
- * deleted), which the reviewer defeated TWICE on WP01, and closes a THIRD gap this mechanism's
- * own first draft (scoped to a located root's subtree, not the whole page) had:
+ * REPLACES `collectSkPrimitives()` (a single-read snapshot; deleted, not kept as a weaker
+ * sibling) and, before that, the source-text mechanism (`skPrimitivesIn()` + `ownBlockRoots()`,
+ * also deleted). Each of the THREE mechanisms this repo has tried for #418's DOM-inventory arm
+ * was SELF-ATTACKED before being reported closed, and each attack that found a real gap is
+ * fixed here rather than only in the one reproduction that found it — re-verified against a
+ * REBUILT `storybook-static/` every time (a stale build silently passes every plant; MEASURED
+ * the hard way after a first false all-clear during this exact round):
+ *
  *   - `ownBlockRoots()` trusted any element carrying a `data-*-pattern`-shaped attribute as a
- *     "real story root," including an INVENTED attribute name (`data-evil-pattern`) and the
- *     REAL attribute repeated on an inner, non-root element — both mint their own credential
- *     because the check asked the rendition to self-report which of its own elements to trust.
- *   - The follow-up ban list (`classList.add/remove/toggle/replace`, `setAttribute("class",
- *     ...)`, `.className=`, the bracket/Reflect spellings of both) was defeated by
- *     `Object.assign(element, { className: "sk-consent-row" })` — an unquoted property key,
- *     structurally the same class of mutation spelled a fifth way. Enumerating spellings of "a
- *     class got mutated" is the exact asymmetry #418 was filed about, one level down: the CSS
- *     arm is derived from files a fixture cannot edit, and the old DOM arm was not.
- *   - SELF-ATTACKED before this mechanism was reported closed (see the mission report for the
- *     full log): a `ref()` callback running `document.body.insertAdjacentHTML("beforeend",
- *     '<div class="sk-terminal-frame">...</div>')` — appending OUTSIDE the located root's own
- *     subtree entirely — passed the first draft of this function (scoped to `root.querySelectorAll`)
- *     silently. Scanning `document.body` itself, not a located root, closes it: there is no
- *     "outside the root" left for an escape to land in. Storybook's own preview-frame chrome
- *     (`#storybook-root`, `.sb-wrapper`, etc. — MEASURED by inspecting `document.body.children`
- *     at this URL) uses `sb-`/plain ids, never `sk-`, so this scan cannot false-positive against
- *     it.
+ *     "real story root" — an INVENTED attribute name, and the REAL attribute repeated on an
+ *     inner element, both minted their own credential.
+ *   - A follow-up ban list (`classList.add/remove/toggle/replace`, `setAttribute("class", ...)`,
+ *     `.className=`, bracket/Reflect spellings) was defeated by `Object.assign(element, {
+ *     className: ... })` — a fifth spelling none of the four banned.
+ *   - `collectSkPrimitives()`'s first draft, scoped to `document.body`, missed
+ *     `document.documentElement.appendChild(el)` — `el` lands as a SIBLING of `<body>`, never
+ *     inside it. Rescoping to `document.documentElement` was the OBVIOUS fix and the WRONG one:
+ *     registered via `page.addInitScript()`, this function can run before `<html>` exists, and
+ *     `document.documentElement` was observed `null` at that point — SELF-ATTACKED, found by
+ *     rerunning the very reproduction this rescope was meant to close and watching it pass for
+ *     the wrong reason (the crash never armed the watch at all; see `stopSkPrimitiveWatch()`'s
+ *     new `armed` flag, added because of this exact failure). `document` itself — always
+ *     available the instant any script runs, and both a valid `querySelectorAll()` host via
+ *     `ParentNode` and a valid `MutationObserver.observe()` target as a `Node` — has no such
+ *     window and is what `watch()` is actually called with, below.
+ *   - The same draft, scoped to `querySelectorAll('*')` only, could not cross a shadow
+ *     boundary — a plain `<div>` with `attachShadow({mode:'open'})` holding a forbidden class
+ *     was invisible. `watch()` below checks `el.shadowRoot` and descends explicitly.
+ *     VERIFIED SAFE against this repo's OWN composed elements before relying on it: every
+ *     `sk-form-input`/`sk-card`/`sk-pill-tag` shadow-DOM class (e.g. `sk-form-input__control`,
+ *     `cardClasses()`'s `sk-card`/`sk-card--*` output) is declared with a real rule in
+ *     `packages/styles/src/**\/sk-*.css` — the SAME file `ownedClasses()` reads — because that
+ *     IS the source `build-elements-css.mjs` compiles each element's shadow stylesheet from.
+ *     Shadow recursion reveals nothing new as unowned inside this repo's own elements; only an
+ *     INVENTED shadow tree is unowned.
+ *     DISCLOSED, NOT CHASED — `mode: 'closed'` shadow roots return `null` from
+ *     `Element.shadowRoot` BY DESIGN; that is what closed mode is FOR (a platform property, not
+ *     a defect), and no DOM-based check can reach one. Also disclosed: a shadow root
+ *     `attachShadow()`-ed onto an element AFTER that element was already recorded by this walk
+ *     (i.e. appended first, given a shadow root and populated only later) has no observer
+ *     attached to it, since nothing observable marks "a shadow root was just attached" the way
+ *     `childList`/`attributes` mutations mark other changes. CHECKED, NOT SKIPPED: `grep -rn
+ *     "extends:" packages/elements/src` found zero customized built-ins (`is="..."`) in this
+ *     repo — a `<button is="sk-x">` keeps `tagName === "BUTTON"` and stays invisible to the tag
+ *     arm; a future author who introduces one should revisit this file.
+ *   - A single READ, taken right after `data-render-complete="true"`, missed
+ *     `setTimeout(() => element.classList.add("sk-consent-row"), 300)` inside a `ref()`
+ *     callback — the mutation simply had not happened yet at read time. This is what the
+ *     observer (rather than a second read) is for.
  *
- * Reading the LIVE, RENDERED DOM after every `ref()` callback has already executed makes all
- * three defeats structural rather than enumerable: there is no "which element is the root" left
- * to spoof (the scan starts at `document.body`, not a locator match), and "was this class ever
- * actually applied" is answered by asking the BROWSER's own `element.classList`, which is
- * authoritative over EVERY possible JS spelling of a mutation (`Object.assign`,
- * `setAttributeNS`, `Reflect.set`, a computed/bracket key, or any future one) by construction —
- * there is nothing left to enumerate.
+ * THE GUARANTEE THIS BUYS, STATED PRECISELY (the previous version of this file asserted more
+ * than a single read could actually prove, and was told directly that silence on that gap would
+ * not be accepted a second time): no unknown `sk`-prefixed tag or class appears ANYWHERE in the
+ * light DOM or any OPEN shadow root, at ANY point from just before the story's own script begins
+ * through the caller's observation window (currently 500ms past `data-render-complete` — see
+ * `sk-cli-auth-pattern.spec.ts`'s use of this pair). "No mutation EVER, however deferred" is NOT
+ * claimed and is not obtainable by a bounded test: a mutation timed to land after the
+ * observation window closes is not caught, and neither is one inside a `mode: 'closed'` shadow
+ * root or one attached to an already-recorded element only after the fact (both above). These
+ * are disclosed limits of what a rendered-DOM check can prove, not silent gaps.
  */
-export function collectSkPrimitives() {
-  const tags = new Set();
-  const classes = new Set();
-  const record = (el) => {
+export function startSkPrimitiveWatch() {
+  const record = (el, seen) => {
     const tag = el.tagName.toLowerCase();
-    if (tag.startsWith('sk-')) tags.add(tag);
+    if (tag.startsWith('sk-')) seen.tags.add(tag);
     for (const cls of el.classList) {
-      // Case-INSENSITIVE prefix test (SELF-ATTACKED: `class="SK-Terminal-Frame"` passed a first
-      // draft using a case-sensitive `cls.startsWith('sk-')`, since neither `insertAdjacentHTML`
-      // nor `classList` itself lowercases a class token). The ORIGINAL casing is still what
-      // gets recorded and compared against every owned/local/known set below (all real,
-      // committed classes in this repo are lowercase-kebab by convention) — a mixed-case
-      // variant therefore still fails to match any of them and reports as unknown, under its
-      // own real spelling in the failure message, not silently normalized away.
-      if (cls.slice(0, 3).toLowerCase() === 'sk-') classes.add(cls);
+      // Case-INSENSITIVE prefix test (SELF-ATTACKED, a prior round: `class="SK-Terminal-Frame"`
+      // passed a case-sensitive `startsWith('sk-')`). The ORIGINAL casing is still what gets
+      // recorded and compared — every real, committed class in this repo is lowercase-kebab, so
+      // a mixed-case variant still fails every acceptance check under its own real spelling.
+      if (cls.slice(0, 3).toLowerCase() === 'sk-') seen.classes.add(cls);
     }
   };
-  record(document.body);
-  for (const el of document.body.querySelectorAll('*')) record(el);
-  return { tags: [...tags], classes: [...classes] };
+  const seen = { tags: new Set(), classes: new Set() };
+  const observers = [];
+  // `root` is `document`, an `Element`, or a `ShadowRoot`. THE `root.shadowRoot` CHECK AT THE
+  // TOP IS LOAD-BEARING, NOT REDUNDANT WITH THE LOOP BELOW — SELF-ATTACKED, a real bug this
+  // round: a `<div>` created via `document.createElement`, given `attachShadow({mode:'open'})`
+  // and shadow content BEFORE being appended, then appended via `document.body.appendChild`,
+  // passed. The childList handler below calls `watch(node)` for that newly added `div` itself
+  // — and the FIRST version of this function checked `el.shadowRoot` only for DESCENDANTS
+  // found by `querySelectorAll('*')`, never for `root` itself. A `<div>` with no light-DOM
+  // children (all of its content lives in its shadow root) has an EMPTY `querySelectorAll('*')`
+  // result, so nothing about it was ever inspected. Checking `root.shadowRoot` before walking
+  // descendants closes this for both the initial sweep and every future `childList` addition.
+  const watch = (root) => {
+    if (root.shadowRoot) watch(root.shadowRoot);
+    for (const el of root.querySelectorAll('*')) {
+      record(el, seen);
+      if (el.shadowRoot) watch(el.shadowRoot);
+    }
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes' && mutation.target instanceof Element) {
+          record(mutation.target, seen);
+          if (mutation.target.shadowRoot) watch(mutation.target.shadowRoot);
+        } else if (mutation.type === 'childList') {
+          for (const node of mutation.addedNodes) {
+            if (!(node instanceof Element)) continue;
+            record(node, seen);
+            watch(node);
+          }
+        }
+      }
+    });
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ['class'],
+      childList: true,
+      subtree: true,
+    });
+    observers.push(observer);
+  };
+  // `document`, NOT `document.documentElement`. SELF-ATTACKED, a real bug this round: when
+  // registered via `page.addInitScript()`, this function can run BEFORE the browser has
+  // created `<html>` — `document.documentElement` was observed `null` at that point, so
+  // `watch(document.documentElement)` threw INSIDE `querySelectorAll` on a null reference,
+  // `startSkPrimitiveWatch()` never reached the line that sets `window.__skPrimitiveWatch`, and
+  // every subsequent `stopSkPrimitiveWatch()` call silently returned `{ tags: [], classes: [] }`
+  // — an empty, trivially-passing result, with NOTHING that surfaced the crash to the test's own
+  // assertions (`page.on('pageerror')` is wired into a DIFFERENT test in this file). The
+  // "document.documentElement.appendChild" reproduction this function exists to catch therefore
+  // passed for the WRONG reason: the whole watch had never armed, not because the escape was
+  // closed. `document` (the `Document` node itself) is ALWAYS available the instant ANY script
+  // executes in a page context — no null-reference window — and supports both
+  // `querySelectorAll()` (via `ParentNode`) and `MutationObserver.observe()` (it is a `Node`)
+  // identically to an Element root.
+  watch(document);
+  window.__skPrimitiveWatch = { seen, observers };
+}
+
+/**
+ * Reads and disarms the watch `startSkPrimitiveWatch()` armed, returning `{ tags, classes,
+ * armed }` as plain data (`MutationObserver` instances and `Set`s are not structured-cloneable
+ * across the `page.evaluate()` boundary, so this must run IN the page and hand back only
+ * serializable data).
+ *
+ * `armed` IS NOT DECORATIVE — THE CALLER MUST ASSERT IT. SELF-ATTACKED, a real bug this round:
+ * `startSkPrimitiveWatch()` used to crash (see its own header) when `document.documentElement`
+ * was `null` at `addInitScript` time, and because it crashed BEFORE setting
+ * `window.__skPrimitiveWatch`, this function's old "no watch armed → return empty arrays,
+ * quietly" fallback made that crash INDISTINGUISHABLE from "nothing unusual was ever rendered."
+ * The reproduction this whole mechanism exists to catch (`document.documentElement.
+ * appendChild(el)`) therefore passed for the wrong reason — the check had silently degenerated
+ * to verifying nothing, the exact "gate that cannot fail" defect class this mission is about,
+ * one level down inside its OWN new mechanism. `armed: false` now says so explicitly instead of
+ * asking the caller to infer it from an empty result that also means "genuinely clean."
+ */
+export function stopSkPrimitiveWatch() {
+  const state = window.__skPrimitiveWatch;
+  if (!state) return { tags: [], classes: [], armed: false };
+  for (const observer of state.observers) observer.disconnect();
+  delete window.__skPrimitiveWatch;
+  return { tags: [...state.seen.tags], classes: [...state.seen.classes], armed: true };
 }
 
 /**
