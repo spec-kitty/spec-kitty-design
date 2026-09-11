@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-11T18:22:28.277252+00:00",
+  "flattened": false,
+  "friendly_name": "cli auth proof hardening",
+  "mission_id": "01M28V9TXMJTY3XV2MDFGDDW0V",
+  "mission_number": null,
+  "mission_slug": "cli-auth-proof-hardening-01M28V9T",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances cli auth proof hardening on mission/cli-auth-proof-hardening so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "cli auth proof hardening",
+  "slug": "cli-auth-proof-hardening-01M28V9T",
+  "target_branch": "mission/cli-auth-proof-hardening",
+  "topology": "single_branch"
+}
