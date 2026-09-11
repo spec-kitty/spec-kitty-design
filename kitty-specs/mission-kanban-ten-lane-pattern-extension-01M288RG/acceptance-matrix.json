@@ -117,11 +117,11 @@
     {
       "criterion_id": "FR-012",
       "description": "Verify FR-012 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "composition gate + source test",
+      "evidence": "head 4f301f83; node scripts/check-pattern-composition.mjs (+ --selftest) green: no reach-through, no duplicated component CSS, parts shell/tag within the 142-part ratchet; sk-mission-kanban-ten-lane-pattern.spec.ts [T006] no library selectors, physical properties or raw colours in pattern CSS.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:42.435625+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
