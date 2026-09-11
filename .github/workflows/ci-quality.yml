@@ -397,6 +397,17 @@ jobs:
         run: node scripts/check-llms-adr-surface.mjs --selftest
       - name: "[ENFORCED] llms.txt and llms-full.txt carry no hand-maintained ADR index (#197)"
         run: node scripts/check-llms-adr-surface.mjs
+      # A multi-screenshot test may not use the hard `toHaveScreenshot` form for any of its
+      # calls (#367). The hard form throws on failure, so a failing screenshot aborts the test
+      # and every LATER screenshot in it never runs — never produces a baseline, never appears
+      # in the `unexpected` count, never lands in the visual-regression-diffs artifact a
+      # harvester reads from. This cost one missed baseline outright on PR #339. `lint-code`
+      # carries no `if:` and no path guard, so a change to a spec file with a single screenshot
+      # today is still caught the moment it grows a second one.
+      - name: "[ENFORCED] Visual screenshot softness gate self-test (#367)"
+        run: node scripts/check-visual-screenshot-softness.mjs --selftest
+      - name: "[ENFORCED] Multi-screenshot tests use expect.soft throughout (#367)"
+        run: node scripts/check-visual-screenshot-softness.mjs
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
         run: |
