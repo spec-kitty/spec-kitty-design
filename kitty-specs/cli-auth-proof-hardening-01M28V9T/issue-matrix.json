@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#418": {
-      "evidence_ref": "commits b13f33b3, 1b263bc7, 3059fafd - derived denylist replacement in sk-cli-auth-pattern.spec.ts + pattern-composition-lib.mjs; reviewer-found Findings 1 (localClassesIn unconstrained local-style acceptance, closed via ownBlockRoots BEM-root derivation) and 2 (classList.add runtime mutation invisible to text scan, closed via explicit ban) both reproduced red-first and fixed in 3059fafd",
+      "evidence_ref": "commit 7d0eb845 - #418's DOM-inventory arm rebuilt on runtime DOM ground truth (collectSkPrimitives() via page.evaluate() over document.body) after two source-text mechanisms were each defeated by the reviewer (forged/repeated data-*-pattern root marker; Object.assign class-mutation bypassing an enumerated ban list). Self-attacked with 6 distinct exploits (both reviewer reproductions, the Object.assign bypass, setAttributeNS, a document.body escape outside the located root, a case-mismatched class name) before being reported closed; unmodified file stays 14/14 green",
       "fr": null,
       "nfr": null,
       "repo": null,
