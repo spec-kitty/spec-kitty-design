@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "mission_slug": "connectors-pattern-stories-01M26947",
+  "mission_id": "01M2694739PAJPJY57MNYCSGP3",
+  "mission_branch": "kitty/mission-connectors-pattern-stories-01M26947",
+  "target_branch": "mission/connectors-pattern-stories",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-connectors-pattern.spec.ts",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "packages/elements/src/patterns/connectors.fixture.ts",
+        "packages/elements/src/patterns/connectors.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "app-shell",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T18:53:20.401220+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "c711fa7a52e159e47ab065c1b6e1387fb8d7571f"
+}
