@@ -808,6 +808,7 @@ test.describe("calibrated geometry, themes, and forced colors", () => {
     page,
     browserName,
   }) => {
+    expect(test.info().config.projects.map((project) => project.name), "the chromium skip below is keyed on this project name").toContain("chromium");
     test.skip(
       browserName !== "chromium",
       "Playwright forced-colors emulation is Chromium-specific",

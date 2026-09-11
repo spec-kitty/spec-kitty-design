@@ -802,6 +802,7 @@ test.describe('sk-section-nav state and resilience contract', () => {
   });
 
   test('forced colours preserve the current-location border and the focus outline via border/outline recolor', async ({ page, browserName }) => {
+    expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
     test.skip(browserName !== 'chromium', 'Playwright forced-colours emulation is Chromium-only');
     await page.emulateMedia({ forcedColors: 'active' });
     const { nav } = await openStory(page, 'forced-colors');
@@ -877,6 +878,7 @@ test.describe('sk-section-nav state and resilience contract', () => {
    * document-level scrollWidth equality the fixed demo frame cannot honestly satisfy at 400%.
    */
   test('CDP-approximated 200%/400% reflow: the strip stays within its container and no content is lost', async ({ page, browserName }) => {
+    expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
     test.skip(browserName !== 'chromium', 'Emulation.setDeviceMetricsOverride is a Chromium CDP method');
     const session = await page.context().newCDPSession(page);
     try {

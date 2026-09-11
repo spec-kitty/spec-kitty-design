@@ -228,6 +228,7 @@ test('wide connectors are directional one-pixel paths aligned with the label ban
 });
 
 test('active forced colors preserves ordered semantics and visible decorative boundaries', async ({ browser, browserName }, testInfo) => {
+  expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
   test.skip(browserName !== 'chromium', 'forced-colors coverage is a Chromium-owned case');
   const context = await (browser as Browser).newContext({
     baseURL: String(testInfo.project.use.baseURL),

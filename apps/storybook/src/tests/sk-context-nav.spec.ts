@@ -553,6 +553,7 @@ test.describe('sk-context-nav live native semantics', () => {
     page,
     browserName,
   }) => {
+    expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
     test.skip(
       browserName !== 'chromium',
       'Chromium CDP supplies the inspectable platform accessibility tree',
@@ -1032,6 +1033,7 @@ test.describe('sk-context-nav state and resilience contract', () => {
   });
 
   test('forced colours preserve focus, current, and nested hierarchy cues', async ({ page, browserName }) => {
+    expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
     test.skip(browserName !== 'chromium', 'Playwright forced-colours emulation is Chromium-only');
     await page.emulateMedia({ forcedColors: 'active' });
     const { nav } = await openStory(page, 'forced-colors');
@@ -1060,6 +1062,7 @@ test.describe('sk-context-nav state and resilience contract', () => {
     page,
     browserName,
   }) => {
+    expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
     test.skip(
       browserName !== 'chromium',
       'Playwright forced-colours emulation is Chromium-only',

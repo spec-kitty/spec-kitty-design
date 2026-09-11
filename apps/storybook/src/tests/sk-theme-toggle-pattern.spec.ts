@@ -225,6 +225,7 @@ test('forced colours keep the three-state control operable while root preference
   page,
   browserName,
 }) => {
+  expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
   test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
   await page.emulateMedia({ forcedColors: 'active', colorScheme: 'dark' });
   const root = await openStory(page, 'forced-colors');
@@ -278,6 +279,7 @@ test('narrow and supplemental HiDPI routes keep controls and content contained',
   await expect(root.getByRole('radio', { name: 'Light' })).toBeVisible();
   await expect(root.getByRole('radio', { name: 'Dark' })).toBeVisible();
 
+  expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
   test.skip(
     browserName !== 'chromium',
     'the 2x device-density supplement is Chromium-owned; genuine zoom has headed evidence',
@@ -437,6 +439,7 @@ test('the composed Default, LightMode, System, and forced-colors stories are axe
   page,
   browserName,
 }) => {
+  expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
   test.skip(browserName !== 'chromium', 'the repository-wide axe lane runs once in Chromium');
   for (const story of ['default', 'light-mode', 'system-light', 'forced-colors'] as const) {
     if (story === 'system-light') await page.emulateMedia({ colorScheme: 'light' });

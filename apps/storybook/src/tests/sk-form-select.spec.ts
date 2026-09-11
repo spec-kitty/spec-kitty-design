@@ -362,6 +362,7 @@ test.describe('sk-form-select live native semantics', () => {
   });
 
   test('forced colors retains native appearance plus non-color focus, invalid, and disabled cues', async ({ page, browserName }) => {
+    expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
     test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-specific');
     await page.emulateMedia({ forcedColors: 'active' });
     const required = await openStory(page, 'forced-colors');

@@ -885,6 +885,7 @@ test("forced colors and reduced motion preserve structure without pattern-owned 
   page,
   browserName,
 }) => {
+  expect(test.info().config.projects.map((project) => project.name), "the chromium skip below is keyed on this project name").toContain("chromium");
   test.skip(
     browserName !== "chromium",
     "Playwright forced-colors emulation is Chromium-owned",
