@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "scripts/lib/selftest-budget.mjs computeSelftestCeilingSeconds(budget.selftestBudget, mutations.length); scripts/suite-selftest.mjs:65-68 wires it for both the main and --selftest runs. Real run: node scripts/suite-selftest.mjs --selftest -> 100.8s under the computed 177.0s ceiling (10 arms); tests/node/selftest-budget.test.ts 10/10 pass.",
+      "pass_fail": "pass",
+      "verified_by": "implementer",
+      "verified_at": "2026-09-11T22:46:07.796249+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
