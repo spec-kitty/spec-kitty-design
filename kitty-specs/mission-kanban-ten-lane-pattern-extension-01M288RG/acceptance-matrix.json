@@ -108,10 +108,10 @@
       "criterion_id": "FR-011",
       "description": "Verify FR-011 is satisfied",
       "proof_type": "browser lifecycle tests",
-      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T007] triad present exactly while overflowing (K1/K2/K3@390/K6) and absent with no tab stop when fitting (K3@1440, K6@2800); live resize both ways and a content change that does not resize the scroller, each on one mounted root; flips at measured fit width and fit-1; Storybook Reload keeps 1 active resize and content target, 0 detached.",
+      "evidence": "product head 8986d38f (rebased on train 16948194); sk-mission-kanban-ten-lane-pattern.spec.ts [T007] triad exactly while overflowing (K1, K2, K3@390, K6@1440) and absent with no tab stop when fitting (K3@1440, K6@2800); live resize both ways; content change at the fit width where no box resizes; flips at fit width and fit-1 with no document overflow; Storybook Reload keeps 1 resize and 1 content target, 0 detached, body watchers do not grow; local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T13:44:41.346446+00:00",
+      "verified_at": "2026-09-11T14:11:15.679953+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
