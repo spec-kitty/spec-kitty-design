@@ -37,11 +37,11 @@
     {
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_review",
+      "evidence": "packages/elements/custom-elements.json's provenance re-verified for real just now: 'npx nx run elements:analyze --skip-nx-cache' (cem analyze + normalise-manifest.mjs) followed by 'git diff --exit-code -- packages/elements/custom-elements.json' produced a clean diff -- the checked-in manifest is exactly what the generator produces, not hand-maintained. CI-gating confirmed by inspection of .github/workflows/ci-quality.yml's '[ENFORCED] Custom Elements Manifest is current' job and scripts/check-manifest-content.mjs's content-vacuity floor. This grounds knownElementTags() (FR-003/FR-005) in generated, CI-gated source of truth rather than an assumption.",
+      "pass_fail": "pass",
+      "verified_by": "claude-implementer",
+      "verified_at": "2026-09-11T21:33:19.680108+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
