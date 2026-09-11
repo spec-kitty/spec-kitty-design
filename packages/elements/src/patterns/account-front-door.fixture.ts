@@ -251,20 +251,27 @@ export interface PasswordMaintenanceFixture {
   readonly formId: string;
   readonly method: "post";
   readonly action: string;
+  readonly helpText: readonly [string, string, string, string];
   readonly currentPassword: FormFieldFixture | undefined;
   readonly newPassword: FormFieldFixture;
   readonly repeatPassword: FormFieldFixture;
   /**
-   * NO `helpText` MEMBER, and its absence is sourced rather than an omission. An earlier revision
-   * carried "Your password must be at least 12 characters and can't be entirely numeric." on both
-   * password-maintenance states. The corpus does not contain that sentence anywhere. Its P24
-   * section (`COPY-CATALOG.md` §P24, rows `account.passwordSet.*` / `account.passwordChange.*`)
-   * records labels and submit copy ONLY — no help row exists for either screen. The corpus's one
-   * password-help row is `account.reset.setNew.field.password1.help`, which belongs to P11
-   * (reset set-new), is Django's real four-item validator list, and says at least EIGHT
-   * characters. So the shipped sentence was invented AND contradicted the only sourced figure in
-   * the family. C-011 forbids the library supplying copy it cannot source, so it is gone rather
-   * than restated with a corrected number on a screen the corpus gives no help text for.
+   * The real P24 validator guidance, transcribed from `COPY-CATALOG.md` row
+   * `account.passwordMaintenance.help` (P24 · BOTH branches, "persistent validator guidance under
+   * the first new-password field", provenance "configured Django validators + locked allauth
+   * 65.13.1 `SetPasswordField`; verified" — a *verified* row, not a `pending Lynn` one).
+   *
+   * A FOUR-ITEM LIST, because the catalogue's Rendering column says "four-item rendered list".
+   * Django emits these as `<ul><li>` through `password_validators_help_text_html()`; flattening
+   * them into one sentence is what let the invented version exist in the first place.
+   *
+   * THIS MEMBER HAS BEEN WRONG IN BOTH DIRECTIONS, which is why the provenance is spelled out.
+   * First it carried "Your password must be at least 12 characters and can't be entirely
+   * numeric." — a sentence appearing nowhere in the corpus, asserting TWELVE where the sourced
+   * row says EIGHT. Removing that was right. Removing it and writing "no help row exists for
+   * either screen" was not: the row above is real and verified, and was missed by a search for
+   * `passwordChange`/`passwordSet` keys when the row is keyed `passwordMaintenance`. C-011 asks
+   * the library not to invent copy; it does not ask it to drop copy the corpus sources.
    */
   readonly submitLabel: string;
 }
@@ -323,7 +330,7 @@ export const deepFreezeAccountFrontDoorFixture = <T>(value: T): DeepReadonly<T> 
 
 // ── Small shared constants — every repeated display fact written once ──────────────────────────
 
-const BRAND = { label: "Spec Kitty", href: "/", context: "Cloud" } as const;
+const BRAND = { label: "Spec Kitty", href: "/", context: "TeamSpace" } as const;
 
 const THEME_LABELS = {
   label: "Appearance",
@@ -332,11 +339,23 @@ const THEME_LABELS = {
   darkLabel: "Dark",
 } as const;
 
+/**
+ * Strings the render helpers previously hardcoded, which C-011 forbids outright ("the pattern
+ * authors no English default and hardcodes no product copy"). Each is the corpus's own value:
+ * `account.email.title` is hyphenated Title Case; `account.signup.socialDivider` is the bare word
+ * "or", not a sentence; and `account.email.status.unverified` is "Unverified" — the render helper
+ * had invented a SECOND term, "Not verified", for the same fact two lines from the pill that
+ * already said "Unverified".
+ */
+export const EMAIL_LIST_LEGEND = "E-mail Addresses";
+export const SOCIAL_DIVIDER = "or";
+export const EMAIL_STATUS = { verified: "Verified", unverified: "Unverified" } as const;
+
 const SIGN_IN: RouteAction = { kind: "sign-in", label: "Sign in", href: "/accounts/login/" };
 const START_FREE: RouteAction = { kind: "start-free", label: "Start free", href: "/accounts/signup/" };
 
-const FOOTER_TAGLINE = "Ship product decisions your whole team can see.";
-const FOOTER_LEGAL = "© 2026 Spec Kitty. All rights reserved.";
+const FOOTER_TAGLINE = "Spec-driven development, made visible.";
+const FOOTER_LEGAL = "Free private beta · © Spec Kitty 2026";
 const FOOTER_LINKS = [{ label: "Terms", href: "/legal/terms/" }] as const;
 
 const chromeWith = (actions: readonly RouteAction[]): PublicChrome => ({
@@ -392,15 +411,15 @@ const INSTALL_COMMANDS: readonly InstallCommandFixture[] = [
   {
     id: "install-cli",
     label: "Copy install command",
-    value: "curl -fsSL https://get.spec-kitty.dev | sh",
+    value: 'gh release download <tag> -R spec-kitty/spec-kitty -p "*.whl" -D dist',
     successMessage: "Command copied.",
     manualMessage: "Command selected. Use your system copy shortcut to copy it.",
     failureMessage: "Unable to copy or select the command.",
   },
   {
     id: "install-init",
-    label: "Copy init command",
-    value: "spec-kitty init",
+    label: "Copy install command (step two)",
+    value: 'uv tool install --find-links dist "spec-kitty-cli==<ver>"',
     successMessage: "Command copied.",
     manualMessage: "Command selected. Use your system copy shortcut to copy it.",
     failureMessage: "Unable to copy or select the command.",
@@ -409,7 +428,7 @@ const INSTALL_COMMANDS: readonly InstallCommandFixture[] = [
 
 const JOURNEY_STEPS: readonly JourneyStepFixture[] = [
   { text: "Install the CLI on your own machine." },
-  { text: "Run spec-kitty init inside a repository you already have." },
+  { text: "Connect the CLI to your team with spec-kitty auth login." },
   { text: "Open the dashboard link the CLI prints to see your first Mission." },
 ];
 
@@ -458,6 +477,17 @@ const SET_REPEAT_PASSWORD_FIELD: FormFieldFixture = {
   required: true,
 };
 
+/**
+ * `account.passwordMaintenance.help`, verbatim from COPY-CATALOG.md. The apostrophes are the
+ * corpus's own typographic ones (U+2019), not ASCII — transcribed, not retyped.
+ */
+const PASSWORD_MAINTENANCE_HELP: readonly [string, string, string, string] = [
+  "Your password can\u2019t be too similar to your other personal information.",
+  "Your password must contain at least 8 characters.",
+  "Your password can\u2019t be a commonly used password.",
+  "Your password can\u2019t be entirely numeric.",
+];
+
 const CURRENT_PASSWORD_FIELD: FormFieldFixture = {
   id: "front-door-current-password",
   label: "Current Password",
@@ -488,14 +518,14 @@ const ACCOUNT_FRONT_DOOR_FIXTURES_AUTHORED = {
   "entry-boundary": {
     state: "entry-boundary",
     chrome: CLOSED_CHROME,
-    title: "Create your account",
+    title: "Sign up",
     formId: "account-front-door-entry-form",
     method: "post",
     action: "/accounts/signup/",
     csrf: CSRF,
     fields: ENTRY_FIELDS,
     providers: [],
-    submitLabel: "Create account",
+    submitLabel: "Sign up",
     errors: [],
     retainedValues: { email: undefined },
   } satisfies EntryBoundaryFixture,
@@ -503,14 +533,14 @@ const ACCOUNT_FRONT_DOOR_FIXTURES_AUTHORED = {
   "entry-boundary-providers": {
     state: "entry-boundary-providers",
     chrome: CLOSED_CHROME,
-    title: "Create your account",
+    title: "Sign up",
     formId: "account-front-door-entry-providers-form",
     method: "post",
     action: "/accounts/signup/",
     csrf: CSRF,
     fields: ENTRY_FIELDS,
     providers: PROVIDERS,
-    submitLabel: "Create account",
+    submitLabel: "Sign up",
     errors: [],
     retainedValues: { email: undefined },
   } satisfies EntryBoundaryFixture,
@@ -518,14 +548,14 @@ const ACCOUNT_FRONT_DOOR_FIXTURES_AUTHORED = {
   "submitted-validation": {
     state: "submitted-validation",
     chrome: CLOSED_CHROME,
-    title: "Create your account",
+    title: "Sign up",
     formId: "account-front-door-validation-form",
     method: "post",
     action: "/accounts/signup/",
     csrf: CSRF,
     fields: ENTRY_FIELDS,
     providers: [],
-    submitLabel: "Create account",
+    submitLabel: "Sign up",
     errors: [
       { fieldId: EMAIL_FIELD.id, message: "That didn't work. Check your details and try again." },
       { fieldId: PASSWORD_FIELD.id, message: "That didn't work. Check your details and try again." },
@@ -536,29 +566,34 @@ const ACCOUNT_FRONT_DOOR_FIXTURES_AUTHORED = {
   "recovery-sent": {
     state: "recovery-sent",
     chrome: CLOSED_CHROME,
-    title: "Check your email",
+    title: "Password Reset",
+    // `account.reset.sent.body`, verbatim (P10). Still non-enumerating, and for the stronger
+    // reason: it states "we've sent you an e-mail" UNCONDITIONALLY, so the response is identical
+    // whether or not an address is registered — no branch exists that could disclose. The
+    // replaced sentence added "It expires in one hour", an expiry FACT the corpus states nowhere
+    // and that C-014 reserves to the application, alongside cooldown timing.
     message:
-      "If an account matches what you entered, we've sent a link to continue. It expires in one hour.",
+      "We've sent you an e-mail. Please get in touch if you do not receive it within a few minutes.",
   } satisfies RecoveryOutcomeFixture,
 
   "terminal-inactive": {
     state: "terminal-inactive",
     chrome: OPEN_CHROME,
-    heading: "This link has expired",
-    message: "Ask whoever shared it with you to send a new one.",
+    heading: "Account Inactive",
+    message: "This account is inactive.",
   } satisfies TerminalFixture,
 
   "terminal-signup-closed": {
     state: "terminal-signup-closed",
     chrome: CLOSED_CHROME,
-    heading: "Signups are currently closed",
-    message: "Check back later, or sign in if you already have an account.",
+    heading: "Sign Up Closed",
+    message: "We are sorry, but the sign up is currently closed.",
   } satisfies TerminalFixture,
 
   "legal-published": {
     state: "legal-published",
     chrome: CLOSED_CHROME,
-    title: "Terms of Service",
+    title: "Terms Of Service",
     blocks: [
       { kind: "heading", text: "1. Using Spec Kitty", items: undefined },
       {
@@ -582,13 +617,14 @@ const ACCOUNT_FRONT_DOOR_FIXTURES_AUTHORED = {
   "legal-unavailable": {
     state: "legal-unavailable",
     chrome: CLOSED_CHROME,
-    title: "This document isn't available",
-    message: "We couldn't show this page. Try again later.",
+    title: "Shucks. We couldn't find that.",
+    message:
+      "If you think this page should exist, double-check that you are signed in as the right person.",
   } satisfies LegalUnavailableFixture,
 
   "email-management": {
     state: "email-management",
-    shellTitle: "Email addresses",
+    shellTitle: "E-mail Addresses",
     formId: "account-front-door-email-form",
     method: "post",
     action: "/account/email/",
@@ -606,7 +642,7 @@ const ACCOUNT_FRONT_DOOR_FIXTURES_AUTHORED = {
 
   "email-management-cooldown": {
     state: "email-management-cooldown",
-    shellTitle: "Email addresses",
+    shellTitle: "E-mail Addresses",
     formId: "account-front-door-email-cooldown-form",
     method: "post",
     action: "/account/email/",
@@ -624,26 +660,28 @@ const ACCOUNT_FRONT_DOOR_FIXTURES_AUTHORED = {
 
   "password-change": {
     state: "password-change",
-    shellTitle: "Change password",
+    shellTitle: "Change Password",
     formId: "account-front-door-password-change-form",
     method: "post",
     action: "/account/password/change/",
+    helpText: PASSWORD_MAINTENANCE_HELP,
     currentPassword: CURRENT_PASSWORD_FIELD,
     newPassword: CHANGE_NEW_PASSWORD_FIELD,
     repeatPassword: CHANGE_REPEAT_PASSWORD_FIELD,
-    submitLabel: "Change password",
+    submitLabel: "Change Password",
   } satisfies PasswordMaintenanceFixture,
 
   "password-set": {
     state: "password-set",
-    shellTitle: "Set a password",
+    shellTitle: "Set Password",
     formId: "account-front-door-password-set-form",
     method: "post",
     action: "/account/password/set/",
+    helpText: PASSWORD_MAINTENANCE_HELP,
     currentPassword: undefined,
     newPassword: SET_PASSWORD_FIELD,
     repeatPassword: SET_REPEAT_PASSWORD_FIELD,
-    submitLabel: "Set password",
+    submitLabel: "Set Password",
   } satisfies PasswordMaintenanceFixture,
 } satisfies Record<FrontDoorState, unknown>;
 

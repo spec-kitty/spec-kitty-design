@@ -92,7 +92,7 @@ describe("Truth constraints made unrepresentable (FR-006, FR-007, FR-009, FR-014
     expect(passwordFields).toHaveLength(1);
   });
 
-  test("P24 legitimately carries a repeat-password field, and carries no help text at all (FR-007 is signup-scoped; C-011 is not)", () => {
+  test("P24 carries the corpus's own four-item validator guidance, not an invented sentence (C-011)", () => {
     for (const state of ["password-change", "password-set"] as const) {
       const fixture = fixtureForAccountFrontDoorState(state);
       if (!("newPassword" in fixture) || !("repeatPassword" in fixture)) {
@@ -100,13 +100,17 @@ describe("Truth constraints made unrepresentable (FR-006, FR-007, FR-009, FR-014
       }
       expect(fixture.newPassword).toBeDefined();
       expect(fixture.repeatPassword).toBeDefined();
-      // The repeat field is P24's own and FR-007's prohibitions are signup-scoped, so it stays.
-      // The HELP TEXT does not. An earlier revision asserted `helpText.length > 0`, which locked
-      // in a sentence the corpus never contained: `COPY-CATALOG.md` §P24 records labels and submit
-      // copy only, and the family's one password-help row belongs to P11 and says EIGHT
-      // characters, not the twelve that shipped. Asserting its ABSENCE is what keeps an invented
-      // requirement from being reintroduced under a corrected number.
-      expect(Object.prototype.hasOwnProperty.call(fixture, "helpText")).toBe(false);
+      // `account.passwordMaintenance.help` (P24, BOTH branches) is a *verified* corpus row and a
+      // FOUR-ITEM list. This member has been wrong in both directions: first an invented single
+      // sentence claiming twelve characters, then deleted outright on the false premise that no
+      // such row existed. Pin the shape, the sourced figure, and the absence of the invented one.
+      expect(fixture.helpText).toHaveLength(4);
+      expect(fixture.helpText[1]).toBe("Your password must contain at least 8 characters.");
+      for (const item of fixture.helpText) {
+        expect(item.length).toBeGreaterThan(0);
+        expect(item).not.toMatch(/12 characters/);
+      }
+      // The per-field descriptions stay absent: the corpus sources none for these fields.
       for (const field of [fixture.currentPassword, fixture.newPassword, fixture.repeatPassword]) {
         if (field === undefined) continue;
         expect(Object.prototype.hasOwnProperty.call(field, "description")).toBe(false);

@@ -65,8 +65,11 @@ import { isolateThemeStory } from "../theme-toggle/theme-story-environment.fixtu
 import {
   ACCOUNT_FRONT_DOOR_FIXTURES,
   deepFreezeAccountFrontDoorFixture,
+  EMAIL_LIST_LEGEND,
+  EMAIL_STATUS,
   fixtureForAccountFrontDoorState,
   projectAccountFrontDoor,
+  SOCIAL_DIVIDER,
   type DeepReadonly,
   type EmailActionsFixture,
   type EmailManagementFixture,
@@ -319,7 +322,7 @@ const formField = (
       ?required=${field.required}
       .value=${retainedValue ?? ""}
       aria-invalid=${error ? "true" : nothing}
-      aria-describedby=${error ? descriptionId : nothing}
+      aria-describedby=${descriptionText ? descriptionId : nothing}
     />
     ${descriptionText
       ? html`<span id=${descriptionId} class="sk-form-field__description"
@@ -349,7 +352,7 @@ const providerRegion = (
   providers.length === 0
     ? nothing
     : html`<div class="sk-account-front-door-pattern__providers" data-provider-region>
-        <p class="sk-account-front-door-pattern__providers-label">Or continue with</p>
+        <p class="sk-account-front-door-pattern__providers-label">${SOCIAL_DIVIDER}</p>
         <div class="sk-account-front-door-pattern__provider-list">
           ${providers.map(
             (provider) =>
@@ -563,7 +566,7 @@ const renderEmailManagement = (
       <main id="main" class="sk-account-front-door-pattern__main">
         <form id=${fixture.formId} method=${fixture.method} action=${fixture.action}>
           <fieldset class="sk-radio-choice-group">
-            <legend class="sk-radio-choice-group__legend">Email addresses</legend>
+            <legend class="sk-radio-choice-group__legend">${EMAIL_LIST_LEGEND}</legend>
             <div class="sk-radio-choice-group__options">
               ${fixture.emails.map((email, index) => {
                 const choiceId = `${fixture.formId}-choice-${index}`;
@@ -588,11 +591,11 @@ const renderEmailManagement = (
                       ? nothing
                       : html`<span
                           class="sk-pill-tag sk-pill-tag--status-attention sk-account-front-door-pattern__radio-pill"
-                          >Unverified</span
+                          >${EMAIL_STATUS.unverified}</span
                         >`}
                   </span>
                   <span class="sk-radio-choice-group__secondary-value"
-                    >${email.verified ? "Verified" : "Not verified"}</span
+                    >${email.verified ? EMAIL_STATUS.verified : EMAIL_STATUS.unverified}</span
                   >
                 </label>`;
               })}
@@ -627,6 +630,15 @@ const renderEmailManagement = (
   `;
 };
 
+// THE `<ul>` BELOW IS `account.passwordMaintenance.help`. The catalogue places it "under the
+// FIRST new-password field" and gives its rendering as a "four-item rendered list" — which is how
+// Django emits it, via password_validators_help_text_html(). A list rather than a flattened
+// sentence, because the flattening is what let an invented single-sentence version stand
+// unnoticed, claiming twelve characters where the sourced row says eight.
+//
+// This note lives HERE, not as an HTML comment inside the template: a comment there would carry a
+// backtick around the copy id, and a backtick inside a template literal closes it. esbuild caught
+// that as a parse error where tsc and vitest did not, so the gates saw a file they could not read.
 const renderPasswordMaintenance = (
   fixture: DeepReadonly<PasswordMaintenanceFixture>,
 ): TemplateResult => html`
@@ -636,6 +648,9 @@ const renderPasswordMaintenance = (
       <form id=${fixture.formId} method=${fixture.method} action=${fixture.action}>
         ${fixture.currentPassword ? formField(fixture.currentPassword, undefined, undefined) : nothing}
         ${formField(fixture.newPassword, undefined, undefined)}
+        <ul class="sk-account-front-door-pattern__password-help">
+          ${fixture.helpText.map((item) => html`<li>${item}</li>`)}
+        </ul>
         ${formField(fixture.repeatPassword, undefined, undefined)}
       </form>
       <button
