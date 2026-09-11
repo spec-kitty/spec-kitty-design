@@ -49,7 +49,7 @@
       "wp": "WP01"
     },
     "#422": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Real pre-filed issue (200%-zoom emulation in apps/storybook/src/tests/visual.spec.ts); C-001 correctly excludes it from this mission because a sibling mission owns visual.spec.ts and has not merged. Joins a future increment once that sibling lands. Status comment posted on #422 recording this exclusion.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -57,7 +57,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "deferred-with-followup",
       "wp": null
     }
   },
