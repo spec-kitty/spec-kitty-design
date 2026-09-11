@@ -148,10 +148,10 @@
       "criterion_id": "FR-015",
       "description": "Verify FR-015 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "CI a11y job (run 34596232715, job 103252824428) completed successfully; reviewer read its log directly: all 13 CLI-auth story ids individually enumerated green (patterns-cli-auth--code-entry-default, ...-invalid, ...-light-mode, authorization-decision[-light-mode], terminal-success[-light-mode], terminal-denied[-light-mode], terminal-error-no-action[-light-mode], terminal-error-with-action[-light-mode]), and the job's own summary line: 'Zero WCAG 2.1 AA violations across all 730 rendered story/stories.' Anchored to run content, not SHA; re-check advised after any story-file change (none made by reviewer).",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:07:37.753970+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
