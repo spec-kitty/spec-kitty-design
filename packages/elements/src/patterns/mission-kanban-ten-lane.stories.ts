@@ -92,6 +92,8 @@ type TenLaneExtensionFixture = Readonly<{
  * Only what the #278 fixture does not carry: ten-lane composition copy (Family 2 COPY-CATALOG K
  * rows where they exist), the unverified not-yet-pushed overlay claim, and long localized lane
  * labels. Every string is a fixture value a consumer supplies, not a design-system default.
+ * Deep freezing covers every object; the `format` functions are not objects, so they are pinned
+ * only by their frozen container. They hold no state.
  */
 export const MISSION_KANBAN_TEN_LANE_FIXTURE = deepFreezeMissionKanban({
   copy: {
@@ -242,9 +244,6 @@ const guardTenLaneSources = (base: BaseFixture, extension: TenLaneSource): true 
   ) {
     throw new TypeError('Stress lane labels must cover exactly the supplied lanes.');
   }
-  if (!base.k3SelectedLaneIds.every((id) => knownLanes.has(id))) {
-    throw new TypeError('The supplied K3 selection names an unknown lane.');
-  }
   if (!Object.values(extension.tones).every((tone) => STATUS_TONES.includes(tone))) {
     throw new TypeError('Unknown supplied indicator tone.');
   }
@@ -311,7 +310,6 @@ export const deriveMissionKanbanTenLanes = (
       .map(({ id }) => id)
       .filter((id) => selectedIds?.has(id) ?? false),
     renderedWorkPackageIds: lanes.flatMap(({ workPackages }) => workPackages.map(({ id }) => id)),
-    total: committed.length,
     snapshot: options.includeSnapshot ? base.snapshot : undefined,
     unverifiedOverlays: lanes.flatMap(({ workPackages }) =>
       workPackages.flatMap(({ unverifiedOverlay }) => (unverifiedOverlay ? [unverifiedOverlay] : [])),
@@ -323,7 +321,10 @@ export const deriveMissionKanbanTenLanes = (
 type TenLaneProjection = ReturnType<typeof deriveMissionKanbanTenLanes>;
 type TenLaneCard = TenLaneProjection['lanes'][number]['workPackages'][number];
 
-/** Every named guard, each fed a mutated clone of the fixtures; `true` means it failed closed. */
+/**
+ * Every guard, each fed a mutated clone of the fixtures. A check counts as proven only when the
+ * projection throws that guard's own error, so a later guard cannot mask a deleted earlier one.
+ */
 export const missionKanbanTenLaneGuardProof = () => {
   const base = MISSION_KANBAN_FIXTURE;
   const extension = MISSION_KANBAN_TEN_LANE_FIXTURE;
@@ -337,31 +338,38 @@ export const missionKanbanTenLaneGuardProof = () => {
     ...base,
     workPackages: [{ ...first, ...patch }, ...base.workPackages.slice(1)],
   });
+  const overlayReplaced = (patch: Partial<UnverifiedOverlayFixture>): TenLaneSource => ({
+    ...extension,
+    unverifiedOverlays: [{ ...overlay, ...patch }],
+  });
   const checks = [
-    ['duplicateLane', withBase({ ...base, detailedLanes: [...base.detailedLanes, base.detailedLanes[0]!] })],
-    ['blankLaneLabel', withBase({ ...base, detailedLanes: [{ ...base.detailedLanes[0]!, label: ' ' }, ...base.detailedLanes.slice(1)] })],
-    ['noCurrentNavigation', withBase({ ...base, navigation: base.navigation.map((item) => ({ ...item, current: false })) })],
-    ['duplicateWorkPackage', withBase({ ...base, workPackages: [...base.workPackages, first] })],
-    ['blankRoute', withBase(firstReplaced({ href: ' ' }))],
-    ['duplicateRoute', withBase(firstReplaced({ href: second.href }))],
-    ['unknownCommittedLane', withBase(firstReplaced({ committedLaneId: 'not-supplied' as BaseWorkPackage['committedLaneId'] }))],
-    ['duplicateTrackerControl', withBase(firstReplaced({ trackerReferences: [first.trackerReferences[0]!, first.trackerReferences[0]!] }))],
-    ['overlayUnknownWorkPackage', withExtension({ ...extension, unverifiedOverlays: [{ ...overlay, workPackageId: 'WP99' }] })],
-    ['overlayUnknownLane', withExtension({ ...extension, unverifiedOverlays: [{ ...overlay, targetLaneId: 'not-supplied' as LaneId }] })],
-    ['duplicateOverlay', withExtension({ ...extension, unverifiedOverlays: [overlay, overlay] })],
-    ['overlayNotUnverified', withExtension({ ...extension, unverifiedOverlays: [{ ...overlay, classification: 'observed' as 'unverified' }] })],
-    ['overlayUnknownTone', withExtension({ ...extension, unverifiedOverlays: [{ ...overlay, tierTone: 'unknown' as StatusIndicatorTone }] })],
-    ['incompleteStressLabels', withExtension({ ...extension, stress: { laneLabels: { genesis: 'Genesis' } as TenLaneSource['stress']['laneLabels'] } })],
-    ['unknownSelection', withOptions({ selectedLaneIds: ['not-supplied' as LaneId] })],
-    ['repeatedSelection', withOptions({ selectedLaneIds: ['blocked', 'blocked'] })],
-    ['unknownWorkPackage', withOptions({ includedWorkPackageIds: ['WP99'] })],
+    ['duplicateLane', /each exactly once/, withBase({ ...base, detailedLanes: [...base.detailedLanes, base.detailedLanes[0]!] })],
+    ['blankLaneLabel', /needs a supplied label/, withBase({ ...base, detailedLanes: [{ ...base.detailedLanes[0]!, label: ' ' }, ...base.detailedLanes.slice(1)] })],
+    ['noCurrentNavigation', /navigation entry must be current/, withBase({ ...base, navigation: base.navigation.map((item) => ({ ...item, current: false })) })],
+    ['duplicateWorkPackage', /Duplicate Work Package identifier/, withBase({ ...base, workPackages: [...base.workPackages, first] })],
+    ['blankRoute', /Work Package route/, withBase(firstReplaced({ href: ' ' }))],
+    ['duplicateRoute', /Work Package route/, withBase(firstReplaced({ href: second.href }))],
+    ['unknownCommittedLane', /Unknown committed lane/, withBase(firstReplaced({ committedLaneId: 'not-supplied' as BaseWorkPackage['committedLaneId'] }))],
+    ['duplicateTrackerControl', /tracker control/, withBase(firstReplaced({ trackerReferences: [first.trackerReferences[0]!, first.trackerReferences[0]!] }))],
+    ['blankTrackerControl', /tracker control/, withBase(firstReplaced({ trackerReferences: [{ label: ' ', href: first.trackerReferences[0]!.href }] }))],
+    ['overlayUnknownWorkPackage', /unknown Work Package/, withExtension(overlayReplaced({ workPackageId: 'WP99' }))],
+    ['overlayUnknownLane', /Overlay names an unknown lane/, withExtension(overlayReplaced({ targetLaneId: 'not-supplied' as LaneId }))],
+    ['duplicateOverlay', /More than one overlay/, withExtension({ ...extension, unverifiedOverlays: [overlay, overlay] })],
+    ['overlayNotUnverified', /classified as unverified/, withExtension(overlayReplaced({ classification: 'observed' as 'unverified' }))],
+    ['overlayUnknownTone', /overlay tier tone/, withExtension(overlayReplaced({ tierTone: 'unknown' as StatusIndicatorTone }))],
+    ['blankOverlayLabel', /tier label and actor/, withExtension(overlayReplaced({ actorLabel: ' ' }))],
+    ['incompleteStressLabels', /Stress lane labels/, withExtension({ ...extension, stress: { laneLabels: { genesis: 'Genesis' } as TenLaneSource['stress']['laneLabels'] } })],
+    ['unknownIndicatorTone', /indicator tone/, withExtension({ ...extension, tones: { ...extension.tones, commitTrust: 'unknown' as StatusIndicatorTone } })],
+    ['unknownSelection', /unknown or repeated lane/, withOptions({ selectedLaneIds: ['not-supplied' as LaneId] })],
+    ['repeatedSelection', /unknown or repeated lane/, withOptions({ selectedLaneIds: ['blocked', 'blocked'] })],
+    ['unknownWorkPackage', /unknown or repeated Work Package/, withOptions({ includedWorkPackageIds: ['WP99'] })],
   ] as const;
-  return deepFreezeMissionKanban(Object.fromEntries(checks.map(([name, check]) => {
+  return deepFreezeMissionKanban(Object.fromEntries(checks.map(([name, expected, check]) => {
     try {
       check();
       return [name, false];
-    } catch {
-      return [name, true];
+    } catch (error) {
+      return [name, error instanceof TypeError && expected.test(error.message)];
     }
   })));
 };
@@ -550,7 +558,6 @@ const PATTERN_STYLES = html`<style>
   .sk-mission-kanban-ten-lane-pattern__lane-list {
     display: grid;
     gap: var(--sk-space-3);
-    min-inline-size: 0;
     padding: 0;
     list-style: none;
   }
@@ -802,9 +809,8 @@ export const renderMissionKanbanTenLanes = (
   return html`
     <div
       class="sk-mission-kanban-ten-lane-pattern${presentation.light ? ' sk-light' : ''}"
-      dir=${presentation.rtl ? 'rtl' : 'ltr'}
+      dir=${presentation.rtl ? 'rtl' : nothing}
       data-mission-kanban-ten-lane-pattern
-      data-story-state=${presentation.state}
       data-render-complete="true"
       data-fixture-deeply-frozen=${String(isMissionKanbanDeeplyFrozen(base) && isMissionKanbanDeeplyFrozen(extension))}
       data-projection-deeply-frozen=${String(isMissionKanbanDeeplyFrozen(projection))}
@@ -906,7 +912,12 @@ const patternRoot = (canvasElement: HTMLElement): HTMLElement => {
   return root;
 };
 
-const basePlay = async (canvasElement: HTMLElement): Promise<HTMLElement> => {
+// The flag every spec and visual test waits on is set LAST, after the story's own checks, so a
+// failing per-story assertion leaves it unset instead of racing past it.
+const basePlay = async (
+  canvasElement: HTMLElement,
+  storyChecks: (root: HTMLElement) => Promise<void> = async () => {},
+): Promise<void> => {
   const root = patternRoot(canvasElement);
   await expect(root.dataset.renderComplete).toBe('true');
   await expect(root.dataset.fixtureDeeplyFrozen).toBe('true');
@@ -915,8 +926,8 @@ const basePlay = async (canvasElement: HTMLElement): Promise<HTMLElement> => {
   // The exact guard names are pinned by the focused suite; here only a non-empty floor.
   await expect(Object.keys(proof).length).toBeGreaterThan(0);
   await expect(Object.values(proof).every((failedClosed) => failedClosed)).toBe(true);
+  await storyChecks(root);
   root.setAttribute('data-play-proof', 'passed');
-  return root;
 };
 
 const meta: Meta = {
@@ -945,20 +956,17 @@ type Story = StoryObj;
 export const Default: Story = {
   name: 'K1 Populated ten lanes',
   render: () => renderMissionKanbanTenLanes(committedBoard(), { state: 'k1' }),
-  play: async ({ canvasElement }) => {
-    const root = await basePlay(canvasElement);
+  play: async ({ canvasElement }) => basePlay(canvasElement, async (root) => {
     await expect(root.querySelectorAll('[data-lane-id]')).toHaveLength(MISSION_KANBAN_FIXTURE.detailedLanes.length);
     await expect(root.querySelectorAll('[data-work-package-id]')).toHaveLength(MISSION_KANBAN_FIXTURE.workPackages.length);
-  },
+  }),
 };
 
 export const K2NarrowContained: Story = {
   name: 'K2 Narrow contained',
   parameters: { viewport: { defaultViewport: 'mobile1' } },
   render: () => renderMissionKanbanTenLanes(committedBoard(), { state: 'k2' }),
-  play: async ({ canvasElement }) => {
-    await basePlay(canvasElement);
-  },
+  play: async ({ canvasElement }) => basePlay(canvasElement),
 };
 
 export const K3FilteredLanes: Story = {
@@ -967,30 +975,27 @@ export const K3FilteredLanes: Story = {
     committedBoard({ selectedLaneIds: MISSION_KANBAN_FIXTURE.k3SelectedLaneIds }),
     { state: 'k3', filtersOpen: true },
   ),
-  play: async ({ canvasElement }) => {
-    const root = await basePlay(canvasElement);
+  play: async ({ canvasElement }) => basePlay(canvasElement, async (root) => {
     await expect(root.dataset.laneIds).toBe('["in_review","blocked"]');
     await expect(root.dataset.workPackageIds).toBe('["WP10","WP05"]');
     await expect(root.querySelectorAll('input[type="checkbox"]:checked')).toHaveLength(2);
-  },
+  }),
 };
 
 export const K4SnapshotBehindLog: Story = {
   name: 'K4 Snapshot behind log',
   render: () => renderMissionKanbanTenLanes(committedBoard({ includeSnapshot: true }), { state: 'k4' }),
-  play: async ({ canvasElement }) => {
-    const root = await basePlay(canvasElement);
+  play: async ({ canvasElement }) => basePlay(canvasElement, async (root) => {
     await expect(root.querySelectorAll('[data-snapshot-behind-log]')).toHaveLength(1);
-  },
+  }),
 };
 
 export const K5UnverifiedOverlay: Story = {
   name: 'K5 Unverified overlay',
   render: () => renderMissionKanbanTenLanes(committedBoard({ includeUnverifiedOverlays: true }), { state: 'k5' }),
-  play: async ({ canvasElement }) => {
-    const root = await basePlay(canvasElement);
+  play: async ({ canvasElement }) => basePlay(canvasElement, async (root) => {
     await expect(root.querySelectorAll('[data-unverified-overlay]')).toHaveLength(1);
-  },
+  }),
 };
 
 export const K6EmptyLanes: Story = {
@@ -999,27 +1004,22 @@ export const K6EmptyLanes: Story = {
     deriveMissionKanbanTenLanes(MISSION_KANBAN_FIXTURE, MISSION_KANBAN_TEN_LANE_FIXTURE, { includedWorkPackageIds: [] }),
     { state: 'k6' },
   ),
-  play: async ({ canvasElement }) => {
-    const root = await basePlay(canvasElement);
+  play: async ({ canvasElement }) => basePlay(canvasElement, async (root) => {
     const counts = JSON.parse(root.dataset.laneCounts ?? '[]') as number[];
     await expect(counts.every((count) => count === 0)).toBe(true);
     await expect(root.querySelectorAll('[data-empty-lane]')).toHaveLength(MISSION_KANBAN_FIXTURE.detailedLanes.length);
-  },
+  }),
 };
 
 export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
   render: () => renderMissionKanbanTenLanes(committedBoard(), { state: 'light', light: true }),
-  play: async ({ canvasElement }) => {
-    await basePlay(canvasElement);
-  },
+  play: async ({ canvasElement }) => basePlay(canvasElement),
 };
 
 export const LongContent: Story = {
   render: () => renderMissionKanbanTenLanes(committedBoard(), { state: 'long', long: true, filtersOpen: true }),
-  play: async ({ canvasElement }) => {
-    await basePlay(canvasElement);
-  },
+  play: async ({ canvasElement }) => basePlay(canvasElement),
 };
 
 export const ForcedColors: Story = {
@@ -1027,21 +1027,15 @@ export const ForcedColors: Story = {
     committedBoard({ includeSnapshot: true, includeUnverifiedOverlays: true }),
     { state: 'forced' },
   ),
-  play: async ({ canvasElement }) => {
-    await basePlay(canvasElement);
-  },
+  play: async ({ canvasElement }) => basePlay(canvasElement),
 };
 
 export const ReducedMotion: Story = {
   render: () => renderMissionKanbanTenLanes(committedBoard({ includeUnverifiedOverlays: true }), { state: 'reduced' }),
-  play: async ({ canvasElement }) => {
-    await basePlay(canvasElement);
-  },
+  play: async ({ canvasElement }) => basePlay(canvasElement),
 };
 
 export const RTL: Story = {
   render: () => renderMissionKanbanTenLanes(committedBoard(), { state: 'rtl', rtl: true }),
-  play: async ({ canvasElement }) => {
-    await basePlay(canvasElement);
-  },
+  play: async ({ canvasElement }) => basePlay(canvasElement),
 };
