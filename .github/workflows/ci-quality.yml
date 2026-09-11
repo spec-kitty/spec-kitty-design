@@ -39,6 +39,8 @@ on:
     # FR-041: nightly CVE audit on main branch
     # Offset from top of hour to avoid busy scheduling window (matches SK pattern)
     - cron: '17 2 * * *'
+    # REL1 (#362), research.md R25: check-develop-ruleset-parity.mjs --check, daily.
+    - cron: '43 3 * * *'
 
 concurrency:
   group: ci-quality-${{ github.ref }}
@@ -927,6 +929,37 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           PROMOTE_SOURCE_REF: ${{ vars.PROMOTE_DEVELOP_SOURCE_BRANCH || 'train/elements-first' }}
         run: node scripts/promote-develop.mjs run
+
+  # ── develop ruleset parity (REL1, #362, FR-001/NFR-004/SC-001) ─────────────────
+  #
+  # check-develop-ruleset-parity.mjs --check compares the live develop ruleset against the
+  # committed artifact (research.md R25) on the daily schedule above and on every push to
+  # develop — a scheduled/push job, never manual-only, so drift is caught without anyone
+  # having to remember to run it. `permissions: { contents: read }` only — no ruleset-specific
+  # permission exists to request, and this is a read-only comparison.
+  #
+  # No-ops cleanly (exit 0, ::notice::) until DEVELOP_RULESET_ID is set — the id does not exist
+  # until the orchestrator applies the ruleset after this PR merges (data-model.md's Post-apply
+  # record); this job must never go red before that has happened.
+  develop-ruleset-parity:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '43 3 * * *') ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/develop')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+      - name: "[ENFORCED] develop ruleset parity check (FR-001, NFR-004, SC-001)"
+        env:
+          DEVELOP_RULESET_ID: ${{ vars.DEVELOP_RULESET_ID }}
+          # research.md R25: the default GITHUB_TOKEN has been sufficient for read-only ruleset
+          # access on this public repo in this mission's own prior investigation — confirmed
+          # empirically against a real scheduled/push run rather than assumed (a residual, named
+          # in branch-model.md, not glossed over as certain).
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-develop-ruleset-parity.mjs --check
 
   # ── Lint feedback ────────────────────────────────────────────────────────────
   lint-feedback:
