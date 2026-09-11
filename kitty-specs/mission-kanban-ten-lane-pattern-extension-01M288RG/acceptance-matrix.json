@@ -68,10 +68,10 @@
       "criterion_id": "FR-007",
       "description": "Verify FR-007 is satisfied",
       "proof_type": "browser parity test",
-      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K4 commit/lane counts/ids/truth band identical to K1 plus exactly one attention notice (announce polite, base heading/message), no actions, exactly one SHA code.",
+      "evidence": "product head 8986d38f (rebased on train 16948194); sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K4 commit, counts, ids and truth band identical to K1 plus one attention notice with the base heading and message, no action, one SHA; local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T13:44:35.671553+00:00",
+      "verified_at": "2026-09-11T14:11:11.234746+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
