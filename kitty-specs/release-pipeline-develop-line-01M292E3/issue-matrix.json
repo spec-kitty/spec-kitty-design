@@ -25,7 +25,7 @@
       "wp": "WP01"
     },
     "#363": {
-      "evidence_ref": "plan.md Fold-ins (Named exclusions): REL2 (#363) owns the rc-publish workflow and its own trigger choice; fold-in comments naming M11/M14 corrections are drafted for #363. C-004/spec.md Recorded Decision.",
+      "evidence_ref": "Fold-in comment POSTED on #363: https://github.com/spec-kitty/spec-kitty-design/issues/363#issuecomment-5640830882 - REL2 must keep rc version state out of develop's tree (tree-sync overwrites it), owns its own rc-publish trigger choice, and observes SC-004/SC-005 across the first ten real promotion cycles.",
       "fr": null,
       "nfr": null,
       "repo": null,
