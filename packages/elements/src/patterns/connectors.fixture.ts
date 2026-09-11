@@ -1,17 +1,17 @@
 /**
- * CONNECTORS PATTERN FIXTURE — unblocked scope (C1-C4 only), mission #338.
+ * CONNECTORS PATTERN FIXTURE — full C1-C9b family, mission #338.
  *
  * One internally consistent, deep-frozen fixture family (FR-017) supplying every repeated
- * provider, health, count, ID, timestamp, and permission value composed by the C1-C4 canvases.
+ * provider, health, count, ID, timestamp, and permission value composed across all ten canvases.
  * Pure projection functions below derive what each canvas shows or omits; no discovery, polling,
  * inference, arithmetic, routing, or timers (C-005, C-007).
  *
- * SIX CANVASES ARE DELIBERATELY ABSENT FROM THIS PASS: C5 (blocked on #336, #321), C6/C7/C8/C9a
- * (blocked on #337, and #320/#321 for two specific controls within them), and C9b (conditionally
- * blocked on #321). See kitty-specs/connectors-pattern-stories-01M26947/research.md's "Dependency
- * reconciliation" section and tasks.md's T008-T011. Nothing here composes a missing public
- * surface; the field shapes below are grounded in the product corpus's own fixture JSON
- * (`ux_redesign/families/03-connectors/screens/C{1,2,3,4}-*.html`'s embedded `<script
+ * All six named dependencies (#336, #337, #280 ruled-out, #307 ruled-out, #320, #321) landed on
+ * `train/elements-first` before this pass; every canvas C1-C9b is composed here. See
+ * kitty-specs/connectors-pattern-stories-01M26947/research.md's "Dependency reconciliation"
+ * section for the history. Nothing here composes a missing public surface; the field shapes below
+ * are grounded in the product corpus's own fixture JSON
+ * (`ux_redesign/families/03-connectors/screens/C*.html`'s embedded `<script
  * type="application/json">` blocks), read as product evidence, never copied as markup or CSS.
  *
  * TRUTH BOUNDARIES THIS FIXTURE MUST NOT VIOLATE (FR-011, FR-012, FR-014, FR-018, FR-019):
@@ -50,6 +50,23 @@ export function healthTone(health: ConnectorHealth): ConnectorTone {
 
 /** A role gate purely mirrors what a backend already decided; it never recomputes permission. */
 export type ConnectorRole = 'admin' | 'member';
+
+/** C9a's per-link authorization-health vocabulary maps to the same tone family as
+ * `healthTone`, but is a DISTINCT total switch over a distinct type — `LinkAuthHealth` has no
+ * `not_installed` member and gains no `active`-vs-`expired` distinction from `ConnectorHealth`.
+ * A fold-in-place onto `healthTone` would require a cast at every call site; this stays separate
+ * and exhaustive so a new health value fails to COMPILE rather than silently painting success. */
+export function linkAuthTone(health: LinkAuthHealth): ConnectorTone {
+  switch (health) {
+    case 'active':
+      return 'success';
+    case 'expired':
+      return 'attention';
+    case 'needs_reauth':
+    case 'revoked':
+      return 'danger';
+  }
+}
 
 // ---------------------------------------------------------------------------------------------
 // C1 — setup index
@@ -150,11 +167,18 @@ export type OperatingProjection = Readonly<{
   team: Readonly<{ name: string; slug: string }>;
   role: ConnectorRole;
   providerCards: ReadonlyArray<ProviderCardProjection>;
+  /** Deliberately admin-only, matching BACKEND-CAPABILITY-MAP.md's "admin-only topology fields"
+   * for the relay card — infrastructure status, not connector activity a member needs. */
   relayNotice: Readonly<{ tone: ConnectorTone; heading: string; message: string }> | null;
   slackNotice: Readonly<{ tone: ConnectorTone; message: string }> | null;
   /** Trailing per-row control for the one linked GitHub account summary row, proving the
    * already-public `sk-action-row` `controls` slot composes C2 without #307 (research.md finding,
-   * 2026-09-10). Absent entirely for a member — permission removes the control, not the row. */
+   * 2026-09-10). Deliberately admin-only — the WHOLE row, not just its control — because it is
+   * the installation-level management shortcut for GitHub's own account link, distinct from
+   * C9a's per-user self-service links tab. A member sees no trace of it, by design, not by an
+   * accidentally-stripped control (pre-merge review finding, 2026-09-11: the code once claimed
+   * "permission removes the control, not the row" while this field actually removed the row too;
+   * that claim was false and is corrected here rather than made true by adding the row back). */
   linkedAccountRow: Readonly<{ id: string; label: string; reference: string; canDisconnect: boolean }> | null;
 }>;
 
@@ -171,8 +195,11 @@ function providerFacts(
   return facts;
 }
 
-/** Pure. Role only removes controls — every fact present for an admin is present for a member
- * too (FR-020); the difference is exclusively `manageAction`/`canDisconnect`. */
+/** Pure. Role removes controls without changing shared FACTS: `providerCards[].facts` (FR-020,
+ * the health/account/mapping/repository facts) are identical for both roles, and only the
+ * per-card `manageAction`/`canDisconnect` controls differ. `relayNotice` and `linkedAccountRow`
+ * are a narrower, deliberately-admin-only exception documented on their own fields above, not an
+ * accidental extension of the same rule — pre-merge review 2026-09-11 found the two conflated. */
 export function selectOperatingProjection(fixture: OperatingFixture, role: ConnectorRole): OperatingProjection {
   const cards: ProviderCardProjection[] = [];
   if (fixture.github) {
@@ -357,7 +384,6 @@ export type GitlabGroupSelectionState = 'populated' | 'no-groups' | 'validation'
 
 export type GitlabGroupFixture = Readonly<{
   team: Readonly<{ name: string; slug: string }>;
-  installationUuid: string;
   groups: ReadonlyArray<GitlabGroup>;
   /** The already-connected group, present only for the connected-refresh-failed state. Backend
    * supplied; never inferred from `groups` (which may not even include it after a refresh). */
@@ -366,7 +392,7 @@ export type GitlabGroupFixture = Readonly<{
   selectionPath: string;
   refreshMethod: 'POST';
   refreshPath: string;
-  failures: Readonly<{ missing: string; manualRefresh: string; list: string }>;
+  failures: Readonly<{ missing: string; manualRefresh: string }>;
 }>;
 
 export type GitlabGroupProjection = Readonly<{
@@ -492,9 +518,14 @@ export function selectSlackChannelPickerProjection(
 // ---------------------------------------------------------------------------------------------
 
 export type InstallationHealth = 'active' | 'degraded' | 'needs_reauth' | 'revoked';
-export type InstallationRole = 'admin' | 'member';
 export type InstallationTab = 'workspace' | 'mappings' | 'links';
 
+/** No mapping/link counts here (pre-merge review 2026-09-11 removed them): a static scalar
+ * duplicating what `projectRouting.mappings.length`/`teamAccounts.states[x].links.length` already
+ * say is exactly the "one root, several sources of truth" defect FR-017 exists to forbid — visible
+ * on shipped output as "2 teammates linked" printed directly above a 0-link empty state. Every
+ * caller of `renderInstallationFacts` now derives both counts from the same array the canvas body
+ * itself renders (see `connectors.stories.ts`). */
 export type InstallationRecord = Readonly<{
   uuid: string;
   teamSlug: string;
@@ -504,8 +535,6 @@ export type InstallationRecord = Readonly<{
   health: InstallationHealth;
   installedBy: string;
   installedAt: string;
-  activeMappingCount: number;
-  activeLinkCount: number;
 }>;
 
 /** Pure. The `?tab=discovery` name is the real backend's historical route naming for the
@@ -534,7 +563,7 @@ export function withInstallationHealth(installation: InstallationRecord, health:
 
 export type InstallationShellProjection = Readonly<{
   installation: InstallationRecord;
-  role: InstallationRole;
+  role: ConnectorRole;
   activeTab: InstallationTab;
   visibleTabs: ReadonlyArray<InstallationTab>;
   /** Present only for admins — a teardown action, never a recovery action (FR-016: danger tone
@@ -548,7 +577,7 @@ export type InstallationShellProjection = Readonly<{
  * (the installation record itself) never change by role — only which tabs/actions surface. */
 export function selectInstallationShellProjection(
   installation: InstallationRecord,
-  role: InstallationRole,
+  role: ConnectorRole,
   activeTab: InstallationTab,
 ): InstallationShellProjection {
   return {
@@ -576,7 +605,6 @@ export type ScopeContainer = Readonly<{
 export type WorkspaceScopeState = 'populated' | 'empty' | 'unavailable' | 'stale-after-refresh-failure';
 
 export type WorkspaceScopeFixture = Readonly<{
-  installation: InstallationRecord;
   states: Readonly<
     Record<
       WorkspaceScopeState,
@@ -591,8 +619,6 @@ export type WorkspaceScopeFixture = Readonly<{
 }>;
 
 export type WorkspaceScopeProjection = Readonly<{
-  installation: InstallationRecord;
-  role: InstallationRole;
   state: WorkspaceScopeState;
   discovered: number;
   included: number;
@@ -600,19 +626,19 @@ export type WorkspaceScopeProjection = Readonly<{
   refreshFailureMessage: string | null;
 }>;
 
-/** Pure. `role: 'member'` never reaches this tab at all (it is admin-only — `visibleTabs` above
- * already excludes it), so this selector exists to prove the boundary rather than branch on it:
- * callers must gate access to this tab by `role`, not by hiding facts inside it. */
+/** Pure. Carries no `installation`/`role` — this tab is reached only through the shared shell
+ * (`InstallationShellProjection`, which already gates it to admin-only via `visibleTabs`), so the
+ * caller composes both from `CONNECTORS_FIXTURE.installation`/`shell.role` directly rather than
+ * through a second, easily-desynced copy (pre-merge review 2026-09-11: both fields were carried
+ * here, never read by any render function, alongside a `role` parameter no branch in this
+ * function used). */
 export function selectWorkspaceScopeProjection(
   fixture: WorkspaceScopeFixture,
-  role: InstallationRole,
   state: WorkspaceScopeState,
 ): WorkspaceScopeProjection {
   // eslint-disable-next-line security/detect-object-injection -- key is the literal union type WorkspaceScopeState
   const s = fixture.states[state];
   return {
-    installation: fixture.installation,
-    role,
     state,
     discovered: s.discovered,
     included: s.included,
@@ -644,20 +670,16 @@ export type AdmittedRepository = Readonly<{
 export type ProjectRoutingState = 'populated' | 'empty' | 'validation' | 'jira-rescue' | 'purge-confirm';
 
 export type ProjectRoutingFixture = Readonly<{
-  installation: InstallationRecord;
   mappings: ReadonlyArray<ResourceMapping>;
   repositories: ReadonlyArray<AdmittedRepository>;
   validationError: string;
   jiraManualRescuePath: string;
   purgeConfirmCopy: string;
   purgeRepositoryId: number;
-  purgePathPattern: string;
   discoveryRedirect: Readonly<{ path: string; note: string }>;
 }>;
 
 export type ProjectRoutingProjection = Readonly<{
-  installation: InstallationRecord;
-  role: InstallationRole;
   state: ProjectRoutingState;
   mappings: ReadonlyArray<ResourceMapping>;
   repositories: ReadonlyArray<AdmittedRepository>;
@@ -669,16 +691,14 @@ export type ProjectRoutingProjection = Readonly<{
 }>;
 
 /** Pure. Never returns a "re-admit"/"restore" control for an inactive repository — hard purge
- * blocks automatic readmission (FR-015) and this projection has no field that could express one. */
+ * blocks automatic readmission (FR-015) and this projection has no field that could express one.
+ * Carries no `installation`/`role` — see `selectWorkspaceScopeProjection`'s doc comment for why. */
 export function selectProjectRoutingProjection(
   fixture: ProjectRoutingFixture,
-  role: InstallationRole,
   state: ProjectRoutingState,
 ): ProjectRoutingProjection {
   const populatedLike = state === 'populated' || state === 'validation' || state === 'purge-confirm';
   return {
-    installation: fixture.installation,
-    role,
     state,
     mappings: populatedLike ? fixture.mappings : [],
     repositories: populatedLike ? fixture.repositories : [],
@@ -702,13 +722,18 @@ export type AccountLink = Readonly<{
   displayName: string;
   providerSubject: string;
   authorizationHealth: LinkAuthHealth;
+  /** The real FR-022 "account activity" fact — when the link was created — independent of
+   * `authorizationHealth`. Pre-merge review 2026-09-11: an earlier revision had no such field and
+   * used `isViewer` as a stand-in, which proves only "is this the signed-in user's own row," not
+   * activity; that test asserted a renamed term satisfied the clause. `linkedAt` is the actual
+   * fact, sourced from the corpus's own `links[].created_at`. */
+  linkedAt: string;
   isViewer: boolean;
 }>;
 
 export type TeamAccountsState = 'admin-active' | 'admin-unhealthy' | 'member-unlinked' | 'member-empty';
 
 export type TeamAccountsFixture = Readonly<{
-  installation: InstallationRecord;
   states: Readonly<
     Record<
       TeamAccountsState,
@@ -719,8 +744,6 @@ export type TeamAccountsFixture = Readonly<{
 }>;
 
 export type TeamAccountsProjection = Readonly<{
-  installation: InstallationRecord;
-  role: InstallationRole;
   state: TeamAccountsState;
   links: ReadonlyArray<AccountLink>;
   emptyCopy: string | null;
@@ -729,19 +752,18 @@ export type TeamAccountsProjection = Readonly<{
 }>;
 
 /** Pure. Mutation is self-owned only: `may_disconnect` is computed here from `isViewer`, never
- * carried as a separate fixture field an author could accidentally desync from it (FR-016/FR-022:
- * `needs_reauth`/revoked expose no recovery action — only disconnect, and only for the viewer's
- * own row; account activity (`isViewer`) stays independent of `authorizationHealth`). */
+ * carried as a separate fixture field an author could accidentally desync from it (FR-016: danger
+ * health exposes no recovery action — only disconnect, and only for the viewer's own row; FR-022:
+ * `linkedAt` stays independent of `authorizationHealth` — the admin-unhealthy fixture row below
+ * pairs an old `linkedAt` with a fresh `needs_reauth` to prove neither is derived from the other).
+ * Carries no `installation`/`role` — see `selectWorkspaceScopeProjection`'s doc comment for why. */
 export function selectTeamAccountsProjection(
   fixture: TeamAccountsFixture,
-  role: InstallationRole,
   state: TeamAccountsState,
 ): TeamAccountsProjection {
   // eslint-disable-next-line security/detect-object-injection -- key is the literal union type TeamAccountsState
   const s = fixture.states[state];
   return {
-    installation: fixture.installation,
-    role,
     state,
     links: s.links,
     emptyCopy: s.emptyCopy,
@@ -761,6 +783,10 @@ export type ConnectorsFixture = Readonly<{
   githubAppFailure: GithubAppFailureFixture;
   gitlabGroup: GitlabGroupFixture;
   slackChannelPicker: SlackChannelPickerFixture;
+  /** The ONE installation record C6/C7/C8/C9a all share — hoisted here rather than declared
+   * separately on each of the three fixtures below (pre-merge review 2026-09-11: it was declared
+   * three times, all pointing at the same object today, but with three edit sites tomorrow). */
+  installation: InstallationRecord;
   workspaceScope: WorkspaceScopeFixture;
   projectRouting: ProjectRoutingFixture;
   teamAccounts: TeamAccountsFixture;
@@ -782,21 +808,6 @@ export type DeepReadonly<T> = T extends (infer U)[]
   : T extends object
     ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
     : T;
-
-/** Shared across C6/C7/C8/C9a — one installation, matching the corpus's own reuse of the same
- * `sm-team` fixture identity across its C6/C7/C8/C9a screens. */
-const SM_TEAM_INSTALLATION: InstallationRecord = {
-  uuid: '00000000-0000-4000-8000-000000000006',
-  teamSlug: 'sm-team',
-  teamName: 'State Machine Team',
-  provider: 'Linear',
-  externalAccountLabel: 'SM Linear',
-  health: 'active',
-  installedBy: 'smadmin@example.com',
-  installedAt: '2026-09-09',
-  activeMappingCount: 2,
-  activeLinkCount: 2,
-};
 
 const RAW_CONNECTORS_FIXTURE: ConnectorsFixture = {
   setup: {
@@ -827,7 +838,11 @@ const RAW_CONNECTORS_FIXTURE: ConnectorsFixture = {
     gitlab: {
       uuid: '00000000-0000-4000-8000-000000002001',
       externalAccountLabel: 'acme',
-      health: 'active',
+      // Mixed provider health (issue's explicit C2 requirement): GitHub above stays active while
+      // GitLab needs reauthorization — gives C2 a real danger-tone arm (pre-merge review
+      // 2026-09-11: every C2 tone was 'success' before this, so FR-016's "independently verified
+      // on C2" claim had nothing to verify against).
+      health: 'needs_reauth',
       isEnabled: true,
       mappingCount: 0,
     },
@@ -904,7 +919,6 @@ const RAW_CONNECTORS_FIXTURE: ConnectorsFixture = {
   },
   gitlabGroup: {
     team: { name: 'GL Select Team', slug: 'gl-select-team' },
-    installationUuid: '00000000-0000-4000-8000-000000000005',
     groups: [
       { id: '2001', name: 'acme', display: 'Acme' },
       { id: '2002', name: 'acme/platform', display: 'Acme / Platform' },
@@ -917,7 +931,6 @@ const RAW_CONNECTORS_FIXTURE: ConnectorsFixture = {
     failures: {
       missing: 'Please choose a GitLab group.',
       manualRefresh: 'Failed to refresh repositories. Please try again.',
-      list: 'Could not list your GitLab groups. Please try reconnecting.',
     },
   },
   slackChannelPicker: {
@@ -970,8 +983,17 @@ const RAW_CONNECTORS_FIXTURE: ConnectorsFixture = {
       },
     },
   },
+  installation: {
+    uuid: '00000000-0000-4000-8000-000000000006',
+    teamSlug: 'sm-team',
+    teamName: 'State Machine Team',
+    provider: 'Linear',
+    externalAccountLabel: 'SM Linear',
+    health: 'active',
+    installedBy: 'smadmin@example.com',
+    installedAt: '2026-09-09',
+  },
   workspaceScope: {
-    installation: SM_TEAM_INSTALLATION,
     states: {
       populated: {
         discovered: 2,
@@ -991,12 +1013,14 @@ const RAW_CONNECTORS_FIXTURE: ConnectorsFixture = {
           { id: 'w-1', container: 'Platform', workspace: 'linear-team-platform', type: 'linear_team', state: 'active' },
           { id: 'w-2', container: 'MVP Launch', workspace: 'linear-project-mvp-launch', type: 'linear_project', state: 'active' },
         ],
-        refreshFailureMessage: 'Could not verify your GitLab groups. Please try again.',
+        // Provider-neutral: this installation (SM_TEAM_INSTALLATION, provider 'Linear') has no
+        // group-selection concept — a GitLab-specific "verify your groups" string here was a copy
+        // error (pre-merge review 2026-09-11), not a real Linear-workspace-scope failure message.
+        refreshFailureMessage: 'Could not verify the workspace scope for this installation. Please try again.',
       },
     },
   },
   projectRouting: {
-    installation: SM_TEAM_INSTALLATION,
     mappings: [
       { id: 201, resourceType: 'linear_team', resourceLabel: 'Platform', targetRepo: 'sm-proj', source: 'discovery', isEnabled: true },
       { id: 202, resourceType: 'linear_project', resourceLabel: 'MVP Launch', targetRepo: 'launch-resilience', source: 'manual', isEnabled: true },
@@ -1011,35 +1035,35 @@ const RAW_CONNECTORS_FIXTURE: ConnectorsFixture = {
     purgeConfirmCopy:
       'Hard-purge spec-kitty/sm-proj? This permanently erases its dossier, rendered content, and caches on Spec Kitty — it cannot be undone. The repo will not be re-admitted automatically.',
     purgeRepositoryId: 301,
-    purgePathPattern: '/a/sm-team/connectors/install/00000000-0000-4000-8000-000000000006/repos/{id}/purge/',
     discoveryRedirect: {
       path: '/a/sm-team/connectors/discovery/?installation=00000000-0000-4000-8000-000000000006',
       note: 'One active installation redirects here to Installation Detail; zero or multiple redirect to the Connectors index. Not a browse destination.',
     },
   },
   teamAccounts: {
-    installation: SM_TEAM_INSTALLATION,
     states: {
       'admin-active': {
         links: [
-          { linkId: 'link-jeroen-linear', displayName: 'Jeroen', providerSubject: 'linear-user-jeroen-001', authorizationHealth: 'active', isViewer: true },
-          { linkId: 'link-mia-linear', displayName: 'Mia', providerSubject: 'linear-user-mia-002', authorizationHealth: 'active', isViewer: false },
+          { linkId: 'link-jeroen-linear', displayName: 'Jeroen', providerSubject: 'linear-user-jeroen-001', authorizationHealth: 'active', linkedAt: '2026-08-19', isViewer: true },
+          { linkId: 'link-mia-linear', displayName: 'Mia', providerSubject: 'linear-user-mia-002', authorizationHealth: 'active', linkedAt: '2026-08-14', isViewer: false },
         ],
         emptyCopy: null,
         ownLinkStartAvailable: false,
       },
       'admin-unhealthy': {
         links: [
-          { linkId: 'link-jeroen-linear', displayName: 'Jeroen', providerSubject: 'linear-user-jeroen-001', authorizationHealth: 'needs_reauth', isViewer: true },
-          { linkId: 'link-mia-linear', displayName: 'Mia', providerSubject: 'linear-user-mia-002', authorizationHealth: 'expired', isViewer: false },
-          { linkId: 'link-lynn-linear', displayName: 'Lynn', providerSubject: 'linear-user-lynn-003', authorizationHealth: 'revoked', isViewer: false },
+          // linkedAt is OLD (2026-08-19) while authorizationHealth is freshly needs_reauth — the
+          // two facts move independently, which is the actual FR-022 claim (not "isViewer").
+          { linkId: 'link-jeroen-linear', displayName: 'Jeroen', providerSubject: 'linear-user-jeroen-001', authorizationHealth: 'needs_reauth', linkedAt: '2026-08-19', isViewer: true },
+          { linkId: 'link-mia-linear', displayName: 'Mia', providerSubject: 'linear-user-mia-002', authorizationHealth: 'expired', linkedAt: '2026-08-14', isViewer: false },
+          { linkId: 'link-lynn-linear', displayName: 'Lynn', providerSubject: 'linear-user-lynn-003', authorizationHealth: 'revoked', linkedAt: '2026-07-28', isViewer: false },
         ],
         emptyCopy: null,
         ownLinkStartAvailable: false,
       },
       'member-unlinked': {
         links: [
-          { linkId: 'link-mia-linear', displayName: 'Mia', providerSubject: 'linear-user-mia-002', authorizationHealth: 'active', isViewer: false },
+          { linkId: 'link-mia-linear', displayName: 'Mia', providerSubject: 'linear-user-mia-002', authorizationHealth: 'active', linkedAt: '2026-08-14', isViewer: false },
         ],
         emptyCopy: null,
         ownLinkStartAvailable: true,

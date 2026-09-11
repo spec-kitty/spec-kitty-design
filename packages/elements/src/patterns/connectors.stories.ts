@@ -1,27 +1,34 @@
 /**
  * CONNECTORS PATTERN STORIES — mission #338.
  *
- * Composes C1 (setup index), C2 (operating index), C3 (provider authorization handoff), C4
- * (GitHub App setup failure), C5 (GitLab exactly-one group selection), and C9b (Slack public-
- * channel selection) from public `@spec-kitty/elements`/`@spec-kitty/styles` surfaces and native
- * HTML semantics only. **C6, C7, C8, and C9a remain deliberately absent** — held on `.sk-section-
- * nav` (#337), which is not yet on the train (PR #368, gate running). Do not stub it, do not copy
- * it from another checkout, do not fork its API. See `connectors.fixture.ts`'s header and
- * `kitty-specs/connectors-pattern-stories-01M26947/tasks.md` (T009 stays blocked; T008/T010, C5
- * and C9b, are now complete since #336 merged to train as `0a232a01` and #321 landed as PR #339).
+ * Composes the FULL C1-C9b family — C1 (setup index), C2 (operating index), C3 (provider
+ * authorization handoff), C4 (GitHub App setup failure), C5 (GitLab exactly-one group selection),
+ * C6 (installation detail shell), C7 (workspace scope), C8 (project routing / admitted
+ * repositories), C9a (team account links), and C9b (Slack public-channel selection) — from public
+ * `@spec-kitty/elements`/`@spec-kitty/styles` surfaces and native HTML semantics only. All six
+ * named dependencies landed on the train before this pass: #336 (`0a232a01`), #337
+ * (`16948194`), #320, #321 (both PRs merged), plus #280/#307 ruled out on measurement (see
+ * `research.md`'s "Dependency reconciliation"). Nothing here is stubbed, copied from another
+ * checkout, or a forked API — every class family composed is the real, now-public one. Pre-merge
+ * review 2026-09-11 caught this comment (and two others, and the shipped autodocs description)
+ * still claiming C5-C9b or C6-C9a were absent after they shipped; corrected here to match what is
+ * actually in this module, not what an earlier pass of it said.
  *
  * PUBLIC SURFACES COMPOSED: `sk-page-header`, `sk-card[status]`, `sk-status-indicator`,
- * `sk-notice`, `sk-button` (element form for the off-site "Manage on GitHub" link; native
+ * `sk-notice`, `sk-confirm-dialog` (C8's hard-purge confirmation, `confirm-variant="danger-
+ * secondary"`), `sk-button` (element form for the off-site "Manage on GitHub" link; native
  * `class="sk-button sk-button--*"` CSS-only form for in-form submit controls, since a `<button>`
  * inside `sk-button`'s shadow root cannot participate in an ancestor light-DOM `<form>` — ADR-9
  * §4's exact finding, reused here rather than rediscovered), `sk-action-row` (its already-public
  * `controls` slot), `.sk-radio-choice-group` (C5 — native `fieldset`/`legend`/`label`/
  * `input[type=radio]` with the family's documented classes only, no CSS or internals read from
- * its package), `.sk-form-select`/`.sk-form-field` (C9b's channel picker — a native `<select>`;
- * #321's contrast/target-size contract governs `.sk-input`, not this component, so it was never
- * actually load-bearing for C9b), plus native `<h1>`/`<form>`/`<a>`/`<dl>` semantics and the
- * documented `.sk-empty-state` CSS family. No shadow-root reach, no duplicated component CSS, no
- * undeclared `::part()` — enforced by `scripts/check-pattern-composition.mjs` (#259).
+ * its package), `.sk-section-nav` (C6-C9a's shared sub-navigation — native `nav`/`a[href]` with
+ * consumer-supplied `aria-current="page"`), `.sk-form-select`/`.sk-form-field` (C9b's channel
+ * picker — a native `<select>`; #321's contrast/target-size contract governs `.sk-input`, not
+ * this component, so it was never actually load-bearing for C9b), `.sk-data-table` (C7/C8's
+ * scrollable tables), plus native `<h1>`/`<form>`/`<a>`/`<dl>` semantics and the documented
+ * `.sk-empty-state` CSS family. No shadow-root reach, no duplicated component CSS, no undeclared
+ * `::part()` — enforced by `scripts/check-pattern-composition.mjs` (#259).
  *
  * MUTATION-FREE FORMS (FR-018): every `<form>` below is evidence only — this module never submits
  * one. `apps/storybook/src/tests/sk-connectors-pattern.spec.ts` proves that submitting one in a
@@ -41,6 +48,7 @@ import type { SkConfirmDialog } from '../confirm-dialog/sk-confirm-dialog.js';
 import {
   CONNECTORS_FIXTURE,
   healthTone,
+  linkAuthTone,
   INSTALLATION_TAB_LABEL,
   installationTabHref,
   selectGithubAppFailureProjection,
@@ -61,7 +69,7 @@ import {
   type HandoffFlow,
   type HandoffProjection,
   type InstallationHealth,
-  type InstallationRole,
+  type InstallationRecord,
   type InstallationShellProjection,
   type InstallationTab,
   type OperatingProjection,
@@ -95,8 +103,22 @@ const patternStyles = html`<style>
   .sk-connectors-pattern {
     box-sizing: border-box;
     display: grid;
+    /* A bare display:grid gives its single implicit column an auto (content-based) minimum --
+       a wide data-table scroller child then forces the TRACK, and so the whole section, wider
+       than max-inline-size (measured on the C8 populated story at 390px: a real document-level
+       horizontal overflow, pre-merge review 2026-09-11's own new 390px test caught it).
+       minmax(0, 1fr) gives the track an explicit 0 minimum so the table's own overflow-x:auto
+       scroller -- not this container -- is what scrolls. No backticks in this comment: it lives
+       inside a JS template literal and a backtick here would silently close it early. */
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--sk-space-6);
     max-inline-size: 960px;
+    /* Defensive containment: measured a residual 3px document-level overflow specific to Firefox
+       at 390px even after the grid-track fix above (393px scrollWidth vs 390px clientWidth) --
+       every local scroller this pattern composes (data-table, section-nav) already owns its own
+       overflow-x:auto, so clipping here cannot hide a real scroll affordance, only a sub-pixel
+       cross-engine rounding bleed. */
+    overflow-x: hidden;
     margin-inline: auto;
     padding: var(--sk-space-6);
     color: var(--sk-fg-body);
@@ -307,8 +329,6 @@ function renderGithubAppFailure(projection: GithubAppFailureProjection): Templat
 // C5 — GitLab exactly-one group selection (unblocked 2026-09-11, #336 merged as `0a232a01`)
 // =============================================================================================
 
-let gitlabGroupSelectSeq = 0;
-
 /** Public `.sk-radio-choice-group` markup (`packages/styles/src/radio-choice-group/`), composed
  * from its documented class contract only — `fieldset.sk-radio-choice-group` >
  * `legend.sk-radio-choice-group__legend` + `div.sk-radio-choice-group__options` >
@@ -317,7 +337,13 @@ let gitlabGroupSelectSeq = 0;
  * No selector here writes CSS for that family — every rule is pattern-scoped, and every use of an
  * owned class is in markup, which `check-pattern-composition.mjs` R3 treats as composition. */
 function renderGitlabGroupChoices(projection: GitlabGroupProjection): TemplateResult {
-  const groupName = `gitlab-group-${(gitlabGroupSelectSeq += 1)}`;
+  // Derived from the projection's own state, not a module-level mutable counter (pre-merge review
+  // 2026-09-11: a `let` counter incremented per call made the radio `name` — and therefore the
+  // exactly-one-selection group — depend on how many times this function had been called across
+  // the whole module's lifetime, not on anything the projection itself carries). Each Storybook
+  // story renders in its own isolated iframe, so a name stable per STATE is sufficient and
+  // deterministic.
+  const groupName = `gitlab-group-${projection.state}`;
   return html`<fieldset class="sk-radio-choice-group">
     <legend class="sk-radio-choice-group__legend">Connect a GitLab group</legend>
     <div class="sk-radio-choice-group__options">
@@ -468,8 +494,15 @@ function renderInstallationSectionNav(shell: InstallationShellProjection): Templ
 /** Stacked `.sk-facts` only — orchestrator ruling 2026-09-11 (research.md's "Dependency
  * reconciliation"): #280's grouped-reflow facts-grid extension is deferred as a follow-up, not a
  * gate; `--two-col` is deliberately never used here — it declares no `min-width:0`/`overflow-wrap`
- * on its value track and carries a real, untested overflow risk that stacked `.sk-facts` does not. */
-function renderInstallationFacts(installation: InstallationRecordLike): TemplateResult {
+ * on its value track and carries a real, untested overflow risk that stacked `.sk-facts` does not.
+ *
+ * `mappingCount`/`linkCount` are explicit parameters, not fields on `installation` (pre-merge
+ * review 2026-09-11): a static scalar on the fixture drifted from what the tab body actually
+ * rendered — `c-9-a-team-accounts-member-empty` printed "2 teammates linked" directly above a
+ * 0-link empty state. Every call site below derives both from the SAME array its own canvas body
+ * renders (or, where a canvas has no array of its own for one axis, from the single canonical
+ * baseline — never a second, separately-declared number). */
+function renderInstallationFacts(installation: InstallationRecord, mappingCount: number, linkCount: number): TemplateResult {
   return html`<dl class="sk-facts">
     <dt class="sk-facts__term">Provider</dt>
     <dd class="sk-facts__value">${installation.provider}</dd>
@@ -480,30 +513,31 @@ function renderInstallationFacts(installation: InstallationRecordLike): Template
       <sk-status-indicator tone=${healthTone(installation.health)}>${installation.health}</sk-status-indicator>
     </dd>
     <dt class="sk-facts__term">Project routing</dt>
-    <dd class="sk-facts__value">${installation.activeMappingCount} active mappings</dd>
+    <dd class="sk-facts__value">${mappingCount} active mappings</dd>
     <dt class="sk-facts__term">Linked accounts</dt>
-    <dd class="sk-facts__value">${installation.activeLinkCount} teammates linked</dd>
+    <dd class="sk-facts__value">${linkCount} teammates linked</dd>
     <dt class="sk-facts__term">Installed</dt>
     <dd class="sk-facts__value">${installation.installedAt} by ${installation.installedBy}</dd>
   </dl>`;
 }
 
-type InstallationRecordLike = Readonly<{
-  provider: string;
-  externalAccountLabel: string;
-  health: InstallationHealth;
-  activeMappingCount: number;
-  activeLinkCount: number;
-  installedAt: string;
-  installedBy: string;
-}>;
+/** The canonical, single-source baseline counts — used only when a canvas has no per-story array
+ * of its own for that axis (C6/C7 for both; C8 falls back for link count; C9a falls back for
+ * mapping count). Derived from the SAME arrays `projectRoutingStory('populated')` and
+ * `teamAccountsStory('admin-active', …)` render, never a separately-typed-in number. */
+function canonicalMappingCount(): number {
+  return CONNECTORS_FIXTURE.projectRouting.mappings.filter((m) => m.isEnabled).length;
+}
+function canonicalLinkCount(): number {
+  return CONNECTORS_FIXTURE.teamAccounts.states['admin-active'].links.length;
+}
 
 // =============================================================================================
 // C6 — installation detail shell
 // =============================================================================================
 
 function renderInstallationShell(shell: InstallationShellProjection): TemplateResult {
-  const dangerHealth = shell.installation.health === 'needs_reauth' || shell.installation.health === 'revoked';
+  const dangerHealth = healthTone(shell.installation.health) === 'danger';
   return html`${patternStyles}
     <section
       class="sk-connectors-pattern"
@@ -517,7 +551,7 @@ function renderInstallationShell(shell: InstallationShellProjection): TemplateRe
         <span slot="supporting">Signed in as ${shell.role === 'admin' ? 'an administrator' : 'a member'}.</span>
       </sk-page-header>
       ${renderInstallationSectionNav(shell)}
-      ${renderInstallationFacts(shell.installation)}
+      ${renderInstallationFacts(shell.installation, canonicalMappingCount(), canonicalLinkCount())}
       ${dangerHealth
         ? html`<sk-notice tone="danger" announce="polite"
             >This installation's authorization needs attention. No automatic recovery route is offered
@@ -555,7 +589,7 @@ function renderWorkspaceScope(scope: WorkspaceScopeProjection, shell: Installati
         <h1 id="c7-heading" slot="title">Workspace scope</h1>
       </sk-page-header>
       ${renderInstallationSectionNav(shell)}
-      ${renderInstallationFacts(shell.installation)}
+      ${renderInstallationFacts(shell.installation, canonicalMappingCount(), canonicalLinkCount())}
       ${scope.refreshFailureMessage
         ? html`<sk-notice tone="danger" announce="assertive">${scope.refreshFailureMessage}</sk-notice>`
         : nothing}
@@ -576,7 +610,12 @@ function renderWorkspaceScope(scope: WorkspaceScopeProjection, shell: Installati
                   <h3 class="sk-empty-state__heading">No scope containers discovered</h3>
                   <p class="sk-empty-state__body">Nothing has been auto-discovered for this installation yet.</p>
                 </div>`
-              : html`<div class="sk-data-table__scroller">
+              : html`<div
+                  class="sk-data-table__scroller"
+                  role="region"
+                  aria-label="Auto-discovered tracker scope containers, scrollable"
+                  tabindex="0"
+                >
                   <table class="sk-data-table">
                     <caption>
                       Auto-discovered tracker scope containers
@@ -622,7 +661,7 @@ function renderProjectRouting(routing: ProjectRoutingProjection, shell: Installa
         <h1 id="c8-heading" slot="title">Project routing</h1>
       </sk-page-header>
       ${renderInstallationSectionNav(shell)}
-      ${renderInstallationFacts(shell.installation)}
+      ${renderInstallationFacts(shell.installation, routing.mappings.filter((m) => m.isEnabled).length, canonicalLinkCount())}
 
       ${/* FR-014: /discovery/ is a compatibility redirect, never a browse link — rendered as
           inert text, no href ever points at it. */ nothing}
@@ -642,9 +681,15 @@ function renderProjectRouting(routing: ProjectRoutingProjection, shell: Installa
             </p>
           </div>`
         : nothing}
+      ${routing.mappings.length === 0 && routing.repositories.length === 0 && !routing.jiraManualRescuePath
+        ? html`<div class="sk-empty-state">
+            <h3 class="sk-empty-state__heading">No project routing yet</h3>
+            <p class="sk-empty-state__body">No resource mappings or admitted repositories exist for this installation.</p>
+          </div>`
+        : nothing}
 
       ${routing.mappings.length > 0
-        ? html`<div class="sk-data-table__scroller">
+        ? html`<div class="sk-data-table__scroller" role="region" aria-label="Resource mappings, scrollable" tabindex="0">
             <table class="sk-data-table">
               <caption>
                 Resource mappings
@@ -689,7 +734,7 @@ function renderProjectRouting(routing: ProjectRoutingProjection, shell: Installa
         : nothing}
 
       ${routing.repositories.length > 0
-        ? html`<div class="sk-data-table__scroller">
+        ? html`<div class="sk-data-table__scroller" role="region" aria-label="Admitted repositories, scrollable" tabindex="0">
             <table class="sk-data-table">
               <caption>
                 Admitted repositories
@@ -718,7 +763,6 @@ function renderProjectRouting(routing: ProjectRoutingProjection, shell: Installa
 
       ${routing.purgeTargetRepo && routing.purgeConfirmCopy
         ? html`<sk-confirm-dialog
-            class="sk-connectors-pattern__purge-dialog"
             dialog-title="Hard-purge repository?"
             message=${routing.purgeConfirmCopy}
             confirm-label="Hard-purge repository"
@@ -746,7 +790,7 @@ function renderTeamAccounts(accounts: TeamAccountsProjection, shell: Installatio
         <h1 id="c9a-heading" slot="title">Team accounts</h1>
       </sk-page-header>
       ${renderInstallationSectionNav(shell)}
-      ${renderInstallationFacts(shell.installation)}
+      ${renderInstallationFacts(shell.installation, canonicalMappingCount(), accounts.links.length)}
 
       ${accounts.links.length === 0
         ? html`<div class="sk-empty-state">
@@ -755,12 +799,12 @@ function renderTeamAccounts(accounts: TeamAccountsProjection, shell: Installatio
           </div>`
         : html`<ul class="sk-connectors-pattern__gap-list" aria-label="Linked accounts">
             ${accounts.links.map((link) => {
-              const dangerHealth = link.authorizationHealth === 'needs_reauth' || link.authorizationHealth === 'revoked';
-              const tone = dangerHealth ? 'danger' : link.authorizationHealth === 'expired' ? 'attention' : 'success';
+              const tone = linkAuthTone(link.authorizationHealth);
               return html`<li>
                 <sk-action-row>
                   <span slot="title">${link.displayName}${link.isViewer ? ' (you)' : ''}</span>
                   <span slot="reference">${link.providerSubject}</span>
+                  <span slot="supporting">Linked ${link.linkedAt}</span>
                   <span slot="metadata"
                     ><sk-status-indicator tone=${tone}>${link.authorizationHealth}</sk-status-indicator></span
                   >
@@ -808,10 +852,11 @@ const meta: Meta = {
     docs: {
       description: {
         component:
-          'Composition proof for Team Kitty Family 3 "Connectors" (#338), C1-C4 only — C5-C9b ' +
-          'are blocked on named public contracts and deliberately absent this pass (see ' +
-          'kitty-specs/connectors-pattern-stories-01M26947/research.md). Pattern-owned: fixture, ' +
-          'projections, layout. Not published: no new custom element, no `sk-connectors`.',
+          'Composition proof for Team Kitty Family 3 "Connectors" (#338) — the full C1-C9b family, ' +
+          'all ten canvases, all six named dependencies landed on the train (see ' +
+          'kitty-specs/connectors-pattern-stories-01M26947/research.md\'s "Dependency ' +
+          'reconciliation"). Pattern-owned: fixture, projections, layout. Not published: no new ' +
+          'custom element, no `sk-connectors`.',
       },
     },
   },
@@ -901,15 +946,21 @@ export const C9bSlackChannelIncomplete: Story = slackChannelPickerStory('incompl
 
 // --- C6 ---------------------------------------------------------------------------------------
 
-function installationShellStory(role: InstallationRole, health: InstallationHealth): Story {
+function installationShellStory(role: ConnectorRole, health: InstallationHealth): Story {
+  // Admin lands on Workspace scope by default (the corpus's own `computed.admin.workspace_tab:
+  // true`); a member has no Workspace scope tab at all, so 'workspace' would be an incoherent
+  // active-tab/visibleTabs pair with zero `aria-current="page"` anywhere in the nav (pre-merge
+  // review 2026-09-11, measured on `C6InstallationMemberActive`). A member lands on Team accounts
+  // instead — the corpus's own `routes.detail` default for a non-admin viewer is `?tab=links`.
+  const activeTab = role === 'admin' ? 'workspace' : 'links';
   return {
     render: () =>
       withThemeWrapper(
         renderInstallationShell(
           selectInstallationShellProjection(
-            withInstallationHealth(CONNECTORS_FIXTURE.workspaceScope.installation, health),
+            withInstallationHealth(CONNECTORS_FIXTURE.installation, health),
             role,
-            'workspace',
+            activeTab,
           ),
         ),
         false,
@@ -925,11 +976,11 @@ export const C6InstallationHealthNeedsReauth: Story = installationShellStory('ad
 
 // --- C7 ---------------------------------------------------------------------------------------
 
-function workspaceScopeStory(state: WorkspaceScopeState, role: InstallationRole = 'admin'): Story {
+function workspaceScopeStory(state: WorkspaceScopeState, role: ConnectorRole = 'admin'): Story {
   return {
     render: () => {
-      const shell = selectInstallationShellProjection(CONNECTORS_FIXTURE.workspaceScope.installation, role, 'workspace');
-      const scope = selectWorkspaceScopeProjection(CONNECTORS_FIXTURE.workspaceScope, role, state);
+      const shell = selectInstallationShellProjection(CONNECTORS_FIXTURE.installation, role, 'workspace');
+      const scope = selectWorkspaceScopeProjection(CONNECTORS_FIXTURE.workspaceScope, state);
       return withThemeWrapper(renderWorkspaceScope(scope, shell), false);
     },
   };
@@ -944,18 +995,18 @@ export const C7WorkspaceScopeMemberBoundary: Story = {
     // The Workspace Scope tab is admin-only: a member's shell never lists it among visibleTabs.
     // This story renders the SHELL as a member would see it, to prove the tab's absence rather
     // than assuming it — see the FR-007 test that asserts zero "Workspace scope" links here.
-    const shell = selectInstallationShellProjection(CONNECTORS_FIXTURE.workspaceScope.installation, 'member', 'mappings');
+    const shell = selectInstallationShellProjection(CONNECTORS_FIXTURE.installation, 'member', 'mappings');
     return withThemeWrapper(renderInstallationShell(shell), false);
   },
 };
 
 // --- C8 ---------------------------------------------------------------------------------------
 
-function projectRoutingStory(state: ProjectRoutingState, role: InstallationRole = 'admin'): Story {
+function projectRoutingStory(state: ProjectRoutingState, role: ConnectorRole = 'admin'): Story {
   return {
     render: () => {
-      const shell = selectInstallationShellProjection(CONNECTORS_FIXTURE.workspaceScope.installation, role, 'mappings');
-      const routing = selectProjectRoutingProjection(CONNECTORS_FIXTURE.projectRouting, role, state);
+      const shell = selectInstallationShellProjection(CONNECTORS_FIXTURE.installation, role, 'mappings');
+      const routing = selectProjectRoutingProjection(CONNECTORS_FIXTURE.projectRouting, state);
       return withThemeWrapper(renderProjectRouting(routing, shell), false);
     },
   };
@@ -976,11 +1027,11 @@ export const C8ProjectRoutingPurgeConfirm: Story = {
 
 // --- C9a --------------------------------------------------------------------------------------
 
-function teamAccountsStory(state: TeamAccountsState, role: InstallationRole): Story {
+function teamAccountsStory(state: TeamAccountsState, role: ConnectorRole): Story {
   return {
     render: () => {
-      const shell = selectInstallationShellProjection(CONNECTORS_FIXTURE.workspaceScope.installation, role, 'links');
-      const accounts = selectTeamAccountsProjection(CONNECTORS_FIXTURE.teamAccounts, role, state);
+      const shell = selectInstallationShellProjection(CONNECTORS_FIXTURE.installation, role, 'links');
+      const accounts = selectTeamAccountsProjection(CONNECTORS_FIXTURE.teamAccounts, state);
       return withThemeWrapper(renderTeamAccounts(accounts, shell), false);
     },
   };

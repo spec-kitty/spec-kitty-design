@@ -275,6 +275,38 @@ fixture-supplied message, not a real validation rule), form submission, confirma
 localization, and terminal-state selection (choosing success vs. denied vs. error is the
 consumer's decision, not something this pattern infers). There is intentionally no `auth-card`,
 auth-shell, `scope-chip`, or `form-action-row` component, and no second boundary/stage frame.
+## Connectors pattern
+
+The Storybook `Patterns/Connectors` family demonstrates the approved Team Kitty Family 3 corpus —
+setup (C1), operating index (C2), provider authorization handoff (C3), GitHub App setup failure
+(C4), GitLab exactly-one group selection (C5), installation detail shell (C6), workspace scope
+(C7), project routing / admitted repositories (C8), team account links (C9a), and Slack channel
+selection (C9b) — without publishing a page, provider, or `sk-connectors` component. It composes
+`sk-page-header`, `sk-card[status]`, `sk-status-indicator`, `sk-notice`, `sk-button`,
+`sk-action-row` (its public `controls` slot), `sk-confirm-dialog` (`confirm-variant="danger-
+secondary"` for C8's hard-purge confirmation), native `.sk-radio-choice-group` (C5), native
+`.sk-section-nav` (C6-C9a's shared sub-navigation), native `.sk-form-select`/`.sk-form-field`
+(C9b), native `.sk-data-table` (C7/C8), and native `.sk-empty-state`/`.sk-facts` (stacked only —
+the grouped-reflow facts-grid extension tracked separately is not composed here).
+
+Keep one immutable fixture and derive every repeated fact, health value, count, ID, timestamp, and
+permission from it — never a second, separately-declared copy of the same number. A permission
+projection (admin vs. member) removes controls, never the shared facts underneath; the one
+documented exception is C2's relay-status notice and linked-account summary row, which are
+themselves admin-only facts (infrastructure/management surfaces), not controls stripped from a
+shared fact. `needs_reauth`/revoked health maps to the danger tone and exposes no recovery/
+reauthorization action anywhere — disconnect is teardown, not recovery. GitHub admission is
+automatic: there is no repository picker or "Admit selected" action. Slack stays outbound-only: no
+preview, readback, or delivery-test capability. Only GitLab exposes another-group connection and
+exactly-one group selection. `/discovery/` is represented only as a compatibility-redirect fact,
+never a browse link. A repository hard-purge blocks automatic readmission; no tombstone-lift action
+is invented. Every form is mutation-free evidence — method/action/fields match the source exactly,
+but submission is intercepted (`preventDefault()`) and never calls a Team Kitty route.
+
+The application owns provider SDK/API integration, OAuth/GitHub App/Nango/webhook/relay/polling
+behavior, permission and admission logic, mapping/purge/refresh state machines, routing, and all
+copy/i18n. There is intentionally no `sk-connectors`, provider component, or published Connectors
+page.
 
 ## Application shell composition
 

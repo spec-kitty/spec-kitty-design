@@ -2608,6 +2608,40 @@ const cliAuthStory = async (
   await page.setViewportSize(viewport);
   await page.goto(`/iframe.html?id=patterns-cli-auth--${id}&viewMode=story`);
   const root = page.locator('[data-cli-auth-pattern]').first();
+// =============================================================================================
+// Connectors pattern (#338) — added per pre-merge review 2026-09-11 (both lenses, both rounds):
+// zero visual-regression coverage for 37 new stories was a MAJOR finding, and the second round
+// found there was no HARVEST MECHANISM at all (no toHaveScreenshot anywhere for this pattern), so
+// FR-027's baselines were not "pending a harvest" — nothing could produce them. These entries make
+// a harvest possible; no PNG is generated or committed in this pass (CI-authoritative, per the
+// programme brief — the orchestrator harvests from the run artifact). Expect visual-regression red
+// on the first run: that is the process working, not a defect.
+// =============================================================================================
+
+type ConnectorsVisualStoryId =
+  | 'c-1-setup-admin-empty'
+  | 'c-2-operating-admin'
+  | 'c-3-handoff-installation-waiting'
+  | 'c-4-github-app-failure-resolved-team'
+  | 'c-5-gitlab-group-populated'
+  | 'c-5-gitlab-group-validation'
+  | 'c-6-installation-admin-active'
+  | 'c-6-installation-health-needs-reauth'
+  | 'c-7-workspace-scope-populated'
+  | 'c-8-project-routing-populated'
+  | 'c-8-project-routing-purge-confirm'
+  | 'c-9-a-team-accounts-admin-unhealthy'
+  | 'c-9-b-slack-channel-populated'
+  | 'light-mode';
+
+const connectorsStory = async (
+  page: Page,
+  id: ConnectorsVisualStoryId,
+  viewport: Readonly<{ width: number; height: number }>,
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=patterns-connectors--${id}&viewMode=story`);
+  const root = page.locator('[data-connectors-pattern]').first();
   await root.waitFor({ state: 'visible', timeout: 20000 });
   await expect(root).toHaveAttribute('data-render-complete', 'true');
   await page.evaluate(() => document.fonts.ready);
@@ -2677,3 +2711,140 @@ for (const zoom of [
     });
   });
 }
+// The ten canonical desktop baselines (one per canvas, FR-027) plus C8's hard-purge dialog state.
+const connectorsDesktopCases = [
+  { id: 'c-1-setup-admin-empty', name: 'sk-connectors-c1-setup-desktop.png' },
+  { id: 'c-2-operating-admin', name: 'sk-connectors-c2-operating-desktop.png' },
+  { id: 'c-3-handoff-installation-waiting', name: 'sk-connectors-c3-handoff-desktop.png' },
+  { id: 'c-4-github-app-failure-resolved-team', name: 'sk-connectors-c4-github-app-failure-desktop.png' },
+  { id: 'c-5-gitlab-group-populated', name: 'sk-connectors-c5-gitlab-group-desktop.png' },
+  { id: 'c-6-installation-admin-active', name: 'sk-connectors-c6-installation-desktop.png' },
+  { id: 'c-7-workspace-scope-populated', name: 'sk-connectors-c7-workspace-scope-desktop.png' },
+  { id: 'c-8-project-routing-populated', name: 'sk-connectors-c8-project-routing-desktop.png' },
+  { id: 'c-9-a-team-accounts-admin-unhealthy', name: 'sk-connectors-c9a-team-accounts-desktop.png' },
+  { id: 'c-9-b-slack-channel-populated', name: 'sk-connectors-c9b-slack-channel-desktop.png' },
+] as const satisfies ReadonlyArray<{ id: ConnectorsVisualStoryId; name: `sk-connectors-${string}.png` }>;
+
+for (const visual of connectorsDesktopCases) {
+  test(`Connectors ${visual.id} — desktop baseline`, async ({ page }) => {
+    const root = await connectorsStory(page, visual.id, { width: 1440, height: 1000 });
+    await expect(root).toHaveScreenshot(visual.name, { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
+  });
+}
+
+// The ten canonical narrow (390px) baselines (FR-027) — same story set, narrow viewport.
+const connectorsNarrowCases = [
+  { id: 'c-1-setup-admin-empty', name: 'sk-connectors-c1-setup-narrow-390.png' },
+  { id: 'c-2-operating-admin', name: 'sk-connectors-c2-operating-narrow-390.png' },
+  { id: 'c-3-handoff-installation-waiting', name: 'sk-connectors-c3-handoff-narrow-390.png' },
+  { id: 'c-4-github-app-failure-resolved-team', name: 'sk-connectors-c4-github-app-failure-narrow-390.png' },
+  { id: 'c-5-gitlab-group-populated', name: 'sk-connectors-c5-gitlab-group-narrow-390.png' },
+  { id: 'c-6-installation-admin-active', name: 'sk-connectors-c6-installation-narrow-390.png' },
+  { id: 'c-7-workspace-scope-populated', name: 'sk-connectors-c7-workspace-scope-narrow-390.png' },
+  { id: 'c-8-project-routing-populated', name: 'sk-connectors-c8-project-routing-narrow-390.png' },
+  { id: 'c-9-a-team-accounts-admin-unhealthy', name: 'sk-connectors-c9a-team-accounts-narrow-390.png' },
+  { id: 'c-9-b-slack-channel-populated', name: 'sk-connectors-c9b-slack-channel-narrow-390.png' },
+] as const satisfies ReadonlyArray<{ id: ConnectorsVisualStoryId; name: `sk-connectors-${string}.png` }>;
+
+for (const visual of connectorsNarrowCases) {
+  test(`Connectors ${visual.id} — narrow 390px baseline`, async ({ page }) => {
+    const root = await connectorsStory(page, visual.id, { width: 390, height: 844 });
+    await expect(root).toHaveScreenshot(visual.name, { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
+  });
+}
+
+// Targeted role/error/health/hard-purge-dialog states the issue names explicitly.
+test('Connectors C5 validation — role/error-state baseline', async ({ page }) => {
+  const root = await connectorsStory(page, 'c-5-gitlab-group-validation', { width: 1440, height: 900 });
+  await expect(root).toHaveScreenshot('sk-connectors-c5-validation.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test('Connectors C6 needs_reauth — danger health baseline', async ({ page }) => {
+  const root = await connectorsStory(page, 'c-6-installation-health-needs-reauth', { width: 1440, height: 900 });
+  await expect(root).toHaveScreenshot('sk-connectors-c6-health-needs-reauth.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test('Connectors C8 hard-purge confirm dialog — baseline', async ({ page }) => {
+  const root = await connectorsStory(page, 'c-8-project-routing-purge-confirm', { width: 1440, height: 900 });
+  await expect(root.locator('sk-confirm-dialog')).toHaveAttribute('open', '');
+  await expect(root).toHaveScreenshot('sk-connectors-c8-purge-confirm-dialog.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test('Connectors C7 local table overflow at 390px — no document-level horizontal scroll', async ({ page }) => {
+  const root = await connectorsStory(page, 'c-7-workspace-scope-populated', { width: 390, height: 844 });
+  const overflowsX = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  );
+  expect(overflowsX, 'no document-level horizontal overflow at 390px — only the local table scroller may scroll').toBe(
+    false,
+  );
+  await expect(root).toHaveScreenshot('sk-connectors-c7-narrow-table-overflow.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test('Connectors LightMode — required system proof baseline', async ({ page }) => {
+  const root = await connectorsStory(page, 'light-mode', { width: 1440, height: 900 });
+  await expect(root).toHaveScreenshot('sk-connectors-light-mode.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test('Connectors forced colors — C6 danger health baseline', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
+  await page.emulateMedia({ forcedColors: 'active' });
+  const root = await connectorsStory(page, 'c-6-installation-health-needs-reauth', { width: 1440, height: 900 });
+  await expect(root).toHaveScreenshot('sk-connectors-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test('Connectors reduced motion — C3 handoff waiting baseline', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const root = await connectorsStory(page, 'c-3-handoff-installation-waiting', { width: 1440, height: 900 });
+  await expect(root).toHaveScreenshot('sk-connectors-reduced-motion.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test('Connectors RTL — C2 operating index baseline', async ({ page }) => {
+  const root = await connectorsStory(page, 'c-2-operating-admin', { width: 1440, height: 900 });
+  await page.evaluate(() => document.documentElement.setAttribute('dir', 'rtl'));
+  await expect(root).toHaveScreenshot('sk-connectors-rtl.png', { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
+});
+
+test('Connectors 200% zoom — C8 project routing baseline, no document-level horizontal overflow', async ({ page }) => {
+  const root = await connectorsStory(page, 'c-8-project-routing-populated', { width: 1440, height: 900 });
+  await page.evaluate(() => {
+    (document.documentElement.style as CSSStyleDeclaration & { zoom?: string }).zoom = '2';
+  });
+  const overflowsX = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  );
+  expect(overflowsX, 'no document-level horizontal overflow at 200% zoom').toBe(false);
+  await expect(root).toHaveScreenshot('sk-connectors-zoom-200.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});

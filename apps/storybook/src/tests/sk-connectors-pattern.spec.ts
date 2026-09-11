@@ -56,16 +56,22 @@ test('fixture and stories keep the pattern outside the public element and applic
   expect(source).not.toMatch(/type="checkbox"/);
   // FR-014: /discovery/ never appears as a link target.
   expect(source).not.toMatch(/href=.*\/discovery\//);
-  // FR-018: forms are mutation-free — every form present intercepts its own submit.
-  // Nine real rendered form TEMPLATES (C2 disconnect, C3 entry, C5 selection + refresh, C9b
-  // choose, C6 disconnect, C8 mapping-toggle, C9a disconnect-own + link-your-account) — counted
-  // from the template markup only, not from doc-comment mentions of `<form>` (the header comments
-  // above legitimately discuss forms in prose, which a naive "<form" substring count would
-  // over-count). C8's mapping-toggle form is one TEMPLATE occurrence even though it renders once
-  // per mapping row — the count is over source text, not rendered DOM instances.
-  const preventDefaultCount = (storiesSource.match(/@submit=\$\{\(event: Event\) => event\.preventDefault\(\)\}/g) ?? [])
+
+  // FR-018: forms are mutation-free — every form present intercepts its own submit. Pre-merge
+  // review 2026-09-11 (reviewer-renata) measured that a HARD-CODED expected count is silent about
+  // its own premise: adding a 10th form with no `preventDefault` still passed a fixed
+  // `toBe(9)` assertion. Fixed to derive both numbers from the SAME comment-stripped source, so a
+  // new unguarded form changes `formCount` without changing `preventDefaultCount` and the
+  // assertion catches the mismatch directly, whatever the count is. Comments are stripped (not
+  // just excluded from a regex) because this file's OWN doc comments legitimately discuss
+  // `<form>` in prose — a naive substring count over-counts against them.
+  const stripComments = (src: string): string => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(?<!:)\/\/.*$/gm, '');
+  const strippedStories = stripComments(storiesSource);
+  const formCount = (strippedStories.match(/<form\b/g) ?? []).length;
+  const preventDefaultCount = (strippedStories.match(/@submit=\$\{\(event: Event\) => event\.preventDefault\(\)\}/g) ?? [])
     .length;
-  expect(preventDefaultCount).toBe(9);
+  expect(formCount).toBeGreaterThan(0);
+  expect(preventDefaultCount).toBe(formCount);
 });
 
 // -------------------------------------------------------------------------------------------
@@ -94,16 +100,45 @@ test.describe('C2 — operating index', () => {
     await expect(root.locator('form[data-mutation-free="true"]')).toHaveCount(1);
   });
 
-  test('member sees the same provider facts but no admin-only controls (FR-020)', async ({ page }) => {
+  test('member sees the same provider CARD facts but no admin-only controls (FR-020)', async ({ page }) => {
     const adminRoot = await loadStory(page, 'c-2-operating-admin');
     const adminFacts = await adminRoot.locator('.sk-facts').allTextContents();
 
     const memberRoot = await loadStory(page, 'c-2-operating-member');
     const memberFacts = await memberRoot.locator('.sk-facts').allTextContents();
 
+    // Scoped to the provider cards' `.sk-facts` specifically — the truly shared health/account/
+    // mapping facts (FR-020). Relay status and the linked-account summary row are a documented,
+    // deliberate exception (see the next test): admin-only FACTS, not controls stripped from a
+    // shared fact — pre-merge review 2026-09-11 found the code's own comment claiming "permission
+    // removes the control, not the row" while this exact field removed the row too.
     expect(memberFacts).toEqual(adminFacts);
     await expect(memberRoot.locator('sk-button', { hasText: 'Manage on GitHub' })).toHaveCount(0);
     await expect(memberRoot.locator('sk-action-row')).toHaveCount(0);
+  });
+
+  test('relay status and the linked-account row are admin-only BY DESIGN, not a stripped control', async ({
+    page,
+  }) => {
+    const adminRoot = await loadStory(page, 'c-2-operating-admin');
+    await expect(adminRoot.locator('sk-notice', { hasText: 'Relay status' })).toBeVisible();
+
+    const memberRoot = await loadStory(page, 'c-2-operating-member');
+    await expect(memberRoot.locator('sk-notice', { hasText: 'Relay status' })).toHaveCount(0);
+    // The whole linked-account ROW is gone for a member, not just its disconnect control — the
+    // row's own label/reference text (`sk-action-row`) is entirely absent, distinct from GitHub's
+    // provider-card fact (also literally "acme-org") which members DO legitimately keep seeing.
+    await expect(memberRoot.locator('sk-action-row')).toHaveCount(0);
+  });
+
+  test('mixed provider health: GitHub active, GitLab needs_reauth (issue-required, not all-success)', async ({
+    page,
+  }) => {
+    // Pre-merge review 2026-09-11: both providers were 'active' before this fix, so C2 had zero
+    // danger-tone coverage despite the spec's own FR-016 claiming C2 was independently verified.
+    const root = await loadStory(page, 'c-2-operating-admin');
+    await expect(root.locator('sk-status-indicator[tone="success"]')).toBeVisible();
+    await expect(root.locator('sk-status-indicator[tone="danger"]')).toBeVisible();
   });
 
   test('no GitHub repository picker and no "Admit selected" control anywhere (FR-011)', async ({ page }) => {
@@ -181,8 +216,17 @@ test.describe('C5 — GitLab exactly-one group selection', () => {
     await expect(radios).toHaveCount(2);
     const name0 = await radios.nth(0).getAttribute('name');
     const name1 = await radios.nth(1).getAttribute('name');
-    expect(name0).toBe(name1); // one shared `name` — the browser owns exactly-one selection
+    // Pre-merge review 2026-09-11 (reviewer-renata) measured that `expect(name0).toBe(name1)`
+    // alone is true-by-construction when BOTH names are null (an unnamed radio is not a group at
+    // all) — 57/57 tests stayed green with `name=${groupName}` deleted from the source. Assert
+    // the name is non-empty FIRST, then prove the actual exactly-one BEHAVIOUR: checking both
+    // inputs must leave exactly one checked, not two.
+    expect(name0).toBeTruthy();
+    expect(name0).toBe(name1);
     await expect(root.locator('input[type="radio"]:checked')).toHaveCount(0);
+    await radios.nth(0).check();
+    await radios.nth(1).check();
+    await expect(root.locator('input[type="radio"]:checked')).toHaveCount(1);
     await expect(root.locator('fieldset.sk-radio-choice-group')).toHaveCount(1);
   });
 
@@ -296,6 +340,11 @@ test.describe('C6 — installation detail shell', () => {
 
     const member = await loadStory(page, 'c-6-installation-member-active');
     await expect(member.locator('nav.sk-section-nav a.sk-section-nav__link')).toHaveCount(2); // no Workspace scope
+    // Pre-merge review 2026-09-11: `C6InstallationMemberActive` originally passed `activeTab:
+    // 'workspace'`, a tab a member's `visibleTabs` never includes — the nav rendered with ZERO
+    // `aria-current="page"` anywhere, an incoherent shell state nothing asserted. Fixed to land
+    // members on Team accounts; this assertion is the one that would have caught the original bug.
+    await expect(member.locator('nav.sk-section-nav a[aria-current="page"]')).toHaveCount(1);
   });
 
   test('needs_reauth/revoked map to danger and expose no recovery action (FR-016)', async ({ page }) => {
@@ -351,7 +400,12 @@ test.describe('C7 — workspace scope tab', () => {
 
   test('stale-after-refresh-failure: prior data persists distinctly from a fresh success', async ({ page }) => {
     const root = await loadStory(page, 'c-7-workspace-scope-stale-after-refresh-failure');
-    await expect(root.locator('sk-notice', { hasText: 'Could not verify your GitLab groups' })).toBeVisible();
+    // Pre-merge review 2026-09-11 (both lenses): the fixture's original refresh-failure message
+    // named GitLab while this installation's provider is Linear. Fixed to a provider-neutral
+    // string; this test now pins that corrected copy rather than the wrong one.
+    await expect(
+      root.locator('sk-notice', { hasText: 'Could not verify the workspace scope for this installation' }),
+    ).toBeVisible();
     await expect(root.locator('table.sk-data-table tbody tr')).toHaveCount(2); // stale rows still shown
   });
 
@@ -385,18 +439,41 @@ test.describe('C8 — project routing / admitted repositories', () => {
     await expect(confirmButton).toHaveClass(/sk-button--danger-secondary/);
   });
 
-  test('/discovery/ is represented only as a compatibility-redirect fact, never a browse link (FR-014)', async ({
+  test('/discovery/ is represented only as a compatibility-redirect fact, never a browse link, on every C8 state (FR-014)', async ({
     page,
   }) => {
-    const root = await loadStory(page, 'c-8-project-routing-populated');
-    await expect(root.locator('a[href*="/discovery/"]')).toHaveCount(0);
-    await expect(root.getByText('/a/sm-team/connectors/discovery/', { exact: false })).toBeVisible();
+    // Pre-merge review 2026-09-11 (reviewer-renata) measured that the source-text guard at the
+    // top of this file cannot see a lit `href=${…}` binding (replacing the `<code>` rendering
+    // with `<a href=${routing.discoveryRedirect.path}>Browse discovery</a>` still passed all 57
+    // tests) and that running the rendered-DOM check on only ONE C8 story misses the rest. Run
+    // the real assertion across every C8 state.
+    for (const id of [
+      'c-8-project-routing-populated',
+      'c-8-project-routing-empty',
+      'c-8-project-routing-validation',
+      'c-8-project-routing-jira-rescue',
+      'c-8-project-routing-purge-confirm',
+    ]) {
+      const root = await loadStory(page, id);
+      await expect(root.locator('a[href*="/discovery/"]')).toHaveCount(0);
+    }
+    const populated = await loadStory(page, 'c-8-project-routing-populated');
+    await expect(populated.getByText('/a/sm-team/connectors/discovery/', { exact: false })).toBeVisible();
   });
 
   test('no GitHub repository picker / no "Admit selected" anywhere (FR-011)', async ({ page }) => {
     const root = await loadStory(page, 'c-8-project-routing-populated');
     await expect(root.locator('input[type="checkbox"]')).toHaveCount(0);
     await expect(root.getByText('Admit selected', { exact: false })).toHaveCount(0);
+  });
+
+  test('empty: honest empty state, no fabricated mappings/repositories', async ({ page }) => {
+    // Pre-merge review 2026-09-11 (minor finding): this state was exercised by no assertion, and
+    // the render function had no empty-state branch for it at all — zero mappings/repositories
+    // rendered nothing, rather than an honest "no project routing yet" message.
+    const root = await loadStory(page, 'c-8-project-routing-empty');
+    await expect(root.locator('table.sk-data-table')).toHaveCount(0);
+    await expect(root.locator('.sk-empty-state')).toBeVisible();
   });
 
   test('validation: exact mapping-conflict message present', async ({ page }) => {
@@ -443,13 +520,19 @@ test.describe('C9a — team account links', () => {
     await expect(forms).toHaveCount(1); // 3 links, only "you" (Jeroen) gets a disconnect control
   });
 
-  test('account activity (isViewer) stays independent of authorization health', async ({ page }) => {
-    // The viewer's own row is needs_reauth (danger) yet still carries the disconnect control that
-    // ANY viewer row would carry regardless of health — activity and health are separate facts.
+  test('account activity (linkedAt) stays independent of authorization health (FR-022)', async ({ page }) => {
+    // Pre-merge review 2026-09-11 (reviewer-renata): an earlier revision proved this clause using
+    // `isViewer` as a stand-in for "activity", which only shows whether a row is the signed-in
+    // user's own — not activity. `linkedAt` is the real fact. Jeroen's row carries the OLDEST
+    // `linkedAt` (2026-08-19) paired with the FRESHEST danger health (needs_reauth) — if either
+    // fact were derived from the other, this pairing could not exist.
     const root = await loadStory(page, 'c-9-a-team-accounts-admin-unhealthy');
     const viewerRow = root.locator('sk-action-row', { hasText: 'Jeroen' });
     await expect(viewerRow.locator('sk-status-indicator[tone="danger"]')).toBeVisible();
-    await expect(viewerRow.locator('form[data-mutation-free="true"]')).toHaveCount(1);
+    await expect(viewerRow.getByText('Linked 2026-08-19')).toBeVisible();
+    const lynnRow = root.locator('sk-action-row', { hasText: 'Lynn' });
+    await expect(lynnRow.locator('sk-status-indicator[tone="danger"]')).toBeVisible(); // revoked
+    await expect(lynnRow.getByText('Linked 2026-07-28')).toBeVisible(); // oldest link, also danger
   });
 
   test('member-unlinked: own-link-start control available, no other member visible beyond the fixture', async ({
@@ -485,4 +568,77 @@ test('LightMode required system proof renders', async ({ page }) => {
   await root.waitFor({ state: 'visible', timeout: 20000 });
   const wrapper = page.locator('.sk-light');
   await expect(wrapper).toHaveCount(1);
+  // Pre-merge review 2026-09-11 (minor finding): the wrapper-presence check alone would pass over
+  // a blank `.sk-light` with nothing inside it. Assert real content is actually there too.
+  await expect(root.locator('h1')).toBeVisible();
+  await expect(root).not.toBeEmpty();
+});
+
+// -------------------------------------------------------------------------------------------
+// Viewport/preference coverage — pre-merge review 2026-09-11 (both lenses): every test above ran
+// at loadStory's 1440 default; the issue explicitly requires forced-colors, reduced-motion, RTL,
+// 390px, and 200% zoom. Functional (not just visual) assertions below; visual.spec.ts carries the
+// corresponding screenshot baselines.
+// -------------------------------------------------------------------------------------------
+
+test.describe('Viewport and preference coverage', () => {
+  test('390px: no document-level horizontal overflow on the four most content-dense canvases', async ({ page }) => {
+    for (const id of [
+      'c-2-operating-admin',
+      'c-7-workspace-scope-populated',
+      'c-8-project-routing-populated',
+      'c-9-a-team-accounts-admin-unhealthy',
+    ]) {
+      await loadStory(page, id, 390, 844);
+      const overflowsX = await page.evaluate(
+        () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      );
+      expect(overflowsX, `${id} must have zero document-level horizontal overflow at 390px`).toBe(false);
+    }
+  });
+
+  test('200% zoom: C8 project routing stays operable with zero document-level horizontal overflow', async ({
+    page,
+  }) => {
+    const root = await loadStory(page, 'c-8-project-routing-populated');
+    await page.evaluate(() => {
+      (document.documentElement.style as CSSStyleDeclaration & { zoom?: string }).zoom = '2';
+    });
+    const overflowsX = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(overflowsX, 'no document-level horizontal overflow at 200% zoom').toBe(false);
+    await expect(root.locator('table.sk-data-table').first()).toBeVisible();
+  });
+
+  test('forced colors: C6 danger status keeps a visible, non-color-only distinction', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
+    await page.emulateMedia({ forcedColors: 'active' });
+    const root = await loadStory(page, 'c-6-installation-health-needs-reauth');
+    const indicator = root.locator('sk-status-indicator[tone="danger"]');
+    await expect(indicator).toBeVisible();
+    // The visible TEXT ("needs_reauth") is the non-color-dependent signal — forced colors strips
+    // custom tone coloring, but the status word itself must still read.
+    await expect(indicator).toHaveText('needs_reauth');
+  });
+
+  test('reduced motion: C3 handoff waiting/completing states carry no motion-dependent meaning', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    for (const id of ['c-3-handoff-installation-waiting', 'c-3-handoff-reconnect-completing']) {
+      const root = await loadStory(page, id);
+      // The phase text itself (not an animation) carries the state under reduced motion.
+      await expect(root.locator('sk-notice')).toBeVisible();
+    }
+  });
+
+  test('RTL: C2 operating index keeps native semantics and legible content under dir="rtl"', async ({ page }) => {
+    const root = await loadStory(page, 'c-2-operating-admin');
+    await page.evaluate(() => document.documentElement.setAttribute('dir', 'rtl'));
+    await expect(root.locator('h1')).toBeVisible();
+    await expect(root.locator('sk-card')).toHaveCount(2);
+    const overflowsX = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(overflowsX, 'no document-level horizontal overflow under RTL').toBe(false);
+  });
 });

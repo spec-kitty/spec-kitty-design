@@ -20,6 +20,13 @@ import "../../../packages/styles/src/breadcrumbs/sk-breadcrumbs.css";
 import "../../../packages/styles/src/checkbox-choice-group/sk-checkbox-choice-group.css";
 import "../../../packages/styles/src/radio-choice-group/sk-radio-choice-group.css";
 import "../../../packages/styles/src/section-nav/sk-section-nav.css";
+// #338's connectors pattern renders native `<button>`/`<a class="sk-button sk-button--*">` light-DOM
+// markup (ADR-9 §4: a `<button>` inside `sk-button`'s shadow root cannot participate in an ancestor
+// `<form>`). Verified missing by the pre-merge squad against the BUILT preview, not by reasoning:
+// the linked stylesheet carried zero `.sk-button` rules and the connectors chunk loads no CSS chunk
+// at all — every connectors canvas painted UA-default buttons, including #320's
+// `.sk-button--danger-secondary` at the two places this pattern actually needs it (C8, C9a).
+import "../../../packages/styles/src/button/sk-button.css";
 import "../../../packages/styles/src/context-nav/sk-context-nav.css";
 import "../../../packages/styles/src/data-table/sk-data-table.css";
 import "../../../packages/styles/src/event-timeline/sk-event-timeline.css";
