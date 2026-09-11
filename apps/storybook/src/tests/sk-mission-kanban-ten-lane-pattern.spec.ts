@@ -489,7 +489,11 @@ test('[T006] every rendered string and accessible name is supplied by a fixture'
 // inside its ${} expressions; attribute writes from script are held to the same rule. The runtime
 // audit cannot tell a hard-coded 'Presence · unverified' from the fixture value it duplicates.
 const ALLOWED_EXPRESSION_LITERALS = new Set(['', ' sk-light', 'rtl', 'page']);
-const ALLOWED_ATTRIBUTE_WRITES = new Set(['role', 'region', 'aria-label', 'tabindex', '0']);
+// A script-side attribute write is copy only when a literal value lands in a user-facing
+// attribute; test hooks (`data-play-proof`) and ARIA tokens (`role="region"`) are not copy.
+const USER_FACING_ATTRIBUTES = new Set([
+  'aria-label', 'aria-description', 'aria-roledescription', 'title', 'alt', 'placeholder', 'label', 'message',
+]);
 
 function scanRenderCode(text: string): { templates: number; offenders: string[] } {
   const file = ts.createSourceFile('scan.ts', text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
@@ -519,14 +523,13 @@ function scanRenderCode(text: string): { templates: number; offenders: string[] 
         for (const span of template.templateSpans) literalsIn(span.expression);
       }
     }
-    if (
-      ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) &&
-      ['setAttribute', 'removeAttribute', 'toggleAttribute'].includes(node.expression.name.text)
-    ) {
-      for (const argument of node.arguments) {
-        if ((ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument)) && !ALLOWED_ATTRIBUTE_WRITES.has(argument.text)) {
-          offenders.push(`${node.expression.name.text} literal: ${argument.text}`);
-        }
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === 'setAttribute') {
+      const [name, value] = node.arguments;
+      const literalText = (argument?: ts.Expression): string | undefined =>
+        argument && (ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument)) ? argument.text : undefined;
+      const attribute = literalText(name);
+      if (attribute && USER_FACING_ATTRIBUTES.has(attribute) && value && (literalText(value) !== undefined || ts.isTemplateExpression(value))) {
+        offenders.push(`setAttribute literal copy: ${attribute}`);
       }
     }
     ts.forEachChild(node, visit);
@@ -560,10 +563,12 @@ test('[T006] render code holds no copy: template text, attributes, expression li
     'html`<span>${`Mission ${id}`}</span>`',
     "html`<i aria-roledescription=${'lane'}></i>`",
     "element.setAttribute('aria-label', 'Kanban lanes');",
+    "element.setAttribute('title', `Mission ${id}`);",
   ]) {
     expect(scanRenderCode(probe).offenders, `self-probe must go red: ${probe}`).not.toEqual([]);
   }
   expect(scanRenderCode("html`<p class=\"x${light ? ' sk-light' : ''}\" dir=${rtl ? 'rtl' : nothing} aria-label=${name}>${copy.label}</p>`").offenders).toEqual([]);
+  expect(scanRenderCode("root.setAttribute('data-play-proof', 'passed'); scroller.setAttribute('role', 'region'); scroller.setAttribute('aria-label', name);").offenders).toEqual([]);
   const source = readFileSync(SOURCE, 'utf8');
   const { templates, offenders } = scanRenderCode(source);
   expect(templates, 'every html template in the module is reached').toBe((source.match(/\bhtml`/g) ?? []).length);
