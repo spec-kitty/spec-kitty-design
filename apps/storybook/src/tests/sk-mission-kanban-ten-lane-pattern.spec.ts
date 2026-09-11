@@ -997,7 +997,7 @@ type ObserverSnapshot = Readonly<{
   contentDetached: ReadonlyArray<number>;
   resizeObserved: number;
   resizeReleased: number;
-  bodyObservers: number;
+  mountWatchers: number;
 }>;
 
 async function installObserverProbe(page: Page): Promise<void> {
@@ -1017,7 +1017,11 @@ async function installObserverProbe(page: Page): Promise<void> {
       target instanceof Element && target.classList.contains('sk-workflow-board__scroller');
     const resizeActive = new Set<Element>();
     const contentActive = new Set<Node>();
-    const bodyObservers = new Set<MutationObserver>();
+    // The pattern builds its body mount watcher synchronously right after it starts observing a
+    // scroller, so the next body observation after a scroller observation is the pattern's. Only
+    // those are counted: Storybook's own body observers come and go on their own schedule.
+    const mountWatchers = new Set<MutationObserver>();
+    let expectingMountWatcher = false;
     let resizeObserved = 0;
     let resizeReleased = 0;
 
@@ -1054,15 +1058,19 @@ async function installObserverProbe(page: Page): Promise<void> {
       }
       observe(target: Node, options?: MutationObserverInit): void {
         this.native.observe(target, options);
-        if (target === document.body) bodyObservers.add(this);
+        if (target === document.body && expectingMountWatcher) {
+          mountWatchers.add(this);
+          expectingMountWatcher = false;
+        }
         if (!isScroller(target)) return;
+        expectingMountWatcher = true;
         this.scrollers.add(target);
         contentActive.add(target);
         idOf(target);
       }
       disconnect(): void {
         this.native.disconnect();
-        bodyObservers.delete(this);
+        mountWatchers.delete(this);
         for (const target of this.scrollers) contentActive.delete(target);
         this.scrollers.clear();
       }
@@ -1084,7 +1092,7 @@ async function installObserverProbe(page: Page): Promise<void> {
           contentDetached: [...contentActive].filter((target) => !target.isConnected).map(idOf),
           resizeObserved,
           resizeReleased,
-          bodyObservers: bodyObservers.size,
+          mountWatchers: mountWatchers.size,
         }),
       },
     });
@@ -1123,11 +1131,9 @@ test('[T005/T007] real Storybook reloads release every observer of the previous 
     expect.soft(current.contentActive, `cycle ${index} content targets`).toHaveLength(1);
     expect.soft(current.contentDetached, `cycle ${index} detached content targets`).toEqual([]);
     expect.soft(current.resizeObserved - current.resizeReleased, `cycle ${index} balance`).toBe(1);
+    expect.soft(current.mountWatchers, `cycle ${index} pattern mount watchers`).toBe(1);
     const previous = snapshots[index - 1];
-    if (index > 0 && previous && current.documentTimeOrigin === previous.documentTimeOrigin) {
-      sameDocument += 1;
-      expect.soft(current.bodyObservers, `cycle ${index} body watchers accumulate`).toBeLessThanOrEqual(previous.bodyObservers);
-    }
+    if (index > 0 && previous && current.documentTimeOrigin === previous.documentTimeOrigin) sameDocument += 1;
   }
   expect(sameDocument, 'at least one reload must remount inside the same document').toBeGreaterThan(0);
 });
