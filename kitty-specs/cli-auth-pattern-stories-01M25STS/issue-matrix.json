@@ -1,7 +1,7 @@
 {
   "rows": {
     "#286": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Referenced only as the #286 DoD-pattern precedent for FR-018/C-006; this WP applies that pattern in tests/node/cli-auth-no-literal.test.ts, not a fix to #286 itself.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#300": {
       "evidence_ref": "<link or commit>",
