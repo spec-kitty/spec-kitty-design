@@ -25,7 +25,7 @@
       "wp": null
     },
     "#403": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "docs/architecture/decisions/2026-09-11-17-sk-button-tone-intensity-flattening.md (ADR-17, Status: Proposed), indexed in docs/architecture/README.md; node scripts/check-adr-index.mjs passes",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,8 +33,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#420": {
       "evidence_ref": "commitlint.config.cjs (3 new anchored exemptions) + scripts/check-commitlint-config.mjs; node scripts/check-commitlint-config.mjs passes, real messages proven ignored+valid, near-misses proven not-ignored (red-first verified)",
