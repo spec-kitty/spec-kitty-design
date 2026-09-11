@@ -229,6 +229,28 @@ async function focusViaKeyboard(page: Page, href: string, maxPresses: number): P
   return false;
 }
 
+/**
+ * HOST-PREFERENCE LIMITATION, NOT A LIBRARY ONE — read before touching any Tab-entry assertion
+ * below.
+ *
+ * WebKit (Safari) ships with sequential-focus navigation scoped to text fields and lists by
+ * default; anchors are excluded unless the user's own OS "Full Keyboard Access" preference is on.
+ * `playwright.config.ts:28-38` already carries the precedent for exactly this class of gap —
+ * `firefoxUserPrefs: { 'accessibility.tabfocus': 7 }` widens Firefox's own default the same way —
+ * but Playwright exposes no equivalent override for WebKit, and this shared config is not the
+ * place to invent one (every other family's WebKit lane would inherit it unreviewed). So a real
+ * `page.keyboard.press('Tab')` walk that expects to land on `.sk-section-nav__link` never will on
+ * WebKit, regardless of anything this family's own CSS or markup does.
+ *
+ * The fix below is CI-verified against a real WebKit with proper deps by
+ * `form-input-contrast-touch-target-contract-01M25STR` (mission #336), which hit the identical gap
+ * for a radio group and confirmed empirically that scoping the Tab-ENTRY step to chromium/firefox,
+ * then reaching the same target via a direct `.focus()` on WebKit and running the identical
+ * downstream assertions, goes green there. This checkout cannot run WebKit locally (the sandbox is
+ * missing its system libraries), so this specific scoping has not been locally re-confirmed here —
+ * only #336's own instance of the pattern has been. CI is what actually proves it for this file.
+ */
+
 function nonColourCue(cue: Awaited<ReturnType<typeof linkCue>>): string {
   return JSON.stringify({
     borderBlockEndStyle: cue.borderBlockEndStyle,
@@ -417,7 +439,7 @@ test.describe('sk-section-nav live native semantics', () => {
     await expect(twoRoute.locator(':scope > *:not(a.sk-section-nav__link)')).toHaveCount(0);
   });
 
-  test('six routes overflow locally without widening the document, and Tab reaches every link once in DOM order', async ({ page }) => {
+  test('six routes overflow locally without widening the document, and Tab reaches every link once in DOM order', async ({ page, browserName }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
     const { nav } = await openStory(page, 'many-routes');
     const geometry = await documentGeometry(page);
@@ -427,6 +449,25 @@ test.describe('sk-section-nav live native semantics', () => {
 
     const hrefs = await nav.locator('a[href]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href')));
     expect(hrefs).toEqual(['#route-1', '#route-2', '#route-3', '#route-4', '#route-5', '#route-6']);
+
+    if (browserName === 'webkit') {
+      // See the WEBKIT TAB-ENTRY note above collectAnchorTabSequence/focusViaKeyboard: WebKit
+      // excludes anchors from sequential-focus navigation by default, so a real Tab walk can never
+      // reach them here. ENGINE-INDEPENDENT invariant instead: focus lands on the exact anchor the
+      // consumer's own DOM order designates, whichever path put it there — proven per link, in
+      // source order, with no Tab semantics involved. Kept isolated to this branch (not run before
+      // the chromium/firefox Tab walk below): programmatically focusing the last link first was
+      // measured to leave Chromium's AND Firefox's own sequential-navigation cursor anchored past
+      // it, so a real Tab afterwards resumed from there instead of the top of the document — this
+      // engine-independent proof and the real Tab walk must not share one test invocation.
+      for (const href of hrefs) {
+        const link = nav.locator(`a[href="${href}"]`);
+        await link.evaluate((node) => (node as HTMLElement).focus());
+        await expect(link).toBeFocused();
+      }
+      return;
+    }
+
     await page.evaluate(() => {
       const sentinel = document.createElement('button');
       sentinel.type = 'button';
@@ -439,13 +480,37 @@ test.describe('sk-section-nav live native semantics', () => {
     expect(sequence).toEqual([...hrefs, 'sentinel']);
   });
 
-  test('the last, off-screen-at-rest link scrolls fully into view on focus with an unclipped outline', async ({ page }) => {
+  test('the last, off-screen-at-rest link scrolls fully into view on focus with an unclipped outline', async ({ page, browserName }) => {
     const { nav } = await openStory(page, 'narrow');
     const links = nav.locator('.sk-section-nav__link');
     const count = await links.count();
     expect(count).toBeGreaterThan(1);
     const lastLink = links.nth(count - 1);
     const lastHref = await lastLink.getAttribute('href');
+
+    if (browserName === 'webkit') {
+      // See the WEBKIT TAB-ENTRY note above: a real Tab walk never reaches an anchor on WebKit, so
+      // reach the target directly instead. The SCROLL/GEOMETRY half of this claim is proven here —
+      // .focus() triggers the same native "scroll the newly focused element into view" behaviour
+      // regardless of how focus was requested, so withinScroller below is real evidence on this
+      // engine. The FOCUS-RING half is deliberately NOT asserted here: this repo has not verified
+      // that a bare .focus() reliably produces :focus-visible on WebKit (unlike Chromium/Firefox,
+      // where collectAnchorTabSequence's real Tab walk supplies the keyboard-modality signal
+      // :focus-visible's heuristic looks for), and guessing would be exactly the speculative,
+      // unverified assertion this family's own review has already refused once for a different
+      // engine. That half stays scoped to chromium/firefox below.
+      await lastLink.evaluate((node) => (node as HTMLElement).focus());
+      await expect(lastLink).toBeFocused();
+      const withinScrollerWebkit = await lastLink.evaluate((node) => {
+        const scroller = node.closest('.sk-section-nav')!;
+        const linkRect = node.getBoundingClientRect();
+        const scrollerRect = scroller.getBoundingClientRect();
+        return linkRect.left >= scrollerRect.left - 1 && linkRect.right <= scrollerRect.right + 1;
+      });
+      expect(withinScrollerWebkit).toBe(true);
+      return;
+    }
+
     const reached = await focusViaKeyboard(page, lastHref!, count + 3);
     expect(reached, `Tab never reached the last link (${lastHref})`).toBe(true);
     await expect(lastLink).toBeFocused();
@@ -521,7 +586,7 @@ test.describe('sk-section-nav live native semantics', () => {
 });
 
 test.describe('sk-section-nav state and resilience contract', () => {
-  test('rest, hover, active, focus-visible, and current each carry a distinct non-colour cue', async ({ page }) => {
+  test('rest, hover, active, focus-visible, and current each carry a distinct non-colour cue', async ({ page, browserName }) => {
     const { nav } = await openStory(page, 'current-first');
     const ordinary = nav.locator('.sk-section-nav__link:not([aria-current])').first();
     const current = nav.locator('.sk-section-nav__link[aria-current]:not([aria-current="false"])');
@@ -535,18 +600,39 @@ test.describe('sk-section-nav state and resilience contract', () => {
     const activeCue = await linkCue(ordinary);
     await page.mouse.up();
     await page.mouse.move(0, 0);
+    const currentCue = await linkCue(current);
+
+    // ENGINE-INDEPENDENT half: hover/active/current are pointer- and attribute-driven, not
+    // keyboard-driven, so they hold on every project including WebKit.
+    expect(hoverCue.textDecorationLine).not.toBe(restCue.textDecorationLine);
+    expect(activeCue.borderBlockEndStyle).not.toBe(restCue.borderBlockEndStyle);
+    expect(currentCue.fontWeight).not.toBe(restCue.fontWeight);
+
+    if (browserName === 'webkit') {
+      // See the WEBKIT TAB-ENTRY note above: reach the target with .focus() rather than a real Tab
+      // walk. That proves "focus lands on the anchor the consumer designated" (toBeFocused(),
+      // engine-independent) but NOT the :focus-visible outline itself — this repo has verified
+      // that a bare .focus() right after a mouse interaction on the SAME element does not reliably
+      // register :focus-visible in Chromium/Firefox either (that is why focusViaKeyboard's real
+      // Tab walk exists at all), and WebKit's own :focus-visible heuristic under a bare .focus()
+      // has not been verified here one way or the other. Asserting it would be exactly the kind of
+      // unverified, speculative claim this family's review has already refused once for a
+      // different engine, so it stays unasserted on WebKit rather than guessed. The four-way
+      // distinctness check below is scoped to rest/hover/active/current only — no focusCue.
+      await ordinary.evaluate((node) => (node as HTMLElement).focus());
+      await expect(ordinary).toBeFocused();
+      expect(new Set([restCue, hoverCue, activeCue, currentCue].map(nonColourCue))).toHaveProperty('size', 4);
+      return;
+    }
+
     const ordinaryHref = await ordinary.getAttribute('href');
     const reached = await focusViaKeyboard(page, ordinaryHref!, 6);
     expect(reached, `Tab never reached the ordinary link (${ordinaryHref})`).toBe(true);
     await expect(ordinary).toBeFocused();
     const focusCue = await linkCue(ordinary);
-    const currentCue = await linkCue(current);
 
-    expect(hoverCue.textDecorationLine).not.toBe(restCue.textDecorationLine);
-    expect(activeCue.borderBlockEndStyle).not.toBe(restCue.borderBlockEndStyle);
     expect(focusCue.outlineStyle).not.toBe('none');
     expect(Number.parseFloat(focusCue.outlineWidth)).toBeGreaterThan(0);
-    expect(currentCue.fontWeight).not.toBe(restCue.fontWeight);
     expect(new Set([restCue, hoverCue, activeCue, focusCue, currentCue].map(nonColourCue))).toHaveProperty('size', 5);
   });
 
