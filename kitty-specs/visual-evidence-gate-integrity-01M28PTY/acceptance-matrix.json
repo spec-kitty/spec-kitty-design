@@ -49,9 +49,9 @@
       "description": "The new gate is wired into .github/workflows/ci-quality.yml's lint-code job as two [ENFORCED] steps (--selftest then real scan), and does not desync check-gate-wiring.mjs / check-gate-wiring-defeats.mjs.",
       "proof_type": "automated_test",
       "evidence": "WP01: `node scripts/check-gate-wiring.mjs` passed after the workflow edit; `node scripts/check-gate-wiring-defeats.mjs` passed all 18 defeat cases plus control after the edit. Re-confirmed after the pass-2 gate rewrite (rule flattened, EXEMPTIONS added).",
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T18:20:45.500787+00:00",
       "notes": "Local script runs only; the workflow itself has not executed on CI (no PR opened yet, per instruction)."
     },
     {
