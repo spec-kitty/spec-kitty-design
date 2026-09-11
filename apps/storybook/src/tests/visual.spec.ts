@@ -3030,3 +3030,146 @@ test('Connectors 200% CSS zoom stress — C8 project routing baseline, no docume
     timeout: 20000,
   });
 });
+
+// ── Account Front Door pattern (#355, epic #352) — CI-authoritative baselines ─────────────────
+//
+// One case per published story id (all 20; T009). Baselines are harvested from the CI Playwright
+// visual-regression artifact and committed from there — NEVER produced or refreshed with a local
+// `--update-snapshots` (NFR-010, SC-017). A first local run of this block is EXPECTED to fail
+// with "no baseline found for …" until that harvest happens; that failure is the correct signal,
+// not a defect to silence.
+
+type AccountFrontDoorStoryId =
+  | 'landing'
+  | 'entry-boundary'
+  | 'submitted-validation'
+  | 'recovery-sent'
+  | 'terminal-inactive'
+  | 'legal-published'
+  | 'legal-unavailable'
+  | 'email-management'
+  | 'password-change'
+  | 'password-set'
+  | 'light-mode'
+  | 'legal-light-mode'
+  | 'account-light-mode'
+  | 'forced-colors'
+  | 'reduced-motion'
+  | 'rtl'
+  | 'narrow-390'
+  | 'short-viewport'
+  | 'zoom-200'
+  | 'long-strings';
+
+const accountFrontDoorStory = async (
+  page: Page,
+  id: AccountFrontDoorStoryId,
+  viewport: Readonly<{ width: number; height: number }>,
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=patterns-account-front-door--${id}&viewMode=story`);
+  const root = page.locator('[data-account-front-door-pattern]').first();
+  await root.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(root).toHaveAttribute('data-render-complete', 'true');
+  await page.evaluate(() => document.fonts.ready);
+  return root;
+};
+
+const accountFrontDoorFullCases = [
+  { id: 'landing', width: 1440, height: 1024, name: 'sk-account-front-door-landing.png' },
+  { id: 'entry-boundary', width: 1440, height: 1024, name: 'sk-account-front-door-entry-boundary.png' },
+  { id: 'submitted-validation', width: 1440, height: 1024, name: 'sk-account-front-door-submitted-validation.png' },
+  { id: 'recovery-sent', width: 1440, height: 1024, name: 'sk-account-front-door-recovery-sent.png' },
+  { id: 'terminal-inactive', width: 1440, height: 1024, name: 'sk-account-front-door-terminal-inactive.png' },
+  { id: 'legal-published', width: 1440, height: 1024, name: 'sk-account-front-door-legal-published.png' },
+  { id: 'legal-unavailable', width: 1440, height: 1024, name: 'sk-account-front-door-legal-unavailable.png' },
+  { id: 'email-management', width: 1440, height: 1024, name: 'sk-account-front-door-email-management.png' },
+  { id: 'password-change', width: 1440, height: 1024, name: 'sk-account-front-door-password-change.png' },
+  { id: 'password-set', width: 1440, height: 1024, name: 'sk-account-front-door-password-set.png' },
+  { id: 'light-mode', width: 1440, height: 1024, name: 'sk-account-front-door-light-mode.png' },
+  { id: 'legal-light-mode', width: 1440, height: 1024, name: 'sk-account-front-door-legal-light-mode.png' },
+  { id: 'account-light-mode', width: 1440, height: 1024, name: 'sk-account-front-door-account-light-mode.png' },
+  { id: 'rtl', width: 1440, height: 1024, name: 'sk-account-front-door-rtl.png' },
+  { id: 'narrow-390', width: 390, height: 844, name: 'sk-account-front-door-narrow-390.png' },
+  { id: 'short-viewport', width: 390, height: 480, name: 'sk-account-front-door-short-viewport.png' },
+  { id: 'long-strings', width: 390, height: 1000, name: 'sk-account-front-door-long-strings.png' },
+] as const satisfies ReadonlyArray<{
+  id: AccountFrontDoorStoryId;
+  width: number;
+  height: number;
+  name: string;
+}>;
+
+for (const visual of accountFrontDoorFullCases) {
+  test(`Account Front Door ${visual.name} — full route baseline`, async ({ page }) => {
+    const root = await accountFrontDoorStory(page, visual.id, {
+      width: visual.width,
+      height: visual.height,
+    });
+    await expect(root).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+      timeout: 20000,
+    });
+  });
+}
+
+test('Account Front Door forced colors — visual baseline', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
+  await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+  const root = await accountFrontDoorStory(page, 'forced-colors', { width: 1440, height: 1024 });
+  await expect(root).toHaveScreenshot('sk-account-front-door-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+// NOT A MEMBER OF `accountFrontDoorFullCases` ABOVE, and the reason is a defect this mission's
+// pre-merge gate caught in its own work. As a plain entry in that list — `{ id: 'zoom-200',
+// width: 390, height: 640 }` — nothing in the loop ever applied zoom, so the case named for a
+// 200% condition never created one. It rendered the same `landing` composition as `narrow-390`
+// at the same 390px width, and `toHaveScreenshot` captures the ELEMENT, not the viewport, so the
+// differing viewport HEIGHT changed nothing either: CI produced a baseline byte-identical to
+// `sk-account-front-door-narrow-390.png` (run 34602839370, both attachments resolving to the
+// same content-addressed file). It could not have failed for the reason its name gives.
+//
+// The shape below is the one the three existing zoom baselines in this file already use —
+// Repository Dossier (`visual.spec.ts` above), Work Explorer and Mission Reading: set
+// `documentElement.style.zoom` AFTER the story has loaded, and pair it with a viewport width
+// that makes the zoom meaningful. 780 at zoom 2 is Repository Dossier's own pairing and yields a
+// 390 CSS-px layout viewport rendered at 2x, so the layout matches the narrow case while the
+// rendering genuinely exercises the zoom path — a different image, not the same one under
+// another name.
+test('Account Front Door 200% CSS zoom stress — visual baseline', async ({ page }) => {
+  const root = await accountFrontDoorStory(page, 'zoom-200', { width: 780, height: 1000 });
+  await page.evaluate(() => {
+    document.documentElement.style.zoom = '2';
+  });
+  await expect(root).toHaveScreenshot('sk-account-front-door-zoom-200.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+// THIS BASELINE IS BYTE-IDENTICAL TO `sk-account-front-door-entry-boundary.png`, and that is the
+// honest outcome rather than an oversight — recorded here so a future author neither "fixes" the
+// duplication nor reads more into it than it carries. The `ReducedMotion` story renders the same
+// `entry-boundary` composition, and this pattern authors no `prefers-reduced-motion` rule that
+// changes static appearance, so the reduced-motion frame IS the ordinary frame. Verified against
+// CI run 34602839370, where both attachments resolved to the same content-addressed file.
+//
+// What it therefore proves is bounded: that enabling the emulation does not perturb the layout.
+// It is NOT evidence that any animation is suppressed — a screenshot cannot carry that, and
+// nothing in this pattern animates. If a future revision adds motion, this baseline becomes
+// load-bearing; until then it is a cheap regression net, not a motion assertion.
+test('Account Front Door reduced motion — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const root = await accountFrontDoorStory(page, 'reduced-motion', { width: 1440, height: 1024 });
+  await expect(root).toHaveScreenshot('sk-account-front-door-reduced-motion.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
