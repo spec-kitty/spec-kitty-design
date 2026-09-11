@@ -25,7 +25,7 @@
       "wp": null
     },
     "#225": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Spurious scrape: #225 is a historical, already-merged PR/mission cited in spec.md's context prose (suite-budget.json's own recorded history), not an open issue this mission addresses. No action taken; referenced only as evidence.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,7 +33,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#270": {
