@@ -10,8 +10,7 @@
       "source_file": "spec.md",
       "title": "feat(tokens): control-boundary contrast and target-size contract for .sk-input and sk-form-input",
       "verdict": "verified-already-fixed",
-      "wp": null,
-      "note": "Cited only as background context in #367's body (the PR where the missed-baseline incident occurred, already merged). Not a scope item of this mission; no action taken or required here."
+      "wp": null
     },
     "#367": {
       "evidence_ref": "WP01: apps/storybook/src/tests/visual.spec.ts (166/166 toHaveScreenshot call sites now soft, both multi-call and loop-executed, operator ruling 2026-09-11), scripts/check-visual-screenshot-softness.mjs (flat rule + EXEMPTIONS), .github/workflows/ci-quality.yml",
@@ -26,7 +25,7 @@
       "wp": "WP01"
     },
     "#401": {
-      "evidence_ref": "WP01: 31 per-test chromium-project floor assertions across 18 files, PLUS 4 standalone floor tests for the describe-level predicate skips (operator ruling 2026-09-11) under apps/storybook/src/tests/",
+      "evidence_ref": "WP01: 31 per-test chromium-project floor assertions across 18 files, PLUS all 8 standalone floor tests for the describe-level predicate skips (corrected from an initial 4/8 after review finding H1) under apps/storybook/src/tests/",
       "fr": "FR-001, FR-002, FR-006",
       "nfr": "NFR-003",
       "repo": "spec-kitty/spec-kitty-design",
