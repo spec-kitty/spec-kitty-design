@@ -4,6 +4,21 @@ import { getViolations, injectAxe } from 'axe-playwright';
 
 const STORY_PREFIX = 'patterns-connectors--';
 
+// Built by construction from the exact index the Playwright webServer serves
+// (apps/storybook/storybook-static/index.json — see playwright.config.ts), never
+// by hand-listing canvas ids. A hand-list silently stops covering a family the
+// moment a new canvas is added; this reads whatever actually shipped in the build.
+const nonC5ConnectorsStoryIds = (): string[] => {
+  const index = JSON.parse(readFileSync('apps/storybook/storybook-static/index.json', 'utf8')) as {
+    entries: Record<string, { type: string }>;
+  };
+  return Object.keys(index.entries)
+    .filter((id) => id.startsWith(STORY_PREFIX))
+    .filter((id) => index.entries[id]?.type === 'story')
+    .map((id) => id.slice(STORY_PREFIX.length))
+    .filter((id) => !id.startsWith('c-5-gitlab-group'));
+};
+
 const loadStory = async (page: Page, id: string, width = 1440, height = 1000): Promise<Locator> => {
   await page.setViewportSize({ width, height });
   await page.goto(`/iframe.html?id=${STORY_PREFIX}${id}&viewMode=story`);
@@ -11,6 +26,17 @@ const loadStory = async (page: Page, id: string, width = 1440, height = 1000): P
   await root.waitFor({ state: 'visible', timeout: 20000 });
   await expect(root).toHaveAttribute('data-render-complete', 'true');
   return root;
+};
+
+// Pre-merge review 2026-09-11 (debugger-debbie, MINOR): the four "mutation-free submit never
+// navigates" assertions used a fixed `page.waitForTimeout(250)` before checking the URL. CI runs
+// `workers: 2` with `retries: 2`; a navigation that lands at, say, 300ms would read as a pass —
+// a fail-open in exactly the assertions carrying FR-018. This actively waits the full window for
+// ANY url change and only treats a timeout (no navigation observed across the whole window) as
+// success, so slowness cannot masquerade as compliance the way a blind sleep-then-check could.
+const assertNoNavigation = async (page: Page, before: string, timeout = 1000): Promise<void> => {
+  await expect(page.waitForURL((url) => url.toString() !== before, { timeout })).rejects.toThrow();
+  expect(page.url()).toBe(before);
 };
 
 const axeIsClean = async (page: Page, storyId: string): Promise<void> => {
@@ -175,8 +201,7 @@ test.describe('C3 — provider authorization handoff', () => {
     const root = await loadStory(page, 'c-3-handoff-installation-waiting');
     const before = page.url();
     await root.locator('form[data-mutation-free="true"] button[type="submit"]').click();
-    await page.waitForTimeout(250);
-    expect(page.url()).toBe(before);
+    await assertNoNavigation(page, before);
   });
 
   test('the failed variant shows the source-exact failure text', async ({ page }) => {
@@ -259,21 +284,19 @@ test.describe('C5 — GitLab exactly-one group selection', () => {
     const before = page.url();
     await root.locator('input[type="radio"]').first().check();
     await root.locator('form button[type="submit"]').click();
-    await page.waitForTimeout(250);
-    expect(page.url()).toBe(before);
+    await assertNoNavigation(page, before);
     await expect(root.getByText(/success|connected successfully/i)).toHaveCount(0);
   });
 
   test('only C5 exposes another-group connection / exactly-one selection (FR-013)', async ({ page }) => {
-    for (const id of [
-      'c-1-setup-admin-empty',
-      'c-2-operating-admin',
-      'c-3-handoff-installation-waiting',
-      'c-4-github-app-failure-resolved-team',
-      'c-9-b-slack-channel-populated',
-    ]) {
+    const ids = nonC5ConnectorsStoryIds();
+    // Floor: this must actually enumerate every other canvas family (C1-C4, C6-C9a,
+    // C9b, light-mode), not silently degrade to an empty, vacuously-green loop if the
+    // index read ever comes back empty.
+    expect(ids.length).toBeGreaterThanOrEqual(30);
+    for (const id of ids) {
       const root = await loadStory(page, id);
-      await expect(root.locator('input[type="radio"]')).toHaveCount(0);
+      await expect(root.locator('input[type="radio"]'), `${id} must not expose a radio group`).toHaveCount(0);
     }
   });
 
@@ -377,10 +400,22 @@ test.describe('C7 — workspace scope tab', () => {
     expect(linkTexts).toContain('Team accounts');
   });
 
-  test('permission projections remove controls without changing shared facts (FR-020)', async ({ page }) => {
+  test('installation shell facts stay identical for the member who cannot reach this tab (FR-020, C6-scoped)', async ({
+    page,
+  }) => {
+    // Pre-merge review 2026-09-11 (debugger-debbie): this test's previous title and comment
+    // claimed to prove C7's OWN workspace-scope facts (Discovered/Included) are unchanged by
+    // role. They are not compared here. `c-7-workspace-scope-member-boundary` renders
+    // `renderInstallationShell` (data-connectors-pattern="c6"), not `renderWorkspaceScope` — the
+    // Workspace scope tab is admin-only (see the previous test), so no member ever renders C7's
+    // own panel at all, and no genuine member-role C7 story can exist without fabricating a state
+    // the real product never produces. What this test actually proves, honestly relabeled: the
+    // shared C6 installation-shell facts (`.sk-facts` — health/account) are byte-identical whether
+    // reached as an admin or as the member who is shown the C7-adjacent boundary shell instead.
+    // C7's own Discovered/Included facts carry no role branch at all — selectWorkspaceScopeProjection
+    // takes only (fixture, state), never a role — so there is nothing role-conditional in them to prove.
     const adminRoot = await loadStory(page, 'c-6-installation-admin-active');
     const adminFacts = await adminRoot.locator('.sk-facts').first().allTextContents();
-    // Reached via C7's member-boundary shell, which shares the same installation record.
     const memberRoot = await loadStory(page, 'c-7-workspace-scope-member-boundary');
     const memberFacts = await memberRoot.locator('.sk-facts').first().allTextContents();
     expect(memberFacts).toEqual(adminFacts);
@@ -490,8 +525,7 @@ test.describe('C8 — project routing / admitted repositories', () => {
     const root = await loadStory(page, 'c-8-project-routing-populated');
     const before = page.url();
     await root.locator('form[data-mutation-free="true"] button[type="submit"]').first().click();
-    await page.waitForTimeout(250);
-    expect(page.url()).toBe(before);
+    await assertNoNavigation(page, before);
   });
 
   test('has zero WCAG 2.1 AA violations', async ({ page }) => {
@@ -535,6 +569,20 @@ test.describe('C9a — team account links', () => {
     await expect(lynnRow.getByText('Linked 2026-07-28')).toBeVisible(); // oldest link, also danger
   });
 
+  test('expired maps to attention, not danger or success — tones are not interchangeable (FR-016)', async ({
+    page,
+  }) => {
+    // Pre-merge review 2026-09-11 (debugger-debbie): the fold moved health→tone into
+    // linkAuthTone(), the correct structural fix, but no test pinned the `attention` case —
+    // only the `danger` pair. A ladder collapsed to `dangerHealth ? 'danger' : 'success'`
+    // (expired shown as healthy) stayed 57/57 green until this assertion existed.
+    const root = await loadStory(page, 'c-9-a-team-accounts-admin-unhealthy');
+    const miaRow = root.locator('sk-action-row', { hasText: 'Mia' });
+    await expect(miaRow.locator('sk-status-indicator[tone="attention"]')).toBeVisible();
+    await expect(miaRow.locator('sk-status-indicator[tone="danger"]')).toHaveCount(0);
+    await expect(miaRow.locator('sk-status-indicator[tone="success"]')).toHaveCount(0);
+  });
+
   test('member-unlinked: own-link-start control available, no other member visible beyond the fixture', async ({
     page,
   }) => {
@@ -551,8 +599,7 @@ test.describe('C9a — team account links', () => {
     const root = await loadStory(page, 'c-9-a-team-accounts-admin-active');
     const before = page.url();
     await root.locator('form[data-mutation-free="true"] button[type="submit"]').first().click();
-    await page.waitForTimeout(250);
-    expect(page.url()).toBe(before);
+    await assertNoNavigation(page, before);
   });
 
   test('has zero WCAG 2.1 AA violations', async ({ page }) => {
