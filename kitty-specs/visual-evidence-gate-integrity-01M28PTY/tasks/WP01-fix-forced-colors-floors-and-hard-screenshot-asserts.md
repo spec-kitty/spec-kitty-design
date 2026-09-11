@@ -1,6 +1,6 @@
 ---
 work_package_id: WP01
-title: Fix
+title: "Fix #401's missing chromium-project floors and #367's hard multi-screenshot assertions, with a regression gate for the latter"
 dependencies: []
 requirement_refs:
 - FR-001
@@ -37,11 +37,13 @@ history:
 - timestamp: '2026-09-11T19:30:00Z'
   agent: system
   action: WP authored by hand following the connectors-pattern-stories precedent, per instruction that spec-kitty tasks --json overwrites hand-authored tasks.md prose
-authoritative_surface: src/tests/
+authoritative_surface: apps/storybook/src/tests/
 create_intent: []
 execution_mode: code_change
 owned_files:
-- src/tests/**
+- apps/storybook/src/tests/**
+- scripts/check-visual-screenshot-softness.mjs
+- .github/workflows/ci-quality.yml
 tags: []
 tracker_refs: []
 ---

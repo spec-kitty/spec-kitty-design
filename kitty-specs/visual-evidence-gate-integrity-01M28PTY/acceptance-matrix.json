@@ -6,54 +6,61 @@
   "criteria": [
     {
       "criterion_id": "FR-001",
-      "description": "Verify FR-001 is satisfied",
+      "description": "Every per-test `test.skip(browserName !== 'chromium', ...)` call site in apps/storybook/src/tests/ (31 sites across 18 files) is immediately preceded by a chromium-project floor assertion.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "WP01: verify_soft.js-style scan confirmed 31/31 insertion sites each immediately precede a test.skip( line; esbuild parse-check passed on all 18 files; local playwright runs of 407 non-visual tests across the touched files passed (171 + 236) under --project=chromium.",
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Locally verified by the implementer; awaiting reviewer/CI confirmation before this can be marked pass."
     },
     {
       "criterion_id": "FR-002",
-      "description": "Verify FR-002 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
+      "description": "The inserted floor assertion's string-literal quote style matches each file's own test.skip(...) convention (single- vs double-quoted).",
+      "proof_type": "manual_review",
+      "evidence": "WP01: 12 of 31 sites use double quotes to match their file's convention (sk-checkbox-choice-group, sk-cli-auth-pattern, sk-mission-reading-pattern, sk-radio-choice-group x4, sk-repository-dossier-pattern, sk-segmented-choice, sk-workflow-board, sk-work-package-detail-primitives); the remaining 19 use single quotes matching their file's convention.",
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Locally verified by the implementer; awaiting reviewer confirmation."
     },
     {
       "criterion_id": "FR-003",
-      "description": "Verify FR-003 is satisfied",
+      "description": "All 16 multi-screenshot tests in visual.spec.ts (20 baselines) use expect.soft(...).toHaveScreenshot(...) for every screenshot call, with zero baseline PNG drift.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "WP01: 36 expect( -> expect.soft( conversions verified via a paren-balanced scan (shots==soft per target test); esbuild parse-check passed; diff review confirmed only expect(/expect.soft( tokens changed, no locator/story/viewport/threshold arguments touched. Full local visual.spec.ts run against CI baselines was NOT used as proof (known local/CI rendering drift, documented in-file at visual.spec.ts:29-31) -- CI is authoritative per repo convention.",
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Zero-pixel-drift claim rests on the diff review (assertion-mode-only change), not a local pixel-perfect run, per this repo's own CI-authoritative baseline policy. CI's actual run on the eventual PR is the real proof."
     },
     {
       "criterion_id": "FR-004",
-      "description": "Verify FR-004 is satisfied",
+      "description": "scripts/check-visual-screenshot-softness.mjs detects a hard toHaveScreenshot call reintroduced into a multi-screenshot test, and its --selftest proves this against both in-memory probes and a real on-disk file.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "WP01: `node scripts/check-visual-screenshot-softness.mjs --selftest` passes (7 shape probes, 4 must-catch, 1 on-disk reader probe). Real-repo scan passes post-fix. Red-first proof: reverted the W4 drawer test's two expect.soft(...) calls to hard in the real visual.spec.ts, ran `node scripts/check-visual-screenshot-softness.mjs` (no flag), observed exit 1 naming apps/storybook/src/tests/visual.spec.ts:2294 with '2 of 2 toHaveScreenshot call(s) are HARD'; reverted and confirmed green again.",
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Locally verified by the implementer; awaiting reviewer/CI confirmation."
     },
     {
       "criterion_id": "FR-005",
-      "description": "Verify FR-005 is satisfied",
+      "description": "The new gate is wired into .github/workflows/ci-quality.yml's lint-code job as two [ENFORCED] steps (--selftest then real scan), and does not desync check-gate-wiring.mjs / check-gate-wiring-defeats.mjs.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "WP01: `node scripts/check-gate-wiring.mjs` passed after the workflow edit; `node scripts/check-gate-wiring-defeats.mjs` passed all 18 defeat cases plus control after the edit.",
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Local script runs only; the workflow itself has not executed on CI (no PR opened yet, per instruction)."
     }
   ],
-  "negative_invariants": []
+  "negative_invariants": [
+    {
+      "id": "NI-001",
+      "description": "No baseline PNG under apps/storybook/src/tests/visual.spec.ts-snapshots/ changes as a result of this mission.",
+      "status": "held",
+      "evidence": "git diff shows zero binary/PNG changes; only .spec.ts, .mjs, and .yml text files touched."
+    }
+  ]
 }
