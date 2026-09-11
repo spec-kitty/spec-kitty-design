@@ -69,9 +69,10 @@ const TRACKERS: Readonly<Record<string, string>> = {
 const REGION_NAME = 'Kanban lanes. Scroll horizontally to see all lanes.';
 const GUARDS = [
   'duplicateLane', 'blankLaneLabel', 'noCurrentNavigation', 'duplicateWorkPackage', 'blankRoute',
-  'duplicateRoute', 'unknownCommittedLane', 'duplicateTrackerControl', 'overlayUnknownWorkPackage',
-  'overlayUnknownLane', 'duplicateOverlay', 'overlayNotUnverified', 'overlayUnknownTone',
-  'incompleteStressLabels', 'unknownSelection', 'repeatedSelection', 'unknownWorkPackage',
+  'duplicateRoute', 'unknownCommittedLane', 'duplicateTrackerControl', 'blankTrackerControl',
+  'overlayUnknownWorkPackage', 'overlayUnknownLane', 'duplicateOverlay', 'overlayNotUnverified',
+  'overlayUnknownTone', 'blankOverlayLabel', 'incompleteStressLabels', 'unknownIndicatorTone',
+  'unknownSelection', 'repeatedSelection', 'unknownWorkPackage',
 ] as const;
 
 const DESKTOP = { width: 1440, height: 1024 } as const;
@@ -212,12 +213,27 @@ async function revealFocusedControlByKeyboard(page: Page, control: Locator): Pro
 }
 
 async function focusByKeyboard(page: Page, control: Locator, maximumTabs = 140): Promise<void> {
-  await page.locator('body').click({ position: { x: 1, y: 1 } });
+  await page.locator('[data-mission-kanban-ten-lane-pattern] h1').click();
   for (let index = 0; index < maximumTabs; index += 1) {
     await page.keyboard.press('Tab');
     if (await control.evaluate((node) => node.matches(':focus'))) return;
   }
   throw new Error(`Keyboard traversal did not reach the target after ${maximumTabs} Tab presses.`);
+}
+
+// The narrowest board that still fits: lane minimums plus gaps plus the scroller's own padding.
+async function measuredFitWidth(scroller: Locator): Promise<number> {
+  return scroller.evaluate((node) => {
+    const style = getComputedStyle(node);
+    const lanes = [...node.children] as HTMLElement[];
+    const lanesWidth = lanes.reduce((sum, lane) => sum + Number.parseFloat(getComputedStyle(lane).minInlineSize), 0);
+    return Math.ceil(
+      lanesWidth +
+      Number.parseFloat(style.columnGap) * (lanes.length - 1) +
+      Number.parseFloat(style.paddingInlineStart) +
+      Number.parseFloat(style.paddingInlineEnd),
+    );
+  });
 }
 
 const routeOf = (root: Locator, id: string): Locator =>
@@ -257,6 +273,7 @@ test('[T002] both fixtures stay frozen and single-source, counts are derived, an
     type Json = Record<string, unknown>;
     type Projection = {
       lanes: Array<{ id: string; count: number; workPackages: Array<{ id: string }> }>;
+      selectedLaneIds: string[];
       unverifiedOverlays: unknown[];
     };
     type Seam = {
@@ -292,6 +309,22 @@ test('[T002] both fixtures stay frozen and single-source, counts are derived, an
       workPackages: seam.base.workPackages.map((workPackage) =>
         workPackage.id === 'WP04' ? { ...workPackage, committedLaneId: 'genesis' } : workPackage),
     }, seam.extension);
+    const reversedSelection = seam.derive(seam.base, seam.extension, { selectedLaneIds: ['blocked', 'in_review'] });
+    const base = seam.base as unknown as Json & {
+      detailedLanes: Array<{ id: string }>;
+      workPackages: Array<{ id: string; committedLaneId: string }>;
+    };
+    const extension = seam.extension as unknown as Json & { stress: { laneLabels: Record<string, string> } };
+    const subsetIds = ['canceled', 'blocked', 'done'];
+    const subset = seam.derive({
+      ...base,
+      detailedLanes: subsetIds.map((id) => base.detailedLanes.find((lane) => lane.id === id)!),
+      workPackages: base.workPackages.filter(({ committedLaneId }) => subsetIds.includes(committedLaneId)),
+    }, {
+      ...extension,
+      stress: { laneLabels: Object.fromEntries(subsetIds.map((id) => [id, extension.stress.laneLabels[id]!])) },
+      unverifiedOverlays: [],
+    });
     const serializedExtension = JSON.stringify(seam.extension);
     return {
       available: true,
@@ -304,8 +337,12 @@ test('[T002] both fixtures stay frozen and single-source, counts are derived, an
       repeatedEqual: JSON.stringify(repeated) === firstBefore,
       renderedProjectionIndependent: seam.projection !== first,
       movedCounts: moved.lanes.map(({ count }) => count),
+      reversedSelectionLanes: reversedSelection.lanes.map(({ id }) => id),
+      reversedSelectionIds: reversedSelection.selectedLaneIds,
+      subsetLanes: subset.lanes.map(({ id }) => id),
+      subsetCounts: subset.lanes.map(({ count }) => count),
       extensionKeys: Object.keys(seam.extension).sort(),
-      extensionHoldsNoRoute: seam.base.workPackages.every(({ href }) => !serializedExtension.includes(href)),
+      extensionRestatesNoWorkPackageRoute: seam.base.workPackages.every(({ href }) => !serializedExtension.includes(href)),
       neverObserved: !firstBefore.includes('Observed') && !firstBefore.includes('up to 60 s behind'),
     };
   });
@@ -320,15 +357,19 @@ test('[T002] both fixtures stay frozen and single-source, counts are derived, an
     repeatedEqual: true,
     renderedProjectionIndependent: true,
     movedCounts: [1, 1, 1, 3, 2, 1, 1, 4, 1, 0],
+    reversedSelectionLanes: ['in_review', 'blocked'],
+    reversedSelectionIds: ['in_review', 'blocked'],
+    subsetLanes: ['canceled', 'blocked', 'done'],
+    subsetCounts: [0, 1, 4],
     extensionKeys: ['copy', 'format', 'routes', 'stress', 'tones', 'unverifiedOverlays'],
-    extensionHoldsNoRoute: true,
+    extensionRestatesNoWorkPackageRoute: true,
     neverObserved: true,
   });
 });
 
 test('[T006] the module stays story-only, owns no application machinery, and imports #278 truth', () => {
   const source = readFileSync(SOURCE, 'utf8');
-  expect(source).toMatch(/from '\.\/mission-kanban\.stories\.js'/);
+  expect(source).toMatch(/from '\.\/mission-kanban(?:\.stories|\.fixture)\.js'/);
   for (const forbidden of [
     /customElements\.define/,
     /<sk-mission-kanban\b/,
@@ -340,7 +381,7 @@ test('[T006] the module stays story-only, owns no application machinery, and imp
     /\b(?:router|polling|dragAndDrop|blockedReason|estimate|priority|owner)\b/i,
     /\bselectable\b|sk-action-row-activate/,
     /\battributes\s*:\s*true/,
-    /(?:animation|transition|scroll-behavior)\s*:/,
+    /(?:animation|transition)[\w-]*\s*:|scroll-behavior\s*:/,
     /\bobservedActivity\b/,
   ]) {
     expect(source, `forbidden ten-lane source surface: ${forbidden}`).not.toMatch(forbidden);
@@ -348,10 +389,24 @@ test('[T006] the module stays story-only, owns no application machinery, and imp
   const styles = source.slice(source.indexOf('const PATTERN_STYLES'), source.indexOf('type Presentation'));
   expect(styles.length).toBeGreaterThan(0);
   expect(styles).not.toMatch(/(?:^|[\s;{])(?:left|right|top|bottom|(?:margin|padding|border)-(?:left|right|top|bottom)[a-z-]*|(?:min-|max-)?(?:width|height))\s*:/m);
-  expect(styles).not.toMatch(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|\d+px\b/i);
+  // Single-quantifier patterns only (security/detect-unsafe-regex): `\d(?:px|...)` still catches
+  // `1.5rem` through its `5rem` tail, and `border[a-z-]*-color` still covers the logical longhands.
+  expect(styles).not.toMatch(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|oklch\(|oklab\(|\blab\(|\blch\(|hwb\(|color-mix\(|\d(?:px|rem|em|pt)\b/i);
+  expect(styles).not.toMatch(/(?:^|[\s;{])(?:float|clear)\s*:|text-align\s*:\s*(?:left|right)|(?:scroll-margin|scroll-padding|inset)-(?:left|right|top|bottom)/m);
+  const [ordinaryStyles, forcedStyles = ''] = styles.split('@media (forced-colors: active)');
+  const colourDeclarations = (block: string) => [...block.matchAll(
+    /(?:^|[\s;{])(background(?:-color)?|color|fill|stroke|outline-color|caret-color|accent-color|text-decoration-color|border[a-z-]*-color)\s*:\s*([^;}]+)/g,
+  )].map(([, property, value]) => [property!, value!.trim()] as const);
+  expect(colourDeclarations(ordinaryStyles).length).toBeGreaterThan(5);
+  for (const [property, value] of colourDeclarations(ordinaryStyles)) {
+    expect(value, `${property} must be a token outside forced colors`).toMatch(/^var\(--sk-[\w-]+\)$/);
+  }
+  for (const [property, value] of colourDeclarations(forcedStyles)) {
+    expect(value, `${property} under forced colors`).toMatch(/^(?:var\(--sk-[\w-]+\)|CanvasText|Canvas|Highlight|HighlightText|LinkText|ButtonText|ButtonBorder|GrayText)$/);
+  }
   expect(styles).not.toMatch(/\.sk-(?:action-row|app-shell|workflow-board|workflow-lane|notice|status-indicator|pill-tag|button|context-nav|breadcrumbs|disclosure|checkbox-choice-group|empty-state)[\w-]*\s*[{,:]/);
   // Only #278's shared overlay id (by reference) and the guard's deliberate unknown id may appear.
-  expect(source.match(/'WP\d{2}'/g)?.sort()).toEqual(["'WP03'", "'WP99'", "'WP99'"]);
+  expect([...new Set(source.match(/'WP\d{2}'/g))].sort()).toEqual(["'WP03'", "'WP99'"]);
 });
 
 test('[T006] every rendered string and accessible name is supplied by a fixture', async ({ page }) => {
@@ -404,8 +459,9 @@ test('[T006] every rendered string and accessible name is supplied by a fixture'
         const value = (text.textContent ?? '').trim();
         if (value && !allowed.has(value)) found.push(value);
       }
-      for (const element of node.querySelectorAll('[aria-label], [label], [message]')) {
-        for (const attribute of ['aria-label', 'label', 'message']) {
+      const userFacing = ['aria-label', 'aria-description', 'label', 'message', 'title', 'alt', 'placeholder'];
+      for (const element of node.querySelectorAll(userFacing.map((attribute) => `[${attribute}]`).join(', '))) {
+        for (const attribute of userFacing) {
           const value = element.getAttribute(attribute);
           if (value !== null && !allowed.has(value)) found.push(`${attribute}=${value}`);
         }
@@ -414,6 +470,154 @@ test('[T006] every rendered string and accessible name is supplied by a fixture'
     });
     expect(offenders, `${id} renders strings no fixture supplies`).toEqual([]);
   }
+});
+
+// Static half of the copy boundary (#286). The runtime audit cannot tell a hard-coded
+// 'Presence · unverified' from the fixture value it duplicates; this walks every html``
+// template, nested ones included, and allows no text between tags and no literal in a
+// user-facing attribute.
+function htmlTemplates(source: string): string[] {
+  const templates: string[] = [];
+  let index = 0;
+  const skipQuoted = (quote: string): void => {
+    index += 1;
+    while (index < source.length && source[index] !== quote) index += source[index] === '\\' ? 2 : 1;
+    index += 1;
+  };
+  const readTemplate = (isHtml: boolean): void => {
+    let text = '';
+    while (index < source.length) {
+      const char = source[index]!;
+      if (char === '\\') {
+        text += source.slice(index, index + 2);
+        index += 2;
+        continue;
+      }
+      if (char === '`') {
+        index += 1;
+        if (isHtml) templates.push(text);
+        return;
+      }
+      if (char === '$' && source[index + 1] === '{') {
+        text += '§';
+        index += 2;
+        readExpression();
+        continue;
+      }
+      text += char;
+      index += 1;
+    }
+  };
+  const readExpression = (): void => {
+    let depth = 1;
+    while (index < source.length && depth > 0) {
+      const char = source[index]!;
+      if (char === '`') {
+        const isHtml = source.slice(Math.max(0, index - 4), index) === 'html';
+        index += 1;
+        readTemplate(isHtml);
+        continue;
+      }
+      if (char === "'" || char === '"') {
+        skipQuoted(char);
+        continue;
+      }
+      if (char === '{') depth += 1;
+      else if (char === '}') depth -= 1;
+      index += 1;
+    }
+  };
+  for (let start = source.indexOf('html`'); start !== -1; start = source.indexOf('html`', index)) {
+    index = start + 'html`'.length;
+    readTemplate(true);
+  }
+  return templates;
+}
+
+function templateOffenders(source: string): string[] {
+  return htmlTemplates(source).flatMap((template) => {
+    const markup = template.replace(/<style>[\s\S]*?<\/style>/g, '');
+    const found: string[] = [];
+    const text = markup.replace(/<[^>]*>/g, ' ').replace(/§/g, ' ').trim();
+    if (text) found.push(`text: ${text.slice(0, 80)}`);
+    for (const tag of markup.match(/<[^>]*>/g) ?? []) {
+      if (/\sstyle\s*=/.test(tag)) found.push(`style attribute in ${tag.slice(0, 40)}`);
+      for (const [, name, value] of tag.matchAll(/\b(aria-label|aria-description|title|alt|placeholder|label|message)\s*=\s*"?([^"\s>]*)/g)) {
+        if (value !== '§') found.push(`${name}=${value}`);
+      }
+    }
+    return found;
+  });
+}
+
+test('[T006] render templates carry no literal text and no literal user-facing attribute', () => {
+  for (const probe of [
+    'html`<p>Literal copy</p>`',
+    'html`<a aria-label="Home" href=${route}>${label}</a>`',
+    'html`<div>${ready ? html`<span>Nested copy</span>` : nothing}</div>`',
+    'html`<div style="margin-left:1px">${label}</div>`',
+  ]) {
+    expect(templateOffenders(probe), `self-probe must go red: ${probe}`).not.toEqual([]);
+  }
+  expect(templateOffenders('html`<p class="x" aria-label=${name}>${copy.label}</p>`')).toEqual([]);
+  const source = readFileSync(SOURCE, 'utf8');
+  expect(htmlTemplates(source).length, 'the scan must reach the render templates').toBeGreaterThan(10);
+  expect(templateOffenders(source)).toEqual([]);
+});
+
+async function focusedControl(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const host = document.activeElement;
+    let focused: Element | null = host;
+    while (focused?.shadowRoot?.activeElement) focused = focused.shadowRoot.activeElement;
+    if (!host || !focused) return 'none';
+    if (focused instanceof HTMLInputElement && focused.type === 'checkbox') return `checkbox:${focused.value}`;
+    if (host.localName === 'sk-button') return `button:${host.textContent?.trim()}`;
+    if (host.localName === 'sk-action-row') {
+      return `route:${host.closest('[data-work-package-id]')?.getAttribute('data-work-package-id')}`;
+    }
+    if (focused.localName === 'summary') return 'summary';
+    if (focused.localName === 'a') return `link:${focused.textContent?.trim()}`;
+    return focused.localName;
+  });
+}
+
+test('[T007] K3 keyboard order equals DOM order through choices, Apply, Clear, routes and trackers', async ({ page }) => {
+  const root = await openStory(page, 'k-3-filtered-lanes');
+  const summary = root.locator('details[data-lane-filters] > summary');
+  await focusByKeyboard(page, summary);
+  await revealFocusedControlByKeyboard(page, summary);
+  const stops: ReadonlyArray<readonly [string, Locator]> = [
+    ...LANES.map((lane) => [`checkbox:${lane}`, root.locator(`input[type="checkbox"][value="${lane}"]`)] as const),
+    ['button:Apply', root.getByRole('button', { name: 'Apply', exact: true })],
+    ['button:Clear', root.getByRole('button', { name: 'Clear', exact: true })],
+    ['route:WP10', routeOf(root, 'WP10')],
+    ['route:WP05', routeOf(root, 'WP05')],
+    ['link:#1054', root.getByRole('link', { name: '#1054', exact: true })],
+  ];
+  for (const [name, control] of stops) {
+    await page.keyboard.press('Tab');
+    expect(await focusedControl(page)).toBe(name);
+    await revealFocusedControlByKeyboard(page, control);
+  }
+});
+
+test('[T007] the closed K1 disclosure opens by keyboard and hands focus to the native choices', async ({ page }) => {
+  const root = await openStory(page, 'default');
+  const details = root.locator('details[data-lane-filters]');
+  await expect(details).not.toHaveAttribute('open', /.*/);
+  const summary = details.locator(':scope > summary');
+  await focusByKeyboard(page, summary);
+  await revealFocusedControlByKeyboard(page, summary);
+  await page.keyboard.press('Enter');
+  await expect(details).toHaveAttribute('open', '');
+  await page.keyboard.press('Tab');
+  expect(await focusedControl(page)).toBe('checkbox:genesis');
+  const genesis = root.locator('input[type="checkbox"][value="genesis"]');
+  await revealFocusedControlByKeyboard(page, genesis);
+  await page.keyboard.press('Space');
+  await expect(genesis).toBeChecked();
+  expect(await laneSignature(root)).toEqual(LANES.map((lane) => ({ lane, cards: CARDS_BY_LANE[lane] })));
 });
 
 test('[T006] K1 renders ten ordered lanes, fifteen committed cards, and no stage reduction', async ({ page }) => {
@@ -676,7 +880,7 @@ test('[T007] the triad exists exactly while the board overflows, and a fitting b
     const root = await openStory(page, id, viewport);
     const scroller = scrollerOf(root);
     await expectFittingWithoutTriad(scroller);
-    await page.locator('body').click({ position: { x: 1, y: 1 } });
+    await page.locator('[data-mission-kanban-ten-lane-pattern] h1').click();
     let landedOnScroller = false;
     for (let index = 0; index < 90; index += 1) {
       await page.keyboard.press('Tab');
@@ -703,28 +907,35 @@ test('[T007] one mounted board follows live resize in both directions', async ({
   await expect(root).toHaveAttribute('data-live-resize-sentinel', 'same-root');
 });
 
-test('[T007] one mounted board follows a content change that does not resize the scroller', async ({ page }) => {
+test('[T007] one mounted board follows a content change that resizes neither the scroller nor a lane', async ({ page }) => {
   const root = await openStory(page, 'k-3-filtered-lanes', DESKTOP);
   await root.evaluate((node) => node.setAttribute('data-content-sentinel', 'same-root'));
+  const board = root.locator('[data-committed-board]');
   const scroller = scrollerOf(root);
+  // At the measured fit width every lane already sits at its minimum, so adding or removing a lane
+  // changes scrollWidth while the scroller box and every existing lane box stay put. Chromium runs
+  // headless with hidden scrollbars, so there the content observer is the only thing that can see
+  // this change.
+  const fitWidth = await measuredFitWidth(scroller);
+  await board.evaluate((node, width) => { (node as HTMLElement).style.inlineSize = `${width}px`; }, fitWidth);
+  await expect.poll(() => scroller.evaluate((node) => node.clientWidth)).toBe(fitWidth);
   await expectFittingWithoutTriad(scroller);
-  const widthBefore = await scroller.evaluate((node) => node.clientWidth);
+  const boxes = () => scroller.evaluate((node) => ({
+    width: node.clientWidth,
+    lanes: [...node.children].map((lane) => (lane as HTMLElement).getBoundingClientRect().width),
+  }));
+  const before = await boxes();
   await scroller.evaluate((node) => {
-    const template = node.querySelector(':scope > section')!;
-    for (let copy = 0; copy < 6; copy += 1) {
-      const clone = template.cloneNode(true) as HTMLElement;
-      clone.setAttribute('data-content-change-probe', '');
-      node.append(clone);
-    }
+    const clone = node.querySelector(':scope > section')!.cloneNode(true) as HTMLElement;
+    clone.setAttribute('data-content-change-probe', '');
+    node.append(clone);
   });
-  expect(await scroller.evaluate((node) => node.clientWidth)).toBe(widthBefore);
-  await expect.poll(() => overflows(scroller)).toBe(true);
   await expect.poll(() => triad(scroller)).toEqual(['region', REGION_NAME, '0']);
-  await scroller.evaluate((node) => {
-    for (const probe of node.querySelectorAll('[data-content-change-probe]')) probe.remove();
-  });
-  await expect.poll(() => overflows(scroller)).toBe(false);
+  const during = await boxes();
+  expect({ width: during.width, lanes: during.lanes.slice(0, before.lanes.length) }).toEqual(before);
+  await scroller.evaluate((node) => node.querySelector('[data-content-change-probe]')?.remove());
   await expect.poll(() => triad(scroller)).toEqual([null, null, null]);
+  expect(await boxes()).toEqual(before);
   await expect(root).toHaveAttribute('data-content-sentinel', 'same-root');
 });
 
@@ -732,17 +943,7 @@ test('[T007] the triad flips exactly at the measured board-fit width', async ({ 
   const root = await openStory(page, 'k-3-filtered-lanes', DESKTOP);
   const board = root.locator('[data-committed-board]');
   const scroller = scrollerOf(root);
-  const fitWidth = await scroller.evaluate((node) => {
-    const style = getComputedStyle(node);
-    const lanes = [...node.children] as HTMLElement[];
-    const lanesWidth = lanes.reduce((sum, lane) => sum + Number.parseFloat(getComputedStyle(lane).minInlineSize), 0);
-    return Math.ceil(
-      lanesWidth +
-      Number.parseFloat(style.columnGap) * (lanes.length - 1) +
-      Number.parseFloat(style.paddingInlineStart) +
-      Number.parseFloat(style.paddingInlineEnd),
-    );
-  });
+  const fitWidth = await measuredFitWidth(scroller);
   expect(fitWidth).toBeGreaterThan(0);
   await board.evaluate((node, width) => { (node as HTMLElement).style.inlineSize = `${width}px`; }, fitWidth);
   await expect.poll(() => scroller.evaluate((node) => node.clientWidth)).toBe(fitWidth);
@@ -753,6 +954,7 @@ test('[T007] the triad flips exactly at the measured board-fit width', async ({ 
   await expect.poll(() => triad(scroller)).toEqual(['region', REGION_NAME, '0']);
   await board.evaluate((node, width) => { (node as HTMLElement).style.inlineSize = `${width}px`; }, fitWidth);
   await expect.poll(() => triad(scroller)).toEqual([null, null, null]);
+  await expectNoDocumentOverflow(page);
 });
 
 type ObserverSnapshot = Readonly<{
@@ -763,6 +965,7 @@ type ObserverSnapshot = Readonly<{
   contentDetached: ReadonlyArray<number>;
   resizeObserved: number;
   resizeReleased: number;
+  bodyObservers: number;
 }>;
 
 async function installObserverProbe(page: Page): Promise<void> {
@@ -782,6 +985,7 @@ async function installObserverProbe(page: Page): Promise<void> {
       target instanceof Element && target.classList.contains('sk-workflow-board__scroller');
     const resizeActive = new Set<Element>();
     const contentActive = new Set<Node>();
+    const bodyObservers = new Set<MutationObserver>();
     let resizeObserved = 0;
     let resizeReleased = 0;
 
@@ -818,6 +1022,7 @@ async function installObserverProbe(page: Page): Promise<void> {
       }
       observe(target: Node, options?: MutationObserverInit): void {
         this.native.observe(target, options);
+        if (target === document.body) bodyObservers.add(this);
         if (!isScroller(target)) return;
         this.scrollers.add(target);
         contentActive.add(target);
@@ -825,6 +1030,7 @@ async function installObserverProbe(page: Page): Promise<void> {
       }
       disconnect(): void {
         this.native.disconnect();
+        bodyObservers.delete(this);
         for (const target of this.scrollers) contentActive.delete(target);
         this.scrollers.clear();
       }
@@ -846,6 +1052,7 @@ async function installObserverProbe(page: Page): Promise<void> {
           contentDetached: [...contentActive].filter((target) => !target.isConnected).map(idOf),
           resizeObserved,
           resizeReleased,
+          bodyObservers: bodyObservers.size,
         }),
       },
     });
@@ -884,7 +1091,11 @@ test('[T005/T007] real Storybook reloads release every observer of the previous 
     expect.soft(current.contentActive, `cycle ${index} content targets`).toHaveLength(1);
     expect.soft(current.contentDetached, `cycle ${index} detached content targets`).toEqual([]);
     expect.soft(current.resizeObserved - current.resizeReleased, `cycle ${index} balance`).toBe(1);
-    if (index > 0 && current.documentTimeOrigin === snapshots[index - 1]!.documentTimeOrigin) sameDocument += 1;
+    const previous = snapshots[index - 1];
+    if (index > 0 && previous && current.documentTimeOrigin === previous.documentTimeOrigin) {
+      sameDocument += 1;
+      expect.soft(current.bodyObservers, `cycle ${index} body watchers accumulate`).toBeLessThanOrEqual(previous.bodyObservers);
+    }
   }
   expect(sameDocument, 'at least one reload must remount inside the same document').toBeGreaterThan(0);
 });
