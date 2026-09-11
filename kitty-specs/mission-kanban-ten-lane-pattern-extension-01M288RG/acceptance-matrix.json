@@ -97,11 +97,11 @@
     {
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "browser + tree test",
+      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T006] reported-live panel is a separate named section with its own tier indicator; [T010] 'Live now' H2 in every K tree; overlay closest('[data-reported-activity]') is null.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:40.295808+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
