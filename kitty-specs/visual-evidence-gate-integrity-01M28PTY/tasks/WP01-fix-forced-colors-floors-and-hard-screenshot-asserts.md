@@ -46,6 +46,7 @@ subtasks:
 - T019
 - T020
 - T021
+- T022
 phase: Phase 1 - Fix and gate
 history:
 - timestamp: '2026-09-11T19:30:00Z'
