@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "mission_slug": "zoom-emulation-and-cli-commit-scopes-01M28YQ6",
+  "mission_id": "01M28YQ6YTQM18RY405H5DADPJ",
+  "mission_branch": "kitty/mission-zoom-emulation-and-cli-commit-scopes-01M28YQ6",
+  "target_branch": "mission/zoom-emulation-and-cli-commit-scopes",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/visual.spec.ts",
+        "commitlint.config.cjs",
+        "scripts/check-commitlint-config.mjs"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-11T19:25:57.485035+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "c048b7ba4d56db8cedc2dae3d5dc64223f564458"
+}
