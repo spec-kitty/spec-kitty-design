@@ -206,13 +206,24 @@ const CSS_PIERCING = [
  */
 // ── Shared derivation primitives ────────────────────────────────────────────────────────────
 //
-// Moved to pattern-composition-lib.mjs (no `import.meta` anywhere in that file) so #418's DOM
-// arm can import `ownedClasses()` and its siblings from a Playwright spec without pulling in
-// this file's CLI tail — MEASURED: importing THIS file after only a `process.exit()` guard was
-// added still broke Playwright's CJS test bundle with `SyntaxError: Cannot use 'import.meta'
-// outside a module`, because `import.meta.url` appears elsewhere in this file (the `--selftest`
-// sandbox) regardless of whether the guarded CLI branch runs. Re-exported here so this file's
-// own previously-exported names (`ownedClasses` etc.) are unchanged for any other consumer.
+// Moved to apps/storybook/src/tests/pattern-composition-lib.mjs (no `import.meta` anywhere in
+// that file) so #418's DOM arm can import `ownedClasses()` and its siblings from a Playwright
+// spec without pulling in this file's CLI tail. TWO problems, both MEASURED, forced the file to
+// live THERE rather than beside this one:
+//   1. Importing this file's CLI tail (even behind a `process.exit()` guard) into a Playwright
+//      spec broke test collection: `SyntaxError: Cannot use 'import.meta' outside a module`,
+//      because `import.meta.url` appears elsewhere in this file (the `--selftest` sandbox)
+//      regardless of whether the guarded branch runs.
+//   2. After splitting the `import.meta`-free primitives into their own `scripts/` module,
+//      importing THAT from a spec file still failed — at lint this time:
+//      `@nx/enforce-module-boundaries` refuses an `apps/**` file reaching a relative path into
+//      `scripts/`, which carries no `project.json` and is outside the Nx project graph
+//      entirely. `scripts/**` files are not covered by that same ESLint rule's `files` glob, so
+//      this file (a `scripts/` script) can import FROM `apps/storybook` without tripping it,
+//      but the reverse direction cannot exist. Hence: the library lives inside the `storybook`
+//      project, and this CLI script imports it from there instead.
+// Re-exported here so this file's own previously-exported names (`ownedClasses` etc.) are
+// unchanged for any other consumer.
 import {
   OWNED_SHEETS,
   bemBlockRoots,
@@ -228,7 +239,7 @@ import {
   styleBlocks,
   tokensOwnedClasses,
   trailingBareTag,
-} from './pattern-composition-lib.mjs';
+} from '../apps/storybook/src/tests/pattern-composition-lib.mjs';
 export {
   OWNED_SHEETS,
   bemBlockRoots,

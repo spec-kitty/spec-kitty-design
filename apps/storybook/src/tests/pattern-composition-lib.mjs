@@ -15,6 +15,17 @@
  * branch containing it ever ran. This file contains no `import.meta` anywhere, so it bundles
  * cleanly; `check-pattern-composition.mjs` imports everything it needs from here and re-exports
  * it, so its own existing public API is unchanged for any other consumer.
+ *
+ * WHY THIS FILE LIVES IN `apps/storybook/src/tests/`, NOT `scripts/` (where it was first
+ * written). Also MEASURED, not assumed: even after the `import.meta` split, a Playwright spec
+ * importing this file from `scripts/` via a deep relative path (`../../../../scripts/...`)
+ * failed lint — `@nx/enforce-module-boundaries` refuses any `apps/**` file reaching a relative
+ * path into `scripts/`, which has no `project.json` and sits outside the Nx project graph
+ * entirely. `scripts/**` files are not covered by that ESLint rule's `files` glob, so
+ * `check-pattern-composition.mjs` can import FROM here without tripping it, but the reverse
+ * direction structurally cannot exist under this repo's lint config. Co-locating here also puts
+ * it beside every future pattern mission's spec file (`apps/storybook/src/tests/*.spec.ts`),
+ * which is exactly who else is meant to import it.
  */
 import { globSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';

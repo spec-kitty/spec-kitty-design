@@ -9,17 +9,26 @@ import {
   ownedClasses,
   skPrimitivesIn,
   tokensOwnedClasses,
-  // #418 — these six are the derived DOM-inventory arm's primitives. Imported from
-  // pattern-composition-lib.mjs specifically, NOT check-pattern-composition.mjs (which
-  // re-exports the same names): that file's CLI tail uses `import.meta.url` at module scope,
-  // and Playwright bundles every spec + its imports to CJS for this test run, where any
-  // `import.meta` syntax anywhere in the graph fails to parse — MEASURED, not assumed, by
-  // importing check-pattern-composition.mjs here first and watching collection fail with
-  // `SyntaxError: Cannot use 'import.meta' outside a module`. `ownedClasses()` is literally the
-  // same function `check-pattern-composition.mjs`'s R3 already uses, so the property stays
-  // derived rather than becoming a second hand-maintained list. Reusable by the four other
-  // pattern missions in flight, not re-implemented per spec file.
-} from "../../../../scripts/pattern-composition-lib.mjs";
+  // #418 — these six are the derived DOM-inventory arm's primitives, co-located here (this
+  // directory, not scripts/) for two independently MEASURED reasons, not one:
+  //   1. `scripts/check-pattern-composition.mjs` (where these were first written) is a CLI
+  //      script whose tail uses `import.meta.url` at module scope, and Playwright bundles every
+  //      spec + its imports to CJS for this test run — any `import.meta` syntax anywhere in the
+  //      import graph fails to parse. Confirmed by importing that file here first: collection
+  //      failed with `SyntaxError: Cannot use 'import.meta' outside a module`.
+  //   2. Even after splitting the `import.meta`-free primitives into their own file, importing
+  //      that file from `scripts/` via a deep relative path (`../../../../scripts/...`) still
+  //      failed — this time at lint, not test time: `@nx/enforce-module-boundaries` refuses any
+  //      `apps/**`/`packages/**` file reaching a relative path outside the Nx project graph
+  //      (`scripts/` has no `project.json` and is not a recognized project). `scripts/` files
+  //      are NOT covered by that same ESLint rule's `files` glob, so the dependency direction
+  //      had to invert: this file lives inside the `storybook` project, and
+  //      `check-pattern-composition.mjs` imports it from here instead.
+  // `ownedClasses()` is literally the same function `check-pattern-composition.mjs`'s R3
+  // already uses, so the property stays derived rather than becoming a second hand-maintained
+  // list. Reusable by the four other pattern missions in flight (their spec files land in this
+  // same directory), not re-implemented per spec file.
+} from "./pattern-composition-lib.mjs";
 
 /**
  * Focused Storybook Playwright suite for the CLI Auth pattern family
