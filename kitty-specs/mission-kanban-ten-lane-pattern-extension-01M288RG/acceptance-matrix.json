@@ -78,10 +78,10 @@
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
       "proof_type": "browser test",
-      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K5: WP03 lane and position identical to K1, one overlay inside WP03's li with visible sk-status-indicator 'Presence \u00b7 unverified', actor lynn, '\u2192 for_review, not yet pushed'; 'live overlays shown' once; no 'Observed'/'up to 60 s behind' text; overlay outside the reported-live region.",
+      "evidence": "product head 8986d38f (rebased on train 16948194); sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K5 lane signature equals K1; one overlay inside WP03 with visible neutral sk-status-indicator 'Presence \u00b7 unverified', actor lynn, '\u2192 for_review, not yet pushed'; 'live overlays shown' once; no Observed text; outside reported-live; NI-005 grep-absence confirmed; local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T13:44:36.754187+00:00",
+      "verified_at": "2026-09-11T14:11:12.368299+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
