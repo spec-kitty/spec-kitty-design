@@ -34,6 +34,7 @@ owned_files:
 - scripts/check-commitlint-config.mjs
 - docs/architecture/decisions/2026-09-11-17-sk-button-tone-intensity-flattening.md
 - docs/architecture/README.md
+- llms-full.txt
 role: implementer
 tags: []
 tracker_refs: []
