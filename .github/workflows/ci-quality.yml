@@ -413,7 +413,7 @@ jobs:
         run: node scripts/check-visual-screenshot-softness.mjs --selftest
       - name: "[ENFORCED] Multi-screenshot tests use expect.soft throughout (#367)"
         run: node scripts/check-visual-screenshot-softness.mjs
-      # REL1 (#362). The develop-promotion mechanism's own 18-probe table (T003/IC-03 —
+      # REL1 (#362). The develop-promotion mechanism's own 21-probe table (T003/IC-03 —
       # floor-outside-the-table, mutation-controlled, contracts/promotion-script.contract.md).
       # No network, no GH_TOKEN — every probe runs against a fresh scratch git repository.
       - name: "[ENFORCED] develop-promotion mechanism self-test (REL1, #362)"
@@ -423,6 +423,13 @@ jobs:
       # table shape as the promotion script's own self-test above.
       - name: "[ENFORCED] develop ruleset parity checker self-test (REL1, #362)"
         run: node scripts/check-develop-ruleset-parity.mjs --selftest
+      # M6 (pre-merge squad, PR #429). The contracted NFR-002/SC-003 static check — job key set
+      # and every job's if:/needs: unchanged except REL1's two named exception classes — ships
+      # as code here rather than staying "something a reviewer verifies by eye".
+      - name: "[ENFORCED] ci-quality.yml trigger-parity self-test (NFR-002, SC-003, REL1 #362)"
+        run: node scripts/check-ci-quality-trigger-parity.mjs --selftest
+      - name: "[ENFORCED] ci-quality.yml trigger parity holds (NFR-002, SC-003, REL1 #362)"
+        run: node scripts/check-ci-quality-trigger-parity.mjs
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
         run: |
@@ -448,14 +455,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [changes]
-    # `&& !startsWith(github.head_ref, 'promote/')` (research.md R15): `github.head_ref` is
-    # empty for `push` events, so this conjunct is a no-op for the push-to-develop run that
-    # follows a promotion merge, and only skips the pull_request-triggered run against the
-    # promotion PR itself — content that is byte-identical to an already-fully-gated train
-    # commit, where the ~30-minute browser suite proves nothing new (REL1, #362).
+    # `&& !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')`
+    # (research.md R15): `github.head_ref`/`github.base_ref` are both empty for `push` events,
+    # so this conjunct is a no-op for the push-to-develop run that follows a promotion merge,
+    # and only skips the pull_request-triggered run against the promotion PR itself — content
+    # that is byte-identical to an already-fully-gated train commit, where the ~30-minute
+    # browser suite proves nothing new (REL1, #362). **B3 (pre-merge squad, PR #429)**: the
+    # base-ref conjunct is load-bearing, not decorative — `startsWith(head_ref, 'promote/')`
+    # alone trusted a branch NAME with no scoping, so a PR headed `promote/anything` into ANY
+    # base (nothing on GitHub reserves this namespace) skipped this job. Only a `promote/*`
+    # head with base `develop` — the one shape this mechanism itself ever creates — qualifies.
     if: >-
       (needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true') &&
-      !startsWith(github.head_ref, 'promote/')
+      !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -492,12 +504,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [storybook-build]
-    # `&& !startsWith(...)` (research.md R15): see storybook-build's own `if:` comment above —
-    # this skip is a no-op for `push` events and only applies to the promotion PR's own
-    # pull_request-triggered run, whose content already passed this suite on train (REL1, #362).
+    # See storybook-build's own `if:` comment above (research.md R15, B3). B3 (pre-merge
+    # squad, PR #429): `startsWith(github.head_ref, 'promote/')` alone trusted a branch NAME
+    # with no base scoping — a PR headed `promote/anything` into ANY base (not just `develop`)
+    # skipped this job. `github.base_ref == 'develop'` closes that: only a `promote/*`-headed
+    # PR whose BASE is `develop` (the one shape this mechanism itself ever creates) skips.
     if: >-
       needs.storybook-build.result == 'success' &&
-      !startsWith(github.head_ref, 'promote/')
+      !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -522,12 +536,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [storybook-build]
-    # `&& !startsWith(...)` (research.md R15): see storybook-build's own `if:` comment above —
-    # this skip is a no-op for `push` events and only applies to the promotion PR's own
-    # pull_request-triggered run, whose content already passed this suite on train (REL1, #362).
+    # See storybook-build's own `if:` comment above (research.md R15, B3). B3 (pre-merge
+    # squad, PR #429): `startsWith(github.head_ref, 'promote/')` alone trusted a branch NAME
+    # with no base scoping — a PR headed `promote/anything` into ANY base (not just `develop`)
+    # skipped this job. `github.base_ref == 'develop'` closes that: only a `promote/*`-headed
+    # PR whose BASE is `develop` (the one shape this mechanism itself ever creates) skips.
     if: >-
       needs.storybook-build.result == 'success' &&
-      !startsWith(github.head_ref, 'promote/')
+      !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -557,12 +573,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [storybook-build]
-    # `&& !startsWith(...)` (research.md R15): see storybook-build's own `if:` comment above —
-    # this skip is a no-op for `push` events and only applies to the promotion PR's own
-    # pull_request-triggered run, whose content already passed this suite on train (REL1, #362).
+    # See storybook-build's own `if:` comment above (research.md R15, B3). B3 (pre-merge
+    # squad, PR #429): `startsWith(github.head_ref, 'promote/')` alone trusted a branch NAME
+    # with no base scoping — a PR headed `promote/anything` into ANY base (not just `develop`)
+    # skipped this job. `github.base_ref == 'develop'` closes that: only a `promote/*`-headed
+    # PR whose BASE is `develop` (the one shape this mechanism itself ever creates) skips.
     if: >-
       needs.storybook-build.result == 'success' &&
-      !startsWith(github.head_ref, 'promote/')
+      !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -632,12 +650,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [storybook-build]
-    # `&& !startsWith(...)` (research.md R15): see storybook-build's own `if:` comment above —
-    # this skip is a no-op for `push` events and only applies to the promotion PR's own
-    # pull_request-triggered run, whose content already passed this suite on train (REL1, #362).
+    # See storybook-build's own `if:` comment above (research.md R15, B3). B3 (pre-merge
+    # squad, PR #429): `startsWith(github.head_ref, 'promote/')` alone trusted a branch NAME
+    # with no base scoping — a PR headed `promote/anything` into ANY base (not just `develop`)
+    # skipped this job. `github.base_ref == 'develop'` closes that: only a `promote/*`-headed
+    # PR whose BASE is `develop` (the one shape this mechanism itself ever creates) skips.
     if: >-
       needs.storybook-build.result == 'success' &&
-      !startsWith(github.head_ref, 'promote/')
+      !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')
     continue-on-error: true   # advisory only
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
@@ -725,6 +745,14 @@ jobs:
     if: always()
     steps:
       - name: "[ENFORCED] All hard gates must pass (FR-026)"
+        # B4 (pre-merge squad, PR #429): `github.head_ref`/`github.base_ref` are passed through
+        # `env:` and read back as `"$HEAD_REF"`/`"$BASE_REF"` below, never interpolated directly
+        # into the shell script text. A `${{ github.head_ref }}` substitution embeds a branch
+        # name literally into the script BEFORE bash ever parses it — a script-injection sink —
+        # and branch names accept shell metacharacters GitHub does not reject.
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
           echo "changes: ${{ needs.changes.result }} (tokens=${{ needs.changes.outputs.tokens }} components=${{ needs.changes.outputs.components }})"
           echo "security: ${{ needs.security.result }}"
@@ -759,17 +787,18 @@ jobs:
           if [ "$vr_ok"   != "success" ] && [ "$vr_ok"   != "skipped" ]; then vr_ok="fail"; fi
           if [ "$pw_ok"   != "success" ] && [ "$pw_ok"   != "skipped" ]; then pw_ok="fail"; fi
 
-          # REL1 (#362): a `promote/*`-headed PR's tree is byte-identical to an already
-          # fully-gated train commit (the four heavy jobs above skip themselves for exactly
-          # this ref shape — see their own `if:` comments), so a `skipped` result here is
-          # correct, not a gap. POSITIVELY SCOPED to `promote/*` only, and it touches ONLY
-          # these four `_ok` variables — `test`/`release-gate`/`security`/`workflow-pin-check`'s
-          # own strict checks below are completely unaffected. This is exactly the class of
-          # edit scripts/check-gate-wiring-defeats.mjs's own header comment warns is easy to
-          # get subtly wrong; its defeat table carries a case asserting this guard cannot be
-          # widened to apply unconditionally.
-          head_ref="${{ github.head_ref }}"
-          if [[ "$head_ref" == promote/* ]]; then
+          # REL1 (#362): a `promote/*`-headed PR into `develop` carries a tree byte-identical
+          # to an already fully-gated train commit (the four heavy jobs above skip themselves
+          # for exactly this shape — see their own `if:` comments), so a `skipped` result here
+          # is correct, not a gap. POSITIVELY SCOPED to `promote/*` heads INTO `develop` only,
+          # and it touches ONLY these four `_ok` variables — `test`/`release-gate`/`security`/
+          # `workflow-pin-check`'s own strict checks below are completely unaffected. This is
+          # exactly the class of edit scripts/check-gate-wiring-defeats.mjs's own header comment
+          # warns is easy to get subtly wrong; its defeat table carries cases asserting this
+          # guard cannot be widened to apply unconditionally, nor to any base other than
+          # `develop` (B3, pre-merge squad, PR #429 — a `promote/*`-headed PR into `main`, say,
+          # must get NO tolerance here).
+          if [[ "$HEAD_REF" == promote/* && "$BASE_REF" == "develop" ]]; then
             sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"
           fi
 
@@ -948,6 +977,15 @@ jobs:
   # No-ops cleanly (exit 0, ::notice::) until DEVELOP_RULESET_ID is set — the id does not exist
   # until the orchestrator applies the ruleset after this PR merges (data-model.md's Post-apply
   # record); this job must never go red before that has happened.
+  #
+  # M10 (pre-merge squad, PR #429), same candour as `workflow_dispatch`'s own note above: the
+  # `schedule:` arm of this job's `if:` is INERT until this exact file reaches `main` — a
+  # scheduled trigger always runs the workflow file as committed on the repository's DEFAULT
+  # branch (`main`), never as it exists on `train/elements-first` where this PR lands. Until
+  # the operator's later train->main landing carries this job there, the only way it actually
+  # runs is the `push`-to-`develop` arm (which is itself dormant until `develop` exists and the
+  # orchestrator's bootstrap sequence reaches it). See branch-model.md for the same note stated
+  # for a reader who has not opened this file.
   develop-ruleset-parity:
     if: >-
       github.event_name == 'schedule' ||
