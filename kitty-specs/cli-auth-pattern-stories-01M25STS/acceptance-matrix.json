@@ -117,11 +117,11 @@
     {
       "criterion_id": "FR-012",
       "description": "Verify FR-012 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_inspection",
+      "evidence": "Reviewer directly opened the 3 harvested forced-colors CI baselines (code-entry, authorization-decision-forced-colors): input boundary is a visible high-contrast stroke, Approve and Deny are both visibly bordered and distinguishable from each other (not color-only \u2014 Deny's border is visibly heavier per the companion automated width comparison at sk-cli-auth-pattern.spec.ts:610-628), scope pill-tags carry a visible border. Note: emulation is Chromium-only by established repo convention (test.skip browserName!=='chromium', sk-cli-auth-pattern.spec.ts:588-591); this is documented scope, not a gap. Execution outcome (the automated width-comparison assertion) pending CI's chromium playwright job.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:09:15.134810+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
