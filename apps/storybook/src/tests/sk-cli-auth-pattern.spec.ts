@@ -163,12 +163,16 @@ test("source is Storybook-only composition with no forbidden reader, private rea
   // enumerate. Every `sk`-prefixed tag/class this fixture's rendered markup names must resolve
   // to real ground truth: a registered custom element (the generated, CI drift+content-gated
   // Custom Elements Manifest), a class `packages/styles` or `packages/tokens` owns, or a class
-  // THIS fixture's own <style> block declares (its story-local BEM frame — legitimate
-  // per-story scoping, not an invented sub-component; `bemBlockRoots` additionally covers a
-  // rule-less block-hook class like the bare `sk-boundary-page`, documented in that file as
-  // carrying no rule of its own). An unlisted invented name has no bucket to land in and fails
-  // BY NAME — see the mission report for the executed red-first proof (a planted
-  // `<sk-auth-panel class="sk-consent-row">` caught and named, then reverted).
+  // THIS fixture's own <style> block declares AND is a BEM member of a block a real story-root
+  // element carries (`localClassesIn`/`ownBlockRoots` — legitimate per-story scoping, not an
+  // invented sub-component restated locally; `bemBlockRoots` additionally covers a rule-less
+  // block-hook class like the bare `sk-boundary-page`, documented in that file as carrying no
+  // rule of its own). An unlisted invented name has no bucket to land in and fails BY NAME —
+  // see the mission report for the executed red-first proofs: a planted `<sk-auth-panel
+  // class="sk-consent-row">` caught and named; a planted `<style>.sk-terminal-frame{...}</style>
+  // <div class="sk-terminal-frame">` (an inner element, one of the five ORIGINAL denylist
+  // names, styled locally with no relation to any real story root) caught and named — the
+  // reviewer's WP01 reject reproduction, now closed; both reverted afterward.
   const knownTags = knownElementTags();
   // FR-004's local floor: the manifest must actually describe something HERE, not only rely on
   // check-manifest-content.mjs's CI-side anti-vacuity gate elsewhere.
@@ -208,6 +212,29 @@ test("source is Storybook-only composition with no forbidden reader, private rea
   expect(code).not.toMatch(
     /\b(?:localStorage|sessionStorage|Math\.random|new\s+Date)\b/,
   );
+  // #418 FINDING 2 (reviewer, WP01 reject): the derived tag/class checks above read markup
+  // TEXT (`skPrimitivesIn()` scans opening tags) — they cannot see a class an element's
+  // `ref()` callback attaches at RUNTIME via the DOM API. REPRODUCED: planting
+  // `element?.classList.add("sk-consent-row")` inside the SAME `ref()` idiom this file already
+  // uses for `setCustomError` (Story 1's invalid-variant callback) passed all 13 tests,
+  // unnamed. This fixture composes, it does not build (C-005's own framing) — it has no
+  // legitimate reason to mutate an element's class list, attributes, or className at runtime,
+  // so that capability is refused outright here rather than left for the text scan to try (and
+  // fail) to see. `classList`'s four mutators, `setAttribute("class", ...)` in any quote style,
+  // and a `.className` assignment are the DOM-API surface for this; there is no existing use of
+  // any of them in this file to protect (checked, not assumed).
+  expect(code).not.toMatch(
+    /\.classList\s*\.\s*(?:add|remove|toggle|replace)\s*\(/,
+  );
+  expect(code).not.toMatch(
+    /\.setAttribute\s*\(\s*['"`]class['"`]/,
+  );
+  expect(code).not.toMatch(/\.className\s*=/);
+  // The bracket/reflection spellings, closed the same way C-004's own catch-all closes them for
+  // `shadowRoot`/`renderRoot`: every one of `el['classList']`, `Reflect.get(el, 'className')`,
+  // a computed key, etc. must NAME the property as a string literal somewhere, so matching the
+  // quoted name catches the family at the cost of one pattern.
+  expect(code).not.toMatch(/['"`](?:classList|className)['"`]/);
   // <sk-button> cannot submit an enclosing form; the three form actions must stay native
   // <button type="submit" class="sk-button ...">, not the custom element.
   expect(code).not.toMatch(/<\s*sk-button(?:\s|>)/);

@@ -272,19 +272,81 @@ export function tokensOwnedClasses(root = '.') {
   return classNamesDeclaredIn(readFileSync(file, 'utf8'), file);
 }
 
+/** `sk-boundary-page` from `sk-boundary-page__stage`; `null` for a name with no `__`/`--`
+ *  suffix. The shared primitive behind `bemBlockRoots()` and `ownBlockRoots()` below. */
+function bemRootOf(name) {
+  const m = /^([a-z][a-z0-9-]*?)(?:__|--)[a-z0-9-]+$/.exec(name);
+  return m ? m[1] : null;
+}
+
 /**
- * Every class declared inside a rendition's OWN `<style>…</style>` block(s) — a story's
+ * The BEM root(s) a rendition DECLARES AS ITS OWN by carrying them on a real story-root
+ * element — any element with a `data-*-pattern` attribute, the repo-wide convention every
+ * pattern family's story root carries (MEASURED: `cli-auth.stories.ts` uses
+ * `data-cli-auth-pattern`, `connectors.stories.ts` uses `data-connectors-pattern`,
+ * `mission-kanban.stories.ts` uses `data-mission-kanban-pattern`, and so on — grepped across
+ * every `packages/elements/src/patterns/*.stories.ts`; all six named pattern families follow
+ * it). Scans each such element's own `class="..."` attribute (including string literals nested
+ * in a `${…}` ternary, the same shape `skPrimitivesIn()` already handles), reducing each token
+ * to its BEM root.
+ *
+ * THIS IS THE FIX FOR #418 FINDING 1 (reviewer, WP01 reject #1): `localClassesIn()` used to
+ * accept ANY class declared in a fixture's own `<style>` block, unconditionally — no check that
+ * it belonged to the fixture's own frame rather than an unrelated block restated locally.
+ * REPRODUCED, then closed: planting
+ *   <style>.sk-terminal-frame { color: red; }</style>
+ *   <div class="sk-terminal-frame">
+ * — an INNER element, never carrying a `data-*-pattern` marker — passed the old check because
+ * `sk-terminal-frame` had a same-file rule. `sk-terminal-frame` is not an arbitrary name: it is
+ * one of the five names the denylist this whole mechanism replaced explicitly forbade, so the
+ * old local-classes arm was STRICTLY WEAKER than the mechanism it replaced for that exact case.
+ * `ownBlockRoots()` only trusts what an actual story root declares as its own; an inner element
+ * styled locally, with no relation to any story root's own class, now has no bucket to land in.
+ */
+export function ownBlockRoots(rendition) {
+  const roots = new Set();
+  // Bounded to each element's own opening tag, matching `skPrimitivesIn()`'s own proven
+  // technique exactly — and for the same reason: a first attempt here tried to precisely
+  // delimit `class="..."`'s value with `/\bclass\s*=\s*"([^"]*)"/`, which broke on
+  // `cli-auth.stories.ts`'s REAL markup (`class="sk-cli-auth-pattern${light ? " sk-light" :
+  // ""}"`) — the ternary's own nested double-quoted JS string literals terminate a `[^"]*`
+  // capture at the FIRST embedded `"`, silently truncating the match and losing
+  // `sk-cli-auth-pattern` entirely. MEASURED: that version flagged the fixture's own legitimate
+  // `sk-cli-auth-pattern` family as unknown. A blanket `sk-[\w-]+` scan across the whole tag
+  // (not attribute-delimited) sidesteps the quote-nesting problem the same way
+  // `skPrimitivesIn()` already does.
+  const openTag = /<\s*[a-zA-Z][\w-]*((?:[^<>]|\$\{[^{}]*\})*)>/g;
+  for (const m of rendition.matchAll(openTag)) {
+    const attrs = m[1];
+    if (!/\bdata-[a-z0-9-]*-pattern\b/.test(attrs)) continue;
+    for (const token of attrs.matchAll(/\bsk-[\w-]+\b/g)) {
+      roots.add(bemRootOf(token[0]) ?? token[0]);
+    }
+  }
+  return roots;
+}
+
+/**
+ * Every class declared inside a rendition's OWN `<style>…</style>` block(s) THAT IS A BEM
+ * MEMBER OF ONE OF ITS OWN DECLARED STORY-ROOT BLOCKS (`ownBlockRoots()`) — a story's
  * story-local BEM frame (e.g. `.sk-cli-auth-pattern` and its `__`-children), which is legitimate
- * per-story scoping and not an invented sub-component. Reuses `styleBlocks()` so this reads
- * `<style>` bodies the same case-insensitive, interpolation-masking way the CSS arm already
- * does.
+ * per-story scoping and not an invented sub-component. A locally-declared class that is NOT
+ * BEM-related to any real story root (see `ownBlockRoots()`'s header for the reproduced exploit
+ * this refuses) is excluded, not trusted just because a same-file rule exists for it. Reuses
+ * `styleBlocks()` so this reads `<style>` bodies the same case-insensitive,
+ * interpolation-masking way the CSS arm already does.
  */
 export function localClassesIn(rendition) {
-  const names = new Set();
+  const roots = ownBlockRoots(rendition);
+  const declared = new Set();
   for (const css of styleBlocks(rendition)) {
-    for (const name of classNamesDeclaredIn(css, 'inline <style>')) names.add(name);
+    for (const name of classNamesDeclaredIn(css, 'inline <style>')) declared.add(name);
   }
-  return names;
+  const accepted = new Set();
+  for (const name of declared) {
+    if (roots.has(name) || roots.has(bemRootOf(name))) accepted.add(name);
+  }
+  return accepted;
 }
 
 /**
@@ -333,8 +395,8 @@ export function knownElementTags(root = '.') {
 export function bemBlockRoots(classNames) {
   const roots = new Set();
   for (const name of classNames) {
-    const m = /^([a-z][a-z0-9-]*?)(?:__|--)[a-z0-9-]+$/.exec(name);
-    if (m) roots.add(m[1]);
+    const root = bemRootOf(name);
+    if (root) roots.add(root);
   }
   return roots;
 }
