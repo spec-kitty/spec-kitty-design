@@ -22,15 +22,38 @@
  * by more than that one substitution — is a VIOLATION.
  *
  * Usage: node scripts/verify-visual-spec-zero-drift.mjs [baseRef]
- *   baseRef defaults to 38f7e6fa, the commit this mission branched from.
+ *   If `baseRef` is given, it is used literally (useful for a one-off historical check, or for
+ *   `--selftest`-style manual verification against the mission's original base, 38f7e6fa).
+ *   If omitted, the base is computed as `git merge-base HEAD origin/train/elements-first` — the
+ *   commit this branch actually forked from RIGHT NOW, recomputed fresh on every run. This is
+ *   deliberately NOT a hardcoded historical SHA: a hardcoded base survives exactly until the
+ *   branch is next rebased onto a moved train, at which point every OTHER change the rebase
+ *   brings in (a sibling PR that also touches this file, adding whole new tests) reads as a
+ *   "violation" too, because it is compared against a base that predates it. Diffing from the
+ *   merge-base instead isolates exactly this branch's own contribution, no matter how many times
+ *   it is rebased. If `origin/train/elements-first` cannot be resolved (no such remote-tracking
+ *   ref — e.g. a shallow clone), falls back to the mission's original base, 38f7e6fa.
  * Exit 0  — invariant holds (including the trivial case: file identical to baseRef).
  * Exit 1  — invariant VIOLATED — a change beyond the sanctioned substitution was found.
  * Exit 2  — verification_error — git itself failed (wrong ref, not a git repo, etc.).
  */
 import { execFileSync } from 'node:child_process';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const FILE = 'apps/storybook/src/tests/visual.spec.ts';
 const FLOOR_SHAPE = /test\.info\(\)\.config\.projects\.map/;
+const FALLBACK_BASE = '38f7e6fa';
+const TRAIN_REF = 'origin/train/elements-first';
+
+/** `git merge-base HEAD <TRAIN_REF>`, or `FALLBACK_BASE` if that ref cannot be resolved. */
+function resolveDefaultBase() {
+  try {
+    return execFileSync('git', ['merge-base', 'HEAD', TRAIN_REF], { encoding: 'utf8' }).trim();
+  } catch {
+    return FALLBACK_BASE;
+  }
+}
 
 function gitDiff(baseRef) {
   return execFileSync('git', ['diff', '--no-color', '-U0', baseRef, '--', FILE], {
@@ -101,81 +124,84 @@ export function checkBlocks(blocks) {
   return { ok: violations.length === 0, violations };
 }
 
-if (process.argv.includes('--selftest')) {
-  const PROBES = [
-    [
-      'a clean expect->expect.soft substitution',
-      '@@ -1 +1 @@\n-  await expect(root).toHaveScreenshot(\'a.png\', {});\n+  await expect.soft(root).toHaveScreenshot(\'a.png\', {});\n',
-      true,
-    ],
-    [
-      'a clean floor-line pure insertion',
-      "@@ -0,0 +1 @@\n+expect(test.info().config.projects.map((project) => project.name), 'x').toContain('chromium');\n",
-      true,
-    ],
-    [
-      'VIOLATION: a locator argument silently changed alongside the substitution',
-      '@@ -1 +1 @@\n-  await expect(root).toHaveScreenshot(\'a.png\', {});\n+  await expect.soft(other).toHaveScreenshot(\'a.png\', {});\n',
-      false,
-    ],
-    [
-      'VIOLATION: a threshold silently changed alongside the substitution',
-      '@@ -1 +1 @@\n-  await expect(root).toHaveScreenshot(\'a.png\', { threshold: 0.02 });\n+  await expect.soft(root).toHaveScreenshot(\'a.png\', { threshold: 0.2 });\n',
-      false,
-    ],
-    [
-      'VIOLATION: a pure deletion',
-      '@@ -1 +0,0 @@\n-  await expect.soft(root).toHaveScreenshot(\'a.png\', {});\n',
-      false,
-    ],
-    [
-      'VIOLATION: a pure insertion that is NOT the floor shape',
-      "@@ -0,0 +1 @@\n+  await expect(root).toHaveScreenshot('sneaked-in.png', {});\n",
-      false,
-    ],
-  ];
-  let bad = 0;
-  for (const [note, patch, expectOk] of PROBES) {
-    const { ok } = checkBlocks(parseHunkBlocks(patch));
-    if (ok !== expectOk) {
-      console.error(`  ✗ ${note}: expected ok=${expectOk}, got ok=${ok}`);
-      bad++;
+// Run-as-CLI guard (same convention as check-adr-index.mjs and the other scripts in this mission) — cheap consistency even though nothing currently imports this module's exports.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  if (process.argv.includes('--selftest')) {
+    const PROBES = [
+      [
+        'a clean expect->expect.soft substitution',
+        '@@ -1 +1 @@\n-  await expect(root).toHaveScreenshot(\'a.png\', {});\n+  await expect.soft(root).toHaveScreenshot(\'a.png\', {});\n',
+        true,
+      ],
+      [
+        'a clean floor-line pure insertion',
+        "@@ -0,0 +1 @@\n+expect(test.info().config.projects.map((project) => project.name), 'x').toContain('chromium');\n",
+        true,
+      ],
+      [
+        'VIOLATION: a locator argument silently changed alongside the substitution',
+        '@@ -1 +1 @@\n-  await expect(root).toHaveScreenshot(\'a.png\', {});\n+  await expect.soft(other).toHaveScreenshot(\'a.png\', {});\n',
+        false,
+      ],
+      [
+        'VIOLATION: a threshold silently changed alongside the substitution',
+        '@@ -1 +1 @@\n-  await expect(root).toHaveScreenshot(\'a.png\', { threshold: 0.02 });\n+  await expect.soft(root).toHaveScreenshot(\'a.png\', { threshold: 0.2 });\n',
+        false,
+      ],
+      [
+        'VIOLATION: a pure deletion',
+        '@@ -1 +0,0 @@\n-  await expect.soft(root).toHaveScreenshot(\'a.png\', {});\n',
+        false,
+      ],
+      [
+        'VIOLATION: a pure insertion that is NOT the floor shape',
+        "@@ -0,0 +1 @@\n+  await expect(root).toHaveScreenshot('sneaked-in.png', {});\n",
+        false,
+      ],
+    ];
+    let bad = 0;
+    for (const [note, patch, expectOk] of PROBES) {
+      const { ok } = checkBlocks(parseHunkBlocks(patch));
+      if (ok !== expectOk) {
+        console.error(`  ✗ ${note}: expected ok=${expectOk}, got ok=${ok}`);
+        bad++;
+      }
     }
+    if (bad) {
+      console.error(`\n❌ ${bad} probe(s) did not behave as recorded.`);
+      process.exit(1);
+    }
+    console.log(`✅ All ${PROBES.length} NI-001 probes behaved as recorded.`);
+    process.exit(0);
   }
-  if (bad) {
-    console.error(`\n❌ ${bad} probe(s) did not behave as recorded.`);
+
+  const baseRef = process.argv[2] || resolveDefaultBase();
+  let patch;
+  try {
+    patch = gitDiff(baseRef);
+  } catch (err) {
+    console.error(`verification_error: git diff against ${baseRef} failed — ${err.message}`);
+    process.exit(2);
+  }
+
+  if (!patch.trim()) {
+    console.log(`OK: ${FILE} is byte-identical to ${baseRef} — no drift is possible.`);
+    process.exit(0);
+  }
+
+  const { ok, violations } = checkBlocks(parseHunkBlocks(patch));
+  if (!ok) {
+    console.error(
+      `❌ NI-001 VIOLATED: ${violations.length} change(s) in ${FILE} relative to ${baseRef} go ` +
+        'beyond the sanctioned expect( -> expect.soft( substitution / #401 floor insertions:',
+    );
+    for (const v of violations) console.error(`  ${v}`);
     process.exit(1);
   }
-  console.log(`✅ All ${PROBES.length} NI-001 probes behaved as recorded.`);
-  process.exit(0);
-}
 
-const baseRef = process.argv[2] || '38f7e6fa';
-let patch;
-try {
-  patch = gitDiff(baseRef);
-} catch (err) {
-  console.error(`verification_error: git diff against ${baseRef} failed — ${err.message}`);
-  process.exit(2);
-}
-
-if (!patch.trim()) {
-  console.log(`OK: ${FILE} is byte-identical to ${baseRef} — no drift is possible.`);
-  process.exit(0);
-}
-
-const { ok, violations } = checkBlocks(parseHunkBlocks(patch));
-if (!ok) {
-  console.error(
-    `❌ NI-001 VIOLATED: ${violations.length} change(s) in ${FILE} relative to ${baseRef} go ` +
-      'beyond the sanctioned expect( -> expect.soft( substitution / #401 floor insertions:',
+  console.log(
+    `✅ NI-001 holds: every changed line in ${FILE} relative to ${baseRef} is exactly ` +
+      'expect( -> expect.soft(, or a recognized #401 floor-assertion insertion. No pure deletions.',
   );
-  for (const v of violations) console.error(`  ${v}`);
-  process.exit(1);
+  process.exit(0);
 }
-
-console.log(
-  `✅ NI-001 holds: every changed line in ${FILE} relative to ${baseRef} is exactly ` +
-    'expect( -> expect.soft(, or a recognized #401 floor-assertion insertion. No pure deletions.',
-);
-process.exit(0);
