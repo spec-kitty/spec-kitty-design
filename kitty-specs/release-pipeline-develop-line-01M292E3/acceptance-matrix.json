@@ -57,11 +57,11 @@
     {
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_review",
+      "evidence": "docs/architecture/branch-model.md 'GitHub Packages visibility' section records the 2026-09-11 ruling verbatim",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T23:25:04.285562+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
