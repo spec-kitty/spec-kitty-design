@@ -963,6 +963,13 @@ else {
     // every comment in this list records, reintroduced one artifact over from `develop`'s own
     // ruleset check two entries above.
     [/node\s+scripts\/check-develop-ruleset-parity\.mjs\s+--check-parity-anchor-tags(\s|$)/, 'the parity-anchor-tags ruleset parity check (F-E)', 'scripts/check-develop-ruleset-parity.mjs --check-parity-anchor-tags'],
+    // #438 F3: verify-visual-spec-zero-drift.mjs's probe table had red-then-green evidence of a
+    // real defect but no CI caller and no registry entry here at all — exactly the omission every
+    // comment in this list records, just on the OTHER new script from the same fold as the two
+    // trigger-parity entries immediately above. Only the `--selftest` half is wired (see the
+    // workflow comment at its call site for why the real check stays manual), so only that half
+    // is registered.
+    [/node\s+scripts\/verify-visual-spec-zero-drift\.mjs\s+--selftest(\s|$)/, "the NI-001 visual-spec zero-drift gate's own probe table", 'scripts/verify-visual-spec-zero-drift.mjs --selftest'],
   ];
 
   /**
@@ -1056,6 +1063,10 @@ else {
     // matched on that verb rather than assuming `node`.
     [/bash\s+scripts\/check-token-breaking-changes\.sh(?!\s*--selftest)(\s|$)/, 'the token breaking-change gate (FR-015)', 'scripts/check-token-breaking-changes.sh'],
     [/bash\s+scripts\/check-token-breaking-changes\.sh\s+--selftest(\s|$)/, "the token breaking-change gate's own probe table", 'scripts/check-token-breaking-changes.sh --selftest'],
+    // #438 F11: without an entry here, the catalogue drift check could be deleted from
+    // `release-gate` with this checker still green, silently reopening the exact "committed
+    // catalogue never verified against a fresh build" gap it exists to close.
+    [/node\s+scripts\/generate-token-catalogue\.js\s+--check(\s|$)/, 'the token catalogue drift check (#438 F11)', 'scripts/generate-token-catalogue.js --check'],
   ];
   const releaseSteps = wf.jobs?.['release-gate']?.steps ?? [];
   for (const [re, what, label] of REQUIRED_RELEASE) {
@@ -1069,6 +1080,25 @@ else {
         problems.push(`the step running ${what} ${why} — it cannot fail the job, so the gate guards nothing`);
       }
     }
+  }
+
+  // #438 F2: `check-token-breaking-changes.sh`'s non-vacuity depends ENTIRELY on this checkout
+  // carrying `fetch-depth: 0` — without full history and tags, `git describe`/`git tag --list`
+  // can see nothing, and the script (deliberately, per its own #438 F2 fold) reports "no release
+  // tag found... first release" over a checkout that is truncated, not empty. That failure mode
+  // is fully described from THIS repo's own git behaviour, no PR needed to observe it — so it is
+  // asserted here directly rather than left to be noticed the next time someone "simplifies" the
+  // checkout step. `wf.jobs['release-gate'].steps[0]` is asserted BY POSITION as the checkout,
+  // not searched for by `uses:` prefix, because a checkout anywhere else in the job would already
+  // be too late for git commands that ran before it.
+  const releaseCheckout = releaseSteps[0];
+  if (!releaseCheckout || typeof releaseCheckout.uses !== 'string' || !releaseCheckout.uses.startsWith('actions/checkout@')) {
+    problems.push('the `release-gate` job\'s first step is not an actions/checkout — fetch-depth cannot be asserted');
+  } else if (releaseCheckout.with?.['fetch-depth'] !== 0) {
+    problems.push(
+      "the `release-gate` job's checkout does not carry `fetch-depth: 0` — " +
+        'scripts/check-token-breaking-changes.sh would silently degrade to its "first release" branch on a truncated history',
+    );
   }
 
   // The gate's OWN enforced step, and both jobs. `continue-on-error` or an `if:` anywhere in

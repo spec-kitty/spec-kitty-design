@@ -432,6 +432,13 @@ jobs:
         run: node scripts/check-visual-screenshot-softness.mjs --selftest
       - name: "[ENFORCED] Multi-screenshot tests use expect.soft throughout (#367)"
         run: node scripts/check-visual-screenshot-softness.mjs
+      # #438 F3: this probe table (NI-001/visual-evidence-gate-integrity) had red-then-green
+      # coverage of a real defect but no CI caller at all — the shell half of the same fold had
+      # both. It needs no train ref and no built artifacts, so wiring it here is free; the real,
+      # non-selftest check stays a manual/one-off verification command (see its own file header)
+      # since it depends on which branch a caller actually wants "before" to mean.
+      - name: "[ENFORCED] NI-001 visual-spec zero-drift gate's own probe table (#438)"
+        run: node scripts/verify-visual-spec-zero-drift.mjs --selftest
       # REL1 (#362). The develop-promotion mechanism's own probe table (T003/IC-03 —
       # floor-outside-the-table, mutation-controlled, contracts/promotion-script.contract.md;
       # F9, gate pass 2: no probe count restated here — see PROBE_FLOOR in the script itself).
@@ -753,6 +760,14 @@ jobs:
       # what it can see, and this one asserts tarball contents that are easy to get vacuously right.
       - name: "[ENFORCED] The release gate can see its own failures (SC-003)"
         run: node scripts/check-release-graph.mjs --selftest
+      # #438 F11: the breaking-change check below trusts that the COMMITTED catalogue reflects
+      # the committed `tokens.css` — nothing verified that before this. Without it, the gate
+      # compares committed-to-committed rather than source-to-source, and a hand-edited or stale
+      # catalogue could hide (or fabricate) a "breaking change" that a fresh build would not show.
+      # Placed BEFORE the breaking-change check itself so that check's CURRENT side is trustworthy
+      # by the time it runs.
+      - name: "[ENFORCED] Token catalogue matches a fresh build from tokens.css (#438 F11)"
+        run: node scripts/generate-token-catalogue.js --check
       # FR-015 (#435). Placed here, not in `lint-code`: this is a RELEASE-time gate over the
       # committed `packages/tokens/dist/token-catalogue.json` against the previous release tag —
       # the same "guards a release" scope every other check in this job carries, and it needs
