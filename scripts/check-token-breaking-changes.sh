@@ -31,6 +31,13 @@ RELEASE_TAG_GLOB='v*.*.*'
 # well-formed catalogue (unparseable JSON, or a missing/non-object `categories` key), prints a
 # one-line diagnostic to stderr and returns non-zero. Shared by --selftest fixtures and the real
 # run below, so a probe against it exercises the actual extraction code (#438 F7).
+#
+# #438 pass 2, finding F: `typeof [] === "object"` in JavaScript, so `categories: []` (and, via
+# `Object.values`, `categories: {}`) both satisfied the ORIGINAL `typeof !== "object"` guard and
+# silently extracted zero tokens. `Array.isArray` is now checked explicitly on both `d` and
+# `d.categories`, and the CALL SITES below refuse an empty result outright — the generator itself
+# refuses to WRITE a zero-token catalogue (see its own `tokenCount === 0` check), so a hand-edited
+# or foreign catalogue that has none is not a legitimate empty state to compare against.
 extract_tokens() {
   node -e '
     const fs = require("fs");
@@ -41,7 +48,7 @@ extract_tokens() {
       console.error("not valid JSON: " + e.message);
       process.exit(1);
     }
-    if (!d || typeof d !== "object" || typeof d.categories !== "object" || d.categories === null) {
+    if (!d || typeof d !== "object" || Array.isArray(d) || typeof d.categories !== "object" || d.categories === null || Array.isArray(d.categories)) {
       console.error("missing or non-object \"categories\" key");
       process.exit(1);
     }
@@ -223,6 +230,22 @@ if [ "${1:-}" = "--selftest" ]; then
   probe "F7: the CURRENT catalogue on disk is unparseable -> exit 2, not exit 1" 2 "CURRENT catalogue" "$REPO_A" v0.1.0
   write_catalogue "$REPO_A/$CATALOGUE_PATH" a b c d e
 
+  # ── Finding F (#438 pass 2), TWO INDEPENDENT MECHANISMS. `typeof [] === "object"` in JS, so
+  #    `categories: []` slipped past the ORIGINAL type check entirely (fixed with Array.isArray,
+  #    below) — but `categories: {}` (a genuinely empty plain object) is not an array and still
+  #    extracts zero tokens, needing the SEPARATE floor on the extracted result. Both, on a
+  #    non-release tag/branch, same reason as the F7 fixtures above. ─────────────────────────────
+  printf '{"categories":[]}' > "$REPO_A/$CATALOGUE_PATH"
+  git -C "$REPO_A" add -A
+  git -C "$REPO_A" commit -q -m "bad catalogue: categories is an array, zero tokens"
+  git -C "$REPO_A" tag bad-catalogue/empty-array-categories
+  probe "F: previous ref's categories:[] -> the Array.isArray type-check rejects it, exit 2" 2 "not a well-formed catalogue" "$REPO_A" bad-catalogue/empty-array-categories
+  write_catalogue "$REPO_A/$CATALOGUE_PATH" a b c d e
+
+  printf '{"categories":{"c":{"tokens":[]}}}' > "$REPO_A/$CATALOGUE_PATH"
+  probe "F: the CURRENT catalogue's categories is a well-formed object with zero tokens -> the FLOOR rejects it, exit 2" 2 "contains zero tokens" "$REPO_A" v0.1.0
+  write_catalogue "$REPO_A/$CATALOGUE_PATH" a b c d e
+
   # ── Repo B: no catalogue file at all — regression, unaffected by this fix. ─────────────────
   REPO_B="$SCRATCH/repo-b"
   new_repo "$REPO_B"
@@ -274,7 +297,7 @@ if [ "${1:-}" = "--selftest" ]; then
 
   # Total floor OUTSIDE the table (same shape as check-develop-ruleset-parity.mjs's PROBE_FLOOR):
   # a probe count silently shrinking must itself be caught.
-  FLOOR=14
+  FLOOR=16
   if [ "$TOTAL" -lt "$FLOOR" ]; then
     echo ""
     echo "❌ the probe set has shrunk: $TOTAL probe(s) against a floor of $FLOOR."
@@ -322,13 +345,26 @@ if [ -z "$PREVIOUS_REF" ]; then
     # script must not depend on that alone; if that one line is ever dropped, it must refuse
     # rather than silently report "first release" over real, truncated history.
     IS_SHALLOW="$(git rev-parse --is-shallow-repository 2>/dev/null || echo "false")"
-    ANY_RELEASE_TAG="$(git tag --list "$RELEASE_TAG_GLOB" | head -1)"
+    # #438 pass 2, finding D: NOT `git tag --list "$GLOB" | head -1`. Under `set -o pipefail`,
+    # `head -1` closes the pipe after its first line; on a repo with enough matching tags, `git`
+    # gets SIGPIPE writing the rest and exits 141, which `pipefail` propagates as THIS SCRIPT's
+    # exit code — a silent, undocumented abort inside the exact branch meant to refuse LOUDLY.
+    # Reproduced locally with 2000 tags. `for-each-ref --count=1` needs no pipe at all: git itself
+    # stops after the first match.
+    ANY_RELEASE_TAG="$(git for-each-ref --count=1 --format='%(refname:short)' "refs/tags/$RELEASE_TAG_GLOB" 2>/dev/null || echo "")"
     if [ "$IS_SHALLOW" = "true" ] || [ -n "$ANY_RELEASE_TAG" ]; then
       echo "❌ Cannot compare: no '$RELEASE_TAG_GLOB' release tag is reachable from HEAD."
       if [ "$IS_SHALLOW" = "true" ]; then
+        # Deliberately NOT "a release tag may exist" as if that were the likely case: a shallow
+        # clone gives no evidence either way, so asserting a direction here would be a guess this
+        # script does not have (a lens caught an earlier draft implying "probably a real release
+        # tag" when the honest answer is "cannot tell").
         echo "   This checkout is a SHALLOW clone — history is truncated, so tag reachability"
-        echo "   cannot be computed even though a release tag may exist. 'release-gate' must"
-        echo "   carry 'fetch-depth: 0'; locally, run 'git fetch --tags --unshallow'."
+        echo "   cannot be computed. This could genuinely be the first release, or a real"
+        echo "   release tag could exist that this checkout simply cannot see; a shallow clone"
+        echo "   cannot tell the two apart, so this refuses rather than guessing either way."
+        echo "   'release-gate' must carry 'fetch-depth: 0'; locally, run"
+        echo "   'git fetch --tags --unshallow' to get a real answer."
       else
         echo "   A release tag exists in this repository ($ANY_RELEASE_TAG) but is not reachable"
         echo "   from HEAD — verify this checkout's branch and history."
@@ -402,10 +438,24 @@ if ! CURRENT_TOKENS=$(extract_tokens "$CATALOGUE_PATH" 2>&1); then
   echo "$CURRENT_TOKENS" | sed 's/^/   /'
   exit 2
 fi
+# #438 pass 2, finding F: a floor OUTSIDE extract_tokens itself — an empty result is a legitimate
+# JS value (`[]`), not an error extract_tokens can refuse on its own, so it must be refused here.
+if [ -z "$CURRENT_TOKENS" ]; then
+  echo "❌ Cannot compare: the CURRENT catalogue at ${CATALOGUE_PATH} contains zero tokens."
+  echo "   scripts/generate-token-catalogue.js itself refuses to WRITE a zero-token catalogue —"
+  echo "   this looks hand-edited or foreign, not a legitimate empty state."
+  exit 2
+fi
 
 if ! PREVIOUS_TOKENS=$(extract_tokens "$PREVIOUS_TMP" 2>&1); then
   echo "❌ Cannot compare: the catalogue at ${PREVIOUS_REF} (${REF_SHA}) is not a well-formed catalogue."
   echo "$PREVIOUS_TOKENS" | sed 's/^/   /'
+  exit 2
+fi
+if [ -z "$PREVIOUS_TOKENS" ]; then
+  echo "❌ Cannot compare: the catalogue at ${PREVIOUS_REF} (${REF_SHA}) contains zero tokens."
+  echo "   A real catalogue always has tokens — this looks hand-edited or foreign, not a"
+  echo "   legitimate empty state to compare against."
   exit 2
 fi
 

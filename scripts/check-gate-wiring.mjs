@@ -1067,6 +1067,11 @@ else {
     // `release-gate` with this checker still green, silently reopening the exact "committed
     // catalogue never verified against a fresh build" gap it exists to close.
     [/node\s+scripts\/generate-token-catalogue\.js\s+--check(\s|$)/, 'the token catalogue drift check (#438 F11)', 'scripts/generate-token-catalogue.js --check'],
+    // #438 pass 2, finding A: the drift check's own probe table, registered separately from the
+    // check itself per every "#75, both entries with the gate itself" comment in this file —
+    // without an entry here, either could be deleted from `release-gate` with this checker still
+    // green, which is the exact defect a lens found by mutation-testing the comparison itself.
+    [/node\s+scripts\/generate-token-catalogue\.js\s+--selftest(\s|$)/, "the token catalogue drift check's own probe table", 'scripts/generate-token-catalogue.js --selftest'],
   ];
   const releaseSteps = wf.jobs?.['release-gate']?.steps ?? [];
   for (const [re, what, label] of REQUIRED_RELEASE) {
@@ -1094,7 +1099,11 @@ else {
   const releaseCheckout = releaseSteps[0];
   if (!releaseCheckout || typeof releaseCheckout.uses !== 'string' || !releaseCheckout.uses.startsWith('actions/checkout@')) {
     problems.push('the `release-gate` job\'s first step is not an actions/checkout — fetch-depth cannot be asserted');
-  } else if (releaseCheckout.with?.['fetch-depth'] !== 0) {
+  } else if (Number(releaseCheckout.with?.['fetch-depth']) !== 0) {
+    // #438 pass 2, smaller finding: YAML happily parses a QUOTED `fetch-depth: '0'` as the
+    // STRING `"0"`, which a strict `!== 0` would reject as absent even though it is a real,
+    // working `fetch-depth: 0` to the actions/checkout runner. `Number(...)` normalizes both
+    // spellings; `Number(undefined)` is `NaN`, which still correctly fails a missing/other value.
     problems.push(
       "the `release-gate` job's checkout does not carry `fetch-depth: 0` — " +
         'scripts/check-token-breaking-changes.sh would silently degrade to its "first release" branch on a truncated history',

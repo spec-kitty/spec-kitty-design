@@ -40,8 +40,10 @@
  *   this file, never through `main`. #362/#434 hit the identical shape one layer up (a workflow
  *   anchored to a commit only a soon-to-be-squash-merged branch carried) and it reddened CI for
  *   every PR the moment that branch was deleted, discovered only by an unrelated PR that happened
- *   to trip it. This script is not CI-wired (#435), so a silent wrong fallback here would surface
- *   even later: a human runs it by hand, gets a plausible-looking result, and trusts a diff
+ *   to trip it. Only this file's `--selftest` is CI-wired (`lint-code`, #438 F3); the real,
+ *   non-selftest check below stays a manual/one-off verification command (see F3's own
+ *   discussion for why), so a silent wrong fallback here would surface even later: a human runs
+ *   it by hand, gets a plausible-looking result, and trusts a diff
  *   against a base that predates every real change in the file — precisely because git does not
  *   reliably error on a dereference of an unreachable-but-not-yet-GC'd object, so the wrong
  *   comparison can still "succeed". Pass a `baseRef` explicitly when the default cannot be
@@ -317,13 +319,36 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         [noFileHeadSha],
         ({ code, out }) => code === 2 && /does not exist at/.test(out) && !/byte-identical/.test(out),
       );
+
+      // #438 pass 2, finding E, THE FIX UNDER TEST: FILE is UNTRACKED — real content sitting on
+      // disk, never `git add`ed — and absent from baseRef. `git diff` (without `--no-index`)
+      // never sees untracked files at all, tracked or not, so this produces the exact same empty
+      // `patch` as the F4 case above even though FILE very much exists on ONE side. An earlier
+      // revision's `&&` guard (both sides must be absent) missed this entirely and reported a
+      // false "byte-identical", exit 0 — proved by hand before this fix. The `||` guard (either
+      // side absent refuses) catches it.
+      const untrackedRepo = join(scratch, 'untracked-file');
+      newRepo(untrackedRepo);
+      writeFileSync(join(untrackedRepo, 'x.txt'), 'x\n');
+      git(untrackedRepo, ['add', 'x.txt']);
+      git(untrackedRepo, ['commit', '-q', '-m', 'base commit, no visual.spec.ts']);
+      const untrackedHeadSha = git(untrackedRepo, ['rev-parse', 'HEAD']).trim();
+      mkdirSync(join(untrackedRepo, 'apps/storybook/src/tests'), { recursive: true });
+      writeFileSync(join(untrackedRepo, FILE), "test('brand new, never staged', async () => {});\n");
+      subprocessProbe(
+        'F(E): FILE exists on disk but is UNTRACKED and absent from baseRef -> loud exit 2, not a false byte-identical',
+        'fail',
+        untrackedRepo,
+        [untrackedHeadSha],
+        ({ code, out }) => code === 2 && /does not exist at/.test(out) && !/byte-identical/.test(out),
+      );
     } finally {
       rmSync(scratch, { recursive: true, force: true });
     }
 
     // Floor OUTSIDE the tables (same shape as check-develop-ruleset-parity.mjs's PROBE_FLOOR):
     // a probe count silently shrinking to zero must itself be caught.
-    const FLOOR = 9;
+    const FLOOR = 10;
     const total = PROBES.length + subprocessTotal;
     if (total < FLOOR) {
       console.error(`\n❌ the probe set has shrunk: ${total} probe(s) against a floor of ${FLOOR}.`);
@@ -365,13 +390,16 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   }
 
   if (!patch.trim()) {
-    // #438 F4: `git diff <baseRef> -- FILE` also prints NOTHING when FILE exists in NEITHER
-    // tree (a scratch/degenerate checkout, or FILE renamed out from under this script without
-    // anyone updating the constant) — that is not "zero drift", it is "nothing to guard", and
-    // reporting it as a clean pass is the same green-over-an-empty-set shape this repo has a
-    // standing rule against. A mismatched existence (present in exactly one tree) is NOT this
-    // case: git would render that as a full add/delete hunk, so `patch` would not be empty.
-    if (!fileExistsAt(baseRef, FILE) && !existsSync(FILE)) {
+    // #438 F4/pass 2 finding E: `git diff <baseRef> -- FILE` prints NOTHING both when FILE
+    // exists in NEITHER tree, AND — this is the part an earlier revision's comment got wrong —
+    // when FILE is UNTRACKED: present on disk, never `git add`ed, and absent from `baseRef`.
+    // `git diff` (without `--no-index`) only ever compares TRACKED content, so it renders a
+    // one-sided change as a full add/delete hunk ONLY for a file git already knows about; an
+    // untracked file is invisible to it entirely, empty diff and all. Proved: a brand-new,
+    // untracked `visual.spec.ts` with real content produced "OK: byte-identical", exit 0.
+    // Both existence checks are therefore required (`||`, not `&&`): a genuine "no drift" claim
+    // needs FILE to exist on BOTH sides, not merely to be absent from neither.
+    if (!fileExistsAt(baseRef, FILE) || !existsSync(FILE)) {
       console.error(
         `verification_error: ${FILE} does not exist at ${baseRef} OR in the working tree — ` +
           'there is nothing to verify, so an empty diff proves nothing.',
