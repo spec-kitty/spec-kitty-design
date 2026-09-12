@@ -143,6 +143,24 @@ ruleset (`docs/architecture/branch-model.md`'s own Post-apply record, data-model
 then, `scripts/check-develop-ruleset-parity.mjs --check` no-ops with a notice rather than
 failing, because `vars.DEVELOP_RULESET_ID` is unset.
 
+## `parity-anchor-tags-are-immutable` ruleset (F-E)
+
+Specified in `.github/rulesets/parity-anchor-tags.json` — target `tag`, condition
+`refs/tags/parity-anchor/*`, rules `creation`, `deletion`, `update`, `non_fast_forward`, zero
+bypass actors. This is what `check-ci-quality-trigger-parity.mjs`'s anchor-tamper defense (its
+own F2) actually rests on: the tag `parity-anchor/rel1` that script resolves at run time cannot
+be created, moved or deleted by anyone — admins included — without first disabling or editing
+this ruleset, a visible, logged administrative act rather than a plain push. It protects the
+WHOLE `parity-anchor/*` prefix, not just `rel1`, so a future re-baseline's replacement tag (e.g.
+`parity-anchor/rel2`, see that script's own REBASELINING note) is covered automatically, and
+also blocked from being minted without the same deliberate step.
+
+**Live ruleset id**: `22997584` — already applied and active (verified via
+`gh api repos/spec-kitty/spec-kitty-design/rulesets/22997584`, 2026-09-12). Unlike `develop`'s
+ruleset above, this one is not mid-bootstrap: `scripts/check-develop-ruleset-parity.mjs
+--check-parity-anchor-tags` reads this id as a plain constant, with no dated floor and no
+unset-id notice path, since the ruleset already exists.
+
 ## Operator and orchestrator actions
 
 See `kitty-specs/release-pipeline-develop-line-01M292E3/quickstart.md` for the full, exact

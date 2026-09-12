@@ -1,16 +1,24 @@
 #!/usr/bin/env node
 /**
- * scripts/check-develop-ruleset-parity.mjs — full-parameter comparison between the live
- * `develop` ruleset and the committed artifact (REL1, #362, FR-001/NFR-004/SC-001;
- * data-model.md's DevelopRulesetArtifact, contracts/promotion-script.contract.md).
+ * scripts/check-develop-ruleset-parity.mjs — full-parameter comparison between two live GitHub
+ * rulesets and their committed artifacts: `develop` (REL1, #362, FR-001/NFR-004/SC-001;
+ * data-model.md's DevelopRulesetArtifact, contracts/promotion-script.contract.md) and, since
+ * F-E, `parity-anchor-tags-are-immutable` (the tag ruleset that protects
+ * `refs/tags/parity-anchor/*` — see check-ci-quality-trigger-parity.mjs's F2). Before F-E the
+ * latter was load-bearing (check-ci-quality-trigger-parity.mjs's whole anchor-tamper defense
+ * depends on it), unrecorded as an artifact, and undrift-checked — exactly the state
+ * `develop`'s own ruleset was in before this mission (FR-001) closed it.
  *
- * `diffRulesetParity(live, artifact)` compares EVERY parameter at every nesting level,
+ * `diffRulesetParity(live, artifact, opts)` compares EVERY parameter at every nesting level,
  * ignoring only the eight named response-only fields GitHub's API adds to a response that
  * never appear in a POST/PATCH body (`id`, `node_id`, `_links`, `current_user_can_bypass`,
- * `created_at`, `updated_at`, `source`, `source_type`) and the three named, documented
- * differences (`name`, `conditions.ref_name.include`,
- * `rules[type=pull_request].parameters.allowed_merge_methods`) — every other mismatch, at any
- * depth, is reported.
+ * `created_at`, `updated_at`, `source`, `source_type`) — universal across any ruleset — plus
+ * whatever `opts.namedDifferences`/`opts.namedPrefixDifferences` name for THIS ruleset (default:
+ * `develop`'s own three: `name`, `conditions.ref_name.include`,
+ * `rules[type=pull_request].parameters.allowed_merge_methods`). `parity-anchor-tags` passes
+ * empty sets for both — its artifact is written to already match the live ruleset's `name` and
+ * `conditions.ref_name.include` exactly, so it has no named differences to declare at all —
+ * every other mismatch, at any depth, is reported for either ruleset.
  *
  * CLI:
  *   node scripts/check-develop-ruleset-parity.mjs --selftest
@@ -19,6 +27,10 @@
  *     BOOTSTRAP_DEADLINE below, exit 1 after it (M9) — the live ruleset does not exist until
  *     the orchestrator applies it post-merge, but that state must not stay silently green
  *     forever.)
+ *   node scripts/check-develop-ruleset-parity.mjs --check-parity-anchor-tags
+ *     (id is NOT bootstrap-pending like develop's — F-E's ruleset already exists, id 22997584,
+ *     recorded in docs/architecture/branch-model.md — so this has no dated floor and no
+ *     unset-id notice path; a missing/unreachable ruleset here is simply an error.)
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -27,6 +39,11 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ARTIFACT_PATH = resolve(__dirname, '..', '.github', 'rulesets', 'develop-ruleset.json');
+const PARITY_ANCHOR_ARTIFACT_PATH = resolve(__dirname, '..', '.github', 'rulesets', 'parity-anchor-tags.json');
+// F-E: already applied and stable (verified via `gh api repos/.../rulesets/22997584`,
+// recorded in docs/architecture/branch-model.md) — unlike DEVELOP_RULESET_ID below, this one
+// is not mid-bootstrap, so it is a plain constant rather than an env-driven, dated-floor value.
+const PARITY_ANCHOR_RULESET_ID = '22997584';
 // "Also" item (pre-merge squad, PR #429): env-driven, not a second hardcoded literal — the
 // one INTENTIONALLY hardcoded literal in this mission is `assertSingleRepoScope`'s security
 // invariant in scripts/promote-develop.mjs, which must stay literal (an env var there would
@@ -145,15 +162,20 @@ const NAMED_PREFIX_DIFFERENCES = ['rules[type=pull_request].parameters.allowed_m
 
 /**
  * Compares EVERY parameter, at every nesting level (data-model.md's DevelopRulesetArtifact
- * section). Returns `[]` only when the full structures match except the three named,
- * documented differences.
+ * section). Returns `[]` only when the full structures match except the named, documented
+ * differences. `opts.namedDifferences`/`opts.namedPrefixDifferences` default to `develop`'s own
+ * three (above) — `parity-anchor-tags` (F-E) passes empty collections instead, since its
+ * artifact is written to match the live ruleset's `name`/`conditions.ref_name.include` exactly
+ * and has no analogous per-type parameter to exempt (it carries no `pull_request` rule at all).
  */
-export function diffRulesetParity(live, artifact) {
+export function diffRulesetParity(live, artifact, opts = {}) {
+  const namedDifferences = opts.namedDifferences ?? NAMED_DIFFERENCES;
+  const namedPrefixDifferences = opts.namedPrefixDifferences ?? NAMED_PREFIX_DIFFERENCES;
   const diffs = [];
   deepDiff('', live, artifact, diffs);
   return diffs.filter((d) => {
-    if (NAMED_DIFFERENCES.has(d.path)) return false;
-    if (NAMED_PREFIX_DIFFERENCES.some((prefix) => d.path === prefix || d.path.startsWith(`${prefix}[`))) {
+    if (namedDifferences.has(d.path)) return false;
+    if (namedPrefixDifferences.some((prefix) => d.path === prefix || d.path.startsWith(`${prefix}[`))) {
       return false;
     }
     return true;
@@ -209,6 +231,28 @@ function cliCheck(args) {
     return;
   }
   console.log(`✅ the live develop ruleset (id ${id}) matches the committed artifact.`);
+}
+
+/** F-E: same shape as `cliCheck` above, minus the bootstrap-deadline dance — this ruleset
+ *  already exists and its id is already known and recorded, so there is no pre-bootstrap
+ *  "nothing to check yet" state to tolerate. */
+function cliCheckParityAnchorTags() {
+  const live = JSON.parse(
+    execFileSync('gh', ['api', `repos/${REPO}/rulesets/${PARITY_ANCHOR_RULESET_ID}`], { encoding: 'utf8' }),
+  );
+  const artifact = JSON.parse(readFileSync(PARITY_ANCHOR_ARTIFACT_PATH, 'utf8'));
+  const diffs = diffRulesetParity(live, artifact, { namedDifferences: new Set(), namedPrefixDifferences: [] });
+  if (diffs.length) {
+    console.error(
+      `::error::the live parity-anchor-tags ruleset (id ${PARITY_ANCHOR_RULESET_ID}) has drifted from the committed artifact:`,
+    );
+    for (const d of diffs) {
+      console.error(`   ${d.path}: live=${JSON.stringify(d.live)} artifact=${JSON.stringify(d.artifact)}`);
+    }
+    process.exitCode = 1;
+    return;
+  }
+  console.log(`✅ the live parity-anchor-tags ruleset (id ${PARITY_ANCHOR_RULESET_ID}) matches the committed artifact.`);
 }
 
 // ── --selftest: floor-outside-the-table, same shape as promote-develop.mjs's (research.md R8) ──
@@ -317,10 +361,34 @@ function runProbes() {
     record(8, 'target changed to tag -> caught (V7 canary)', 'fail', diffs.length > 0 && flagged, diffs);
   }
 
+  // F-E: the SAME diff engine, driven against the parity-anchor-tags artifact instead — it has
+  // ZERO named differences to tolerate (its artifact is written to match name/ref_name.include
+  // exactly, and it carries no pull_request rule to narrow), so every field is compared as-is.
+  const parityAnchorArtifact = JSON.parse(readFileSync(PARITY_ANCHOR_ARTIFACT_PATH, 'utf8'));
+  const noNamedDiffs = { namedDifferences: new Set(), namedPrefixDifferences: [] };
+
+  // Probe 9 — same-shaped fixture (response-only fields only, no named differences at all) -> [].
+  {
+    const live = liveShapedFrom(parityAnchorArtifact);
+    const diffs = diffRulesetParity(live, parityAnchorArtifact, noNamedDiffs);
+    record(9, 'parity-anchor-tags: same-shaped fixture (response-only fields only) -> []', 'pass', diffs.length === 0, diffs);
+  }
+
+  // Probe 10 — a genuinely different fixture (creation rule silently dropped, the exact
+  // regression that would let a substitute tag be minted without an admin lifting the
+  // ruleset first) -> non-empty, naming the field.
+  {
+    const live = liveShapedFrom(parityAnchorArtifact);
+    live.rules = live.rules.filter((r) => r.type !== 'creation');
+    const diffs = diffRulesetParity(live, parityAnchorArtifact, noNamedDiffs);
+    const flagged = diffs.some((d) => d.path === 'rules[type=creation]');
+    record(10, 'parity-anchor-tags: creation rule missing entirely -> caught', 'fail', diffs.length > 0 && flagged, diffs);
+  }
+
   return results;
 }
 
-const PROBE_FLOOR = 8;
+const PROBE_FLOOR = 10;
 
 function selftest() {
   const results = runProbes();
@@ -374,7 +442,13 @@ function main() {
     cliCheck(args);
     return;
   }
-  console.error('usage: node scripts/check-develop-ruleset-parity.mjs <--selftest|--check> [--ruleset-id <id>]');
+  if (args.includes('--check-parity-anchor-tags')) {
+    cliCheckParityAnchorTags();
+    return;
+  }
+  console.error(
+    'usage: node scripts/check-develop-ruleset-parity.mjs <--selftest|--check [--ruleset-id <id>]|--check-parity-anchor-tags>',
+  );
   process.exitCode = 1;
 }
 
