@@ -1,7 +1,7 @@
 {
   "rows": {
     "#286": {
-      "evidence_ref": "Issue #286 remains independently owned. Compact implementation a260ef9e introduces no runtime element render literal and supplies every Storybook-visible/accessibility string through the frozen consumer fixture; FR-013 and NI-006 in acceptance-matrix.json record the positive and negative proof.",
+      "evidence_ref": "Issue #286 remains independently owned. Current verification introduces no runtime element render literal and supplies every Storybook-visible/accessibility string through the frozen consumer fixture. The Storybook-only renderer seam drives non-canonical observed subsection headings through the actual projection and render path, proving both rendered H3 text and accessible names remain consumer supplied; FR-013 and NI-006 in acceptance-matrix.json record the positive and negative proof.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -25,7 +25,7 @@
       "wp": "WP01"
     },
     "#382": {
-      "evidence_ref": "Independent final approval remains preserved in review-cycle-8.md (historical reviewed code SHA 91b5d0cf). The byte-equivalent compact implementation a260ef9e and executable evidence 495b018b retain the compiled-seam enumerable/non-enumerable/symbol/getter-safety proofs and all green truth-region, a11y, responsive, visual, composition, unit, type, quality, and commitlint evidence.",
+      "evidence_ref": "Independent final approval remains preserved in review-cycle-8.md (historical reviewed code SHA 91b5d0cf). Current exact verification on train base 57fe4ce7 retains the compiled-seam enumerable/non-enumerable/symbol/getter-safety proofs, adds the repository-convention DPR-2/exact-half-viewport real-zoom proof, and drives alternate consumer headings through a projection-local Storybook renderer. Truth-region, a11y, responsive, visual, composition, unit, type, quality, and commitlint evidence is green; rebase-evidence.md records the current counts, host-raster visual diagnostic, and immutable snapshot ledger.",
       "fr": null,
       "nfr": null,
       "repo": null,

@@ -238,6 +238,10 @@ test("projection freeze is detached from caller-owned nested fixture nodes", asy
           groups: Array<{ rows: Array<{ subject: string }> }>;
         };
       };
+      copy: {
+        observedMomentsHeading: string;
+        observedRecordedHeading: string;
+      };
     };
     type Projection = {
       kind: string;
@@ -250,6 +254,8 @@ test("projection freeze is detached from caller-owned nested fixture nodes", asy
       repositories?: Array<{ rows: Array<{ actor: string }> }>;
       moments?: Array<{ kind: string }>;
       groups?: Array<{ rows: Array<{ subject: string }> }>;
+      momentsHeading?: string;
+      recordedHeading?: string;
     };
     const seam = (
       node as HTMLElement & {
@@ -259,10 +265,16 @@ test("projection freeze is detached from caller-owned nested fixture nodes", asy
             candidate: MutableFixture,
             state: "l1" | "tl1" | "oa1-populated",
           ) => Projection;
+          renderFixture: (
+            candidate: MutableFixture,
+            state: "oa1-populated",
+          ) => HTMLElement;
         };
       }
     ).__teamActivityTestSeam;
     const candidate = structuredClone(seam.fixture);
+    candidate.copy.observedMomentsHeading = "Alternate supplied moments";
+    candidate.copy.observedRecordedHeading = "Alternate supplied records";
     const pristine = structuredClone(candidate);
     const descriptorSignature = (value: object) =>
       Object.fromEntries(
@@ -286,6 +298,7 @@ test("projection freeze is detached from caller-owned nested fixture nodes", asy
       candidate.repositoryLive.l1.rows[0]!.time,
       candidate.hostContext,
       candidate.hostContext.facts,
+      candidate.copy,
       candidate.observed.populated,
       candidate.observed.populated.moments,
       candidate.observed.populated.groups[0]!.rows[0]!,
@@ -294,8 +307,13 @@ test("projection freeze is detached from caller-owned nested fixture nodes", asy
     const l1 = seam.projectFixture(candidate, "l1");
     const tl1 = seam.projectFixture(candidate, "tl1");
     const observed = seam.projectFixture(candidate, "oa1-populated");
+    const rendered = seam.renderFixture(candidate, "oa1-populated");
+    const renderedIntoDetachedContainer = !rendered.isConnected;
+    rendered.dataset.teamActivityRenderSeamOutput = "alternate-headings";
+    document.body.append(rendered);
     const descriptorsAfter = watched.map(descriptorSignature);
-    const unchangedAfterProjection = JSON.stringify(candidate) === JSON.stringify(pristine);
+    const unchangedAfterProjectionAndRender =
+      JSON.stringify(candidate) === JSON.stringify(pristine);
     const callerNodesRemainMutable = watched.every((value) => !Object.isFrozen(value));
 
     candidate.repositoryLive.l1.rows[0]!.actor = "caller-mutated-actor";
@@ -307,7 +325,8 @@ test("projection freeze is detached from caller-owned nested fixture nodes", asy
       "caller-mutated-subject";
 
     return {
-      unchangedAfterProjection,
+      unchangedAfterProjectionAndRender,
+      renderedIntoDetachedContainer,
       descriptorsUnchanged:
         JSON.stringify(descriptorsBefore) === JSON.stringify(descriptorsAfter),
       callerNodesRemainMutable,
@@ -328,11 +347,48 @@ test("projection freeze is detached from caller-owned nested fixture nodes", asy
         teamActor: tl1.repositories?.[0]?.rows[0]?.actor,
         moment: observed.moments?.[0]?.kind,
         subject: observed.groups?.[0]?.rows[0]?.subject,
+        momentsHeading: observed.momentsHeading,
+        recordedHeading: observed.recordedHeading,
       },
     };
   });
+  const rendered = page.locator(
+    '[data-team-activity-render-seam-output="alternate-headings"]',
+  );
+  const renderedHeadings = rendered.locator("h3");
+  await expect(renderedHeadings).toHaveCount(2);
+  expect(await renderedHeadings.allInnerTexts()).toEqual([
+    "Alternate supplied moments",
+    "Alternate supplied records",
+  ]);
+  await expect(
+    rendered.getByRole("heading", {
+      level: 3,
+      name: "Alternate supplied moments",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    rendered.getByRole("heading", {
+      level: 3,
+      name: "Alternate supplied records",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    rendered.getByRole("heading", { level: 3, name: "Moments", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    rendered.getByRole("heading", {
+      level: 3,
+      name: "Recorded activity",
+      exact: true,
+    }),
+  ).toHaveCount(0);
+  await rendered.evaluate((node) => node.remove());
   expect(proof).toEqual({
-    unchangedAfterProjection: true,
+    unchangedAfterProjectionAndRender: true,
+    renderedIntoDetachedContainer: true,
     descriptorsUnchanged: true,
     callerNodesRemainMutable: true,
     mutationsApplied: {
@@ -352,6 +408,8 @@ test("projection freeze is detached from caller-owned nested fixture nodes", asy
       teamActor: "lynn",
       moment: "WPStatusChanged",
       subject: "user:alice",
+      momentsHeading: "Alternate supplied moments",
+      recordedHeading: "Alternate supplied records",
     },
   });
 });

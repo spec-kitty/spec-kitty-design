@@ -73,7 +73,32 @@ This section supersedes only the older locally rendered Noble baseline bytes doc
 their source/behavioral gate results remain historical evidence. A local Noble visual replay is
 diagnostic on this host and is not used to overwrite these CI-authoritative images.
 
-## Final approved compaction on #410/#429 train
+## Current exact-base rebase after CI/ruleset tooling landing
+
+- Exact target: `57fe4ce7a752d2fcbce19e963a7c833acf951473`
+  (`origin/train/elements-first`). The reviewed/published source head is preserved at
+  `safety/382-pre-rebase-4921b044`
+  (`4921b0445395394293d4a6e307a2419f4c2c53eb`).
+- All eight mission commits replayed linearly without conflicts or merge commits. The target delta
+  from historical base `b38b40e7` is limited to the CI workflow, ruleset artifact, two release/
+  architecture documents, and three parity/wiring checkers. Those files are inherited from the
+  target: `git diff 57fe4ce7..HEAD` is empty across `.github/`, `scripts/`, `docs/`, and shared
+  configuration, so no mission commit alters the landed tooling.
+- Post-rebase verification at `2026-09-12T05:03:27Z`: quality passes all eight Nx lint projects,
+  Stylelint, and 163-file HTMLHint; typecheck passes 5/5; Vitest passes 58 files / 808 tests; and the
+  Storybook production build succeeds. Composition passes 47 probes plus the live 17-fixture /
+  368-rule / 25-tag scan. Visual softness passes 21 shapes plus 52 live specs.
+- The target's corrected parity/wiring gates pass: trigger parity 17/17 selftest plus live check,
+  develop-ruleset parity 13/13 selftest, gate wiring 14/14 selftest plus live check, and all 28
+  defeat-table mutations are refused. Focused Chromium passes 24/24; the pinned Noble matrix
+  passes 68 with four expected engine-specific skips; the story ratchet finds 672/672 declared
+  IDs; and axe renders 828/828 with zero WCAG 2.1 AA violations.
+- The pinned Noble owned-visual diagnostic reproduces the already-documented host raster split:
+  L5 passes and the other 17 images show environment typography/metric differences. No baseline is
+  regenerated. All 18 committed files remain byte-identical to the reviewed head and match the
+  CI-authoritative SHA-256 ledger above.
+
+## Historical: final approved compaction on #410/#429 train
 
 - Exact target: `b38b40e74f4b1bf698697db5e127c5b52cce9bd3`
   (`origin/train/elements-first`). The complete pre-compaction approved line is preserved at
@@ -97,7 +122,7 @@ Final refresh validation on that tree:
 
 | Gate | Result |
 |---|---|
-| full-range commitlint, `git diff --check`, clean-status check | pass: 7/7 exact corrected-branch commits; zero whitespace errors; clean |
+| full-range commitlint, `git diff --check`, clean-status check | pass: 8/8 exact corrected-branch commits; zero whitespace errors; clean |
 | `npm run quality:all` | pass: 8 Nx lint projects, Stylelint, HTMLHint (163 files) |
 | `node scripts/typecheck-all.mjs` | pass: 5/5 projects |
 | `npm test -- --reporter=dot` | pass: 58 files, 808 tests |
@@ -107,8 +132,8 @@ Final refresh validation on that tree:
 | Storybook budget build | pass: 10.19 seconds under the 180-second ceiling |
 | artifact size | pass: `packages/elements/SIZES.md` current |
 | story ratchet and axe | pass: 672/672 declared IDs; 828/828 rendered with zero WCAG 2.1 AA violations |
-| focused host Chromium | pass: 22/22 exact Team Activity contract probes |
-| focused pinned Noble browser matrix | pass: 62 tests and 4 expected engine-specific skips across Chromium, Firefox, and WebKit |
+| focused host Chromium | pass: 24/24 exact Team Activity contract probes |
+| focused pinned Noble browser matrix | pass: 68 tests and 4 expected engine-specific skips across Chromium, Firefox, and WebKit |
 | owned pinned Noble visuals | pass: replayed 18/18; all 18 inspected individually with no clipping, overflow, stale shell, or truth-region crossover; no baseline regeneration required |
 
 This refresh did not push, comment, review, approve, merge, or alter mission lifecycle state.
@@ -133,6 +158,20 @@ Stylelint and HTMLHint (163 files); `node scripts/typecheck-all.mjs` passed all 
 completed successfully; the focused host Chromium file passed 24/24; and the pinned Playwright
 1.62.1 Noble matrix passed 68 tests with four expected engine-specific skips across Chromium,
 Firefox, and WebKit.
+
+The final locality correction removes the two remaining render-time reads from the canonical
+fixture: `ObservedProjection` now carries both consumer-supplied subsection headings, and
+`renderObserved` reads only its supplied projection. A Storybook-only seam on authorized roots
+renders a non-canonical fixture through the actual `projectTeamActivity` -> `renderTeamActivity` ->
+`renderObserved` path into a detached container. The focused test proves both alternate strings are
+the exact rendered H3 text and accessible names, canonical headings are absent, and the caller
+fixture/descriptors remain unchanged and mutable. A deliberate local two-line regression back to
+the canonical-fixture reads makes that focused assertion fail with `Moments` / `Recorded activity`
+instead of the alternate names; restoring the projection reads returns the suite to green. L5's
+early return remains capability-free: its root has no seam, fixture, projection, or render method.
+Canonical fixture values are unchanged, so all 18 CI-authoritative snapshot files retain the
+SHA-256 values recorded above. The correction adds no runtime component/API/export, story ID,
+visual case, or snapshot.
 
 ## History and equivalence
 

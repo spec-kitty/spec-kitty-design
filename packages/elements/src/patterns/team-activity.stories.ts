@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/web-components";
 import { expect } from "storybook/test";
-import { html, nothing, type TemplateResult } from "lit";
+import { html, nothing, render as litRender, type TemplateResult } from "lit";
 import { ref } from "lit/directives/ref.js";
 import "../entity-marker/sk-entity-marker.js";
 import "../notice/sk-notice.js";
@@ -176,6 +176,8 @@ type ObservedProjection = DeepReadonly<{
   freshnessTooltip: string;
   retention: string;
   retentionTooltip: string;
+  momentsHeading: string;
+  recordedHeading: string;
   notice?: string;
   summary?: string;
   moments: ReadonlyArray<ObservedMomentFixture>;
@@ -827,6 +829,8 @@ const observedProjection = (
       freshnessTooltip: fixture.copy.observedFreshnessTooltip,
       retention: fixture.copy.observedRetention,
       retentionTooltip: fixture.copy.observedRetentionTooltip,
+      momentsHeading: fixture.copy.observedMomentsHeading,
+      recordedHeading: fixture.copy.observedRecordedHeading,
       ...(observed.notice ? { notice: observed.notice } : {}),
       ...(observed.state === "populated" ||
       observed.state === "retained-degraded"
@@ -1600,7 +1604,7 @@ const renderObserved = (
               class="sk-team-activity-pattern__subheading"
               id=${momentsHeadingId}
             >
-              ${TEAM_ACTIVITY_FIXTURE.copy.observedMomentsHeading}
+              ${projection.momentsHeading}
             </h3>
             <ol
               class="sk-event-timeline sk-event-timeline--compact"
@@ -1639,7 +1643,7 @@ const renderObserved = (
               class="sk-team-activity-pattern__subheading"
               id=${recordedHeadingId}
             >
-              ${TEAM_ACTIVITY_FIXTURE.copy.observedRecordedHeading}
+              ${projection.recordedHeading}
             </h3>
             ${projection.groups.map(
               (group) =>
@@ -1786,6 +1790,20 @@ export const renderTeamActivity = (
       state: TeamActivityState,
       options: ProjectionOptions = {},
     ) => projectTeamActivity(candidate, state, options),
+    renderFixture: (
+      candidate: DeepReadonly<TeamActivityFixture>,
+      state: TeamActivityState,
+      options: ProjectionOptions = {},
+    ) => {
+      const container = document.createElement("div");
+      litRender(
+        renderTeamActivity(projectTeamActivity(candidate, state, options), {
+          storyState: `test-seam-${state}`,
+        }),
+        container,
+      );
+      return container;
+    },
   });
   const testSeamRef = (element?: Element): void => {
     if (!(element instanceof HTMLElement)) return;
