@@ -38,6 +38,32 @@ import "../../../packages/styles/src/progress/sk-progress.css";
 import "../../../packages/styles/src/prose/sk-prose.css";
 import "../../../packages/styles/src/workflow-board/sk-workflow-board.css";
 import "../../../packages/styles/src/workflow-lane/sk-workflow-lane.css";
+// TWO MORE, ADDED BY #355 FOR THE SAME REASON AND UNDER THE SAME INVARIANT. The account /
+// front-door pattern (packages/elements/src/patterns/account-front-door.stories.ts) composes
+// custom elements with four STYLES-ONLY families that ship no custom element of their own
+// (ADR-10 §3): public-header (#353), boundary-page (#303), radio-choice-group and skip-link. It
+// registers only TWO of the four, because sibling pattern missions reached the same conclusion
+// about the other two first and their imports are already on the train — boundary-page further
+// down this file (#329's CLI Auth pattern) and radio-choice-group in the block above. A second
+// identical specifier for one sheet changes nothing in the bundle and reads as deliberate to the
+// next author, so each was dropped from here on the rebase that brought it in, rather than
+// dropped from the landed mission that got there first.
+//
+// The pattern story cannot import this CSS itself — `scripts/check-no-css-in-source.mjs` rejects
+// a bare stylesheet import anywhere under packages/elements/src (FR-009, ADR-10 §1 Confirmation
+// #4), and it rejected exactly that, which is how this landed here instead. The block above is
+// the documented route for the case, and this is that case.
+//
+// Without these, every class in the four families paints with the browser's UNSTYLED default —
+// measured: an unstyled <a> under a dark `color-scheme` renders rgb(158, 158, 255), an axe
+// colour-contrast violation.
+//
+// The line-14 invariant holds for all four sheets this pattern needs, including the two
+// registered elsewhere: every top-level selector in them is a `.sk-<family>` class or a
+// `:where(.sk-<family>__*) ...` descendant of one, so a story that does not use the classes is
+// unaffected and the axe gate sees no change.
+import "../../../packages/styles/src/public-header/sk-public-header.css";
+import "../../../packages/styles/src/skip-link/sk-skip-link.css";
 // #303's sk-boundary-page is the mirror-image case of the block above: a styles-only, no-element
 // FRAME (packages/styles, scope:styles) composing an already-shipped CUSTOM ELEMENT
 // (sk-entity-marker #304) as an opaque child in its own plain HTML exemplars — never the other

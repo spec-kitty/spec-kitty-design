@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-10T18:59:53.069481+00:00",
+  "flattened": false,
+  "friendly_name": "account front door pattern stories",
+  "mission_id": "01M26B1M3DWEN1JSPPK5BZYF8P",
+  "mission_number": null,
+  "mission_slug": "account-front-door-pattern-stories-01M26B1M",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances account front door pattern stories on mission/account-front-door-pattern-stories so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "account front door pattern stories",
+  "slug": "account-front-door-pattern-stories-01M26B1M",
+  "target_branch": "mission/account-front-door-pattern-stories",
+  "topology": "single_branch"
+}
