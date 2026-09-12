@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-11T12:23:12.802835+00:00",
+  "flattened": false,
+  "friendly_name": "team overview current main pattern refresh",
+  "mission_id": "01M286R0N2QF9CV9DE7DQFB2WY",
+  "mission_number": null,
+  "mission_slug": "team-overview-current-main-pattern-refresh-01M286R0",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances team overview current main pattern refresh on team-overview-current-main-pattern-refresh so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "team overview current main pattern refresh",
+  "slug": "team-overview-current-main-pattern-refresh-01M286R0",
+  "target_branch": "team-overview-current-main-pattern-refresh",
+  "topology": "single_branch"
+}
