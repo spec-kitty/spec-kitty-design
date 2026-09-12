@@ -1,7 +1,19 @@
 {
   "rows": {
+    "#209": {
+      "evidence_ref": "Closed #209 (native workflow-board and lane styles) is consumed unchanged. Its measured conditional-overflow triad -- role=region, one accessible name and tabindex=0, applied only while scrollWidth > clientWidth -- is applied locally in this Storybook-only pattern; no styles package surface, selector or token is modified and no library API is added. Proven by the pattern's fit/overflow, live-resize, content-change and remount tests in CI run 34623767293.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#276": {
-      "evidence_ref": "Epic 276 (Mission Kanban) is the reopened parent; this mission is its only open child. The PR carries Refs #276 with no closing keyword; the epic stays open until #395 is accepted and merged.",
+      "evidence_ref": "Parent epic, not closed by this mission. #395 was its only open child and is now delivered; the epic closes when the operator lands train/elements-first on main, and that landing PR body must carry the Closes lines. PR #411 carries Refs #276 with no closing keyword.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,7 +21,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "in-mission",
+      "verdict": "deferred-with-followup",
       "wp": "WP01"
     },
     "#278": {
@@ -24,8 +36,20 @@
       "verdict": "verified-already-fixed",
       "wp": "WP01"
     },
+    "#368": {
+      "evidence_ref": "Not an issue: #368 is a train PR (native section-navigation strip) that this mission rebased onto. The reference was scraped from rebase bookkeeping; nothing here changes its surface and its ratchet entry is untouched.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#395": {
-      "evidence_ref": "Issue 395 (TKK3) is this mission's own child issue; WP01 delivers the ten-lane pattern, focused suite, visual block and ratchet; the PR carries Refs #395.",
+      "evidence_ref": "Delivered by this mission: WP01 shipped the ten-lane pattern, its focused suite, twelve visual baselines and the ratchet entry. PR #411 merged into train/elements-first as d579888e on 2026-09-11T17:19:53Z, with CI run 34623767293 green on merge commit 1caa720. The issue stays open until the train lands on main, per the programme's close-on-landing rule.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,7 +57,19 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "in-mission",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#409": {
+      "evidence_ref": "Not an issue: #409 is a train PR (CLI Auth pattern stories) that this mission rebased onto. The reference was scraped from rebase bookkeeping; the rebase preserved its thirteen ratchet ids and its visual cases unchanged.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
       "wp": "WP01"
     }
   },
