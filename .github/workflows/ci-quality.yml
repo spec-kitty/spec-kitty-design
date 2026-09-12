@@ -27,9 +27,14 @@ on:
   # branch-filtered, not universal, so a long-lived integration branch has to
   # be named explicitly or it merges unchecked.
   pull_request:
-    branches: [main, 'train/**']
+    branches: [main, 'train/**', develop]
   push:
-    branches: [main, 'train/**']
+    branches: [main, 'train/**', develop]
+  # Added for the future (research.md R18): not actually invocable until this exact file
+  # reaches `main` (workflow_dispatch requires the trigger to already be declared on the
+  # repository's default branch) — harmless now, and it activates automatically once the
+  # operator's later train->main landing carries this file there.
+  workflow_dispatch: {}
   schedule:
     # FR-041: nightly CVE audit on main branch
     # Offset from top of hour to avoid busy scheduling window (matches SK pattern)
@@ -54,8 +59,27 @@ jobs:
       docs:       ${{ steps.filter.outputs.docs }}
       ci:         ${{ steps.filter.outputs.ci }}
       doctrine:   ${{ steps.filter.outputs.doctrine }}
+      # F7 (pre-merge squad, gate pass 2): the promote/*-skip conjuncts on storybook-build and
+      # the four heavy jobs used to trust the loose `startsWith(github.head_ref, 'promote/')`
+      # glob — the same shape B3/B5 already rejected on the SCRIPT side, because nothing on
+      # GitHub reserves that namespace. GitHub Actions' own `if:` expression language has no
+      # regex/length function to anchor a `promote/<40-hex>` shape directly in a job `if:`, so
+      # the exact-shape test runs here, once, as a real shell regex (bash `=~`), and every
+      # consumer reads this one computed boolean instead of re-deriving it with a weaker glob.
+      is_develop_promotion_pr: ${{ steps.promo-shape.outputs.result }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+      - name: "[ENFORCED] Exact promote/<40-hex>-into-develop shape check (F7)"
+        id: promo-shape
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [[ "$HEAD_REF" =~ ^promote/[0-9a-f]{40}$ && "$BASE_REF" == "develop" ]]; then
+            echo "result=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "result=false" >> "$GITHUB_OUTPUT"
+          fi
       - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d  # dorny/paths-filter v4.0.1
         id: filter
         with:
@@ -408,6 +432,24 @@ jobs:
         run: node scripts/check-visual-screenshot-softness.mjs --selftest
       - name: "[ENFORCED] Multi-screenshot tests use expect.soft throughout (#367)"
         run: node scripts/check-visual-screenshot-softness.mjs
+      # REL1 (#362). The develop-promotion mechanism's own probe table (T003/IC-03 —
+      # floor-outside-the-table, mutation-controlled, contracts/promotion-script.contract.md;
+      # F9, gate pass 2: no probe count restated here — see PROBE_FLOOR in the script itself).
+      # No network, no GH_TOKEN — every probe runs against a fresh scratch git repository.
+      - name: "[ENFORCED] develop-promotion mechanism self-test (REL1, #362)"
+        run: node scripts/promote-develop.mjs --selftest
+      # REL1 (#362). The develop ruleset parity checker's own probe table (T004/IC-04) — a
+      # same-fixture and a different-fixture case are both required, same floor-outside-the-
+      # table shape as the promotion script's own self-test above.
+      - name: "[ENFORCED] develop ruleset parity checker self-test (REL1, #362)"
+        run: node scripts/check-develop-ruleset-parity.mjs --selftest
+      # M6 (pre-merge squad, PR #429). The contracted NFR-002/SC-003 static check — job key set
+      # and every job's if:/needs: unchanged except REL1's two named exception classes — ships
+      # as code here rather than staying "something a reviewer verifies by eye".
+      - name: "[ENFORCED] ci-quality.yml trigger-parity self-test (NFR-002, SC-003, REL1 #362)"
+        run: node scripts/check-ci-quality-trigger-parity.mjs --selftest
+      - name: "[ENFORCED] ci-quality.yml trigger parity holds (NFR-002, SC-003, REL1 #362)"
+        run: node scripts/check-ci-quality-trigger-parity.mjs
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
         run: |
@@ -433,7 +475,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [changes]
-    if: needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true'
+    # `&& needs.changes.outputs.is_develop_promotion_pr != 'true'` (research.md R15):
+    # `github.head_ref`/`github.base_ref` are both empty for `push` events, so the underlying
+    # shape check (in `changes`, F7) is false for the push-to-develop run that follows a
+    # promotion merge, and this conjunct only skips the pull_request-triggered run against the
+    # promotion PR itself — content that is byte-identical to an already-fully-gated train
+    # commit, where the ~30-minute browser suite proves nothing new (REL1, #362). **F7
+    # (pre-merge squad, gate pass 2)**: reads the ONE shared, exact-shape
+    # (`promote/<40-hex>`-into-`develop`) check computed once in `changes`, rather than
+    # re-deriving a loose `startsWith(head_ref, 'promote/')` glob here — nothing on GitHub
+    # reserves that namespace, and a glob cannot express the 40-hex shape at all. Only a
+    # `promote/<40-hex>` head with base `develop` — the one shape this mechanism itself ever
+    # creates — qualifies.
+    if: >-
+      (needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true') &&
+      needs.changes.outputs.is_develop_promotion_pr != 'true'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -469,8 +525,18 @@ jobs:
   a11y:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [storybook-build]
-    if: needs.storybook-build.result == 'success'
+    # `changes` added (F7, pre-merge squad gate pass 2) so this job can read
+    # `needs.changes.outputs.is_develop_promotion_pr` — GitHub Actions only exposes a job's
+    # outputs to jobs that list it in their OWN `needs:`.
+    needs: [storybook-build, changes]
+    # See storybook-build's own `if:` comment above (research.md R15, B3/F7). `startsWith
+    # (github.head_ref, 'promote/')` alone trusted a branch NAME with no base scoping and no
+    # shape check — a PR headed `promote/anything` into ANY base (not just `develop`) skipped
+    # this job, and a loose glob cannot express the `promote/<40-hex>` shape at all (F7). Reads
+    # the one shared, exact-shape check computed once in `changes` instead.
+    if: >-
+      needs.storybook-build.result == 'success' &&
+      needs.changes.outputs.is_develop_promotion_pr != 'true'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -494,8 +560,18 @@ jobs:
   visual-regression:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [storybook-build]
-    if: needs.storybook-build.result == 'success'
+    # `changes` added (F7, pre-merge squad gate pass 2) so this job can read
+    # `needs.changes.outputs.is_develop_promotion_pr` — GitHub Actions only exposes a job's
+    # outputs to jobs that list it in their OWN `needs:`.
+    needs: [storybook-build, changes]
+    # See storybook-build's own `if:` comment above (research.md R15, B3/F7). `startsWith
+    # (github.head_ref, 'promote/')` alone trusted a branch NAME with no base scoping and no
+    # shape check — a PR headed `promote/anything` into ANY base (not just `develop`) skipped
+    # this job, and a loose glob cannot express the `promote/<40-hex>` shape at all (F7). Reads
+    # the one shared, exact-shape check computed once in `changes` instead.
+    if: >-
+      needs.storybook-build.result == 'success' &&
+      needs.changes.outputs.is_develop_promotion_pr != 'true'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -524,8 +600,18 @@ jobs:
   playwright:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [storybook-build]
-    if: needs.storybook-build.result == 'success'
+    # `changes` added (F7, pre-merge squad gate pass 2) so this job can read
+    # `needs.changes.outputs.is_develop_promotion_pr` — GitHub Actions only exposes a job's
+    # outputs to jobs that list it in their OWN `needs:`.
+    needs: [storybook-build, changes]
+    # See storybook-build's own `if:` comment above (research.md R15, B3/F7). `startsWith
+    # (github.head_ref, 'promote/')` alone trusted a branch NAME with no base scoping and no
+    # shape check — a PR headed `promote/anything` into ANY base (not just `develop`) skipped
+    # this job, and a loose glob cannot express the `promote/<40-hex>` shape at all (F7). Reads
+    # the one shared, exact-shape check computed once in `changes` instead.
+    if: >-
+      needs.storybook-build.result == 'success' &&
+      needs.changes.outputs.is_develop_promotion_pr != 'true'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -594,8 +680,18 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [storybook-build]
-    if: needs.storybook-build.result == 'success'
+    # `changes` added (F7, pre-merge squad gate pass 2) so this job can read
+    # `needs.changes.outputs.is_develop_promotion_pr` — GitHub Actions only exposes a job's
+    # outputs to jobs that list it in their OWN `needs:`.
+    needs: [storybook-build, changes]
+    # See storybook-build's own `if:` comment above (research.md R15, B3/F7). `startsWith
+    # (github.head_ref, 'promote/')` alone trusted a branch NAME with no base scoping and no
+    # shape check — a PR headed `promote/anything` into ANY base (not just `develop`) skipped
+    # this job, and a loose glob cannot express the `promote/<40-hex>` shape at all (F7). Reads
+    # the one shared, exact-shape check computed once in `changes` instead.
+    if: >-
+      needs.storybook-build.result == 'success' &&
+      needs.changes.outputs.is_develop_promotion_pr != 'true'
     continue-on-error: true   # advisory only
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
@@ -683,6 +779,14 @@ jobs:
     if: always()
     steps:
       - name: "[ENFORCED] All hard gates must pass (FR-026)"
+        # B4 (pre-merge squad, PR #429): `github.head_ref`/`github.base_ref` are passed through
+        # `env:` and read back as `"$HEAD_REF"`/`"$BASE_REF"` below, never interpolated directly
+        # into the shell script text. A `${{ github.head_ref }}` substitution embeds a branch
+        # name literally into the script BEFORE bash ever parses it — a script-injection sink —
+        # and branch names accept shell metacharacters GitHub does not reject.
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
           echo "changes: ${{ needs.changes.result }} (tokens=${{ needs.changes.outputs.tokens }} components=${{ needs.changes.outputs.components }})"
           echo "security: ${{ needs.security.result }}"
@@ -716,6 +820,24 @@ jobs:
           if [ "$a11y_ok" != "success" ] && [ "$a11y_ok" != "skipped" ]; then a11y_ok="fail"; fi
           if [ "$vr_ok"   != "success" ] && [ "$vr_ok"   != "skipped" ]; then vr_ok="fail"; fi
           if [ "$pw_ok"   != "success" ] && [ "$pw_ok"   != "skipped" ]; then pw_ok="fail"; fi
+
+          # REL1 (#362): a `promote/*`-headed PR into `develop` carries a tree byte-identical
+          # to an already fully-gated train commit (the four heavy jobs above skip themselves
+          # for exactly this shape — see their own `if:` comments), so a `skipped` result here
+          # is correct, not a gap. POSITIVELY SCOPED to `promote/*` heads INTO `develop` only,
+          # and it touches ONLY these four `_ok` variables — `test`/`release-gate`/`security`/
+          # `workflow-pin-check`'s own strict checks below are completely unaffected. This is
+          # exactly the class of edit scripts/check-gate-wiring-defeats.mjs's own header comment
+          # warns is easy to get subtly wrong; its defeat table carries cases asserting this
+          # guard cannot be widened to apply unconditionally, nor to any base other than
+          # `develop` (B3, pre-merge squad, PR #429 — a `promote/*`-headed PR into `main`, say,
+          # must get NO tolerance here). F7 (gate pass 2): anchored to the EXACT
+          # `promote/<40-hex>` shape via a real bash regex (`=~`), never the loose `promote/*`
+          # glob the script side (`PROMOTION_BRANCH_RE`) already rejects — nothing on GitHub
+          # reserves the bare `promote/` namespace.
+          if [[ "$HEAD_REF" =~ ^promote/[0-9a-f]{40}$ && "$BASE_REF" == "develop" ]]; then
+            sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"
+          fi
 
           # 'skipped' is only acceptable for the REASON it exists: nothing
           # relevant changed. Accepting it unconditionally was the same
@@ -756,6 +878,170 @@ jobs:
             exit 1
           fi
           echo "All hard gates passed."
+
+  # ── develop promotion (REL1, #362, FR-007/FR-008/FR-010) ───────────────────────
+  #
+  # Tree-sync promotion (operator-ruled Option D, spec.md Recorded Decision): on every push
+  # to train/elements-first, once the train's own quality gate above has already succeeded,
+  # promote it to `develop` as one new commit whose tree equals the train tip's tree. `needs:
+  # [gate]` is what "gated on real CI" means here (research.md R15) — no poll loop reading a
+  # status no ruleset actually requires, and this job's own `if:` structurally cannot fire for
+  # anything but a push to train/elements-first (NFR-002: main's job set is unaffected).
+  #
+  # This mission's PR does NOT create `develop`, does not apply its ruleset, and does not flip
+  # PROMOTE_DEVELOP_ENABLED — those are the operator's and the orchestrator's actions, after
+  # this PR merges (quickstart.md). Every step below is written to no-op safely before any of
+  # that has happened: the enable switch and the develop-exists check both run before any
+  # secret is read or any token minted (research.md R19).
+  promote-develop:
+    needs: [gate]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/train/elements-first'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15   # the poll loop itself is capped at 10m (research.md R5, an explicitly
+                           # provisional estimate pending recalibration against the first real
+                           # cycle) — this leaves headroom for checkout, token mint, git/API calls
+    permissions:
+      contents: read   # actions/checkout's OWN pre-mint clone step only; every GitHub-write
+                        # after that happens on the App token (research.md R4), never this job's
+                        # own GITHUB_TOKEN
+    steps:
+      # ORDER (M4, research.md R19), cheapest and most information-bearing first:
+      # 1. enable switch (no I/O)  2. develop-exists via remote ls-remote (no auth needed,
+      # public repo)  3. secrets  4. mint + checkout-with-token  5. App-scope guard (M5)
+
+      - name: "[ENFORCED] Enable switch"
+        id: enabled
+        env:
+          ENABLED: ${{ vars.PROMOTE_DEVELOP_ENABLED }}
+        run: |
+          if [ "$ENABLED" != "true" ]; then
+            echo "::notice::PROMOTE_DEVELOP_ENABLED is not 'true' — promotion is disabled. Doing nothing."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: "[ENFORCED] develop exists? (remote check, no auth needed — public repo)"
+        id: develop-exists
+        if: steps.enabled.outputs.run == 'true'
+        run: |
+          if git ls-remote --exit-code https://github.com/spec-kitty/spec-kitty-design.git refs/heads/develop >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::develop does not exist yet — no-op (FR-007(c)). Not an error."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # research.md R7: secrets cannot be tested in `if:` directly — read into env, check in
+      # the shell.
+      - name: "[ENFORCED] Fail fast if the release App's credentials are missing"
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        env:
+          APP_ID: ${{ secrets.SK_DESIGN_RELEASE_APP_ID }}
+          APP_KEY: ${{ secrets.SK_DESIGN_RELEASE_APP_PRIVATE_KEY }}
+        run: |
+          if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
+            echo "::error::SK_DESIGN_RELEASE_APP_ID and/or SK_DESIGN_RELEASE_APP_PRIVATE_KEY repository secrets are not set."
+            echo "::error::The develop-promotion job cannot mint a token without them and will not pretend to have promoted anything."
+            echo "::error::See docs/architecture/branch-model.md (Operator Actions) for how to create and install the App and add these secrets."
+            exit 1
+          fi
+
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # actions/create-github-app-token v3.2.0
+        id: mint
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        with:
+          app-id: ${{ secrets.SK_DESIGN_RELEASE_APP_ID }}
+          private-key: ${{ secrets.SK_DESIGN_RELEASE_APP_PRIVATE_KEY }}
+          # Neither `owner` nor `repositories` set: the App is installed on spec-kitty-design
+          # ONLY (spec.md Recorded Decision), so the default scope already is this one repo.
+          # The runtime guard below is defense in depth against that install ever being widened.
+
+      # B3: mint BEFORE checkout, then checkout WITH the App token — persist-credentials
+      # (default true) then makes every later `git` command (including `git push`) already
+      # authenticate as the App, with no further credential wiring (research.md R14, verified
+      # against the action's own README pattern).
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        with:
+          fetch-depth: 0
+          token: ${{ steps.mint.outputs.token }}
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        with: { node-version: '22' }
+
+      - name: "[ENFORCED] App-scope runtime guard (M5) — fail closed unless installed on this repo only"
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ steps.mint.outputs.token }}
+        run: node scripts/promote-develop.mjs assert-scope
+
+      - name: "[ENFORCED] Set the App's bot identity for the commits this job authors"
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ steps.mint.outputs.token }}
+        run: |
+          user_id=$(gh api "/users/${{ steps.mint.outputs.app-slug }}[bot]" --jq .id)
+          git config --global user.name "${{ steps.mint.outputs.app-slug }}[bot]"
+          git config --global user.email "${user_id}+${{ steps.mint.outputs.app-slug }}[bot]@users.noreply.github.com"
+
+      - name: "[ENFORCED] Promote train/elements-first to develop"
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ steps.mint.outputs.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PROMOTE_SOURCE_REF: ${{ vars.PROMOTE_DEVELOP_SOURCE_BRANCH || 'train/elements-first' }}
+        run: node scripts/promote-develop.mjs run
+
+  # ── develop ruleset parity (REL1, #362, FR-001/NFR-004/SC-001) ─────────────────
+  #
+  # check-develop-ruleset-parity.mjs --check compares the live develop ruleset against the
+  # committed artifact (research.md R25) on the EXISTING nightly schedule (FR-041's own cron,
+  # `17 2 * * *`) and on every push to develop — a scheduled/push job, never manual-only, so
+  # drift is caught without anyone having to remember to run it. `permissions: { contents:
+  # read }` only — no ruleset-specific permission exists to request, and this is a read-only
+  # comparison.
+  #
+  # DELIBERATELY reuses the one existing cron rather than adding a second (research.md R25,
+  # revised): a second `schedule` entry re-triggers the ENTIRE workflow a second time daily —
+  # every job in this file without its own event-specific guard (workflow-pin-check, lint-code,
+  # storybook-build, test, release-gate, gate, and even security, whose own guard only checks
+  # `github.ref`, not which cron fired) would then run twice a day instead of once, just to
+  # serve a sub-second comparison. Not worth it — one cron, shared, this job's own `if:` is
+  # what scopes it, not a second trigger entry.
+  #
+  # No-ops cleanly (exit 0, ::notice::) until DEVELOP_RULESET_ID is set — the id does not exist
+  # until the orchestrator applies the ruleset after this PR merges (data-model.md's Post-apply
+  # record); this job must never go red before that has happened.
+  #
+  # M10 (pre-merge squad, PR #429), same candour as `workflow_dispatch`'s own note above: the
+  # `schedule:` arm of this job's `if:` is INERT until this exact file reaches `main` — a
+  # scheduled trigger always runs the workflow file as committed on the repository's DEFAULT
+  # branch (`main`), never as it exists on `train/elements-first` where this PR lands. Until
+  # the operator's later train->main landing carries this job there, the only way it actually
+  # runs is the `push`-to-`develop` arm (which is itself dormant until `develop` exists and the
+  # orchestrator's bootstrap sequence reaches it). See branch-model.md for the same note stated
+  # for a reader who has not opened this file.
+  develop-ruleset-parity:
+    if: >-
+      github.event_name == 'schedule' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/develop')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+      - name: "[ENFORCED] develop ruleset parity check (FR-001, NFR-004, SC-001)"
+        env:
+          DEVELOP_RULESET_ID: ${{ vars.DEVELOP_RULESET_ID }}
+          # research.md R25: the default GITHUB_TOKEN has been sufficient for read-only ruleset
+          # access on this public repo in this mission's own prior investigation — confirmed
+          # empirically against a real scheduled/push run rather than assumed (a residual, named
+          # in branch-model.md, not glossed over as certain).
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-develop-ruleset-parity.mjs --check
 
   # ── Lint feedback ────────────────────────────────────────────────────────────
   lint-feedback:

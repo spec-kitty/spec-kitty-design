@@ -159,6 +159,68 @@ const CASES = [
     const step = lintStep(wf, 'check-adr-index.mjs');
     step.shell = 'bash -c "true" #';
   }],
+
+  // ── REL1 (#362), contracts/ci-quality-integration.md §5: WP01's original two cases ──────
+  ['REL1 pull_request.branches narrowed back to [main, train/**] (develop must still be flagged uncovered)', (wf) => {
+    wf.on.pull_request.branches = ['main', 'train/**'];
+  }],
+  ['REL1 the gate\'s promote/* tolerance widened to apply unconditionally', (wf) => {
+    const step = gateStep(wf);
+    const anchor =
+      'if [[ "$HEAD_REF" =~ ^promote/[0-9a-f]{40}$ && "$BASE_REF" == "develop" ]]; then\n' +
+      '  sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"\n' +
+      'fi';
+    step.run = once(String(step.run), anchor, 'sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"');
+  }],
+
+  // ── B3/M5 (pre-merge squad, PR #429): three more cases the first pass missed ────────────
+  ['B3 the gate\'s promote/* tolerance drops the base_ref==develop conjunct (a promote/* PR into ANY base, e.g. main, would get tolerance)', (wf) => {
+    const step = gateStep(wf);
+    const anchor = 'if [[ "$HEAD_REF" =~ ^promote/[0-9a-f]{40}$ && "$BASE_REF" == "develop" ]]; then';
+    step.run = once(String(step.run), anchor, 'if [[ "$HEAD_REF" =~ ^promote/[0-9a-f]{40}$ ]]; then');
+  }],
+  ['B3 storybook-build\'s own if: drops the base_ref==develop conjunct', (wf) => {
+    const job = wf.jobs?.['storybook-build'];
+    if (!job) throw new Error('no storybook-build job');
+    const before = String(job.if);
+    const narrow = "needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true'";
+    if (!before.includes(' && needs.changes.outputs.is_develop_promotion_pr')) {
+      throw new Error('anchor not found, probe would be vacuous');
+    }
+    job.if = `(${narrow})`;
+  }],
+  ['M5 push.branches narrowed back to [main, train/**] (develop must still be flagged uncovered on the push side)', (wf) => {
+    wf.on.push.branches = ['main', 'train/**'];
+  }],
+
+  // ── F3 (pre-merge squad, gate pass 2): the four jobs check-gate-wiring.mjs did not
+  // independently guard until this same fold added HEAVY_JOB_PREDICATE (one case per job,
+  // dropping ITS OWN is_develop_promotion_pr conjunct — never touching storybook-build's). ──
+  ...['a11y', 'visual-regression', 'playwright', 'lighthouse'].map((jobName) => [
+    `F3 ${jobName}'s own if: drops the is_develop_promotion_pr conjunct`,
+    (wf) => {
+      const job = wf.jobs?.[jobName];
+      if (!job) throw new Error(`no ${jobName} job`);
+      const before = String(job.if);
+      if (!before.includes(" && needs.changes.outputs.is_develop_promotion_pr != 'true'")) {
+        throw new Error('anchor not found, probe would be vacuous');
+      }
+      job.if = "needs.storybook-build.result == 'success'";
+    },
+  ]),
+
+  // ── V1 (pre-merge squad, gate pass 4): the promo-shape step's OWN shell body, weakened to
+  // the loose promote/* glob the script side already rejects — every one of the five
+  // downstream if:s trusts this one computed boolean, so weakening it here silently widens
+  // all five at once while HEAVY_JOB_PREDICATE/STORYBOOK_PREDICATE (which only check the
+  // OUTPUT NAME, not what it computes) stay green. ──────────────────────────────────────
+  ['V1 the promo-shape step weakened to the loose promote/* glob', (wf) => {
+    const step = (wf.jobs?.changes?.steps ?? []).find((s) => s.id === 'promo-shape');
+    if (!step) throw new Error('no promo-shape step');
+    const anchor = 'if [[ "$HEAD_REF" =~ ^promote/[0-9a-f]{40}$ && "$BASE_REF" == "develop" ]]; then';
+    const widened = 'if [[ "$HEAD_REF" == promote/* && "$BASE_REF" == "develop" ]]; then';
+    step.run = once(String(step.run), anchor, widened);
+  }],
 ];
 
 /**
@@ -166,7 +228,7 @@ const CASES = [
  * REMOVED by lowering it in the same commit, which is a reviewable edit rather than a deletion
  * that hides in a digit.
  */
-const MIN_CASES = 18;
+const MIN_CASES = 28;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });

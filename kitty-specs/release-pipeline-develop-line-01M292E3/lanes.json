@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "mission_slug": "release-pipeline-develop-line-01M292E3",
+  "mission_id": "01M292E3BF3NVZTAZWZKQKV8V5",
+  "mission_branch": "kitty/mission-release-pipeline-develop-line-01M292E3",
+  "target_branch": "mission/release-pipeline-develop-line",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        ".github/rulesets/develop-ruleset.json",
+        ".github/workflows/ci-quality.yml",
+        ".github/workflows/pr-preview.yml",
+        "docs/architecture/branch-model.md",
+        "docs/architecture/elements-first-run-prompt.md",
+        "scripts/check-develop-ruleset-parity.mjs",
+        "scripts/check-gate-wiring-defeats.mjs",
+        "scripts/check-gate-wiring.mjs",
+        "scripts/lib/promote-github.mjs",
+        "scripts/promote-develop.mjs"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "tests",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-11T22:01:07.692032+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "7f075e97804621300852fb4e3b616fec017927ff"
+}

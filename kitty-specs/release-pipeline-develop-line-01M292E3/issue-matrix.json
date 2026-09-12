@@ -1,0 +1,53 @@
+{
+  "rows": {
+    "#361": {
+      "evidence_ref": "spec.md Summary \u2014 this mission implements REL1, one of three named issues (#362-#364) under epic #361 (Decision A); the epic itself is not closed by this mission",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#362": {
+      "evidence_ref": "kitty-specs/release-pipeline-develop-line-01M292E3/spec.md, plan.md, tasks/WP01-develop-line-governance.md \u2014 this WP implements REL1 (#362) in full",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#363": {
+      "evidence_ref": "Fold-in comment POSTED on #363: https://github.com/spec-kitty/spec-kitty-design/issues/363#issuecomment-5640830882 - REL2 must keep rc version state out of develop's tree (tree-sync overwrites it), owns its own rc-publish trigger choice, and observes SC-004/SC-005 across the first ten real promotion cycles.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#364": {
+      "evidence_ref": "Fold-in comment POSTED on #364: https://github.com/spec-kitty/spec-kitty-design/issues/364#issuecomment-5640831499 - REL3 owns registry-routing docs, including the using-components.md install section REL1 deliberately does not touch.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}
