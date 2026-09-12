@@ -740,7 +740,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # fetch-depth: 0 (#435): the token-breaking-change check below needs the FULL history and
+      # tags to resolve `git describe --tags --abbrev=0` and `git show <tag>:<path>` against — a
+      # shallow (depth-1) checkout has neither, so it would only ever exercise the "no tags
+      # reachable" branch and never the comparison itself.
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+        with: { fetch-depth: 0 }
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci --ignore-scripts
@@ -748,6 +753,18 @@ jobs:
       # what it can see, and this one asserts tarball contents that are easy to get vacuously right.
       - name: "[ENFORCED] The release gate can see its own failures (SC-003)"
         run: node scripts/check-release-graph.mjs --selftest
+      # FR-015 (#435). Placed here, not in `lint-code`: this is a RELEASE-time gate over the
+      # committed `packages/tokens/dist/token-catalogue.json` against the previous release tag —
+      # the same "guards a release" scope every other check in this job carries, and it needs
+      # `release-gate`'s full-history checkout above to resolve a tag at all. It was previously
+      # wired to nothing (`grep -rn` across `.github/workflows/` and `package.json` found no
+      # caller), so a genuinely breaking token rename could ship without ever failing anything —
+      # dead weight for a check FR-015 requires. The probe table runs FIRST, same convention as
+      # every other gate in this job.
+      - name: "[ENFORCED] Token breaking-change gate's own probe table (FR-015, #435)"
+        run: bash scripts/check-token-breaking-changes.sh --selftest
+      - name: "[ENFORCED] No breaking token renames since the previous release (FR-015, ADR-003)"
+        run: bash scripts/check-token-breaking-changes.sh
       - name: Build the publishable graph
         run: |
           set -euo pipefail

@@ -22,8 +22,7 @@
  * by more than that one substitution — is a VIOLATION.
  *
  * Usage: node scripts/verify-visual-spec-zero-drift.mjs [baseRef]
- *   If `baseRef` is given, it is used literally (useful for a one-off historical check, or for
- *   `--selftest`-style manual verification against the mission's original base, 38f7e6fa).
+ *   If `baseRef` is given, it is used literally (useful for a one-off historical check).
  *   If omitted, the base is computed as `git merge-base HEAD origin/train/elements-first` — the
  *   commit this branch actually forked from RIGHT NOW, recomputed fresh on every run. This is
  *   deliberately NOT a hardcoded historical SHA: a hardcoded base survives exactly until the
@@ -31,27 +30,52 @@
  *   brings in (a sibling PR that also touches this file, adding whole new tests) reads as a
  *   "violation" too, because it is compared against a base that predates it. Diffing from the
  *   merge-base instead isolates exactly this branch's own contribution, no matter how many times
- *   it is rebased. If `origin/train/elements-first` cannot be resolved (no such remote-tracking
- *   ref — e.g. a shallow clone), falls back to the mission's original base, 38f7e6fa.
+ *   it is rebased.
+ *
+ *   If `origin/train/elements-first` cannot be resolved (no such remote-tracking ref — e.g. a
+ *   shallow or main-only clone), this is a LOUD failure (exit 2), not a silent substitution. An
+ *   earlier revision fell back to a hardcoded historical SHA (`38f7e6fa`) here, via a bare
+ *   `catch { return FALLBACK_BASE }` with no notice printed at all. That SHA was a real commit —
+ *   reachable from the train at the time, but ONLY through the mission branch that introduced
+ *   this file, never through `main`. #362/#434 hit the identical shape one layer up (a workflow
+ *   anchored to a commit only a soon-to-be-squash-merged branch carried) and it reddened CI for
+ *   every PR the moment that branch was deleted, discovered only by an unrelated PR that happened
+ *   to trip it. This script is not CI-wired (#435), so a silent wrong fallback here would surface
+ *   even later: a human runs it by hand, gets a plausible-looking result, and trusts a diff
+ *   against a base that predates every real change in the file — precisely because git does not
+ *   reliably error on a dereference of an unreachable-but-not-yet-GC'd object, so the wrong
+ *   comparison can still "succeed". Pass a `baseRef` explicitly when the default cannot be
+ *   resolved; the caller then decides what "before" means, instead of the script silently
+ *   guessing.
  * Exit 0  — invariant holds (including the trivial case: file identical to baseRef).
  * Exit 1  — invariant VIOLATED — a change beyond the sanctioned substitution was found.
- * Exit 2  — verification_error — git itself failed (wrong ref, not a git repo, etc.).
+ * Exit 2  — verification_error — git itself failed (wrong ref, not a git repo, default base
+ *           could not be resolved, etc.).
  */
 import { execFileSync } from 'node:child_process';
-import { resolve } from 'node:path';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const FILE = 'apps/storybook/src/tests/visual.spec.ts';
 const FLOOR_SHAPE = /test\.info\(\)\.config\.projects\.map/;
-const FALLBACK_BASE = '38f7e6fa';
 const TRAIN_REF = 'origin/train/elements-first';
 
-/** `git merge-base HEAD <TRAIN_REF>`, or `FALLBACK_BASE` if that ref cannot be resolved. */
-function resolveDefaultBase() {
+/**
+ * `git merge-base HEAD <TRAIN_REF>`. Throws — loudly, carrying the underlying git error — if
+ * `TRAIN_REF` cannot be resolved, rather than silently substituting a hardcoded base. See the
+ * file header for why a fallback here is exactly the #362/#434 defect class and why it was
+ * deleted rather than re-anchored to an immutable tag.
+ */
+export function resolveDefaultBase() {
   try {
     return execFileSync('git', ['merge-base', 'HEAD', TRAIN_REF], { encoding: 'utf8' }).trim();
-  } catch {
-    return FALLBACK_BASE;
+  } catch (err) {
+    throw new Error(
+      `cannot resolve default base: \`git merge-base HEAD ${TRAIN_REF}\` failed — ${String(err.message).trim()}. ` +
+        'Pass a base ref explicitly: node scripts/verify-visual-spec-zero-drift.mjs <baseRef>',
+    );
   }
 }
 
@@ -167,15 +191,92 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         bad++;
       }
     }
-    if (bad) {
-      console.error(`\n❌ ${bad} probe(s) did not behave as recorded.`);
+
+    // ── PART B: resolveDefaultBase()'s LOUD-FAILURE behaviour (#435) ──────────────────────────
+    //
+    // Part A above exercises checkBlocks/parseHunkBlocks in-process — real code, but not the
+    // resolveDefaultBase() path this file's own defect (a silent hardcoded-SHA fallback) lived
+    // in. That function shells out to git and its answer depends on which refs the CURRENT repo
+    // happens to carry, so it cannot be probed by calling it directly without controlling the
+    // repo it runs against. These probes spawn THIS SAME FILE as a real subprocess against
+    // scratch git repos that do/don't carry `origin/train/elements-first` — the actual CLI path
+    // end to end, not a reimplementation of it (the #434 mistake this mission was warned about).
+    const SELF = fileURLToPath(import.meta.url);
+    const scratch = mkdtempSync(join(tmpdir(), 'ni001-selftest-'));
+    const gitEnv = {
+      ...process.env,
+      GIT_AUTHOR_NAME: 'selftest', GIT_AUTHOR_EMAIL: 'selftest@example.invalid',
+      GIT_COMMITTER_NAME: 'selftest', GIT_COMMITTER_EMAIL: 'selftest@example.invalid',
+    };
+    const git = (repo, args) => execFileSync('git', args, { cwd: repo, encoding: 'utf8', env: gitEnv });
+    let subprocessBad = 0;
+    let subprocessTotal = 0;
+    const subprocessProbe = (note, repo, args, check) => {
+      subprocessTotal++;
+      let result;
+      try {
+        const out = execFileSync('node', [SELF, ...args], { cwd: repo, encoding: 'utf8', env: gitEnv });
+        result = { code: 0, out };
+      } catch (err) {
+        result = { code: err.status ?? 1, out: `${err.stdout ?? ''}${err.stderr ?? ''}` };
+      }
+      if (!check(result)) {
+        console.error(`  ✗ ${note}: got exit ${result.code}, output:\n${result.out.split('\n').map((l) => `      ${l}`).join('\n')}`);
+        subprocessBad++;
+      }
+    };
+    try {
+      // A repo with NO `origin/train/elements-first` ref at all — a main-only or shallow clone,
+      // exactly the shape #362/#434 and this script's own docstring describe.
+      const noTrainRepo = join(scratch, 'no-train-ref');
+      mkdirSync(noTrainRepo);
+      git(noTrainRepo, ['init', '-q']);
+      writeFileSync(join(noTrainRepo, 'x.txt'), 'x\n');
+      git(noTrainRepo, ['add', '.']);
+      git(noTrainRepo, ['commit', '-q', '-m', 'init']);
+
+      subprocessProbe(
+        'no baseRef, unresolvable origin/train/elements-first -> LOUD exit 2, no silent fallback',
+        noTrainRepo,
+        [],
+        ({ code, out }) => code === 2 && /cannot resolve default base/.test(out) && /origin\/train\/elements-first/.test(out),
+      );
+
+      const headSha = git(noTrainRepo, ['rev-parse', 'HEAD']).trim();
+      subprocessProbe(
+        'explicit baseRef bypasses resolveDefaultBase entirely -> still runs (exit 0)',
+        noTrainRepo,
+        [headSha],
+        ({ code, out }) => code === 0 && /byte-identical/.test(out),
+      );
+    } finally {
+      rmSync(scratch, { recursive: true, force: true });
+    }
+
+    // Floor OUTSIDE the tables (same shape as check-develop-ruleset-parity.mjs's PROBE_FLOOR):
+    // a probe count silently shrinking to zero must itself be caught.
+    const FLOOR = 8;
+    const total = PROBES.length + subprocessTotal;
+    if (total < FLOOR) {
+      console.error(`\n❌ the probe set has shrunk: ${total} probe(s) against a floor of ${FLOOR}.`);
       process.exit(1);
     }
-    console.log(`✅ All ${PROBES.length} NI-001 probes behaved as recorded.`);
+
+    if (bad || subprocessBad) {
+      console.error(`\n❌ ${bad + subprocessBad} of ${total} probe(s) did not behave as recorded.`);
+      process.exit(1);
+    }
+    console.log(`✅ All ${total} NI-001 probes behaved as recorded (${PROBES.length} block-level, ${subprocessTotal} resolveDefaultBase subprocess probes).`);
     process.exit(0);
   }
 
-  const baseRef = process.argv[2] || resolveDefaultBase();
+  let baseRef;
+  try {
+    baseRef = process.argv[2] || resolveDefaultBase();
+  } catch (err) {
+    console.error(`verification_error: ${err.message}`);
+    process.exit(2);
+  }
   let patch;
   try {
     patch = gitDiff(baseRef);
