@@ -97,11 +97,11 @@
     {
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": "runCycle() calls writeStepSummary(renderDecisionSummary(decision)) unconditionally at entry (probe 19/20 exercise this path); every outcome (promoted/no-op/blocked-and-why) is written to GITHUB_STEP_SUMMARY and printed to stdout",
+      "proof_type": "manual_review",
+      "evidence": "Corrected (F10, gate pass 2): the original evidence named probe 19, which never calls renderDecisionSummary; only probe 20 (runCycle's every-outcome sweep test) reaches that call path, and it does not itself assert the rendered text. Downgraded from automated_test to manual_review: writeStepSummary() silently no-ops when GITHUB_STEP_SUMMARY is unset (true for every local/selftest invocation), so this is a code-reading verification (runCycle calls writeStepSummary(renderDecisionSummary(decision)) unconditionally at entry) plus console.log(JSON.stringify(decision)) as a second, always-active channel, not an automated assertion of rendered content.",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T23:25:22.477188+00:00",
+      "verified_at": "2026-09-12T00:24:28.884755+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
