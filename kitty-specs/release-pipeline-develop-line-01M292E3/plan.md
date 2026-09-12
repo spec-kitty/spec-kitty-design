@@ -113,7 +113,7 @@ kitty-specs/release-pipeline-develop-line-01M292E3/
 │   ├── promote-develop.workflow.yml           # the promote-develop JOB (for ci-quality.yml)
 │   ├── ci-quality-integration.md              # NEW: the other ci-quality.yml/pr-preview.yml/gate-wiring edits
 │   ├── develop-ruleset.json                   # unchanged shape; bootstrap variant is a documented jq transform, not a 2nd file
-│   └── promotion-script.contract.md           # revised: 22 probes (F8, gate pass 2 — was 18 through the WP01 pre-merge squad's first pass), floor-outside-table, mutation controls
+│   └── promotion-script.contract.md           # revised: 23 probes (F8, gate pass 2 — was 18 through the WP01 pre-merge squad's first pass; V5, gate pass 3, added probe 23), floor-outside-table, mutation controls
 └── quickstart.md                              # revised: M1 bootstrap re-sequence
 ```
 
@@ -199,7 +199,7 @@ strict check — named explicitly, with its own defeat-table row, rather than a 
 ### IC-03 — Promotion script test suite
 
 - **Purpose**: the red-first, floor-outside-table, mutation-controlled probe table
-  (`contracts/promotion-script.contract.md`, 22 probes as shipped — F8/F9, gate pass 2).
+  (`contracts/promotion-script.contract.md`, 23 probes as shipped — F8/F9, gate pass 2; V5, gate pass 3).
 - **Relevant requirements**: NFR-003, NFR-005, the memory rule that a gate over an empty/degenerate
   set must fail, and DIRECTIVE_034/041.
 - **Affected surfaces**: same files as IC-02.
