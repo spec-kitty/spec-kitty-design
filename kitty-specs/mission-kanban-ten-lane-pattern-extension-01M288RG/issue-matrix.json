@@ -25,7 +25,7 @@
       "wp": "WP01"
     },
     "#395": {
-      "evidence_ref": "Issue 395 (TKK3) is this mission's own child issue; WP01 delivers the ten-lane pattern, focused suite, visual block and ratchet; the PR carries Refs #395.",
+      "evidence_ref": "Delivered by this mission: WP01 shipped the ten-lane pattern, its focused suite, twelve visual baselines and the ratchet entry. PR #411 merged into train/elements-first as d579888e on 2026-09-11T17:19:53Z, with CI run 34623767293 green on merge commit 1caa720. The issue stays open until the train lands on main, per the programme's close-on-landing rule.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,7 +33,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "in-mission",
+      "verdict": "fixed",
       "wp": "WP01"
     }
   },
