@@ -13,6 +13,12 @@ const STORY_IDS = [
 
 type StoryId = (typeof STORY_IDS)[number];
 
+const NORMAL_STORY_VIEWPORT = Object.freeze({ width: 1440, height: 1024 });
+const ZOOM_200_VIEWPORT = Object.freeze({
+  width: NORMAL_STORY_VIEWPORT.width / 2,
+  height: NORMAL_STORY_VIEWPORT.height / 2,
+});
+
 const loadStory = async (
   page: Page,
   id: StoryId,
@@ -405,10 +411,9 @@ test("compact shell drawer is consumer-controlled and returns focus after accept
 
 test("responsive, short-viewport, long-copy, RTL, and media modes preserve containment", async ({
   page,
-  browserName,
 }) => {
   for (const [id, width, height] of [
-    ["default", 1440, 1024],
+    ["default", NORMAL_STORY_VIEWPORT.width, NORMAL_STORY_VIEWPORT.height],
     ["default", 1123, 1024],
     ["default", 860, 844],
     ["default", 859, 844],
@@ -439,14 +444,7 @@ test("responsive, short-viewport, long-copy, RTL, and media modes preserve conta
     }
   }
 
-  let root = await loadStory(page, "long-content", 780, 844);
-  await root.evaluate((node) => {
-    node.style.zoom = "2";
-  });
-  expect(await root.evaluate((node) => getComputedStyle(node).zoom)).toBe("2");
-  if (browserName === "chromium") await expectNoDocumentOverflow(page);
-
-  root = await loadStory(page, "default", 390, 844);
+  const root = await loadStory(page, "default", 390, 844);
   await root.evaluate((node) => node.setAttribute("dir", "rtl"));
   await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
   await expect(root).toHaveAttribute("dir", "rtl");
@@ -455,6 +453,95 @@ test("responsive, short-viewport, long-copy, RTL, and media modes preserve conta
   await expect(
     root.getByRole("button", { name: "Open team navigation" }),
   ).toBeFocused();
+});
+
+test("CSS zoom is supplemental magnification stress and remains contained", async ({
+  page,
+  browserName,
+}) => {
+  const root = await loadStory(page, "long-content", 780, 844);
+  await root.evaluate((node) => {
+    node.style.zoom = "2";
+  });
+  expect(await root.evaluate((node) => getComputedStyle(node).zoom)).toBe("2");
+  if (browserName === "chromium") await expectNoDocumentOverflow(page);
+});
+
+test("real 200% zoom halves the CSS viewport and crosses the compact-shell breakpoint", async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  const normalRoot = await loadStory(
+    page,
+    "long-content",
+    NORMAL_STORY_VIEWPORT.width,
+    NORMAL_STORY_VIEWPORT.height,
+  );
+  const normalRail = normalRoot.locator('sk-personal-rail[slot="personal-rail"]');
+  const normalCompactHeader = normalRoot.locator('[slot="compact-header"]');
+  await expect(normalRail).not.toHaveAttribute("inert");
+  await expect(normalRail).not.toHaveAttribute("aria-hidden");
+  await expect(normalCompactHeader).toHaveAttribute("inert", "");
+  await expect(normalCompactHeader).toHaveAttribute("aria-hidden", "true");
+
+  const zoomContext = await browser.newContext({
+    baseURL,
+    deviceScaleFactor: 2,
+    viewport: ZOOM_200_VIEWPORT,
+  });
+  try {
+    const zoomPage = await zoomContext.newPage();
+    const root = await loadStory(
+      zoomPage,
+      "long-content",
+      ZOOM_200_VIEWPORT.width,
+      ZOOM_200_VIEWPORT.height,
+    );
+    const viewport = await zoomPage.evaluate(() => ({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      deviceScaleFactor: window.devicePixelRatio,
+    }));
+    expect(
+      viewport,
+      "200% zoom must halve the normal CSS viewport; retaining the old 780px CSS viewport is not equivalent",
+    ).toEqual({
+      width: NORMAL_STORY_VIEWPORT.width / 2,
+      height: NORMAL_STORY_VIEWPORT.height / 2,
+      deviceScaleFactor: 2,
+    });
+
+    const compactHeader = root.locator('[slot="compact-header"]');
+    const rail = root.locator('sk-personal-rail[slot="personal-rail"]');
+    await expect(compactHeader).not.toHaveAttribute("inert");
+    await expect(compactHeader).not.toHaveAttribute("aria-hidden");
+    await expect(rail).toHaveAttribute("inert", "");
+    await expect(rail).toHaveAttribute("aria-hidden", "true");
+
+    await expectNoDocumentOverflow(zoomPage);
+    const rootBox = await root.boundingBox();
+    expect(rootBox).not.toBeNull();
+    expect(rootBox!.x).toBeGreaterThanOrEqual(0);
+    expect(rootBox!.x + rootBox!.width).toBeLessThanOrEqual(
+      ZOOM_200_VIEWPORT.width + 1,
+    );
+
+    const trigger = root.getByRole("button", { name: "Open team navigation" });
+    await trigger.focus();
+    await expect(trigger).toBeFocused();
+    const triggerBox = await trigger.boundingBox();
+    expect(triggerBox).not.toBeNull();
+    expect(Math.min(triggerBox!.width, triggerBox!.height)).toBeGreaterThanOrEqual(
+      44,
+    );
+    expect(triggerBox!.x).toBeGreaterThanOrEqual(0);
+    expect(triggerBox!.x + triggerBox!.width).toBeLessThanOrEqual(
+      ZOOM_200_VIEWPORT.width + 1,
+    );
+  } finally {
+    await zoomContext.close();
+  }
 });
 
 test("all six discovered stories are non-empty and axe-clean", async ({
