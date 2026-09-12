@@ -59,8 +59,27 @@ jobs:
       docs:       ${{ steps.filter.outputs.docs }}
       ci:         ${{ steps.filter.outputs.ci }}
       doctrine:   ${{ steps.filter.outputs.doctrine }}
+      # F7 (pre-merge squad, gate pass 2): the promote/*-skip conjuncts on storybook-build and
+      # the four heavy jobs used to trust the loose `startsWith(github.head_ref, 'promote/')`
+      # glob — the same shape B3/B5 already rejected on the SCRIPT side, because nothing on
+      # GitHub reserves that namespace. GitHub Actions' own `if:` expression language has no
+      # regex/length function to anchor a `promote/<40-hex>` shape directly in a job `if:`, so
+      # the exact-shape test runs here, once, as a real shell regex (bash `=~`), and every
+      # consumer reads this one computed boolean instead of re-deriving it with a weaker glob.
+      is_develop_promotion_pr: ${{ steps.promo-shape.outputs.result }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+      - name: "[ENFORCED] Exact promote/<40-hex>-into-develop shape check (F7)"
+        id: promo-shape
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [[ "$HEAD_REF" =~ ^promote/[0-9a-f]{40}$ && "$BASE_REF" == "develop" ]]; then
+            echo "result=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "result=false" >> "$GITHUB_OUTPUT"
+          fi
       - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d  # dorny/paths-filter v4.0.1
         id: filter
         with:
@@ -413,8 +432,9 @@ jobs:
         run: node scripts/check-visual-screenshot-softness.mjs --selftest
       - name: "[ENFORCED] Multi-screenshot tests use expect.soft throughout (#367)"
         run: node scripts/check-visual-screenshot-softness.mjs
-      # REL1 (#362). The develop-promotion mechanism's own 21-probe table (T003/IC-03 —
-      # floor-outside-the-table, mutation-controlled, contracts/promotion-script.contract.md).
+      # REL1 (#362). The develop-promotion mechanism's own probe table (T003/IC-03 —
+      # floor-outside-the-table, mutation-controlled, contracts/promotion-script.contract.md;
+      # F9, gate pass 2: no probe count restated here — see PROBE_FLOOR in the script itself).
       # No network, no GH_TOKEN — every probe runs against a fresh scratch git repository.
       - name: "[ENFORCED] develop-promotion mechanism self-test (REL1, #362)"
         run: node scripts/promote-develop.mjs --selftest
@@ -455,19 +475,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [changes]
-    # `&& !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')`
-    # (research.md R15): `github.head_ref`/`github.base_ref` are both empty for `push` events,
-    # so this conjunct is a no-op for the push-to-develop run that follows a promotion merge,
-    # and only skips the pull_request-triggered run against the promotion PR itself — content
-    # that is byte-identical to an already-fully-gated train commit, where the ~30-minute
-    # browser suite proves nothing new (REL1, #362). **B3 (pre-merge squad, PR #429)**: the
-    # base-ref conjunct is load-bearing, not decorative — `startsWith(head_ref, 'promote/')`
-    # alone trusted a branch NAME with no scoping, so a PR headed `promote/anything` into ANY
-    # base (nothing on GitHub reserves this namespace) skipped this job. Only a `promote/*`
-    # head with base `develop` — the one shape this mechanism itself ever creates — qualifies.
+    # `&& needs.changes.outputs.is_develop_promotion_pr != 'true'` (research.md R15):
+    # `github.head_ref`/`github.base_ref` are both empty for `push` events, so the underlying
+    # shape check (in `changes`, F7) is false for the push-to-develop run that follows a
+    # promotion merge, and this conjunct only skips the pull_request-triggered run against the
+    # promotion PR itself — content that is byte-identical to an already-fully-gated train
+    # commit, where the ~30-minute browser suite proves nothing new (REL1, #362). **F7
+    # (pre-merge squad, gate pass 2)**: reads the ONE shared, exact-shape
+    # (`promote/<40-hex>`-into-`develop`) check computed once in `changes`, rather than
+    # re-deriving a loose `startsWith(head_ref, 'promote/')` glob here — nothing on GitHub
+    # reserves that namespace, and a glob cannot express the 40-hex shape at all. Only a
+    # `promote/<40-hex>` head with base `develop` — the one shape this mechanism itself ever
+    # creates — qualifies.
     if: >-
       (needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true') &&
-      !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')
+      needs.changes.outputs.is_develop_promotion_pr != 'true'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -503,15 +525,18 @@ jobs:
   a11y:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [storybook-build]
-    # See storybook-build's own `if:` comment above (research.md R15, B3). B3 (pre-merge
-    # squad, PR #429): `startsWith(github.head_ref, 'promote/')` alone trusted a branch NAME
-    # with no base scoping — a PR headed `promote/anything` into ANY base (not just `develop`)
-    # skipped this job. `github.base_ref == 'develop'` closes that: only a `promote/*`-headed
-    # PR whose BASE is `develop` (the one shape this mechanism itself ever creates) skips.
+    # `changes` added (F7, pre-merge squad gate pass 2) so this job can read
+    # `needs.changes.outputs.is_develop_promotion_pr` — GitHub Actions only exposes a job's
+    # outputs to jobs that list it in their OWN `needs:`.
+    needs: [storybook-build, changes]
+    # See storybook-build's own `if:` comment above (research.md R15, B3/F7). `startsWith
+    # (github.head_ref, 'promote/')` alone trusted a branch NAME with no base scoping and no
+    # shape check — a PR headed `promote/anything` into ANY base (not just `develop`) skipped
+    # this job, and a loose glob cannot express the `promote/<40-hex>` shape at all (F7). Reads
+    # the one shared, exact-shape check computed once in `changes` instead.
     if: >-
       needs.storybook-build.result == 'success' &&
-      !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')
+      needs.changes.outputs.is_develop_promotion_pr != 'true'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -535,15 +560,18 @@ jobs:
   visual-regression:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [storybook-build]
-    # See storybook-build's own `if:` comment above (research.md R15, B3). B3 (pre-merge
-    # squad, PR #429): `startsWith(github.head_ref, 'promote/')` alone trusted a branch NAME
-    # with no base scoping — a PR headed `promote/anything` into ANY base (not just `develop`)
-    # skipped this job. `github.base_ref == 'develop'` closes that: only a `promote/*`-headed
-    # PR whose BASE is `develop` (the one shape this mechanism itself ever creates) skips.
+    # `changes` added (F7, pre-merge squad gate pass 2) so this job can read
+    # `needs.changes.outputs.is_develop_promotion_pr` — GitHub Actions only exposes a job's
+    # outputs to jobs that list it in their OWN `needs:`.
+    needs: [storybook-build, changes]
+    # See storybook-build's own `if:` comment above (research.md R15, B3/F7). `startsWith
+    # (github.head_ref, 'promote/')` alone trusted a branch NAME with no base scoping and no
+    # shape check — a PR headed `promote/anything` into ANY base (not just `develop`) skipped
+    # this job, and a loose glob cannot express the `promote/<40-hex>` shape at all (F7). Reads
+    # the one shared, exact-shape check computed once in `changes` instead.
     if: >-
       needs.storybook-build.result == 'success' &&
-      !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')
+      needs.changes.outputs.is_develop_promotion_pr != 'true'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -572,15 +600,18 @@ jobs:
   playwright:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [storybook-build]
-    # See storybook-build's own `if:` comment above (research.md R15, B3). B3 (pre-merge
-    # squad, PR #429): `startsWith(github.head_ref, 'promote/')` alone trusted a branch NAME
-    # with no base scoping — a PR headed `promote/anything` into ANY base (not just `develop`)
-    # skipped this job. `github.base_ref == 'develop'` closes that: only a `promote/*`-headed
-    # PR whose BASE is `develop` (the one shape this mechanism itself ever creates) skips.
+    # `changes` added (F7, pre-merge squad gate pass 2) so this job can read
+    # `needs.changes.outputs.is_develop_promotion_pr` — GitHub Actions only exposes a job's
+    # outputs to jobs that list it in their OWN `needs:`.
+    needs: [storybook-build, changes]
+    # See storybook-build's own `if:` comment above (research.md R15, B3/F7). `startsWith
+    # (github.head_ref, 'promote/')` alone trusted a branch NAME with no base scoping and no
+    # shape check — a PR headed `promote/anything` into ANY base (not just `develop`) skipped
+    # this job, and a loose glob cannot express the `promote/<40-hex>` shape at all (F7). Reads
+    # the one shared, exact-shape check computed once in `changes` instead.
     if: >-
       needs.storybook-build.result == 'success' &&
-      !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')
+      needs.changes.outputs.is_develop_promotion_pr != 'true'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -649,15 +680,18 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [storybook-build]
-    # See storybook-build's own `if:` comment above (research.md R15, B3). B3 (pre-merge
-    # squad, PR #429): `startsWith(github.head_ref, 'promote/')` alone trusted a branch NAME
-    # with no base scoping — a PR headed `promote/anything` into ANY base (not just `develop`)
-    # skipped this job. `github.base_ref == 'develop'` closes that: only a `promote/*`-headed
-    # PR whose BASE is `develop` (the one shape this mechanism itself ever creates) skips.
+    # `changes` added (F7, pre-merge squad gate pass 2) so this job can read
+    # `needs.changes.outputs.is_develop_promotion_pr` — GitHub Actions only exposes a job's
+    # outputs to jobs that list it in their OWN `needs:`.
+    needs: [storybook-build, changes]
+    # See storybook-build's own `if:` comment above (research.md R15, B3/F7). `startsWith
+    # (github.head_ref, 'promote/')` alone trusted a branch NAME with no base scoping and no
+    # shape check — a PR headed `promote/anything` into ANY base (not just `develop`) skipped
+    # this job, and a loose glob cannot express the `promote/<40-hex>` shape at all (F7). Reads
+    # the one shared, exact-shape check computed once in `changes` instead.
     if: >-
       needs.storybook-build.result == 'success' &&
-      !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')
+      needs.changes.outputs.is_develop_promotion_pr != 'true'
     continue-on-error: true   # advisory only
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
@@ -797,8 +831,11 @@ jobs:
           # warns is easy to get subtly wrong; its defeat table carries cases asserting this
           # guard cannot be widened to apply unconditionally, nor to any base other than
           # `develop` (B3, pre-merge squad, PR #429 — a `promote/*`-headed PR into `main`, say,
-          # must get NO tolerance here).
-          if [[ "$HEAD_REF" == promote/* && "$BASE_REF" == "develop" ]]; then
+          # must get NO tolerance here). F7 (gate pass 2): anchored to the EXACT
+          # `promote/<40-hex>` shape via a real bash regex (`=~`), never the loose `promote/*`
+          # glob the script side (`PROMOTION_BRANCH_RE`) already rejects — nothing on GitHub
+          # reserves the bare `promote/` namespace.
+          if [[ "$HEAD_REF" =~ ^promote/[0-9a-f]{40}$ && "$BASE_REF" == "develop" ]]; then
             sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"
           fi
 
