@@ -1,0 +1,65 @@
+{
+  "rows": {
+    "#329": {
+      "evidence_ref": "PR #409 (merged 2026-09-11T15:54:01Z) closes #329's scope; left open deliberately because a Closes line in a train-targeting PR registers nothing against the issue",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#409": {
+      "evidence_ref": "#409 is a PR, not an issue (state: MERGED, 2026-09-11T15:54:01Z, confirmed via gh api repos/spec-kitty/spec-kitty-design/pulls/409) - noted here so it is not miscounted as an open issue again",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#417": {
+      "evidence_ref": "commit b13f33b3 (cli-auth.stories.ts breakpoint 390px->480px with mirror comment); family sweep of the other 5 named pattern families found no divergence (WP01 tasks.md T002)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#418": {
+      "evidence_ref": "commits 8e20b23c, 16bbfc5b, 14b5c652, 7816e662 (same-origin iframe recursion via watchFrame(); closes a MutationObserver-tree-boundary gap and a cross-realm 'instanceof Element' bug found chasing it, both self-attacked - exact reproduction, nested iframe, iframe-in-shadow-root, shadow-root-in-iframe, deferred-past-window all verified). Disclosure now names all four floors: deferred-past-window, closed shadow roots, cross-origin iframes, whole-page appendChild patch. 14/14 green on a fresh build throughout",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#422": {
+      "evidence_ref": "Real pre-filed issue (200%-zoom emulation in apps/storybook/src/tests/visual.spec.ts); C-001 correctly excludes it from this mission because a sibling mission owns visual.spec.ts and has not merged. Joins a future increment once that sibling lands. Status comment posted on #422 recording this exclusion.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    }
+  },
+  "schema_version": 1
+}

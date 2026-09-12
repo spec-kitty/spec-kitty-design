@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "mission_slug": "cli-auth-proof-hardening-01M28V9T",
+  "mission_id": "01M28V9TXMJTY3XV2MDFGDDW0V",
+  "mission_branch": "kitty/mission-cli-auth-proof-hardening-01M28V9T",
+  "target_branch": "mission/cli-auth-proof-hardening",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-cli-auth-pattern.spec.ts",
+        "packages/elements/src/patterns/cli-auth.stories.ts",
+        "scripts/check-pattern-composition.mjs"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-11T18:36:17.400811+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "2fbe165c97a504f55024c3d9b011cc3316e87ead"
+}
