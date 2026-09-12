@@ -1,11 +1,11 @@
 # Mission Specification: Team Overview current-main pattern refresh
 
-**Mission**: \`team-overview-current-main-pattern-refresh-01M286R0\`  
-**Mission Branch**: \`team-overview-current-main-pattern-refresh\`  
-**Created**: 2026-09-11  
-**Status**: Specification complete — ready for planning  
-**Input**: GitHub issues #381 and #383; Family 1 Team workspace handoff and TO1/TO2 evidence; current \`train/elements-first@0a232a01a17627de6f1553ad0948b8b2f6f4f286\`; predecessor #150  
-**Target**: One Work Package and one pull request into \`train/elements-first\`, with \`Refs #383\` and \`Refs #381\`  
+**Mission**: \`team-overview-current-main-pattern-refresh-01M286R0\`
+**Mission Branch**: \`team-overview-current-main-pattern-refresh\`
+**Created**: 2026-09-11
+**Status**: Specification complete — ready for planning
+**Input**: GitHub issues #381 and #383; Family 1 Team workspace handoff and TO1/TO2 evidence; refreshed \`train/elements-first@d3263e9488f7df85a537a927d417729eacc75f12\`; predecessor #150
+**Target**: One Work Package and one pull request into \`train/elements-first\`, with \`Refs #383\` and \`Refs #381\`
 **Squad tier**: C — independent pre-merge review
 
 ## Outcome

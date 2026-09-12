@@ -6,7 +6,7 @@
 - Family 1 programme handoff, screen matrix, TO1/TO2 prompt finales, correction rounds, and
   authority/copy/implementation review evidence.
 - ADR-9, ADR-10, ADR-11 and the repository component-authoring, visual, voice, and quality rules.
-- Current `train/elements-first@0a232a01a17627de6f1553ad0948b8b2f6f4f286` Team Overview
+- Refreshed `train/elements-first@d3263e9488f7df85a537a927d417729eacc75f12` Team Overview
   stories/tests/snapshots and landed Team Overview, Mission Reading, and Mission Kanban missions.
 
 ## Findings

@@ -1,7 +1,7 @@
 # Tasks: Team Overview current-main pattern refresh
 
-**Input**: `spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`  
-**Branch**: `team-overview-current-main-pattern-refresh`  
+**Input**: `spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`
+**Branch**: `team-overview-current-main-pattern-refresh`
 **External merge target**: `train/elements-first`
 
 One bounded work package owns the complete evidence cutover. Splitting the story source from its

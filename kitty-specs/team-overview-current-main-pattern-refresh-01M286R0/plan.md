@@ -1,8 +1,8 @@
 # Implementation Plan: Team Overview current-main pattern refresh
 
-**Branch**: `team-overview-current-main-pattern-refresh` | **Date**: 2026-09-11 | **Spec**: [spec.md](./spec.md)  
+**Branch**: `team-overview-current-main-pattern-refresh` | **Date**: 2026-09-11 | **Spec**: [spec.md](./spec.md)
 **Input**: #381/#383, the Family 1 programme handoff and TO1/TO2 reviewed evidence, current
-`train/elements-first@0a232a01a17627de6f1553ad0948b8b2f6f4f286`, and landed pattern conventions.
+`train/elements-first@d3263e9488f7df85a537a927d417729eacc75f12`, and landed pattern conventions.
 
 ## Summary
 
@@ -19,15 +19,15 @@ clipboard policy.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x, Lit 3.3 templates, CSS custom properties  
-**Primary Dependencies**: Storybook 10.6, public `@spec-kitty/elements` source modules, native HTML  
-**Storage**: N/A — immutable in-memory Storybook fixtures only  
-**Testing**: Vitest fixture tests; Playwright against built Storybook; axe; visual regression  
-**Target Platform**: Current Chromium, Firefox, and WebKit browser projects  
-**Project Type**: Nx web-components monorepo, Storybook-only pattern composition  
-**Performance Goals**: Storybook build remains below the committed 180-second ceiling  
+**Language/Version**: TypeScript 5.x, Lit 3.3 templates, CSS custom properties
+**Primary Dependencies**: Storybook 10.6, public `@spec-kitty/elements` source modules, native HTML
+**Storage**: N/A — immutable in-memory Storybook fixtures only
+**Testing**: Vitest fixture tests; Playwright against built Storybook; axe; visual regression
+**Target Platform**: Current Chromium, Firefox, and WebKit browser projects
+**Project Type**: Nx web-components monorepo, Storybook-only pattern composition
+**Performance Goals**: Storybook build remains below the committed 180-second ceiling
 **Constraints**: six stable story IDs; zero public element/token/wrapper/API delta; token-only
-pattern CSS; zero document overflow at required presentations; zero axe violations  
+pattern CSS; zero document overflow at required presentations; zero axe violations
 **Scale/Scope**: one current populated fixture, one alternate-retention fixture, exactly six
 first-run response fixtures, one Work Package
 
