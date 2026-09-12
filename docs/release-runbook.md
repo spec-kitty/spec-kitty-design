@@ -23,6 +23,45 @@ mission needs npm write access, and none has it.
 | 5 | Re-run the release for the **existing** `v1.0.0` tag (see below) | operator | starts the release |
 | 6 | The workflow builds, audits, SBOMs, publishes, and creates a GitHub Release | CI | see below |
 
+**Step 1 carries a hidden precondition (F-B)**: `train/elements-first` cannot land on `main` by a
+merge commit — `main-is-safe`'s `required_linear_history` rule forbids it — so the landing is a
+squash or rebase (`allowed_merge_methods: ["squash", "rebase"]`). Either way, the commit that
+reaches `main` does NOT carry `train/elements-first`'s ancestry the way every commit on the train
+currently does, and `scripts/check-ci-quality-trigger-parity.mjs`'s anchor tag
+(`parity-anchor/rel1`) is only a real ancestor of commits ON the train. The landing PR ITSELF
+still shows green — it runs against the train's own history, where the anchor still applies. The
+break shows up on the FIRST PUSH TO `main` after the landing, when that check's
+is-ancestor-of-`HEAD` test runs against `main`'s new tip for the first time and fails with "not
+an ancestor of HEAD" — mysterious-looking unless this step has already been planned for:
+
+1. Once the landing commit exists on `main`, create a NEW tag under `refs/tags/parity-anchor/*`
+   (e.g. `parity-anchor/rel2`) at that commit — `git tag parity-anchor/rel2 <main's new sha>`.
+   Creating the LOCAL tag is not itself blocked; PUSHING it is what the
+   `parity-anchor-tags-are-immutable` ruleset (`docs/architecture/branch-model.md`) forbids —
+   it covers the whole prefix with a `creation` rule too. An admin must, in order: disable or
+   edit that ruleset (a deliberate, logged act) — `git push origin parity-anchor/rel2` — restore
+   the ruleset. A tag that is only ever created locally and never pushed satisfies nothing in
+   CI: `resolveAnchorTagSha()` resolves `refs/tags/...` in the CHECKOUT it runs in, which for
+   every real workflow run is a fresh clone from the remote.
+2. In one commit: update `PRE_MISSION_TAG`/`PRE_MISSION_SHA` in
+   `scripts/check-ci-quality-trigger-parity.mjs` to the new tag/commit, and fully re-capture
+   `BASELINE`/`ON_BASELINE` from that commit's real `.github/workflows/ci-quality.yml` (see that
+   file's own REBASELINING note).
+3. Run `node scripts/check-ci-quality-trigger-parity.mjs --selftest` before pushing that commit.
+4. **Operator, standing check — `bypass_actors` (F-E, incident 3)**: PR-time CI
+   (`--check-parity-anchor-tags` in `lint-code`) cannot see this field at all — GitHub only
+   returns it to a write-access-authenticated request, and a PR-time workflow token is
+   deliberately not that (see `docs/architecture/branch-model.md`). Run
+   `gh api repos/spec-kitty/spec-kitty-design/rulesets/<id> --jq .bypass_actors` yourself
+   (an admin-authenticated read) and confirm it prints `[]` — for BOTH the tag ruleset above and
+   `develop`'s ruleset once it exists — at every landing, and periodically otherwise, since
+   nothing else in this repo ever checks it. `bypass_actors: []` is the entire "nobody can move
+   this tag, admins included" security claim; a CI warning naming this gap is not the same thing
+   as it having been checked.
+
+Doing this as part of step 1 — rather than after CI on `main` reds and someone has to
+reverse-engineer why — is the point of naming it here.
+
 Steps 2–4 are one-time. Tag `v1.0.0` was pushed on 2026-09-01 and failed 50 seconds later with
 `npm error 404 Not Found - PUT https://registry.npmjs.org/@spec-kitty%2ftokens` — a 404 on `PUT`
 means the scope was not there to publish into. ADR-2 recorded scope ownership as a pre-flight and it

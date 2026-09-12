@@ -143,6 +143,39 @@ ruleset (`docs/architecture/branch-model.md`'s own Post-apply record, data-model
 then, `scripts/check-develop-ruleset-parity.mjs --check` no-ops with a notice rather than
 failing, because `vars.DEVELOP_RULESET_ID` is unset.
 
+## `parity-anchor-tags-are-immutable` ruleset (F-E)
+
+Specified in `.github/rulesets/parity-anchor-tags.json` — target `tag`, condition
+`refs/tags/parity-anchor/*`, rules `creation`, `deletion`, `update`, `non_fast_forward`, zero
+bypass actors. This is what `check-ci-quality-trigger-parity.mjs`'s anchor-tamper defense (its
+own F2) actually rests on: the tag `parity-anchor/rel1` that script resolves at run time cannot
+be created, moved or deleted by anyone — admins included — without first disabling or editing
+this ruleset, a visible, logged administrative act rather than a plain push. It protects the
+WHOLE `parity-anchor/*` prefix, not just `rel1`, so a future re-baseline's replacement tag (e.g.
+`parity-anchor/rel2`, see that script's own REBASELINING note) is covered automatically, and
+also blocked from being minted without the same deliberate step.
+
+**Live ruleset id**: `22997584` — already applied and active (verified via
+`gh api repos/spec-kitty/spec-kitty-design/rulesets/22997584`, 2026-09-12). Unlike `develop`'s
+ruleset above, this one is not mid-bootstrap: `scripts/check-develop-ruleset-parity.mjs
+--check-parity-anchor-tags` reads this id as a plain constant, with no dated floor and no
+unset-id notice path, since the ruleset already exists.
+
+**What PR-time CI can and cannot verify (F-E, incident 3)**: `--check-parity-anchor-tags` runs
+in `lint-code` on every PR and checks the ruleset's shape, target, conditions, and every rule
+(`creation`/`deletion`/`update`/`non_fast_forward`) — but NOT `bypass_actors`. GitHub's REST docs
+for "Get a repository ruleset" state: *"To prevent leaking sensitive information, the
+bypass_actors property is only returned if the user making the API request has write access to
+the ruleset."* The PR-time workflow token does not have write access to the ruleset (granting
+`administration: write` so a read-only drift check could see one field would let any step on
+any PR modify repository settings — the wrong trade, not made), so the field is silently absent
+from that token's response. The script does not read absence as agreement: it prints a named
+`::warning::` and exits 0 rather than reporting drift or false confidence. `bypass_actors: []`
+(the entire "nobody can move this tag, admins included" claim) is therefore verified only by an
+admin-authenticated read — `gh api repos/spec-kitty/spec-kitty-design/rulesets/22997584 --jq
+.bypass_actors` should print `[]` — which is an OPERATOR step, not something CI can close; see
+`docs/release-runbook.md`'s landing/maintenance section for where that step lives.
+
 ## Operator and orchestrator actions
 
 See `kitty-specs/release-pipeline-develop-line-01M292E3/quickstart.md` for the full, exact

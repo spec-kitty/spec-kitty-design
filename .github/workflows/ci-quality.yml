@@ -450,6 +450,18 @@ jobs:
         run: node scripts/check-ci-quality-trigger-parity.mjs --selftest
       - name: "[ENFORCED] ci-quality.yml trigger parity holds (NFR-002, SC-003, REL1 #362)"
         run: node scripts/check-ci-quality-trigger-parity.mjs
+      # F-E (post-merge squad, pass 4, V1): the parity-anchor-tags-are-immutable ruleset is what
+      # the trigger-parity check's whole F2 anchor-tamper defence rests on — if it drifts or is
+      # deleted, nothing above notices. `develop`'s own ruleset check (below, `develop-ruleset-
+      # parity` job) runs only on the existing schedule or a push to `develop`, so it gives no
+      # PR-time coverage; this ruleset already exists (id 22997584, docs/architecture/branch-
+      # model.md), unlike develop's, so it belongs here rather than waiting for a dedicated job.
+      # `contents: read` (this workflow's top-level permission) is sufficient for a read-only
+      # ruleset GET, the same assumption `develop-ruleset-parity` already makes.
+      - name: "[ENFORCED] parity-anchor-tags ruleset parity (F-E)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-develop-ruleset-parity.mjs --check-parity-anchor-tags
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
         run: |
