@@ -59,6 +59,18 @@
       "title": "<fill at WP-implementation time>",
       "verdict": "fixed",
       "wp": "WP01"
+    },
+    "#409": {
+      "evidence_ref": "Not an issue: #409 is a train PR (CLI Auth pattern stories) that this mission rebased onto. The reference was scraped from rebase bookkeeping; the rebase preserved its thirteen ratchet ids and its visual cases unchanged.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
