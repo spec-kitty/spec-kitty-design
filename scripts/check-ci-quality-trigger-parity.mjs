@@ -6,8 +6,8 @@
  * the WP report, "explicitly not something a reviewer verifies by eye." This ships it.
  *
  * Compares the live `.github/workflows/ci-quality.yml` against a hardcoded BASELINE captured
- * from the pre-mission tree (commit 907b2bbd, the last commit before REL1/#362 touched this
- * file) plus the named classes of change REL1 is allowed to have made:
+ * from the pre-mission tree (see PRE_MISSION_SHA below — the tree immediately before REL1/#362
+ * touched this file) plus the named classes of change REL1 is allowed to have made:
  *
  *   1. Exactly two NEW jobs (`promote-develop`, `develop-ruleset-parity`) — present in the live
  *      file, absent from BASELINE.
@@ -27,10 +27,36 @@
  *
  * **F3 (pre-merge squad, gate pass 2)**: `BASELINE`/`ON_BASELINE` are no longer trusted as
  * hardcoded literals alone — `verifyBaselineAgainstHistory` re-fetches the REAL pre-mission
- * file via `git show 907b2bbd:...` on every run (not only `--selftest`) and refuses to report
- * green if the hardcoded baseline has drifted from it. Editing `BASELINE`/`EXPECTED_CHANGED_IF`
- * in the same commit as a workflow edit no longer defeats this check: commit `907b2bbd` is
- * fixed, real git history, not something a same-commit edit can also rewrite.
+ * file via `git show ${PRE_MISSION_SHA}:...` on every run (not only `--selftest`) and refuses
+ * to report green if the hardcoded baseline has drifted from it. Editing
+ * `BASELINE`/`EXPECTED_CHANGED_IF` in the same commit as a workflow edit does not defeat this
+ * check: `PRE_MISSION_SHA` names fixed, real git history, not something a same-commit edit can
+ * also rewrite.
+ *
+ * **INCIDENT (this fix)**: the anchor above was originally `907b2bbd`, a commit that only ever
+ * existed on the mission branch `mission/release-pipeline-develop-line`. REL1's own squash
+ * merge (train commit `b38b40e7`, closing #362) deleted that branch, which made `907b2bbd`
+ * unreachable from every remaining ref — `git branch -r --contains 907b2bbd` is empty and
+ * `git merge-base --is-ancestor 907b2bbd origin/train/elements-first` fails. A fresh clone (what
+ * CI always uses) can no longer read it at all, so the F3 check fails CLOSED on every PR —
+ * correct given the missing object, but self-inflicted: the very commit that carried "the tree
+ * immediately before REL1 touched this file" was never guaranteed to survive REL1's own merge.
+ * It happened to keep working on machines that still held the object loose (a local, same-host
+ * `git clone` hardlinks the whole object store regardless of reachability, which is why this
+ * looked fine in a checkout that predates the incident and red everywhere else).
+ *
+ * The fix re-anchors on `9a9e284a6af97053e38c1fbd033c523423ed0779` — `b38b40e7`'s own first
+ * parent on `train/elements-first` (i.e. `git rev-parse b38b40e7^`), train's own tip in the
+ * instant before REL1's squash-merge commit landed. Its `.github/workflows/ci-quality.yml` blob
+ * is confirmed byte-identical to the old `907b2bbd` version (`git diff 907b2bbd b38b40e7^ --
+ * .github/workflows/ci-quality.yml` was empty when both objects were still readable) — other
+ * missions merged into the train between
+ * `907b2bbd` and REL1's merge did not touch this file, so no content was lost by anchoring one
+ * commit later. Being an ancestor of `train/elements-first`'s own history, this commit cannot be
+ * deleted the way a mission branch's tip can: only a force-rewrite of the train's protected
+ * history removes it, and `verifyBaselineAgainstHistory`/`loadPreMissionWorkflow`'s `git show`
+ * already fails LOUDLY (not silently green) if the anchor is ever unreadable — see `inspect()`'s
+ * catch branch, and Probe 9 below, which defeat-tests exactly that path.
  *
  * CLI: node scripts/check-ci-quality-trigger-parity.mjs [--selftest]
  */
@@ -44,10 +70,20 @@ import { STORYBOOK_PREDICATE, HEAVY_JOB_PREDICATE } from './lib/storybook-predic
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..');
 const WORKFLOW = resolve(REPO_ROOT, '.github', 'workflows', 'ci-quality.yml');
-const PRE_MISSION_SHA = '907b2bbd';
+// The commit immediately before REL1 (#362, train commit b38b40e7) touched this file — i.e.
+// `b38b40e7^` on train/elements-first. Deliberately NOT the mission branch's own last
+// pre-mission commit (the original `907b2bbd`): a mission branch is deleted on merge, so
+// anchoring there meant the anchor vanished the moment REL1 landed. This SHA is an ANCESTOR of
+// train/elements-first (`git merge-base --is-ancestor <this> origin/train/elements-first`
+// succeeds) and therefore cannot disappear the way a mission branch tip can — only rewriting
+// train's own protected history would remove it, which `verifyBaselineAgainstHistory`'s `git
+// show` below would surface as a loud failure (see `inspect()`'s catch branch), never a silent
+// pass. Content verified byte-identical to `907b2bbd` before that object stopped being
+// reachable — see the file-header INCIDENT note for the verification command.
+const PRE_MISSION_SHA = '9a9e284a6af97053e38c1fbd033c523423ed0779';
 
-/** Captured from `git show 907b2bbd:.github/workflows/ci-quality.yml` — the tree immediately
- *  before REL1 (#362) touched this file. `null` means the field was absent.
+/** Captured from `git show ${PRE_MISSION_SHA}:.github/workflows/ci-quality.yml` — the tree
+ *  immediately before REL1 (#362) touched this file. `null` means the field was absent.
  *  `verifyBaselineAgainstHistory` (below) holds this to the REAL commit on every run. */
 export const BASELINE = {
   changes: { if: null, needs: null },
@@ -425,10 +461,35 @@ function runProbes() {
     record(8, 'a tampered in-memory BASELINE disagreeing with real git history is detectable', 'fail', problems.length === 0, problems);
   }
 
+  // Probe 9 — F9 (this fix, the incident): the anchor itself becoming unreadable fails LOUDLY,
+  // never silently green. This is the exact failure mode `907b2bbd` hit once its owning mission
+  // branch was deleted — `git show <sha>:...` throws instead of resolving — and it is the same
+  // code path `inspect()` runs on every real invocation (`loadPreMissionWorkflow`, wrapped in
+  // exactly this try/catch). A previously-good anchor going missing must be reported as a
+  // problem, not treated as "nothing to compare against, so pass."
+  {
+    let threw = null;
+    try {
+      execFileSync('git', ['show', '0000000000000000000000000000000000000000:.github/workflows/ci-quality.yml'], {
+        cwd: REPO_ROOT,
+        encoding: 'utf8',
+      });
+    } catch (err) {
+      threw = err;
+    }
+    record(
+      9,
+      'an anchor commit that cannot be read (deleted branch, shallow clone, rewritten history) throws rather than resolving to nothing',
+      'pass',
+      threw !== null,
+      threw?.message,
+    );
+  }
+
   return results;
 }
 
-const PROBE_FLOOR = 8;
+const PROBE_FLOOR = 9;
 
 function selftest() {
   const results = runProbes();
