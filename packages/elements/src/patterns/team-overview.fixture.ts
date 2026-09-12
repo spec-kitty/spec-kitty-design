@@ -155,12 +155,15 @@ export const deepFreezeTeamOverviewFixture = <T>(value: T): DeepReadonly<T> => {
   return value as DeepReadonly<T>;
 };
 
-const isSafeTeamRoute = (href: string): boolean =>
-  !href.includes("/../") &&
-  !href.includes("/./") &&
-  /^\/a\/[a-z0-9-]+\/(?:$|work\/$|connectors\/$|team\/$|repos\/[a-z0-9._-]+\/$|repos\/[a-z0-9._-]+\/missions\/[a-z0-9._-]+\/$)/u.test(
-    href,
-  );
+const TEAM_ROUTE_PATTERNS = {
+  overview: /^\/a\/[a-z0-9-]+\/$/u,
+  work: /^\/a\/[a-z0-9-]+\/work\/$/u,
+  connectors: /^\/a\/[a-z0-9-]+\/connectors\/$/u,
+  members: /^\/a\/[a-z0-9-]+\/team\/$/u,
+  repository: /^\/a\/[a-z0-9-]+\/repos\/[a-z0-9._-]+\/$/u,
+  mission:
+    /^\/a\/[a-z0-9-]+\/repos\/[a-z0-9._-]+\/missions\/[a-z0-9._-]+\/$/u,
+} as const satisfies Record<Exclude<SafeRouteKind, "release">, RegExp>;
 
 const isSafeReleaseRoute = (href: string): boolean =>
   href === "https://github.com/spec-kitty/EXPERIMENTAL-spec-kitty/releases";
@@ -170,23 +173,18 @@ export const safeTeamOverviewHref = (
   route: SuppliedRoute | undefined,
 ): string | undefined => {
   if (!route) return undefined;
+  if (route.href.includes("/../") || route.href.includes("/./")) {
+    return undefined;
+  }
   if (route.kind === "release") {
     return isSafeReleaseRoute(route.href) ? route.href : undefined;
   }
-  return isSafeTeamRoute(route.href) ? route.href : undefined;
+  return TEAM_ROUTE_PATTERNS[route.kind].test(route.href)
+    ? route.href
+    : undefined;
 };
 
 const validatePopulatedFixture = (fixture: PopulatedOverviewResponse): void => {
-  const suppliedRoutes = [
-    ...Object.values(fixture.routes),
-    ...fixture.moments.map((moment) => moment.missionRoute),
-    ...fixture.repositories.map((repository) => repository.route),
-  ];
-  if (
-    suppliedRoutes.some((route) => safeTeamOverviewHref(route) === undefined)
-  ) {
-    throw new Error("Team Overview fixture contains an unsafe route");
-  }
   for (const retention of Object.values(fixture.retention)) {
     if (retention.retentionHours <= 0 || retention.cells.length === 0) {
       throw new Error("Team Overview retention input must be positive");

@@ -1,6 +1,7 @@
 /* eslint-disable @nx/enforce-module-boundaries -- #383: this fixture suite directly exercises the
    non-published Team Overview story projection module. Exporting it would create the runtime API
    that the programme handoff prohibits. */
+import { render } from "lit";
 import { describe, expect, test } from "vitest";
 import {
   FIRST_RUN_SHELL,
@@ -14,6 +15,7 @@ import {
   type PopulatedOverviewResponse,
   type TeamMomentRecord,
 } from "../../../packages/elements/src/patterns/team-overview.fixture.js";
+import { renderTeamOverviewRoute } from "../../../packages/elements/src/patterns/team-overview.route.fixture.js";
 
 const expectDeeplyFrozen = (value: unknown): void => {
   if (value === null || typeof value !== "object") return;
@@ -209,6 +211,78 @@ describe("Team Overview supplied route allow-list", () => {
   ] as const)("rejects an absent or unsafe route %#", (route) => {
     expect(safeTeamOverviewHref(route)).toBeUndefined();
   });
+
+  test.each([
+    {
+      ...TEAM_OVERVIEW_POPULATED_RESPONSE.routes.members,
+      href: TEAM_OVERVIEW_POPULATED_RESPONSE.routes.connectors.href,
+    },
+    {
+      ...TEAM_OVERVIEW_POPULATED_RESPONSE.routes.connectors,
+      href: TEAM_OVERVIEW_POPULATED_RESPONSE.routes.members.href,
+    },
+  ])("rejects a forged $kind kind/path pairing", (route) => {
+    expect(safeTeamOverviewHref(route)).toBeUndefined();
+  });
+
+  test("unsafe populated routes survive projection as supplied passive copy and never render as actions", async () => {
+    const caller = structuredClone(
+      TEAM_OVERVIEW_POPULATED_RESPONSE,
+    ) as unknown as PopulatedOverviewResponse;
+    const membersPath = caller.routes.members.href;
+    const connectorsPath = caller.routes.connectors.href;
+    const forged = {
+      ...caller,
+      routes: {
+        ...caller.routes,
+        work: {
+          ...caller.routes.work,
+          label: "Work unavailable",
+          href: "",
+        },
+        members: { ...caller.routes.members, href: connectorsPath },
+        connectors: { ...caller.routes.connectors, href: membersPath },
+      },
+    } satisfies PopulatedOverviewResponse;
+
+    expect(() => projectPopulatedOverview(forged)).not.toThrow();
+    const host = document.createElement("div");
+    document.body.append(host);
+    render(
+      [
+        forged.routes.overview,
+        forged.routes.work,
+        forged.routes.connectors,
+        forged.routes.members,
+      ].map((route) => renderTeamOverviewRoute(route, "route-under-test")),
+      host,
+    );
+    await Promise.resolve();
+
+    expect(
+      host.querySelector(
+        `a[href="${TEAM_OVERVIEW_POPULATED_RESPONSE.routes.overview.href}"]`,
+      )?.textContent,
+    ).toBe("Overview");
+    expect(host.querySelectorAll(`a[href="${membersPath}"]`)).toHaveLength(0);
+    expect(host.querySelectorAll(`a[href="${connectorsPath}"]`)).toHaveLength(
+      0,
+    );
+    expect(
+      Array.from(host.querySelectorAll("[data-passive-route]")).map(
+        (node) => node.textContent,
+      ),
+    ).toEqual(
+      expect.arrayContaining(["Work unavailable", "Connectors", "Members"]),
+    );
+    expect(
+      host.querySelector('[data-passive-route="connectors"]')?.textContent,
+    ).toBe("Connectors");
+    expect(
+      host.querySelector('[data-passive-route="members"]')?.textContent,
+    ).toBe("Members");
+    host.remove();
+  });
 });
 
 describe("Team Overview first-run responses", () => {
@@ -327,6 +401,31 @@ describe("Team Overview first-run responses", () => {
         welcomeRoutes: [FIRST_RUN_SHELL.routes.members],
       }),
     ).toThrow(/Members/u);
+  });
+
+  test("rejects forged Members and Connectors kind/path pairs before first-run projection", () => {
+    const administrator = structuredClone(
+      firstRunFixture("admin-install"),
+    ) as unknown as FirstRunResponseFixture;
+    const membersPath = FIRST_RUN_SHELL.routes.members.href;
+    const connectorsPath = FIRST_RUN_SHELL.routes.connectors.href;
+
+    expect(() =>
+      projectFirstRunResponse({
+        ...administrator,
+        welcomeRoutes: [
+          { ...FIRST_RUN_SHELL.routes.members, href: connectorsPath },
+        ],
+      }),
+    ).toThrow(/unsafe route/u);
+    expect(() =>
+      projectFirstRunResponse({
+        ...administrator,
+        welcomeRoutes: [
+          { ...FIRST_RUN_SHELL.routes.connectors, href: membersPath },
+        ],
+      }),
+    ).toThrow(/unsafe route/u);
   });
 
   test("every command supplies copied, manual, and failed public copy-field messages", () => {

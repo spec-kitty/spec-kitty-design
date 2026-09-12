@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/web-components";
 import { createRef, ref, type Ref } from "lit/directives/ref.js";
-import { html, nothing, type TemplateResult } from "lit";
+import { html, nothing, render as renderLit, type TemplateResult } from "lit";
 import "../app-shell/sk-app-shell.js";
 import "../context-sidebar/sk-context-sidebar.js";
 import "../copy-field/sk-copy-field.js";
@@ -24,6 +24,7 @@ import {
   type SetupStepState,
   type SuppliedRoute,
 } from "./team-overview.fixture.js";
+import { renderTeamOverviewRoute } from "./team-overview.route.fixture.js";
 
 const patternStyles = html`<style>
   .sk-team-overview-pattern {
@@ -503,6 +504,7 @@ type ShellCopy = DeepReadonly<
 >;
 
 interface ShellModel {
+  readonly panelId: string;
   readonly copy: ShellCopy;
   readonly routes: DeepReadonly<{
     overview: SuppliedRoute;
@@ -516,20 +518,28 @@ interface ShellModel {
   readonly emptyRepositoryNavigation?: string;
 }
 
-const safeRouteLink = (
-  route: DeepReadonly<SuppliedRoute>,
-  className: string,
+const personalRailRoute = (
+  route: DeepReadonly<SuppliedRoute> | undefined,
+  mark: string,
   current = false,
 ): TemplateResult | typeof nothing => {
+  if (!route) return nothing;
   const href = safeTeamOverviewHref(route);
   return href
     ? html`<a
-        class=${className}
+        class="sk-team-overview-pattern__rail-link"
+        slot="primary"
         href=${href}
         aria-current=${current ? "page" : nothing}
-        >${route.label}</a
+        aria-label=${route.label}
+        >${mark}</a
       >`
-    : nothing;
+    : html`<span
+        class="sk-team-overview-pattern__rail-identity"
+        slot="primary"
+        data-passive-route=${route.kind}
+        >${route.label}</span
+      >`;
 };
 
 const personalRail = (model: ShellModel): TemplateResult =>
@@ -537,21 +547,8 @@ const personalRail = (model: ShellModel): TemplateResult =>
     slot="personal-rail"
     label=${model.copy.personalNavigationLabel}
   >
-    <a
-      class="sk-team-overview-pattern__rail-link"
-      slot="primary"
-      href=${safeTeamOverviewHref(model.routes.overview)}
-      aria-current="page"
-      aria-label=${model.routes.overview.label}
-      >${model.copy.overviewMark}</a
-    >
-    <a
-      class="sk-team-overview-pattern__rail-link"
-      slot="primary"
-      href=${safeTeamOverviewHref(model.routes.work)}
-      aria-label=${model.routes.work.label}
-      >${model.copy.workMark}</a
-    >
+    ${personalRailRoute(model.routes.overview, model.copy.overviewMark, true)}
+    ${personalRailRoute(model.routes.work, model.copy.workMark)}
     <span
       class="sk-team-overview-pattern__rail-identity"
       slot="account"
@@ -564,20 +561,20 @@ const contextNavigation = (model: ShellModel): TemplateResult =>
   html`<nav aria-label=${model.copy.contextNavigationLabel}>
     <ul class="sk-team-overview-pattern__navigation-list">
       <li>
-        ${safeRouteLink(
+        ${renderTeamOverviewRoute(
           model.routes.overview,
           "sk-team-overview-pattern__navigation-link",
           true,
         )}
       </li>
       <li>
-        ${safeRouteLink(
+        ${renderTeamOverviewRoute(
           model.routes.work,
           "sk-team-overview-pattern__navigation-link",
         )}
       </li>
       <li>
-        ${safeRouteLink(
+        ${renderTeamOverviewRoute(
           model.routes.connectors,
           "sk-team-overview-pattern__navigation-link",
         )}
@@ -585,7 +582,7 @@ const contextNavigation = (model: ShellModel): TemplateResult =>
       ${
         model.repositoryRoute
           ? html`<li>
-              ${safeRouteLink(
+              ${renderTeamOverviewRoute(
                 model.repositoryRoute,
                 "sk-team-overview-pattern__navigation-link",
               )}
@@ -595,7 +592,7 @@ const contextNavigation = (model: ShellModel): TemplateResult =>
       ${
         model.missionRoute
           ? html`<li>
-              ${safeRouteLink(
+              ${renderTeamOverviewRoute(
                 model.missionRoute,
                 "sk-team-overview-pattern__navigation-link",
               )}
@@ -605,7 +602,7 @@ const contextNavigation = (model: ShellModel): TemplateResult =>
       ${
         model.showMembers
           ? html`<li>
-              ${safeRouteLink(
+              ${renderTeamOverviewRoute(
                 model.routes.members,
                 "sk-team-overview-pattern__navigation-link",
               )}
@@ -633,7 +630,7 @@ const contextSidebar = (
         : nothing
     }
     slot=${placement === "desktop" ? "context-sidebar" : "compact-navigation"}
-    id=${placement === "compact" ? `team-overview-navigation-${model.copy.teamInitials}` : nothing}
+    id=${placement === "compact" ? `team-overview-navigation-${model.panelId}` : nothing}
     label=${
       placement === "desktop"
         ? model.copy.contextNavigationLabel
@@ -671,6 +668,7 @@ const shell = (
     open?: boolean;
   }> = {},
 ): TemplateResult => {
+  const compactNavigationId = `team-overview-navigation-${model.panelId}`;
   const shellRef = createRef<SkAppShell>();
   const triggerRef = createRef<HTMLButtonElement>();
   const setOpen = (next: boolean): void => {
@@ -719,7 +717,7 @@ const shell = (
           class="sk-team-overview-pattern__drawer-trigger"
           type="button"
           aria-label=${model.copy.openNavigationLabel}
-          aria-controls=${`team-overview-navigation-${model.copy.teamInitials}`}
+          aria-controls=${compactNavigationId}
           aria-expanded=${String(options.open ?? false)}
           @click=${() => setOpen(!(shellRef.value?.open ?? false))}
         >
@@ -855,7 +853,7 @@ const populatedContent = (
           ${projection.repositories.map(
             (repository) =>
               html`<li class="sk-team-overview-pattern__repository-row">
-                ${safeRouteLink(
+                ${renderTeamOverviewRoute(
                   repository.route,
                   "sk-team-overview-pattern__repository-link",
                 )}
@@ -941,7 +939,9 @@ const populatedContent = (
 
 const populatedShellModel = (
   fixture: DeepReadonly<PopulatedOverviewResponse>,
+  panelId: string,
 ): ShellModel => ({
+  panelId,
   copy: fixture.copy,
   routes: fixture.routes,
   repositoryRoute: fixture.repositories[0]?.route,
@@ -963,7 +963,10 @@ export const renderPopulatedOverview = (
     ? TEAM_OVERVIEW_LONG_CONTENT_RESPONSE
     : TEAM_OVERVIEW_POPULATED_RESPONSE;
   return shell(
-    populatedShellModel(fixture),
+    populatedShellModel(
+      fixture,
+      `to1-${options.long ? "long" : "current"}-${retention}`,
+    ),
     populatedContent(projectPopulatedOverview(fixture, retention), fixture),
     options,
   );
@@ -1053,7 +1056,7 @@ const setupStep = (
             }
             ${
               step.route
-                ? safeRouteLink(
+                ? renderTeamOverviewRoute(
                     step.route,
                     "sk-team-overview-pattern__setup-link",
                   )
@@ -1064,24 +1067,47 @@ const setupStep = (
     </div>
   </li>`;
 
-const onFirstRunFixtureChange = (event: Event): void => {
+type FirstRunRenderOptions = Readonly<{
+  light?: boolean;
+  direction?: "ltr" | "rtl";
+  open?: boolean;
+}>;
+
+const litOwnedFirstRunOutlets = new WeakSet<HTMLElement>();
+
+const onFirstRunFixtureChange = (
+  event: Event,
+  options: FirstRunRenderOptions,
+): void => {
   const select = event.currentTarget;
   if (!(select instanceof HTMLSelectElement)) return;
   const root = select.closest<HTMLElement>("[data-first-run-review-root]");
+  const outlet = root?.querySelector<HTMLElement>("[data-first-run-outlet]");
   const selectedId = select.value as FirstRunFixtureId;
-  if (!root || !(selectedId in TEAM_OVERVIEW_FIRST_RUN_RESPONSES)) return;
-  for (const candidate of root.querySelectorAll<HTMLElement>(
-    "[data-first-run-fixture]",
-  )) {
-    candidate.hidden = candidate.dataset.firstRunFixture !== selectedId;
+  if (
+    !root ||
+    !outlet ||
+    !(selectedId in TEAM_OVERVIEW_FIRST_RUN_RESPONSES)
+  ) {
+    return;
   }
-  const nextSelect = root.querySelector<HTMLSelectElement>(
-    `[data-first-run-fixture="${selectedId}"] select`,
-  );
-  nextSelect?.focus({ preventScroll: true });
+  if (!litOwnedFirstRunOutlets.has(outlet)) {
+    outlet.replaceChildren();
+    litOwnedFirstRunOutlets.add(outlet);
+  }
+  renderLit(firstRunFixtureTree(selectedId, options), outlet);
+  queueMicrotask(() => {
+    const nextSelect = root.querySelector<HTMLSelectElement>(
+      "[data-first-run-selector]",
+    );
+    nextSelect?.focus({ preventScroll: true });
+  });
 };
 
-const reviewScaffold = (selected: FirstRunFixtureId): TemplateResult => {
+const reviewScaffold = (
+  selected: FirstRunFixtureId,
+  options: FirstRunRenderOptions,
+): TemplateResult => {
   const copy = FIRST_RUN_SHELL.copy;
   return html`<aside
     class="sk-team-overview-pattern__review-scaffold"
@@ -1099,7 +1125,7 @@ const reviewScaffold = (selected: FirstRunFixtureId): TemplateResult => {
       <select
         class="sk-team-overview-pattern__fixture-select"
         data-first-run-selector
-        @change=${onFirstRunFixtureChange}
+        @change=${(event: Event) => onFirstRunFixtureChange(event, options)}
       >
         ${Object.values(TEAM_OVERVIEW_FIRST_RUN_RESPONSES).map(
           (fixture) =>
@@ -1118,8 +1144,9 @@ const reviewScaffold = (selected: FirstRunFixtureId): TemplateResult => {
 const firstRunContent = (
   selected: FirstRunFixtureId,
   projection: DeepReadonly<FirstRunProjection>,
+  options: FirstRunRenderOptions,
 ): TemplateResult =>
-  html`${reviewScaffold(selected)}
+  html`${reviewScaffold(selected, options)}
     <section
       class="sk-team-overview-pattern__section"
       aria-labelledby=${`first-run-heading-${projection.id}`}
@@ -1151,7 +1178,7 @@ const firstRunContent = (
             projection.welcomeRoutes.length
               ? html`<nav class="sk-team-overview-pattern__welcome-actions">
                   ${projection.welcomeRoutes.map((route) =>
-                    safeRouteLink(
+                    renderTeamOverviewRoute(
                       route,
                       "sk-team-overview-pattern__setup-link",
                     ),
@@ -1172,35 +1199,34 @@ const firstRunContent = (
 const firstRunShellModel = (
   projection: DeepReadonly<FirstRunProjection>,
 ): ShellModel => ({
+  panelId: `to2-${projection.id}`,
   copy: FIRST_RUN_SHELL.copy,
   routes: FIRST_RUN_SHELL.routes,
   showMembers: projection.canManage && projection.privacy === "collaborative",
   emptyRepositoryNavigation: FIRST_RUN_SHELL.copy.emptyRepositoryNavigation,
 });
 
-/** Renders all six immutable TO2 responses behind review-only fixture selection. */
+const firstRunFixtureTree = (
+  selected: FirstRunFixtureId,
+  options: FirstRunRenderOptions,
+): TemplateResult => {
+  const projection = projectFirstRunResponse(firstRunFixture(selected));
+  return html`<div data-first-run-fixture=${selected}>
+    ${shell(
+      firstRunShellModel(projection),
+      firstRunContent(selected, projection, options),
+      options,
+    )}
+  </div>`;
+};
+
+/** Renders one selected immutable TO2 response behind review-only fixture selection. */
 export const renderFirstRunOverview = (
   selected: FirstRunFixtureId = "admin-install",
-  options: Readonly<{
-    light?: boolean;
-    direction?: "ltr" | "rtl";
-    open?: boolean;
-  }> = {},
+  options: FirstRunRenderOptions = {},
 ): TemplateResult =>
   html`<div data-first-run-review-root>
-    ${Object.values(TEAM_OVERVIEW_FIRST_RUN_RESPONSES).map((fixture) => {
-      const projection = projectFirstRunResponse(firstRunFixture(fixture.id));
-      return html`<div
-        data-first-run-fixture=${fixture.id}
-        ?hidden=${fixture.id !== selected}
-      >
-        ${shell(
-          firstRunShellModel(projection),
-          firstRunContent(fixture.id, projection),
-          options,
-        )}
-      </div>`;
-    })}
+    <div data-first-run-outlet>${firstRunFixtureTree(selected, options)}</div>
   </div>`;
 
 const meta: Meta = {
@@ -1210,7 +1236,10 @@ const meta: Meta = {
     a11y: { disable: false },
     layout: "fullscreen",
   },
-  excludeStories: ["renderPopulatedOverview", "renderFirstRunOverview"],
+  excludeStories: [
+    "renderPopulatedOverview",
+    "renderFirstRunOverview",
+  ],
 };
 
 export default meta;

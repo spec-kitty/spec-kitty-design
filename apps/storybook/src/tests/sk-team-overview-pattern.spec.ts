@@ -234,7 +234,8 @@ test("default dark and LightMode render the identical fixture with distinct surf
 test("TO2 switcher exposes exactly six response fixtures and preserves focus/a11y state", async ({
   page,
 }) => {
-  let root = await loadStory(page, "first-run");
+  test.setTimeout(60_000);
+  let root = await loadStory(page, "first-run", 390, 844);
   const selector = root.getByRole("combobox", {
     name: "Server-response fixture",
   });
@@ -249,6 +250,12 @@ test("TO2 switcher exposes exactly six response fixtures and preserves focus/a11
   await expect(root.locator("[data-review-scaffolding]")).toContainText(
     "outside the product contract",
   );
+  await expect(page.locator("[data-first-run-fixture]")).toHaveCount(1);
+  await expect(
+    page.locator(
+      '[data-first-run-review-root] sk-context-sidebar[slot="compact-navigation"]',
+    ),
+  ).toHaveCount(1);
 
   const cases = [
     ["admin-install", "Administrator", "Install the Spec Kitty CLI", 0],
@@ -281,6 +288,50 @@ test("TO2 switcher exposes exactly six response fixtures and preserves focus/a11
     await expect(
       root.getByRole("combobox", { name: "Server-response fixture" }),
     ).toBeFocused();
+    await expect(page.locator("[data-first-run-fixture]")).toHaveCount(1);
+    await expect(page.locator("[data-first-run-fixture]")).toHaveAttribute(
+      "data-first-run-fixture",
+      id,
+    );
+    const compactNavigations = page.locator(
+      '[data-first-run-review-root] sk-context-sidebar[slot="compact-navigation"]',
+    );
+    await expect(compactNavigations).toHaveCount(1);
+    await expect(compactNavigations).toHaveAttribute(
+      "id",
+      `team-overview-navigation-to2-${id}`,
+    );
+    const compactTrigger = root.getByRole("button", {
+      name: "Open team navigation",
+    });
+    const compactRelationship = await compactTrigger.evaluate((trigger) => {
+      const controlledId = trigger.getAttribute("aria-controls");
+      const target = controlledId
+        ? document.getElementById(controlledId)
+        : null;
+      const selectedPanel = trigger.closest("[data-first-run-fixture]");
+      return {
+        controlledId,
+        targetId: target?.id ?? null,
+        targetIsCompactSidebar:
+          target?.matches(
+            'sk-context-sidebar[slot="compact-navigation"]',
+          ) ?? false,
+        targetContainsNavigation: target?.querySelector("nav") !== null,
+        samePanel:
+          target?.closest("[data-first-run-fixture]") === selectedPanel,
+        onlySelectedPanelMounted:
+          document.querySelectorAll("[data-first-run-fixture]").length === 1,
+      };
+    });
+    expect(compactRelationship).toEqual({
+      controlledId: `team-overview-navigation-to2-${id}`,
+      targetId: `team-overview-navigation-to2-${id}`,
+      targetIsCompactSidebar: true,
+      targetContainsNavigation: true,
+      samePanel: true,
+      onlySelectedPanelMounted: true,
+    });
     const aria = await root.ariaSnapshot();
     expect(aria).not.toContain("Delivery return");
     expect(aria).not.toContain("Flow health");
@@ -290,35 +341,41 @@ test("TO2 switcher exposes exactly six response fixtures and preserves focus/a11
 test("TO2 role and privacy fixtures omit unauthorized admission and Members routes", async ({
   page,
 }) => {
-  let root = await loadStory(page, "first-run");
+  const root = await loadStory(page, "first-run");
   await root
     .getByRole("combobox", { name: "Server-response fixture" })
     .selectOption("member-repo");
-  root = page.locator("[data-team-overview-pattern]:visible").first();
+  await expect(page.locator("[data-first-run-fixture]")).toHaveCount(1);
   await expect(
-    root.getByRole("link", { name: /Admit a repository/u }),
+    page.getByRole("link", { name: /Admit a repository/u }),
   ).toHaveCount(0);
   await expect(
-    root.getByRole("link", {
+    page.getByRole("link", {
       name: /Members|Manage members|Invite teammates/u,
     }),
   ).toHaveCount(0);
   await expect(root).toContainText(
     "An admin admits the first repository for the team.",
   );
+  await expect(page.locator('a[href$="/team/"]')).toHaveCount(0);
+  await expect(page.locator('a[href*="/repos/"]')).toHaveCount(0);
+  await expect(page.locator('a[href*="/missions/"]')).toHaveCount(0);
 
   await root
     .getByRole("combobox", { name: "Server-response fixture" })
     .selectOption("private-install");
-  root = page.locator("[data-team-overview-pattern]:visible").first();
+  await expect(page.locator("[data-first-run-fixture]")).toHaveCount(1);
   await expect(
-    root.getByRole("link", { name: "Admit a repository" }),
+    page.getByRole("link", { name: "Admit a repository" }),
   ).toHaveCount(1);
   await expect(
-    root.getByRole("link", {
+    page.getByRole("link", {
       name: /Members|Manage members|Invite teammates/u,
     }),
   ).toHaveCount(0);
+  await expect(page.locator('a[href$="/team/"]')).toHaveCount(0);
+  await expect(page.locator('a[href*="/repos/"]')).toHaveCount(0);
+  await expect(page.locator('a[href*="/missions/"]')).toHaveCount(0);
   expect(await root.ariaSnapshot()).not.toContain("Members");
 });
 
