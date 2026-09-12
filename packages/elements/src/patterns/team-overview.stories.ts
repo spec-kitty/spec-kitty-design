@@ -1,1278 +1,1248 @@
-import type { Meta, StoryObj } from '@storybook/web-components';
-import { expect, fn } from 'storybook/test';
-import { html, nothing, type TemplateResult } from 'lit';
-import '../action-row/sk-action-row.js';
-import '../app-shell/sk-app-shell.js';
-import '../bar-chart/sk-bar-chart.js';
-import '../button/sk-button.js';
-import '../card/sk-card.js';
-import '../context-sidebar/sk-context-sidebar.js';
-import '../entity-marker/sk-entity-marker.js';
-import '../evidence-chain/sk-evidence-chain.js';
-import '../grid/sk-grid.js';
-import '../metric/sk-metric.js';
-import '../nav-pill/sk-nav-pill.js';
-import '../page-header/sk-page-header.js';
-import '../personal-rail/sk-personal-rail.js';
-import '../pill-tag/sk-pill-tag.js';
-import '../section-header/sk-section-header.js';
-import '../status-indicator/sk-status-indicator.js';
-import '../transition-matrix/sk-transition-matrix.js';
-import type { ActionRowActivateDetail } from '../action-row/sk-action-row.js';
-import type { BarChartSelectDetail, BarSeries } from '../bar-chart/sk-bar-chart.js';
-import type { EvidenceStage } from '../evidence-chain/sk-evidence-chain.js';
-import type {
-  TransitionColumn,
-  TransitionMatrixSelectDetail,
-  TransitionRoute,
-  TransitionTone,
-} from '../transition-matrix/sk-transition-matrix.js';
-
-type Primitive = string | number | boolean | bigint | symbol | null | undefined;
-type DeepReadonly<T> = T extends Primitive | ((...args: never[]) => unknown)
-  ? T
-  : T extends ReadonlyArray<infer Item>
-    ? ReadonlyArray<DeepReadonly<Item>>
-    : { readonly [Key in keyof T]: DeepReadonly<T[Key]> };
-
-type DeliveryFixture = Readonly<{
-  title: string;
-  windowLabel: string;
-  illustrativeLabel: string;
-  description: string;
-  totalInvestment: number;
-  unattributedInvestment: number;
-  completedWorkPackages: number;
-  deployedMissions: number;
-  verifiedOutcomes: number;
-  firstPass: number;
-  awaitingEvidence: number;
-  buckets: ReadonlyArray<Readonly<{
-    id: string;
-    label: string;
-    value: number;
-    deployed: number;
-  }>>;
-  outcomes: ReadonlyArray<Readonly<{
-    id: string;
-    title: string;
-    detail: string;
-    state: string;
-    tone: 'info' | 'success' | 'attention';
-  }>>;
-}>;
-
-type FlowFixture = Readonly<{
-  description: string;
-  windowLabel: string;
-  selectionHint: string;
-  columns: ReadonlyArray<TransitionColumn>;
-  routes: ReadonlyArray<TransitionRoute>;
-  statuses: ReadonlyArray<Readonly<{
-    id: string;
-    label: string;
-    count: number;
-    tone: 'neutral' | 'info' | 'success' | 'attention';
-  }>>;
-}>;
-
-type OperationalPill = Readonly<{
-  label: string;
-  kind: 'pill' | 'status';
-  variant?: 'green' | 'purple' | 'yellow';
-  tone?: 'neutral' | 'info' | 'success' | 'attention';
-}>;
-
-type OperationalRow = Readonly<{
-  id: string;
-  marker: string;
-  markerLabel: string;
-  title: string;
-  reference: string;
-  pills: ReadonlyArray<OperationalPill>;
-  time: string;
-  selectable: boolean;
-  warning?: string;
-  repeatReason?: string;
-}>;
-
-type OperationalSection = Readonly<{
-  id: string;
-  eyebrow: string;
-  title: string;
-  description: string;
-  emptyMessage: string;
-  rows: ReadonlyArray<OperationalRow>;
-}>;
-
-type TeamOverviewFixture = Readonly<{
-  team: Readonly<{
-    name: string;
-    repository: string;
-    syncLabel: string;
-  }>;
-  shell: Readonly<{
-    eyebrow: string;
-    title: string;
-    supporting: string;
-    accountName: string;
-    accountInitials: string;
-    primaryNavigation: ReadonlyArray<Readonly<{ label: string; href: string; glyph: string }>>;
-    contextNavigation: ReadonlyArray<Readonly<{ label: string; href: string }>>;
-  }>;
-  delivery: DeliveryFixture;
-  flow: FlowFixture;
-  operational: Readonly<{
-    attentionMeanings: ReadonlyArray<string>;
-    sections: ReadonlyArray<OperationalSection>;
-  }>;
-}>;
-
-export const deepFreeze = <T>(value: T): DeepReadonly<T> => {
-  if (value !== null && typeof value === 'object' && !Object.isFrozen(value)) {
-    for (const nested of Object.values(value as Record<string, unknown>)) deepFreeze(nested);
-    Object.freeze(value);
-  }
-  return value as DeepReadonly<T>;
-};
-
-const isDeeplyFrozen = (value: unknown): boolean => {
-  if (value === null || typeof value !== 'object') return true;
-  return Object.isFrozen(value) && Object.values(value as Record<string, unknown>).every(isDeeplyFrozen);
-};
-
-export const TEAM_OVERVIEW_FIXTURE = deepFreeze({
-  team: {
-    name: 'Collaborative Demo Team',
-    repository: 'spec-kitty/e2e-team-landing',
-    syncLabel: 'Last synced 1 min ago',
-  },
-  shell: {
-    eyebrow: 'Overview',
-    title: 'Collaborative Demo Team',
-    supporting: 'What needs you, and what is moving.',
-    accountName: 'Collaborative Demo account',
-    accountInitials: 'CD',
-    primaryNavigation: [
-      { label: 'Overview', href: '#overview', glyph: '⌘' },
-      { label: 'Work', href: '#work', glyph: '↗' },
-      { label: 'Connectors', href: '#connectors', glyph: '◇' },
-    ],
-    contextNavigation: [
-      { label: 'Overview', href: '#overview' },
-      { label: 'Delivery return', href: '#delivery-return' },
-      { label: 'Flow health', href: '#flow-health' },
-      { label: 'Operational activity', href: '#operational-activity' },
-    ],
-  },
-  delivery: {
-    title: 'Delivery return',
-    windowLabel: 'Last 30 days',
-    illustrativeLabel: 'Illustrative data',
-    description: 'What this investment produced — and what is proven.',
-    totalInvestment: 1840,
-    unattributedInvestment: 166,
-    completedWorkPackages: 42,
-    deployedMissions: 6,
-    verifiedOutcomes: 2,
-    firstPass: 34,
-    awaitingEvidence: 4,
-    buckets: [
-      { id: 'aug-11', label: 'Aug 11', value: 320, deployed: 1 },
-      { id: 'aug-18', label: 'Aug 18', value: 410, deployed: 2 },
-      { id: 'aug-25', label: 'Aug 25', value: 340, deployed: 1 },
-      { id: 'sep-1', label: 'Sep 1', value: 604, deployed: 2 },
-    ],
-    outcomes: [
-      {
-        id: 'local-setup',
-        title: 'Local setup under 10 min',
-        detail: 'Setup time · 24m → 8m',
-        state: 'Verified',
-        tone: 'success',
-      },
-      {
-        id: 'team-status',
-        title: 'Faster team-status assembly',
-        detail: 'Observation closes in 12 days',
-        state: 'Measuring',
-        tone: 'info',
-      },
-      {
-        id: 'blocked-visible',
-        title: 'Blocked work visible within 1 min',
-        detail: 'Deployment evidence required',
-        state: 'Pending',
-        tone: 'attention',
-      },
-    ],
-  },
-  flow: {
-    description: 'Moves grouped by route and day.',
-    windowLabel: 'last 72 hours',
-    selectionHint: 'Select any row to inspect its WPs.',
-    columns: [
-      { id: 'tue-1', label: 'Tue 1' },
-      { id: 'wed-2', label: 'Wed 2' },
-      { id: 'thu-3', label: 'Thu 3' },
-      { id: 'fri-4', label: 'Today · Fri 4' },
-    ],
-    routes: [
-      {
-        id: 'planned-progress',
-        label: 'Planned → In progress',
-        tone: 'forward',
-        values: { 'tue-1': 3, 'wed-2': 6, 'thu-3': 7, 'fri-4': 5 },
-      },
-      {
-        id: 'progress-review',
-        label: 'In progress → For review',
-        tone: 'forward',
-        values: { 'tue-1': 2, 'wed-2': 5, 'thu-3': 6, 'fri-4': 4 },
-      },
-      {
-        id: 'review-done',
-        label: 'For review → Done',
-        tone: 'completed',
-        values: { 'tue-1': 1, 'wed-2': 3, 'thu-3': 4, 'fri-4': 3 },
-      },
-      {
-        id: 'blocked',
-        label: 'Any lane → Blocked',
-        tone: 'blocked',
-        group: 'Exceptions & recovery',
-        values: { 'tue-1': 1, 'wed-2': 3, 'thu-3': 2, 'fri-4': 0 },
-      },
-      {
-        id: 'recovery',
-        label: 'Blocked → In progress',
-        tone: 'recovery',
-        group: 'Exceptions & recovery',
-        values: { 'tue-1': 0, 'wed-2': 1, 'thu-3': 1, 'fri-4': 2 },
-      },
-      {
-        id: 'backward',
-        label: 'Any lane → Any lane (backward)',
-        tone: 'backward',
-        group: 'Exceptions & recovery',
-        values: { 'tue-1': 0, 'wed-2': 1, 'thu-3': 1, 'fri-4': 1 },
-      },
-    ],
-    statuses: [
-      { id: 'planned', label: 'Planned', count: 12, tone: 'neutral' },
-      { id: 'in-progress', label: 'In progress', count: 21, tone: 'info' },
-      { id: 'for-review', label: 'For review', count: 13, tone: 'success' },
-      { id: 'blocked', label: 'Blocked', count: 4, tone: 'neutral' },
-    ],
-  },
-  operational: {
-    attentionMeanings: ['awaiting-evidence', 'off-default-branch'],
-    sections: [
-      {
-        id: 'in-flight',
-        eyebrow: 'In flight',
-        title: 'Work moving now',
-        description: 'Current work with a consumer-owned activation seam.',
-        emptyMessage: 'No work is currently in flight.',
-        rows: [
-          {
-            id: 'flight-team-landing',
-            marker: 'SP',
-            markerLabel: 'Spec Kitty repository',
-            title: 'team-landing-pivots',
-            reference: 'spec-kitty/e2e-team-landing',
-            pills: [
-              { label: 'WP status changed', kind: 'pill' },
-              { label: 'Presence · unverified', kind: 'pill', variant: 'purple' },
-            ],
-            time: '2 hours ago',
-            selectable: true,
-          },
-        ],
-      },
-      {
-        id: 'admitted-repos',
-        eyebrow: 'Admitted repos',
-        title: 'Repository evidence',
-        description: 'Observed repository facts, separate from product actions.',
-        emptyMessage: 'No repositories have been admitted.',
-        rows: [
-          {
-            id: 'admitted-team-landing',
-            marker: 'SP',
-            markerLabel: 'Spec Kitty repository',
-            title: 'spec-kitty/e2e-team-landing',
-            reference: '17bd28375d5f',
-            pills: [{ label: 'Git activity · factual', kind: 'pill' }],
-            time: 'pushed 1 minute ago',
-            selectable: false,
-            warning: '1 mission off default branch',
-          },
-        ],
-      },
-      {
-        id: 'recent-activity',
-        eyebrow: 'Recent activity',
-        title: 'Latest verified changes',
-        description: 'Distinct events ordered by their fixture timestamps.',
-        emptyMessage: 'No recent activity is available.',
-        rows: [
-          {
-            id: 'recent-dashboard-polish',
-            marker: 'SK',
-            markerLabel: 'Spec Kitty dashboard repository',
-            title: 'dashboard-polish',
-            reference: 'ccb055c52429',
-            pills: [
-              { label: 'Review passed', kind: 'pill' },
-              { label: 'Fresh', kind: 'status', tone: 'success' },
-            ],
-            time: '1 day ago',
-            selectable: true,
-          },
-          {
-            id: 'recent-docs-refresh',
-            marker: 'SD',
-            markerLabel: 'Spec Kitty design repository',
-            title: 'docs-surface-refresh',
-            reference: '70c1d5d23aee',
-            pills: [
-              { label: 'Evidence recorded', kind: 'pill', variant: 'green' },
-              { label: 'Available', kind: 'status', tone: 'success' },
-            ],
-            time: '2 days ago',
-            selectable: false,
-          },
-        ],
-      },
-    ],
-  },
-} satisfies TeamOverviewFixture);
-
-type CoverageMode = 'full' | 'partial';
-
-export const deriveDelivery = (
-  delivery: DeepReadonly<DeliveryFixture>,
-  coverageMode: CoverageMode = 'full',
-) => {
-  if (
-    !Number.isFinite(delivery.totalInvestment) ||
-    delivery.totalInvestment <= 0 ||
-    !Number.isFinite(delivery.unattributedInvestment) ||
-    delivery.unattributedInvestment < 0 ||
-    delivery.unattributedInvestment >= delivery.totalInvestment
-  ) {
-    throw new RangeError('Delivery totals cannot produce an honest attribution percentage.');
-  }
-
-  const attributed = delivery.totalInvestment - delivery.unattributedInvestment;
-  const attributionPercent = Math.round((attributed / delivery.totalInvestment) * 100);
-  const fullBucketTotal = delivery.buckets.reduce((sum, bucket) => sum + bucket.value, 0);
-  if (fullBucketTotal !== attributed) {
-    throw new RangeError('Full-coverage delivery buckets must equal the attributed investment.');
-  }
-
-  const selectedBuckets = coverageMode === 'partial' ? delivery.buckets.slice(0, 2) : delivery.buckets;
-  const bucketTotal = selectedBuckets.reduce((sum, bucket) => sum + bucket.value, 0);
-  const currency = (value: number) => `€${value.toLocaleString('en-US')}`;
-  const evidenceStages = deepFreeze([
-    {
-      id: 'investment',
-      label: 'Investment',
-      displayValue: currency(delivery.totalInvestment),
-      annotation: `${currency(delivery.unattributedInvestment)} unattributed`,
-      tone: 'neutral',
-    },
-    {
-      id: 'completed',
-      label: 'Completed',
-      displayValue: `${delivery.completedWorkPackages} WPs`,
-      annotation: `${delivery.firstPass} first pass`,
-      tone: 'info',
-    },
-    {
-      id: 'deployed',
-      label: 'Deployed',
-      displayValue: `${delivery.deployedMissions} missions`,
-      annotation: 'Production evidence',
-      tone: 'success',
-    },
-    {
-      id: 'verified',
-      label: 'Verified outcomes',
-      displayValue: coverageMode === 'partial' ? 'Evidence pending' : `${delivery.verifiedOutcomes} verified`,
-      annotation: `${delivery.awaitingEvidence} awaiting evidence`,
-      tone: coverageMode === 'partial' ? 'attention' : 'success',
-    },
-  ] satisfies ReadonlyArray<EvidenceStage>);
-  const barSeries = deepFreeze(
-    selectedBuckets.map((bucket) => ({
-      id: bucket.id,
-      label: bucket.label,
-      value: bucket.value,
-      displayValue: currency(bucket.value),
-    })) satisfies BarSeries,
-  );
-
-  return deepFreeze({
-    attributed,
-    attributionPercent,
-    bucketTotal,
-    coverageMode,
-    coverageLabel: coverageMode === 'partial'
-      ? `Partial coverage · ${currency(bucketTotal)} of ${currency(attributed)} attributed`
-      : 'Full attributed coverage',
-    evidenceStages,
-    barSeries,
-  });
-};
-
-export const deriveFlow = (flow: DeepReadonly<FlowFixture>) => {
-  const columnIds = new Set(flow.columns.map((column) => column.id));
-  const moveTotal = flow.routes.reduce((total, route) => {
-    if (!route.label.includes(' → ')) throw new TypeError('Every route must use the A → B grammar.');
-    const valueKeys = Object.keys(route.values);
-    if (valueKeys.length !== columnIds.size || valueKeys.some((key) => !columnIds.has(key))) {
-      throw new TypeError(`Route ${route.id} does not own one cell for every time column.`);
-    }
-    return total + Object.values(route.values).reduce((sum, value) => sum + value, 0);
-  }, 0);
-  const openTotal = flow.statuses.reduce((sum, status) => sum + status.count, 0);
-  const legendTones = flow.routes.reduce<TransitionTone[]>((tones, route) => {
-    if (!tones.includes(route.tone)) tones.push(route.tone);
-    return tones;
-  }, []);
-
-  return deepFreeze({
-    moveTotal,
-    openTotal,
-    columns: flow.columns.map((column) => ({ ...column })),
-    routes: flow.routes.map((route) => ({ ...route, values: { ...route.values } })),
-    statuses: flow.statuses.map((status) => ({ ...status })),
-    legendTones,
-  });
-};
-
-export const deriveOperationalSections = (
-  operational: DeepReadonly<TeamOverviewFixture['operational']>,
-  empty = false,
-) => {
-  if (new Set(operational.attentionMeanings).size > 2) {
-    throw new RangeError('Attention amber is limited to two documented meanings.');
-  }
-
-  const fingerprints = new Map<string, OperationalRow>();
-  for (const section of operational.sections) {
-    for (const row of section.rows) {
-      if (row.reference !== row.reference.toLowerCase()) {
-        throw new TypeError(`Operational reference ${row.reference} must remain lowercase.`);
-      }
-      const fingerprint = JSON.stringify([
-        row.title,
-        row.reference,
-        row.pills.map((pill) => pill.label),
-        row.time,
-      ]);
-      const prior = fingerprints.get(fingerprint);
-      if (prior && (!prior.repeatReason || prior.repeatReason !== row.repeatReason)) {
-        throw new TypeError(`Operational row ${row.id} duplicates ${prior.id} without a repeat reason.`);
-      }
-      fingerprints.set(fingerprint, row);
-    }
-  }
-
-  return deepFreeze(operational.sections.map((section) => ({
-    ...section,
-    rows: empty ? [] : section.rows.map((row) => ({ ...row, pills: row.pills.map((pill) => ({ ...pill })) })),
-  })));
-};
-
-type StoryArgs = Readonly<{
-  selectedRowId: string;
-  selectedBarId: string;
-  selectedRouteId: string;
-  onRowActivate: (detail: ActionRowActivateDetail) => void;
-  onBarSelect: (detail: BarChartSelectDetail) => void;
-  onRouteSelect: (detail: TransitionMatrixSelectDetail) => void;
-}>;
-
-type RenderOptions = Readonly<{
-  light?: boolean;
-  coverageMode?: CoverageMode;
-  emptyOperational?: boolean;
-  scale?: boolean;
-}>;
+import type { Meta, StoryObj } from "@storybook/web-components";
+import { createRef, ref, type Ref } from "lit/directives/ref.js";
+import { html, nothing, type TemplateResult } from "lit";
+import "../app-shell/sk-app-shell.js";
+import "../context-sidebar/sk-context-sidebar.js";
+import "../copy-field/sk-copy-field.js";
+import "../page-header/sk-page-header.js";
+import "../personal-rail/sk-personal-rail.js";
+import type { SkAppShell } from "../app-shell/sk-app-shell.js";
+import {
+  FIRST_RUN_SHELL,
+  TEAM_OVERVIEW_FIRST_RUN_RESPONSES,
+  TEAM_OVERVIEW_LONG_CONTENT_RESPONSE,
+  TEAM_OVERVIEW_POPULATED_RESPONSE,
+  firstRunFixture,
+  projectFirstRunResponse,
+  projectPopulatedOverview,
+  safeTeamOverviewHref,
+  type DeepReadonly,
+  type FirstRunFixtureId,
+  type FirstRunProjection,
+  type PopulatedOverviewProjection,
+  type PopulatedOverviewResponse,
+  type SetupStepState,
+  type SuppliedRoute,
+} from "./team-overview.fixture.js";
 
 const patternStyles = html`<style>
-  .sk-pattern-overview {
+  .sk-team-overview-pattern {
     box-sizing: border-box;
-    min-height: 100vh;
+    min-inline-size: 0;
+    min-block-size: 100%;
     color: var(--sk-fg-body);
     background: var(--sk-surface-page);
     font-family: var(--sk-font-sans);
   }
 
-  .sk-pattern-overview *,
-  .sk-pattern-overview *::before,
-  .sk-pattern-overview *::after {
+  .sk-team-overview-pattern *,
+  .sk-team-overview-pattern *::before,
+  .sk-team-overview-pattern *::after {
     box-sizing: border-box;
   }
 
-  .sk-pattern-overview :where(h2, h3, p) {
-    margin: 0;
-  }
-
-  .sk-pattern-overview sk-app-shell::part(shell) {
-    min-height: 100vh;
-  }
-
-  .sk-pattern-overview__rail-link,
-  .sk-pattern-overview__account,
-  .sk-pattern-overview__context-link {
-    color: var(--sk-fg-default);
-    font: inherit;
-    text-decoration: none;
-  }
-
-  .sk-pattern-overview__rail-link,
-  .sk-pattern-overview__account,
-  .sk-pattern-overview__rail-control {
-    display: grid;
-    place-items: center;
-    min-inline-size: var(--sk-space-8);
-    min-block-size: var(--sk-space-8);
-    padding: var(--sk-space-1);
-    color: var(--sk-fg-default);
-    background: var(--sk-surface-pill);
-    border: var(--sk-border-width-1) solid var(--sk-border-default);
-    border-radius: var(--sk-radius-pill);
-    font: inherit;
-  }
-
-  .sk-pattern-overview__context-title {
-    display: grid;
-    gap: var(--sk-space-1);
-  }
-
-  .sk-pattern-overview__context-title span,
-  .sk-pattern-overview__muted,
-  .sk-pattern-overview__outcome-detail,
-  .sk-pattern-overview__chart-note,
-  .sk-pattern-overview__empty {
-    color: var(--sk-fg-muted);
-  }
-
-  .sk-pattern-overview__context-link {
-    display: block;
-    padding: var(--sk-space-2) var(--sk-space-3);
-    border-radius: var(--sk-radius-sm);
-  }
-
-  .sk-pattern-overview__context-link[aria-current='page'] {
-    color: var(--sk-fg-default);
-    background: var(--sk-surface-pill);
-    border-inline-start: var(--sk-border-width-4) solid var(--sk-color-accent);
-  }
-
-  .sk-pattern-overview__context-navigation {
-    display: block;
-    min-inline-size: 0;
-    inline-size: 100%;
-  }
-
-  .sk-pattern-overview__context-navigation::part(nav) {
-    align-items: stretch;
-    box-sizing: border-box;
-    inline-size: 100%;
-    border-radius: var(--sk-radius-md);
-  }
-
-  .sk-pattern-overview__context-navigation::part(items) {
-    align-items: stretch;
-    display: flex;
-    flex-direction: column;
-    min-inline-size: 0;
-    inline-size: 100%;
-  }
-
-  .sk-pattern-overview__context-navigation::part(hamburger) {
+  .sk-team-overview-pattern [hidden] {
     display: none;
   }
 
-  .sk-pattern-overview__content {
+  .sk-team-overview-pattern__rail-link,
+  .sk-team-overview-pattern__navigation-link,
+  .sk-team-overview-pattern__repository-link,
+  .sk-team-overview-pattern__setup-link {
+    color: var(--sk-fg-default);
+    overflow-wrap: anywhere;
+  }
+
+  .sk-team-overview-pattern__rail-link {
+    display: grid;
+    place-items: center;
+    min-block-size: var(--sk-space-9);
+    min-inline-size: var(--sk-space-9);
+    padding: var(--sk-space-2);
+    border-radius: var(--sk-radius-sm);
+    text-decoration: none;
+  }
+
+  .sk-team-overview-pattern__rail-identity {
+    display: grid;
+    place-items: center;
+    min-block-size: var(--sk-space-9);
+    color: var(--sk-fg-default);
+    font-weight: var(--sk-weight-semibold);
+  }
+
+  .sk-team-overview-pattern__rail-link:hover,
+  .sk-team-overview-pattern__navigation-link:hover,
+  .sk-team-overview-pattern__repository-link:hover,
+  .sk-team-overview-pattern__setup-link:hover {
+    text-decoration: underline;
+  }
+
+  .sk-team-overview-pattern__rail-link:focus-visible,
+  .sk-team-overview-pattern__navigation-link:focus-visible,
+  .sk-team-overview-pattern__repository-link:focus-visible,
+  .sk-team-overview-pattern__setup-link:focus-visible,
+  .sk-team-overview-pattern__drawer-trigger:focus-visible,
+  .sk-team-overview-pattern__fixture-select:focus-visible {
+    outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+    outline-offset: var(--sk-border-width-1);
+  }
+
+  .sk-team-overview-pattern__sidebar-heading,
+  .sk-team-overview-pattern__compact-header,
+  .sk-team-overview-pattern__content,
+  .sk-team-overview-pattern__section,
+  .sk-team-overview-pattern__overview-pair,
+  .sk-team-overview-pattern__row-copy,
+  .sk-team-overview-pattern__welcome,
+  .sk-team-overview-pattern__welcome-copy,
+  .sk-team-overview-pattern__step-content,
+  .sk-team-overview-pattern__copy-stack {
+    min-inline-size: 0;
+  }
+
+  .sk-team-overview-pattern__sidebar-heading {
+    display: grid;
+    gap: var(--sk-space-2);
+  }
+
+  .sk-team-overview-pattern__sidebar-heading strong,
+  .sk-team-overview-pattern__compact-identity,
+  .sk-team-overview-pattern__row-copy,
+  .sk-team-overview-pattern__welcome-copy,
+  .sk-team-overview-pattern__step-content,
+  .sk-team-overview-pattern code {
+    overflow-wrap: anywhere;
+  }
+
+  .sk-team-overview-pattern__compact-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sk-space-3);
+  }
+
+  .sk-team-overview-pattern__drawer-trigger,
+  .sk-team-overview-pattern__fixture-select {
+    min-block-size: var(--sk-space-9);
+    padding-block: var(--sk-space-2);
+    padding-inline: var(--sk-space-3);
+    color: var(--sk-fg-default);
+    background: var(--sk-surface-card);
+    border: var(--sk-border-width-1) solid var(--sk-border-default);
+    border-radius: var(--sk-radius-sm);
+    font: inherit;
+  }
+
+  .sk-team-overview-pattern__drawer-trigger {
+    font-weight: var(--sk-weight-semibold);
+    cursor: pointer;
+  }
+
+  .sk-team-overview-pattern__compact-identity {
+    font-weight: var(--sk-weight-semibold);
+  }
+
+  .sk-team-overview-pattern__compact-navigation {
+    inline-size: var(--sk-layout-context-sidebar-width);
+    max-inline-size: 100%;
+  }
+
+  .sk-team-overview-pattern__navigation-list,
+  .sk-team-overview-pattern__activity-list,
+  .sk-team-overview-pattern__mission-list,
+  .sk-team-overview-pattern__repository-list,
+  .sk-team-overview-pattern__setup-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sk-team-overview-pattern__navigation-list,
+  .sk-team-overview-pattern__activity-list,
+  .sk-team-overview-pattern__mission-list,
+  .sk-team-overview-pattern__repository-list,
+  .sk-team-overview-pattern__setup-list,
+  .sk-team-overview-pattern__copy-stack {
+    display: grid;
+  }
+
+  .sk-team-overview-pattern__navigation-list {
+    gap: var(--sk-space-1);
+  }
+
+  .sk-team-overview-pattern__navigation-link {
+    display: block;
+    min-block-size: var(--sk-space-9);
+    padding: var(--sk-space-3);
+    border-radius: var(--sk-radius-sm);
+    text-decoration: none;
+  }
+
+  .sk-team-overview-pattern__navigation-link[aria-current="page"] {
+    color: var(--sk-fg-default);
+    background: var(--sk-surface-muted);
+    font-weight: var(--sk-weight-semibold);
+  }
+
+  .sk-team-overview-pattern__navigation-note,
+  .sk-team-overview-pattern__description,
+  .sk-team-overview-pattern__observed,
+  .sk-team-overview-pattern__row-meta,
+  .sk-team-overview-pattern__review-note,
+  .sk-team-overview-pattern__step-introduction,
+  .sk-team-overview-pattern__step-note,
+  .sk-team-overview-pattern__guidance {
+    margin: 0;
+    color: var(--sk-fg-muted);
+  }
+
+  .sk-team-overview-pattern__navigation-note,
+  .sk-team-overview-pattern__observed,
+  .sk-team-overview-pattern__row-meta,
+  .sk-team-overview-pattern__review-note {
+    font-size: var(--sk-text-sm);
+  }
+
+  .sk-team-overview-pattern__content {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    min-inline-size: 0;
     gap: var(--sk-space-7);
     padding: var(--sk-space-7);
   }
 
-  .sk-pattern-overview__card-content,
-  .sk-pattern-overview__section,
-  .sk-pattern-overview__delivery,
-  .sk-pattern-overview__flow,
-  .sk-pattern-overview__outcomes,
-  .sk-pattern-overview__current {
+  .sk-team-overview-pattern__compact-header:not([inert])
+    ~ .sk-team-overview-pattern__content {
+    padding-inline: var(--sk-space-4);
+  }
+
+  .sk-team-overview-pattern__section {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    min-inline-size: 0;
     gap: var(--sk-space-4);
   }
 
-  .sk-pattern-overview__delivery-summary,
-  .sk-pattern-overview__flow-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    min-inline-size: 0;
-    gap: var(--sk-space-4);
-  }
-
-  .sk-pattern-overview__flow-layout {
-    grid-template-columns: minmax(0, 1fr) calc(var(--sk-space-12) + var(--sk-space-11));
-    align-items: start;
-  }
-
-  .sk-pattern-overview__flow-layout--scale {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .sk-pattern-overview [data-visual-region] {
-    min-inline-size: 0;
-    max-inline-size: 100%;
-  }
-
-  .sk-pattern-overview__delivery-heading,
-  .sk-pattern-overview__chart-heading,
-  .sk-pattern-overview__outcomes-heading,
-  .sk-pattern-overview__current-heading {
-    display: flex;
-    align-items: start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--sk-space-3);
-  }
-
-  .sk-pattern-overview__title-line {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--sk-space-3);
-  }
-
-  .sk-pattern-overview__title-line h2,
-  .sk-pattern-overview__outcomes h3,
-  .sk-pattern-overview__current h3 {
-    color: var(--sk-fg-default);
-    font-family: var(--sk-font-display);
-    font-weight: var(--sk-weight-semibold);
-  }
-
-  .sk-pattern-overview__outcome-list,
-  .sk-pattern-overview__operational-list,
-  .sk-pattern-overview__bar-notes,
-  .sk-pattern-overview__chart-legend {
+  .sk-team-overview-pattern__section-heading {
     display: grid;
     gap: var(--sk-space-2);
-    padding: 0;
+  }
+
+  .sk-team-overview-pattern__section-heading h2,
+  .sk-team-overview-pattern__welcome h2,
+  .sk-team-overview-pattern__step-title {
     margin: 0;
-    list-style: none;
+    color: var(--sk-fg-default);
   }
 
-  .sk-pattern-overview__outcome-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--sk-space-2) var(--sk-space-4);
-    padding-block: var(--sk-space-3);
-    border-block-end: var(--sk-border-width-1) solid var(--sk-border-default);
+  .sk-team-overview-pattern__section-heading h2,
+  .sk-team-overview-pattern__welcome h2 {
+    font-size: var(--sk-text-xl);
   }
 
-  .sk-pattern-overview__outcome-row:last-child {
-    border-block-end: 0;
-  }
-
-  .sk-pattern-overview__outcome-detail {
-    grid-column: 1;
-    font-size: var(--sk-text-sm);
-  }
-
-  .sk-pattern-overview__outcome-row sk-status-indicator {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    align-self: center;
-  }
-
-  .sk-pattern-overview__bar-notes {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  .sk-team-overview-pattern__eyebrow,
+  .sk-team-overview-pattern__welcome-meta,
+  .sk-team-overview-pattern__review-label {
+    margin: 0;
     color: var(--sk-fg-muted);
     font-size: var(--sk-text-xs);
-    text-align: center;
+    font-weight: var(--sk-weight-semibold);
+    text-transform: uppercase;
   }
 
-  .sk-pattern-overview__bar-notes li,
-  .sk-pattern-overview__chart-legend li {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--sk-space-1);
-  }
-
-  .sk-pattern-overview__chart-legend {
+  .sk-team-overview-pattern__velocity-summary {
     display: flex;
     flex-wrap: wrap;
-    color: var(--sk-fg-muted);
-    font-size: var(--sk-text-xs);
+    align-items: baseline;
+    gap: var(--sk-space-2);
   }
 
-  .sk-pattern-overview__legend-key {
-    inline-size: var(--sk-space-2);
-    block-size: var(--sk-space-2);
-    background: var(--sk-color-data-series-primary);
-    border-radius: var(--sk-radius-pill);
-  }
-
-  .sk-pattern-overview__legend-key--deployed {
-    background: var(--sk-color-green);
-  }
-
-  .sk-pattern-overview__current-total {
+  .sk-team-overview-pattern__velocity-summary strong {
     color: var(--sk-fg-default);
-    font-family: var(--sk-font-display);
-    font-size: var(--sk-text-2xl);
-    font-weight: var(--sk-weight-bold);
+    font-size: var(--sk-text-lg);
   }
 
-  .sk-pattern-overview__scale-proof {
-    padding: var(--sk-space-3) var(--sk-space-4);
-    color: var(--sk-fg-body);
+  .sk-team-overview-pattern__velocity-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--sk-space-12), 1fr));
+    gap: var(--sk-space-2);
+  }
+
+  .sk-team-overview-pattern__velocity-cell {
+    display: grid;
+    align-content: end;
+    min-block-size: var(--sk-space-10);
+    padding: var(--sk-space-3);
+    color: var(--sk-fg-muted);
     background: var(--sk-surface-muted);
-    border-inline-start: var(--sk-border-width-4) solid var(--sk-color-accent);
+    border: var(--sk-border-width-1) solid var(--sk-border-default);
     border-radius: var(--sk-radius-sm);
     font-size: var(--sk-text-sm);
   }
 
-  .sk-pattern-overview__operational-list li {
+  .sk-team-overview-pattern__velocity-cell[data-populated="true"] {
+    color: var(--sk-fg-default);
+    background: var(--sk-surface-tint-lilac);
+    border-color: var(--sk-border-tint-lilac);
+    font-weight: var(--sk-weight-semibold);
+  }
+
+  .sk-team-overview-pattern__overview-pair {
+    display: grid;
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, calc(var(--sk-space-12) * 3)), 1fr)
+    );
+    gap: var(--sk-space-6);
+  }
+
+  .sk-team-overview-pattern__mission-list,
+  .sk-team-overview-pattern__repository-list,
+  .sk-team-overview-pattern__activity-list {
+    border-block-start: var(--sk-border-width-1) solid var(--sk-border-default);
+  }
+
+  .sk-team-overview-pattern__row,
+  .sk-team-overview-pattern__repository-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sk-space-3);
+    padding-block: var(--sk-space-4);
+    border-block-end: var(--sk-border-width-1) solid var(--sk-border-default);
+  }
+
+  .sk-team-overview-pattern__row-title,
+  .sk-team-overview-pattern__repository-link {
+    color: var(--sk-fg-default);
+    font-weight: var(--sk-weight-semibold);
+  }
+
+  .sk-team-overview-pattern__repository-link {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--sk-space-9);
+  }
+
+  .sk-team-overview-pattern__row-facts,
+  .sk-team-overview-pattern__repository-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sk-space-2) var(--sk-space-4);
+    margin: 0;
+  }
+
+  .sk-team-overview-pattern__row-facts div,
+  .sk-team-overview-pattern__repository-facts div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sk-space-1);
     min-inline-size: 0;
   }
 
-  .sk-pattern-overview__warning {
-    display: inline-flex;
-    cursor: default;
-    text-decoration: none;
+  .sk-team-overview-pattern__row-facts dt,
+  .sk-team-overview-pattern__repository-facts dt {
+    color: var(--sk-fg-muted);
   }
 
-  .sk-pattern-overview__empty {
-    padding: var(--sk-space-6);
-    border: var(--sk-border-width-1) dashed var(--sk-border-default);
+  .sk-team-overview-pattern__row-facts dd,
+  .sk-team-overview-pattern__repository-facts dd {
+    margin: 0;
+    color: var(--sk-fg-default);
+    overflow-wrap: anywhere;
+  }
+
+  .sk-team-overview-pattern__review-scaffold {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--sk-space-4);
+    padding: var(--sk-space-4);
+    background: var(--sk-surface-muted);
+    border: var(--sk-border-width-1) dashed var(--sk-border-strong);
     border-radius: var(--sk-radius-md);
   }
 
-  .sk-pattern-overview__intent-log {
-    display: none;
+  .sk-team-overview-pattern__review-copy,
+  .sk-team-overview-pattern__fixture-control {
+    display: grid;
+    gap: var(--sk-space-2);
   }
 
-  @media (min-width: 721px) and (max-width: 1280px) {
-    .sk-pattern-overview__flow-layout:not(.sk-pattern-overview__flow-layout--scale)
-      sk-transition-matrix::part(table) {
-      min-inline-size: calc((var(--sk-space-12) * 4) + var(--sk-space-11));
-      table-layout: fixed;
+  .sk-team-overview-pattern__fixture-control {
+    flex: 1 1 calc(var(--sk-space-12) * 2);
+    max-inline-size: calc(var(--sk-space-12) * 4);
+    color: var(--sk-fg-default);
+    font-size: var(--sk-text-sm);
+    font-weight: var(--sk-weight-semibold);
+  }
+
+  .sk-team-overview-pattern__welcome {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--sk-space-4);
+    padding-block: var(--sk-space-4);
+  }
+
+  .sk-team-overview-pattern__welcome-marker,
+  .sk-team-overview-pattern__step-marker {
+    display: grid;
+    place-items: center;
+    inline-size: var(--sk-space-9);
+    block-size: var(--sk-space-9);
+    color: var(--sk-fg-default);
+    background: var(--sk-surface-tint-butter);
+    border: var(--sk-border-width-1) solid var(--sk-color-yellow);
+    border-radius: var(--sk-radius-pill);
+    font-weight: var(--sk-weight-semibold);
+  }
+
+  .sk-team-overview-pattern__welcome-marker svg,
+  .sk-team-overview-pattern__step-marker svg {
+    inline-size: var(--sk-space-4);
+    block-size: var(--sk-space-4);
+  }
+
+  .sk-team-overview-pattern__welcome-copy {
+    display: grid;
+    gap: var(--sk-space-3);
+  }
+
+  .sk-team-overview-pattern__welcome-body {
+    margin: 0;
+    max-inline-size: calc(var(--sk-space-12) * 6);
+  }
+
+  .sk-team-overview-pattern__welcome-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sk-space-3);
+  }
+
+  .sk-team-overview-pattern__welcome-actions a,
+  .sk-team-overview-pattern__setup-link {
+    min-block-size: var(--sk-space-9);
+    padding-block: var(--sk-space-3);
+    padding-inline: var(--sk-space-4);
+    border: var(--sk-border-width-1) solid var(--sk-border-strong);
+    border-radius: var(--sk-radius-sm);
+  }
+
+  .sk-team-overview-pattern__setup-list {
+    counter-reset: none;
+  }
+
+  .sk-team-overview-pattern__step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--sk-space-4);
+    padding-block: var(--sk-space-5);
+    border-block-start: var(--sk-border-width-1) solid var(--sk-border-default);
+  }
+
+  .sk-team-overview-pattern__step[data-state="completed"]
+    .sk-team-overview-pattern__step-marker {
+    color: var(--sk-color-green);
+    background: var(--sk-color-green-bg);
+    border-color: var(--sk-color-green);
+  }
+
+  .sk-team-overview-pattern__step-content,
+  .sk-team-overview-pattern__copy-stack {
+    gap: var(--sk-space-3);
+  }
+
+  .sk-team-overview-pattern__step-content {
+    display: grid;
+    align-content: start;
+  }
+
+  .sk-team-overview-pattern__copy-stack sk-copy-field {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .sk-team-overview-pattern__copy-stack sk-copy-field::part(copy-control) {
+    min-inline-size: var(--sk-space-9);
+    min-block-size: var(--sk-space-9);
+  }
+
+  .sk-team-overview-pattern__setup-link {
+    display: inline-flex;
+    align-items: center;
+    inline-size: fit-content;
+  }
+
+  @media (forced-colors: active) {
+    .sk-team-overview-pattern__drawer-trigger,
+    .sk-team-overview-pattern__fixture-select,
+    .sk-team-overview-pattern__velocity-cell,
+    .sk-team-overview-pattern__review-scaffold,
+    .sk-team-overview-pattern__welcome-marker,
+    .sk-team-overview-pattern__step-marker {
+      border-color: CanvasText;
     }
 
-    .sk-pattern-overview__flow-layout:not(.sk-pattern-overview__flow-layout--scale)
-      sk-transition-matrix::part(route) {
-      inline-size: var(--sk-space-11);
-      max-inline-size: var(--sk-space-11);
+    .sk-team-overview-pattern__velocity-cell[data-populated="true"] {
+      forced-color-adjust: none;
+      color: HighlightText;
+      background: Highlight;
     }
   }
 
-  @media (max-width: 720px) {
-    .sk-pattern-overview__flow-layout {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .sk-pattern-overview__content {
-      gap: var(--sk-space-4);
-      padding: var(--sk-space-4);
-    }
-
-    .sk-pattern-overview__bar-notes {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+  @media (prefers-reduced-motion: reduce) {
+    .sk-team-overview-pattern *,
+    .sk-team-overview-pattern *::before,
+    .sk-team-overview-pattern *::after {
+      scroll-behavior: auto;
+      transition: none;
     }
   }
 </style>`;
 
-const renderPill = (pill: DeepReadonly<OperationalPill>): TemplateResult =>
-  pill.kind === 'status'
-    ? html`<sk-status-indicator slot="tags" tone=${pill.tone ?? 'neutral'}>${pill.label}</sk-status-indicator>`
-    : html`<sk-pill-tag slot="tags" variant=${pill.variant ?? nothing}>${pill.label}</sk-pill-tag>`;
+type ShellCopy = DeepReadonly<
+  PopulatedOverviewResponse["copy"] | typeof FIRST_RUN_SHELL.copy
+>;
 
-const renderOperationalRow = (
-  row: DeepReadonly<OperationalRow>,
-  selectedRowId: string,
-): TemplateResult => html`
-  <sk-action-row
-    row-id=${row.id}
-    ?selectable=${row.selectable}
-    ?selected=${selectedRowId === row.id}
-  >
-    <sk-entity-marker slot="marker" label=${row.markerLabel}>${row.marker}</sk-entity-marker>
-    <span slot="title">${row.title}</span>
-    <code slot="reference">${row.reference}</code>
-    ${row.pills.map(renderPill)}
-    ${row.warning
-      ? html`<span
-          slot="tags"
-          class="sk-pattern-overview__warning"
-          data-non-link-warning
-          data-attention-meaning="off-default-branch"
-        ><sk-pill-tag variant="yellow">${row.warning}</sk-pill-tag></span>`
-      : nothing}
-    <time slot="metadata">${row.time}</time>
-  </sk-action-row>`;
+interface ShellModel {
+  readonly copy: ShellCopy;
+  readonly routes: DeepReadonly<{
+    overview: SuppliedRoute;
+    work: SuppliedRoute;
+    connectors: SuppliedRoute;
+    members: SuppliedRoute;
+  }>;
+  readonly repositoryRoute?: DeepReadonly<SuppliedRoute>;
+  readonly missionRoute?: DeepReadonly<SuppliedRoute>;
+  readonly showMembers: boolean;
+  readonly emptyRepositoryNavigation?: string;
+}
 
-const renderOperationalSection = (
-  section: ReturnType<typeof deriveOperationalSections>[number],
-  selectedRowId: string,
-): TemplateResult => html`
-  <section
-    class="sk-pattern-overview__section"
-    data-operational-section=${section.id}
-    aria-labelledby=${`operational-${section.id}`}
-  >
-    <sk-section-header>
-      <span slot="eyebrow">${section.eyebrow}</span>
-      <h2 slot="title" id=${`operational-${section.id}`}>${section.title}</h2>
-      <p slot="description">${section.description}</p>
-    </sk-section-header>
-    ${section.rows.length > 0
-      ? html`<ul class="sk-pattern-overview__operational-list">
-          ${section.rows.map((row) => html`<li>${renderOperationalRow(row, selectedRowId)}</li>`)}
-        </ul>`
-      : html`<p class="sk-pattern-overview__empty" role="status">${section.emptyMessage}</p>`}
-  </section>`;
-
-const recordIntent = <Detail extends object>(
-  event: CustomEvent<Detail>,
-  kind: 'row' | 'bar' | 'route',
-  callback: (detail: Detail) => void,
-): void => {
-  callback(event.detail);
-  const root = event.currentTarget as HTMLElement;
-  const log = root.querySelector<HTMLElement>('[data-intent-log]');
-  if (!log) return;
-  const attribute = `data-${kind}-event`;
-  const prior = JSON.parse(log.getAttribute(attribute) ?? '{}') as { count?: number };
-  const record = {
-    count: (prior.count ?? 0) + 1,
-    detail: event.detail,
-    bubbles: event.bubbles,
-    composed: event.composed,
-    cancelable: event.cancelable,
-  };
-  log.setAttribute(attribute, JSON.stringify(record));
-  log.textContent = `${kind} intent: ${JSON.stringify(event.detail)}`;
+const safeRouteLink = (
+  route: DeepReadonly<SuppliedRoute>,
+  className: string,
+  current = false,
+): TemplateResult | typeof nothing => {
+  const href = safeTeamOverviewHref(route);
+  return href
+    ? html`<a
+        class=${className}
+        href=${href}
+        aria-current=${current ? "page" : nothing}
+        >${route.label}</a
+      >`
+    : nothing;
 };
 
-export const renderTeamOverview = (
-  fixture: DeepReadonly<TeamOverviewFixture>,
-  args: StoryArgs,
-  options: RenderOptions = {},
-): TemplateResult => {
-  const delivery = deriveDelivery(fixture.delivery, options.coverageMode ?? 'full');
-  const flow = deriveFlow(fixture.flow);
-  const operational = deriveOperationalSections(fixture.operational, options.emptyOperational ?? false);
-  const semanticSignature = JSON.stringify({
-    team: fixture.team,
-    shell: fixture.shell,
-    delivery: {
-      attributed: delivery.attributed,
-      attributionPercent: delivery.attributionPercent,
-      bucketTotal: delivery.bucketTotal,
-      coverageMode: delivery.coverageMode,
-      evidenceStages: delivery.evidenceStages,
-      barSeries: delivery.barSeries,
-      outcomes: options.coverageMode === 'partial' ? [] : fixture.delivery.outcomes,
-    },
-    flow,
-    operational,
-  });
-
-  return html`
-    <div
-      class=${`sk-pattern-overview${options.light ? ' sk-light' : ''}`}
-      data-team-overview-pattern
-      data-story-variant=${options.scale ? 'scale-50-wps' : options.coverageMode ?? 'approved'}
-      data-render-complete="true"
-      data-fixture-deeply-frozen=${String(isDeeplyFrozen(fixture))}
-      data-investment-total=${String(fixture.delivery.totalInvestment)}
-      data-unattributed-total=${String(fixture.delivery.unattributedInvestment)}
-      data-attributed-total=${String(delivery.attributed)}
-      data-attribution-percent=${String(delivery.attributionPercent)}
-      data-bucket-total=${String(delivery.bucketTotal)}
-      data-coverage-mode=${delivery.coverageMode}
-      data-move-total=${String(flow.moveTotal)}
-      data-open-total=${String(flow.openTotal)}
-      data-columns=${JSON.stringify(flow.columns.map((column) => column.label))}
-      data-legend-tones=${JSON.stringify(flow.legendTones)}
-      data-semantic-signature=${semanticSignature}
-      @sk-action-row-activate=${(event: CustomEvent<ActionRowActivateDetail>) =>
-        recordIntent(event, 'row', args.onRowActivate)}
-      @sk-bar-chart-select=${(event: CustomEvent<BarChartSelectDetail>) =>
-        recordIntent(event, 'bar', args.onBarSelect)}
-      @sk-transition-matrix-select=${(event: CustomEvent<TransitionMatrixSelectDetail>) =>
-        recordIntent(event, 'route', args.onRouteSelect)}
+const personalRail = (model: ShellModel): TemplateResult =>
+  html`<sk-personal-rail
+    slot="personal-rail"
+    label=${model.copy.personalNavigationLabel}
+  >
+    <a
+      class="sk-team-overview-pattern__rail-link"
+      slot="primary"
+      href=${safeTeamOverviewHref(model.routes.overview)}
+      aria-current="page"
+      aria-label=${model.routes.overview.label}
+      >${model.copy.overviewMark}</a
     >
-      ${patternStyles}
-      <sk-app-shell>
-        <sk-personal-rail
-          slot="personal-rail"
-          label="Product areas"
-          data-visual-region="rail-identity"
-        >
-          ${fixture.shell.primaryNavigation.map((item) => html`
-            <a
-              slot="primary"
-              class="sk-pattern-overview__rail-link"
-              href=${item.href}
-              aria-label=${item.label}
-              aria-current=${item.label === 'Overview' ? 'page' : nothing}
-            ><span aria-hidden="true">${item.glyph}</span></a>`)}
-          <button
-            slot="utilities"
-            class="sk-pattern-overview__rail-control"
-            type="button"
-            aria-label="Notifications"
-          >♢</button>
-          <a
-            slot="account"
-            class="sk-pattern-overview__account"
-            href="#account"
-            aria-label=${fixture.shell.accountName}
-            data-account-identity
-          >${fixture.shell.accountInitials}</a>
-          <button
-            slot="logout"
-            class="sk-pattern-overview__rail-control"
-            type="button"
-            aria-label="Log out"
-          >↪</button>
-        </sk-personal-rail>
+    <a
+      class="sk-team-overview-pattern__rail-link"
+      slot="primary"
+      href=${safeTeamOverviewHref(model.routes.work)}
+      aria-label=${model.routes.work.label}
+      >${model.copy.workMark}</a
+    >
+    <span
+      class="sk-team-overview-pattern__rail-identity"
+      slot="account"
+      aria-label=${model.copy.accountLabel}
+      >${model.copy.teamInitials}</span
+    >
+  </sk-personal-rail>`;
 
-        <sk-context-sidebar slot="context-sidebar" label="Team context">
-          <div slot="header" class="sk-pattern-overview__context-title">
-            <strong>${fixture.team.name}</strong>
-            <span>${fixture.team.repository}</span>
-          </div>
-          <sk-nav-pill class="sk-pattern-overview__context-navigation" label="Team sections">
-            ${fixture.shell.contextNavigation.map((item) => html`
-              <a
-                class="sk-pattern-overview__context-link"
-                href=${item.href}
-                aria-current=${item.label === 'Overview' ? 'page' : nothing}
-              >${item.label}</a>`)}
-          </sk-nav-pill>
-          <sk-button slot="footer" variant="ghost" size="sm">Manage team</sk-button>
-        </sk-context-sidebar>
+const contextNavigation = (model: ShellModel): TemplateResult =>
+  html`<nav aria-label=${model.copy.contextNavigationLabel}>
+    <ul class="sk-team-overview-pattern__navigation-list">
+      <li>
+        ${safeRouteLink(
+          model.routes.overview,
+          "sk-team-overview-pattern__navigation-link",
+          true,
+        )}
+      </li>
+      <li>
+        ${safeRouteLink(
+          model.routes.work,
+          "sk-team-overview-pattern__navigation-link",
+        )}
+      </li>
+      <li>
+        ${safeRouteLink(
+          model.routes.connectors,
+          "sk-team-overview-pattern__navigation-link",
+        )}
+      </li>
+      ${
+        model.repositoryRoute
+          ? html`<li>
+              ${safeRouteLink(
+                model.repositoryRoute,
+                "sk-team-overview-pattern__navigation-link",
+              )}
+            </li>`
+          : nothing
+      }
+      ${
+        model.missionRoute
+          ? html`<li>
+              ${safeRouteLink(
+                model.missionRoute,
+                "sk-team-overview-pattern__navigation-link",
+              )}
+            </li>`
+          : nothing
+      }
+      ${
+        model.showMembers
+          ? html`<li>
+              ${safeRouteLink(
+                model.routes.members,
+                "sk-team-overview-pattern__navigation-link",
+              )}
+            </li>`
+          : nothing
+      }
+    </ul>
+    ${
+      model.emptyRepositoryNavigation
+        ? html`<p class="sk-team-overview-pattern__navigation-note">
+            ${model.emptyRepositoryNavigation}
+          </p>`
+        : nothing
+    }
+  </nav>`;
 
-        <sk-page-header slot="page-header">
-          <span slot="eyebrow">${fixture.shell.eyebrow}</span>
-          <h1 slot="title">${fixture.shell.title}</h1>
-          <p slot="supporting">${fixture.shell.supporting}</p>
-          <sk-status-indicator slot="sync" tone="success">${fixture.team.syncLabel}</sk-status-indicator>
-          <sk-button slot="actions" variant="ghost" size="sm">Refresh evidence</sk-button>
-        </sk-page-header>
+const contextSidebar = (
+  model: ShellModel,
+  placement: "desktop" | "compact",
+): TemplateResult =>
+  html`<sk-context-sidebar
+    class=${
+      placement === "compact"
+        ? "sk-team-overview-pattern__compact-navigation"
+        : nothing
+    }
+    slot=${placement === "desktop" ? "context-sidebar" : "compact-navigation"}
+    id=${placement === "compact" ? `team-overview-navigation-${model.copy.teamInitials}` : nothing}
+    label=${
+      placement === "desktop"
+        ? model.copy.contextNavigationLabel
+        : model.copy.compactNavigationLabel
+    }
+  >
+    <div class="sk-team-overview-pattern__sidebar-heading" slot="header">
+      <strong>${model.copy.teamName}</strong>
+    </div>
+    ${contextNavigation(model)}
+  </sk-context-sidebar>`;
 
-        <div class="sk-pattern-overview__content" data-page-content id="overview">
-          <section id="delivery-return" aria-labelledby="delivery-return-title">
-            <sk-card>
-              <div class="sk-pattern-overview__card-content sk-pattern-overview__delivery">
-                <div
-                  class="sk-pattern-overview__delivery-summary"
-                  data-visual-region="delivery-evidence"
-                >
-                  <header class="sk-pattern-overview__delivery-heading">
-                    <div class="sk-pattern-overview__title-line">
-                      <h2 id="delivery-return-title">${fixture.delivery.title}</h2>
-                      <span>${fixture.delivery.windowLabel}</span>
-                      <sk-pill-tag>${fixture.delivery.illustrativeLabel}</sk-pill-tag>
-                    </div>
-                    <div>
-                      <strong>${delivery.attributionPercent}% spend attributed</strong>
-                      <p class="sk-pattern-overview__muted">Observed · evidence, not guaranteed ROI</p>
-                    </div>
-                  </header>
-                  <p>${fixture.delivery.description}</p>
-                  <sk-evidence-chain .stages=${delivery.evidenceStages}></sk-evidence-chain>
-                </div>
-                <sk-grid variant="cols-2" gap="6">
-                  <section
-                    class="sk-pattern-overview__section"
-                    aria-labelledby="return-over-time-title"
-                    data-visual-region="return-chart"
-                  >
-                    <div class="sk-pattern-overview__chart-heading">
-                      <h3 id="return-over-time-title">Return over time</h3>
-                      <ul class="sk-pattern-overview__chart-legend" aria-label="Return chart legend">
-                        <li><span class="sk-pattern-overview__legend-key"></span>Attributed spend</li>
-                        <li><span class="sk-pattern-overview__legend-key sk-pattern-overview__legend-key--deployed"></span>Missions deployed</li>
-                      </ul>
-                    </div>
-                    <sk-bar-chart
-                      label="Return over time"
-                      description=${delivery.coverageLabel}
-                      ?selectable=${true}
-                      .selectedId=${args.selectedBarId}
-                      .series=${delivery.barSeries}
-                    ></sk-bar-chart>
-                    <ul class="sk-pattern-overview__bar-notes" aria-label="Missions deployed by date">
-                      ${(options.coverageMode === 'partial'
-                        ? fixture.delivery.buckets.slice(0, 2)
-                        : fixture.delivery.buckets
-                      ).map((bucket) => html`<li><span class="sk-pattern-overview__legend-key sk-pattern-overview__legend-key--deployed"></span>${bucket.deployed} deployed</li>`)}
-                    </ul>
-                  </section>
-
-                  <section class="sk-pattern-overview__outcomes" aria-labelledby="outcomes-title">
-                    <header class="sk-pattern-overview__outcomes-heading">
-                      <h3 id="outcomes-title">Recent outcome evidence</h3>
-                      ${options.coverageMode === 'partial'
-                        ? nothing
-                        : html`<sk-button variant="ghost" size="sm">View evidence →</sk-button>`}
-                    </header>
-                    ${options.coverageMode === 'partial'
-                      ? html`<p class="sk-pattern-overview__empty" role="status">Outcome evidence pending</p>`
-                      : html`<ul class="sk-pattern-overview__outcome-list">
-                          ${fixture.delivery.outcomes.map((outcome) => html`
-                            <li class="sk-pattern-overview__outcome-row">
-                              <strong>${outcome.title}</strong>
-                              <p class="sk-pattern-overview__outcome-detail">${outcome.detail}</p>
-                              <sk-status-indicator
-                                tone=${outcome.tone}
-                                data-attention-meaning=${outcome.tone === 'attention'
-                                  ? 'awaiting-evidence'
-                                  : nothing}
-                              >${outcome.state}</sk-status-indicator>
-                            </li>`)}
-                        </ul>`}
-                  </section>
-                </sk-grid>
-              </div>
-            </sk-card>
-          </section>
-
-          <section id="flow-health" aria-label="Flow health and current inventory">
-            <sk-card>
-              <div class="sk-pattern-overview__card-content sk-pattern-overview__flow">
-                ${options.scale
-                  ? html`<p class="sk-pattern-overview__scale-proof" data-scale-proof>
-                      <strong>50-WP scale proof.</strong>
-                      Fifty current work packages remain a compact inventory beside six aggregate
-                      routes and 24 time cells; the matrix never expands to one row per WP.
-                    </p>`
-                  : nothing}
-                <div class=${`sk-pattern-overview__flow-layout${options.scale
-                  ? ' sk-pattern-overview__flow-layout--scale'
-                  : ''}`}>
-                  <div data-visual-region="flow-matrix">
-                    <sk-transition-matrix
-                      .columns=${flow.columns}
-                      .routes=${flow.routes}
-                      .selectedRouteId=${args.selectedRouteId || undefined}
-                      ?selectable=${true}
-                      .windowLabel=${fixture.flow.windowLabel}
-                      .description=${fixture.flow.description}
-                      .selectionHint=${fixture.flow.selectionHint}
-                    ></sk-transition-matrix>
-                  </div>
-                  <aside class="sk-pattern-overview__current" aria-labelledby="current-inventory-title">
-                    <div class="sk-pattern-overview__current-heading">
-                      <h3 id="current-inventory-title">Current</h3>
-                      <span class="sk-pattern-overview__muted">Items, not moves</span>
-                    </div>
-                    <p class="sk-pattern-overview__current-total">${flow.openTotal} open WPs</p>
-                    <sk-grid variant="cols-2" gap="4">
-                      ${flow.statuses.map((status) => html`
-                        <sk-metric
-                          compact
-                          .label=${status.label}
-                          .displayValue=${String(status.count)}
-                          .annotation=${status.id === 'blocked' ? 'Needs attention' : ''}
-                          .tone=${status.tone}
-                        ></sk-metric>`)}
-                    </sk-grid>
-                    <sk-button variant="ghost" size="sm">View ${flow.openTotal} WPs</sk-button>
-                    <p class="sk-pattern-overview__muted">Observer · up to 60 s behind</p>
-                  </aside>
-                </div>
-              </div>
-            </sk-card>
-          </section>
-
-          <div id="operational-activity" class="sk-pattern-overview__section">
-            ${operational.map((section) => renderOperationalSection(section, args.selectedRowId))}
-          </div>
-
-          <span
-            class="sk-pattern-overview__intent-log"
-            data-intent-log
-            data-row-event='{"count":0}'
-            data-bar-event='{"count":0}'
-            data-route-event='{"count":0}'
-          >No selection intent yet.</span>
-        </div>
-      </sk-app-shell>
-    </div>`;
+const connectCompactControls = (
+  shellRef: Ref<SkAppShell>,
+  triggerRef: Ref<HTMLButtonElement>,
+): void => {
+  const shell = shellRef.value;
+  const trigger = triggerRef.value;
+  if (shell && trigger) shell.compactTrigger = trigger;
 };
 
-const meta = {
-  title: 'Patterns/Team Overview',
-  tags: ['autodocs'],
-  excludeStories: [
-    'deepFreeze',
-    'TEAM_OVERVIEW_FIXTURE',
-    'deriveDelivery',
-    'deriveFlow',
-    'deriveOperationalSections',
-    'renderTeamOverview',
-  ],
+const pageHeader = (model: ShellModel): TemplateResult =>
+  html`<sk-page-header slot="page-header">
+    <span slot="eyebrow">${model.copy.overviewEyebrow}</span>
+    <h1 slot="title">${model.copy.teamName}</h1>
+    <p slot="supporting">${model.copy.pageSupporting}</p>
+  </sk-page-header>`;
+
+const shell = (
+  model: ShellModel,
+  content: TemplateResult,
+  options: Readonly<{
+    light?: boolean;
+    direction?: "ltr" | "rtl";
+    open?: boolean;
+  }> = {},
+): TemplateResult => {
+  const shellRef = createRef<SkAppShell>();
+  const triggerRef = createRef<HTMLButtonElement>();
+  const setOpen = (next: boolean): void => {
+    const shellElement = shellRef.value;
+    const trigger = triggerRef.value;
+    if (!shellElement || !trigger) return;
+    shellElement.open = next;
+    trigger.setAttribute("aria-expanded", String(next));
+    if (next) {
+      void shellElement.updateComplete.then(() => {
+        shellElement
+          .querySelector<HTMLAnchorElement>(
+            '[slot="compact-navigation"] a[href]',
+          )
+          ?.focus();
+      });
+    }
+  };
+
+  return html`<div
+    class="sk-team-overview-pattern${options.light ? " sk-light" : ""}"
+    dir=${options.direction ?? "ltr"}
+    data-team-overview-pattern
+    data-render-complete="true"
+  >
+    ${patternStyles}
+    <sk-app-shell
+      ${ref((element) => {
+        shellRef.value = element as SkAppShell;
+        connectCompactControls(shellRef, triggerRef);
+      })}
+      presentation="compact"
+      .open=${options.open ?? false}
+      @sk-app-shell-dismiss=${() => setOpen(false)}
+    >
+      ${personalRail(model)} ${contextSidebar(model, "desktop")}
+      <div
+        class="sk-team-overview-pattern__compact-header"
+        slot="compact-header"
+      >
+        <button
+          ${ref((element) => {
+            triggerRef.value = element as HTMLButtonElement;
+            connectCompactControls(shellRef, triggerRef);
+          })}
+          class="sk-team-overview-pattern__drawer-trigger"
+          type="button"
+          aria-label=${model.copy.openNavigationLabel}
+          aria-controls=${`team-overview-navigation-${model.copy.teamInitials}`}
+          aria-expanded=${String(options.open ?? false)}
+          @click=${() => setOpen(!(shellRef.value?.open ?? false))}
+        >
+          ${model.copy.menuLabel}
+        </button>
+        <span class="sk-team-overview-pattern__compact-identity"
+          >${model.copy.teamName}</span
+        >
+      </div>
+      ${contextSidebar(model, "compact")} ${pageHeader(model)}
+      <div class="sk-team-overview-pattern__content">${content}</div>
+    </sk-app-shell>
+  </div>`;
+};
+
+const sectionHeading = (
+  id: string,
+  eyebrow: string,
+  title: string,
+  description: string,
+  observed?: string,
+): TemplateResult =>
+  html`<div class="sk-team-overview-pattern__section-heading">
+    <p class="sk-team-overview-pattern__eyebrow">${eyebrow}</p>
+    <h2 id=${id}>${title}</h2>
+    <p class="sk-team-overview-pattern__description">${description}</p>
+    ${
+      observed
+        ? html`<p class="sk-team-overview-pattern__observed">${observed}</p>`
+        : nothing
+    }
+  </div>`;
+
+const populatedContent = (
+  projection: DeepReadonly<PopulatedOverviewProjection>,
+  fixture: DeepReadonly<PopulatedOverviewResponse>,
+): TemplateResult => {
+  const copy = fixture.copy;
+  return html`<section
+      class="sk-team-overview-pattern__section"
+      aria-labelledby="team-velocity-heading"
+      data-truth-region="observed"
+      data-visual-region="velocity"
+    >
+      ${sectionHeading(
+        "team-velocity-heading",
+        copy.velocityEyebrow,
+        copy.velocityTitle,
+        projection.retention.description,
+        copy.observedBoundary,
+      )}
+      <div
+        class="sk-team-overview-pattern__velocity-summary"
+        data-event-total=${String(projection.eventTotal)}
+      >
+        <strong>${projection.retention.summary}</strong>
+      </div>
+      <div
+        class="sk-team-overview-pattern__velocity-strip"
+        role="img"
+        aria-label=${projection.retention.summary}
+        data-retention-hours=${String(projection.retention.retentionHours)}
+      >
+        ${projection.retention.cells.map(
+          (cell) =>
+            html`<span
+              class="sk-team-overview-pattern__velocity-cell"
+              data-populated=${String(cell.count > 0)}
+              data-cell-count=${String(cell.count)}
+              aria-label=${cell.label}
+              >${cell.label}</span
+            >`,
+        )}
+      </div>
+    </section>
+
+    <div class="sk-team-overview-pattern__overview-pair">
+      <section
+        class="sk-team-overview-pattern__section"
+        aria-labelledby="team-in-flight-heading"
+        data-truth-region="observed"
+      >
+        ${sectionHeading(
+          "team-in-flight-heading",
+          copy.inFlightEyebrow,
+          copy.inFlightTitle,
+          copy.inFlightDescription,
+          copy.observedBoundary,
+        )}
+        <ul class="sk-team-overview-pattern__mission-list">
+          ${projection.inFlight.map(
+            (moment) =>
+              html`<li class="sk-team-overview-pattern__row" data-in-flight-row>
+                <strong class="sk-team-overview-pattern__row-title"
+                  >${moment.missionRef}</strong
+                >
+                <dl class="sk-team-overview-pattern__row-facts">
+                  <div>
+                    <dt>${copy.repositoryLabel}</dt>
+                    <dd>${moment.repository}</dd>
+                  </div>
+                  <div>
+                    <dt>${copy.kindLabel}</dt>
+                    <dd><code>${moment.kind}</code></dd>
+                  </div>
+                  <div>
+                    <dt>${copy.stageLabel}</dt>
+                    <dd>${moment.stage}</dd>
+                  </div>
+                  <div>
+                    <dt>${copy.observedAtLabel}</dt>
+                    <dd>${moment.age}</dd>
+                  </div>
+                </dl>
+              </li>`,
+          )}
+        </ul>
+      </section>
+
+      <section
+        class="sk-team-overview-pattern__section"
+        aria-labelledby="team-repositories-heading"
+        data-truth-region="factual"
+        data-visual-region="repositories"
+      >
+        ${sectionHeading(
+          "team-repositories-heading",
+          copy.admittedEyebrow,
+          copy.admittedTitle,
+          copy.admittedDescription,
+        )}
+        <ul class="sk-team-overview-pattern__repository-list">
+          ${projection.repositories.map(
+            (repository) =>
+              html`<li class="sk-team-overview-pattern__repository-row">
+                ${safeRouteLink(
+                  repository.route,
+                  "sk-team-overview-pattern__repository-link",
+                )}
+                <p class="sk-team-overview-pattern__row-meta">
+                  ${repository.missionSummary}
+                </p>
+                <dl
+                  class="sk-team-overview-pattern__repository-facts"
+                  aria-label=${copy.repositoryFactsLabel}
+                >
+                  <div>
+                    <dt>${copy.shaLabel}</dt>
+                    <dd><code>${repository.sha}</code></dd>
+                  </div>
+                  <div>
+                    <dt>${copy.branchLabel}</dt>
+                    <dd><code>${repository.branch}</code></dd>
+                  </div>
+                  <div>
+                    <dt>${copy.pushedLabel}</dt>
+                    <dd>${repository.pushed}</dd>
+                  </div>
+                </dl>
+              </li>`,
+          )}
+        </ul>
+      </section>
+    </div>
+
+    <section
+      class="sk-team-overview-pattern__section"
+      aria-labelledby="team-recent-heading"
+      data-truth-region="observed"
+      data-visual-region="recent-activity"
+    >
+      ${sectionHeading(
+        "team-recent-heading",
+        copy.recentEyebrow,
+        copy.recentTitle,
+        copy.recentDescription,
+        copy.observedBoundary,
+      )}
+      <ul
+        class="sk-team-overview-pattern__activity-list"
+        aria-label=${copy.recentListLabel}
+        data-passive-activity
+      >
+        ${projection.recent.map(
+          (moment) =>
+            html`<li class="sk-team-overview-pattern__row" data-activity-row>
+              <strong class="sk-team-overview-pattern__row-title"
+                >${moment.missionRef}</strong
+              >
+              <dl class="sk-team-overview-pattern__row-facts">
+                <div>
+                  <dt>${copy.repositoryLabel}</dt>
+                  <dd>${moment.repository}</dd>
+                </div>
+                <div>
+                  <dt>${copy.kindLabel}</dt>
+                  <dd><code>${moment.kind}</code></dd>
+                </div>
+                <div>
+                  <dt>${copy.stageLabel}</dt>
+                  <dd>${moment.stage}</dd>
+                </div>
+                <div>
+                  <dt>${copy.freshnessLabel}</dt>
+                  <dd>${moment.freshness}</dd>
+                </div>
+                <div>
+                  <dt>${copy.observedAtLabel}</dt>
+                  <dd>
+                    <time datetime=${moment.occurredAt}>${moment.age}</time>
+                  </dd>
+                </div>
+              </dl>
+            </li>`,
+        )}
+      </ul>
+    </section>`;
+};
+
+const populatedShellModel = (
+  fixture: DeepReadonly<PopulatedOverviewResponse>,
+): ShellModel => ({
+  copy: fixture.copy,
+  routes: fixture.routes,
+  repositoryRoute: fixture.repositories[0]?.route,
+  missionRoute: fixture.moments[0]?.missionRoute,
+  showMembers: true,
+});
+
+/** Renders current TO1 populated evidence from one immutable response fixture. */
+export const renderPopulatedOverview = (
+  retention: "default" | "alternate" = "default",
+  options: Readonly<{
+    light?: boolean;
+    direction?: "ltr" | "rtl";
+    long?: boolean;
+    open?: boolean;
+  }> = {},
+): TemplateResult => {
+  const fixture = options.long
+    ? TEAM_OVERVIEW_LONG_CONTENT_RESPONSE
+    : TEAM_OVERVIEW_POPULATED_RESPONSE;
+  return shell(
+    populatedShellModel(fixture),
+    populatedContent(projectPopulatedOverview(fixture, retention), fixture),
+    options,
+  );
+};
+
+const completedMark = (): TemplateResult =>
+  html`<svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="m5 12 4 4L19 6"></path>
+  </svg>`;
+
+const welcomeMark = (): TemplateResult =>
+  html`<svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    aria-hidden="true"
+  >
+    <path d="M12 3v18M3 12h18"></path>
+  </svg>`;
+
+const setupStep = (
+  step: DeepReadonly<FirstRunProjection["visibleSteps"][number]>,
+): TemplateResult =>
+  html`<li
+    class="sk-team-overview-pattern__step"
+    data-state=${step.state}
+    data-setup-step=${step.id}
+  >
+    <span class="sk-team-overview-pattern__step-marker" aria-hidden="true">
+      ${step.state === "completed" ? completedMark() : step.numberLabel}
+    </span>
+    <div class="sk-team-overview-pattern__step-content">
+      <h3 class="sk-team-overview-pattern__step-title">
+        ${step.title}<span class="sk-visually-hidden"
+          >${step.state === "completed" ? step.completedLabel : step.currentLabel}</span
+        >
+      </h3>
+      ${
+        step.state === ("current" satisfies SetupStepState)
+          ? html`${
+              step.introduction
+                ? html`<p class="sk-team-overview-pattern__step-introduction">
+                    ${step.introduction}
+                  </p>`
+                : nothing
+            }
+            ${
+              step.commands.length
+                ? html`<div class="sk-team-overview-pattern__copy-stack">
+                    ${step.commands.map(
+                      (command) =>
+                        html`<sk-copy-field
+                          data-copy-command=${command.id}
+                          .value=${command.value}
+                          .label=${command.label}
+                          .successMessage=${command.successMessage}
+                          .manualMessage=${command.manualMessage}
+                          .failureMessage=${command.failureMessage}
+                        ></sk-copy-field>`,
+                    )}
+                  </div>`
+                : nothing
+            }
+            ${
+              step.note
+                ? html`<p class="sk-team-overview-pattern__step-note">
+                    ${step.note}
+                  </p>`
+                : nothing
+            }
+            ${
+              step.memberGuidance
+                ? html`<p class="sk-team-overview-pattern__guidance">
+                    ${step.memberGuidance}
+                  </p>`
+                : nothing
+            }
+            ${
+              step.route
+                ? safeRouteLink(
+                    step.route,
+                    "sk-team-overview-pattern__setup-link",
+                  )
+                : nothing
+            }`
+          : nothing
+      }
+    </div>
+  </li>`;
+
+const onFirstRunFixtureChange = (event: Event): void => {
+  const select = event.currentTarget;
+  if (!(select instanceof HTMLSelectElement)) return;
+  const root = select.closest<HTMLElement>("[data-first-run-review-root]");
+  const selectedId = select.value as FirstRunFixtureId;
+  if (!root || !(selectedId in TEAM_OVERVIEW_FIRST_RUN_RESPONSES)) return;
+  for (const candidate of root.querySelectorAll<HTMLElement>(
+    "[data-first-run-fixture]",
+  )) {
+    candidate.hidden = candidate.dataset.firstRunFixture !== selectedId;
+  }
+  const nextSelect = root.querySelector<HTMLSelectElement>(
+    `[data-first-run-fixture="${selectedId}"] select`,
+  );
+  nextSelect?.focus({ preventScroll: true });
+};
+
+const reviewScaffold = (selected: FirstRunFixtureId): TemplateResult => {
+  const copy = FIRST_RUN_SHELL.copy;
+  return html`<aside
+    class="sk-team-overview-pattern__review-scaffold"
+    data-review-scaffolding
+    data-visual-region="review-scaffolding"
+  >
+    <div class="sk-team-overview-pattern__review-copy">
+      <p class="sk-team-overview-pattern__review-label">
+        ${copy.reviewHeading}
+      </p>
+      <p class="sk-team-overview-pattern__review-note">${copy.reviewNote}</p>
+    </div>
+    <label class="sk-team-overview-pattern__fixture-control">
+      <span>${copy.selectorLabel}</span>
+      <select
+        class="sk-team-overview-pattern__fixture-select"
+        data-first-run-selector
+        @change=${onFirstRunFixtureChange}
+      >
+        ${Object.values(TEAM_OVERVIEW_FIRST_RUN_RESPONSES).map(
+          (fixture) =>
+            html`<option
+              value=${fixture.id}
+              ?selected=${fixture.id === selected}
+            >
+              ${fixture.selectorLabel}
+            </option>`,
+        )}
+      </select>
+    </label>
+  </aside>`;
+};
+
+const firstRunContent = (
+  selected: FirstRunFixtureId,
+  projection: DeepReadonly<FirstRunProjection>,
+): TemplateResult =>
+  html`${reviewScaffold(selected)}
+    <section
+      class="sk-team-overview-pattern__section"
+      aria-labelledby=${`first-run-heading-${projection.id}`}
+      data-server-response=${projection.id}
+      data-visual-region="first-run-setup"
+    >
+      <header class="sk-team-overview-pattern__welcome">
+        <span class="sk-team-overview-pattern__welcome-marker"
+          >${welcomeMark()}</span
+        >
+        <div class="sk-team-overview-pattern__welcome-copy">
+          <p class="sk-team-overview-pattern__welcome-meta">
+            ${projection.meta}
+          </p>
+          <h2 id=${`first-run-heading-${projection.id}`}>
+            ${projection.heading}
+          </h2>
+          <p class="sk-team-overview-pattern__welcome-body">
+            ${projection.body}
+          </p>
+          ${
+            projection.guidance
+              ? html`<p class="sk-team-overview-pattern__guidance">
+                  ${projection.guidance}
+                </p>`
+              : nothing
+          }
+          ${
+            projection.welcomeRoutes.length
+              ? html`<nav class="sk-team-overview-pattern__welcome-actions">
+                  ${projection.welcomeRoutes.map((route) =>
+                    safeRouteLink(
+                      route,
+                      "sk-team-overview-pattern__setup-link",
+                    ),
+                  )}
+                </nav>`
+              : nothing
+          }
+        </div>
+      </header>
+      <ol
+        class="sk-team-overview-pattern__setup-list"
+        aria-label=${FIRST_RUN_SHELL.copy.stepsLabel}
+      >
+        ${projection.visibleSteps.map(setupStep)}
+      </ol>
+    </section>`;
+
+const firstRunShellModel = (
+  projection: DeepReadonly<FirstRunProjection>,
+): ShellModel => ({
+  copy: FIRST_RUN_SHELL.copy,
+  routes: FIRST_RUN_SHELL.routes,
+  showMembers: projection.canManage && projection.privacy === "collaborative",
+  emptyRepositoryNavigation: FIRST_RUN_SHELL.copy.emptyRepositoryNavigation,
+});
+
+/** Renders all six immutable TO2 responses behind review-only fixture selection. */
+export const renderFirstRunOverview = (
+  selected: FirstRunFixtureId = "admin-install",
+  options: Readonly<{
+    light?: boolean;
+    direction?: "ltr" | "rtl";
+    open?: boolean;
+  }> = {},
+): TemplateResult =>
+  html`<div data-first-run-review-root>
+    ${Object.values(TEAM_OVERVIEW_FIRST_RUN_RESPONSES).map((fixture) => {
+      const projection = projectFirstRunResponse(firstRunFixture(fixture.id));
+      return html`<div
+        data-first-run-fixture=${fixture.id}
+        ?hidden=${fixture.id !== selected}
+      >
+        ${shell(
+          firstRunShellModel(projection),
+          firstRunContent(fixture.id, projection),
+          options,
+        )}
+      </div>`;
+    })}
+  </div>`;
+
+const meta: Meta = {
+  title: "Patterns/Team Overview",
+  tags: ["autodocs"],
   parameters: {
-    layout: 'fullscreen',
     a11y: { disable: false },
-    docs: {
-      description: {
-        component:
-          'A Storybook-only composition proving the Team overview through existing public elements, one immutable fixture, and consumer-controlled intent.',
-      },
-    },
+    layout: "fullscreen",
   },
-  args: {
-    selectedRowId: '',
-    selectedBarId: '',
-    selectedRouteId: '',
-    onRowActivate: fn(),
-    onBarSelect: fn(),
-    onRouteSelect: fn(),
-  },
-  render: (args) => renderTeamOverview(TEAM_OVERVIEW_FIXTURE, args),
-} satisfies Meta<StoryArgs>;
+  excludeStories: ["renderPopulatedOverview", "renderFirstRunOverview"],
+};
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj;
 
 export const Default: Story = {
-  name: 'ApprovedDark',
+  name: "TO1 · current populated",
+  render: () => renderPopulatedOverview(),
+};
+
+export const AlternateRetention: Story = {
+  name: "TO1 · alternate retention",
+  render: () => renderPopulatedOverview("alternate"),
+};
+
+export const FirstRun: Story = {
+  name: "TO2 · six first-run responses",
+  render: () => renderFirstRunOverview(),
 };
 
 export const LightMode: Story = {
-  parameters: { backgrounds: { default: 'sk-light' } },
-  render: (args) => renderTeamOverview(TEAM_OVERVIEW_FIXTURE, args, { light: true }),
+  name: "TO1 · current populated · light",
+  parameters: { backgrounds: { default: "sk-light" } },
+  render: () => renderPopulatedOverview("default", { light: true }),
 };
 
-export const Narrow: Story = {
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
+export const LongContent: Story = {
+  name: "TO1 · long localized content",
+  render: () => renderPopulatedOverview("default", { long: true }),
 };
 
-export const Scale50WPs: Story = {
-  render: (args) => renderTeamOverview(TEAM_OVERVIEW_FIXTURE, args, { scale: true }),
-};
-
-export const ControlledInteractions: Story = {
-  args: {
-    selectedRowId: 'flight-team-landing',
-    selectedBarId: 'aug-11',
-    selectedRouteId: 'planned-progress',
-  },
-  play: async ({ canvasElement, args }) => {
-    const selectedRow = canvasElement.querySelector<HTMLElement & { selectable: boolean; selected: boolean }>(
-      `sk-action-row[row-id="${CSS.escape(args.selectedRowId)}"]`,
-    );
-    const requestedRowId = args.selectedRowId === 'flight-team-landing'
-      ? 'recent-dashboard-polish'
-      : 'flight-team-landing';
-    const requestedBarId = args.selectedBarId === 'aug-11' ? 'aug-18' : 'aug-11';
-    const requestedRouteId = args.selectedRouteId === 'planned-progress'
-      ? 'progress-review'
-      : 'planned-progress';
-    const requestedRow = canvasElement.querySelector<HTMLElement & { selected: boolean }>(
-      `sk-action-row[row-id="${requestedRowId}"]`,
-    );
-    const chart = canvasElement.querySelector<HTMLElement & { selectedId: string }>('sk-bar-chart');
-    const matrix = canvasElement.querySelector<HTMLElement & { selectedRouteId?: string }>(
-      'sk-transition-matrix',
-    );
-    const root = canvasElement.querySelector<HTMLElement>('[data-team-overview-pattern]');
-    const log = root?.querySelector<HTMLElement>('[data-intent-log]');
-    await expect(args.onRowActivate).not.toBe(args.onBarSelect);
-    await expect(args.onRowActivate).not.toBe(args.onRouteSelect);
-    await expect(args.onBarSelect).not.toBe(args.onRouteSelect);
-    await expect(requestedRow).not.toBeNull();
-    await expect(chart).not.toBeNull();
-    await expect(matrix).not.toBeNull();
-
-    // PUBLIC_CONTRACT_WIRING_PROOF: Storybook's DOM locators do not cross child
-    // shadow roots. These typed host events prove only the composition's public
-    // listener/spies; dedicated Playwright tests prove real pointer/keyboard origin.
-    requestedRow?.dispatchEvent(new CustomEvent<ActionRowActivateDetail>('sk-action-row-activate', {
-      detail: { id: requestedRowId },
-      bubbles: true,
-      composed: true,
-      cancelable: false,
-    }));
-    chart?.dispatchEvent(new CustomEvent<BarChartSelectDetail>('sk-bar-chart-select', {
-      detail: { id: requestedBarId },
-      bubbles: true,
-      composed: true,
-      cancelable: false,
-    }));
-    matrix?.dispatchEvent(new CustomEvent<TransitionMatrixSelectDetail>('sk-transition-matrix-select', {
-      detail: { routeId: requestedRouteId },
-      bubbles: true,
-      composed: true,
-      cancelable: false,
-    }));
-    await expect(args.onRowActivate).toHaveBeenCalledTimes(1);
-    await expect(args.onRowActivate).toHaveBeenCalledWith({ id: requestedRowId });
-    await expect(args.onBarSelect).toHaveBeenCalledTimes(1);
-    await expect(args.onBarSelect).toHaveBeenCalledWith({ id: requestedBarId });
-    await expect(args.onRouteSelect).toHaveBeenCalledTimes(1);
-    await expect(args.onRouteSelect).toHaveBeenCalledWith({ routeId: requestedRouteId });
-    await expect(JSON.parse(log?.getAttribute('data-row-event') ?? '{}')).toEqual({
-      count: 1,
-      detail: { id: requestedRowId },
-      bubbles: true,
-      composed: true,
-      cancelable: false,
-    });
-    await expect(JSON.parse(log?.getAttribute('data-bar-event') ?? '{}')).toEqual({
-      count: 1,
-      detail: { id: requestedBarId },
-      bubbles: true,
-      composed: true,
-      cancelable: false,
-    });
-    await expect(JSON.parse(log?.getAttribute('data-route-event') ?? '{}')).toEqual({
-      count: 1,
-      detail: { routeId: requestedRouteId },
-      bubbles: true,
-      composed: true,
-      cancelable: false,
-    });
-    await expect(selectedRow?.selectable).toBe(true);
-    await expect(selectedRow?.selected).toBe(true);
-    await expect(requestedRow?.selected).toBe(false);
-    await expect(chart?.selectedId).toBe(args.selectedBarId);
-    await expect(matrix?.selectedRouteId).toBe(args.selectedRouteId);
-    log?.setAttribute('data-row-event', '{"count":0}');
-    log?.setAttribute('data-bar-event', '{"count":0}');
-    log?.setAttribute('data-route-event', '{"count":0}');
-    if (log) log.textContent = 'Play proof complete; awaiting consumer intent.';
-    root?.setAttribute('data-play-proof-layer', 'public-contract-wiring');
-    root?.setAttribute('data-play-proof', 'passed');
-  },
-};
-
-export const EmptyPartialData: Story = {
-  render: (args) => renderTeamOverview(TEAM_OVERVIEW_FIXTURE, args, {
-    coverageMode: 'partial',
-    emptyOperational: true,
-  }),
+export const CopyOutcomes: Story = {
+  name: "TO2 · public copy-field outcomes",
+  render: () => renderFirstRunOverview("admin-install"),
 };
