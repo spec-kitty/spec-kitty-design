@@ -193,11 +193,21 @@ export function assessMergeReadiness({ mergeable, mergeStateStatus }) {
   }
 }
 
-/** Pure. M6 — `gh pr list --head` is an exact match, so discovery is list-then-filter. Reads
- *  `PROMOTE_PREFIX`, the same constant the decision rules build branch names from (M2) — the
- *  two are joined at the hip on purpose, and a `--selftest` mutation control proves it. */
+/**
+ * Pure. M6 — `gh pr list --head` is an exact match, so discovery is list-then-filter.
+ *
+ * **F1 (pre-merge squad, gate pass 2)**: matches the EXACT `promote/<40-hex>` shape
+ * (`PROMOTION_BRANCH_RE`, `scripts/lib/promote-github.mjs`), never a loose `promote/` prefix.
+ * B5 tightened the SWEEP's branch-deletion half to this shape but left this selection function
+ * on the loose prefix — a human PR into `develop` headed `promote/my-feature` was adopted as
+ * `existingPr` (`cliRun`), closed with a misleading "Superseded by" comment, and its branch
+ * deleted by `applyOutcome`'s supersede path, none of which consult `PROMOTION_BRANCH_RE` at
+ * all. Fixing selection here closes all three: `existingPr` (and therefore the supersede
+ * path's `deleteBranch` call) can now only ever be populated from a PR this mechanism itself
+ * could have created.
+ */
 export function findPromotionPRs(prListJson) {
-  return (prListJson ?? []).filter((pr) => String(pr.headRefName ?? '').startsWith(PROMOTE_PREFIX));
+  return (prListJson ?? []).filter((pr) => PROMOTION_BRANCH_RE.test(String(pr.headRefName ?? '')));
 }
 
 /** Pure. M5 — fails closed unless the installation covers exactly spec-kitty/spec-kitty-design. */
@@ -531,7 +541,13 @@ export function applyOutcome(exec, repo, cwd, decision, developSha, trainSha) {
             'this PR merged.',
         );
         closePR(exec, repo, decision.existingPr.number);
-        deleteBranch(exec, repo, decision.existingPr.branch);
+        // F1 (pre-merge squad, gate pass 2): defense in depth at the deletion call site
+        // itself, on top of `findPromotionPRs`'s selection-time filter — a branch reaching
+        // here that does NOT match the mechanism's own exact shape is never deleted,
+        // whatever upstream code populated `existingPr`.
+        if (PROMOTION_BRANCH_RE.test(decision.existingPr.branch)) {
+          deleteBranch(exec, repo, decision.existingPr.branch);
+        }
       }
       const newSha = impl.createTreeSyncCommit(cwd, {
         tree: decision.trainTree,
@@ -695,8 +711,14 @@ async function cliRun() {
   // actually triggered this run ever disagree, promoting from the variable's content would
   // promote a branch this job's own trigger was never scoped to gate. Fail closed rather than
   // silently trusting the variable over the trigger.
-  const triggeringRef = process.env.GITHUB_REF_NAME;
-  if (triggeringRef && triggeringRef !== sourceRef) {
+  // F11 (pre-merge squad, gate pass 2): required, like GITHUB_REPOSITORY already is — the
+  // earlier `if (triggeringRef && ...)` failed OPEN when GITHUB_REF_NAME was unset (skipping
+  // the whole guard silently) instead of failing closed on a run mode that cannot tell what
+  // triggered it. GitHub Actions sets this automatically for every push-triggered run; its
+  // absence means something is genuinely wrong with the invocation, not a legitimate case to
+  // let through.
+  const triggeringRef = requireEnv('GITHUB_REF_NAME');
+  if (triggeringRef !== sourceRef) {
     console.error(
       `::error::PROMOTE_SOURCE_REF ("${sourceRef}") does not match GITHUB_REF_NAME ` +
         `("${triggeringRef}", the ref that actually triggered this run) — refusing to promote ` +
@@ -777,7 +799,12 @@ async function cliRun() {
   await runCycle({ exec, repo, cwd, decision, developSha, trainSha, trainTree });
 }
 
-// ── --selftest (T003/IC-03): 18 probes, floor outside the table, mutation controls ───────
+// ── --selftest (T003/IC-03): the probe table, floor outside the table, mutation controls ──
+//
+// F9 (pre-merge squad, gate pass 2): this banner used to restate a probe count ("18 probes")
+// that drifted from the shipped table more than once. `PROBE_FLOOR` below and `selftest()`'s
+// own summary line derive and print the real count at run time — see those, not a number
+// re-typed here, for how many probes actually exist right now.
 //
 // contracts/promotion-script.contract.md is authoritative for the shape and numbering below.
 // Every probe runs against a FRESH scratch git repository (`mkdtempSync`), identity set via
@@ -1284,8 +1311,8 @@ async function runProbes() {
     }
   }
 
-  // Probe 10 — develop moves between PR-open and merge-attempt: re-check divergence, never
-  // merge over it. `assessMergeReadiness`'s BEHIND handling is the general case (probe 13);
+  // Probe 11 — develop moves between PR-open and merge-attempt: re-check divergence, never
+  // merge over it. `assessMergeReadiness`'s BEHIND handling is the general case (probe 14);
   // this probe demonstrates the end-to-end consequence against a real, mutated git state: an
   // `open-new` decision's premise (develop's tip at PR-open time) is invalidated by a
   // concurrent write, and re-deciding against the NEW tip never reuses/merges blindly.
@@ -1339,7 +1366,7 @@ async function runProbes() {
     }
   }
 
-  // Probe 11 — mutation control: broken createTreeSyncCommit. Monkey-patches the REAL,
+  // Probe 12 — mutation control: broken createTreeSyncCommit. Monkey-patches the REAL,
   // already-loaded `impl.createTreeSyncCommit` and re-runs probe 4's own postcondition
   // helper (never a second, hand-written simulation) — the postcondition MUST now fail.
   {
@@ -1410,7 +1437,7 @@ async function runProbes() {
     });
   }
 
-  // Probe 13 — assessMergeReadiness, all seven documented states + null.
+  // Probe 14 — assessMergeReadiness, all seven documented states + null.
   {
     const cases = [
       [{ mergeable: null, mergeStateStatus: null }, 'poll-again'],
@@ -1431,17 +1458,36 @@ async function runProbes() {
     record(14, 'assessMergeReadiness: all documented states + null', 'pass', allMatch, outcomes);
   }
 
-  // Probe 15 — findPromotionPRs: 0, 1, 2+.
+  // Probe 15 — findPromotionPRs: 0, 1, 2+, AND (F1, pre-merge squad gate pass 2) a
+  // loosely-`promote/`-prefixed human branch is never adopted even when it is the only entry.
   {
+    const shaped = (n) => `promote/${String(n).repeat(40).slice(0, 40)}`;
     const zero = impl.findPromotionPRs([{ headRefName: 'other' }]);
-    const one = impl.findPromotionPRs([{ headRefName: 'other' }, { headRefName: 'promote/aaa' }]);
+    const one = impl.findPromotionPRs([{ headRefName: 'other' }, { headRefName: shaped('a') }]);
     const two = impl.findPromotionPRs([
-      { headRefName: 'promote/aaa' },
-      { headRefName: 'promote/bbb' },
+      { headRefName: shaped('a') },
+      { headRefName: shaped('b') },
       { headRefName: 'other' },
     ]);
-    const ok = zero.length === 0 && one.length === 1 && two.length === 2;
-    record(15, 'findPromotionPRs: 0, 1, 2+', 'pass', ok, { zero: zero.length, one: one.length, two: two.length });
+    // F1: `promote/my-feature` (a real, human-plausible branch name) does NOT match the exact
+    // `promote/<40-hex>` shape and must never be adopted, whatever else is in the list.
+    const humanBranchExcluded = impl.findPromotionPRs([{ headRefName: 'promote/my-feature' }]).length === 0;
+    const humanBranchExcludedAlongsideReal = impl
+      .findPromotionPRs([{ headRefName: 'promote/my-feature' }, { headRefName: shaped('c') }])
+      .every((pr) => pr.headRefName === shaped('c'));
+    const ok =
+      zero.length === 0 &&
+      one.length === 1 &&
+      two.length === 2 &&
+      humanBranchExcluded &&
+      humanBranchExcludedAlongsideReal;
+    record(15, 'findPromotionPRs: 0, 1, 2+, and a loosely-prefixed human branch is never adopted (F1)', 'pass', ok, {
+      zero: zero.length,
+      one: one.length,
+      two: two.length,
+      humanBranchExcluded,
+      humanBranchExcludedAlongsideReal,
+    });
   }
 
   // Probe 16 — assertSingleRepoScope: 0, 1-correct, 1-wrong, 2+.
@@ -1695,6 +1741,11 @@ async function runProbes() {
     }
 
     // (c) happy path — parent matches, post-merge tree matches — merges cleanly, no error.
+    // F2 (pre-merge squad, gate pass 2): also asserts the recorded merge argv itself, not just
+    // that SOME "gh pr merge" call happened — deleting --match-head-commit entirely left this
+    // probe green before, because nothing checked the argv contents. The exact expected argv
+    // is asserted (deep equality), so a dropped or reordered flag is caught, not just a
+    // dropped subcommand.
     process.exitCode = undefined;
     {
       const { exec, calls } = makePollExec({
@@ -1703,8 +1754,19 @@ async function runProbes() {
         postMergeTree: 'TRAIN_TREE',
       });
       await pollAndMerge(exec, 'spec-kitty/spec-kitty-design', '/tmp', 1, 'headsha', 'EXPECTED_PARENT_SHA', 'TRAIN_TREE');
-      outcomes.happyPathMerges =
-        process.exitCode !== 1 && calls.some((c) => c[0] === 'gh' && c[1] === 'pr' && c[2] === 'merge');
+      const mergeCall = calls.find((c) => c[0] === 'gh' && c[1] === 'pr' && c[2] === 'merge');
+      const expectedMergeArgv = [
+        'gh', 'pr', 'merge', '1',
+        '--repo', 'spec-kitty/spec-kitty-design',
+        '--rebase',
+        '--match-head-commit', 'headsha',
+      ];
+      const mergeArgvOk =
+        !!mergeCall &&
+        mergeCall.length === expectedMergeArgv.length &&
+        expectedMergeArgv.every((part, i) => mergeCall[i] === part);
+      outcomes.happyPathMerges = process.exitCode !== 1 && mergeArgvOk;
+      outcomes.happyPathMergeArgv = mergeCall;
     }
 
     process.exitCode = savedExitCode;
@@ -1802,16 +1864,69 @@ async function runProbes() {
     );
   }
 
+  // Probe 22 — F1 (pre-merge squad, gate pass 2): a human PR into `develop` headed
+  // `promote/my-feature` is neither adopted (probe 15 covers `findPromotionPRs`'s selection
+  // half directly), nor closed, nor deleted, across a full `runCycle` — the sweep's own reads
+  // (`listOpenPRsBaseDevelop`, `listOpenPromotionHeadPRsAnyBase`, `listPromotionBranches`, all
+  // real, unmutated production code) return the human PR/branch, and neither the closing half
+  // nor the deletion half of the sweep may ever reference it.
+  {
+    const HUMAN_PR_NUMBER = 999;
+    const HUMAN_BRANCH = 'promote/my-feature';
+    const calls = [];
+    const exec = (file, args) => {
+      calls.push([file, ...(args ?? [])]);
+      if (file === 'gh' && args?.[0] === 'pr' && args?.[1] === 'list') {
+        return JSON.stringify([
+          {
+            number: HUMAN_PR_NUMBER,
+            headRefName: HUMAN_BRANCH,
+            headRefOid: 'deadbeef',
+            baseRefName: 'develop',
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+      }
+      if (file === 'gh' && args?.[0] === 'api' && String(args?.[1] ?? '').includes('matching-refs')) {
+        return JSON.stringify([{ ref: `refs/heads/${HUMAN_BRANCH}` }]);
+      }
+      return '';
+    };
+    const decision = { outcome: 'no-op-missing-develop', existingPr: null, divergence: null };
+    await runCycle({
+      exec,
+      repo: 'spec-kitty/spec-kitty-design',
+      cwd: '/tmp',
+      decision,
+      developSha: null,
+      trainSha: 'trainsha',
+      trainTree: 'traintree',
+    });
+    const touchedHumanPr = calls.some(
+      (c) =>
+        (c[0] === 'gh' && c[1] === 'pr' && (c[2] === 'comment' || c[2] === 'close') && c[3] === String(HUMAN_PR_NUMBER)) ||
+        (c[0] === 'gh' && c[1] === 'api' && c[2] === '-X' && c[3] === 'DELETE' && String(c[4] ?? '').includes(HUMAN_BRANCH)),
+    );
+    record(
+      22,
+      'F1: a human promote/my-feature PR into develop is neither closed nor deleted by the sweep',
+      'pass',
+      !touchedHumanPr,
+      { calls },
+    );
+  }
+
   return results;
 }
 
-// M3 (pre-merge squad): 21 DISTINCT probe numbers (1-21, no duplicates — the two divergence
-// scenarios that both used to be numbered "9" are now 9 and 10) and no second, self-
-// referential floor living INSIDE the table (the contract's own words: "the floor sits
-// OUTSIDE the probe table") — the code-level checks below are the only floor. Raise this
-// deliberately when a probe is added; lowering it is a deliberate edit in the same commit
-// that removes a probe, never a silent side effect of a duplicate label masking a shrink.
-const PROBE_FLOOR = 21;
+// M3 (pre-merge squad): DISTINCT probe numbers, no duplicates (the two divergence scenarios
+// that both used to be numbered "9" are 9 and 10), and no second, self-referential floor
+// living INSIDE the table (the contract's own words: "the floor sits OUTSIDE the probe
+// table") — the code-level checks below are the only floor. Raise this deliberately when a
+// probe is added (F1/F2 added probes 22 and extended 19, gate pass 2); lowering it is a
+// deliberate edit in the same commit that removes a probe, never a silent side effect of a
+// duplicate label masking a shrink.
+const PROBE_FLOOR = 22;
 
 async function selftest() {
   // B1 (pre-merge squad, PR #429): the ONE choke point every git call in this file's
