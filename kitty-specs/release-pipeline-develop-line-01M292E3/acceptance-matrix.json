@@ -67,11 +67,11 @@
     {
       "criterion_id": "FR-007",
       "description": "Verify FR-007 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": "node scripts/promote-develop.mjs --selftest 21/21 (probes 9-13 divergence/mutation, 17-18 sweep/argv, 19 merge-time re-read, 20 sweep-on-every-outcome, 21 prefix mutation); FR-007(a)-(h) each map to a named function/probe per the WP report",
+      "proof_type": "manual_review",
+      "evidence": "Corrected (F10, gate pass 2): FR-007(e) (results in a normal push event) is design-evidenced, not automated-test-evidenced \u2014 a real push event triggering REL2's rc-publish workflow cannot be observed before this PR merges and develop exists. Deferred to SC-005's real, post-merge, ten-cycle observation (branch-model.md's queries), owned by REL2 (#363). FR-007(a)-(d),(f)-(h) remain covered by node scripts/promote-develop.mjs --selftest (22/22 probes) as previously recorded.",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T23:25:05.299212+00:00",
+      "verified_at": "2026-09-12T00:24:29.980826+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
