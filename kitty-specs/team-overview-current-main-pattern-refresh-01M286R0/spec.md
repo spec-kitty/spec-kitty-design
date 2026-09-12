@@ -133,9 +133,12 @@ stories, and reviewed visual baselines at 1440px, intermediate, 390px, short vie
    match the visual order.
 2. **Given** a closed compact drawer, **when** keyboard navigation runs, **then** drawer content is
    absent from focus/accessibility exposure; accepted dismissal returns focus to the trigger.
-3. **Given** 390px, 200% zoom, long localized copy, RTL, or a short viewport, **when** the pattern is
-   traversed, **then** targets are at least 44 CSS pixels, focus is not clipped, local content wraps,
-   and the document has zero horizontal overflow.
+3. **Given** 390px, real 200% browser zoom (a fresh `deviceScaleFactor: 2` context at the
+   720x512 CSS viewport derived from the normal 1440x1024 story viewport), long localized copy,
+   RTL, or a short viewport, **when** the pattern is traversed, **then** the compact-shell
+   breakpoint is observably crossed, targets are at least 44 CSS pixels, focus is not clipped,
+   local content wraps, and the document has zero horizontal overflow. CSS `zoom` is supplemental
+   magnification stress only and is not acceptance evidence for browser zoom.
 4. **Given** light, forced-colors, or reduced-motion media, **when** rendered, **then** the same
    fixture content remains complete and meaning does not depend on hue or animation.
 
@@ -179,7 +182,7 @@ stories, and reviewed visual baselines at 1440px, intermediate, 390px, short vie
 | ID      | Title                  | Requirement                                                                                                                                    | Category        | Priority | Status |
 | ------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | -------- | ------ |
 | NFR-001 | Accessibility          | Every ratcheted story is non-empty and has zero axe WCAG 2.1 AA violations; TO1/TO2 expose one H1 and native semantic structure.               | Accessibility   | High     | Open   |
-| NFR-002 | Responsive containment | At 1440px, 1123px, 860/859px, 390px, short viewport, and calibrated 200% zoom, document overflow is zero and narrow targets are at least 44px. | Usability       | High     | Open   |
+| NFR-002 | Responsive containment | At 1440px, 1123px, 860/859px, 390px, short viewport, and real 200% zoom (fresh DPR-2 context at derived 720x512 CSS viewport), document overflow is zero and narrow targets are at least 44px. | Usability       | High     | Open   |
 | NFR-003 | Theme/media resilience | Dark/default, same-fixture LightMode, RTL, forced colors, and reduced motion preserve complete content, visible boundaries, and focus.         | Accessibility   | High     | Open   |
 | NFR-004 | Cross-browser          | Focused semantic/interaction/layout checks pass in configured Chromium, Firefox, and WebKit.                                                   | Compatibility   | High     | Open   |
 | NFR-005 | Determinism            | Repeated projection of the same fixtures produces byte-equivalent values/order and never mutates caller-owned inputs.                          | Reliability     | High     | Open   |

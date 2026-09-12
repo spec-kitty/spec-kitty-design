@@ -117,7 +117,9 @@ focused discovery/test/visual claim that presents Delivery/Flow as the current T
   role/route authorization guards.
 - One H1, landmarks/native lists/headings/labels, keyboard and accessibility-tree checks, axe.
 - Default dark and same-fixture LightMode; 1440/intermediate/390/short viewport/long localized
-  content/calibrated 200% zoom/RTL/forced colors/reduced motion.
+  content/RTL/forced colors/reduced motion; real 200% browser zoom uses a fresh DPR-2 context at
+  the 720x512 CSS viewport derived from 1440x1024, proves the compact-shell exposure change, and
+  keeps CSS `zoom` explicitly supplemental.
 - Zero document overflow or clipped focus and narrow actionable targets at least 44px.
 - Public copy result outcomes and focus safety; passive activity; controlled drawer focus return.
 - Six replacement discovered IDs and fully replaced Team Overview visual cases/PNGs, each inspected.
