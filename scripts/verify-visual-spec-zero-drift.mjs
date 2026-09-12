@@ -53,7 +53,7 @@
  *           could not be resolved, etc.).
  */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -61,6 +61,16 @@ import { fileURLToPath } from 'node:url';
 const FILE = 'apps/storybook/src/tests/visual.spec.ts';
 const FLOOR_SHAPE = /test\.info\(\)\.config\.projects\.map/;
 const TRAIN_REF = 'origin/train/elements-first';
+
+// #438 F9: execFileSync's default `stdio` INHERITS the child's stderr straight through to this
+// process's own stderr, IN ADDITION TO capturing it on `error.stderr` — measured, not assumed:
+// a healthy, fully green `--selftest` run leaked raw `fatal:`/`verification_error:` lines from
+// every scratch-repo subprocess it deliberately drives to failure. Explicit `stdio: ['pipe',
+// 'pipe', 'pipe']` keeps the diagnostic (still readable via `error.stdout`/`error.stderr`)
+// without it also printing live — the fix is capture, never `'ignore'` on fd 2, which would
+// discard a REAL failure's diagnostic on the one path (the non-selftest CLI run) where a human
+// is actually reading it.
+const PIPED = { stdio: ['pipe', 'pipe', 'pipe'] };
 
 /**
  * `git merge-base HEAD <TRAIN_REF>`. Throws — loudly, carrying the underlying git error — if
@@ -70,7 +80,7 @@ const TRAIN_REF = 'origin/train/elements-first';
  */
 export function resolveDefaultBase() {
   try {
-    return execFileSync('git', ['merge-base', 'HEAD', TRAIN_REF], { encoding: 'utf8' }).trim();
+    return execFileSync('git', ['merge-base', 'HEAD', TRAIN_REF], { encoding: 'utf8', ...PIPED }).trim();
   } catch (err) {
     throw new Error(
       `cannot resolve default base: \`git merge-base HEAD ${TRAIN_REF}\` failed — ${String(err.message).trim()}. ` +
@@ -83,7 +93,18 @@ function gitDiff(baseRef) {
   return execFileSync('git', ['diff', '--no-color', '-U0', baseRef, '--', FILE], {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
+    ...PIPED,
   });
+}
+
+/** Whether FILE exists in the tree at `ref` (never throws — a missing ref/path is just `false`). */
+function fileExistsAt(ref, file) {
+  try {
+    execFileSync('git', ['cat-file', '-e', `${ref}:${file}`], PIPED);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Parse a `-U0` unified diff body into `{ removed: string[], added: string[] }` blocks. */
@@ -184,7 +205,10 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       ],
     ];
     let bad = 0;
+    let passKindA = 0;
+    let failKindA = 0;
     for (const [note, patch, expectOk] of PROBES) {
+      if (expectOk) passKindA++; else failKindA++;
       const { ok } = checkBlocks(parseHunkBlocks(patch));
       if (ok !== expectOk) {
         console.error(`  ✗ ${note}: expected ok=${expectOk}, got ok=${ok}`);
@@ -192,14 +216,15 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       }
     }
 
-    // ── PART B: resolveDefaultBase()'s LOUD-FAILURE behaviour (#435) ──────────────────────────
+    // ── PART B: resolveDefaultBase()'s LOUD-FAILURE behaviour, and F4's file-existence floor
+    //    (#435, #438) ──────────────────────────────────────────────────────────────────────────
     //
     // Part A above exercises checkBlocks/parseHunkBlocks in-process — real code, but not the
-    // resolveDefaultBase() path this file's own defect (a silent hardcoded-SHA fallback) lived
-    // in. That function shells out to git and its answer depends on which refs the CURRENT repo
-    // happens to carry, so it cannot be probed by calling it directly without controlling the
-    // repo it runs against. These probes spawn THIS SAME FILE as a real subprocess against
-    // scratch git repos that do/don't carry `origin/train/elements-first` — the actual CLI path
+    // resolveDefaultBase()/CLI path this file's own defects (a silent hardcoded-SHA fallback;
+    // an empty diff over a file absent from BOTH trees read as "byte-identical") lived in. Those
+    // depend on which refs/files the CURRENT repo happens to carry, so they cannot be probed by
+    // calling functions directly without controlling the repo they run against. These probes
+    // spawn THIS SAME FILE as a real subprocess against scratch git repos — the actual CLI path
     // end to end, not a reimplementation of it (the #434 mistake this mission was warned about).
     const SELF = fileURLToPath(import.meta.url);
     const scratch = mkdtempSync(join(tmpdir(), 'ni001-selftest-'));
@@ -208,14 +233,27 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       GIT_AUTHOR_NAME: 'selftest', GIT_AUTHOR_EMAIL: 'selftest@example.invalid',
       GIT_COMMITTER_NAME: 'selftest', GIT_COMMITTER_EMAIL: 'selftest@example.invalid',
     };
-    const git = (repo, args) => execFileSync('git', args, { cwd: repo, encoding: 'utf8', env: gitEnv });
+    const git = (repo, args) => execFileSync('git', args, { cwd: repo, encoding: 'utf8', env: gitEnv, ...PIPED });
+    // #438 F9: a scratch repo must not inherit a machine-wide `commit.gpgsign = true` — with no
+    // key/agent wired to `selftest@example.invalid`, every commit below would abort. Set it
+    // false on each repo, immediately after `init`, rather than relying on the ambient config.
+    const newRepo = (repo) => {
+      mkdirSync(repo, { recursive: true });
+      git(repo, ['init', '-q']);
+      git(repo, ['config', 'commit.gpgsign', 'false']);
+    };
     let subprocessBad = 0;
     let subprocessTotal = 0;
-    const subprocessProbe = (note, repo, args, check) => {
+    let passKindB = 0;
+    let failKindB = 0;
+    // `kind`: 'pass' (expect exit 0) or 'fail' (expect non-zero) — tracked by EXPECTATION, same
+    // as Part A's `expectOk`, so #438 F8's degenerate-split floor covers both tables uniformly.
+    const subprocessProbe = (note, kind, repo, args, check) => {
       subprocessTotal++;
+      if (kind === 'pass') passKindB++; else failKindB++;
       let result;
       try {
-        const out = execFileSync('node', [SELF, ...args], { cwd: repo, encoding: 'utf8', env: gitEnv });
+        const out = execFileSync('node', [SELF, ...args], { cwd: repo, encoding: 'utf8', env: gitEnv, ...PIPED });
         result = { code: 0, out };
       } catch (err) {
         result = { code: err.status ?? 1, out: `${err.stdout ?? ''}${err.stderr ?? ''}` };
@@ -229,25 +267,55 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       // A repo with NO `origin/train/elements-first` ref at all — a main-only or shallow clone,
       // exactly the shape #362/#434 and this script's own docstring describe.
       const noTrainRepo = join(scratch, 'no-train-ref');
-      mkdirSync(noTrainRepo);
-      git(noTrainRepo, ['init', '-q']);
+      newRepo(noTrainRepo);
       writeFileSync(join(noTrainRepo, 'x.txt'), 'x\n');
       git(noTrainRepo, ['add', '.']);
       git(noTrainRepo, ['commit', '-q', '-m', 'init']);
 
       subprocessProbe(
         'no baseRef, unresolvable origin/train/elements-first -> LOUD exit 2, no silent fallback',
+        'fail',
         noTrainRepo,
         [],
         ({ code, out }) => code === 2 && /cannot resolve default base/.test(out) && /origin\/train\/elements-first/.test(out),
       );
 
-      const headSha = git(noTrainRepo, ['rev-parse', 'HEAD']).trim();
+      // #438 F4: a SEPARATE repo, with a REAL `visual.spec.ts` committed with identical content
+      // in both the baseRef commit and the working tree. The probe this replaces asserted
+      // "byte-identical" against a repo that never created the file at all — so its green came
+      // from the file's ABSENCE in both trees, not from real matching content, and could not
+      // have told the two apart. This one earns the result honestly.
+      const realFileRepo = join(scratch, 'real-file');
+      newRepo(realFileRepo);
+      mkdirSync(join(realFileRepo, 'apps/storybook/src/tests'), { recursive: true });
+      writeFileSync(join(realFileRepo, FILE), "test('placeholder', async () => {});\n");
+      git(realFileRepo, ['add', '.']);
+      git(realFileRepo, ['commit', '-q', '-m', 'real visual.spec.ts, unchanged since']);
+      const realFileHeadSha = git(realFileRepo, ['rev-parse', 'HEAD']).trim();
       subprocessProbe(
-        'explicit baseRef bypasses resolveDefaultBase entirely -> still runs (exit 0)',
-        noTrainRepo,
-        [headSha],
+        'explicit baseRef, a REAL unchanged visual.spec.ts on both sides -> genuinely byte-identical, exit 0',
+        'pass',
+        realFileRepo,
+        [realFileHeadSha],
         ({ code, out }) => code === 0 && /byte-identical/.test(out),
+      );
+
+      // #438 F4, THE FIX UNDER TEST: FILE exists in NEITHER the baseRef commit nor the working
+      // tree (the shape the replaced probe accidentally relied on). Pre-fold this produced the
+      // exact same "OK: byte-identical" exit-0 message as real, earned identity above — a false
+      // pass over an empty set. Post-fold it must refuse loudly instead.
+      const noFileRepo = join(scratch, 'no-file-either-side');
+      newRepo(noFileRepo);
+      writeFileSync(join(noFileRepo, 'x.txt'), 'x\n');
+      git(noFileRepo, ['add', '.']);
+      git(noFileRepo, ['commit', '-q', '-m', 'no visual.spec.ts at all']);
+      const noFileHeadSha = git(noFileRepo, ['rev-parse', 'HEAD']).trim();
+      subprocessProbe(
+        "F4: FILE absent from BOTH the baseRef and the working tree -> loud exit 2, not a false 'byte-identical'",
+        'fail',
+        noFileRepo,
+        [noFileHeadSha],
+        ({ code, out }) => code === 2 && /does not exist at/.test(out) && !/byte-identical/.test(out),
       );
     } finally {
       rmSync(scratch, { recursive: true, force: true });
@@ -255,10 +323,21 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
 
     // Floor OUTSIDE the tables (same shape as check-develop-ruleset-parity.mjs's PROBE_FLOOR):
     // a probe count silently shrinking to zero must itself be caught.
-    const FLOOR = 8;
+    const FLOOR = 9;
     const total = PROBES.length + subprocessTotal;
     if (total < FLOOR) {
       console.error(`\n❌ the probe set has shrunk: ${total} probe(s) against a floor of ${FLOOR}.`);
+      process.exit(1);
+    }
+
+    // #438 F8: the total floor alone lets a must-catch (expect-fail) row be swapped for a
+    // must-pass row with the same total — including the single probe covering resolveDefaultBase's
+    // loud-failure fix. Ported from check-develop-ruleset-parity.mjs: refuse to report green over
+    // a degenerate expect-pass/expect-fail split, across BOTH tables together.
+    const passKind = passKindA + passKindB;
+    const failKind = failKindA + failKindB;
+    if (passKind === 0 || failKind === 0) {
+      console.error(`\n❌ refusing to report green over a degenerate probe set: ${passKind} expect-pass, ${failKind} expect-fail.`);
       process.exit(1);
     }
 
@@ -266,7 +345,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       console.error(`\n❌ ${bad + subprocessBad} of ${total} probe(s) did not behave as recorded.`);
       process.exit(1);
     }
-    console.log(`✅ All ${total} NI-001 probes behaved as recorded (${PROBES.length} block-level, ${subprocessTotal} resolveDefaultBase subprocess probes).`);
+    console.log(`✅ All ${total} NI-001 probes behaved as recorded (${PROBES.length} block-level, ${subprocessTotal} subprocess; ${passKind} expect-pass, ${failKind} expect-fail).`);
     process.exit(0);
   }
 
@@ -286,6 +365,19 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   }
 
   if (!patch.trim()) {
+    // #438 F4: `git diff <baseRef> -- FILE` also prints NOTHING when FILE exists in NEITHER
+    // tree (a scratch/degenerate checkout, or FILE renamed out from under this script without
+    // anyone updating the constant) — that is not "zero drift", it is "nothing to guard", and
+    // reporting it as a clean pass is the same green-over-an-empty-set shape this repo has a
+    // standing rule against. A mismatched existence (present in exactly one tree) is NOT this
+    // case: git would render that as a full add/delete hunk, so `patch` would not be empty.
+    if (!fileExistsAt(baseRef, FILE) && !existsSync(FILE)) {
+      console.error(
+        `verification_error: ${FILE} does not exist at ${baseRef} OR in the working tree — ` +
+          'there is nothing to verify, so an empty diff proves nothing.',
+      );
+      process.exit(2);
+    }
     console.log(`OK: ${FILE} is byte-identical to ${baseRef} — no drift is possible.`);
     process.exit(0);
   }
