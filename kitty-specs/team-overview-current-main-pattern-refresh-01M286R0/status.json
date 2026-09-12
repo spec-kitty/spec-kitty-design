@@ -1,0 +1,60 @@
+{
+  "event_count": 16,
+  "last_event_id": "01M28DH7A22VFDTHD35EYGCPCZ",
+  "materialized_at": "2026-09-11T14:21:50.274735+00:00",
+  "mission_number": "",
+  "mission_slug": "team-overview-current-main-pattern-refresh-01M286R0",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 1,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "user",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "codex",
+      "force_count": 3,
+      "lane": "approved",
+      "last_event_id": "01M28DH7A22VFDTHD35EYGCPCZ",
+      "last_transition_at": "2026-09-11T14:21:50.274735+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Implement current TO1/TO2 Team Overview evidence cutover",
+        "Implementation complete: TO1/TO2 current evidence, #150 retirement, full accessibility/browser/visual verification ready for independent review",
+        "Cycle 3 repair only: initial WP subtasks were already completed before review; fixes correct CI-reproducible size/SRI metadata and the inspected 168-hour visual hash",
+        "Cycle 3 review passed at 1d1dba2ea6a98fa2544671920cf7bf408ccb4907: retention derivation remains sound; clean top-level no-cache build reproduced 274885-byte IIFE and committed SRI; all 19 visual hashes match, corrected 168-hour baseline re-inspected and passed Noble Chromium; quality, 5-project typecheck, 47-probe composition, 802 tests, and focused 12-test Chromium suite pass; no config, public API, ownership, or scope drift."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/383/kitty-specs/team-overview-current-main-pattern-refresh-01M286R0/tasks/WP01-current-team-overview-pattern-and-proof/review-cycle-3.md",
+        "reference": "review-cycle://team-overview-current-main-pattern-refresh-01M286R0/WP01-current-team-overview-pattern-and-proof/review-cycle-3.md",
+        "reviewer": "reviewer-renata",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 795825,
+      "shell_pid_created_at": "1789128565.51",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done"
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "mission_slug": "team-overview-current-main-pattern-refresh-01M286R0",
+  "mission_id": "01M286R0N2QF9CV9DE7DQFB2WY",
+  "mission_branch": "kitty/mission-team-overview-current-main-pattern-refresh-01M286R0",
+  "target_branch": "team-overview-current-main-pattern-refresh",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-team-overview-pattern.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-current-*.png",
+        "docs/architecture/validation/issue-383-team-overview/README.md",
+        "docs/architecture/validation/issue-383-team-overview/visual-inspection.md",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/pattern-team-overview.test.ts",
+        "packages/elements/src/patterns/team-overview.fixture.ts",
+        "packages/elements/src/patterns/team-overview.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "dashboard",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-11T12:30:13.789365+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "ba5ae6a25ebc06517abec8fa8ede41adb250e8e7"
+}
