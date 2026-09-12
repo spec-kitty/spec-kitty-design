@@ -36,6 +36,18 @@
       "verdict": "verified-already-fixed",
       "wp": "WP01"
     },
+    "#368": {
+      "evidence_ref": "Not an issue: #368 is a train PR (native section-navigation strip) that this mission rebased onto. The reference was scraped from rebase bookkeeping; nothing here changes its surface and its ratchet entry is untouched.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#395": {
       "evidence_ref": "Delivered by this mission: WP01 shipped the ten-lane pattern, its focused suite, twelve visual baselines and the ratchet entry. PR #411 merged into train/elements-first as d579888e on 2026-09-11T17:19:53Z, with CI run 34623767293 green on merge commit 1caa720. The issue stays open until the train lands on main, per the programme's close-on-landing rule.",
       "fr": null,
