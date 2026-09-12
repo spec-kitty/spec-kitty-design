@@ -7,33 +7,48 @@
  *
  * Compares the live `.github/workflows/ci-quality.yml` against a hardcoded BASELINE captured
  * from the pre-mission tree (commit 907b2bbd, the last commit before REL1/#362 touched this
- * file) plus the two named classes of change REL1 is allowed to have made:
+ * file) plus the named classes of change REL1 is allowed to have made:
  *
  *   1. Exactly two NEW jobs (`promote-develop`, `develop-ruleset-parity`) — present in the live
  *      file, absent from BASELINE.
  *   2. Five EXISTING jobs (`storybook-build`, `a11y`, `visual-regression`, `playwright`,
- *      `lighthouse`) whose `if:` gains the `promote/*`-into-`develop` skip conjunct (B3) — their
- *      `needs:` is unchanged, and their new `if:` must equal the exact expected value, not
- *      merely differ from the baseline (so a THIRD, uncontrolled edit to one of these five is
- *      still caught).
+ *      `lighthouse`) whose `if:` gains the exact-shape `promote/<40-hex>`-into-`develop` skip
+ *      conjunct (B3/F7); the four downstream ones also gain `changes` in their `needs:` (F7 —
+ *      needed to read `needs.changes.outputs.is_develop_promotion_pr`). Every new `if:`/`needs:`
+ *      must equal the exact expected value, not merely differ from the baseline (so a THIRD,
+ *      uncontrolled edit to one of these five is still caught).
+ *   3. The `on:` trigger block (F4): `pull_request.branches`/`push.branches` gain `develop`,
+ *      `workflow_dispatch: {}` is added — and `schedule` is UNCHANGED (still exactly the one
+ *      cron), which is the deliberate operator decision (research.md R25) that a second cron
+ *      would silently re-trigger the entire workflow for every unguarded job.
  *
  * Every other job's `if:`/`needs:` (and the job key set otherwise) must be BYTE-IDENTICAL to
- * the baseline. A hardcoded baseline, not a live `git show <merge-base>` lookup, on purpose —
- * this survives a rebase/squash of REL1's own history without needing to know which commit is
- * "before" at run time, and is exactly what the WP's own DoD item 8 asked to see run and pasted.
+ * the baseline.
+ *
+ * **F3 (pre-merge squad, gate pass 2)**: `BASELINE`/`ON_BASELINE` are no longer trusted as
+ * hardcoded literals alone — `verifyBaselineAgainstHistory` re-fetches the REAL pre-mission
+ * file via `git show 907b2bbd:...` on every run (not only `--selftest`) and refuses to report
+ * green if the hardcoded baseline has drifted from it. Editing `BASELINE`/`EXPECTED_CHANGED_IF`
+ * in the same commit as a workflow edit no longer defeats this check: commit `907b2bbd` is
+ * fixed, real git history, not something a same-commit edit can also rewrite.
  *
  * CLI: node scripts/check-ci-quality-trigger-parity.mjs [--selftest]
  */
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
+import { STORYBOOK_PREDICATE, HEAVY_JOB_PREDICATE } from './lib/storybook-predicate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const WORKFLOW = resolve(__dirname, '..', '.github', 'workflows', 'ci-quality.yml');
+const REPO_ROOT = resolve(__dirname, '..');
+const WORKFLOW = resolve(REPO_ROOT, '.github', 'workflows', 'ci-quality.yml');
+const PRE_MISSION_SHA = '907b2bbd';
 
 /** Captured from `git show 907b2bbd:.github/workflows/ci-quality.yml` — the tree immediately
- *  before REL1 (#362) touched this file. `null` means the field was absent. */
+ *  before REL1 (#362) touched this file. `null` means the field was absent.
+ *  `verifyBaselineAgainstHistory` (below) holds this to the REAL commit on every run. */
 export const BASELINE = {
   changes: { if: null, needs: null },
   security: { if: "github.event_name != 'schedule' || github.ref == 'refs/heads/main'", needs: null },
@@ -65,16 +80,43 @@ export const BASELINE = {
   },
 };
 
-/** The five jobs allowed to gain the `promote/*`-into-`develop` skip conjunct (B3), and the
- *  EXACT expected new `if:` for each — not merely "different from baseline". */
+/** F4 (pre-merge squad, gate pass 2): the pre-mission `on:` block, also verified against real
+ *  git history — see `verifyBaselineAgainstHistory`. */
+export const ON_BASELINE = {
+  pullRequestBranches: ['main', 'train/**'],
+  pushBranches: ['main', 'train/**'],
+  schedule: [{ cron: '17 2 * * *' }],
+  hasWorkflowDispatch: false,
+};
+
+/** The five jobs allowed to gain the exact-shape `promote/<40-hex>`-into-`develop` skip
+ *  conjunct (B3/F7/F6 — reads the SHARED predicate constants, never a second hardcoded copy). */
 export const EXPECTED_CHANGED_IF = {
-  'storybook-build':
-    "(needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true') && " +
-    "!(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')",
-  a11y: "needs.storybook-build.result == 'success' && !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')",
-  'visual-regression': "needs.storybook-build.result == 'success' && !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')",
-  playwright: "needs.storybook-build.result == 'success' && !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')",
-  lighthouse: "needs.storybook-build.result == 'success' && !(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')",
+  'storybook-build': STORYBOOK_PREDICATE,
+  a11y: HEAVY_JOB_PREDICATE,
+  'visual-regression': HEAVY_JOB_PREDICATE,
+  playwright: HEAVY_JOB_PREDICATE,
+  lighthouse: HEAVY_JOB_PREDICATE,
+};
+
+/** F7: the four downstream heavy jobs also gain `changes` in `needs:` (to read
+ *  `needs.changes.outputs.is_develop_promotion_pr`) — `storybook-build`'s own `needs:` is
+ *  unchanged (it already depended on `changes`). */
+export const EXPECTED_CHANGED_NEEDS = {
+  a11y: ['storybook-build', 'changes'],
+  'visual-regression': ['storybook-build', 'changes'],
+  playwright: ['storybook-build', 'changes'],
+  lighthouse: ['storybook-build', 'changes'],
+};
+
+/** F4: the on: block REL1 is allowed to have produced. `schedule` is DELIBERATELY the same
+ *  single-entry array as ON_BASELINE — a second cron re-triggers the entire workflow for every
+ *  job without its own event-specific guard (research.md R25's own corrected decision). */
+export const ON_EXPECTED = {
+  pullRequestBranches: ['main', 'train/**', 'develop'],
+  pushBranches: ['main', 'train/**', 'develop'],
+  schedule: [{ cron: '17 2 * * *' }],
+  hasWorkflowDispatch: true,
 };
 
 export const EXPECTED_NEW_JOBS = new Set(['promote-develop', 'develop-ruleset-parity']);
@@ -86,9 +128,80 @@ function needsEqual(a, b) {
   return na.length === nb.length && na.every((v, i) => v === nb[i]);
 }
 
-/** Pure. Compares a parsed workflow's `jobs` map against BASELINE + the named exceptions.
- *  Returns an array of problem strings ([] means parity holds). */
-export function checkTriggerParity(jobs) {
+function arraysEqualByJson(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b)) return false;
+  return a.length === b.length && a.every((v, i) => JSON.stringify(v) === JSON.stringify(b[i]));
+}
+
+function onShape(on) {
+  return {
+    pullRequestBranches: on?.pull_request?.branches ?? null,
+    pushBranches: on?.push?.branches ?? null,
+    schedule: on?.schedule ?? null,
+    hasWorkflowDispatch: on != null && Object.prototype.hasOwnProperty.call(on, 'workflow_dispatch'),
+  };
+}
+
+/**
+ * F3 (pre-merge squad, gate pass 2): fetches the REAL pre-mission workflow from git history and
+ * asserts the hardcoded `BASELINE`/`ON_BASELINE` above still match it exactly. This is what
+ * makes editing `BASELINE` alongside a workflow edit, in the same commit, unable to defeat the
+ * checker: `PRE_MISSION_SHA` is a fixed, already-existing commit, not something that commit can
+ * also rewrite.
+ */
+export function verifyBaselineAgainstHistory(preMissionJobs, preMissionOn) {
+  const problems = [];
+  const preKeys = new Set(Object.keys(preMissionJobs ?? {}));
+  const baselineKeys = new Set(Object.keys(BASELINE));
+
+  for (const name of preKeys) {
+    if (!baselineKeys.has(name)) {
+      problems.push(`BASELINE is missing job \`${name}\`, which exists at ${PRE_MISSION_SHA}`);
+      continue;
+    }
+    const real = preMissionJobs[name];
+    const base = BASELINE[name];
+    if ((real.if ?? null) !== base.if) {
+      problems.push(
+        `BASELINE.${name}.if is ${JSON.stringify(base.if)}, but ${PRE_MISSION_SHA} has ${JSON.stringify(real.if ?? null)}`,
+      );
+    }
+    if (!needsEqual(real.needs ?? null, base.needs)) {
+      problems.push(
+        `BASELINE.${name}.needs is ${JSON.stringify(base.needs)}, but ${PRE_MISSION_SHA} has ${JSON.stringify(real.needs ?? null)}`,
+      );
+    }
+  }
+  for (const name of baselineKeys) {
+    if (!preKeys.has(name)) problems.push(`BASELINE carries job \`${name}\`, which does not exist at ${PRE_MISSION_SHA}`);
+  }
+
+  const realOn = onShape(preMissionOn);
+  for (const key of Object.keys(ON_BASELINE)) {
+    const realVal = realOn[key];
+    const baseVal = ON_BASELINE[key];
+    const equal = Array.isArray(baseVal) ? arraysEqualByJson(realVal, baseVal) : realVal === baseVal;
+    if (!equal) {
+      problems.push(
+        `ON_BASELINE.${key} is ${JSON.stringify(baseVal)}, but ${PRE_MISSION_SHA} has ${JSON.stringify(realVal)}`,
+      );
+    }
+  }
+
+  return problems;
+}
+
+function loadPreMissionWorkflow() {
+  const raw = execFileSync('git', ['show', `${PRE_MISSION_SHA}:.github/workflows/ci-quality.yml`], {
+    cwd: REPO_ROOT,
+    encoding: 'utf8',
+  });
+  return parse(raw);
+}
+
+/** Pure. Compares a parsed workflow's `jobs` map and `on` block against BASELINE/ON_BASELINE +
+ *  the named exceptions. Returns an array of problem strings ([] means parity holds). */
+export function checkTriggerParity(jobs, on) {
   const problems = [];
   const liveKeys = new Set(Object.keys(jobs ?? {}));
 
@@ -99,6 +212,7 @@ export function checkTriggerParity(jobs) {
     }
     const live = jobs[name];
     const expectedIf = name in EXPECTED_CHANGED_IF ? EXPECTED_CHANGED_IF[name] : expected.if;
+    const expectedNeeds = name in EXPECTED_CHANGED_NEEDS ? EXPECTED_CHANGED_NEEDS[name] : expected.needs;
     const liveIf = live.if ?? null;
     if (liveIf !== expectedIf) {
       problems.push(
@@ -106,8 +220,11 @@ export function checkTriggerParity(jobs) {
           (name in EXPECTED_CHANGED_IF ? '(the one REL1-allowed change)' : '(unchanged from baseline)'),
       );
     }
-    if (!needsEqual(live.needs ?? null, expected.needs)) {
-      problems.push(`job \`${name}\`'s \`needs:\` is ${JSON.stringify(live.needs ?? null)}, expected ${JSON.stringify(expected.needs)} (unchanged from baseline)`);
+    if (!needsEqual(live.needs ?? null, expectedNeeds)) {
+      problems.push(
+        `job \`${name}\`'s \`needs:\` is ${JSON.stringify(live.needs ?? null)}, expected ${JSON.stringify(expectedNeeds)} ` +
+          (name in EXPECTED_CHANGED_NEEDS ? '(the one REL1-allowed change, F7)' : '(unchanged from baseline)'),
+      );
     }
   }
 
@@ -122,19 +239,60 @@ export function checkTriggerParity(jobs) {
     if (!liveKeys.has(name)) problems.push(`expected new job \`${name}\` is missing`);
   }
 
+  // F4: the on: block.
+  const live = onShape(on);
+  if (!arraysEqualByJson(live.pullRequestBranches, ON_EXPECTED.pullRequestBranches)) {
+    problems.push(
+      `on.pull_request.branches is ${JSON.stringify(live.pullRequestBranches)}, expected ${JSON.stringify(ON_EXPECTED.pullRequestBranches)}`,
+    );
+  }
+  if (!arraysEqualByJson(live.pushBranches, ON_EXPECTED.pushBranches)) {
+    problems.push(
+      `on.push.branches is ${JSON.stringify(live.pushBranches)}, expected ${JSON.stringify(ON_EXPECTED.pushBranches)}`,
+    );
+  }
+  if (!arraysEqualByJson(live.schedule, ON_EXPECTED.schedule)) {
+    problems.push(
+      `on.schedule is ${JSON.stringify(live.schedule)}, expected ${JSON.stringify(ON_EXPECTED.schedule)} — exactly ` +
+        'one cron; adding a second was a deliberate operator decision NOT to make (research.md R25: it ' +
+        're-triggers the entire workflow for every job without its own event-specific guard)',
+    );
+  }
+  if (live.hasWorkflowDispatch !== ON_EXPECTED.hasWorkflowDispatch) {
+    problems.push(
+      `on.workflow_dispatch presence is ${live.hasWorkflowDispatch}, expected ${ON_EXPECTED.hasWorkflowDispatch}`,
+    );
+  }
+
   return problems;
 }
 
 function inspect() {
+  let preMission;
+  try {
+    preMission = loadPreMissionWorkflow();
+  } catch (err) {
+    return [
+      `could not read ${PRE_MISSION_SHA}:.github/workflows/ci-quality.yml from git history (${err.message}) — ` +
+        'refusing to trust the hardcoded BASELINE unverified. A shallow clone (missing history) is the usual ' +
+        "cause; this job's checkout must fetch full history.",
+    ];
+  }
+  const historyProblems = verifyBaselineAgainstHistory(preMission.jobs ?? {}, preMission.on ?? {});
+  if (historyProblems.length) {
+    return [
+      `BASELINE/ON_BASELINE have drifted from the real ${PRE_MISSION_SHA} — refusing to trust them:`,
+      ...historyProblems,
+    ];
+  }
   const wf = parse(readFileSync(WORKFLOW, 'utf8'));
-  return checkTriggerParity(wf.jobs ?? {});
+  return checkTriggerParity(wf.jobs ?? {}, wf.on ?? {});
 }
 
 // ── --selftest: floor-outside-table shape ────────────────────────────────────────────────
 
-function cloneJobsFromLiveFile() {
-  const wf = parse(readFileSync(WORKFLOW, 'utf8'));
-  return structuredClone(wf.jobs);
+function cloneLiveWorkflow() {
+  return structuredClone(parse(readFileSync(WORKFLOW, 'utf8')));
 }
 
 function runProbes() {
@@ -144,25 +302,26 @@ function runProbes() {
     results.push({ n, name, expect, ok, detail });
   };
 
-  // Probe 1 — the REAL, current live file matches (same fixture -> []).
+  // Probe 1 — the REAL, current live file matches (same fixture -> []), AND BASELINE itself
+  // matches real git history (F3).
   {
     const problems = inspect();
-    record(1, 'the live ci-quality.yml matches BASELINE + the two named exception classes', 'pass', problems.length === 0, problems);
+    record(1, 'the live ci-quality.yml matches BASELINE/ON_BASELINE + the named exception classes, and BASELINE matches real git history', 'pass', problems.length === 0, problems);
   }
 
   // Probe 2 — an extra, unexpected new job is caught.
   {
-    const jobs = cloneJobsFromLiveFile();
-    jobs['some-new-job'] = { 'runs-on': 'ubuntu-latest', steps: [] };
-    const problems = checkTriggerParity(jobs);
+    const wf = cloneLiveWorkflow();
+    wf.jobs['some-new-job'] = { 'runs-on': 'ubuntu-latest', steps: [] };
+    const problems = checkTriggerParity(wf.jobs, wf.on);
     record(2, 'an unexpected new job is caught', 'fail', !problems.some((p) => p.includes('some-new-job')));
   }
 
   // Probe 3 — a baseline job's `needs:` silently regressed is caught.
   {
-    const jobs = cloneJobsFromLiveFile();
-    jobs.gate.needs = jobs.gate.needs.filter((n) => n !== 'test');
-    const problems = checkTriggerParity(jobs);
+    const wf = cloneLiveWorkflow();
+    wf.jobs.gate.needs = wf.jobs.gate.needs.filter((n) => n !== 'test');
+    const problems = checkTriggerParity(wf.jobs, wf.on);
     record(3, "gate's needs: silently dropping `test` is caught", 'fail', !problems.some((p) => p.includes('`gate`') && p.includes('needs')));
   }
 
@@ -170,25 +329,61 @@ function runProbes() {
   // silently removed) is caught — this is the exact NFR-002 regression class this check exists
   // for.
   {
-    const jobs = cloneJobsFromLiveFile();
-    jobs.a11y.if = BASELINE.a11y.if;
-    const problems = checkTriggerParity(jobs);
+    const wf = cloneLiveWorkflow();
+    wf.jobs.a11y.if = BASELINE.a11y.if;
+    const problems = checkTriggerParity(wf.jobs, wf.on);
     record(4, "a11y's if: silently reverting to the pre-REL1 value is caught", 'fail', !problems.some((p) => p.includes('`a11y`')));
   }
 
   // Probe 5 — a baseline job's `if:` changed to something OTHER than the one expected new
   // value is caught (not merely "differs from baseline" — the exact expected value is asserted).
   {
-    const jobs = cloneJobsFromLiveFile();
-    jobs.playwright.if = "needs.storybook-build.result == 'success' && true";
-    const problems = checkTriggerParity(jobs);
+    const wf = cloneLiveWorkflow();
+    wf.jobs.playwright.if = "needs.storybook-build.result == 'success' && true";
+    const problems = checkTriggerParity(wf.jobs, wf.on);
     record(5, "playwright's if: changed to a THIRD, uncontrolled value is caught", 'fail', !problems.some((p) => p.includes('`playwright`')));
+  }
+
+  // Probe 6 — F4: a second cron silently added is caught.
+  {
+    const wf = cloneLiveWorkflow();
+    wf.on.schedule.push({ cron: '43 3 * * *' });
+    const problems = checkTriggerParity(wf.jobs, wf.on);
+    record(6, 'a second cron entry is caught (the deliberate one-cron decision, research.md R25)', 'fail', !problems.some((p) => p.includes('on.schedule')));
+  }
+
+  // Probe 7 — F4: develop silently dropped from push.branches is caught.
+  {
+    const wf = cloneLiveWorkflow();
+    wf.on.push.branches = ['main', 'train/**'];
+    const problems = checkTriggerParity(wf.jobs, wf.on);
+    record(7, 'develop silently dropped from on.push.branches is caught', 'fail', !problems.some((p) => p.includes('on.push.branches')));
+  }
+
+  // Probe 8 — F3: BASELINE itself disagreeing with real git history is caught, not just the
+  // live file disagreeing with BASELINE. Simulates "BASELINE edited alongside a workflow edit
+  // in the same commit" by comparing a deliberately WRONG in-memory baseline against the real
+  // pre-mission history — proving `verifyBaselineAgainstHistory` actually discriminates.
+  {
+    const realPreMission = loadPreMissionWorkflow();
+    const tamperedJobs = { ...(realPreMission.jobs ?? {}) };
+    // Simulate BASELINE having been (wrongly) edited to claim `gate` never required `test`.
+    const wrongBaseline = { ...BASELINE, gate: { ...BASELINE.gate, needs: BASELINE.gate.needs.filter((n) => n !== 'test') } };
+    const problems = [];
+    for (const [name, expected] of Object.entries(wrongBaseline)) {
+      const real = tamperedJobs[name];
+      if (!real) continue;
+      if (!needsEqual(real.needs ?? null, expected.needs)) {
+        problems.push(`BASELINE.${name}.needs disagrees with real history`);
+      }
+    }
+    record(8, 'a tampered in-memory BASELINE disagreeing with real git history is detectable', 'fail', problems.length === 0, problems);
   }
 
   return results;
 }
 
-const PROBE_FLOOR = 5;
+const PROBE_FLOOR = 8;
 
 function selftest() {
   const results = runProbes();
@@ -227,7 +422,7 @@ function main() {
     process.exitCode = 1;
     return;
   }
-  console.log('✅ ci-quality.yml: job key set and every job\'s if:/needs: match baseline except the two named REL1 exception classes (NFR-002/SC-003).');
+  console.log('✅ ci-quality.yml: job key set, every job\'s if:/needs:, and the on: block match baseline except the named REL1 exception classes (NFR-002/SC-003).');
 }
 
 main();
