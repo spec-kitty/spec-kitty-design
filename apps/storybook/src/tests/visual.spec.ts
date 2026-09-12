@@ -3106,7 +3106,7 @@ for (const visual of accountFrontDoorFullCases) {
       width: visual.width,
       height: visual.height,
     });
-    await expect(root).toHaveScreenshot(visual.name, {
+    await expect.soft(root).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
       timeout: 20000,
@@ -3118,7 +3118,7 @@ test('Account Front Door forced colors — visual baseline', async ({ page, brow
   test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
   await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
   const root = await accountFrontDoorStory(page, 'forced-colors', { width: 1440, height: 1024 });
-  await expect(root).toHaveScreenshot('sk-account-front-door-forced-colors.png', {
+  await expect.soft(root).toHaveScreenshot('sk-account-front-door-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -3146,7 +3146,7 @@ test('Account Front Door 200% CSS zoom stress — visual baseline', async ({ pag
   await page.evaluate(() => {
     document.documentElement.style.zoom = '2';
   });
-  await expect(root).toHaveScreenshot('sk-account-front-door-zoom-200.png', {
+  await expect.soft(root).toHaveScreenshot('sk-account-front-door-zoom-200.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -3167,7 +3167,7 @@ test('Account Front Door 200% CSS zoom stress — visual baseline', async ({ pag
 test('Account Front Door reduced motion — visual baseline', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const root = await accountFrontDoorStory(page, 'reduced-motion', { width: 1440, height: 1024 });
-  await expect(root).toHaveScreenshot('sk-account-front-door-reduced-motion.png', {
+  await expect.soft(root).toHaveScreenshot('sk-account-front-door-reduced-motion.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
