@@ -2,6 +2,77 @@
 
 Date: 2026-09-12
 
+## CI-authoritative baseline harvest after final compaction
+
+The current baseline bytes come from the exact GitHub Actions failure that rendered the preserved
+approved source head against the final #410/#429 train:
+
+- CI Quality run [`34666218964`](https://github.com/spec-kitty/spec-kitty-design/actions/runs/34666218964),
+  visual job [`103478749864`](https://github.com/spec-kitty/spec-kitty-design/actions/runs/34666218964/job/103478749864),
+  source head `e07757731ffbc88e122c0e76e38e219d98a0bba8`, base
+  `b38b40e74f4b1bf698697db5e127c5b52cce9bd3`, and checked PR merge commit
+  `898689dd9e2bf97893db2c2526e3d8a6acd6c18c`.
+- Artifact `10289042050`, `visual-regression-diffs`, GitHub digest
+  `sha256:856f375bad667bbeaaa2aaae1cb5aeccd0ac1437201984d087c3ed5768f697a6`.
+  The downloaded Playwright HTML report records 364 tests: 347 expected and exactly 17
+  unexpected. Its Team Activity subset contains all 18 cases, with those 17 failures and L5
+  passing.
+- The compact pre-harvest head was `a53ff0754e0006355ffe8ff970346de6cde79179`.
+  `git diff --name-status e0775773..a53ff075` names only `acceptance-matrix.json`,
+  `issue-matrix.json`, and this rebase-evidence document. A scoped comparison of `packages/`,
+  `apps/`, `fixtures/`, `expected-stories.json`, `package*.json`, `nx.json`,
+  `playwright.config.ts`, `scripts/`, and `.storybook/` is empty. The explicit blob IDs match at
+  both heads: Team Activity story `9bf170c9e6312e0c05a049bfa92a66e3ec9b8a7d`, focused spec
+  `323b3db2a3dc3f303b4b0b5ff9309fa5f8c884b6`, visual spec
+  `c08eedeca58afff5f1a794ac351660c750ce0952`, story inventory
+  `c623db4620d21426dca2aef6003d7c3137aad527`, and Playwright config
+  `3b61eb72a74a379b6d2a0bb233726fd28f7b1e9e`. The compaction delta is therefore
+  documentation-only and cannot change these renders.
+- Each failed test's `Snapshot:` value and named `*-expected.png`, `*-actual.png`, and
+  `*-diff.png` attachments were read from the decoded Playwright report manifest. Before any
+  replacement, every expected attachment byte-matched the corresponding checked-in
+  `*-chromium-linux.png`; that proves all 17 mappings without relying on archive order or loose
+  filename inference. Only the paired 17 actual attachments were copied. L5 remained unchanged
+  at Git blob `55279faebe05157e22b946f4fce76af668885d94` and SHA-256
+  `a67d583b0f9ef3f5ae85422d4b5be30ae94298c86f316af4b43be310a721720a`.
+
+All 17 actuals and their 17 expected/diff counterparts were inspected individually. L1-L4 retain
+their distinct live/quiet/degraded/gap boundaries and stable factual region; TL1 retains four
+independent repository states; OA1 populated/degraded/quiet/loading remain distinct and DM1 shows
+only `Decision` / `dp-42`. Default dark, required light, 390px narrow, intermediate, long-content,
+RTL, forced-colors, and reduced-motion identities are correct. Long and narrow content remains
+fully wrapped with no clipping or horizontal overflow; RTL alignment is coherent; forced-colors
+keeps visible borders and markers. The diffs show the systematic CI typography/metric change and
+its downstream wrapping/height effects, not substituted content, lost hierarchy, or truth-region
+crossover.
+
+The current CI-authoritative SHA-256 ledger is:
+
+```text
+2550e0bf419f6a7b3e0080c387b40695761f74649d94b5d26ff67cfdd1d758bb  team-activity-dm1-decision-chromium-linux.png
+fc64a24e7c93f44383d5a14478edf48c8bc85f7ef1b2bf82b121355e0c2561eb  team-activity-forced-colors-chromium-linux.png
+9c46e4ada07989fa40dccfaefe2cde4a4ba3d8570ee93aa01e9e5df2c299a602  team-activity-intermediate-chromium-linux.png
+66f28173b20809500ea05dd4902537baf10c488a06f787c2763a47eaefbaeffa  team-activity-l1-default-chromium-linux.png
+4f7c53234167b5c5dceefe023aa00ced9502c91f8aef046509c2336221400f98  team-activity-l2-quiet-chromium-linux.png
+4212003cc8417b0a3ea312f27d28bee32d4d5ca0ac04aa18e2c784a9c5fd9912  team-activity-l3-degraded-chromium-linux.png
+797a630f96ed18df6a97e4cd2a549ce68c6a382a0219bebc04d6b842944c7e49  team-activity-l4-gap-chromium-linux.png
+a67d583b0f9ef3f5ae85422d4b5be30ae94298c86f316af4b43be310a721720a  team-activity-l5-denial-chromium-linux.png
+1d2c547b410b4d97cfb1bb8037acc0391f44402b2bbfa34e30864c5bdf03053e  team-activity-light-mode-chromium-linux.png
+fb52d3df5637e39f0b24fa722997d3f72c2d0d32cc2f189fa1447e037dfbd895  team-activity-long-content-chromium-linux.png
+e1d8e74f3b82b936c434592be836db48ab8efcc7326bccd46ddbc74af6a0a186  team-activity-narrow-chromium-linux.png
+e16b3a02556f1e408440a00f13395fd7faedd2793a445fd42e1f6b08a0946e9f  team-activity-oa1-degraded-chromium-linux.png
+a6eb97149484365fdb3988a240a88613da7c96201c0ec5a7730e047812684e7e  team-activity-oa1-loading-chromium-linux.png
+fd35fde5ef501f1a18799c2cd726e0e3f3a080af548b11ede2c4eaf77db85664  team-activity-oa1-populated-chromium-linux.png
+d2452d3b1fb6f75afa2832f72ca71281f354f240dbcc1555b86e649b65ce64cb  team-activity-oa1-quiet-chromium-linux.png
+339327be2cd44d03b7a52213d8f5ef800e20d175ab64aa267d1cf3c0370092f6  team-activity-reduced-motion-chromium-linux.png
+ab6931b0e3a066fdce1aa3c421dc5ef10de883243d5769ca7223c9586ff242dc  team-activity-rtl-chromium-linux.png
+d12a3652c9d8ff40645112e0b8315b94a5baad05ae7dc2d49f9c5a48e4bf95af  team-activity-tl1-mixed-chromium-linux.png
+```
+
+This section supersedes only the older locally rendered Noble baseline bytes documented below;
+their source/behavioral gate results remain historical evidence. A local Noble visual replay is
+diagnostic on this host and is not used to overwrite these CI-authoritative images.
+
 ## Final approved compaction on #410/#429 train
 
 - Exact target: `b38b40e74f4b1bf698697db5e127c5b52cce9bd3`
@@ -80,8 +151,9 @@ This refresh did not push, comment, review, approve, merge, or alter mission lif
 | gate selftest | pass: 50/50 shapes |
 | offline packed load | pass: 31/31 elements, one sheet, 30 fonts, zero off-machine requests |
 
-The pinned visual environment was
-`mcr.microsoft.com/playwright:v1.62.1-noble`. The 18 inspected baseline SHA-256 values are:
+At that historical checkpoint the pinned visual environment was
+`mcr.microsoft.com/playwright:v1.62.1-noble`. Those 18 locally rendered, inspected baseline
+SHA-256 values were:
 
 ```text
 ec959549207633480f47e4025ec6bbd0536d3718f59eab1d1c8b9b98e85e6c93  team-activity-dm1-decision-chromium-linux.png
