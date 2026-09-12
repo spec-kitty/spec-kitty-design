@@ -2,33 +2,31 @@
 
 Date: 2026-09-12
 
-## Final train refresh after #410 and #429
+## Final approved compaction on #410/#429 train
 
 - Exact target: `b38b40e74f4b1bf698697db5e127c5b52cce9bd3`
-  (`origin/train/elements-first`). The pre-refresh approved head is preserved at
-  `safety/382-pre-b38-refresh-b63112e5` (`b63112e536e43db5268efe98f09b3646fd270de7`).
-- The 20-commit mission range was rebased linearly from its prior target
-  `d3263e9488f7df85a537a927d417729eacc75f12` onto the exact target above. The validated
-  post-rebase tree before this documentation-only addendum is
-  `c3b0a26c55a3bc9072276b32f9810d6e712268e6`; it is 20 commits ahead and zero behind.
-- `git range-diff` maps 19 commits patch-equivalently. The one changed mapping is executable
-  evidence `d2e300d8` to `76bd36ff`, where the two expected shared-file conflicts were resolved:
-  `visual.spec.ts` preserves all of #410's Account Front Door cases under `expect.soft` and adds
-  the 18 Team Activity cases under the same rule; `expected-stories.json` preserves the 654-story
-  target inventory and adds the 18 Team Activity routes for 672 unique IDs. No workflow or
-  configuration file is changed by the mission range.
-- The Team Activity source, focused browser spec, and all 18 PNGs are byte-identical to the
-  approved safety ref. `status.json` and `status.events.jsonl` also retain identical Git blobs
-  (`1662d23b` and `11a571bc`) and SHA-256 values
-  (`3425659c38a428aff8ea5440a27fd7e8ecc818120014cbfcbe46d5ebfe8ca87a` and
-  `c95b17436734f16db5f223010291419d521ab3b1bfb1c892e5389f4ffbc41116`). WP01 remains
-  approved; historical event SHAs remain historical.
+  (`origin/train/elements-first`). The complete pre-compaction approved line is preserved at
+  `safety/382-pre-final-compact-e0775773`
+  (`e07757731ffbc88e122c0e76e38e219d98a0bba8`).
+- The approved tree was rebuilt without merge commits as four logical changes: mission contract
+  and preserved review/lifecycle record `3ca9c43e`, story implementation `a260ef9e`, executable
+  browser/visual/inventory evidence `495b018b`, and exact-target evidence `3f551486`.
+- Before this SHA-only documentation reconciliation, compact commit
+  `3f5514864d020e4b996afd8744afbdfe051d992e` and the preserved source head had the identical Git
+  tree `008e6d4fa064bed9da2ed1300ba1d188c4777d28`; `git diff --exit-code` was empty. The shared files
+  therefore retain all Account Front Door cases under the current soft visual convention and all
+  672 unique story IDs, including the 18 Team Activity routes. No source, test behavior, snapshot,
+  workflow, or configuration changed during compaction.
+- `status.json`, `status.events.jsonl`, and every review-cycle/review-feedback artifact retain their
+  exact source blobs. WP01 remains approved; canonical historical event and review SHAs remain
+  historical. Only the mutable acceptance, issue, and rebase evidence references were reconciled
+  to the compact implementation/evidence commits.
 
 Final refresh validation on that tree:
 
 | Gate | Result |
 |---|---|
-| full-range commitlint, `git diff --check`, clean-status check | pass: 20/20 commits; zero whitespace errors; clean |
+| full-range commitlint, `git diff --check`, clean-status check | pass: 5/5 compact commits; zero whitespace errors; clean |
 | `npm run quality:all` | pass: 8 Nx lint projects, Stylelint, HTMLHint (163 files) |
 | `node scripts/typecheck-all.mjs` | pass: 5/5 projects |
 | `npm test -- --reporter=dot` | pass: 58 files, 808 tests |

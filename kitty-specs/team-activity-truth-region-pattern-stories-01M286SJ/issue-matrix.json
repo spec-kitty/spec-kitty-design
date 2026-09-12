@@ -1,7 +1,7 @@
 {
   "rows": {
     "#286": {
-      "evidence_ref": "Issue #286 remains independently owned. Compact implementation e88db202 introduces no runtime element render literal and supplies every Storybook-visible/accessibility string through the frozen consumer fixture; FR-013 and NI-006 in acceptance-matrix.json record the positive and negative proof.",
+      "evidence_ref": "Issue #286 remains independently owned. Compact implementation a260ef9e introduces no runtime element render literal and supplies every Storybook-visible/accessibility string through the frozen consumer fixture; FR-013 and NI-006 in acceptance-matrix.json record the positive and negative proof.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -13,7 +13,7 @@
       "wp": "WP01"
     },
     "#381": {
-      "evidence_ref": "Epic #381 is partially delivered by child #382 at compact implementation e88db202 with executable evidence d2e300d8; #382's L1-L5/TL1/OA1/DM1 acceptance is criterion-mapped in acceptance-matrix.json while sibling #383 remains separately owned.",
+      "evidence_ref": "Epic #381 is partially delivered by child #382 at compact implementation a260ef9e with executable evidence 495b018b; #382's L1-L5/TL1/OA1/DM1 acceptance is criterion-mapped in acceptance-matrix.json while sibling #383 remains separately owned.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -25,7 +25,7 @@
       "wp": "WP01"
     },
     "#382": {
-      "evidence_ref": "Independent final review at 91b5d0cf: cycle-7 DM1 own-key defect closed by b2710af1; compiled-seam valid and enumerable/non-enumerable/symbol/getter-safety proofs pass with exact errors; full truth-region, a11y, responsive, visual, composition, unit, type, quality, and commitlint evidence green.",
+      "evidence_ref": "Independent final approval remains preserved in review-cycle-8.md (historical reviewed code SHA 91b5d0cf). The byte-equivalent compact implementation a260ef9e and executable evidence 495b018b retain the compiled-seam enumerable/non-enumerable/symbol/getter-safety proofs and all green truth-region, a11y, responsive, visual, composition, unit, type, quality, and commitlint evidence.",
       "fr": null,
       "nfr": null,
       "repo": null,
