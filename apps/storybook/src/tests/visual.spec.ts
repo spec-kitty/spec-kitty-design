@@ -1672,6 +1672,27 @@ for (const visual of teamOverviewFullCases) {
   });
 }
 
+test('Team overview current forced colors — full pattern baseline', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
+  await page.emulateMedia({ forcedColors: 'active' });
+  expect(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBe(true);
+  const root = await teamOverviewPatternStory(page, 'default', 1440, 1500);
+  await expect.soft(root).toHaveScreenshot('team-overview-current-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('Team overview current reduced motion — full pattern baseline', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  expect(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
+  const root = await teamOverviewPatternStory(page, 'default', 1440, 1500);
+  await expect.soft(root).toHaveScreenshot('team-overview-current-reduced-motion.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
 const teamOverviewFocusedCases = [
   { id: 'default', region: 'velocity', name: 'team-overview-current-velocity.png' },
   { id: 'default', region: 'repositories', name: 'team-overview-current-repositories.png' },

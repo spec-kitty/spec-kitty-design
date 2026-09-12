@@ -160,9 +160,10 @@ const TEAM_ROUTE_PATTERNS = {
   work: /^\/a\/[a-z0-9-]+\/work\/$/u,
   connectors: /^\/a\/[a-z0-9-]+\/connectors\/$/u,
   members: /^\/a\/[a-z0-9-]+\/team\/$/u,
-  repository: /^\/a\/[a-z0-9-]+\/repos\/[a-z0-9._-]+\/$/u,
+  repository:
+    /^\/a\/[a-z0-9-]+\/repos\/[a-z0-9._-]+\/[a-z0-9._-]+\/$/u,
   mission:
-    /^\/a\/[a-z0-9-]+\/repos\/[a-z0-9._-]+\/missions\/[a-z0-9._-]+\/$/u,
+    /^\/a\/[a-z0-9-]+\/repos\/[a-z0-9._-]+\/[a-z0-9._-]+\/m\/[a-z0-9._-]+\/$/u,
 } as const satisfies Record<Exclude<SafeRouteKind, "release">, RegExp>;
 
 const isSafeReleaseRoute = (href: string): boolean =>
@@ -414,7 +415,7 @@ export const TEAM_OVERVIEW_POPULATED_RESPONSE = deepFreezeTeamOverviewFixture({
       missionRoute: {
         kind: "mission",
         label: "team-landing-pivots",
-        href: "/a/collaborative-demo-team/repos/e2e-team-landing/missions/team-landing-pivots/",
+        href: "/a/collaborative-demo-team/repos/spec-kitty/e2e-team-landing/m/team-landing-pivots/",
       },
       repository: "spec-kitty/e2e-team-landing",
       kind: "WPStatusChanged",
@@ -430,7 +431,7 @@ export const TEAM_OVERVIEW_POPULATED_RESPONSE = deepFreezeTeamOverviewFixture({
       missionRoute: {
         kind: "mission",
         label: "team-landing-pivots",
-        href: "/a/collaborative-demo-team/repos/e2e-team-landing/missions/team-landing-pivots/",
+        href: "/a/collaborative-demo-team/repos/spec-kitty/e2e-team-landing/m/team-landing-pivots/",
       },
       repository: "spec-kitty/e2e-team-landing",
       kind: "WPStatusChanged",
@@ -446,7 +447,7 @@ export const TEAM_OVERVIEW_POPULATED_RESPONSE = deepFreezeTeamOverviewFixture({
       missionRoute: {
         kind: "mission",
         label: "team-landing-pivots",
-        href: "/a/collaborative-demo-team/repos/e2e-team-landing/missions/team-landing-pivots/",
+        href: "/a/collaborative-demo-team/repos/spec-kitty/e2e-team-landing/m/team-landing-pivots/",
       },
       repository: "spec-kitty/e2e-team-landing",
       kind: "WPStatusChanged",
@@ -462,7 +463,7 @@ export const TEAM_OVERVIEW_POPULATED_RESPONSE = deepFreezeTeamOverviewFixture({
       missionRoute: {
         kind: "mission",
         label: "team-landing-pivots",
-        href: "/a/collaborative-demo-team/repos/e2e-team-landing/missions/team-landing-pivots/",
+        href: "/a/collaborative-demo-team/repos/spec-kitty/e2e-team-landing/m/team-landing-pivots/",
       },
       repository: "spec-kitty/e2e-team-landing",
       kind: "WPStatusChanged",
@@ -479,7 +480,7 @@ export const TEAM_OVERVIEW_POPULATED_RESPONSE = deepFreezeTeamOverviewFixture({
       route: {
         kind: "repository",
         label: "spec-kitty/e2e-team-landing",
-        href: "/a/collaborative-demo-team/repos/e2e-team-landing/",
+        href: "/a/collaborative-demo-team/repos/spec-kitty/e2e-team-landing/",
       },
       missionSummary: "1 mission not on default branch",
       sha: "17bd28375d5f",

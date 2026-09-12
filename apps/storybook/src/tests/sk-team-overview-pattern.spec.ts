@@ -167,7 +167,13 @@ test("TO1 exposes current semantics, truth boundaries, derived totals, caps, rou
     root.getByRole("link", { name: "spec-kitty/e2e-team-landing" }).last(),
   ).toHaveAttribute(
     "href",
-    "/a/collaborative-demo-team/repos/e2e-team-landing/",
+    "/a/collaborative-demo-team/repos/spec-kitty/e2e-team-landing/",
+  );
+  await expect(
+    root.getByRole("link", { name: "team-landing-pivots" }).last(),
+  ).toHaveAttribute(
+    "href",
+    "/a/collaborative-demo-team/repos/spec-kitty/e2e-team-landing/m/team-landing-pivots/",
   );
 
   const links = await root
@@ -359,7 +365,7 @@ test("TO2 role and privacy fixtures omit unauthorized admission and Members rout
   );
   await expect(page.locator('a[href$="/team/"]')).toHaveCount(0);
   await expect(page.locator('a[href*="/repos/"]')).toHaveCount(0);
-  await expect(page.locator('a[href*="/missions/"]')).toHaveCount(0);
+  await expect(page.locator('a[href*="/m/"]')).toHaveCount(0);
 
   await root
     .getByRole("combobox", { name: "Server-response fixture" })
@@ -375,7 +381,7 @@ test("TO2 role and privacy fixtures omit unauthorized admission and Members rout
   ).toHaveCount(0);
   await expect(page.locator('a[href$="/team/"]')).toHaveCount(0);
   await expect(page.locator('a[href*="/repos/"]')).toHaveCount(0);
-  await expect(page.locator('a[href*="/missions/"]')).toHaveCount(0);
+  await expect(page.locator('a[href*="/m/"]')).toHaveCount(0);
   expect(await root.ariaSnapshot()).not.toContain("Members");
 });
 
@@ -466,7 +472,7 @@ test("compact shell drawer is consumer-controlled and returns focus after accept
   await expect(trigger).toBeFocused();
 });
 
-test("responsive, short-viewport, long-copy, RTL, and media modes preserve containment", async ({
+test("responsive, short-viewport, long-copy, and RTL modes preserve containment", async ({
   page,
 }) => {
   for (const [id, width, height] of [
@@ -503,13 +509,81 @@ test("responsive, short-viewport, long-copy, RTL, and media modes preserve conta
 
   const root = await loadStory(page, "default", 390, 844);
   await root.evaluate((node) => node.setAttribute("dir", "rtl"));
-  await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
   await expect(root).toHaveAttribute("dir", "rtl");
   await expectNoDocumentOverflow(page);
   await root.getByRole("button", { name: "Open team navigation" }).focus();
   await expect(
     root.getByRole("button", { name: "Open team navigation" }),
   ).toBeFocused();
+});
+
+test("forced colors expose a system-color velocity boundary", async ({
+  page,
+  browserName,
+}) => {
+  test.skip(
+    browserName !== "chromium",
+    "Playwright forced-colors emulation is Chromium-owned",
+  );
+  await page.emulateMedia({ forcedColors: "active" });
+  expect(
+    await page.evaluate(() => matchMedia("(forced-colors: active)").matches),
+  ).toBe(true);
+  const root = await loadStory(page, "default", 1440, 1024);
+  const populated = root
+    .locator('.sk-team-overview-pattern__velocity-cell[data-populated="true"]')
+    .first();
+  const boundary = await populated.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return {
+      forcedColorAdjust: style.forcedColorAdjust,
+      backgroundColor: style.backgroundColor,
+      color: style.color,
+      borderColor: style.borderTopColor,
+      borderStyle: style.borderTopStyle,
+      borderWidth: style.borderTopWidth,
+    };
+  });
+  expect(boundary.forcedColorAdjust).toBe("none");
+  expect(boundary.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+  expect(boundary.color).not.toBe(boundary.backgroundColor);
+  expect(boundary.borderColor).not.toBe(boundary.backgroundColor);
+  expect(boundary.borderStyle).toBe("solid");
+  expect(Number.parseFloat(boundary.borderWidth)).toBeGreaterThan(0);
+});
+
+test("reduced motion wins over a competing transition and smooth-scroll declaration", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(
+    await page.evaluate(
+      () => matchMedia("(prefers-reduced-motion: reduce)").matches,
+    ),
+  ).toBe(true);
+  const root = await loadStory(page, "default", 1440, 1024);
+  const probe = root.locator(".sk-team-overview-pattern__velocity-cell").first();
+  await probe.evaluate((node) => {
+    node.setAttribute("data-motion-probe", "");
+    const style = document.createElement("style");
+    style.dataset["teamOverviewMotionProbe"] = "true";
+    style.textContent = `.sk-team-overview-pattern [data-motion-probe] {
+      scroll-behavior: smooth;
+      transition: transform 10s linear;
+    }`;
+    document.head.append(style);
+  });
+  const motion = await probe.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return {
+      scrollBehavior: style.scrollBehavior,
+      transitionDuration: style.transitionDuration,
+      transitionProperty: style.transitionProperty,
+    };
+  });
+  expect(motion.scrollBehavior).toBe("auto");
+  expect(motion.transitionDuration).toBe("0s");
+  expect(motion.transitionProperty).toBe("none");
 });
 
 test("CSS zoom is supplemental magnification stress and remains contained", async ({

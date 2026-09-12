@@ -486,6 +486,7 @@ const patternStyles = html`<style>
       forced-color-adjust: none;
       color: HighlightText;
       background: Highlight;
+      border-color: CanvasText;
     }
   }
 
@@ -493,8 +494,8 @@ const patternStyles = html`<style>
     .sk-team-overview-pattern *,
     .sk-team-overview-pattern *::before,
     .sk-team-overview-pattern *::after {
-      scroll-behavior: auto;
-      transition: none;
+      scroll-behavior: auto !important;
+      transition: none !important;
     }
   }
 </style>`;

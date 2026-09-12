@@ -6,6 +6,7 @@ import { describe, expect, test } from "vitest";
 import {
   FIRST_RUN_SHELL,
   TEAM_OVERVIEW_FIRST_RUN_RESPONSES,
+  TEAM_OVERVIEW_LONG_CONTENT_RESPONSE,
   TEAM_OVERVIEW_POPULATED_RESPONSE,
   firstRunFixture,
   projectFirstRunResponse,
@@ -145,7 +146,7 @@ describe("Team Overview populated response and projection", () => {
       missionRoute: {
         kind: "mission",
         label: `mission-${index}`,
-        href: `/a/collaborative-demo-team/repos/e2e-team-landing/missions/mission-${index}/`,
+        href: `/a/collaborative-demo-team/repos/spec-kitty/e2e-team-landing/m/mission-${index}/`,
       },
     }));
     const expanded = {
@@ -196,6 +197,46 @@ describe("Team Overview supplied route allow-list", () => {
     FIRST_RUN_SHELL.routes.release,
   ])("preserves reviewed safe route $href", (route) => {
     expect(safeTeamOverviewHref(route)).toBe(route.href);
+  });
+
+  test("normal and long fixtures retain the authoritative owner/repository and /m/ Mission shapes", () => {
+    for (const response of [
+      TEAM_OVERVIEW_POPULATED_RESPONSE,
+      TEAM_OVERVIEW_LONG_CONTENT_RESPONSE,
+    ]) {
+      expect(response.repositories[0].route.href).toBe(
+        "/a/collaborative-demo-team/repos/spec-kitty/e2e-team-landing/",
+      );
+      expect(response.moments[0].missionRoute.href).toBe(
+        "/a/collaborative-demo-team/repos/spec-kitty/e2e-team-landing/m/team-landing-pivots/",
+      );
+      expect(safeTeamOverviewHref(response.repositories[0].route)).toBe(
+        response.repositories[0].route.href,
+      );
+      expect(safeTeamOverviewHref(response.moments[0].missionRoute)).toBe(
+        response.moments[0].missionRoute.href,
+      );
+    }
+  });
+
+  test.each([
+    {
+      kind: "repository",
+      label: "One-segment repository",
+      href: "/a/collaborative-demo-team/repos/e2e-team-landing/",
+    },
+    {
+      kind: "mission",
+      label: "Invented missions collection",
+      href: "/a/collaborative-demo-team/repos/spec-kitty/e2e-team-landing/missions/team-landing-pivots/",
+    },
+    {
+      kind: "mission",
+      label: "One-segment repository mission",
+      href: "/a/collaborative-demo-team/repos/e2e-team-landing/m/team-landing-pivots/",
+    },
+  ] as const)("rejects the superseded Team Kitty route shape $href", (route) => {
+    expect(safeTeamOverviewHref(route)).toBeUndefined();
   });
 
   test.each([
