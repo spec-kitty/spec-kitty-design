@@ -49,11 +49,15 @@
  * own commit — not just re-typing a string in this file: a same-commit edit to
  * `PRE_MISSION_SHA` alone is caught immediately (the resolved tag stops matching it), and a
  * same-commit edit to `BASELINE` alone is still caught by `verifyBaselineAgainstHistory` as
- * before. What this does NOT independently defend against: someone with push access moving
- * `parity-anchor/rel1` itself, in a separate operation, to a commit whose content they also
- * crafted — the residual defeat every purely in-repo pin accepts, since a git tag with no push
- * protection is not a signature. The is-ancestor-of-`HEAD` check narrows a moved tag to "a real
- * commit already in this repo's own history," which is not full closure, only a smaller target.
+ * before. The remaining question — could someone with push access move `parity-anchor/rel1`
+ * itself, in a separate operation, to a commit whose content they also crafted? — is now closed
+ * at the platform level: the `parity-anchor-tags-are-immutable` repository ruleset covers
+ * `refs/tags/parity-anchor/*` with `deletion`, `update` and `non_fast_forward` rules and NO
+ * bypass actors, so the tag cannot be moved or deleted by anyone — admins included — without
+ * first deleting that ruleset. That is not a cryptographic signature; it makes moving the tag a
+ * visible, deliberate administrative act (deleting or editing an active ruleset, both logged),
+ * never a plain push. The is-ancestor-of-`HEAD` check is what remains as defense in depth if
+ * that administrative control is ever the thing that gets bypassed.
  *
  * **INCIDENT (the original defect this fix corrects)**: the anchor was originally the literal
  * `907b2bbd`, a commit that only ever existed on the mission branch
@@ -77,10 +81,12 @@
  * `git rev-parse ${PRE_MISSION_SHA}:.github/workflows/ci-quality.yml` to reproduce — identical to
  * the blob at `907b2bbd` and at every commit between the two. Being an ancestor of
  * `train/elements-first`'s own history, this commit cannot be deleted the way a mission branch's
- * tip can; only a force-rewrite of the train's protected history, or the tag itself moving (see
- * F2), removes it — either fails LOUDLY (never silently green): see `inspect()`'s catch branch
- * and Probe 9 below, which calls `inspect()` directly with an unreadable SHA and asserts it
- * returns a non-empty, anchor-naming problem list, not merely that `git show` itself throws.
+ * tip can; only a force-rewrite of the train's protected history, or the tag itself moving past
+ * its own ruleset (see F2), removes it — every one of those fails LOUDLY (never silently green):
+ * Probe 9 below calls `inspect()` directly with an unreadable SHA and asserts a non-empty,
+ * anchor-naming problem list, not merely that `git show` itself throws; Probes 10 and 11 drive
+ * `resolveAndInspect()` itself for a resolved tag that disagrees with `PRE_MISSION_SHA` and for
+ * one that is real but not an ancestor of `HEAD`, respectively.
  *
  * **REBASELINING**: the anchor above never moves for an ordinary mission. A mission that changes
  * `ci-quality.yml` extends `EXPECTED_CHANGED_IF`/`EXPECTED_CHANGED_NEEDS`/`EXPECTED_NEW_JOBS` (or
@@ -431,11 +437,16 @@ export function inspect(sha = PRE_MISSION_SHA) {
  *  hardcoded `PRE_MISSION_SHA` and is real history (an ancestor of `HEAD`), and only then runs
  *  `inspect()` against it. Any failure here is a loud, explicit problem — never a silent pass —
  *  because an anchor this function can't vouch for is exactly the failure mode `907b2bbd`
- *  produced once its owning branch was deleted. */
-export function resolveAndInspect() {
+ *  produced once its owning branch was deleted.
+ *
+ *  `expectedSha`/`resolveTagSha` default to the real `PRE_MISSION_SHA`/`resolveAnchorTagSha` —
+ *  parameterised (like `inspect`'s own `sha`) so `--selftest` Probes 10/11 can drive the REAL
+ *  mismatch/non-ancestor branches below through this exact function, injecting only "what did
+ *  resolution return", never re-implementing the comparison or the ancestor check inline. */
+export function resolveAndInspect(expectedSha = PRE_MISSION_SHA, resolveTagSha = resolveAnchorTagSha) {
   let tagSha;
   try {
-    tagSha = resolveAnchorTagSha();
+    tagSha = resolveTagSha();
   } catch (err) {
     return [
       `could not resolve anchor tag \`${PRE_MISSION_TAG}\` (${err.message}) — refusing to trust ` +
@@ -443,10 +454,10 @@ export function resolveAndInspect() {
         '(actions/checkout with fetch-depth: 0); a shallow or blob-filtered clone is the usual cause.',
     ];
   }
-  if (tagSha !== PRE_MISSION_SHA) {
+  if (tagSha !== expectedSha) {
     return [
       `anchor tag \`${PRE_MISSION_TAG}\` resolves to ${tagSha}, but the hardcoded PRE_MISSION_SHA ` +
-        `is ${PRE_MISSION_SHA} — refusing to trust either until a human reconciles them (the tag ` +
+        `is ${expectedSha} — refusing to trust either until a human reconciles them (the tag ` +
         'may have moved, or PRE_MISSION_SHA may have been edited without moving it).',
     ];
   }
@@ -590,12 +601,74 @@ function runProbes() {
     );
   }
 
+  // Probe 10 — F2: `resolveAndInspect()` ITSELF refuses when the resolved tag disagrees with
+  // the hardcoded `PRE_MISSION_SHA` — the exact seam a same-commit edit to `PRE_MISSION_SHA`
+  // alone (without moving the protected tag) hits. Drives the REAL function via its injectable
+  // `resolveTagSha` parameter (never re-implementing the comparison inline): the resolver is
+  // faked to return something else, `expectedSha` stays the real constant.
+  {
+    const fakeResolved = '0'.repeat(40);
+    const problems = resolveAndInspect(PRE_MISSION_SHA, () => fakeResolved);
+    const namesBoth = problems.some((p) => p.includes(fakeResolved) && p.includes(PRE_MISSION_SHA));
+    record(
+      10,
+      'resolveAndInspect() refuses when the resolved tag disagrees with the hardcoded PRE_MISSION_SHA',
+      'pass',
+      problems.length > 0 && namesBoth,
+      problems,
+    );
+  }
+
+  // Probe 11 — F2: `resolveAndInspect()` ITSELF refuses when the resolved anchor is real but is
+  // NOT an ancestor of HEAD — the seam that catches a tag pointed at a genuine, but unrelated or
+  // crafted, commit. Mints a fresh, PARENTLESS commit that reuses the REAL anchor's own tree
+  // (`git commit-tree <PRE_MISSION_SHA's tree>`, no `-p`), so this exercises ONLY the ancestry
+  // check: an earlier version of this probe used an EMPTY tree instead, which "passed" for the
+  // wrong reason — `inspect()`'s own "workflow file not found in this tree" catch branch fired
+  // first and happened to name the orphan SHA too, so the probe stayed green even with the
+  // ancestor check deleted entirely (verified: reverting the guard did not redden it). With the
+  // real tree, disabling the ancestor check makes `inspect()` proceed all the way through and
+  // find genuinely matching content — a true false-green — which this probe now actually
+  // catches. The commit is parentless and freshly minted, so it is unreachable from HEAD by
+  // construction and this probe never depends on some OTHER branch's tip surviving in every
+  // checkout that runs it.
+  {
+    const anchorTreeSha = execFileSync('git', ['rev-parse', `${PRE_MISSION_SHA}^{tree}`], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+    }).trim();
+    const orphanSha = execFileSync(
+      'git',
+      ['commit-tree', anchorTreeSha, '-m', 'selftest orphan probe commit — real tree, unreachable from any branch'],
+      { cwd: REPO_ROOT, encoding: 'utf8' },
+    ).trim();
+    const problems = resolveAndInspect(orphanSha, () => orphanSha);
+    const namesAnchor = problems.some((p) => p.includes(orphanSha) && p.includes('ancestor'));
+    record(
+      11,
+      'resolveAndInspect() refuses when the resolved anchor is real but not an ancestor of HEAD',
+      'pass',
+      problems.length > 0 && namesAnchor,
+      problems,
+    );
+  }
+
   return results;
 }
 
-const PROBE_FLOOR = 9;
+const PROBE_FLOOR = 11;
 
 function selftest() {
+  // Probe 11 mints a real orphan commit via `git commit-tree`, which needs a git identity —
+  // absent on a bare CI runner even though `git show`/`git rev-parse`/`git merge-base` (every
+  // OTHER git call in this file) need none. Set it here, once, the same way
+  // promote-develop.mjs's own `selftest()` does for its tree-sync commits, rather than depend
+  // on whatever identity happens to be configured globally on the machine running this process.
+  process.env.GIT_AUTHOR_NAME = 'selftest';
+  process.env.GIT_AUTHOR_EMAIL = 'selftest@example.invalid';
+  process.env.GIT_COMMITTER_NAME = 'selftest';
+  process.env.GIT_COMMITTER_EMAIL = 'selftest@example.invalid';
+
   const results = runProbes();
   if (results.length < PROBE_FLOOR) {
     console.error(`❌ the probe table has shrunk: ${results.length} against a floor of ${PROBE_FLOOR}.`);
