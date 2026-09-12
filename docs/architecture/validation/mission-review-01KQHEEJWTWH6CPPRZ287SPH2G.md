@@ -149,6 +149,8 @@ This is a greenfield infrastructure mission on a new frontend monorepo repositor
 
 **Required fix**: Create a GitHub issue tracking `scripts/check-token-breaking-changes.sh` implementation. Until that script exists, publishers must manually diff the catalogue before a release. Document this in `docs/contributing/running-quality-checks.md`.
 
+**Resolved (2026-09-12, #435/#438)**: `scripts/check-token-breaking-changes.sh` exists and is now wired into `ci-quality.yml`'s `release-gate` job on every PR (it previously existed but had no CI caller anywhere — the same "detectable but not blocked" gap this drift item names, one level later). `scripts/generate-token-catalogue.js --check` (also wired into `release-gate`) closes the adjacent gap that nothing verified the committed catalogue matched a fresh build. `docs/contributing/running-quality-checks.md` reflects the automated status. FR-015 is no longer PARTIAL.
+
 ---
 
 ### DRIFT-4: FR-034 pre-implementation gate treated as documentation placeholder

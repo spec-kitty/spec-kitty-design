@@ -19,7 +19,8 @@ npm run quality:all    # ESLint + Stylelint + HTMLHint
 | npm audit | `bash scripts/npm-audit-gate.sh` | Known CVEs in dependencies | After adding or updating dependencies |
 | Lockfile | `npm ci --dry-run --ignore-scripts` | Lockfile drift detection | After any `package.json` change |
 | Action SHA pins | `bash scripts/check-action-pins.sh` | Mutable `@v*` tags in workflows | After editing `.github/workflows/` |
-| Token breaking changes | `bash scripts/check-token-breaking-changes.sh` | Removed or renamed `--sk-*` tokens | Before bumping package version |
+| Token breaking changes | `bash scripts/check-token-breaking-changes.sh` | Removed or renamed `--sk-*` tokens | Automated in CI's `release-gate` job on every PR (#435, #438); run locally to reproduce a failure |
+| Token catalogue drift | `node scripts/generate-token-catalogue.js --check` | The committed `token-catalogue.json` not matching a fresh build from `tokens.css` | Automated in CI's `release-gate` job (#438 F11); run after editing `tokens.css` if you forgot to regenerate |
 | ADR index | `node scripts/check-adr-index.mjs` | A record in `docs/architecture/decisions/` with no row in the architecture README's ADR table, a row pointing at no record, or a row whose Status disagrees with the record's own | After adding, renaming or ratifying an ADR |
 
 ## Storybook-specific
@@ -80,17 +81,29 @@ used by CI remain intact alongside your macOS baselines.
 
 ## Breaking token change check
 
-After renaming or removing a `--sk-*` token, verify no breaking changes were
-introduced before publishing:
+**Automated** since #435/#438: `ci-quality.yml`'s `release-gate` job runs this on every PR —
+it is no longer a manual pre-publish step. Run it locally to reproduce a CI failure, or after
+renaming/removing a `--sk-*` token to check before pushing:
 
 ```bash
 bash scripts/check-token-breaking-changes.sh
-# Compares current token-catalogue.json against the most recent git tag
+# Compares the current committed token-catalogue.json against the most recent RELEASE tag
+# (a `v*.*.*` tag — the same glob release.yml's own trigger uses, not merely the nearest
+# reachable tag of any kind: this repo also carries non-release tags such as
+# `parity-anchor/relN`, and the nearest one of THOSE is not a release)
 # Exits 1 with a list of removed tokens if a breaking change is detected
 ```
 
-This check requires a previous git tag to exist. On the first release, it will
-report "No previous tag found" and exit 0 — that is correct behavior.
+Exit codes: `0` no breaking changes (including the legitimate "nothing to compare against yet"
+cases: first release, or the release tag predates the catalogue's existence); `1` breaking
+changes detected; `2` cannot compare — the ref/tag does not resolve or is unreachable (e.g. a
+shallow clone), or a catalogue that should be comparable is not well-formed.
+
+`release-gate`'s checkout uses `fetch-depth: 0` specifically so this check's tag resolution has
+real history to work with locally, run `git fetch --tags --unshallow` first if your clone is
+shallow. `node scripts/generate-token-catalogue.js --check` (also wired into `release-gate`)
+verifies the committed catalogue matches a fresh build from `tokens.css` before this check trusts
+it as the CURRENT side of the comparison.
 
 ## CI parity note
 
