@@ -122,13 +122,15 @@ kitty-specs/team-activity-truth-region-pattern-stories-01M286SJ/
 ├── acceptance-matrix.json
 ├── status.json
 ├── status.events.jsonl        # canonical CLI-emitted lifecycle history
+├── mission-events.jsonl       # requested compatibility invocation record
 └── lanes.json
 ```
 
-`status.events.jsonl` is the Spec Kitty 3.2 canonical event surface for this mission. The earlier
-plan listed a second `mission-events.jsonl`, but the CLI did not create or consume that file; it is
-therefore removed from the promised shape rather than fabricated or hand-edited. Cycle 6's
-planned/doing/for-review transitions are emitted through the supported CLI only.
+`status.events.jsonl` remains the Spec Kitty 3.2 canonical lifecycle surface and is never
+hand-edited. The separate one-line `mission-events.jsonl` exists only to satisfy the programme's
+requested compatibility shape and records the actual final WP01 packaging review invocation; it
+does not claim a lane transition or duplicate the canonical history. Cycle 6's planned/doing/
+for-review transitions remain emitted through the supported CLI only.
 
 ### Authored and evidence surfaces
 

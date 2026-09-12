@@ -59,6 +59,7 @@ create_intent:
 - packages/elements/src/patterns/team-activity.stories.ts
 - apps/storybook/src/tests/sk-team-activity-pattern.spec.ts
 - apps/storybook/src/tests/visual.spec.ts-snapshots/team-activity-*.png
+- kitty-specs/team-activity-truth-region-pattern-stories-01M286SJ/mission-events.jsonl
 execution_mode: code_change
 owned_files:
 - packages/elements/src/patterns/team-activity.stories.ts
@@ -66,6 +67,7 @@ owned_files:
 - expected-stories.json
 - apps/storybook/src/tests/visual.spec.ts
 - apps/storybook/src/tests/visual.spec.ts-snapshots/team-activity-*.png
+- kitty-specs/team-activity-truth-region-pattern-stories-01M286SJ/mission-events.jsonl
 priority: P1
 role: implementer
 tags:
@@ -117,6 +119,7 @@ apps/storybook/src/tests/sk-team-activity-pattern.spec.ts
 expected-stories.json
 apps/storybook/src/tests/visual.spec.ts
 apps/storybook/src/tests/visual.spec.ts-snapshots/team-activity-*.png
+kitty-specs/team-activity-truth-region-pattern-stories-01M286SJ/mission-events.jsonl
 ```
 
 Expected public/generated delta is zero. Do not modify element/style implementations, preview
