@@ -55,13 +55,16 @@ agent_profile: frontend-freddy
 authoritative_surface: packages/elements/src/patterns/team-overview.stories.ts
 create_intent:
   - packages/elements/src/patterns/team-overview.fixture.ts
+  - packages/elements/src/patterns/team-overview.route.fixture.ts
   - fixtures/elements-behaviour/src/pattern-team-overview.test.ts
   - docs/architecture/validation/issue-383-team-overview/README.md
   - docs/architecture/validation/issue-383-team-overview/visual-inspection.md
+  - kitty-specs/team-overview-current-main-pattern-refresh-01M286R0/mission-events.jsonl
 execution_mode: code_change
 model: ""
 owned_files:
   - packages/elements/src/patterns/team-overview.fixture.ts
+  - packages/elements/src/patterns/team-overview.route.fixture.ts
   - packages/elements/src/patterns/team-overview.stories.ts
   - fixtures/elements-behaviour/src/pattern-team-overview.test.ts
   - apps/storybook/src/tests/sk-team-overview-pattern.spec.ts
@@ -70,6 +73,7 @@ owned_files:
   - expected-stories.json
   - docs/architecture/validation/issue-383-team-overview/README.md
   - docs/architecture/validation/issue-383-team-overview/visual-inspection.md
+  - kitty-specs/team-overview-current-main-pattern-refresh-01M286R0/mission-events.jsonl
 role: implementer
 tags: []
 task_type: implement

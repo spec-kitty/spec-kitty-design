@@ -2,9 +2,10 @@
 
 Inspected on 2026-09-11 after rebuilding Storybook without the Nx cache and regenerating every
 Team Overview baseline from an absent file in the version-matched Playwright 1.62.1 Noble image.
-The 19 Linux/Chromium images cover dark and identical-fixture light, 1440 px, intermediate 1123 px,
-390 px, short viewport, alternate 168-hour retention, long localized content, all six TO2
-responses, and five focused truth/setup regions.
+The original 19 Linux/Chromium images cover dark and identical-fixture light, 1440 px,
+intermediate 1123 px, 390 px, alternate 168-hour retention, long localized content, all six TO2
+responses, and five focused truth/setup regions. The 390x540 short-viewport case is semantic
+containment evidence in `sk-team-overview-pattern.spec.ts`, not a pixel baseline.
 
 Re-inspected all 19 images on 2026-09-12 after transplanting the evidence onto
 `train/elements-first@d3263e9488f7df85a537a927d417729eacc75f12`. The exact committed bytes passed
@@ -25,6 +26,12 @@ and a fresh SHA-256 comparison reproduced every hash below exactly. The correcti
 light-DOM relationships, mounted-response cardinality, and unsafe-route fallback behavior, so no
 baseline was regenerated.
 
+Added and inspected the two media baselines at correction commit `48580637` on 2026-09-12. The
+forced-colors capture exposes high-contrast system-color Velocity cells and clear structural
+boundaries; the reduced-motion capture retains the complete static default composition. The final
+version-matched Noble Chromium replay passes all 21/21 owned cases. The earlier 19 hashes remain
+unchanged, and the two new exact hashes are included below.
+
 The captures show one H1, native readable facts, single-character personal-rail marks, no clipped
 focus rings, no document overflow, passive activity, authorization-aware actions, and copy controls
 that remain usable at narrow width. The TO2 fixture control is visibly separated and labelled as
@@ -38,7 +45,9 @@ other three cells quiet and the derived summary, in-flight row, and recent-activ
 
 ```text
 4f3390379f07640854c7917594d7634a911b5643da007c1aaa46b2d8e14840ba  team-overview-current-first-run-setup-chromium-linux.png
+b9907fc2218e19a6982d45825ee3a7775a42a118a8be2e40e2ecd246fef86e25  team-overview-current-forced-colors-chromium-linux.png
 f29b97c0792c644f4f792cf23ea0c3ae10a8d765eecd2c7ea7886bbea94ca2af  team-overview-current-recent-activity-chromium-linux.png
+95b1aabb3e9a9de6a16fb8a3ed343bb96814fb6cdf345fe7959bf83ba3f3505e  team-overview-current-reduced-motion-chromium-linux.png
 b29f6b66d68dc493ef74124ef50c082a7485f0068f7ec4072509b8eb225fd27a  team-overview-current-repositories-chromium-linux.png
 8388a3d91fea75f580d9656241afb478c97a9b06027debd393738519a5d3b175  team-overview-current-review-scaffolding-chromium-linux.png
 760e298eadadd71a90f65b0d8d1eaa4cd44426642027ca6395c66d8e989e0139  team-overview-current-to1-1123-chromium-linux.png

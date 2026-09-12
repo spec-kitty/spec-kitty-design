@@ -1,7 +1,7 @@
 {
   "rows": {
     "#150": {
-      "evidence_ref": "The #150 Delivery return/Flow health/operational-dashboard composition is explicitly historical/deprecated in the migration contract and validation README. Six current TO1/TO2 story IDs and 19 current visual cases replace its retired inventory at corrective code head 8793a7a9 on train base 57fe4ce7.",
+      "evidence_ref": "The #150 Delivery return/Flow health/operational-dashboard composition is explicitly historical/deprecated in the migration contract and validation README. Six current TO1/TO2 story IDs and 21 current visual cases replace its retired inventory at corrective code head 48580637 on train base 57fe4ce7.",
       "fr": "FR-001, FR-012, FR-013",
       "nfr": "NFR-006",
       "repo": "spec-kitty/spec-kitty-design",
@@ -13,7 +13,7 @@
       "wp": "WP01"
     },
     "#286": {
-      "evidence_ref": "WP01 uses fixture/consumer-supplied visible and accessibility copy throughout. Unsafe populated destinations retain their supplied label as passive text, and no new element default or runtime copy API is introduced. quality:all, source guards, 841 Vitest tests, and focused Playwright pass at corrective code head 8793a7a9.",
+      "evidence_ref": "WP01 uses fixture/consumer-supplied visible and accessibility copy throughout. Unsafe populated destinations retain their supplied label as passive text, and no new element default or runtime copy API is introduced. quality:all, source guards, 845 Vitest tests, and focused Playwright pass at corrective code head 48580637.",
       "fr": "FR-002, FR-006, FR-009, FR-010",
       "nfr": "NFR-001, NFR-003",
       "repo": "spec-kitty/spec-kitty-design",
@@ -25,7 +25,7 @@
       "wp": "WP01"
     },
     "#381": {
-      "evidence_ref": "WP01 delivers epic #381's #383 Team Overview child: current TO1 TeamMoment and six-response TO2 evidence, with route/authorization, compact-navigation, and single-mounted-response review findings corrected at 8793a7a9 on exact train base 57fe4ce7. The epic remains open and is not closed by this mission.",
+      "evidence_ref": "WP01 delivers epic #381's #383 Team Overview child: current TO1 TeamMoment and six-response TO2 evidence, with authoritative repository/Mission routes, authorization, compact-navigation, single-mounted-response, and load-bearing media findings corrected at 48580637 on exact train base 57fe4ce7. The epic remains open and is not closed by this mission.",
       "fr": "FR-001..FR-015",
       "nfr": "NFR-001..NFR-008",
       "repo": "spec-kitty/spec-kitty-design",
@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#383": {
-      "evidence_ref": "Current TO1/TO2 Storybook composition, immutable fixtures, exact route-kind correspondence, passive unsafe-route fallback, one selected authorization response in document DOM, focused/unit/a11y/cross-browser/visual proof, and migration evidence are complete at corrective code head 8793a7a9 on exact train base 57fe4ce7. Fresh exact-head independent publication review remains external to this corrective implementation.",
+      "evidence_ref": "Current TO1/TO2 Storybook composition, immutable fixtures, pinned owner/repository and /m/ Mission route correspondence, passive unsafe-route fallback, one selected authorization response in document DOM, independent forced-colors/reduced-motion proof, 21 owned visuals, and migration evidence are complete at corrective code head 48580637 on exact train base 57fe4ce7. Fresh exact-head independent publication review remains external to this corrective implementation.",
       "fr": "FR-001..FR-015",
       "nfr": "NFR-001..NFR-008",
       "repo": "spec-kitty/spec-kitty-design",

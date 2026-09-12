@@ -21,6 +21,10 @@ network, router, store, locale service, permission service, or clipboard API.
 - Repository facts are copied as local facts; observed freshness decorates TeamMoment regions only.
 - Route safety is separate from projection. A missing, unsafe, or kind-mismatched populated route
   keeps its supplied label as passive text and never becomes an anchor; no destination is inferred.
+- Repository routes match the pinned Team Kitty owner/repository shape
+  `/a/<team>/repos/<owner>/<repo>/`; Mission routes extend that exact dossier with
+  `m/<mission>/`. One-segment repositories and the invented `missions/<mission>/` collection are
+  unsafe inputs, including in the long-content fixture.
 
 ## First-run response input
 
@@ -49,3 +53,6 @@ administrator Mission, member repository, and private installation. Each supplie
    supplied passive labels; unauthorized first-run labels/routes are absent from document,
    focus, and accessibility-tree surfaces.
 6. Every rendered string comes from a fixture copy record.
+7. Forced colors preserve a system-color populated-cell boundary; reduced motion suppresses
+   competing transitions and smooth scrolling. Dedicated computed-style tests and visual cases
+   exercise the two media blocks independently.

@@ -2,7 +2,7 @@
 
 **Branch**: `team-overview-current-main-pattern-refresh` | **Date**: 2026-09-11 | **Spec**: [spec.md](./spec.md)
 **Input**: #381/#383, the Family 1 programme handoff and TO1/TO2 reviewed evidence, current
-`train/elements-first@d3263e9488f7df85a537a927d417729eacc75f12`, and landed pattern conventions.
+`train/elements-first@57fe4ce7a752d2fcbce19e963a7c833acf951473`, and landed pattern conventions.
 
 ## Summary
 
@@ -93,6 +93,7 @@ kitty-specs/team-overview-current-main-pattern-refresh-01M286R0/
 ```text
 packages/elements/src/patterns/
 ├── team-overview.fixture.ts
+├── team-overview.route.fixture.ts
 └── team-overview.stories.ts
 
 fixtures/elements-behaviour/src/
@@ -114,6 +115,11 @@ expected-stories.json
 following Repository Dossier/Mission Reading precedent, while keeping direct fixture contract tests
 in the existing elements-behaviour fixture and built-browser evidence in the Storybook test app.
 No public barrel imports or exports the fixture module.
+
+`mission-events.jsonl` is a compatibility invocation record, not the canonical lane ledger. The
+single WP01 correction entry records the actual final adversarial-review correction invocation;
+`status.events.jsonl` remains canonical and is not rewritten or supplemented with invented past
+transitions.
 
 ## Current-to-historical migration
 

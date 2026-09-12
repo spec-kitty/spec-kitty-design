@@ -6,8 +6,8 @@ relay client, clock, permission system, or mutation API.
 
 The evidence is based without merge commits on
 `train/elements-first@57fe4ce7a752d2fcbce19e963a7c833acf951473`. The pre-rewrite safety ref is
-`refs/safety/issue-383-pre-57fe-c5c057fc`; route, authorization, compact-navigation, and single-tree
-fixes are commit `8793a7a9`. The earlier independent approval remains in the canonical mission
+`refs/safety/issue-383-pre-57fe-c5c057fc`; the final route, authorization, compact-navigation,
+single-tree, and media evidence correction is commit `48580637`. The earlier independent approval remains in the canonical mission
 trail, while this corrected exact head requires a fresh independent review before publication.
 
 ## Current reviewed surface
@@ -26,9 +26,11 @@ trail, while this corrected exact head requires a fresh independent review befor
 - Every product-visible and accessibility string comes from the fixtures. The CSF title and story
   export names are Storybook registration metadata, not product copy.
 - Reviewed route kinds correspond only to their matching Overview, Work, Connectors, Members,
-  repository, Mission, or exact release destination. Unsafe populated destinations degrade to the
-  supplied label as passive text; forged privileged first-run destinations fail closed and never
-  render as actions.
+  repository, Mission, or exact release destination. Repository and Mission evidence follows the
+  authoritative Team Kitty shapes `/repos/<owner>/<repo>/` and
+  `/repos/<owner>/<repo>/m/<mission>/`; the former one-segment and `/missions/` inventions are
+  rejected. Unsafe populated destinations degrade to the supplied label as passive text; forged
+  privileged first-run destinations fail closed and never render as actions.
 
 ## Ownership boundary
 
@@ -54,6 +56,10 @@ evidence. See the mission's `contracts/team-overview-pattern-migration.md` for c
     same response tree's navigation using document/light-DOM queries only.
   - Member and private-response checks are document-wide: no unselected sibling can retain a
     privileged Members, admission, repository, or Mission action.
+  - Forced-colors evidence asserts active emulation plus the populated Velocity cell's actual
+    `forced-color-adjust`, system-color background, and bordered boundary. Reduced-motion evidence
+    injects competing transition and smooth-scroll declarations and proves the pattern's media
+    suppression wins. Deleting either media block makes its dedicated test fail.
   - Real 200% browser zoom is a fresh DPR-2 Playwright context at 720x512 CSS pixels, derived by
     halving the normal 1440x1024 story viewport. The test proves the public compact-shell exposure
     transition, zero document/root/control overflow, visible focus, and a 44px trigger. Its CSS
@@ -61,18 +67,19 @@ evidence. See the mission's `contracts/team-overview-pattern-migration.md` for c
   - A deliberate unchanged-780px mutation fails the 720px viewport assertion, so the real-zoom
     mechanism is load-bearing rather than descriptive.
 - Current inventory: `expected-stories.json`
-- Visual matrix and 19 Linux/Chromium baselines: `apps/storybook/src/tests/visual.spec.ts`
+- Visual matrix and 21 Linux/Chromium baselines: `apps/storybook/src/tests/visual.spec.ts`
 - Human inspection record: `visual-inspection.md`
 
 ## Corrective gate record
 
 - `npm run quality:all` and all five typecheck projects pass.
-- Full Vitest passes 59 files/841 tests with zero skipped, including 33 Team Overview fixture tests.
-- Focused Playwright passes 14/14 Chromium and 42/42 across pinned Noble Chromium, Firefox, and
-  WebKit.
+- Full Vitest passes 59 files/845 tests with zero skipped, including 37 Team Overview fixture tests.
+- Focused Playwright passes 16/16 Chromium. The pinned Noble three-engine run executes 48 cases:
+  46 pass and only the two expected non-Chromium forced-colors cases skip.
 - Axe finds all 654 declared story IDs, renders 810/810 built stories, and reports zero WCAG 2.1 AA
   violations.
 - Composition passes 47 self-probes and 18 fixture files/339 CSS rules/20 tags/142 parts;
   visual-softness passes 51 files.
-- All 19 owned visuals pass in the version-matched Noble Chromium image and exactly retain the
-  hashes recorded in `visual-inspection.md`; no baseline regeneration was needed.
+- All 21 owned visuals pass in the version-matched Noble Chromium image. The 19 inherited owned
+  hashes remain exact and the two new inspected media baselines are recorded in
+  `visual-inspection.md`.
