@@ -34,7 +34,11 @@ const WORKFLOW = '.github/workflows/ci-quality.yml';
 // failed by a final step), so the whole-job payload audit below does not describe it. REQUIRED_LINT
 // is how a step in that job is held to running — see #193's two entries there, and the
 // `lint-code` EDGE assertions below, which hold the job itself to being able to block a merge.
-const JOBS = ['test', 'release-gate'];
+// `changes` added (V1, pre-merge squad, gate pass 4): it now carries an [ENFORCED] step
+// (`promo-shape`, F7) whose output five downstream jobs' `if:`s trust — labelling a step
+// [ENFORCED] while nothing sweeps it for continue-on-error/an `if:`/a `shell:` override/a
+// swallowed failure is the same defect class this whole file exists to close one level up.
+const JOBS = ['test', 'release-gate', 'changes'];
 // REL1 (#362): the relevant-change predicate gained a `promote/*`-into-`develop`-skip conjunct
 // (research.md R15, base-scoped per B3, exact-shape per F7 — both pre-merge squad, PR #429) so
 // a promotion PR's already-fully-gated content doesn't redundantly re-run the ~30-minute
@@ -309,6 +313,25 @@ const problems = [];
 // storybook-build is intentionally NOT in JOBS: it legitimately skips for unrelated changes.
 // The guarantee here is narrower and source-structural. When relevant tokens/components select
 // the job, exactly one unconditional, fail-closed wrapper invocation must own the 180 s budget.
+// V2 (pre-merge squad, gate pass 4): hardcoded HERE, never derived from
+// `STORYBOOK_PREDICATE`/`HEAVY_JOB_PREDICATE` (imported below from
+// scripts/lib/storybook-predicate.mjs). F6's deduplication created a single point of defeat —
+// editing that shared file's constant alongside the matching workflow `if:`s, in one commit,
+// left BOTH this file's own exact-match check AND check-ci-quality-trigger-parity.mjs green,
+// because both trusted the same (also-edited) source. These structural checks are independent
+// of that import: an attacker now has to also edit THIS file's own regex to stay silent, a
+// second, separately-reviewable diff — not a full defense against a sufficiently coordinated
+// multi-file edit (no purely textual, same-repo pin can be, for a value with no PRE-EXISTING
+// git history to check against — see verifyBaselineAgainstHistory's own doc comment in
+// check-ci-quality-trigger-parity.mjs for why that trick works for BASELINE and not here), but
+// it raises the bar from "one file" to "every file that must independently agree."
+const hasExactShapeSkipConjunct = (jobIf) =>
+  /needs\.changes\.outputs\.is_develop_promotion_pr\s*!=\s*'true'/.test(jobIf);
+const hasRelevantChangeCheck = (jobIf) =>
+  /needs\.changes\.outputs\.tokens\s*==\s*'true'/.test(jobIf) &&
+  /needs\.changes\.outputs\.components\s*==\s*'true'/.test(jobIf);
+const hasStorybookSuccessCheck = (jobIf) => /needs\.storybook-build\.result\s*==\s*'success'/.test(jobIf);
+
 const storybook = wf.jobs?.['storybook-build'];
 if (!storybook) {
   problems.push('there is no `storybook-build` job at all');
@@ -319,6 +342,12 @@ if (!storybook) {
   } else if (jobIf !== STORYBOOK_PREDICATE) {
     problems.push(
       `the \`storybook-build\` job condition is \`${jobIf}\`, not the exact deliberate relevant-change predicate`
+    );
+  }
+  if ('if' in storybook && (!hasRelevantChangeCheck(jobIf) || !hasExactShapeSkipConjunct(jobIf))) {
+    problems.push(
+      `the \`storybook-build\` job condition \`${jobIf}\` is missing the independently-required ` +
+        'relevant-change check and/or the exact-shape promotion-skip conjunct (V2 structural check)',
     );
   }
   if (storybook['continue-on-error']) {
@@ -386,6 +415,41 @@ for (const jobName of ['a11y', 'visual-regression', 'playwright', 'lighthouse'])
     problems.push(`the \`${jobName}\` job lost its deliberate relevant-change/promotion-skip predicate`);
   } else if (jobIf !== HEAVY_JOB_PREDICATE) {
     problems.push(`the \`${jobName}\` job condition is \`${jobIf}\`, not the exact deliberate predicate`);
+  }
+  // V2: independent structural check, hardcoded above — see its own doc comment.
+  if ('if' in job && (!hasStorybookSuccessCheck(jobIf) || !hasExactShapeSkipConjunct(jobIf))) {
+    problems.push(
+      `the \`${jobName}\` job condition \`${jobIf}\` is missing the independently-required ` +
+        'storybook-build-success check and/or the exact-shape promotion-skip conjunct (V2 structural check)',
+    );
+  }
+}
+
+// ── THE `promo-shape` STEP ITSELF (V1, pre-merge squad, gate pass 4) ────────────────────
+//
+// F7 moved the exact-`promote/<40-hex>`-shape test into ONE place (`changes`'s `promo-shape`
+// step) that five job `if:`s now trust via `needs.changes.outputs.is_develop_promotion_pr`.
+// Nothing asserted that step's own SHELL BODY still performs the exact-shape test rather than
+// a loose `promote/*` glob — weakening it there would silently widen every one of those five
+// downstream `if:`s at once, while `HEAVY_JOB_PREDICATE`/`STORYBOOK_PREDICATE` (which only
+// check the STRING naming the output, not what the output computes) stayed green. Mirrors the
+// same three-part structural check the `gate` job's own shell copy is held to, below.
+{
+  const promoShapeStep = (wf.jobs?.changes?.steps ?? []).find((s) => s.id === 'promo-shape');
+  if (!promoShapeStep) {
+    problems.push('there is no `promo-shape` step in the `changes` job at all');
+  } else {
+    const body = String(promoShapeStep.run ?? '');
+    const headRefOk = /HEAD_REF/.test(body);
+    const exactShapeOk = /=~/.test(body) && /promote\/\[0-9a-f\]\{40\}\$/.test(body);
+    const baseRefOk = /BASE_REF/.test(body) && /develop/.test(body);
+    if (!headRefOk || !exactShapeOk || !baseRefOk) {
+      problems.push(
+        'the `promo-shape` step no longer tests the head ref against the EXACT `promote/<40-hex>` ' +
+          `shape (a real regex match, never a loose glob) AND the base ref against \`develop\` — ` +
+          `body: ${JSON.stringify(body)}`,
+      );
+    }
   }
 }
 
@@ -686,8 +750,18 @@ else {
     // 2. a STRICT clause in the failure disjunction, by SHAPE (#202)
     strictlyRequired(JOB);
 
-    // 3 (continued)
-    if (tolerance.includes(JOB)) {
+    // 3 (continued). MATCHED BY SHAPE (V1, gate pass 4), not a bare substring: `tolerance.
+    // includes(JOB)` used to fire on the job's NAME appearing anywhere in the block's text at
+    // all — which false-positived the moment `changes` joined JOBS, because the block's own
+    // echo strings say "skipped despite relevant changes" (ordinary English, not a reference to
+    // the `changes` job). A real tolerance reference takes one of two shapes: `needs.<job>.`
+    // (reading the job's own result/outputs) or `<job>_ok` (the normalized shell variable) —
+    // require one of those, not merely the job's name as a word.
+    const jobEscaped = JOB.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const toleranceReferencesJob = new RegExp(
+      String.raw`needs\.${jobEscaped}\.|${JOB.replace(/-/g, '[-_]')}_ok\b`,
+    ).test(tolerance);
+    if (toleranceReferencesJob) {
       problems.push(
         `\`${JOB}\` appears in the skipped-tolerance block. It runs UNCONDITIONALLY, so ` +
           `'skipped' is never legitimate for it — tolerating it reopens the green-by-skip ` +
@@ -1036,6 +1110,10 @@ function storybookStep(model) {
   );
 }
 
+function gateEnforcedStep(model) {
+  return (model.jobs?.gate?.steps ?? []).find((step) => String(step.name ?? '').includes('[ENFORCED]'));
+}
+
 function selftest() {
   const canonical = parse(readFileSync(WORKFLOW, 'utf8'));
   const probes = [
@@ -1103,6 +1181,26 @@ function selftest() {
       name: 'raw Nx build',
       expected: 'raw `nx run storybook:storybook:build` remains',
       mutate: (model) => { storybookStep(model).run = 'npx nx run storybook:storybook:build'; },
+    },
+    {
+      // V5 (pre-merge squad, gate pass 4): a one-line `if …; then …; fi` INSIDE the real
+      // tolerance guard's own body, immediately before the `sb_ok=…` assignment. F5's bug (pop
+      // only on a line-INITIAL `fi`) would push this harmless one-liner and never pop it,
+      // leaving it — not the real, still-open outer guard — on top of the stack at the exact
+      // point the assignment line is found; the checker would then read the one-liner's own
+      // condition (which mentions neither `head_ref` nor `promote/` nor `base_ref`) as the
+      // guard, and WRONGLY report the correctly-guarded real file as unguarded. `expected:
+      // null` — the FIXED (depthDelta-based) pop must still find the real outer guard and
+      // report no problem at all.
+      name: 'one-line if/fi interleaved inside the real tolerance guard (F5 regression probe)',
+      expected: null,
+      mutate: (model) => {
+        const step = gateEnforcedStep(model);
+        const anchor = 'sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"';
+        const before = String(step.run);
+        if (!before.includes(anchor)) throw new Error('anchor not found, probe would be vacuous');
+        step.run = before.replace(anchor, `if [ "$X" = "y" ]; then echo z; fi\n  ${anchor}`);
+      },
     },
   ];
 

@@ -51,6 +51,25 @@ export function isPastBootstrapDeadline(now) {
   return now.getTime() > BOOTSTRAP_DEADLINE.getTime();
 }
 
+// V7 (pre-merge squad, gate pass 5): these four collections (IGNORED_TOP_LEVEL_FIELDS,
+// OPAQUE_PATHS, NAMED_DIFFERENCES, NAMED_PREFIX_DIFFERENCES below) are, on their face, the same
+// shape as V1/V2/V3's defeated guards: an expected-value list, editable in the same commit as
+// the artifact/live comparison it filters. They are deliberately NOT given a BASELINE-style
+// history pin or a check-gate-wiring-style independent structural duplicate, for a reason that
+// does not apply to those three: BASELINE/ON_BASELINE/STORYBOOK_PREDICATE/HEAVY_JOB_PREDICATE
+// each guard against SILENTLY REVERTING a protection that already existed before this mission
+// (a pre-mission `if:` weakened back, an existing cron count widened) — history to pin against
+// exists precisely because the thing being protected predates this file. The develop ruleset
+// and this parity check are BOTH new in this mission; there is no prior state to pin an
+// ignore-list against, and no second file/language independently re-derives "which GitHub
+// ruleset response fields are response-only" the way the workflow's bash steps and JS checks
+// independently duplicate the same regex. The honest backstop here is narrower: this file is
+// short, single-purpose, and every entry above is named and justified in the file's own
+// docstring (a widening is a visible, self-contained diff, not a cross-format/cross-file
+// tamper); AND probes 2-4 plus the two below exercise every non-ignored top-level key a real
+// ruleset carries (`rules` nested fields, `bypass_actors`, `enforcement`, `target`) to prove
+// today's exact list is the correct one and to give a future widening of the list a concrete,
+// named regression to explain away in review — not a mechanical pin, but not nothing either.
 const IGNORED_TOP_LEVEL_FIELDS = new Set([
   'id',
   'node_id',
@@ -278,10 +297,30 @@ function runProbes() {
     });
   }
 
+  // Probe 7 — V7 canary: `enforcement` (active vs disabled) differing must be caught. Not
+  // currently ignorable/named — this probe is the concrete regression a future widening of
+  // IGNORED_TOP_LEVEL_FIELDS to include `enforcement` would have to explain away.
+  {
+    const live = liveShapedFrom(artifact);
+    live.enforcement = 'disabled';
+    const diffs = diffRulesetParity(live, artifact);
+    const flagged = diffs.some((d) => d.path === 'enforcement');
+    record(7, 'enforcement flipped to disabled -> caught (V7 canary)', 'fail', diffs.length > 0 && flagged, diffs);
+  }
+
+  // Probe 8 — V7 canary: `target` (e.g. branch vs tag ruleset) differing must be caught.
+  {
+    const live = liveShapedFrom(artifact);
+    live.target = 'tag';
+    const diffs = diffRulesetParity(live, artifact);
+    const flagged = diffs.some((d) => d.path === 'target');
+    record(8, 'target changed to tag -> caught (V7 canary)', 'fail', diffs.length > 0 && flagged, diffs);
+  }
+
   return results;
 }
 
-const PROBE_FLOOR = 6;
+const PROBE_FLOOR = 8;
 
 function selftest() {
   const results = runProbes();

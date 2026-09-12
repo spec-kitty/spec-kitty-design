@@ -1525,8 +1525,15 @@ async function runProbes() {
   // (B5, pre-merge squad) a branch with an open PR to a DIFFERENT base — protected, never
   // deleted, plus the exact-shape regex itself (`promote/<40-hex>`, never a loose prefix).
   {
+    // V4 (pre-merge squad, gate pass 4): boundary assertions — a loosened regex like
+    // `promote/[0-9a-f]{7,40}` (still "looks right", still passes a casual read) left this
+    // suite green before this. 39-hex (one short) and 41-hex (one long) must BOTH be
+    // rejected, not just the exact 40-hex shape accepted and an unrelated human name refused.
     const shapeOk =
-      PROMOTION_BRANCH_RE.test(`promote/${'0'.repeat(40)}`) && !PROMOTION_BRANCH_RE.test('promote/my-feature');
+      PROMOTION_BRANCH_RE.test(`promote/${'0'.repeat(40)}`) &&
+      !PROMOTION_BRANCH_RE.test('promote/my-feature') &&
+      !PROMOTION_BRANCH_RE.test(`promote/${'0'.repeat(39)}`) &&
+      !PROMOTION_BRANCH_RE.test(`promote/${'0'.repeat(41)}`);
 
     const now = Date.now();
     const openPRs = [
@@ -1916,6 +1923,60 @@ async function runProbes() {
     );
   }
 
+  // Probe 23 — V5 (pre-merge squad, gate pass 4): a discriminating test for `applyOutcome`'s
+  // OWN delete-site defense-in-depth guard, independent of `findPromotionPRs`'s selection-time
+  // filter (probe 15) or the sweep's branch-listing filter (probe 17) — both of which this
+  // probe deliberately bypasses by handing `applyOutcome` an `existingPr` object DIRECTLY,
+  // the way a hypothetical future upstream bug might. Reverting the `PROMOTION_BRANCH_RE.test
+  // (...)` guard immediately around `deleteBranch` in `applyOutcome`'s supersede path (so it
+  // deletes unconditionally) leaves every OTHER probe green, since none of them exercise this
+  // exact call site with a malformed `existingPr.branch`.
+  {
+    const s = scratchRepo();
+    try {
+      s.git(['branch', 'develop']);
+      s.commit('a.txt', 'a', 'chore: a');
+      const train = tipOf(s.git, 'HEAD');
+      const develop = tipOf(s.git, 'develop');
+      const malformedExistingPr = {
+        number: 42,
+        headSha: 'e'.repeat(40),
+        headTree: '2'.repeat(40),
+        branch: 'promote/my-feature', // NOT the exact promote/<40-hex> shape
+        createdAt: new Date().toISOString(),
+      };
+      const decision = impl.decidePromotion({
+        trainSha: train.sha,
+        trainTree: train.tree,
+        developSha: develop.sha,
+        developTree: develop.tree,
+        existingPr: malformedExistingPr,
+        developHealthy: true,
+        divergence: null,
+      });
+      const { exec, calls } = makeRecordingExec();
+      applyOutcome(exec, 'spec-kitty/spec-kitty-design', s.dir, decision, develop.sha, train.sha);
+      const deletedMalformedBranch = calls.some(
+        (c) => c[0] === 'gh' && c[1] === 'api' && c[2] === '-X' && c[3] === 'DELETE' && String(c[4] ?? '').includes('promote/my-feature'),
+      );
+      // The REST of the supersede flow (comment, close, push, create) must still happen —
+      // this probe is about the ONE deletion call, not a general refusal to supersede.
+      const restOfFlowRan =
+        calls.some((c) => c[0] === 'gh' && c[1] === 'pr' && c[2] === 'comment' && c[3] === '42') &&
+        calls.some((c) => c[0] === 'gh' && c[1] === 'pr' && c[2] === 'close' && c[3] === '42') &&
+        calls.some((c) => c[0] === 'gh' && c[1] === 'pr' && c[2] === 'create');
+      record(
+        23,
+        "V5: applyOutcome's own delete-site guard refuses to delete a malformed existingPr.branch, even bypassing findPromotionPRs entirely",
+        'pass',
+        !deletedMalformedBranch && restOfFlowRan,
+        { deletedMalformedBranch, restOfFlowRan, calls },
+      );
+    } finally {
+      s.cleanup();
+    }
+  }
+
   return results;
 }
 
@@ -1926,7 +1987,7 @@ async function runProbes() {
 // probe is added (F1/F2 added probes 22 and extended 19, gate pass 2); lowering it is a
 // deliberate edit in the same commit that removes a probe, never a silent side effect of a
 // duplicate label masking a shrink.
-const PROBE_FLOOR = 22;
+const PROBE_FLOOR = 23;
 
 async function selftest() {
   // B1 (pre-merge squad, PR #429): the ONE choke point every git call in this file's

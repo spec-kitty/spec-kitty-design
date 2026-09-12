@@ -99,9 +99,24 @@ export const EXPECTED_CHANGED_IF = {
   lighthouse: HEAVY_JOB_PREDICATE,
 };
 
-/** F7: the four downstream heavy jobs also gain `changes` in `needs:` (to read
- *  `needs.changes.outputs.is_develop_promotion_pr`) — `storybook-build`'s own `needs:` is
- *  unchanged (it already depended on `changes`). */
+/**
+ * F7: the four downstream heavy jobs also gain `changes` in `needs:` (to read
+ * `needs.changes.outputs.is_develop_promotion_pr`) — `storybook-build`'s own `needs:` is
+ * unchanged (it already depended on `changes`).
+ *
+ * V7 (pre-merge squad, gate pass 5): this dict is compared directly against `live.needs`
+ * (below), which is on its face the same "expected value edited alongside the thing it
+ * guards" shape as BASELINE/ON_EXPECTED before their fixes. It is left unpinned deliberately:
+ * unlike a dropped `if:` conjunct (a fail-OPEN regression — the promotion-skip check silently
+ * stops applying), a same-commit edit here can only ever REMOVE `changes` from a job's
+ * `needs:`, which makes `needs.changes.outputs.is_develop_promotion_pr` unavailable to that
+ * job's `if:` and therefore fails CLOSED (the job runs unconditionally, same as before REL1) —
+ * the opposite direction from every vulnerability this mission's guards exist to close. There
+ * is also no way to widen `needs:` to smuggle a bypass: `needs:` only gates job scheduling
+ * order, never the promotion-skip decision itself (that is `EXPECTED_CHANGED_IF`, which IS
+ * independently pinned via the V2 structural check above). Not exempt from V7's "say why it
+ * does not need one": this is why.
+ */
 export const EXPECTED_CHANGED_NEEDS = {
   a11y: ['storybook-build', 'changes'],
   'visual-regression': ['storybook-build', 'changes'],
@@ -109,16 +124,35 @@ export const EXPECTED_CHANGED_NEEDS = {
   lighthouse: ['storybook-build', 'changes'],
 };
 
-/** F4: the on: block REL1 is allowed to have produced. `schedule` is DELIBERATELY the same
- *  single-entry array as ON_BASELINE — a second cron re-triggers the entire workflow for every
- *  job without its own event-specific guard (research.md R25's own corrected decision). */
+/**
+ * F4: the on: block REL1 is allowed to have produced. V3 (pre-merge squad, gate pass 4):
+ * DERIVED from `ON_BASELINE` plus the named deltas below, never restated as a second,
+ * independently-editable literal — adding a second cron to the workflow AND to a hand-typed
+ * `ON_EXPECTED`, in one commit, used to pass both this check AND its own `--selftest`.
+ * `schedule` is a DIRECT REFERENCE to `ON_BASELINE.schedule` (not a re-typed copy): the only
+ * way to widen it here is to edit `ON_BASELINE` itself, which `verifyBaselineAgainstHistory`
+ * now holds to real git history on every run — a second cron re-triggers the entire workflow
+ * for every job without its own event-specific guard (research.md R25's corrected decision).
+ */
 export const ON_EXPECTED = {
-  pullRequestBranches: ['main', 'train/**', 'develop'],
-  pushBranches: ['main', 'train/**', 'develop'],
-  schedule: [{ cron: '17 2 * * *' }],
+  pullRequestBranches: [...ON_BASELINE.pullRequestBranches, 'develop'],
+  pushBranches: [...ON_BASELINE.pushBranches, 'develop'],
+  schedule: ON_BASELINE.schedule,
   hasWorkflowDispatch: true,
 };
 
+// V7: also unpinned, but honestly so rather than falsely pinned. This set is a drift-detector
+// for "an unnamed job appeared" (probe 2) only — it enforces no security property of the job
+// itself. A same-commit edit that adds a new job to the workflow AND to this set silences that
+// one generic surprise-flag, but it does NOT touch any of the actual enforcement: every real
+// guard in this mission (the exact-shape `if:` conjuncts, check-gate-wiring.mjs's JOBS sweep
+// and its `['a11y','visual-regression','playwright','lighthouse']` loop) is keyed to specific,
+// already-named jobs, fixed in source, independent of this set — none of them derive "which
+// jobs to check" FROM EXPECTED_NEW_JOBS. So this check was never a general "every new job is
+// vetted" mechanism, and unpinning it doesn't regress one into existing. The real residual
+// limitation — a genuinely new, unnamed, unguarded heavy job added by a future PR would need a
+// human to notice and add BOTH real enforcement AND a mention here — is accepted as out of
+// scope for this mission's already-enumerated attack surface, not silently assumed solved.
 export const EXPECTED_NEW_JOBS = new Set(['promote-develop', 'develop-ruleset-parity']);
 
 function needsEqual(a, b) {
@@ -224,6 +258,17 @@ export function checkTriggerParity(jobs, on) {
       problems.push(
         `job \`${name}\`'s \`needs:\` is ${JSON.stringify(live.needs ?? null)}, expected ${JSON.stringify(expectedNeeds)} ` +
           (name in EXPECTED_CHANGED_NEEDS ? '(the one REL1-allowed change, F7)' : '(unchanged from baseline)'),
+      );
+    }
+    // V2 (pre-merge squad, gate pass 4): for the jobs REL1 is allowed to have changed, ALSO
+    // require the exact-shape promotion-skip conjunct structurally — hardcoded HERE, never
+    // derived from the imported STORYBOOK_PREDICATE/HEAVY_JOB_PREDICATE. Those are a SINGLE
+    // shared constant both this file and check-gate-wiring.mjs import; editing it alongside
+    // the matching workflow `if:`s, in one commit, would otherwise leave both green.
+    if (name in EXPECTED_CHANGED_IF && !/needs\.changes\.outputs\.is_develop_promotion_pr\s*!=\s*'true'/.test(String(live.if ?? ''))) {
+      problems.push(
+        `job \`${name}\`'s \`if:\` is missing the independently-required exact-shape ` +
+          'promotion-skip conjunct (V2 structural check, not derived from the shared predicate constant)',
       );
     }
   }

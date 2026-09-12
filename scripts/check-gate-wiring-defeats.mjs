@@ -208,6 +208,19 @@ const CASES = [
       job.if = "needs.storybook-build.result == 'success'";
     },
   ]),
+
+  // ── V1 (pre-merge squad, gate pass 4): the promo-shape step's OWN shell body, weakened to
+  // the loose promote/* glob the script side already rejects — every one of the five
+  // downstream if:s trusts this one computed boolean, so weakening it here silently widens
+  // all five at once while HEAVY_JOB_PREDICATE/STORYBOOK_PREDICATE (which only check the
+  // OUTPUT NAME, not what it computes) stay green. ──────────────────────────────────────
+  ['V1 the promo-shape step weakened to the loose promote/* glob', (wf) => {
+    const step = (wf.jobs?.changes?.steps ?? []).find((s) => s.id === 'promo-shape');
+    if (!step) throw new Error('no promo-shape step');
+    const anchor = 'if [[ "$HEAD_REF" =~ ^promote/[0-9a-f]{40}$ && "$BASE_REF" == "develop" ]]; then';
+    const widened = 'if [[ "$HEAD_REF" == promote/* && "$BASE_REF" == "develop" ]]; then';
+    step.run = once(String(step.run), anchor, widened);
+  }],
 ];
 
 /**
@@ -215,7 +228,7 @@ const CASES = [
  * REMOVED by lowering it in the same commit, which is a reviewable edit rather than a deletion
  * that hides in a digit.
  */
-const MIN_CASES = 27;
+const MIN_CASES = 28;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });
