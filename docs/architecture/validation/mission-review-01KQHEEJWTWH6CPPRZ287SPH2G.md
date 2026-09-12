@@ -60,7 +60,7 @@ This is a greenfield infrastructure mission on a new frontend monorepo repositor
 | FR-012 | Token usable via CDN link / no build step | WP02 | `exports: {".": "./dist/tokens.css"}` enables CDN; untested in CI | PARTIAL | RISK-1 |
 | FR-013 | All packages published under shared scope | WP02 | `.npmrc`: `@spec-kitty:registry=https://registry.npmjs.org/` | ADEQUATE | — |
 | FR-014 | `--sk-*` as single token authority | WP02, WP05 | Stylelint `declaration-strict-value` enforces; tokens.css verified | ADEQUATE | — |
-| FR-015 | Breaking token name change detectable | WP02 | `token-catalogue.json` generated but no diff-against-tag CI check | PARTIAL | DRIFT-3 |
+| FR-015 | Breaking token name change detectable | WP02 | `token-catalogue.json` generated; `scripts/check-token-breaking-changes.sh` now wired into `ci-quality.yml`'s `release-gate` on every PR (#435, #438) | ADEQUATE | — (was DRIFT-3, resolved 2026-09-12) |
 | FR-016 | Every PR triggers CI | WP07 | `ci-quality.yml` triggers on `pull_request` | ADEQUATE | — |
 | FR-017 | Stylesheet convention gate | WP05 | `stylelint.config.mjs` configured and verified | ADEQUATE | — |
 | FR-018 | Script convention gate | WP05 | `eslint.config.mjs` with security plugin | ADEQUATE | — |
@@ -266,7 +266,7 @@ Neither of these blocks using the infrastructure for local development or CI val
 ### Open items (non-blocking, addressed in follow-up)
 
 1. **DRIFT-2**: Add ADR-007 documenting the Storybook 10.x version adoption decision.
-2. **DRIFT-3**: Create a GitHub issue and implement `scripts/check-token-breaking-changes.sh` (FR-015 enforcement gap).
+2. ~~**DRIFT-3**: Create a GitHub issue and implement `scripts/check-token-breaking-changes.sh` (FR-015 enforcement gap).~~ **Resolved 2026-09-12 (#435, #438)**: the script exists and is wired into `release-gate`; see the FR-015 row above and the DRIFT-3 section's own Resolved note.
 3. **RISK-1**: Add a CDN consumption smoke test to Playwright suite.
 4. **RISK-2**: Update visual baseline strategy for cross-platform contributors (macOS).
 5. **RISK-3**: Replace single-URL axe scan with per-story story-iterator approach.

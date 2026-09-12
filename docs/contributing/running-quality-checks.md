@@ -99,11 +99,12 @@ cases: first release, or the release tag predates the catalogue's existence); `1
 changes detected; `2` cannot compare — the ref/tag does not resolve or is unreachable (e.g. a
 shallow clone), or a catalogue that should be comparable is not well-formed.
 
-`release-gate`'s checkout uses `fetch-depth: 0` specifically so this check's tag resolution has
-real history to work with locally, run `git fetch --tags --unshallow` first if your clone is
-shallow. `node scripts/generate-token-catalogue.js --check` (also wired into `release-gate`)
-verifies the committed catalogue matches a fresh build from `tokens.css` before this check trusts
-it as the CURRENT side of the comparison.
+In CI, `release-gate`'s checkout uses `fetch-depth: 0` specifically so this check's tag
+resolution has real history to work with. Locally, if your own clone is shallow, run
+`git fetch --tags --unshallow` first. `node scripts/generate-token-catalogue.js --check` (also
+wired into `release-gate`, and its own `--selftest` before it) verifies the committed catalogue
+matches a fresh build from `tokens.css` before this check trusts it as the CURRENT side of the
+comparison.
 
 ## CI parity note
 
