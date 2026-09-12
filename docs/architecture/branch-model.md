@@ -161,6 +161,21 @@ ruleset above, this one is not mid-bootstrap: `scripts/check-develop-ruleset-par
 --check-parity-anchor-tags` reads this id as a plain constant, with no dated floor and no
 unset-id notice path, since the ruleset already exists.
 
+**What PR-time CI can and cannot verify (F-E, incident 3)**: `--check-parity-anchor-tags` runs
+in `lint-code` on every PR and checks the ruleset's shape, target, conditions, and every rule
+(`creation`/`deletion`/`update`/`non_fast_forward`) — but NOT `bypass_actors`. GitHub's REST docs
+for "Get a repository ruleset" state: *"To prevent leaking sensitive information, the
+bypass_actors property is only returned if the user making the API request has write access to
+the ruleset."* The PR-time workflow token does not have write access to the ruleset (granting
+`administration: write` so a read-only drift check could see one field would let any step on
+any PR modify repository settings — the wrong trade, not made), so the field is silently absent
+from that token's response. The script does not read absence as agreement: it prints a named
+`::warning::` and exits 0 rather than reporting drift or false confidence. `bypass_actors: []`
+(the entire "nobody can move this tag, admins included" claim) is therefore verified only by an
+admin-authenticated read — `gh api repos/spec-kitty/spec-kitty-design/rulesets/22997584 --jq
+.bypass_actors` should print `[]` — which is an OPERATOR step, not something CI can close; see
+`docs/release-runbook.md`'s landing/maintenance section for where that step lives.
+
 ## Operator and orchestrator actions
 
 See `kitty-specs/release-pipeline-develop-line-01M292E3/quickstart.md` for the full, exact

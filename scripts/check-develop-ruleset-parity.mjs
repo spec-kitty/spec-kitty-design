@@ -31,6 +31,19 @@
  *     (id is NOT bootstrap-pending like develop's — F-E's ruleset already exists, id 22997584,
  *     recorded in docs/architecture/branch-model.md — so this has no dated floor and no
  *     unset-id notice path; a missing/unreachable ruleset here is simply an error.)
+ *
+ * **THE LESSON, THIRD TIME (F-E)**: a check that reads privileged state is only as strong as
+ * the identity running it, and an identity difference between a local run and CI reads exactly
+ * like a code defect. `check-ci-quality-trigger-parity.mjs` hit this twice already — a real git
+ * identity for `git commit-tree` that a bare runner lacks (its own `selftest()`'s
+ * `GIT_AUTHOR_*`/`GIT_COMMITTER_*` setup), then a deleted commit that stayed readable ONLY on a
+ * checkout that still held it locally (the whole `907b2bbd`/`parity-anchor` incident). This file
+ * hits the same shape a third time, but in the other direction: `--check-parity-anchor-tags`
+ * passed green in every local run here, because local runs use an admin-authenticated `gh`, and
+ * only reproduced the real CI failure — `bypass_actors: live=undefined artifact=[]` — under a
+ * simulated non-admin token. See `UNVERIFIABLE_IF_ABSENT_DEFAULT` below for the specific field
+ * and the documented reason, and `docs/architecture/branch-model.md` for what this means CI can
+ * and cannot verify.
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -159,18 +172,38 @@ function deepDiff(pathPrefix, a, b, diffs) {
 
 const NAMED_DIFFERENCES = new Set(['name', 'conditions.ref_name.include']);
 const NAMED_PREFIX_DIFFERENCES = ['rules[type=pull_request].parameters.allowed_merge_methods'];
+// F-E, incident 3: GitHub's REST docs for "Get a repository ruleset" state — quoted here so the
+// next reader does not have to re-derive it from a red CI run the way this mission did — "To
+// prevent leaking sensitive information, the bypass_actors property is only returned if the
+// user making the API request has write access to the ruleset." A PR-time workflow token does
+// not have write access to the ruleset (granting `administration: write` so a read-only drift
+// check could see one field would let any step on any PR modify repository settings — the
+// wrong trade, not made). So `bypass_actors` is ABSENT from that token's response, not merely
+// empty — and `bypass_actors: []` is the entire security claim this ruleset makes ("nobody can
+// move this tag, admins included"). Absent must never read as drift (the token cannot see the
+// field) and must never silently read as agreement either (the artifact's claim stays
+// unconfirmed by this run). `opts.unverifiableIfAbsent` names paths where "the live value is
+// exactly `undefined`" is filtered out of `diffs` and instead reported by
+// `findUnverifiableAbsences` below, as a named, exit-0 `::warning::` — see `branch-model.md` and
+// `docs/release-runbook.md` for where `bypass_actors` IS actually verified (an admin-
+// authenticated read, not any CI-available token today).
+const UNVERIFIABLE_IF_ABSENT_DEFAULT = new Set();
 
 /**
  * Compares EVERY parameter, at every nesting level (data-model.md's DevelopRulesetArtifact
  * section). Returns `[]` only when the full structures match except the named, documented
- * differences. `opts.namedDifferences`/`opts.namedPrefixDifferences` default to `develop`'s own
- * three (above) — `parity-anchor-tags` (F-E) passes empty collections instead, since its
- * artifact is written to match the live ruleset's `name`/`conditions.ref_name.include` exactly
- * and has no analogous per-type parameter to exempt (it carries no `pull_request` rule at all).
+ * differences AND any path named in `opts.unverifiableIfAbsent` whose LIVE value is absent
+ * (`undefined`) — that is not "matches", it is "cannot be checked here"; see
+ * `findUnverifiableAbsences`, which callers must ALSO call to learn about it.
+ * `opts.namedDifferences`/`opts.namedPrefixDifferences` default to `develop`'s own three
+ * (above) — `parity-anchor-tags` (F-E) passes empty collections instead, since its artifact is
+ * written to match the live ruleset's `name`/`conditions.ref_name.include` exactly and has no
+ * analogous per-type parameter to exempt (it carries no `pull_request` rule at all).
  */
 export function diffRulesetParity(live, artifact, opts = {}) {
   const namedDifferences = opts.namedDifferences ?? NAMED_DIFFERENCES;
   const namedPrefixDifferences = opts.namedPrefixDifferences ?? NAMED_PREFIX_DIFFERENCES;
+  const unverifiableIfAbsent = opts.unverifiableIfAbsent ?? UNVERIFIABLE_IF_ABSENT_DEFAULT;
   const diffs = [];
   deepDiff('', live, artifact, diffs);
   return diffs.filter((d) => {
@@ -178,8 +211,36 @@ export function diffRulesetParity(live, artifact, opts = {}) {
     if (namedPrefixDifferences.some((prefix) => d.path === prefix || d.path.startsWith(`${prefix}[`))) {
       return false;
     }
+    if (unverifiableIfAbsent.has(d.path) && d.live === undefined) return false;
     return true;
   });
+}
+
+/**
+ * F-E, incident 3: reports every path in `unverifiableIfAbsent` whose value is present in
+ * `artifact` but ABSENT (not merely falsy/empty — `undefined`) from `live`. `diffRulesetParity`
+ * silently drops these from its own `diffs` (they are not drift), so a caller that wants the
+ * gap made visible must call this too — a caller that calls neither would silently treat
+ * "cannot see this field" as "matches", exactly the failure mode this exists to prevent. Each
+ * message quotes the reason (GitHub's own docs sentence, above) rather than asserting it,
+ * so the next reader does not have to trust an unexplained warning.
+ */
+export function findUnverifiableAbsences(live, artifact, unverifiableIfAbsent) {
+  const messages = [];
+  for (const path of unverifiableIfAbsent) {
+    const liveVal = path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), live);
+    const artifactVal = path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), artifact);
+    if (liveVal === undefined && artifactVal !== undefined) {
+      messages.push(
+        `${path} is absent from this token's API response, so it cannot be verified here. GitHub's ` +
+          'REST docs for "Get a repository ruleset" state: "To prevent leaking sensitive information, ' +
+          `the ${path} property is only returned if the user making the API request has write access ` +
+          `to the ruleset." The committed artifact claims ${path} = ${JSON.stringify(artifactVal)}; this ` +
+          'run neither confirms nor contradicts that — see branch-model.md for where it IS verified.',
+      );
+    }
+  }
+  return messages;
 }
 
 // ── CLI: --check ──────────────────────────────────────────────────────────────────────
@@ -233,6 +294,12 @@ function cliCheck(args) {
   console.log(`✅ the live develop ruleset (id ${id}) matches the committed artifact.`);
 }
 
+// F-E, incident 3: `bypass_actors` is the one field this PR-time token cannot see (see the
+// `UNVERIFIABLE_IF_ABSENT_DEFAULT` comment above) — named here, not folded into that default,
+// because it is specific to WHICH ruleset is being read with WHICH token, not a universal
+// response-only field the way `IGNORED_TOP_LEVEL_FIELDS` are.
+const PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT = new Set(['bypass_actors']);
+
 /** F-E: same shape as `cliCheck` above, minus the bootstrap-deadline dance — this ruleset
  *  already exists and its id is already known and recorded, so there is no pre-bootstrap
  *  "nothing to check yet" state to tolerate. */
@@ -241,7 +308,11 @@ function cliCheckParityAnchorTags() {
     execFileSync('gh', ['api', `repos/${REPO}/rulesets/${PARITY_ANCHOR_RULESET_ID}`], { encoding: 'utf8' }),
   );
   const artifact = JSON.parse(readFileSync(PARITY_ANCHOR_ARTIFACT_PATH, 'utf8'));
-  const diffs = diffRulesetParity(live, artifact, { namedDifferences: new Set(), namedPrefixDifferences: [] });
+  const opts = { namedDifferences: new Set(), namedPrefixDifferences: [], unverifiableIfAbsent: PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT };
+  for (const w of findUnverifiableAbsences(live, artifact, PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT)) {
+    console.log(`::warning::${w}`);
+  }
+  const diffs = diffRulesetParity(live, artifact, opts);
   if (diffs.length) {
     console.error(
       `::error::the live parity-anchor-tags ruleset (id ${PARITY_ANCHOR_RULESET_ID}) has drifted from the committed artifact:`,
@@ -385,10 +456,59 @@ function runProbes() {
     record(10, 'parity-anchor-tags: creation rule missing entirely -> caught', 'fail', diffs.length > 0 && flagged, diffs);
   }
 
+  // F-E, incident 3: the three `bypass_actors` comparison paths — reproduced live on 2026-09-12
+  // against the real ruleset (`::error::... bypass_actors: live=undefined artifact=[]`, a
+  // PR-time-token GET that succeeded but omitted the field per GitHub's own documented
+  // write-access gate, quoted at `UNVERIFIABLE_IF_ABSENT_DEFAULT` above). All three MUST be
+  // driven through the real `diffRulesetParity`/`findUnverifiableAbsences` pair, with the SAME
+  // `unverifiableIfAbsent` set `cliCheckParityAnchorTags` actually uses — never a hand-rolled
+  // reimplementation of "is it absent".
+  const withBypassOpts = { ...noNamedDiffs, unverifiableIfAbsent: PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT };
+
+  // Probe 11 — ABSENT (the real, reproduced case): a named warning, zero diffs, exit-0 shape.
+  {
+    const live = liveShapedFrom(parityAnchorArtifact);
+    delete live.bypass_actors;
+    const diffs = diffRulesetParity(live, parityAnchorArtifact, withBypassOpts);
+    const warnings = findUnverifiableAbsences(live, parityAnchorArtifact, PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT);
+    const named = warnings.length === 1 && warnings[0].includes('bypass_actors') && warnings[0].includes('write access');
+    record(
+      11,
+      'parity-anchor-tags: bypass_actors absent from the live response -> a named warning, zero diffs (never drift, never silent agreement)',
+      'pass',
+      diffs.length === 0 && named,
+      { diffs, warnings },
+    );
+  }
+
+  // Probe 12 — PRESENT and DIFFERENT: real drift, not swallowed by the absence exemption.
+  {
+    const live = liveShapedFrom(parityAnchorArtifact);
+    live.bypass_actors = [{ actor_id: 1, actor_type: 'Team', bypass_mode: 'always' }];
+    const diffs = diffRulesetParity(live, parityAnchorArtifact, withBypassOpts);
+    const warnings = findUnverifiableAbsences(live, parityAnchorArtifact, PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT);
+    const flagged = diffs.some((d) => d.path === 'bypass_actors');
+    record(
+      12,
+      'parity-anchor-tags: bypass_actors present and different -> real drift, no warning suppresses it',
+      'fail',
+      diffs.length > 0 && flagged && warnings.length === 0,
+      { diffs, warnings },
+    );
+  }
+
+  // Probe 13 — PRESENT and EQUAL: clean, no warning at all.
+  {
+    const live = liveShapedFrom(parityAnchorArtifact); // clones the artifact, so bypass_actors: [] survives untouched
+    const diffs = diffRulesetParity(live, parityAnchorArtifact, withBypassOpts);
+    const warnings = findUnverifiableAbsences(live, parityAnchorArtifact, PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT);
+    record(13, 'parity-anchor-tags: bypass_actors present and equal -> clean, no warning', 'pass', diffs.length === 0 && warnings.length === 0, { diffs, warnings });
+  }
+
   return results;
 }
 
-const PROBE_FLOOR = 10;
+const PROBE_FLOOR = 13;
 
 function selftest() {
   const results = runProbes();

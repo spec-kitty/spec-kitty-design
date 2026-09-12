@@ -48,6 +48,16 @@ an ancestor of HEAD" — mysterious-looking unless this step has already been pl
    `BASELINE`/`ON_BASELINE` from that commit's real `.github/workflows/ci-quality.yml` (see that
    file's own REBASELINING note).
 3. Run `node scripts/check-ci-quality-trigger-parity.mjs --selftest` before pushing that commit.
+4. **Operator, standing check — `bypass_actors` (F-E, incident 3)**: PR-time CI
+   (`--check-parity-anchor-tags` in `lint-code`) cannot see this field at all — GitHub only
+   returns it to a write-access-authenticated request, and a PR-time workflow token is
+   deliberately not that (see `docs/architecture/branch-model.md`). Run
+   `gh api repos/spec-kitty/spec-kitty-design/rulesets/<id> --jq .bypass_actors` yourself
+   (an admin-authenticated read) and confirm it prints `[]` — for BOTH the tag ruleset above and
+   `develop`'s ruleset once it exists — at every landing, and periodically otherwise, since
+   nothing else in this repo ever checks it. `bypass_actors: []` is the entire "nobody can move
+   this tag, admins included" security claim; a CI warning naming this gap is not the same thing
+   as it having been checked.
 
 Doing this as part of step 1 — rather than after CI on `main` reds and someone has to
 reverse-engineer why — is the point of naming it here.
