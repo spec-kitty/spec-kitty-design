@@ -97,7 +97,7 @@ Final refresh validation on that tree:
 
 | Gate | Result |
 |---|---|
-| full-range commitlint, `git diff --check`, clean-status check | pass: 5/5 compact commits; zero whitespace errors; clean |
+| full-range commitlint, `git diff --check`, clean-status check | pass: 7/7 exact corrected-branch commits; zero whitespace errors; clean |
 | `npm run quality:all` | pass: 8 Nx lint projects, Stylelint, HTMLHint (163 files) |
 | `node scripts/typecheck-all.mjs` | pass: 5/5 projects |
 | `npm test -- --reporter=dot` | pass: 58 files, 808 tests |
@@ -112,6 +112,27 @@ Final refresh validation on that tree:
 | owned pinned Noble visuals | pass: replayed 18/18; all 18 inspected individually with no clipping, overflow, stale shell, or truth-region crossover; no baseline regeneration required |
 
 This refresh did not push, comment, review, approve, merge, or alter mission lifecycle state.
+
+## Corrective real-zoom evidence
+
+The final evidence review correctly rejected the earlier 640px-only reflow proxy as insufficient
+for the programme's 200% zoom claim. The focused suite now follows the train convention landed by
+#427: it opens a fresh Playwright context at device scale factor 2 and exactly halves the normal
+1280x1000 CSS viewport to 640x500. The test independently proves the context dimensions and DPR,
+document and root containment, and the pattern's public auto-fit grid changing from two columns to
+stacked truth regions. Long supplied copy remains visible. The display-only pattern intentionally
+authors no user-action control; without inventing one or reaching through a shadow root, the test
+focuses the public `sk-notice[tabindex=-1]` host, verifies a visible native focus outline, and checks
+that its public focus target is at least 44px high and horizontally contained. The separately named
+CSS-zoom check remains supplemental magnification stress only. No story, runtime/API surface,
+visual case, or snapshot changed.
+
+Corrective-tree validation: `npm run quality:all` passed all eight Nx lint projects plus
+Stylelint and HTMLHint (163 files); `node scripts/typecheck-all.mjs` passed all five projects;
+`npm test -- --reporter=dot` passed 58 files and 808 tests; the Storybook production build
+completed successfully; the focused host Chromium file passed 24/24; and the pinned Playwright
+1.62.1 Noble matrix passed 68 tests with four expected engine-specific skips across Chromium,
+Firefox, and WebKit.
 
 ## History and equivalence
 

@@ -3116,8 +3116,8 @@ for (const visual of accountFrontDoorFullCases) {
 
 // #382 Team Activity truth-region matrix. These eighteen screenshots are the canonical
 // visual inventory for L1-L5, TL1, OA1, DM1, and the required presentation stress states.
-// The focused functional suite owns the separately named 200%-zoom-equivalent reflow and
-// supplemental CSS-zoom stress checks; neither mechanism is mislabeled as native browser zoom.
+// The focused functional suite owns the fresh DPR-2, exactly-halved-viewport 200% zoom evidence
+// and the separately named supplemental CSS-zoom stress check.
 type TeamActivityVisualStoryId =
   | 'default'
   | 'l-2-repository-quiet'

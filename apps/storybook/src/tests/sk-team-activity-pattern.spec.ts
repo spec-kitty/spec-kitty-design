@@ -26,6 +26,12 @@ const STORY_IDS = [
 ] as const;
 type StoryId = (typeof STORY_IDS)[number];
 
+const NORMAL_STORY_VIEWPORT = Object.freeze({ width: 1280, height: 1000 });
+const ZOOM_200_VIEWPORT = Object.freeze({
+  width: NORMAL_STORY_VIEWPORT.width / 2,
+  height: NORMAL_STORY_VIEWPORT.height / 2,
+});
+
 const EXPECTED_GUARD_PROOF = {
   l5DenialOnly: true,
   factualHostContextStable: true,
@@ -1378,7 +1384,7 @@ test("dark and light reuse the semantic fixture while computed surfaces differ",
   expect(lightSurface).not.toBe(darkSurface);
 });
 
-test("narrow, intermediate, desktop, short, long, 200%-zoom-equivalent reflow, and RTL contain supplied facts", async ({
+test("narrow, intermediate, desktop, short, long, and RTL contain supplied facts", async ({
   page,
 }) => {
   const cases = [
@@ -1411,24 +1417,9 @@ test("narrow, intermediate, desktop, short, long, 200%-zoom-equivalent reflow, a
         nodes.map((node) => node.getAttribute("data-live-state")),
       ),
   ).toEqual(["populated", "quiet", "degraded", "gap"]);
+});
 
-  // This fixed-window case proves the layout/reflow pressure of a 1280 CSS-pixel desktop at
-  // 200% browser zoom: 640 CSS pixels remain available. It deliberately does not claim that
-  // Playwright drove the browser chrome's native zoom UI.
-  const zoomEquivalent = await openStory(page, "long-content", {
-    width: 640,
-    height: 1000,
-  });
-  expect(await documentGeometry(page)).toEqual({
-    clientWidth: 640,
-    scrollWidth: 640,
-  });
-  await expect(
-    zoomEquivalent.getByText(/deliberately-long-consumer-supplied-name/).first(),
-  ).toBeVisible();
-
-  // CSS zoom remains supplemental rendering stress only; the 640 CSS-pixel case above is the
-  // repo-native automated reflow evidence.
+test("CSS zoom remains supplemental rendering stress only", async ({ page }) => {
   const zoom = await openStory(page, "long-content", {
     width: 780,
     height: 1000,
@@ -1444,6 +1435,117 @@ test("narrow, intermediate, desktop, short, long, 200%-zoom-equivalent reflow, a
   await expect(
     zoom.getByText(/deliberately-long-consumer-supplied-name/).first(),
   ).toBeVisible();
+});
+
+test("real 200% zoom halves the CSS viewport and reflows the truth-region grid", async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  const normalRoot = await openStory(
+    page,
+    "long-content",
+    NORMAL_STORY_VIEWPORT,
+  );
+  const normalRegions = await normalRoot
+    .locator(".sk-team-activity-pattern__region")
+    .evaluateAll((nodes) =>
+      nodes.slice(0, 2).map((node) => {
+        const box = node.getBoundingClientRect();
+        return { x: box.x, y: box.y, right: box.right, bottom: box.bottom };
+      }),
+    );
+  expect(normalRegions).toHaveLength(2);
+  expect(
+    Math.abs(normalRegions[1]!.y - normalRegions[0]!.y),
+    "the normal viewport must expose the two-column truth-region reference layout",
+  ).toBeLessThanOrEqual(1);
+  expect(normalRegions[1]!.x).toBeGreaterThan(normalRegions[0]!.right);
+
+  const zoomContext = await browser.newContext({
+    baseURL,
+    deviceScaleFactor: 2,
+    viewport: ZOOM_200_VIEWPORT,
+  });
+  try {
+    const zoomPage = await zoomContext.newPage();
+    const root = await openStory(
+      zoomPage,
+      "long-content",
+      ZOOM_200_VIEWPORT,
+    );
+    const viewport = await zoomPage.evaluate(() => ({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      deviceScaleFactor: window.devicePixelRatio,
+    }));
+    expect(
+      viewport,
+      "200% zoom must halve both dimensions of the normal CSS viewport in a fresh DPR-2 context",
+    ).toEqual({
+      width: NORMAL_STORY_VIEWPORT.width / 2,
+      height: NORMAL_STORY_VIEWPORT.height / 2,
+      deviceScaleFactor: 2,
+    });
+
+    const zoomRegions = await root
+      .locator(".sk-team-activity-pattern__region")
+      .evaluateAll((nodes) =>
+        nodes.slice(0, 2).map((node) => {
+          const box = node.getBoundingClientRect();
+          return { x: box.x, y: box.y, right: box.right, bottom: box.bottom };
+        }),
+      );
+    expect(zoomRegions).toHaveLength(2);
+    expect(
+      zoomRegions[1]!.y,
+      "the halved viewport must stack truth regions instead of retaining the desktop columns",
+    ).toBeGreaterThan(zoomRegions[0]!.bottom);
+    expect(Math.abs(zoomRegions[1]!.x - zoomRegions[0]!.x)).toBeLessThanOrEqual(
+      1,
+    );
+
+    expect(await documentGeometry(zoomPage)).toEqual({
+      clientWidth: ZOOM_200_VIEWPORT.width,
+      scrollWidth: ZOOM_200_VIEWPORT.width,
+    });
+    const rootBox = await root.boundingBox();
+    expect(rootBox).not.toBeNull();
+    expect(rootBox!.x).toBeGreaterThanOrEqual(0);
+    expect(rootBox!.x + rootBox!.width).toBeLessThanOrEqual(
+      ZOOM_200_VIEWPORT.width + 1,
+    );
+    await expect(
+      root.getByText(/deliberately-long-consumer-supplied-name/).first(),
+    ).toBeVisible();
+
+    // This truth display intentionally has no user-action control. Its public notice host is
+    // natively programmatically focusable (`tabindex=-1`), so it is the honest focus/target-size
+    // boundary to check without inventing a control or reaching through the element's shadow root.
+    const focusTarget = root.locator("sk-notice[tabindex='-1']").first();
+    await focusTarget.focus();
+    await expect(focusTarget).toBeFocused();
+    const focusEvidence = await focusTarget.evaluate((node) => {
+      const box = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return {
+        height: box.height,
+        left: box.left,
+        right: box.right,
+        outlineStyle: style.outlineStyle,
+        outlineWidth: Number.parseFloat(style.outlineWidth),
+      };
+    });
+    expect(focusEvidence.outlineStyle).not.toBe("none");
+    expect(focusEvidence.outlineWidth).toBeGreaterThan(0);
+    expect(focusEvidence.height).toBeGreaterThanOrEqual(44);
+    expect(focusEvidence.left).toBeGreaterThanOrEqual(0);
+    expect(focusEvidence.right).toBeLessThanOrEqual(
+      ZOOM_200_VIEWPORT.width + 1,
+    );
+  } finally {
+    await zoomContext.close();
+  }
 });
 
 test("forced colors and reduced motion remain perceivable and deterministic", async ({
