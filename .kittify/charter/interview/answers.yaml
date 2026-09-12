@@ -4,23 +4,32 @@ profile: "comprehensive"
 answers:
   project_intent: >
     A reusable, multi-framework design system for the Spec Kitty ecosystem.
-    Publishes SCSS/CSS custom-property tokens, HTML primitives, JavaScript
-    utilities, Angular components, and docsite theme elements as importable
+    Publishes CSS custom-property tokens, a CSS layer with generated static
+    HTML, Lit custom elements, and generated React wrappers as importable
     artifacts consumed by the SK operator dashboard, public documentation site,
     blog surfaces, marketing pages, and slidedecks. Also ships pluggable
     doctrine elements — YAML + prose brand-voice and visual-style guidelines —
     for use inside agentic workflows (Claude Code skill, charter voice policy).
     Primary v1 consumers: SK dashboard UI overhaul (issue #650) and docsite
-    refresh (issue #648). The Claude Design reference set (tmp/) is the
-    authoritative visual baseline for v1.
+    refresh (issue #648). Visual regression is baselined by 375 committed
+    Playwright snapshots in apps/storybook/src/tests/visual.spec.ts-snapshots/,
+    not by tmp/reference_system/ — nothing in the current pipeline reads the
+    latter for comparison; it remains a historical design reference from the
+    initial token migration.
 
   languages_frameworks: >
-    SCSS for design tokens and base styles; vanilla HTML for primitive
-    component markup; JavaScript (ES modules) for interactive component
-    behavior; Angular for the primary framework-specific component library;
-    Storybook as the component documentation and visual-regression baseline.
-    CSS custom properties (--sk-* namespace) are the single authoritative
-    token distribution format consumed across all framework targets.
+    Four packages, dependencies flowing one way (tokens -> styles -> elements
+    -> react). CSS custom properties in @spec-kitty/tokens for design values;
+    authored CSS plus generated static HTML in @spec-kitty/styles; TypeScript
+    Lit custom elements in @spec-kitty/elements, the component layer since
+    ADR-8, from whose authored markup modules the static forms are generated;
+    and @spec-kitty/react, whose wrappers are generated from the manifest and
+    never hand-edited. Angular is not a target — packages/angular was deleted
+    in #102 and ADR-8 replaced hand-written wrappers with generated ones;
+    there is no SCSS in this repository. Storybook is the component
+    documentation and visual-regression baseline. CSS custom properties
+    (--sk-* namespace) are the single authoritative token distribution format
+    consumed across all framework targets.
     Secondary: docsite theme integration (static site generator TBD).
     Component behaviour is verified with Vitest in browser mode on the
     Playwright provider, with a Node project in the same configuration for
@@ -34,8 +43,12 @@ answers:
     state, all interactive states (hover, focus, active, disabled), and
     responsive breakpoints. Automated WCAG 2.1 AA accessibility scans via
     axe-core (or Storybook a11y addon) are required before a work package is
-    marked done. Visual diff against the Claude Design reference screenshots
-    (tmp/) is required for new and modified components. Cross-browser smoke
+    marked done. Visual diff against the committed Playwright snapshot
+    baselines in apps/storybook/src/tests/visual.spec.ts-snapshots/ (375
+    committed PNGs; see docs/contributing/running-quality-checks.md) is
+    required for new and modified components — tmp/reference_system/ is a
+    historical design reference that nothing in the current pipeline reads
+    for comparison. Cross-browser smoke
     tests (Chrome, Firefox, Safari latest) are required before a release tag.
     A component that owns behaviour is additionally verified against the
     required-behaviours list in ADR-11: form association (a native form submit
@@ -63,7 +76,7 @@ answers:
     closes every pull request, with its evidence posted on that pull request
     before merge, plus the earlier point-cuts its mission's tier declares
     (see review_policy).
-    CSS/SCSS output must use only --sk-* tokens — no hardcoded color, spacing,
+    CSS output must use only --sk-* tokens — no hardcoded color, spacing,
     or type values outside the token file. Conventional commits enforced via
     commitlint. One maintainer approval required for PRs touching component
     files or the core token layer; documentation-only PRs (Storybook stories,
@@ -73,7 +86,8 @@ answers:
     PRs must include a screenshot or visual diff for any component change.
     Token additions or renames require maintainer sign-off. Storybook build
     must pass in CI before merge. One human approval required for any change
-    to the --sk-* token namespace (colors_and_type.scss or equivalent).
+    to the --sk-* token namespace (packages/tokens/src/tokens.css or
+    equivalent).
     Exception: documentation-only changes (stories, README, SKILL.md) can
     self-merge when CI is green. Adversarial squad cadence is a standing
     order. Every pull request receives the full adversarial gate before merge,
@@ -95,21 +109,51 @@ answers:
     escalation, and plan-phase architecture on risky missions.
 
   performance_targets: >
-    Base CSS token file (colors_and_type.css) must remain under 20 KB
-    uncompressed. Full Angular component bundle under 150 KB compressed per
-    component chunk. Storybook CI build time under 3 minutes. No runtime
-    performance targets beyond standard browser rendering — these are
-    static/presentational components, not application logic.
+    Design tokens live in packages/tokens/src/tokens.css, currently 41,177
+    bytes (~40.2 KiB). colors_and_type.css matches the tmp/ .gitignore rule
+    but is one of ~133 files force-added and tracked under
+    tmp/reference_system/; it is not distributed in any published package.
+    ADR-1's NFR-004 cites a <20 KB uncompressed token-file budget as its
+    mitigation for the format's lack of tree-shaking — that budget is
+    currently exceeded by roughly 2x, and no operator ruling or ADR retiring
+    NFR-004 exists in this repository; flagged here for an operator decision
+    (ratify a new ceiling, or formally supersede NFR-004) rather than
+    silently repealed. Per-artifact byte sizes and SRI hashes are recorded in
+    packages/elements/SIZES.md, generated by scripts/measure-elements-sizes.mjs
+    and re-derived with --check in ci-quality.yml and release.yml — that
+    check is the size gate, registered in scripts/check-gate-wiring.mjs so it
+    cannot be silently removed. The artifact table's min+gzip column IS
+    committed, deliberately at whole-KiB precision so zlib-version drift
+    across machines cannot red the build; what is never committed is a
+    package's packed (gzipped-tarball) size, which is sensitive to the local
+    zlib build and compression level. Storybook CI build time under 3
+    minutes. No runtime performance targets beyond standard browser
+    rendering — these are static/presentational components, not application
+    logic.
 
   deployment_constraints: >
-    Versioned with semantic versioning (semver). Token file and component
-    distributions published to npm under the @spec-kitty scope; plain
-    HTML/CSS layer optionally mirrored to a CDN. The Claude Code skill
-    (SKILL.md) and doctrine elements (YAML + prose) are distributed as files
-    within the published package, not as a separate registry. Breaking changes
-    to --sk-* token names require a major version bump. Additive framework
+    Versioned with semantic versioning (semver). Per the operator's GitHub
+    Packages ruling (2026-09-11, FR-006, recorded in full in
+    docs/architecture/branch-model.md's "GitHub Packages visibility"
+    section): one public @spec-kitty/{elements,styles,tokens} package per
+    name — created private, flipped to public on first publish — with the rc
+    and prod streams separated only by dist-tag, never a second package name
+    or registry. branch-model.md names those tags next (rc line) and latest
+    (main); an earlier draft of this record said rc instead of next — that
+    discrepancy is left open here for an operator decision rather than
+    picked silently. The target registry is GitHub Packages
+    (https://npm.pkg.github.com), not registry.npmjs.org; a token with
+    read:packages is required to install even a public package, so every
+    consumer maps the @spec-kitty scope to that registry. The classic-script
+    IIFE bundle (dist/elements.js) is additionally mirrored to a CDN for
+    direct <script> consumption, pinned via the SRI hash recorded in
+    packages/elements/SIZES.md. The Claude Code skill (SKILL.md) and
+    doctrine elements (YAML + prose) are distributed as files within the
+    published package, not as a separate registry. Breaking changes to
+    --sk-* token names require a major version bump. Additive framework
     ports (e.g., Vue, Svelte) may be added as sub-packages without a major
-    bump. tmp/ is gitignored and not distributed.
+    bump. tmp/ matches a .gitignore rule but ~133 files under it are tracked
+    (force-added); none are distributed in any published package.
 
   documentation_policy: >
     Every component must have: a Storybook story as its living documentation;
@@ -187,10 +231,14 @@ answers:
     Charter and governance amendments via PR with rationale comment; no
     special approval beyond the standard review policy. Changes to the atomic
     design hierarchy classification or the core token naming convention require
-    maintainer sign-off and an ADR entry. The Claude Design reference set
-    (tmp/) is the fixed visual baseline for v1 — token values derived from it
-    cannot be overridden by individual PRs without producing a new design
-    reference first.
+    maintainer sign-off and an ADR entry. Token values were originally
+    derived from tmp/reference_system/colors_and_type.css during the initial
+    design-system migration (kitty-specs/design-system-reference-migration-01KQJNTP)
+    and cannot be overridden by individual PRs without producing a new
+    design reference first. The current visual-regression baseline, however,
+    is the committed Playwright snapshots in
+    apps/storybook/src/tests/visual.spec.ts-snapshots/, not
+    tmp/reference_system/ — see testing_requirements.
 
   exception_policy: >
     Components may be added under an @experimental tag in Storybook without
@@ -217,5 +265,3 @@ available_tools:
   - git
   - spec-kitty
   - storybook
-  - angular-cli
-  - sass
