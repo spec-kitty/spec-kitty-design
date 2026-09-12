@@ -32,6 +32,15 @@ boundaries; the reduced-motion capture retains the complete static default compo
 version-matched Noble Chromium replay passes all 21/21 owned cases. The earlier 19 hashes remain
 unchanged, and the two new exact hashes are included below.
 
+The first hosted run for published head `f9ddc9db` used the CI-authoritative Ubuntu font/raster
+environment and therefore rejected all 21 locally generated Noble bytes while preserving the same
+content and states. Actions run `34677426105`, artifact `10292399428` (artifact digest
+`ecc97baa8f9e46b966283e0517644b683e962891b4b6da2804201e1b40cb88d6`), supplied the retry-stable
+actuals. All 21 were manifest-mapped; the dark, light, mobile-long, administrator-Mission,
+forced-colors, and reduced-motion representatives were directly re-inspected with no clipping,
+content, authorization, route, or state regression. Only these 21 owned baselines were replaced.
+The hashes below are the resulting CI-authoritative bytes pending their clean replay.
+
 The captures show one H1, native readable facts, single-character personal-rail marks, no clipped
 focus rings, no document overflow, passive activity, authorization-aware actions, and copy controls
 that remain usable at narrow width. The TO2 fixture control is visibly separated and labelled as
@@ -44,25 +53,25 @@ other three cells quiet and the derived summary, in-flight row, and recent-activ
 ## Baseline hashes
 
 ```text
-4f3390379f07640854c7917594d7634a911b5643da007c1aaa46b2d8e14840ba  team-overview-current-first-run-setup-chromium-linux.png
-b9907fc2218e19a6982d45825ee3a7775a42a118a8be2e40e2ecd246fef86e25  team-overview-current-forced-colors-chromium-linux.png
-f29b97c0792c644f4f792cf23ea0c3ae10a8d765eecd2c7ea7886bbea94ca2af  team-overview-current-recent-activity-chromium-linux.png
-95b1aabb3e9a9de6a16fb8a3ed343bb96814fb6cdf345fe7959bf83ba3f3505e  team-overview-current-reduced-motion-chromium-linux.png
-b29f6b66d68dc493ef74124ef50c082a7485f0068f7ec4072509b8eb225fd27a  team-overview-current-repositories-chromium-linux.png
-8388a3d91fea75f580d9656241afb478c97a9b06027debd393738519a5d3b175  team-overview-current-review-scaffolding-chromium-linux.png
-760e298eadadd71a90f65b0d8d1eaa4cd44426642027ca6395c66d8e989e0139  team-overview-current-to1-1123-chromium-linux.png
-95b1aabb3e9a9de6a16fb8a3ed343bb96814fb6cdf345fe7959bf83ba3f3505e  team-overview-current-to1-1440-chromium-linux.png
-05812e54dd28b40ea90367b333341aaf9dc2ad1bc387e5806577174ce374c860  team-overview-current-to1-390-chromium-linux.png
-fbf403d3cac3366a2057be0d285a1d805fad76c0d5d662ae2469afb8b4602067  team-overview-current-to1-light-1440-chromium-linux.png
-cc8e2f9203e0be7eecb08ba0f70a33d72167a91540d54fedcbdddb7f89e76d20  team-overview-current-to1-long-390-chromium-linux.png
-218fc07b2b446bbb16a553ccf36822c2718c953b38790ba8e6062264c7a347fd  team-overview-current-to1-retention-168-chromium-linux.png
-0acaa594084f4367eee850d410076674ff0980e00d3ba693f0baa4f68fb891ff  team-overview-current-to2-admin-install-1440-chromium-linux.png
-1f3925e7431eb4d879e6ae2cd44403052949905e5982761ca07517a854700c40  team-overview-current-to2-admin-install-390-chromium-linux.png
-f942e990191c24d44b3139ddab66ad3efb9aef416e2805313aeacc88e535fb08  team-overview-current-to2-admin-mission-1440-chromium-linux.png
-ac5d08a8910567b27affeb5cda675ce9ae5757ce0ae855a782aee2b542fe0223  team-overview-current-to2-admin-mission-390-chromium-linux.png
-b094466af0fa66f0a5d4e5f5031b9716d335fee7a6a1249667d0afd64aa49e19  team-overview-current-to2-admin-repo-1440-chromium-linux.png
-b864fb321ad73ecf13b8b09bdd723ceeda1fe21de59b0af9215a03ff7f90f850  team-overview-current-to2-joined-1440-chromium-linux.png
-1be35d1680d3aee86bc401d5d597f8045d74711dc22e903cefb2ee15094cd473  team-overview-current-to2-member-repo-1440-chromium-linux.png
-76eba96a20c81c06facc5eb0049c785cd8efc797eb40eb38a3d7b0fddc54dee1  team-overview-current-to2-private-install-1440-chromium-linux.png
-61350e1b717907eef4891b6b2bc9af3f5a50f8e7a61e23709f662d5de4e5c0fe  team-overview-current-velocity-chromium-linux.png
+5be75b4a2fb0907e9f049999752dddefcfe153cda1240edcf387ce4a26e56e19  team-overview-current-first-run-setup-chromium-linux.png
+fc4f67d74eea92e3bb78382ddeaf0d977513ea5669d96db692887336f812d6f4  team-overview-current-forced-colors-chromium-linux.png
+09c7a8a88a11294f045d93c12f427665891f04a436b558470187d7e73feeb21e  team-overview-current-recent-activity-chromium-linux.png
+97f95a087269d0ea9c20fc7e8e73670a7073f040f5ef42e1909526d26f9bb674  team-overview-current-reduced-motion-chromium-linux.png
+b5a64fa46c3221750b6391384c4f56a15ed8aeaa29919dcf4ac3befad1237242  team-overview-current-repositories-chromium-linux.png
+8f08fd9d0caa36efeb94ffcc4d3a4cd785249df1d6aa0a547be14b7858b0f941  team-overview-current-review-scaffolding-chromium-linux.png
+2dee8e8801d6564b68004c5330cbc918b7dcd344b23cfc23ac72d48ea7a7ff52  team-overview-current-to1-1123-chromium-linux.png
+97f95a087269d0ea9c20fc7e8e73670a7073f040f5ef42e1909526d26f9bb674  team-overview-current-to1-1440-chromium-linux.png
+eac813c0d4cf7f41ddefd11eb8f455aa4c84bfaf84b2657c7836b0bf22f8e721  team-overview-current-to1-390-chromium-linux.png
+750a6d17306ae8ee5c6ac4a9544675709d0a16f58399dc81ac2133e20f637049  team-overview-current-to1-light-1440-chromium-linux.png
+36486adddf23c3d180818e2a85e326af75f283ac21924acbd03f23228964b108  team-overview-current-to1-long-390-chromium-linux.png
+ec5d9785b343fac3412da0644e261aae20282826ae29a368ee19682cc31fedb0  team-overview-current-to1-retention-168-chromium-linux.png
+89fe7465514aa06de3032d37a6c73ab94c4e24cbf7f2200d5b09ba7a575e2e0f  team-overview-current-to2-admin-install-1440-chromium-linux.png
+e088a1aa6db7184540e610678c543ac547b8b3b24c2d8c7cbc9a1f99cd01f215  team-overview-current-to2-admin-install-390-chromium-linux.png
+710b41c1a41683dedee385308b7bdaafe49b9384c80746209f3fc0064b00eabd  team-overview-current-to2-admin-mission-1440-chromium-linux.png
+3ef2ba797cedd5377b8f4ea458f7ea3a44d607bb0d71d7a73ec6107e82afa0a2  team-overview-current-to2-admin-mission-390-chromium-linux.png
+470a472fa7cca640844b57e12f9a2c8f26f9b75340c51ce0096c2af253dacddf  team-overview-current-to2-admin-repo-1440-chromium-linux.png
+8188727248579bad3b0ead9d396fc33b80bdd24cf967ca6196928779073d2017  team-overview-current-to2-joined-1440-chromium-linux.png
+d9b8f2d87bea4e4676be52fb6de38ba6eb1300fa4cf45f7155f897f6862d772d  team-overview-current-to2-member-repo-1440-chromium-linux.png
+42d1332e6632a57806af32b92a8ec27bd9c685a6d063e4c51d36dfab32e9174d  team-overview-current-to2-private-install-1440-chromium-linux.png
+a14809110773f78fb1226e6afec9a2945ac09e6e4994cbc25d104cfb1248ced9  team-overview-current-velocity-chromium-linux.png
 ```

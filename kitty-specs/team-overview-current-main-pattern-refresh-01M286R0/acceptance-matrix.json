@@ -118,7 +118,7 @@
       "criterion_id": "FR-012",
       "description": "Replace the six obsolete #150 IDs with the six entries named in RD-009 and update discovery/visual inventories.",
       "proof_type": "built story ratchet + visual inventory",
-      "evidence": "expected-stories.json declares the six current Team Overview IDs and all 654 declared IDs are present in the clean build. The visual registry owns 21 current Team Overview cases; its Noble Chromium slice passes 21/21 at corrective head 48580637. The 19 prior hashes remain unchanged and the two new inspected media hashes are recorded.",
+      "evidence": "expected-stories.json declares the six current Team Overview IDs and all 654 declared IDs are present in the clean build. The visual registry owns 21 current Team Overview cases; its Noble Chromium slice passed 21/21 at corrective head 48580637. Hosted run 34677426105 then supplied retry-stable CI-authoritative actuals for all 21 cases in artifact 10292399428; representative states were re-inspected and all resulting hashes are recorded.",
       "pass_fail": "pass",
       "verified_by": "codex",
       "verified_at": "2026-09-12T05:44:11Z",
@@ -152,7 +152,7 @@
       "pass_fail": "pass",
       "verified_by": "codex",
       "verified_at": "2026-09-12T05:44:11Z",
-      "notes": "The route correction preserved the prior 19 image hashes; two required media baselines were added and inspected."
+      "notes": "The two required media cases were added and inspected. The first hosted publication run exposed only the expected environment raster split; its 21 actuals became the recorded CI-authoritative baseline set pending clean replay."
     }
   ],
   "negative_invariants": [

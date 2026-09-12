@@ -68,8 +68,12 @@ historical Team Overview IDs with six current IDs.
 - Accessibility: all 50 gate self-test shapes classify correctly; all 654 declared story IDs are
   present; 810/810 built stories render; axe reports zero WCAG 2.1 AA violations.
 - Visual: the 21 owned Team Overview cases pass 21/21 in the version-matched Noble Chromium image.
-  The 19 earlier hashes remain exact; the two new, inspected forced-colors and reduced-motion PNGs
-  match the additional SHA-256 entries in `visual-inspection.md`.
+  The first hosted run then rejected only the different local raster bytes, while producing 21
+  retry-stable actuals in Actions artifact `10292399428`. Those actuals were manifest-mapped and
+  representative dark, light, narrow-long, administrator-Mission, forced-colors, and
+  reduced-motion states were re-inspected before replacing exactly the 21 owned baselines. Their
+  CI-authoritative SHA-256 values are recorded in `visual-inspection.md`; a clean hosted replay is
+  required after publication of the baseline-only correction.
 - Generated/release: React/style/Vue/generated-CSS/theme-bootstrap/markup/static-form/export,
   release-graph, size, and SRI checks pass and produce no tracked diff.
 
@@ -104,9 +108,10 @@ baseline was accepted there. The version-matched `sk383-playwright:1.62.1` Noble
 exact committed images; the DejaVu Noble image remains useful for the font-independent three-engine
 semantic/interaction slice.
 
-At final correction head `48580637`, the version-matched image passes the expanded 21/21 owned set,
-and the DejaVu image passes 46 semantic/interaction cases across three engines with the two expected
-forced-colors skips.
+At correction head `48580637`, the version-matched image passed the expanded 21/21 owned set, and
+the DejaVu image passed 46 semantic/interaction cases across three engines with the two expected
+forced-colors skips. Hosted run `34677426105` subsequently established the CI-authoritative raster
+bytes without changing any story, fixture, test, or visual-case definition.
 
 ## Lifecycle note
 

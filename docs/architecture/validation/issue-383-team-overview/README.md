@@ -6,9 +6,10 @@ relay client, clock, permission system, or mutation API.
 
 The evidence is based without merge commits on
 `train/elements-first@57fe4ce7a752d2fcbce19e963a7c833acf951473`. The pre-rewrite safety ref is
-`refs/safety/issue-383-pre-57fe-c5c057fc`; the final route, authorization, compact-navigation,
-single-tree, and media evidence correction is commit `48580637`. The earlier independent approval remains in the canonical mission
-trail, while this corrected exact head requires a fresh independent review before publication.
+`refs/safety/issue-383-pre-57fe-c5c057fc`; the route, authorization, compact-navigation,
+single-tree, and media evidence correction is commit `48580637`. Three fresh independent lenses
+passed corrected pre-publication head `f9ddc9db` with no findings; the earlier Spec Kitty approval
+also remains in the canonical mission trail.
 
 ## Current reviewed surface
 
@@ -80,6 +81,7 @@ evidence. See the mission's `contracts/team-overview-pattern-migration.md` for c
   violations.
 - Composition passes 47 self-probes and 18 fixture files/339 CSS rules/20 tags/142 parts;
   visual-softness passes 51 files.
-- All 21 owned visuals pass in the version-matched Noble Chromium image. The 19 inherited owned
-  hashes remain exact and the two new inspected media baselines are recorded in
-  `visual-inspection.md`.
+- All 21 owned visual cases passed in the version-matched Noble Chromium image before publication.
+  The first hosted run then exposed only the known Ubuntu font/raster split. Its retry-stable 21
+  actuals were manifest-mapped, representative states inspected, and adopted as the
+  CI-authoritative bytes; exact artifact provenance and hashes are in `visual-inspection.md`.
