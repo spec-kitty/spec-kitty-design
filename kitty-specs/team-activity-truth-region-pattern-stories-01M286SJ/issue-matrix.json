@@ -1,0 +1,53 @@
+{
+  "rows": {
+    "#286": {
+      "evidence_ref": "Issue #286 remains independently owned. Compact implementation e88db202 introduces no runtime element render literal and supplies every Storybook-visible/accessibility string through the frozen consumer fixture; FR-013 and NI-006 in acceptance-matrix.json record the positive and negative proof.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "No user-visible literal in an element's render() \u2014 shadow DOM makes them untranslatable by any consumer",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#381": {
+      "evidence_ref": "Epic #381 is partially delivered by child #382 at compact implementation e88db202 with executable evidence d2e300d8; #382's L1-L5/TL1/OA1/DM1 acceptance is criterion-mapped in acceptance-matrix.json while sibling #383 remains separately owned.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "Epic: Team workspace and activity \u2014 truthful live/observed regions and current Team Overview patterns",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#382": {
+      "evidence_ref": "Independent final review at 91b5d0cf: cycle-7 DM1 own-key defect closed by b2710af1; compiled-seam valid and enumerable/non-enumerable/symbol/getter-safety proofs pass with exact errors; full truth-region, a11y, responsive, visual, composition, unit, type, quality, and commitlint evidence green.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "[TKTW1] Team activity truth-region pattern stories \u2014 repository/team live, observed, and Decision states",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#383": {
+      "evidence_ref": "Sibling epic child #383 is independently owned by its literal mission branch; #382 adds no Team Overview surface, TeamMoment/onboarding logic, or #383 copy/state behavior (acceptance NI-005/NI-006).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": "[TKTW2] Team Overview current-main pattern refresh \u2014 TeamMoment populated and role-aware first run",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    }
+  },
+  "schema_version": 1
+}
