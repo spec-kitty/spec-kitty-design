@@ -956,6 +956,13 @@ else {
     // from `lint-code` with this checker still green.
     [/node\s+scripts\/check-ci-quality-trigger-parity\.mjs(?!\s*--selftest)(\s|$)/, 'the ci-quality.yml trigger-parity check (NFR-002, SC-003)', 'scripts/check-ci-quality-trigger-parity.mjs'],
     [/node\s+scripts\/check-ci-quality-trigger-parity\.mjs\s+--selftest(\s|$)/, "the trigger-parity check's own probe table", 'scripts/check-ci-quality-trigger-parity.mjs --selftest'],
+    // F-E (post-merge squad, pass 4, V1). Without an entry here, the ONLY PR-time evidence that
+    // the parity-anchor-tags-are-immutable ruleset (which check-ci-quality-trigger-parity.mjs's
+    // whole F2 anchor-tamper defence rests on) still exists and matches its committed artifact
+    // could be deleted from `lint-code` with this checker still green — the exact defect class
+    // every comment in this list records, reintroduced one artifact over from `develop`'s own
+    // ruleset check two entries above.
+    [/node\s+scripts\/check-develop-ruleset-parity\.mjs\s+--check-parity-anchor-tags(\s|$)/, 'the parity-anchor-tags ruleset parity check (F-E)', 'scripts/check-develop-ruleset-parity.mjs --check-parity-anchor-tags'],
   ];
 
   /**

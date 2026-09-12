@@ -34,16 +34,20 @@ break shows up on the FIRST PUSH TO `main` after the landing, when that check's
 is-ancestor-of-`HEAD` test runs against `main`'s new tip for the first time and fails with "not
 an ancestor of HEAD" — mysterious-looking unless this step has already been planned for:
 
-1. Once the landing commit exists on `main`, mint a NEW tag under `refs/tags/parity-anchor/*`
-   (e.g. `parity-anchor/rel2`) at that commit. The `parity-anchor-tags-are-immutable` ruleset
-   (`docs/architecture/branch-model.md`) covers the whole prefix with a `creation` rule too, so
-   an admin must first disable or edit that ruleset — a deliberate, logged act — create the tag,
-   and restore the ruleset.
+1. Once the landing commit exists on `main`, create a NEW tag under `refs/tags/parity-anchor/*`
+   (e.g. `parity-anchor/rel2`) at that commit — `git tag parity-anchor/rel2 <main's new sha>`.
+   Creating the LOCAL tag is not itself blocked; PUSHING it is what the
+   `parity-anchor-tags-are-immutable` ruleset (`docs/architecture/branch-model.md`) forbids —
+   it covers the whole prefix with a `creation` rule too. An admin must, in order: disable or
+   edit that ruleset (a deliberate, logged act) — `git push origin parity-anchor/rel2` — restore
+   the ruleset. A tag that is only ever created locally and never pushed satisfies nothing in
+   CI: `resolveAnchorTagSha()` resolves `refs/tags/...` in the CHECKOUT it runs in, which for
+   every real workflow run is a fresh clone from the remote.
 2. In one commit: update `PRE_MISSION_TAG`/`PRE_MISSION_SHA` in
    `scripts/check-ci-quality-trigger-parity.mjs` to the new tag/commit, and fully re-capture
    `BASELINE`/`ON_BASELINE` from that commit's real `.github/workflows/ci-quality.yml` (see that
    file's own REBASELINING note).
-3. Run `node scripts/check-ci-quality-trigger-parity.mjs --selftest` before pushing.
+3. Run `node scripts/check-ci-quality-trigger-parity.mjs --selftest` before pushing that commit.
 
 Doing this as part of step 1 — rather than after CI on `main` reds and someone has to
 reverse-engineer why — is the point of naming it here.

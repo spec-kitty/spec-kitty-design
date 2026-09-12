@@ -87,12 +87,15 @@
  * REL1 touched this file", "12 commits earlier" — false on every count. `907b2bbd` never
  * touched `ci-quality.yml` at all (it is a `docs:` commit on the unrelated, now-deleted mission
  * branch), is NOT an ancestor of `9a9e284a` (`git rev-list --count 907b2bbd..9a9e284a` is 158,
- * and `git merge-base --is-ancestor` returns false), and "12 commits" was the true distance
- * between an entirely different pair — `907b2bbd` and the mission branch's OWN first workflow
- * edit, `f3d8ed45` — mistakenly carried over into a sentence about the train's line instead. The
- * only claim that ever needed to hold is the blob-identity one above, independently confirmed at
- * `907b2bbd`, `9a9e284a` and `761fe66b`: three different commits, on two disjoint lines of
- * history, carrying byte-identical content — which is what actually establishes that nothing was
+ * and `git merge-base --is-ancestor` returns false); "12 commits" belonged to an entirely
+ * different pair — `907b2bbd` and the mission branch's OWN first workflow edit, `f3d8ed45` — and
+ * even THAT number was off by one (`git rev-list --count 907b2bbd..f3d8ed45` is 11, not 12): a
+ * mismeasured distance, for the wrong pair, mistakenly carried into a sentence about the train's
+ * line. No commit-distance figure is load-bearing here or worth restating — this paragraph is
+ * now the second one to get one wrong. The only claim that ever needed to hold is the
+ * blob-identity one above, independently confirmed at `907b2bbd`, `9a9e284a` and `761fe66b`:
+ * three different commits, on two disjoint lines of history, carrying byte-identical content —
+ * which is what actually establishes that nothing was
  * lost, with no commit-distance argument required at all. Being an ancestor of
  * `train/elements-first`'s own history, this commit cannot be deleted the way a mission branch's
  * tip can; only a force-rewrite of the train's protected history, or the tag itself moving past
@@ -105,14 +108,33 @@
  *
  * **REBASELINING**: the anchor above never moves for an ordinary mission. Three knobs are
  * genuinely extensible — `EXPECTED_CHANGED_NEEDS` (a job's `needs:` gains an entry),
- * `EXPECTED_NEW_JOBS` (a wholly new job appears), and `ON_EXPECTED` (the `on:` block gains a
- * trigger) — a mission adds to these and leaves `BASELINE`/`ON_BASELINE`/`PRE_MISSION_SHA`/
- * `PRE_MISSION_TAG` untouched, since those describe the PRIOR state, not the mission in flight.
- * `EXPECTED_CHANGED_IF` is NOT a fourth such knob, despite its shape: the V2 structural check
- * inside `checkTriggerParity` independently forces every job named there to carry the exact
- * promotion-skip conjunct, so it cannot be repurposed to describe an unrelated `if:` change — a
- * mission needing one extends that structural check itself, not just this dict. And a job
- * REMOVAL fits none of the four knobs — there is no "expected missing job" mechanism, so
+ * `EXPECTED_NEW_JOBS` (a wholly new job appears), and `ON_EXPECTED` (a mission-allowed change to
+ * `pull_request.branches`/`push.branches`/`workflow_dispatch` presence — see the three
+ * comparisons in `checkTriggerParity` below) — a mission adds to these and leaves `BASELINE`/
+ * `ON_BASELINE`/`PRE_MISSION_SHA`/`PRE_MISSION_TAG` untouched, since those describe the PRIOR
+ * state, not the mission in flight. `ON_EXPECTED` does NOT cover a wholly NEW trigger key (e.g.
+ * `workflow_call`) — `ON_TOP_LEVEL_KEYS` (F-F) rejects any key outside
+ * `{pull_request, push, workflow_dispatch, schedule}` independently of `ON_EXPECTED`, so a
+ * mission adding a real new trigger must extend `ON_TOP_LEVEL_KEYS` too, or this note sends a
+ * future mission to the wrong constant and a red it cannot explain from here alone.
+ *
+ * `EXPECTED_CHANGED_IF` is NOT a fourth such knob for an UNRELATED `if:` change, but say
+ * precisely what stops it, since an earlier version of this note overstated the boundary: V2
+ * (the structural check inside `checkTriggerParity`) pins only the promotion-skip conjunct's
+ * PRESENCE as a substring — reproduced: adding `workflow-pin-check` to `EXPECTED_CHANGED_IF`
+ * with `"false && needs.changes.outputs.is_develop_promotion_pr != 'true'"`, and giving that job
+ * the identical `if:` in the live workflow, passes THIS file's check, its own `--selftest`, AND
+ * `check-gate-wiring.mjs` — the job is permanently skipped and none of the three notice, because
+ * the conjunct is present verbatim even though `false &&` makes the whole expression always
+ * false. What actually stops this: the runtime `gate` job's own strict
+ * `needs.<job>.result != "success"` test (a skipped job's result is `skipped`, which satisfies
+ * that inequality and fails the merge) for every job `gate` depends on, and
+ * `check-gate-wiring.mjs`'s own independent coverage for the specific jobs it names
+ * (`a11y`/`visual-regression`/`playwright`/`lighthouse`/`storybook-build`) — NOT this file for
+ * jobs outside that list. A same-commit `EXPECTED_CHANGED_IF` entry for a job neither `gate` nor
+ * `check-gate-wiring.mjs` covers is a real, currently-open gap this file does not close.
+ *
+ * A job REMOVAL fits none of the four knobs — there is no "expected missing job" mechanism, so
  * deleting a pre-existing job is representable only by a genuine re-baseline, never a same-shape
  * extension.
  *
@@ -130,10 +152,13 @@
  * or the train-to-`main` landing above — does NOT move `parity-anchor/rel1`: the
  * `parity-anchor-tags-are-immutable` ruleset forbids that for everyone, no exceptions (F2). It
  * MINTS A NEW TAG NAME instead (e.g. `parity-anchor/rel2`) — and because that ruleset's
- * `creation` rule ALSO covers `refs/tags/parity-anchor/*` as a whole, minting any new tag under
- * this prefix is blocked too, until an admin deliberately disables or edits the ruleset (the
- * same visible, logged act moving `rel1` would have required), creates the new tag, and restores
- * the ruleset. Only then does one commit land that: updates `PRE_MISSION_TAG` to the new tag
+ * `creation` rule ALSO covers `refs/tags/parity-anchor/*` as a whole, PUSHING any new tag under
+ * this prefix is blocked too (creating it only locally is not itself restricted — this file
+ * always resolves `refs/tags/...` in whatever checkout it runs in, a fresh clone from the
+ * remote for every real workflow run, so an unpushed local tag satisfies nothing in CI). An
+ * admin must, in order: disable or edit the ruleset (the same visible, logged act moving
+ * `rel1` would have required), push the new tag, and restore the ruleset. Only then does one
+ * commit land that: updates `PRE_MISSION_TAG` to the new tag
  * name, updates `PRE_MISSION_SHA` to the new anchor commit, and fully re-captures `BASELINE`/
  * `ON_BASELINE` from that commit's REAL `.github/workflows/ci-quality.yml` — then `--selftest`
  * is re-run before pushing. `ci-quality.yml` has picked up 35 commits so far; someone will need
@@ -225,16 +250,20 @@ export const EXPECTED_CHANGED_IF = {
  *
  * V7 (pre-merge squad, gate pass 5): this dict is compared directly against `live.needs`
  * (below), which is on its face the same "expected value edited alongside the thing it
- * guards" shape as BASELINE/ON_EXPECTED before their fixes. It is left unpinned deliberately:
- * unlike a dropped `if:` conjunct (a fail-OPEN regression — the promotion-skip check silently
- * stops applying), a same-commit edit here can only ever REMOVE `changes` from a job's
- * `needs:`, which makes `needs.changes.outputs.is_develop_promotion_pr` unavailable to that
- * job's `if:` and therefore fails CLOSED (the job runs unconditionally, same as before REL1) —
- * the opposite direction from every vulnerability this mission's guards exist to close. There
- * is also no way to widen `needs:` to smuggle a bypass: `needs:` only gates job scheduling
- * order, never the promotion-skip decision itself (that is `EXPECTED_CHANGED_IF`, which IS
- * independently pinned via the V2 structural check above). Not exempt from V7's "say why it
- * does not need one": this is why.
+ * guards" shape as BASELINE/ON_EXPECTED before their fixes. It is left unpinned deliberately,
+ * but not for the reason an earlier version of this note gave — that a same-commit edit "can
+ * only ever REMOVE `changes`" is false, reproduced: adding `lighthouse` to
+ * `EXPECTED_CHANGED_NEEDS.a11y` AND to `a11y`'s own `needs:` in the live workflow passes this
+ * check, its `--selftest`, AND `check-gate-wiring.mjs` — a genuine WIDENING, not a removal,
+ * making `a11y` now contingent on `lighthouse`. The real reason this is unpinned: `needs:` only
+ * gates job SCHEDULING order, never the promotion-skip decision itself (that is
+ * `EXPECTED_CHANGED_IF`, independently pinned via the V2 structural check above), so no edit
+ * here — addition, removal, or otherwise — can smuggle a bypass of the skip logic. The
+ * widening case above is contained, but by something OUTSIDE this dict: the runtime `gate`
+ * job's strict `needs.<job>.result != "success"` test reads `skipped` the same as `failed`, so
+ * `a11y` unexpectedly skipping because `lighthouse` skipped still fails `gate` — the same
+ * runtime backstop V2's own gap (REBASELINING note, above) rests on. Not exempt from V7's "say
+ * why it does not need one": this is why.
  */
 export const EXPECTED_CHANGED_NEEDS = {
   a11y: ['storybook-build', 'changes'],
