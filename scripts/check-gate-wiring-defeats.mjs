@@ -94,6 +94,27 @@ const fallback = (needle, tail) => (wf) => {
   step.run = `${String(step.run).trimEnd()} ${tail}\n`;
 };
 
+/** The `release-gate` job's steps array, or a loud error if the job/steps are gone. */
+const releaseSteps = (wf) => {
+  const steps = wf.jobs?.['release-gate']?.steps;
+  if (!steps) throw new Error('no release-gate steps');
+  return steps;
+};
+
+/** #438 pass 2, finding G: delete the FIRST step of `jobName` whose `run` is EXACTLY
+ *  `exactRun` (not a substring match — `check-token-breaking-changes.sh` is a substring of its
+ *  own `--selftest` invocation, so a loose match would delete the wrong one, or delete both by
+ *  hitting whichever sorts first). A registered gate step, deleted outright, is the most direct
+ *  form of "this step could be removed with the checker still green" every comment in
+ *  check-gate-wiring.mjs's REQUIRED_* tables describes. */
+const deleteStepExact = (jobName, exactRun) => (wf) => {
+  const steps = wf.jobs?.[jobName]?.steps;
+  if (!steps) throw new Error(`no ${jobName} steps`);
+  const idx = steps.findIndex((s) => String(s.run ?? '').trim() === exactRun);
+  if (idx === -1) throw new Error(`no ${jobName} step with run === \`${exactRun}\`, probe would be vacuous`);
+  steps.splice(idx, 1);
+};
+
 const CASES = [
   // ── #202: the gate job's failure disjunction, matched as shell TEXT ──────────────────
   ['#202 conjunct on the lint-code disjunct', conjunct('lint-code')],
@@ -221,6 +242,43 @@ const CASES = [
     const widened = 'if [[ "$HEAD_REF" == promote/* && "$BASE_REF" == "develop" ]]; then';
     step.run = once(String(step.run), anchor, widened);
   }],
+
+  // ── #438 pass 2, finding G: check-gate-wiring.mjs's four new wiring assertions (the
+  // `release-gate` checkout's `fetch-depth: 0`, and the three new REQUIRED_RELEASE/
+  // REQUIRED_LINT registry entries added across #435/#438) had zero defeat cases here — two
+  // lenses proved they fire, but that evidence dies with a review unless it is a re-runnable
+  // probe. Same shape as every other section in this table: mutate the thing the checker is
+  // supposed to catch, assert it is refused. ─────────────────────────────────────────────────
+  ['G: release-gate checkout drops `with:` entirely (fetch-depth implicitly gone)', (wf) => {
+    const checkout = releaseSteps(wf)[0];
+    if (!String(checkout?.uses ?? '').startsWith('actions/checkout@')) {
+      throw new Error('release-gate steps[0] is not actions/checkout, probe would be vacuous');
+    }
+    delete checkout.with;
+  }],
+  ['G: release-gate checkout sets fetch-depth: 1 instead of 0', (wf) => {
+    const checkout = releaseSteps(wf)[0];
+    if (Number(checkout?.with?.['fetch-depth']) !== 0) {
+      throw new Error('release-gate checkout does not currently carry fetch-depth: 0, probe would be vacuous');
+    }
+    checkout.with['fetch-depth'] = 1;
+  }],
+  ['G: release-gate checkout displaced from index 0 (setup-node moved first)', (wf) => {
+    const steps = releaseSteps(wf);
+    if (!String(steps[0]?.uses ?? '').startsWith('actions/checkout@')) {
+      throw new Error('release-gate steps[0] is not actions/checkout, probe would be vacuous');
+    }
+    if (!String(steps[1]?.uses ?? '').startsWith('actions/setup-node@')) {
+      throw new Error('release-gate steps[1] is not actions/setup-node, probe would be vacuous');
+    }
+    const [checkout, setupNode, ...rest] = steps;
+    steps.splice(0, steps.length, setupNode, checkout, ...rest);
+  }],
+  ['G: release-gate `check-token-breaking-changes.sh` (non-selftest) step deleted', deleteStepExact('release-gate', 'bash scripts/check-token-breaking-changes.sh')],
+  ["G: release-gate `check-token-breaking-changes.sh --selftest` step deleted", deleteStepExact('release-gate', 'bash scripts/check-token-breaking-changes.sh --selftest')],
+  ["G: lint-code `verify-visual-spec-zero-drift.mjs --selftest` step deleted", deleteStepExact('lint-code', 'node scripts/verify-visual-spec-zero-drift.mjs --selftest')],
+  ["G: release-gate `generate-token-catalogue.js --check` step deleted", deleteStepExact('release-gate', 'node scripts/generate-token-catalogue.js --check')],
+  ["G: release-gate `generate-token-catalogue.js --selftest` step deleted", deleteStepExact('release-gate', 'node scripts/generate-token-catalogue.js --selftest')],
 ];
 
 /**
@@ -228,7 +286,7 @@ const CASES = [
  * REMOVED by lowering it in the same commit, which is a reviewable edit rather than a deletion
  * that hides in a digit.
  */
-const MIN_CASES = 28;
+const MIN_CASES = 36;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });

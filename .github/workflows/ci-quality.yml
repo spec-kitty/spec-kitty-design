@@ -765,7 +765,15 @@ jobs:
       # compares committed-to-committed rather than source-to-source, and a hand-edited or stale
       # catalogue could hide (or fabricate) a "breaking change" that a fresh build would not show.
       # Placed BEFORE the breaking-change check itself so that check's CURRENT side is trustworthy
-      # by the time it runs.
+      # by the time it runs — that ordering is WHY it is here, not a history dependency: unlike
+      # the breaking-change check below, this one reads only the current checkout's `tokens.css`
+      # and committed catalogue, needs no tag/ref resolution, and does not depend on this job's
+      # `fetch-depth: 0`.
+      # #438 pass 2, finding A: the probe table FIRST, same convention as every other gate in this
+      # job (see the comment at the top of this job) — its comparison had zero probes and its own
+      # neutered-comparison mutant survived silently until a lens found it by mutation testing.
+      - name: "[ENFORCED] Token catalogue drift gate's own probe table (#438 pass 2, finding A)"
+        run: node scripts/generate-token-catalogue.js --selftest
       - name: "[ENFORCED] Token catalogue matches a fresh build from tokens.css (#438 F11)"
         run: node scripts/generate-token-catalogue.js --check
       # FR-015 (#435). Placed here, not in `lint-code`: this is a RELEASE-time gate over the
