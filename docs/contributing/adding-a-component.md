@@ -493,4 +493,8 @@ Baselines are **CI-authoritative** — local font metrics differ. Take them from
 New tokens go in **both** blocks of `packages/tokens/src/tokens.css` (the `:root` default and
 the `:root[data-theme="light"], .sk-light` override) and require
 `npx nx run tokens:catalogue` — the catalogue is a published artifact, and
-`scripts/check-token-breaking-changes.sh` is blind to anything missing from it.
+`scripts/check-token-breaking-changes.sh` reads only the CATALOGUE, so it is blind to any token
+missing from it (present in `tokens.css` but never regenerated in). As of #438,
+`node scripts/generate-token-catalogue.js --check` (also wired into `release-gate`, running
+before the breaking-change check) catches exactly that omission — forgetting to regenerate now
+fails CI instead of silently shipping a catalogue the breaking-change check cannot see past.
