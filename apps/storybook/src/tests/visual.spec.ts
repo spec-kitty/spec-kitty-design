@@ -1525,60 +1525,146 @@ test('SK-section-nav forced colors — visual baseline', async ({ page }) => {
 
 type TeamOverviewStoryId =
   | 'default'
+  | 'alternate-retention'
+  | 'first-run'
   | 'light-mode'
-  | 'narrow'
-  | 'scale-50-w-ps'
-  | 'controlled-interactions'
-  | 'empty-partial-data';
+  | 'long-content';
 
-// #150 visual authority is the operator-supplied 1123×1600 capture at
-// /tmp/codex-clipboard-LwdjJW.png (sha256
-// ca08a0cbe1120233a1619d6b58da1bc2b84e3b9edeea41aff24a151321dbef04). It is
-// not an authenticated clean-v4 export. Flow-health comparison also uses #149's committed
-// sk-transition-matrix-approved-dark baseline (sha256
-// 870eb7c6aff160a324d2477cfcc2b00ecfa0d3e16a6f7eeb8826082df339d277). New baselines below
-// remain CI-authoritative and require explicit visual disposition before acceptance.
+type TeamOverviewFirstRunFixture =
+  | 'admin-install'
+  | 'joined'
+  | 'admin-repo'
+  | 'admin-mission'
+  | 'member-repo'
+  | 'private-install';
+
+// #383 retires #150's Delivery return, Flow health, operational-dashboard, and page-wide sync
+// captures as historical/deprecated. These cases are the current TO1/TO2 reviewed authority and
+// must be inspected together with docs/architecture/validation/issue-383-team-overview/.
 
 const teamOverviewPatternStory = async (
   page: Page,
   id: TeamOverviewStoryId,
   width: number,
   height: number,
+  firstRunFixture?: TeamOverviewFirstRunFixture,
 ): Promise<Locator> => {
   await page.setViewportSize({ width, height });
   await page.goto(`/iframe.html?id=patterns-team-overview--${id}&viewMode=story`);
-  const root = page.locator('[data-team-overview-pattern]').first();
+  let root = page.locator('[data-team-overview-pattern]:visible').first();
   await root.waitFor({ state: 'visible', timeout: 20000 });
   await expect(root).toHaveAttribute('data-render-complete', 'true');
   await page.evaluate(() => document.fonts.ready);
   await expect(root.locator('sk-app-shell')).toBeVisible();
-  await expect(root.locator('sk-evidence-chain').locator('[part~="list"]')).toBeVisible();
-  await expect(root.locator('sk-bar-chart').locator('[part~="chart"]')).toBeVisible();
-  await expect(root.locator('sk-transition-matrix').locator('[part~="table"]')).toBeVisible();
-  if (id === 'controlled-interactions') {
-    await expect(root).toHaveAttribute('data-play-proof', 'passed');
+  await expect(root.getByRole('heading', { level: 1 })).toHaveCount(1);
+  if (firstRunFixture) {
+    await root
+      .getByRole('combobox', { name: 'Server-response fixture' })
+      .selectOption(firstRunFixture);
+    root = page.locator('[data-team-overview-pattern]:visible').first();
+    await expect(root.locator('[data-server-response]')).toHaveAttribute(
+      'data-server-response',
+      firstRunFixture,
+    );
   }
   return root;
 };
 
 const teamOverviewFullCases = [
-  { id: 'default', width: 1280, height: 1600, name: 'team-overview-approved-dark-1280.png' },
-  { id: 'default', width: 1440, height: 1600, name: 'team-overview-approved-dark-1440.png' },
-  { id: 'light-mode', width: 1440, height: 1600, name: 'team-overview-light-1440.png' },
-  { id: 'narrow', width: 390, height: 844, name: 'team-overview-narrow-390.png' },
-  { id: 'scale-50-w-ps', width: 1440, height: 1200, name: 'team-overview-scale-50-wps.png' },
-  { id: 'controlled-interactions', width: 1440, height: 1200, name: 'team-overview-controlled-interactions.png' },
-  { id: 'empty-partial-data', width: 1440, height: 1200, name: 'team-overview-empty-partial-data.png' },
+  { id: 'default', width: 1440, height: 1500, name: 'team-overview-current-to1-1440.png' },
+  { id: 'default', width: 1123, height: 1500, name: 'team-overview-current-to1-1123.png' },
+  { id: 'default', width: 390, height: 844, name: 'team-overview-current-to1-390.png' },
+  {
+    id: 'alternate-retention',
+    width: 1440,
+    height: 1500,
+    name: 'team-overview-current-to1-retention-168.png',
+  },
+  {
+    id: 'light-mode',
+    width: 1440,
+    height: 1500,
+    name: 'team-overview-current-to1-light-1440.png',
+  },
+  {
+    id: 'long-content',
+    width: 390,
+    height: 844,
+    name: 'team-overview-current-to1-long-390.png',
+  },
+  {
+    id: 'first-run',
+    firstRunFixture: 'admin-install',
+    width: 1440,
+    height: 1500,
+    name: 'team-overview-current-to2-admin-install-1440.png',
+  },
+  {
+    id: 'first-run',
+    firstRunFixture: 'joined',
+    width: 1440,
+    height: 1500,
+    name: 'team-overview-current-to2-joined-1440.png',
+  },
+  {
+    id: 'first-run',
+    firstRunFixture: 'admin-repo',
+    width: 1440,
+    height: 1500,
+    name: 'team-overview-current-to2-admin-repo-1440.png',
+  },
+  {
+    id: 'first-run',
+    firstRunFixture: 'admin-mission',
+    width: 1440,
+    height: 1500,
+    name: 'team-overview-current-to2-admin-mission-1440.png',
+  },
+  {
+    id: 'first-run',
+    firstRunFixture: 'member-repo',
+    width: 1440,
+    height: 1500,
+    name: 'team-overview-current-to2-member-repo-1440.png',
+  },
+  {
+    id: 'first-run',
+    firstRunFixture: 'private-install',
+    width: 1440,
+    height: 1500,
+    name: 'team-overview-current-to2-private-install-1440.png',
+  },
+  {
+    id: 'first-run',
+    firstRunFixture: 'admin-install',
+    width: 390,
+    height: 844,
+    name: 'team-overview-current-to2-admin-install-390.png',
+  },
+  {
+    id: 'first-run',
+    firstRunFixture: 'admin-mission',
+    width: 390,
+    height: 844,
+    name: 'team-overview-current-to2-admin-mission-390.png',
+  },
 ] as const satisfies ReadonlyArray<{
   id: TeamOverviewStoryId;
   width: number;
   height: number;
   name: string;
+  firstRunFixture?: TeamOverviewFirstRunFixture;
 }>;
 
 for (const visual of teamOverviewFullCases) {
   test(`Team overview ${visual.name} — full pattern baseline`, async ({ page }) => {
-    const root = await teamOverviewPatternStory(page, visual.id, visual.width, visual.height);
+    const root = await teamOverviewPatternStory(
+      page,
+      visual.id,
+      visual.width,
+      visual.height,
+      'firstRunFixture' in visual ? visual.firstRunFixture : undefined,
+    );
     await expect.soft(root).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
@@ -1587,10 +1673,23 @@ for (const visual of teamOverviewFullCases) {
 }
 
 const teamOverviewFocusedCases = [
-  { id: 'default', region: 'rail-identity', name: 'team-overview-rail-identity.png' },
-  { id: 'default', region: 'delivery-evidence', name: 'team-overview-delivery-evidence.png' },
-  { id: 'default', region: 'return-chart', name: 'team-overview-return-chart.png' },
-  { id: 'scale-50-w-ps', region: 'flow-matrix', name: 'team-overview-flow-matrix.png' },
+  { id: 'default', region: 'velocity', name: 'team-overview-current-velocity.png' },
+  { id: 'default', region: 'repositories', name: 'team-overview-current-repositories.png' },
+  {
+    id: 'default',
+    region: 'recent-activity',
+    name: 'team-overview-current-recent-activity.png',
+  },
+  {
+    id: 'first-run',
+    region: 'review-scaffolding',
+    name: 'team-overview-current-review-scaffolding.png',
+  },
+  {
+    id: 'first-run',
+    region: 'first-run-setup',
+    name: 'team-overview-current-first-run-setup.png',
+  },
 ] as const;
 
 for (const visual of teamOverviewFocusedCases) {
