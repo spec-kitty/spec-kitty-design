@@ -4,11 +4,11 @@ This record validates the Team Overview Storybook refresh against the Family 1 T
 contracts. The package remains story composition: it adds no Team Overview component, controller,
 relay client, clock, permission system, or mutation API.
 
-The evidence was transplanted without merge commits onto
-`train/elements-first@d3263e9488f7df85a537a927d417729eacc75f12`. The refreshed product story and
-fixture surface is commit `1f4339ba`; corrective browser-zoom proof is commit `d9e6baa3`. The
-earlier independent approval at lane `1d1dba2e` remains in the mission trail, and the rewritten
-exact head requires a fresh independent review before publication.
+The evidence is based without merge commits on
+`train/elements-first@57fe4ce7a752d2fcbce19e963a7c833acf951473`. The pre-rewrite safety ref is
+`refs/safety/issue-383-pre-57fe-c5c057fc`; route, authorization, compact-navigation, and single-tree
+fixes are commit `8793a7a9`. The earlier independent approval remains in the canonical mission
+trail, while this corrected exact head requires a fresh independent review before publication.
 
 ## Current reviewed surface
 
@@ -18,11 +18,17 @@ exact head requires a fresh independent review before publication.
   freshness-qualified.
 - TO2: `FirstRun` exposes exactly six immutable server-response fixtures behind a native select.
   The selector is labelled design-review scaffolding outside the product contract. Routes and
-  admission/member actions remain fixture- and authorization-gated.
+  admission/member actions remain fixture- and authorization-gated. Exactly one selected response
+  tree exists in document DOM; it has a stable fixture-derived compact-navigation ID whose trigger
+  controls the navigation in that same tree.
 - `CopyOutcomes` exercises copied, manual, and failed outcomes through the public `sk-copy-field`
   contract with supplied messages and focus retention.
 - Every product-visible and accessibility string comes from the fixtures. The CSF title and story
   export names are Storybook registration metadata, not product copy.
+- Reviewed route kinds correspond only to their matching Overview, Work, Connectors, Members,
+  repository, Mission, or exact release destination. Unsafe populated destinations degrade to the
+  supplied label as passive text; forged privileged first-run destinations fail closed and never
+  render as actions.
 
 ## Ownership boundary
 
@@ -43,6 +49,11 @@ evidence. See the mission's `contracts/team-overview-pattern-migration.md` for c
 - Fixture invariants: `fixtures/elements-behaviour/src/pattern-team-overview.test.ts`
 - Browser semantics, interactions, media, viewport, axe, and role guards:
   `apps/storybook/src/tests/sk-team-overview-pattern.spec.ts`
+  - At the 390px compact state, selecting every response proves exactly one fixture and compact
+    navigation are mounted, and the focused selector's trigger `aria-controls` resolves to that
+    same response tree's navigation using document/light-DOM queries only.
+  - Member and private-response checks are document-wide: no unselected sibling can retain a
+    privileged Members, admission, repository, or Mission action.
   - Real 200% browser zoom is a fresh DPR-2 Playwright context at 720x512 CSS pixels, derived by
     halving the normal 1440x1024 story viewport. The test proves the public compact-shell exposure
     transition, zero document/root/control overflow, visible focus, and a 44px trigger. Its CSS
@@ -52,3 +63,16 @@ evidence. See the mission's `contracts/team-overview-pattern-migration.md` for c
 - Current inventory: `expected-stories.json`
 - Visual matrix and 19 Linux/Chromium baselines: `apps/storybook/src/tests/visual.spec.ts`
 - Human inspection record: `visual-inspection.md`
+
+## Corrective gate record
+
+- `npm run quality:all` and all five typecheck projects pass.
+- Full Vitest passes 59 files/841 tests with zero skipped, including 33 Team Overview fixture tests.
+- Focused Playwright passes 14/14 Chromium and 42/42 across pinned Noble Chromium, Firefox, and
+  WebKit.
+- Axe finds all 654 declared story IDs, renders 810/810 built stories, and reports zero WCAG 2.1 AA
+  violations.
+- Composition passes 47 self-probes and 18 fixture files/339 CSS rules/20 tags/142 parts;
+  visual-softness passes 51 files.
+- All 19 owned visuals pass in the version-matched Noble Chromium image and exactly retain the
+  hashes recorded in `visual-inspection.md`; no baseline regeneration was needed.

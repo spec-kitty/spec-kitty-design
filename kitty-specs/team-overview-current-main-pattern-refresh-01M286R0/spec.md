@@ -150,10 +150,10 @@ stories, and reviewed visual baselines at 1440px, intermediate, 390px, short vie
 - A retention window with a different hour count and touched-day set changes all dependent labels
   and cells while leaving unrelated repository facts unchanged.
 - Missing or unsafe route values render passive text; no route is inferred from an identifier.
-- Unauthorized fixtures cannot leak admission, Members, repository, Mission, or hidden future-step
-  links into roles, names, keyboard order, or the accessibility tree.
+- Unauthorized fixtures cannot leak admission, Members, repository, Mission, or future-step links
+  into document DOM, roles, names, keyboard order, or the accessibility tree.
 - Long commands remain selectable and contained; copy controls do not fall outside the viewport.
-- Hidden TO2 fixture panels are \`hidden\` and absent from keyboard/accessibility exposure.
+- Exactly one selected TO2 response tree is mounted; unselected responses have no document DOM.
 
 ## Requirements
 

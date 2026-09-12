@@ -2,158 +2,204 @@
   "mission_slug": "team-overview-current-main-pattern-refresh-01M286R0",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
-      "description": "Verify FR-001 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Replace the retired #150 current-product composition with TO1 and TO2 Storybook evidence only.",
+      "proof_type": "story inventory + browser source guard",
+      "evidence": "Corrective code head 8793a7a9 on train base 57fe4ce7. expected-stories.json and the built index expose the six current Team Overview stories; sk-team-overview-pattern.spec.ts proves the current source excludes Delivery return, Flow health, ROI, inventory, evidence-route, and page-wide sync claims. Full axe found all 654 declared IDs and rendered 810/810 stories.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": "#150 is retained only as historical/deprecated migration context."
     },
     {
       "criterion_id": "FR-002",
-      "description": "Verify FR-002 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Supply one deeply frozen TeamMoment/repository fixture with all visible/a11y copy and routes.",
+      "proof_type": "fixture unit tests",
+      "evidence": "pattern-team-overview.test.ts recursively proves the TO1 source and projections are frozen and verifies supplied copy/routes. Full Vitest passes 59 files/841 tests, including 33 Team Overview tests.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": null
     },
     {
       "criterion_id": "FR-003",
-      "description": "Verify FR-003 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Derive Velocity totals/cells, two distinct Missions, repository rows, and six recent rows without mutation.",
+      "proof_type": "projection unit tests + mutation proof",
+      "evidence": "pattern-team-overview.test.ts proves deterministic derived totals/cells, stable distinct-Mission and recent caps, unchanged caller data, and frozen results. Full Vitest passes 841/841.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": null
     },
     {
       "criterion_id": "FR-004",
-      "description": "Verify FR-004 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Prove default and alternate retention inputs drive every dependent label and cell.",
+      "proof_type": "unit + browser + visual tests",
+      "evidence": "Fixture tests and sk-team-overview-pattern.spec.ts compare default and 168-hour alternate retention totals, cells, labels, and row membership. The owned alternate-retention baseline passes in Noble Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": null
     },
     {
       "criterion_id": "FR-005",
-      "description": "Verify FR-005 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Limit observed freshness to TeamMoment regions and keep repository Git facts locally factual.",
+      "proof_type": "browser semantics test",
+      "evidence": "The TO1 browser contract asserts observed labels on Velocity/In flight/Recent activity and their absence from repository facts; focused Chromium passes 14/14 and pinned three-engine coverage passes 42/42.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": null
     },
     {
       "criterion_id": "FR-006",
-      "description": "Verify FR-006 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Render links only for safe supplied Overview/Work/Connectors/Members/repository/Mission routes; keep activity passive.",
+      "proof_type": "route correspondence + rendered DOM negative tests",
+      "evidence": "safeTeamOverviewHref uses a kind-specific destination allow-list plus the exact release destination. Unit tests preserve all reviewed routes, reject unsafe/traversal/external values and forged Members↔Connectors kind/path pairs, and prove unsafe populated routes render their supplied labels as passive spans with no forbidden href. Activity rows remain non-interactive. A deliberate Members-pattern mutation produced 10 intended Vitest failures before exact restoration; final full Vitest is 841/841.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": "Unsafe populated destinations preserve supplied passive copy; unauthorized first-run routes fail closed before rendering."
     },
     {
       "criterion_id": "FR-007",
-      "description": "Verify FR-007 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Provide exactly the six reviewed immutable role/state responses and a labelled review-only selector.",
+      "proof_type": "fixture + browser tests",
+      "evidence": "The fixture suite proves exactly six deeply frozen responses. The TO2 browser contract enumerates all six selector choices and verifies the design-review notice; focused Chromium passes 14/14 and the three-engine slice passes 42/42.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": null
     },
     {
       "criterion_id": "FR-008",
-      "description": "Verify FR-008 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Preserve supplied role/privacy/canManage/completed/current facts and authorization-gate admission/Members actions.",
+      "proof_type": "projection + rendered accessibility-tree negatives",
+      "evidence": "projectFirstRunResponse rejects forged Members-kind/Connectors-path and Connectors-kind/Members-path responses, rejects Member admission and unauthorized/private Members exposure, and preserves all six valid response facts. Playwright sequentially selects all six responses while only one tree exists, then proves document-wide—not merely visible-root-scoped—absence of unauthorized member/private routes and accessibility names.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": null
     },
     {
       "criterion_id": "FR-009",
-      "description": "Verify FR-009 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Render an ordered list with completed/current labels and only fixture-supplied commands/routes/copy.",
+      "proof_type": "browser semantics + source-origin tests",
+      "evidence": "Playwright asserts the ordered setup list, exactly one current step, supplied completed/current labels, and hidden future-step behavior for all six responses. The source/copy guards pass in quality:all and focused browser coverage.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": null
     },
     {
       "criterion_id": "FR-010",
-      "description": "Verify FR-010 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Use public sk-copy-field and prove copied/manual/failed outcomes and safe focus.",
+      "proof_type": "interaction tests",
+      "evidence": "Three focused Chromium interaction cases prove supplied copied/manual/failed feedback and retained focus through the public copy-field contract; the same cases pass across Chromium, Firefox, and WebKit in the 42/42 slice.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": null
     },
     {
       "criterion_id": "FR-011",
-      "description": "Verify FR-011 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Compose current sk-app-shell compact seam with consumer-controlled open/dismiss and focus return.",
+      "proof_type": "interaction + light-DOM relationship tests",
+      "evidence": "Playwright proves consumer-controlled drawer open/Escape/focus return without shadow traversal. Exactly one selected TO2 fixture and compact navigation exist at a time; sequential selection of all six preserves selector focus and proves each trigger aria-controls resolves exactly to its same-tree navigation. A deliberate hidden-sibling mutation failed the initial document count with six fixtures received instead of one expected; restoration passes focused and cross-browser coverage.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": null
     },
     {
       "criterion_id": "FR-012",
-      "description": "Verify FR-012 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Replace the six obsolete #150 IDs with the six entries named in RD-009 and update discovery/visual inventories.",
+      "proof_type": "built story ratchet + visual inventory",
+      "evidence": "expected-stories.json declares the six current Team Overview IDs and all 654 declared IDs are present in the clean build. The visual registry owns 19 current Team Overview cases; its Noble Chromium slice passes 19/19 with no baseline rewrite at corrective head 8793a7a9.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": null
     },
     {
       "criterion_id": "FR-013",
-      "description": "Verify FR-013 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Document that #150 is historical/deprecated and map consumers to the current TeamMoment/first-run evidence.",
+      "proof_type": "migration and evidence review",
+      "evidence": "contracts/team-overview-pattern-migration.md and docs/architecture/validation/issue-383-team-overview/README.md explicitly retire #150's Delivery/Flow/dashboard current-product claim and point consumers to TO1 TeamMoment and TO2 first-run evidence.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": null
     },
     {
       "criterion_id": "FR-014",
-      "description": "Verify FR-014 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Add direct immutable/projection/cap/authorization tests in the fixture suite.",
+      "proof_type": "Vitest suite",
+      "evidence": "pattern-team-overview.test.ts contributes 33 tests covering immutability, deterministic projections, totals, retention, caps, route correspondence, passive degradation, six response states, and positive/negative authorization. Full Vitest passes 59 files/841 tests with zero skipped.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": null
     },
     {
       "criterion_id": "FR-015",
-      "description": "Verify FR-015 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Replace the focused Playwright and visual cases/baselines with current TO1/TO2 evidence.",
+      "proof_type": "cross-browser, axe, visual, build, and repository gates",
+      "evidence": "Final corrective runs pass quality:all; all five typecheck projects; 59 Vitest files/841 tests; Storybook build; 47 composition self-probes and 18 fixture files/339 CSS rules/20 tags/142-part ratchet; 51-file visual-softness; 76-story theme audit; focused Chromium 14/14; pinned Noble three-engine 42/42; axe 810/810 with zero WCAG 2.1 AA violations; and 19/19 owned Noble Chromium visuals with recorded hashes unchanged. Generated, release-graph, size, and SRI gates pass.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "notes": "No baseline regeneration was required by the corrective route/ID changes."
     }
   ],
-  "negative_invariants": []
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "No Team Overview runtime element, public helper/API export, wrapper, manifest entry, workflow, or configuration change is introduced.",
+      "verification_method": "diff and barrel audit",
+      "verification_command": "git diff --name-only 57fe4ce7...HEAD; rg -n 'team-overview.route.fixture' packages/elements/src/index.ts packages/elements/src/patterns/index.ts packages/react/src 2>/dev/null",
+      "result": "confirmed_absent",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "evidence": "The route renderer is Team-Overview-specific story evidence and is absent from public barrels; the 57fe4ce7 diff contains no .github/workflows, config, manifest, React/Vue, or runtime component API file."
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "Stories do not own Team Kitty routing, permissions, relay reads, polling, clocks, retention policy, state classification, clipboard policy, or mutations.",
+      "verification_method": "source guard + composition gate",
+      "verification_command": "npm run quality:all && node scripts/check-pattern-composition.mjs --selftest && node scripts/check-pattern-composition.mjs",
+      "result": "confirmed_absent",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "evidence": "Quality and composition gates pass; the pattern remains fixture projection and consumer-controlled presentation over public/static/native surfaces."
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "Retired #150 Delivery/Flow/ROI/inventory/evidence/page-sync product evidence is absent from current stories, tests, and visual inventory.",
+      "verification_method": "browser/source/inventory negative assertions",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-team-overview-pattern.spec.ts --project=chromium",
+      "result": "confirmed_absent",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "evidence": "Focused Chromium passes 14/14; source and accessibility snapshots assert the retired labels absent. Only historical/deprecated migration prose names them."
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "Unsafe or forged privileged routes never become actionable, while supplied labels remain passive in populated evidence.",
+      "verification_method": "adversarial fixture + rendered DOM tests",
+      "verification_command": "npx vitest run",
+      "result": "confirmed_absent",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "evidence": "Forged Members/Connectors path-kind pairs are rejected by first-run projection; unsafe populated Work and forged privileged routes produce passive supplied labels and zero forbidden anchors. Deliberately weakening Members correspondence caused 10 focused/full-suite failures; restored suite passes 841/841."
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "No unselected TO2 authorization response remains in document DOM, and the one compact-navigation ID cannot resolve across response trees.",
+      "verification_method": "browser relationship test + mutation proof",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-team-overview-pattern.spec.ts --project=chromium",
+      "result": "confirmed_absent",
+      "verified_at": "2026-09-12T05:10:22Z",
+      "evidence": "Sequentially selecting all six fixtures leaves exactly one response tree and one compact navigation each time; every trigger resolves to its same-tree navigation without shadow reach-through and document-wide member/private assertions find no privileged sibling links. Deliberately restoring five hidden siblings failed the initial count (received 6, expected 1); restoration passes."
+    }
+  ]
 }

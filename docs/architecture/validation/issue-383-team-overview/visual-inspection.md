@@ -18,6 +18,13 @@ in the version-matched Noble Chromium image. Their exact committed bytes replay 
 hashes below; the old and new captures were visually compared, and no story, inventory, or unrelated
 baseline was accepted as part of the refresh.
 
+Replayed all 19 owned cases after the pre-publication route/authorization, compact-navigation, and
+single-response correction at product/test commit `8793a7a9` on exact train base
+`57fe4ce7a752d2fcbce19e963a7c833acf951473`. The version-matched Noble Chromium run passed 19/19,
+and a fresh SHA-256 comparison reproduced every hash below exactly. The correction changes only
+light-DOM relationships, mounted-response cardinality, and unsafe-route fallback behavior, so no
+baseline was regenerated.
+
 The captures show one H1, native readable facts, single-character personal-rail marks, no clipped
 focus rings, no document overflow, passive activity, authorization-aware actions, and copy controls
 that remain usable at narrow width. The TO2 fixture control is visibly separated and labelled as

@@ -1,63 +1,96 @@
-# Exact-base transplant evidence
+# Exact-base and corrective evidence
 
-The approved Team Overview WP was transplanted without merge commits from the retained local
-safety ref `refs/safety/issue-383-pre-rebase-71e64435` onto the exact target
-`train/elements-first@d3263e9488f7df85a537a927d417729eacc75f12`.
+The retained Team Overview mission history is based directly on
+`train/elements-first@57fe4ce7a752d2fcbce19e963a7c833acf951473`, with no merge commit. Before
+rewriting, safety ref `refs/safety/issue-383-pre-57fe-c5c057fc` was created at
+`c5c057fc71b0330178508f7887a9da99617b669a`. The autosquash rebase from `b38b40e7` completed
+without conflicts.
 
-## Rewritten seams
+## Current commit provenance
 
-- `a17e6e72`: mission contract and the complete three-cycle review trail.
-- `3f946ec0`: immutable TO1/TO2 fixture and current Team Overview stories.
-- `1f4339ba`: focused browser/fixture tests, regenerated story inventory, current visual cases,
-  and the 19 owned Linux/Chromium baselines.
-- `d9e6baa3`: corrective test-only proof that real 200% browser zoom halves the normal story
-  viewport to 720x512 in a fresh DPR-2 context and crosses the public compact-shell breakpoint.
+- `9e86e443`: preserve the canonical Team Overview mission trail.
+- `3fb13f50`: refresh current workspace fixture and story evidence.
+- `aed5644a`: replace historical Team Overview pattern tests and inventory.
+- `2b4d7af2`: reconcile earlier exact-base evidence.
+- `fe664e03`: prove real browser zoom.
+- `4925e90f`: record the real-zoom evidence.
+- `32873e68`: refresh the 19 current baselines on the then-current train.
+- `8793a7a9`: harden route-kind authorization and passive fallback; ensure stable compact-navigation
+  identity; and render only one selected TO2 authorization response in document DOM.
+- The final documentation commit reconciles this file, matrices, model, and validation records on
+  the exact `57fe4ce7` base.
 
 The old #150 visual cases were removed only from the Team Overview-owned block. Every target-side
-visual/composition/zoom guardrail and unrelated baseline remains inherited from `d3263e94`.
-`expected-stories.json` retains the target's aggregate total of 634 and replaces only the six
-historical Team Overview IDs with the six current IDs.
+visual/composition/zoom guardrail and unrelated baseline remains inherited from `57fe4ce7`.
+`expected-stories.json` retains the target's aggregate total of 654 and replaces only the six
+historical Team Overview IDs with six current IDs.
+
+## Pre-publication corrections
+
+- `safeTeamOverviewHref` maps each route kind to only its reviewed destination shape and keeps the
+  latest-release destination exact. Forged Members-kind/Connectors-path and
+  Connectors-kind/Members-path inputs are rejected directly and by `projectFirstRunResponse`.
+- Populated fixtures separate projection from route rendering: missing, unsafe, or mismatched
+  destinations preserve their consumer-supplied labels as passive text rather than throwing or
+  disappearing. First-run authorization remains fail-closed, so forged privileged routes cannot
+  become actionable.
+- The TO2 review surface mounts exactly one selected response projection. A story-only Lit outlet
+  replaces that response on selection and restores focus to the selector; unselected responses have
+  no hidden document DOM. Sequential browser checks cover all six responses, assert one fixture and
+  one compact-navigation ID each time, resolve `aria-controls` within the selected tree, and search
+  the whole document for unauthorized member/private actions without shadow traversal.
+- The route renderer remains Team-Overview-specific story evidence and is absent from package
+  barrels. No runtime component API, generic exported helper, wrapper, manifest entry, workflow, or
+  configuration changes.
 
 ## Exact-base validation
 
-- Quality: ESLint, stylelint, and HTMLHint pass.
-- Type safety: all five declared typecheck projects pass.
-- Behaviour: 58 files and 816 Vitest tests pass; the Team Overview fixture contributes 29 tests.
-- Composition: 47 probes and all 15 pattern fixtures pass.
-- Storybook: clean build completes in 11.17 seconds; release graph, generated sizes, and SRI pass.
-- Focused browser: 12/12 Chromium and 36/36 across Chromium, Firefox, and WebKit in the pinned
-  Playwright 1.62.1 Noble image.
-- Accessibility: 634 declared IDs are present; 790/790 stories render; axe reports zero WCAG 2.1
-  AA violations.
-- Visual: all 19 owned Team Overview cases pass in Noble Chromium and were directly inspected.
-  A non-owning full-suite confidence run exposed inherited environment/baseline drift, so no
-  unrelated PNG was rewritten.
+- Quality: `npm run quality:all` passes (only inherited warnings).
+- Type safety: `node scripts/typecheck-all.mjs` passes all five declared projects.
+- Behaviour: `npx vitest run` passes 59 files and 841 tests with zero skipped; the Team Overview
+  fixture contributes 33 tests.
+- Composition/theme: 47 composition self-probes pass; repository composition covers 18 fixture
+  files, 339 CSS rules, 20 tags, and the 142-part ratchet. Visual-softness passes 51 spec files;
+  theme-story audit covers 76 story files with only the two known inherited inert stories.
+- Storybook: a clean `npx nx run storybook:storybook:build` completes successfully.
+- Focused browser: 14/14 Chromium tests pass. The pinned Playwright 1.62.1 Noble semantic slice
+  passes 42/42 across Chromium, Firefox, and WebKit.
+- Accessibility: all 50 gate self-test shapes classify correctly; all 654 declared story IDs are
+  present; 810/810 built stories render; axe reports zero WCAG 2.1 AA violations.
+- Visual: the 19 owned Team Overview cases pass 19/19 in the version-matched Noble Chromium image.
+  Their SHA-256 hashes exactly match `visual-inspection.md`; no PNG was regenerated by these
+  corrections.
+- Generated/release: React/style/Vue/generated-CSS/theme-bootstrap/markup/static-form/export,
+  release-graph, size, and SRI checks pass and produce no tracked diff.
 
-## Corrective real-zoom evidence
+## Adversarial proof
 
-The original focused test applied CSS `zoom: 2` at an unchanged 780px CSS viewport. That remains
-useful only as supplemental uniform-magnification stress and is labelled accordingly. It does not
-claim browser-zoom equivalence.
+Three apply-patch mutations were run and exactly restored before the final gates:
 
-Commit `d9e6baa3` adds the real acceptance path using the convention landed by #427: start from the
-normal 1440x1024 story viewport, derive the 720x512 CSS viewport for 200% zoom, and create a fresh
-Playwright browser context with `deviceScaleFactor: 2`. The test observes the public app-shell
-contract without traversing its shadow root: the wide personal rail becomes suppressed, the
-compact header becomes exposed, document/root/control geometry stays contained, focus remains
-visible, and the compact trigger retains a 44px target. A deliberate mutation that retained the
-old 780px CSS width failed the exact derived-width assertion (received 780, expected 720).
+1. Replacing the stable panel-derived compact-navigation ID with the shared team initials made the
+   earlier six-mounted switcher guard fail: expected six unique IDs, received one.
+2. Mapping the Members route kind to the Connectors destination pattern made the full Vitest suite
+   fail 10 tests: the canonical Members path was rejected, forged Members became safe, rendered-DOM
+   action leakage was detected, and valid first-run fixtures failed projection.
+3. Reintroducing the five unselected response trees as hidden siblings made the current TO2
+   switcher guard fail immediately: expected one document fixture, received six. This is the
+   authorization regression the final guard permanently detects.
 
-Corrective-head verification passes quality, all five typecheck projects, 58 Vitest files/816
-tests, the clean Storybook build, all 47 composition probes, the 15-fixture composition gate, the
-50-file screenshot-softness gate, 14/14 focused Chromium tests, and 42/42 focused tests across
-Chromium, Firefox, and WebKit in the Playwright 1.62.1 Noble image. The two corrective commits
-change no story, component, stylesheet, visual case, or PNG; all 19 owned baseline hashes remain
-byte-identical to the inspected values recorded in `visual-inspection.md` and were not regenerated.
+All three mutations were restored exactly. The final focused, cross-browser, unit, axe, and visual
+runs use only the restored single-response implementation.
+
+## Visual environment note
+
+An exploratory visual run in the local `sk383-playwright-dejavu` image failed all 19 snapshots
+because that image deliberately substitutes fonts and does not match the baseline environment. No
+baseline was accepted there. The version-matched `sk383-playwright:1.62.1` Noble image passes all 19
+exact committed images; the DejaVu Noble image remains useful for the font-independent three-engine
+semantic/interaction slice.
 
 ## Lifecycle note
 
 WP01 remains `approved` because the original independent approval is real and retained in the
 canonical event trail. Spec Kitty exposes an `approved -> planned` edge only as a review-rejection
-transition requiring rejection feedback. No rejection exists here, so this transplant does not
-fabricate one. Because commit identities and target context changed, the rewritten exact head is
-ready for a fresh independent exact-head review before publication.
+transition requiring rejection feedback. No rejection exists here, so this correction does not
+fabricate one. `status.json` and `status.events.jsonl` remain untouched; the corrected exact head is
+ready for fresh independent publication review.

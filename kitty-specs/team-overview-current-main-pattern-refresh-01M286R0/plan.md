@@ -148,8 +148,9 @@ of the current Team root is retired.
 - **Relevant requirements**: FR-001, FR-005–FR-011; NFR-001–NFR-003; C-001–C-005.
 - **Affected surfaces**: `team-overview.stories.ts`.
 - **Sequencing/depends-on**: IC-01.
-- **Risks**: private `::part` misuse; local CSS duplicating a component sheet; hidden fixture
-  panels remaining focusable; story-only scaffolding looking like product behavior.
+- **Risks**: private `::part` misuse; local CSS duplicating a component sheet; mounting hidden
+  authorization responses instead of replacing the selected tree; story-only scaffolding looking
+  like product behavior.
 
 ### IC-03 — Direct and built-browser verification
 

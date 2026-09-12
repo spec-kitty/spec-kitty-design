@@ -32,7 +32,8 @@ discovery, browser, and visual inventories could temporarily certify retired #15
 - **Included subtasks**: T001–T008.
 - **Dependencies**: current `train/elements-first`; no mission-internal dependency.
 - **Risks**: accidental product policy, stale append-only inventories after #382, private styling,
-  unauthorized hidden links, or local visual bytes not matching the Linux/Chromium baseline.
+  unselected authorization responses remaining in document DOM, or local visual bytes not matching
+  the Linux/Chromium baseline.
 
 ## Parallelization
 

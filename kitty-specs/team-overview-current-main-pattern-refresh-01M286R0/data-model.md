@@ -19,7 +19,8 @@ network, router, store, locale service, permission service, or clipboard API.
 - In-flight Missions are stable-order distinct by supplied Mission ID and capped at two.
 - Recent activity is stable-order source data capped at six and remains passive.
 - Repository facts are copied as local facts; observed freshness decorates TeamMoment regions only.
-- Unsafe or unauthorized routes fail closed before rendering.
+- Route safety is separate from projection. A missing, unsafe, or kind-mismatched populated route
+  keeps its supplied label as passive text and never becomes an anchor; no destination is inferred.
 
 ## First-run response input
 
@@ -32,8 +33,11 @@ administrator Mission, member repository, and private installation. Each supplie
 - Preserve completed/current/future order and state exactly as supplied.
 - Admission is visible only when the supplied response authorizes it.
 - Members is visible only when the supplied response authorizes it; private installation excludes it.
+- First-run route authorization fails closed before rendering. In particular, a Members kind cannot
+  carry the Connectors path and a Connectors/admission kind cannot carry the Members path.
 - Commands remain opaque strings passed to public `sk-copy-field` with supplied result messages.
-- The review selector changes only which immutable response is displayed; it is not a product API.
+- The review selector replaces the one mounted response tree with another immutable projection;
+  unselected authorization responses have no document DOM. The selector is not a product API.
 
 ## Invariants
 
@@ -41,6 +45,7 @@ administrator Mission, member repository, and private installation. Each supplie
 2. Retention is parameterized and a non-72-hour fixture changes dependent values.
 3. Mission and activity caps are applied without changing source records.
 4. Activity has no link/button semantics.
-5. Only supplied safe routes appear, and unauthorized labels/routes are absent from hidden/focus/a11y
-   surfaces.
+5. Only supplied, kind-corresponding safe routes become links. Unsafe populated routes remain
+   supplied passive labels; unauthorized first-run labels/routes are absent from document,
+   focus, and accessibility-tree surfaces.
 6. Every rendered string comes from a fixture copy record.
