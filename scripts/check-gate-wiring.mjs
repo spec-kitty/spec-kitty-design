@@ -1047,6 +1047,15 @@ else {
     // is a SUBSTRING of the same line with `--selftest`.
     [/node\s+scripts\/check-static-form-equivalence\.mjs(?!\s*--)(\s|$)/, 'the static-form rendered equivalence gate', 'scripts/check-static-form-equivalence.mjs'],
     [/node\s+scripts\/check-static-form-equivalence\.mjs\s+--selftest(\s|$)/, "the static-form gate's red-first probe table", 'scripts/check-static-form-equivalence.mjs --selftest'],
+    // #435, both entries with the gate itself, per every comment above. FR-015's breaking-token
+    // check existed with NO caller anywhere in `.github/workflows/` or `package.json` — a gate
+    // nobody ran is not a gate the pattern above needs to protect FROM deletion, but the moment
+    // it gained one (this mission) it needed the same protection every other line here has, or
+    // its two new CI steps could be deleted from `release-gate` with this checker still green.
+    // A `bash` invocation, not `node` — the only shell-script entry in this table so far — so
+    // matched on that verb rather than assuming `node`.
+    [/bash\s+scripts\/check-token-breaking-changes\.sh(?!\s*--selftest)(\s|$)/, 'the token breaking-change gate (FR-015)', 'scripts/check-token-breaking-changes.sh'],
+    [/bash\s+scripts\/check-token-breaking-changes\.sh\s+--selftest(\s|$)/, "the token breaking-change gate's own probe table", 'scripts/check-token-breaking-changes.sh --selftest'],
   ];
   const releaseSteps = wf.jobs?.['release-gate']?.steps ?? [];
   for (const [re, what, label] of REQUIRED_RELEASE) {
