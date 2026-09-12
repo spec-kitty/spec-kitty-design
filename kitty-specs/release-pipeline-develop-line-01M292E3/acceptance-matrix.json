@@ -98,10 +98,10 @@
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
       "proof_type": "manual_review",
-      "evidence": "Corrected (F10, gate pass 2): the original evidence named probe 19, which never calls renderDecisionSummary; only probe 20 (runCycle's every-outcome sweep test) reaches that call path, and it does not itself assert the rendered text. Downgraded from automated_test to manual_review: writeStepSummary() silently no-ops when GITHUB_STEP_SUMMARY is unset (true for every local/selftest invocation), so this is a code-reading verification (runCycle calls writeStepSummary(renderDecisionSummary(decision)) unconditionally at entry) plus console.log(JSON.stringify(decision)) as a second, always-active channel, not an automated assertion of rendered content.",
+      "evidence": "Corrected again (V6, gate pass 4): probes 20 AND 22 both reach runCycle (probe 22 was added in the same fold that first made this correction, F1's end-to-end sweep probe) - not only probe 20. Still manual_review, not automated_test: writeStepSummary() silently no-ops when GITHUB_STEP_SUMMARY is unset (true for every local/selftest invocation), so this remains a code-reading verification (runCycle calls writeStepSummary(renderDecisionSummary(decision)) unconditionally at entry) plus console.log(JSON.stringify(decision)) as a second, always-active channel, not an automated assertion of rendered content.",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-12T00:24:28.884755+00:00",
+      "verified_at": "2026-09-12T00:49:37.901989+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
