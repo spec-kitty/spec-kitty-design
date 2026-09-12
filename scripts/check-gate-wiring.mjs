@@ -22,6 +22,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parse, stringify } from 'yaml';
+import { STORYBOOK_PREDICATE, HEAVY_JOB_PREDICATE } from './lib/storybook-predicate.mjs';
 
 const WORKFLOW = '.github/workflows/ci-quality.yml';
 // A LIST, not a name. This was `const JOB = 'test'` — one job, hard-coded — in the script whose
@@ -35,14 +36,12 @@ const WORKFLOW = '.github/workflows/ci-quality.yml';
 // `lint-code` EDGE assertions below, which hold the job itself to being able to block a merge.
 const JOBS = ['test', 'release-gate'];
 // REL1 (#362): the relevant-change predicate gained a `promote/*`-into-`develop`-skip conjunct
-// (research.md R15, base-scoped per B3/pre-merge squad PR #429) so a promotion PR's
-// already-fully-gated content doesn't redundantly re-run the ~30-minute browser suite. Updated
-// here WITH that edit, not left stale — a stale exact-string comparison would have reported
-// this job's `if:` as wrong forever, which is a checker that reds on a correct file, exactly
-// the failure mode this file's own header warns about one level up.
-const STORYBOOK_PREDICATE =
-  "(needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true') && " +
-  "!(startsWith(github.head_ref, 'promote/') && github.base_ref == 'develop')";
+// (research.md R15, base-scoped per B3, exact-shape per F7 — both pre-merge squad, PR #429) so
+// a promotion PR's already-fully-gated content doesn't redundantly re-run the ~30-minute
+// browser suite. `STORYBOOK_PREDICATE` is now a SHARED constant (F6) imported from
+// `scripts/lib/storybook-predicate.mjs`, rather than hardcoded here AND in
+// `check-ci-quality-trigger-parity.mjs` — the two had to be hand-synced on every edit, and F7's
+// own predicate change was the second time that happened.
 const STORYBOOK_WRAPPER = 'node scripts/build-storybook-with-budget.mjs';
 
 // ── READING A `run:` BODY AS SHAPE RATHER THAN AS TEXT (#202, #205) ───────────────────
@@ -370,6 +369,26 @@ if (!storybook) {
   }
 }
 
+// ── THE FOUR DOWNSTREAM HEAVY JOBS' OWN `if:` (F3, pre-merge squad, gate pass 2) ─────────
+//
+// Before this, NOTHING in this file independently asserted `a11y`/`visual-regression`/
+// `playwright`/`lighthouse`'s own `if:` — only `check-ci-quality-trigger-parity.mjs` did, and a
+// pre-merge lens named it "the only guard" for these four. This is the second, independent one:
+// each must equal `HEAVY_JOB_PREDICATE` exactly, the same way `storybook-build`'s is held above.
+for (const jobName of ['a11y', 'visual-regression', 'playwright', 'lighthouse']) {
+  const job = wf.jobs?.[jobName];
+  if (!job) {
+    problems.push(`there is no \`${jobName}\` job at all`);
+    continue;
+  }
+  const jobIf = String(job.if ?? '').trim();
+  if (!('if' in job)) {
+    problems.push(`the \`${jobName}\` job lost its deliberate relevant-change/promotion-skip predicate`);
+  } else if (jobIf !== HEAVY_JOB_PREDICATE) {
+    problems.push(`the \`${jobName}\` job condition is \`${jobIf}\`, not the exact deliberate predicate`);
+  }
+}
+
 // ── THE TRIGGER ITSELF ────────────────────────────────────────────────────────────────
 //
 // Every question below asks whether the `gate` job can block a merge. All of them are vacuous
@@ -559,28 +578,52 @@ else {
     // the one guarding it — tracked as a simple open/close stack over LOGICAL lines (so
     // realignment/reflow of the block is free, the same way every other structural check in
     // this file treats it), not a substring search over the raw text.
+    //
+    // F5 (pre-merge squad, gate pass 2): pop via the file's own `depthDelta` (word-level,
+    // whole-line block counting — see its own doc comment above), not a line-INITIAL `fi\b`
+    // test. The old test never popped a ONE-LINE `if …; then …; fi` (its `fi` sits at the END
+    // of the line, not the start) — and this script's own gate body has exactly that shape
+    // four times, immediately above this block (`if [ "$sb_ok" != "success" ] && …; then
+    // sb_ok="fail"; fi`, one per `_ok` variable). Those four pushes were never popped by the
+    // old logic, leaving four stale entries on the stack by the time this block's own guard is
+    // reached — it resolved correctly ONLY because the real tolerance guard is pushed AFTER
+    // them and this function reads the TOP of the stack, so the stale entries never surfaced.
+    // Reordering the script, or adding another one-liner after this block, would have broken
+    // that by accident.
     const guardStack = [];
     let guardCondition;
+    let depth = 0;
     for (const line of logicalLines(script)) {
       const opener = line.match(/^if\s+([\s\S]*?);\s*then\b/);
-      if (opener) guardStack.push(opener[1].trim());
+      const delta = depthDelta(line);
+      if (opener) guardStack.push({ condition: opener[1].trim(), depthAtOpen: depth });
       if (line.includes(TOLERANCE_ASSIGNMENT)) {
-        guardCondition = guardStack.length ? guardStack[guardStack.length - 1] : null;
+        guardCondition = guardStack.length ? guardStack[guardStack.length - 1].condition : null;
         break;
       }
-      if (/^fi\b/.test(line) && guardStack.length) guardStack.pop();
+      depth += delta;
+      while (guardStack.length && depth <= guardStack[guardStack.length - 1].depthAtOpen) {
+        guardStack.pop();
+      }
     }
     // B4 (pre-merge squad): the guard now reads `"$HEAD_REF"`/`"$BASE_REF"` (env-sourced),
     // never `${{ github.head_ref }}` interpolated directly into the script — case-insensitive
     // so this survives either spelling without treating the injection fix itself as a defeat.
+    // F7 (gate pass 2): the head-ref test itself must be the EXACT `promote/<40-hex>` shape via
+    // a real bash regex match (`=~`), never the loose `promote/*` GLOB (`==`) test-side script
+    // originally used — a glob cannot express the 40-hex shape at all, and this file's own
+    // sibling check (`scripts/lib/promote-github.mjs`'s `PROMOTION_BRANCH_RE`) already holds
+    // the script side to it.
     const headRefOk = /head_ref/i.test(guardCondition ?? '');
-    const promotePatternOk = /promote\/\*/.test(guardCondition ?? '');
+    const promotePatternOk =
+      /=~/.test(guardCondition ?? '') && /promote\/\[0-9a-f\]\{40\}\$/.test(guardCondition ?? '');
     const baseRefOk = /base_ref/i.test(guardCondition ?? '') && /develop/.test(guardCondition ?? '');
     if (!guardCondition || !headRefOk || !promotePatternOk || !baseRefOk) {
       problems.push(
         "the gate's promote/* skip-tolerance assignment is not scoped inside a conditional " +
-          'testing the head ref against a `promote/*` pattern AND the base ref against ' +
-          `\`develop\` (nearest enclosing guard: ${JSON.stringify(guardCondition ?? null)}) — ` +
+          'testing the head ref against the EXACT `promote/<40-hex>` shape (a real regex match, ' +
+          `never a loose glob) AND the base ref against \`develop\` (nearest enclosing guard: ` +
+          `${JSON.stringify(guardCondition ?? null)}) — ` +
           'this turns a narrowly-scoped exception into an unconditional, or base-unscoped, ' +
           'acceptance of a skip that should be a failure',
       );
