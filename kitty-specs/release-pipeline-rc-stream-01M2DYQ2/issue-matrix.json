@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#364": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "REL3, out of scope here by operator decision. Carries: converting release.yml to a caller (12 of its 14 steps duplicate the payload today), restoring id-token: write and --access public for provenance (FR-044), the ADR-5 contents audit, and settling publishConfig-vs-registry-input authority \u2014 now asserted by checkRegistryAuthorityAgrees so the fold fails loudly at PR time.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,7 +45,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "deferred-with-followup",
       "wp": null
     }
   },
