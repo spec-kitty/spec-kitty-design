@@ -146,8 +146,10 @@ if (process.argv.includes('--selftest')) {
   let bad = 0;
   let passKind = 0;
   let failKind = 0;
+  const seenVerdicts = new Set();
   for (const [note, fresh, committedRaw, expectVerdict] of PROBES) {
     if (expectVerdict === 'match') passKind++; else failKind++;
+    seenVerdicts.add(expectVerdict);
     const { verdict } = compareCatalogue(fresh, committedRaw);
     if (verdict !== expectVerdict) {
       console.error(`  ✗ ${note}: expected verdict '${expectVerdict}', got '${verdict}'`);
@@ -157,17 +159,22 @@ if (process.argv.includes('--selftest')) {
     }
   }
 
-  // Floor OUTSIDE the table (check-develop-ruleset-parity.mjs's PROBE_FLOOR shape), AND #438 F8's
-  // degenerate-split refusal: the total floor alone lets the single stale-content probe — the
-  // ENTIRE reason this table exists (pass 2, finding A) — be swapped out for another match-kind
-  // probe with the total unchanged.
+  // Floor OUTSIDE the table (check-develop-ruleset-parity.mjs's PROBE_FLOOR shape).
   const FLOOR = 8;
   if (PROBES.length < FLOOR) {
     console.error(`\n❌ the probe table has shrunk: ${PROBES.length} probe(s) against a floor of ${FLOOR}.`);
     process.exit(1);
   }
-  if (passKind === 0 || failKind === 0) {
-    console.error(`\n❌ refusing to report green over a degenerate probe set: ${passKind} expect-match, ${failKind} expect-non-match.`);
+  // #438 pass 2, finding F8, corrected in pass 3: a pass/fail SPLIT floor alone does not protect
+  // any one verdict kind. Swapping the single stale-content probe — the ENTIRE reason this table
+  // exists (pass 2, finding A) — for another non-match probe (e.g. a second 'invalid-json' case)
+  // keeps the split non-degenerate (still 2 match / 6 non-match) and the total unchanged, so that
+  // guard alone would go green with the one probe the table exists for gone. Asserting every
+  // VERDICT KIND `compareCatalogue` can return is covered is what actually prevents that swap.
+  const REQUIRED_VERDICTS = ['match', 'stale', 'reformatted', 'invalid-json', 'invalid-generated_at'];
+  const missingVerdicts = REQUIRED_VERDICTS.filter((v) => !seenVerdicts.has(v));
+  if (missingVerdicts.length > 0) {
+    console.error(`\n❌ refusing to report green: no probe covers verdict kind(s): ${missingVerdicts.join(', ')}.`);
     process.exit(1);
   }
   if (bad) {

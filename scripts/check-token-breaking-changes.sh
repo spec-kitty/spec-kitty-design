@@ -246,6 +246,19 @@ if [ "${1:-}" = "--selftest" ]; then
   probe "F: the CURRENT catalogue's categories is a well-formed object with zero tokens -> the FLOOR rejects it, exit 2" 2 "contains zero tokens" "$REPO_A" v0.1.0
   write_catalogue "$REPO_A/$CATALOGUE_PATH" a b c d e
 
+  # ── #438 pass 2, finding F (other half): the CURRENT-side floor above has a probe; the
+  #    PREVIOUS-side floor (below, at the `PREVIOUS_TOKENS` check) did not — a release tag whose
+  #    catalogue is a well-formed object with zero tokens compared against a real CURRENT
+  #    catalogue fell through to "No tokens removed", exit 0: the exact fail-open shape this
+  #    script exists to close, just on the other side of the diff. CURRENT is restored to a
+  #    normal catalogue first so the CURRENT-side check above does not intercept this first.
+  printf '{"categories":{"c":{"tokens":[]}}}' > "$REPO_A/$CATALOGUE_PATH"
+  git -C "$REPO_A" add -A
+  git -C "$REPO_A" commit -q -m "bad catalogue: PREVIOUS side has zero tokens"
+  git -C "$REPO_A" tag bad-catalogue/previous-zero-tokens
+  write_catalogue "$REPO_A/$CATALOGUE_PATH" a b c d e
+  probe "F (previous side): the ref's catalogue is well-formed with zero tokens -> the FLOOR rejects it, exit 2" 2 "the catalogue at" "$REPO_A" bad-catalogue/previous-zero-tokens
+
   # ── Repo B: no catalogue file at all — regression, unaffected by this fix. ─────────────────
   REPO_B="$SCRATCH/repo-b"
   new_repo "$REPO_B"
@@ -295,9 +308,29 @@ if [ "${1:-}" = "--selftest" ]; then
   git -C "$REPO_E" commit -q -m "unrelated orphan history"
   probe "F2b: a release tag exists but is unreachable from HEAD -> exit 2, not 'first release'" 2 "not reachable" "$REPO_E"
 
+  # ── #438 pass 2, finding D: reproduce the SIGPIPE-under-`pipefail` defect this fix closes,
+  #    against the ACTUAL vulnerable shape (an unreachable-from-HEAD release tag — the same
+  #    branch F2b probes above), at a scale that reproduces the defect. A handful of unreachable
+  #    tags is not enough: the pre-fix `git tag --list "$GLOB" | head -1` only SIGPIPEs when
+  #    `head -1` closes the pipe's read end before `git` finishes writing all matching refs, which
+  #    needs enough output to exceed the pipe buffer. ~20,000 tags reproduces it 10/10 locally;
+  #    fewer did not reproduce reliably. Built with `git update-ref --stdin` against one throwaway
+  #    orphan commit (sub-second, so this stays cheap enough for CI) rather than 20,000 individual
+  #    `git tag` invocations. On the reverted code this probe is RED: the script aborts with exit
+  #    141, not the exit 2 this asserts — a silent crash inside the branch whose entire job is to
+  #    refuse LOUDLY. `for-each-ref --count=1` needs no pipe at all, so it cannot SIGPIPE here.
+  REPO_F="$SCRATCH/repo-f-sigpipe"
+  new_repo "$REPO_F"
+  echo "root" > "$REPO_F/README.md"
+  git -C "$REPO_F" add README.md
+  git -C "$REPO_F" commit -q -m "root, no reachable release tag"
+  ORPHAN_SHA="$(git -C "$REPO_F" commit-tree 4b825dc642cb6eb9a060e54bf8d69288fbee4904 -m "unreachable orphan carrying the release tags")"
+  { for i in $(seq 1 20000); do printf 'create refs/tags/v%d.0.0 %s\n' "$i" "$ORPHAN_SHA"; done; } | git -C "$REPO_F" update-ref --stdin
+  probe "D: ~20,000 unreachable release tags don't SIGPIPE the lookup -> exit 2, 'not reachable' (not a silent 141)" 2 "not reachable" "$REPO_F"
+
   # Total floor OUTSIDE the table (same shape as check-develop-ruleset-parity.mjs's PROBE_FLOOR):
   # a probe count silently shrinking must itself be caught.
-  FLOOR=16
+  FLOOR=18
   if [ "$TOTAL" -lt "$FLOOR" ]; then
     echo ""
     echo "❌ the probe set has shrunk: $TOTAL probe(s) against a floor of $FLOOR."
