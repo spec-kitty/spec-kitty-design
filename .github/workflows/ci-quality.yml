@@ -421,6 +421,18 @@ jobs:
         run: node scripts/check-llms-adr-surface.mjs --selftest
       - name: "[ENFORCED] llms.txt and llms-full.txt carry no hand-maintained ADR index (#197)"
         run: node scripts/check-llms-adr-surface.mjs
+      # charter.md's served surface, held to what it duplicates (#436). Policy Summary is the
+      # ONLY half of this file `charter context` ever renders to an agent (bootstrap/compact
+      # tiers read only its bullets, per context_result_builders.py); Testing Standards, Quality
+      # Gates, Performance Benchmarks and part of Branch Strategy are display-only prose for a
+      # human, duplicated into Policy Summary by hand. A correction applied to only the top-
+      # section half looks done in review and reaches no agent — the near-miss #433 itself
+      # produced before its final fold. Same placement rationale as the #193/#197 pair above:
+      # `lint-code` carries no `if:` and no path guard, so a docs-only PR is certain to run it.
+      - name: "[ENFORCED] Charter served-surface gate self-test (#436)"
+        run: node scripts/check-charter-served-surface.mjs --selftest
+      - name: "[ENFORCED] Policy Summary reflects every registered top-section duplicate, within its render cap (#436)"
+        run: node scripts/check-charter-served-surface.mjs
       # A multi-screenshot test may not use the hard `toHaveScreenshot` form for any of its
       # calls (#367). The hard form throws on failure, so a failing screenshot aborts the test
       # and every LATER screenshot in it never runs — never produces a baseline, never appears

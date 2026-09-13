@@ -44,7 +44,13 @@ template_set: software-dev-default
      Strategy. Anything that must reach every agent belongs in one of the bullets below, not
      only in the fuller prose above. `_append_policy_summary_lines` caps at 8 bullets
      (bootstrap_text.py:208); this section holds 7 — do not add a bullet without checking that
-     cap, fold into an existing one instead. -->
+     cap, fold into an existing one instead. Testing Standards, Quality Gates, Performance
+     Benchmarks and part of Branch Strategy are hand-duplicated into the bullets below (#436) —
+     correcting one of those top sections without also correcting its bullet here changes
+     nothing an agent will ever see. scripts/check-charter-served-surface.mjs asserts the
+     direction that matters (top-section content missing from here is a defect; this section
+     carrying more than a top section is not) for every pair it has registered; register a new
+     pair there in the same commit that adds one. -->
 
 - Intent: A reusable, multi-framework design system for the Spec Kitty ecosystem. Publishes CSS custom-property tokens, a CSS layer with generated static HTML, Lit custom elements, and generated React wrappers as importable artifacts consumed by the SK operator dashboard, public documentation site, blog surfaces, marketing pages, and slidedecks. Also ships pluggable doctrine elements — YAML + prose brand-voice and visual-style guidelines — for use inside agentic workflows (Claude Code skill, charter voice policy). Primary v1 consumers: SK dashboard UI overhaul (issue #650) and docsite refresh (issue #648). Visual regression is baselined by 375 committed Playwright snapshots in `apps/storybook/src/tests/visual.spec.ts-snapshots/`, not by `tmp/reference_system/` — nothing in the current pipeline reads the latter for comparison; it remains a historical design reference from the initial token migration (see Testing).
 
