@@ -321,6 +321,18 @@ export function checkRegistryAuthorityAgrees(packages, workflows) {
   }
   for (const p of packages) {
     if (p.private) continue;
+    // A MANIFEST `tag` KEY OVERRIDES `npm publish --tag`, SILENTLY. npm resolves
+    // `manifest.tag || defaultTag` (libnpmpublish publish.js:99), so `"tag": "latest"` in a
+    // package.json claims the prod channel while the run log prints the flag's value — reproduced
+    // by review against a local registry: PUT dist-tags={"latest": …} under `npm notice … with tag
+    // rc`. Nothing in the repo read the key, so it was one JSON line away and unobservable.
+    if (typeof p.tag === 'string' && p.tag.trim() !== '') {
+      problems.push(
+        `${p.name} declares a top-level \`"tag": ${JSON.stringify(p.tag)}\` in its manifest — npm ` +
+          'resolves `manifest.tag || --tag`, so this silently overrides the dist-tag the workflow ' +
+          'passes and the run log still reports the flag. The dist-tag is the stream\'s to set.',
+      );
+    }
     const effective = p.publishConfig?.registry;
     if (typeof effective !== 'string' || effective.trim() === '') {
       problems.push(
@@ -618,7 +630,12 @@ export function checkWorkflowUsesDerivedSet(
     // Renata M18: deleting the dist-tag report survived every gate for three passes. Non-`latest`
     // tags never appear in the GitHub web UI, so this step is the ONLY place an operator can see
     // that the publish landed — which makes it evidence, not decoration.
-    [/npm\s+dist-tag\s+ls/, 'the published dist-tag report'],
+    // ANCHORED ON THE ASSIGNMENT, not the bare command. My own fix introduced the defeat: the new
+    // `echo "::error::$NAME: npm dist-tag ls exited $RC"` satisfies a bare `/npm\s+dist-tag\s+ls/`,
+    // so the real invocation could be deleted and the error message alone kept the gate green.
+    // That is the prose-satisfies-the-guard class this file closed two passes ago, reintroduced by
+    // the very line meant to make the report honest.
+    [/OUT="\$\(npm\s+dist-tag\s+ls/, 'the published dist-tag report'],
   ];
   const REQUIRED_STEPS = jobName === 'release' ? [...PROD_ONLY_STEPS, ...EVERY_STREAM_STEPS] : EVERY_STREAM_STEPS;
   for (const [re, what] of REQUIRED_STEPS) {
@@ -1054,7 +1071,7 @@ const VALID_RELEASE_WORKFLOW = `jobs:
       - name: Security
         run: bash scripts/npm-audit-gate.sh
       - name: Report
-        run: npm dist-tag ls "@spec-kitty/tokens"
+        run: OUT="$(npm dist-tag ls "@spec-kitty/tokens" 2>/tmp/e)"
       - name: Resolve the publishable package set
         id: graph
         run: |
@@ -1125,7 +1142,7 @@ const REUSABLE_PAYLOAD_FIXTURE = `jobs:
       - name: Security
         run: bash scripts/npm-audit-gate.sh
       - name: Report
-        run: npm dist-tag ls "@spec-kitty/tokens"
+        run: OUT="$(npm dist-tag ls "@spec-kitty/tokens" 2>/tmp/e)"
       - name: Bump
         run: node scripts/bump-prerelease.mjs --from-registry
       - name: Publish
@@ -1183,7 +1200,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 64;
+const PROBE_FLOOR = 65;
 
 const PROBES = [
   {
@@ -1688,6 +1705,16 @@ const PROBES = [
     run: () =>
       checkRegistryAuthorityAgrees(
         [{ name: '@spec-kitty/tokens', dir: 'tokens', private: false, publishConfig: { registry: 'https://registry.npmjs.org' } }],
+        [{ file: 'release-rc.yml', text: VALID_CALLER_FIXTURE }],
+      ),
+  },
+  {
+    // Pass 6, B1. npm resolves `manifest.tag || defaultTag`, so this key beats `--tag` and the run
+    // log still prints the flag's value. Reproduced against a local registry before the guard.
+    what: 'a manifest declaring a top-level `tag` that would override the workflow\'s dist-tag',
+    run: () =>
+      checkRegistryAuthorityAgrees(
+        [{ name: '@spec-kitty/tokens', dir: 'tokens', private: false, tag: 'latest', publishConfig: { registry: GH_PACKAGES } }],
         [{ file: 'release-rc.yml', text: VALID_CALLER_FIXTURE }],
       ),
   },
