@@ -115,13 +115,14 @@ every step; `release.yml` keeps the prod path and this mission does not repurpos
 - **Affected surfaces**: `.npmrc` — **one line, and nothing else**
 - **Sequencing/depends-on**: none
 - **Narrowed during implementation, and why.** This concern originally included cutting
-  `release.yml` over too. That was scope creep: #363 names `.npmrc`, and `release.yml` is the
-  tag-triggered *prod* path. Making the edit turned `check-release-graph.mjs` red with
-  `release.yml has no step running publish with provenance` — the gate **enforces** FR-044, which
-  ADR-5 ratifies as a supply-chain control and which `system-context-canvas.md`,
-  `release-runbook.md` and a mission-review record all cite. Removing it is an ADR amendment, not a
-  cleanup. The edits were reverted, the gate is green again (28/28 probes trip), and the prod
-  cutover plus the FR-044 decision belong to REL3 (#364), which already owns attestations.
+  `release.yml` over too. That was scope creep at the time and the edits were reverted — but the
+  judgement was **overturned by the operator on 2026-09-13**, after pass-3 review measured that this
+  mission's own `publishConfig` addition already retargets prod's destination while leaving its
+  credentials pointed at npmjs. The inconsistency below stopped being harmless the moment
+  `publishConfig` landed. `release.yml` is now retargeted in this mission; FR-006 is reinstated in
+  spec.md with the ruling recorded; FR-044's control moves to `actions/attest-build-provenance`
+  under #364 scope item 3, and the gate no longer asserts an invocation that cannot succeed on this
+  registry (it asserts prod still publishes).
 - **Risks**: leaving `.npmrc` on GitHub Packages while `release.yml` still names npmjs is a real
   inconsistency — but a harmless one today, because `release.yml` is tag-triggered, has never run,
   and has no credential (`NPM_TOKEN` has never existed). Say so in the PR rather than fixing it

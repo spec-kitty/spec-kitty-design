@@ -592,11 +592,13 @@ export function checkWorkflowUsesDerivedSet(
   const PROD_ONLY_STEPS = [
     // PROVENANCE IS NO LONGER REQUIRED, AND THAT IS A LOSS RECORDED RATHER THAN A RULE RELAXED.
     // This used to be `npm publish --provenance --access public`. npm provenance is an npmjs.org
-    // feature, unsupported on GitHub Packages, and prod moved to GitHub Packages by operator
-    // decision once review measured that `publishConfig` was already redirecting its tarballs
-    // there. FR-044 cannot be satisfied on this registry by ANY configuration, so asserting it
-    // would be asserting something no correct workflow can do. REL3 (#364) owns the question of
-    // what replaces it (attestations, or a second npmjs stream).
+    // MECHANISM, unsupported on GitHub Packages, and prod moved there by operator decision once
+    // review measured that `publishConfig` was already redirecting its tarballs. The `--provenance`
+    // INVOCATION cannot succeed on this registry, so asserting it would assert something no correct
+    // workflow can do. The CONTROL is relocated, not retired: #364 scope item 3 replaces it with
+    // `actions/attest-build-provenance` per the 2026-09-11 operator amendment on #361. Do not
+    // restate this as "FR-044 is impossible" — an earlier revision did, in three places, and it is
+    // false.
     //
     // What remains asserted is that prod actually publishes — dropping the flag must not be a
     // route to dropping the publish.
@@ -613,6 +615,10 @@ export function checkWorkflowUsesDerivedSet(
     // `[ENFORCED]` label in the payload, and in this repo that prefix means "registered in a wiring
     // checker" — it was decoration until now. (The bump is asserted separately below, not here.)
     [/npm-audit-gate\.sh/, 'the ADR-005 security gate before publish'],
+    // Renata M18: deleting the dist-tag report survived every gate for three passes. Non-`latest`
+    // tags never appear in the GitHub web UI, so this step is the ONLY place an operator can see
+    // that the publish landed — which makes it evidence, not decoration.
+    [/npm\s+dist-tag\s+ls/, 'the published dist-tag report'],
   ];
   const REQUIRED_STEPS = jobName === 'release' ? [...PROD_ONLY_STEPS, ...EVERY_STREAM_STEPS] : EVERY_STREAM_STEPS;
   for (const [re, what] of REQUIRED_STEPS) {
@@ -634,17 +640,51 @@ export function checkWorkflowUsesDerivedSet(
           'lives in that script, and an inline publish bypasses it entirely',
       );
     }
+    // ...AND `npm dist-tag` IS REFUSED OUTRIGHT. Closing the `npm publish --tag` route left the
+    // OTHER documented way to write a dist-tag wide open: a plausible "Promote to latest" step
+    // running `npm dist-tag add @spec-kitty/tokens@1.0.0 latest` passed every gate and claimed the
+    // prod channel. Unlike the `--tag` arms race this closes in one line rather than a pattern to
+    // be excused, because the command has no legitimate use in a prerelease payload at all.
+    if (/npm\s+dist-tag\s+add\b/.test(commands)) {
+      problems.push(
+        `${label} runs \`npm dist-tag add\`, which writes a dist-tag directly and bypasses the ` +
+          'publish script entirely — there is no legitimate use for it in a prerelease payload',
+      );
+    }
     // ...AND NOTHING ELSE MAY PUBLISH. The script is only a guarantee if it is the sole route.
     for (const line of commands.split('\n')) {
-      if (/npm\s+publish\b/.test(line)) {
+      if (/npm\s+publish\b/.test(line) || /\bnpm\b(?=[^\n;|&]*\bpublish\b)/.test(line)) {
         problems.push(
           `${label} runs \`${line.trim()}\` directly instead of going through ` +
             'scripts/publish-derived-set.mjs, which is where the `latest` refusal lives',
         );
       }
     }
-    if (!/DIST_TAG/.test(workflowText)) {
-      problems.push(`${label} never passes DIST_TAG to the publish script, so it would refuse on an empty tag`);
+    // THE HAND-OFF, READ FROM THE PARSED STEP. `/DIST_TAG/.test(workflowText)` asserted that eight
+    // characters appear SOMEWHERE in the file — satisfied by a comment, and satisfied by
+    // `DIST_TAG: latest` with the input no longer forwarded. Both survived; both would brick the
+    // stream at run time rather than leak `latest`, but a gate that certifies a payload which
+    // cannot publish is still a gate reporting green over a broken artifact. Fourth occurrence of
+    // "a token test standing in for a data-flow assertion" in this file, so it gets the parse.
+    const publishStep = steps.find((st) => /publish-derived-set\.mjs/.test(String(st?.run ?? '')));
+    if (!publishStep) {
+      problems.push(`${label} has no step invoking the publish script`);
+    } else {
+      const handoff = publishStep.env?.DIST_TAG;
+      if (typeof handoff !== 'string' || !handoff.includes('inputs.dist-tag')) {
+        problems.push(
+          `${label}'s publish step does not pass \`env.DIST_TAG: \${{ inputs.dist-tag }}\` ` +
+            `(found ${JSON.stringify(handoff ?? null)}) — the caller's dist-tag never reaches the script`,
+        );
+      }
+      // AND IT IS INVOKED BARE. `--dry-run` appended here turns the whole release into a no-op that
+      // every gate reports green — the "green line over zero inputs" defect one level up.
+      if (!/^\s*node scripts\/publish-derived-set\.mjs\s*$/.test(String(publishStep.run ?? ''))) {
+        problems.push(
+          `${label}'s publish step must run exactly \`node scripts/publish-derived-set.mjs\` with no ` +
+            `arguments (found ${JSON.stringify(String(publishStep.run ?? '').trim())})`,
+        );
+      }
     }
     // THE BUMP, and its `--from-registry`. Deleting either was green. Nothing commits the bump
     // back to `develop`, so without `--from-registry` every run recomputes the same version and
@@ -971,6 +1011,8 @@ const VALID_RELEASE_WORKFLOW = `jobs:
     steps:
       - name: Security
         run: bash scripts/npm-audit-gate.sh
+      - name: Report
+        run: npm dist-tag ls "@spec-kitty/tokens"
       - name: Resolve the publishable package set
         id: graph
         run: |
@@ -1040,6 +1082,8 @@ const REUSABLE_PAYLOAD_FIXTURE = `jobs:
           for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm pack --dry-run ); done
       - name: Security
         run: bash scripts/npm-audit-gate.sh
+      - name: Report
+        run: npm dist-tag ls "@spec-kitty/tokens"
       - name: Bump
         run: node scripts/bump-prerelease.mjs --from-registry
       - name: Publish
@@ -1097,7 +1141,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 57;
+const PROBE_FLOOR = 62;
 
 const PROBES = [
   {
@@ -1296,6 +1340,85 @@ const PROBES = [
           /run: node scripts\/publish-derived-set\.mjs/,
           'run: |\n          node scripts/publish-derived-set.mjs\n          npm publish --tag latest',
         ),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    // Randy pass 4: `npm --tag latest publish` — npm's ordinary flag-before-subcommand form — did
+    // not match /npm\s+publish\b/, and a TRAILING comment satisfied the "invokes the script" rule.
+    // Both survivors of the three rules they replaced, inheriting the same defeat class.
+    what: 'an inline publish written as `npm --tag latest publish`, excused by a trailing comment',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(
+          / {8}run: node scripts\/publish-derived-set\.mjs/,
+          '        run: |\n          echo pub   # via node scripts/publish-derived-set.mjs\n' +
+            '          for pkg in $DIRS; do ( cd "packages/$pkg" && npm --tag latest publish ); done',
+        ),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    // Randy pass 4 / Alphonso A4-2: `--dry-run` appended turns the release into a no-op that every
+    // gate reported green. The delta deleted the "must actually publish" rule without replacing it.
+    what: 'the publish script invoked with --dry-run (a green release that publishes nothing)',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(
+          / {8}run: node scripts\/publish-derived-set\.mjs/,
+          '        run: node scripts/publish-derived-set.mjs --dry-run',
+        ),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    // Renata pass 4: `npm dist-tag add` is the OTHER documented route to a dist-tag, and the script
+    // never sees it. A plausible "Promote to latest" step claimed the prod channel, all gates green.
+    what: 'a `Promote to latest` step using `npm dist-tag add` beside a correct script call',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(
+          / {8}run: node scripts\/publish-derived-set\.mjs/,
+          '        run: |\n          node scripts/publish-derived-set.mjs\n' +
+            '          npm dist-tag add "@spec-kitty/tokens@1.0.0" latest',
+        ),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    // Renata pass 4: `/DIST_TAG/` over the whole file was satisfied by a COMMENT while the env
+    // hand-off was deleted — a token test standing in for a data-flow assertion, the fourth
+    // occurrence of that class in this file. Now read from the parsed step.
+    what: 'the DIST_TAG hand-off deleted, with only a comment left mentioning it',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(
+          / {8}env:\n {10}DIST_TAG: [^\n]*\n/,
+          '        # DIST_TAG is supplied by the caller\n',
+        ),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'the DIST_TAG hand-off hard-coded instead of forwarding inputs.dist-tag',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/DIST_TAG: \$\{\{ inputs\.dist-tag \}\}/, 'DIST_TAG: latest'),
         ['@spec-kitty/tokens'],
         ['tokens'],
         'publish',

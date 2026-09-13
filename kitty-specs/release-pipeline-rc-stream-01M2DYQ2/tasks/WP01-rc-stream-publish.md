@@ -8,6 +8,7 @@ requirement_refs:
 - FR-003
 - FR-004
 - FR-005
+- FR-006
 - FR-008
 - FR-009
 - FR-010

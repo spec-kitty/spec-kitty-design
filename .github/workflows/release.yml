@@ -15,10 +15,15 @@ on:
 #   `packages: write`  is now required — without it GITHUB_TOKEN cannot publish here at all, and
 #                      this workflow did not have it, so it would have 403'd even after the
 #                      registry change.
-#   `id-token: write`  is gone with `--provenance` below. npm provenance is an npmjs.org feature
-#                      and is UNSUPPORTED on GitHub Packages, so FR-044 cannot be satisfied on this
-#                      registry by any configuration. That is REL3's (#364) question to settle, not
-#                      something this file can quietly keep claiming.
+#   `id-token: write`  is gone with `--provenance` below. npm provenance is an npmjs.org MECHANISM
+#                      and is unsupported on GitHub Packages. The CONTROL it implements is not lost:
+#                      #364 scope item 3 replaces it with `actions/attest-build-provenance` over the
+#                      packed tarballs, needing `attestations: write` and `id-token: write` — under
+#                      the operator amendment of 2026-09-11 (#361), "GitHub artifact attestations
+#                      replace npm provenance". So FR-044 is RELOCATED, not retired, and this file
+#                      must not say otherwise: an earlier revision of this comment claimed it "cannot
+#                      be satisfied by any configuration", which is false and is exactly the kind of
+#                      confident wrong statement a later mission cites as settled.
 #   `NPM_TOKEN`        never existed as a secret (verified: zero secrets by that name), so prod
 #                      could not publish to npmjs today regardless. GITHUB_TOKEN is a credential
 #                      that actually exists.
@@ -154,7 +159,7 @@ jobs:
       # exempts the condition of an `if` from `set -e`, and both handled commands are if-conditions.
       # Dropping `-e` therefore bought nothing and silently removed protection from every
       # *unhandled* command in the block.
-      - name: Publish every package in the derived set (FR-044)
+      - name: Publish every package in the derived set
         run: |
           set -euo pipefail
           PKGS="${{ steps.graph.outputs.dirs }}"
@@ -162,12 +167,12 @@ jobs:
           failed=""
           for pkg in $PKGS; do
             echo "=== publishing packages/$pkg ==="
-            # `--provenance` REMOVED with the registry move, not as a preference: npm provenance is
-            # an npmjs.org feature, unsupported on GitHub Packages, and it hard-fails without the
-            # `id-token: write` this workflow no longer declares. FR-044 cannot be satisfied on this
-            # registry by any configuration — REL3 (#364) owns that question. `--access public` went
-            # with it: it is an npmjs access model, and GitHub Packages governs visibility per
-            # package outside the publish call.
+            # `--provenance` REMOVED with the registry move, not as a preference: it is the npmjs
+            # MECHANISM, unsupported on GitHub Packages, and it hard-fails without the
+            # `id-token: write` this workflow no longer declares. FR-044's control is relocated, not
+            # retired — #364 scope item 3 replaces it with `actions/attest-build-provenance`.
+            # `--access public` went with it: an npmjs access model; GitHub Packages governs
+            # visibility per package outside the publish call.
             #
             # This loop is deliberately NOT routed through scripts/publish-derived-set.mjs yet. That
             # is REL3's fold, and the operator scoped this change to the registry alone. The script
@@ -220,6 +225,25 @@ jobs:
             echo "packages are skipped, so the retry completes the set."
             exit 1
           fi
+
+      # SAME REASONING AS THE RC PAYLOAD, and it applies here now that prod publishes to GitHub
+      # Packages too: `npm view` returns exit 0 with zero bytes against this registry, so a report
+      # built on it is blind and green. `npm dist-tag ls` works, and an empty read is a FAILED read.
+      - name: "[ENFORCED] Report the published dist-tags"
+        run: |
+          set -euo pipefail
+          FAILED=""
+          for pkg in ${{ steps.graph.outputs.dirs }}; do
+            NAME="$(node -p "require('./packages/$pkg/package.json').name")"
+            echo "=== $NAME ==="
+            OUT="$(npm dist-tag ls "$NAME" 2>&1)" || true
+            printf '%s\n' "$OUT"
+            if [ -z "$(printf '%s' "$OUT" | tr -d '[:space:]')" ]; then
+              echo "::error::$NAME returned an empty dist-tag listing — a failed read, not an absent tag"
+              FAILED="$FAILED $NAME"
+            fi
+          done
+          [ -z "$FAILED" ] || { echo "::error::could not confirm dist-tags for:$FAILED"; exit 1; }
 
       - name: Create GitHub Release with SBOM
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # softprops/action-gh-release v3.0.0

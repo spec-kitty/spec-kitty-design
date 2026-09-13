@@ -117,7 +117,7 @@ For every release after this one, step 5 is the ordinary `git tag vX.Y.Z && git 
    resolve, no sourcemaps, tests or dev files), then `npm pack --dry-run` lists them for the log.
    The assertion is the gate; the listing is for a human reading the release afterwards
 5. **CycloneDX SBOM** (ADR-5 FR-045)
-6. **Publishes** each package with `--provenance --access public` (ADR-5 FR-044)
+6. **Publishes** each package to GitHub Packages under dist-tag `latest`. `--provenance` was removed on 2026-09-13: it is the npmjs mechanism and is unsupported on GitHub Packages. FR-044's control relocates to `actions/attest-build-provenance` (#364 scope item 3), per the operator amendment of 2026-09-11 on #361.
 7. **GitHub Release** with the SBOM attached
 
 There is one package list, and it is computed. Until #80 there were three hand-written ones and they

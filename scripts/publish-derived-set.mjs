@@ -18,14 +18,23 @@
  * by construction (DIRECTIVE_043), and that means the refusal has to run at publish time over the
  * value actually in hand, not over the text somebody typed.
  *
- * THE AUTHORITY FOR `latest` IS THE REF TYPE, NOT A FLAG. A workflow author cannot opt into the
- * prod channel by passing something — the only way to publish `latest` is for GitHub to report
- * `GITHUB_REF_TYPE=tag`, which the rc stream (a branch push) can never produce. This follows the
- * rule an earlier review pass produced and which this mission keeps relearning: a guard must key
- * on something the shipped environment emits, never on something the caller types.
+ * THE AUTHORITY FOR `latest` IS THE REF, NOT A FLAG. `latest` requires GITHUB_REF_TYPE to be `tag`
+ * AND GITHUB_REF to start with `refs/tags/` — two signals that must agree. One scalar was not
+ * enough: a step's own `env:` block can populate `GITHUB_REF_TYPE`, so keying on it alone made the
+ * claim "something the runner emits, not something an author types" an assertion rather than an
+ * enforcement. Two agreeing signals make the forgery conspicuous, and their disagreement is itself
+ * a refusal.
+ *
+ * AND THE DECISION IS BRANDED. `publishAll()` accepts only a token minted by `decidePublish`,
+ * because pass 4 deleted one line from `main()` — the call itself — and published four packages
+ * under `latest` from a branch while every probe table stayed green. A thoroughly probed pure
+ * function whose CALL nothing probes is not a guard. The probe table below therefore ends with
+ * EFFECT probes that spawn this file as a child process against a stub `npm` and count
+ * invocations: those cannot be satisfied by a bypassed `main()`.
  */
-import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // `publishable()` already returns the set in topological order (tokens <- styles <- elements <-
@@ -53,12 +62,22 @@ export function unknownArgv(argv) {
 }
 
 /**
- * THE DECISION, as a pure function so the probe table can drive it.
+ * THE DECISION, as a pure function so the probe table can drive it, AND THE ONLY MINT FOR AN AUTHORIZATION. `publishAll()` will not accept anything but a token produced
+ * here, so `main()` cannot construct permission it did not obtain — the bypass is unrepresentable
+ * rather than merely discouraged.
  *
- * `refType` is GITHUB_REF_TYPE as the runner reports it — 'tag' or 'branch'. Everything else,
- * including undefined, is treated as not-a-tag: a missing signal is not permission.
+ * `refType`/`ref` are GITHUB_REF_TYPE and GITHUB_REF as the runner reports them. Anything that is
+ * not a tag — including undefined — is treated as not-a-tag: a missing signal is not permission.
+ *
+ * WHY THE BRAND: review deleted ONE LINE from `main()` (the `decidePublish(...)` call, replaced by
+ * a hand-built `{ ok: true, tag: 'latest' }`), left `decidePublish` byte-identical, and published
+ * four packages under `latest` from a branch ref while all three probe tables reported green. The
+ * function was exhaustively probed; its CALL was probed by nothing. A symbol no other module can
+ * forge is what closes that, and the effect probes below are what prove it stays closed.
  */
-export function decidePublish({ tag, refType }) {
+const AUTHORIZED = Symbol('publish-authorized');
+
+export function decidePublish({ tag, refType, ref }) {
   if (typeof tag !== 'string' || tag.trim() === '') {
     return { ok: false, why: 'no dist-tag supplied; refusing to let npm default to `latest`' };
   }
@@ -66,16 +85,30 @@ export function decidePublish({ tag, refType }) {
   if (/\s/.test(t)) {
     return { ok: false, why: `dist-tag ${JSON.stringify(t)} contains whitespace; npm would misparse it` };
   }
-  if (t === 'latest' && refType !== 'tag') {
-    return {
-      ok: false,
-      why:
-        'refusing to publish dist-tag `latest` from a non-tag ref ' +
-        `(GITHUB_REF_TYPE=${JSON.stringify(refType ?? '(unset)')}). Claiming the prod channel from a ` +
-        'prerelease stream is irreversible; only a tag-triggered release may write `latest`.',
-    };
+  // AN UNEVALUATED WORKFLOW EXPRESSION IS NOT A TAG. `dist-tag: ${{ vars.RC_CHANNEL }}` reaches
+  // here verbatim when the variable is unset, and `${{...}}` is a perfectly valid npm tag string.
+  if (t.includes('${{') || t.includes('}}')) {
+    return { ok: false, why: `dist-tag ${JSON.stringify(t)} is an unevaluated workflow expression` };
   }
-  return { ok: true, tag: t };
+  if (t === 'latest') {
+    // TWO SIGNALS THAT MUST AGREE, not one. `GITHUB_REF_TYPE` alone is a single scalar that the
+    // step's own `env:` block can populate, so the design's claim — "keys on something the runner
+    // emits, not something an author types" — was asserted rather than enforced. Faking one
+    // variable is a one-line edit; faking `GITHUB_REF` and `GITHUB_REF_TYPE` consistently is a
+    // conspicuous one, and the disagreement itself is now a refusal.
+    const refSaysTag = typeof ref === 'string' && ref.startsWith('refs/tags/');
+    if (refType !== 'tag' || !refSaysTag) {
+      return {
+        ok: false,
+        why:
+          'refusing to publish dist-tag `latest` outside a tag ref ' +
+          `(GITHUB_REF_TYPE=${JSON.stringify(refType ?? '(unset)')}, ` +
+          `GITHUB_REF=${JSON.stringify(ref ?? '(unset)')}). Claiming the prod channel from a ` +
+          'prerelease stream is irreversible; only a tag-triggered release may write `latest`.',
+      };
+    }
+  }
+  return { ok: true, tag: t, [AUTHORIZED]: true };
 }
 
 /** EPUBLISHCONFLICT is a resumption ONLY on a re-run. On attempt 1 it means the name+version is on
@@ -87,10 +120,16 @@ export function classifyFailure(output, attempt) {
   return 'failure';
 }
 
-function main({ dryRun }) {
-  const decision = decidePublish({ tag: process.env.DIST_TAG, refType: process.env.GITHUB_REF_TYPE });
-  if (!decision.ok) {
-    console.error(`::error::${decision.why}`);
+/**
+ * The executor. REFUSES ANY DECISION IT DID NOT RECEIVE FROM `decidePublish`.
+ *
+ * This is the half that makes the guard structural. A caller cannot hand it `{ok: true}` — the
+ * brand is a module-private Symbol — so there is no one-line edit that turns an unauthorized
+ * publish into an authorized one.
+ */
+function publishAll(decision, { dryRun }) {
+  if (!decision || decision[AUTHORIZED] !== true) {
+    console.error('::error::publish attempted without an authorization from decidePublish() — refusing');
     process.exit(1);
   }
   const tag = decision.tag;
@@ -115,7 +154,14 @@ function main({ dryRun }) {
     const cwd = join(ROOT, 'packages', p.dir);
     console.log(`\n=== publishing ${p.name} under ${tag} ===`);
     try {
-      const out = execFileSync('npm', ['publish', '--tag', tag], { cwd, encoding: 'utf8', stdio: 'pipe' });
+      // BOTH STREAMS. `execFileSync` returns stdout only, and npm writes its publish notices to
+      // stderr — so the success path logged almost nothing, in the one place where the log IS the
+      // evidence. maxBuffer is raised explicitly: the 1 MB default turns a chatty publish into an
+      // ENOBUFS throw that would be misreported as a publish failure.
+      const r = spawnSync('npm', ['publish', '--tag', tag], { cwd, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
+      if (r.error) throw r.error;
+      const out = `${r.stdout ?? ''}${r.stderr ?? ''}`;
+      if (r.status !== 0) throw Object.assign(new Error(`npm publish exited ${r.status}`), { stdout: r.stdout, stderr: r.stderr });
       console.log(out);
     } catch (e) {
       const out = `${e.stdout ?? ''}${e.stderr ?? ''}`;
@@ -142,6 +188,36 @@ function main({ dryRun }) {
   console.log(`\n✅ published ${pkgs.length} package(s) under \`${tag}\`.`);
 }
 
+function main({ dryRun }) {
+  // NOT FROM A WORKSTATION. Before this guard, `node scripts/publish-derived-set.mjs` with no
+  // arguments published all four packages for real from a laptop — the destructive action was the
+  // default for ZERO arguments, which is the same shape the sibling bump script was just fixed for.
+  // The inline loop this replaced could only ever run inside a workflow; the extraction quietly
+  // removed that property, so it is restored explicitly.
+  if (process.env.GITHUB_ACTIONS !== 'true' && !dryRun) {
+    console.error('::error::refusing to publish outside GitHub Actions (GITHUB_ACTIONS is not "true").');
+    console.error('For a local check use --dry-run, which resolves and prints the set without publishing.');
+    process.exit(1);
+  }
+  // ...AND `--dry-run` IS NOT A RELEASE. Appending it to the workflow step turned the whole release
+  // into a no-op that every gate reported green — the "green line over zero inputs" defect, one
+  // level up from the empty-set floor below.
+  if (dryRun && process.env.GITHUB_ACTIONS === 'true') {
+    console.error('::error::--dry-run inside GitHub Actions would report a green release having published nothing');
+    process.exit(1);
+  }
+  const decision = decidePublish({
+    tag: process.env.DIST_TAG,
+    refType: process.env.GITHUB_REF_TYPE,
+    ref: process.env.GITHUB_REF,
+  });
+  if (!decision.ok) {
+    console.error(`::error::${decision.why}`);
+    process.exit(1);
+  }
+  publishAll(decision, { dryRun });
+}
+
 /* ────────────────────────────── --selftest ────────────────────────────── */
 
 const PROBES = [
@@ -149,14 +225,21 @@ const PROBES = [
   ['refuses a missing dist-tag', () => decidePublish({ tag: undefined, refType: 'branch' }).ok === false],
   ['refuses a whitespace-only dist-tag', () => decidePublish({ tag: '   ', refType: 'branch' }).ok === false],
   ['refuses a dist-tag containing whitespace', () => decidePublish({ tag: 'rc 1', refType: 'branch' }).ok === false],
-  ['refuses `latest` on a branch ref', () => decidePublish({ tag: 'latest', refType: 'branch' }).ok === false],
-  ['refuses `latest` when the ref type is unset', () => decidePublish({ tag: 'latest', refType: undefined }).ok === false],
-  ['refuses `latest` when the ref type is a lookalike', () => decidePublish({ tag: 'latest', refType: 'tags' }).ok === false],
-  ['refuses ` latest ` (padded) on a branch ref', () => decidePublish({ tag: ' latest ', refType: 'branch' }).ok === false],
-  ['ALLOWS `latest` on a tag ref (prod)', () => decidePublish({ tag: 'latest', refType: 'tag' }).ok === true],
-  ['allows `rc` on a branch ref', () => decidePublish({ tag: 'rc', refType: 'branch' }).ok === true],
-  ['allows `next` on a branch ref', () => decidePublish({ tag: 'next', refType: 'branch' }).ok === true],
-  ['trims the returned tag', () => decidePublish({ tag: '  rc  ', refType: 'branch' }).tag === 'rc'],
+  ['refuses `latest` on a branch ref', () => decidePublish({ tag: 'latest', refType: 'branch', ref: 'refs/heads/develop' }).ok === false],
+  ['refuses `latest` when the ref type is unset', () => decidePublish({ tag: 'latest', refType: undefined, ref: undefined }).ok === false],
+  ['refuses `latest` when the ref type is a lookalike', () => decidePublish({ tag: 'latest', refType: 'tags', ref: 'refs/tags/v1' }).ok === false],
+  ['refuses ` latest ` (padded) on a branch ref', () => decidePublish({ tag: ' latest ', refType: 'branch', ref: 'refs/heads/develop' }).ok === false],
+  // THE TWO SIGNALS MUST AGREE: forging either one alone is refused.
+  ['refuses `latest` when REF_TYPE says tag but REF says a branch', () => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/heads/develop' }).ok === false],
+  ['refuses `latest` when REF says a tag but REF_TYPE says branch', () => decidePublish({ tag: 'latest', refType: 'branch', ref: 'refs/tags/v1.2.3' }).ok === false],
+  ['refuses `latest` when REF is unset even if REF_TYPE says tag', () => decidePublish({ tag: 'latest', refType: 'tag', ref: undefined }).ok === false],
+  ['refuses an unevaluated workflow expression as a dist-tag', () => decidePublish({ tag: '${{ vars.RC_CHANNEL }}', refType: 'branch', ref: 'refs/heads/develop' }).ok === false],
+  ['ALLOWS `latest` when BOTH signals say tag (prod)', () => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1.2.3' }).ok === true],
+  ['an authorization carries the private brand', () => Object.getOwnPropertySymbols(decidePublish({ tag: 'rc', refType: 'branch', ref: 'refs/heads/develop' })).length === 1],
+  ['a hand-built decision carries no brand', () => Object.getOwnPropertySymbols({ ok: true, tag: 'latest' }).length === 0],
+  ['allows `rc` on a branch ref', () => decidePublish({ tag: 'rc', refType: 'branch', ref: 'refs/heads/develop' }).ok === true],
+  ['allows `next` on a branch ref', () => decidePublish({ tag: 'next', refType: 'branch', ref: 'refs/heads/develop' }).ok === true],
+  ['trims the returned tag', () => decidePublish({ tag: '  rc  ', refType: 'branch', ref: 'refs/heads/develop' }).tag === 'rc'],
   ['EPUBLISHCONFLICT on attempt 1 is NOT a resumption', () => classifyFailure('npm error code EPUBLISHCONFLICT', '1') === 'unexpected-conflict'],
   ['EPUBLISHCONFLICT on attempt 2 IS a resumption', () => classifyFailure('npm error code EPUBLISHCONFLICT', '2') === 'resumption'],
   ['E409 on attempt 2 is a resumption', () => classifyFailure('npm error code E409', '2') === 'resumption'],
@@ -168,8 +251,115 @@ const PROBES = [
   ['importing does not publish', () => isDirectInvocation('/some/other.mjs', import.meta.url) === false],
 ];
 
+/**
+ * EFFECT PROBES — the ones that survive a bypassed `main()`.
+ *
+ * Every probe above drives a pure function. Review proved that is not enough: deleting the
+ * `decidePublish(...)` call from `main()` left all of them green while the script published four
+ * packages under `latest` from a branch ref. So these spawn THIS FILE as a child process with a
+ * stub `npm` first on PATH, and assert on what npm was actually asked to do. A `main()` that skips
+ * the decision fails them, because they count invocations rather than inspecting a return value.
+ */
+function effectProbes() {
+  const dir = mkdtempSync(join(tmpdir(), 'pds-effect-'));
+  const log = join(dir, 'npm.log');
+  const bin = join(dir, 'bin');
+  mkdirSync(bin);
+  writeFileSync(join(bin, 'npm'), `#!/bin/sh\necho "npm $*" >> "${log}"\nexit 0\n`, { mode: 0o755 });
+
+  const run = (env) => {
+    writeFileSync(log, '');
+    const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], {
+      encoding: 'utf8',
+      env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, GITHUB_ACTIONS: 'true', ...env },
+    });
+    const calls = readFileSync(log, 'utf8').trim();
+    return { status: r.status, calls: calls === '' ? [] : calls.split('\n'), out: `${r.stdout}${r.stderr}` };
+  };
+
+  const cases = [
+    [
+      'EFFECT: `latest` from a branch ref invokes npm ZERO times and exits non-zero',
+      () => {
+        const r = run({ DIST_TAG: 'latest', GITHUB_REF_TYPE: 'branch', GITHUB_REF: 'refs/heads/develop' });
+        return r.status !== 0 && r.calls.length === 0;
+      },
+    ],
+    [
+      'EFFECT: `latest` with a FORGED GITHUB_REF_TYPE but a branch GITHUB_REF still invokes npm zero times',
+      () => {
+        const r = run({ DIST_TAG: 'latest', GITHUB_REF_TYPE: 'tag', GITHUB_REF: 'refs/heads/develop' });
+        return r.status !== 0 && r.calls.length === 0;
+      },
+    ],
+    [
+      'EFFECT: an unset dist-tag invokes npm zero times',
+      () => {
+        const r = run({ DIST_TAG: '', GITHUB_REF_TYPE: 'branch', GITHUB_REF: 'refs/heads/develop' });
+        return r.status !== 0 && r.calls.length === 0;
+      },
+    ],
+    [
+      'EFFECT: `rc` from a branch ref publishes the whole derived set, every call carrying --tag rc',
+      () => {
+        const r = run({ DIST_TAG: 'rc', GITHUB_REF_TYPE: 'branch', GITHUB_REF: 'refs/heads/develop' });
+        return (
+          r.status === 0 &&
+          r.calls.length === publishable().length &&
+          r.calls.every((c) => c.includes('publish') && c.includes('--tag rc'))
+        );
+      },
+    ],
+    [
+      'EFFECT: no npm call ever omits --tag',
+      () => {
+        const r = run({ DIST_TAG: 'rc', GITHUB_REF_TYPE: 'branch', GITHUB_REF: 'refs/heads/develop' });
+        return r.calls.length > 0 && r.calls.every((c) => /--tag\s+\S+/.test(c));
+      },
+    ],
+    [
+      'EFFECT: refuses to publish outside GitHub Actions',
+      () => {
+        writeFileSync(log, '');
+        const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, DIST_TAG: 'rc', GITHUB_REF_TYPE: 'branch' };
+        delete env.GITHUB_ACTIONS;
+        const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], { encoding: 'utf8', env });
+        return r.status !== 0 && readFileSync(log, 'utf8').trim() === '';
+      },
+    ],
+    [
+      'EFFECT: --dry-run inside GitHub Actions is refused rather than reported as a release',
+      () => {
+        const r = run({ DIST_TAG: 'rc', GITHUB_REF_TYPE: 'branch', GITHUB_REF: 'refs/heads/develop' });
+        writeFileSync(log, '');
+        const d = spawnSync(process.execPath, [fileURLToPath(import.meta.url), '--dry-run'], {
+          encoding: 'utf8',
+          env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, GITHUB_ACTIONS: 'true', DIST_TAG: 'rc' },
+        });
+        return r.status === 0 && d.status !== 0 && readFileSync(log, 'utf8').trim() === '';
+      },
+    ],
+  ];
+
+  let bad = 0;
+  for (const [what, fn] of cases) {
+    let ok = false;
+    try {
+      ok = fn() === true;
+    } catch (e) {
+      console.error(`  effect probe threw: ${what} — ${e.message}`);
+    }
+    console.log(`${ok ? '✅' : '❌'} ${what}`);
+    if (!ok) bad++;
+  }
+  rmSync(dir, { recursive: true, force: true });
+  return { bad, total: cases.length };
+}
+
 // The floor lives OUTSIDE the table, so a table that silently emptied cannot report green.
-const PROBE_FLOOR = 21;
+const PROBE_FLOOR = 27;
+// Effect probes have their own floor: they are the only ones a bypassed `main()` cannot satisfy.
+const EFFECT_FLOOR = 7;
 
 function selftest() {
   let bad = 0;
@@ -191,7 +381,17 @@ function selftest() {
     console.error(`\n❌ only ${PROBES.length} probes — the floor is ${PROBE_FLOOR}`);
     process.exit(1);
   }
-  console.log(`\n✅ All ${PROBES.length} publish-derived-set probes behaved as recorded.`);
+  console.log('\n── effect probes (spawned child + stub npm; a bypassed main() fails these) ──');
+  const eff = effectProbes();
+  if (eff.bad) {
+    console.error(`\n❌ ${eff.bad} of ${eff.total} EFFECT probe(s) failed — the decision is not reaching the publish.`);
+    process.exit(1);
+  }
+  if (eff.total < EFFECT_FLOOR) {
+    console.error(`\n❌ only ${eff.total} effect probes — the floor is ${EFFECT_FLOOR}`);
+    process.exit(1);
+  }
+  console.log(`\n✅ All ${PROBES.length} decision probes and ${eff.total} effect probes behaved as recorded.`);
 }
 
 if (isDirectInvocation(process.argv[1], import.meta.url)) {

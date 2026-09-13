@@ -68,7 +68,7 @@
       "criterion_id": "FR-009",
       "description": "The rc publish never writes dist-tag `latest`",
       "proof_type": "automated_test",
-      "evidence": "Four independent guards, each added after the unguarded form was MEASURED green: per-invocation `--tag` on every npm publish line (comments stripped), refusal of a hard-coded `--tag latest`, a requirement that TAG derive from inputs.dist-tag, and caller-side refusal of `dist-tag: latest` from a non-tag-triggered workflow. Verified absent on the live packages.",
+      "evidence": "The refusal is no longer a set of regexes over workflow YAML \u2014 four review passes defeated that, most sharply by reassigning TAG=latest after the input-derived line while satisfying every rule. It now lives in scripts/publish-derived-set.mjs: `latest` requires GITHUB_REF_TYPE=tag AND GITHUB_REF starting refs/tags/, the decision is branded with a module-private Symbol that the executor demands, and 7 EFFECT probes spawn the script against a stub npm and count invocations \u2014 those cannot be satisfied by a bypassed main(), which is how the previous version failed. The workflow side asserts the step runs the script bare, forwards env.DIST_TAG from inputs.dist-tag, and that nothing else publishes or runs `npm dist-tag add`.",
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
@@ -93,18 +93,28 @@
       "verified_by": null,
       "verified_at": null,
       "notes": "Evidence recorded; pass_fail stays pending until the payload executes once for real \u2014 nothing in this mission's diff has ever run."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "release.yml publishes to GitHub Packages with credentials that exist, and claims no provenance it cannot produce",
+      "proof_type": "inspection",
+      "evidence": "Operator decision 2026-09-13. registry-url -> npm.pkg.github.com; packages: write added (absent before, so prod would have 403'd); NODE_AUTH_TOKEN -> GITHUB_TOKEN (no NPM_TOKEN secret has ever existed, verified via gh secret list with a control); --provenance and id-token: write removed as unsupported on this registry. checkRegistryAuthorityAgrees now reads setup-node registry-url from every inline publisher, so a reintroduced mismatch reds at PR time. FR-044's control relocates to actions/attest-build-provenance under #364 scope item 3.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Pending until a tag release actually runs. This is the production path and it has never executed under this configuration."
     }
   ],
   "negative_invariants": [
     {
       "invariant": "The rc stream never writes dist-tag `latest`",
       "why": "The first publish of a package with no existing versions would claim the prod channel, and that cannot be undone.",
-      "guarded_by": "check-release-graph.mjs \u2014 four guards, each added after the unguarded form was measured green"
+      "guarded_by": "scripts/publish-derived-set.mjs (branded decision + two agreeing ref signals, 27 decision probes + 7 effect probes); check-release-graph.mjs asserts the payload's sole route and refuses `npm dist-tag add`"
     },
     {
       "invariant": "A failed publish halts the loop rather than continuing",
       "why": "The set publishes in topological order; continuing past a failure ships dependents against a peer version that does not exist, permanently.",
-      "guarded_by": "publish-packages.yml publish loop (`break`), ported from release.yml"
+      "guarded_by": "scripts/publish-derived-set.mjs publishAll() \u2014 halts on a real failure rather than accumulating; the loop moved out of the workflow when the publish became a script"
     },
     {
       "invariant": "The payload never declares a permission above what its caller grants",

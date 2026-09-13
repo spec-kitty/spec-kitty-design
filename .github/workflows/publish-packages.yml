@@ -157,14 +157,27 @@ jobs:
 
       # Non-`latest` dist-tags never appear in the GitHub web UI version list, so this is the only
       # place an operator can see that the publish actually landed.
-      - name: Report the published dist-tags
+      - name: "[ENFORCED] Report the published dist-tags"
         run: |
           set -euo pipefail
+          # `npm dist-tag ls`, NOT `npm view`. This PR's own bump script records the measurement:
+          # `npm view` returns EXIT 0 WITH ZERO BYTES against GitHub Packages, so the previous
+          # `npm view ... || echo` never even reached its fallback — the step printed a package name
+          # followed by nothing and succeeded. The one surface an operator has for confirming the
+          # publish landed was blind AND green, which is the failure mode this whole mission is about.
+          FAILED=""
           for pkg in ${{ steps.graph.outputs.dirs }}; do
             NAME="$(node -p "require('./packages/$pkg/package.json').name")"
             echo "=== $NAME ==="
-            npm view "$NAME" dist-tags || echo "(not yet readable — first publish propagating)"
+            OUT="$(npm dist-tag ls "$NAME" 2>&1)" || true
+            printf '%s\n' "$OUT"
+            # An empty read is a FAILED read on this registry, not an absent tag.
+            if [ -z "$(printf '%s' "$OUT" | tr -d '[:space:]')" ]; then
+              echo "::error::$NAME returned an empty dist-tag listing — that is a failed read, not an absent tag"
+              FAILED="$FAILED $NAME"
+            fi
           done
+          [ -z "$FAILED" ] || { echo "::error::could not confirm dist-tags for:$FAILED"; exit 1; }
 
       # THE RELEASE STEP IS DELIBERATELY NOT HERE. Cutting a GitHub Release needs `contents: write`,
       # and declaring that in this job is what made the rc stream unstartable (see the permissions
@@ -172,10 +185,16 @@ jobs:
       # as an artifact instead, and REL3's prod caller attaches it from a job of its own that grants
       # itself `contents: write` — the caller can hold a permission this payload must not.
       #
-      # REL3 NOTE, recorded so the fold does not silently downgrade prod: converting `release.yml`
-      # to a caller must also restore `id-token: write` (npm provenance, FR-044) and `--access
-      # public` on the publish. Both are absent here because the rc stream needs neither, and both
-      # fail QUIETLY — provenance degrades without an error, scoped packages default to restricted.
+      # REL3 NOTE, rewritten after review caught the previous version instructing the exact opposite
+      # of what the same commit made true. Converting `release.yml` to a caller must:
+      #   - pass `dist-tag: latest` (this payload refuses an unset tag, so a naive fold fails closed);
+      #   - add `attestations: write` + `id-token: write` and run `actions/attest-build-provenance`
+      #     over the packed tarballs — #364 scope item 3, per the 2026-09-11 operator amendment on
+      #     #361. Do NOT restore `--provenance`: it is the npmjs mechanism and hard-fails here.
+      #   - NOT restore `--access public`: that is an npmjs access model; GitHub Packages governs
+      #     visibility per package outside the publish call.
+      #   - cut the GitHub Release from a CALLER job holding `contents: write`, which downloads the
+      #     SBOM artifact below. The payload must never hold that permission — see the ceiling.
       - name: Upload the SBOM for the caller to attach
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         with:

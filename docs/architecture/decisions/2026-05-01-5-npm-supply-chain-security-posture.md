@@ -53,7 +53,7 @@ This ADR records the agreed security posture as a set of explicit controls and a
 
 | Control | Mechanism | Spec ref |
 |---|---|---|
-| npm Provenance | `npm publish --provenance` in GitHub Actions release workflow; links package to source commit and CI build | FR-044 |
+| npm Provenance | **SUPERSEDED 2026-09-13, mechanism only — the control stands.** Was `npm publish --provenance`. The release path moved to GitHub Packages, where npm provenance is unsupported, so the flag was removed. The linkage between package and source commit is preserved by GitHub artifact attestations (`actions/attest-build-provenance`), scoped in #364 item 3 under the operator amendment of 2026-09-11 on #361. This row records the change rather than rewriting the decision's history. | FR-044 |
 | SBOM | `@cyclonedx/cyclonedx-npm` generates CycloneDX JSON SBOM; published as GitHub Release artifact | FR-045 |
 | Package contents audit | `npm pack --dry-run` before publish; verify no secrets, source maps, or dev files included | Release workflow |
 | 2FA enforcement | 2FA required on `@spec-kitty` npm account for all publish operations | Operational policy |
