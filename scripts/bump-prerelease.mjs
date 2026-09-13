@@ -26,7 +26,7 @@
  * resolve are all refusals, never warnings.
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,7 +36,14 @@ import { publishable } from './release-graph.mjs';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SCOPE = '@spec-kitty/';
 const PRERELEASE_ID = 'rc';
-const RANGE_FIELDS = ['dependencies', 'peerDependencies', 'optionalDependencies'];
+// `devDependencies` is load-bearing, not an afterthought: ALL FIVE workspace consumers
+// (apps/storybook, fixtures/{elements-behaviour,vite-consumer,react-consumer,vue-consumer})
+// declare `@spec-kitty/*` there and nowhere else. Omitting it made every consumer rewrite a no-op,
+// so the bump wrote four bumped packages, left every consumer pinned at a range the new versions
+// no longer satisfy, and `npm install --package-lock-only` died with E404 — the whole rc publish
+// failing at its last step. Measured by running the real command, which is the only thing that
+// shows it: `--selftest` and `--dry-run` both reported success.
+const RANGE_FIELDS = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
 
 /** The range that admits every rc in `next`'s line, and the eventual final. */
 export function admittingRange(next, id = PRERELEASE_ID) {
@@ -88,8 +95,8 @@ export function planBump(pkgs, { id = PRERELEASE_ID } = {}) {
  * `rewrites` names every intra-scope range that changed — printed, so the effect is visible
  * rather than implied.
  */
-export function rewriteManifest(manifest, next, range) {
-  const out = { ...manifest, version: next };
+export function rewriteManifest(manifest, next, range, { setVersion = true } = {}) {
+  const out = setVersion ? { ...manifest, version: next } : { ...manifest };
   const rewrites = [];
   for (const field of RANGE_FIELDS) {
     if (!out[field]) continue;
@@ -106,18 +113,29 @@ export function rewriteManifest(manifest, next, range) {
 }
 
 /**
- * PURE. The post-condition: after the bump, every intra-scope range must actually be satisfied by
- * the new version. Computed with semver — never by re-reading the strings we just wrote, which
- * would assert our own output against itself.
+ * PURE. The post-condition: every intra-scope range must be satisfied by the version the depended-on
+ * package ACTUALLY carries after the rewrite.
+ *
+ * `versions` is a Map of package name -> the version now written for it.
+ *
+ * It took a Map rather than a single `next` because checking against the INTENDED version validated
+ * a variable instead of the files. Measured: with `version: next` removed from `rewriteManifest`,
+ * every manifest stayed at 1.0.0 while its peers were rewritten to `^1.1.0-rc.0` — an unresolvable
+ * set — and all 13 probes still reported green, because `semver.satisfies(next, spec)` compared the
+ * intent to itself. Keying on the written version is what makes this a post-condition rather than a
+ * restatement.
  */
-export function unresolvedRanges(manifests, next) {
+export function unresolvedRanges(manifests, versions) {
   const problems = [];
   for (const m of manifests) {
     for (const field of RANGE_FIELDS) {
       for (const [dep, spec] of Object.entries(m[field] ?? {})) {
         if (!dep.startsWith(SCOPE)) continue;
-        if (!semver.satisfies(next, spec)) {
-          problems.push(`${m.name}: ${field}.${dep} range "${spec}" is not satisfied by ${next}`);
+        const actual = versions.get(dep);
+        // A scoped dep that is not one of ours to publish is out of scope for this check.
+        if (actual === undefined) continue;
+        if (!semver.satisfies(actual, spec)) {
+          problems.push(`${m.name}: ${field}.${dep} range "${spec}" is not satisfied by ${dep}@${actual}`);
         }
       }
     }
@@ -125,12 +143,46 @@ export function unresolvedRanges(manifests, next) {
   return problems;
 }
 
-function manifestPath(dir) {
+function packageManifestPath(dir) {
   return join(ROOT, 'packages', dir, 'package.json');
 }
 
-function readManifest(dir) {
-  return JSON.parse(readFileSync(manifestPath(dir), 'utf8'));
+function readJson(path) {
+  return JSON.parse(readFileSync(path, 'utf8'));
+}
+
+/**
+ * Every workspace member's manifest path, from the root `workspaces` globs.
+ *
+ * WHY THIS EXISTS. The bump used to rewrite ranges only under `packages/`, and five workspace
+ * consumers outside it pin the scope — `apps/storybook` (3), `fixtures/{elements-behaviour,
+ * vite-consumer}` at `^1.0.0`, and `fixtures/{react-consumer,vue-consumer}` at `*`. Once the
+ * packages moved to a prerelease, none of those ranges matched (measured: `1.1.0-rc.0` satisfies
+ * neither `^1.0.0` NOR `*` — a bare `*` excludes prereleases just as a caret does), the workspace
+ * links stopped resolving, npm fell through to the registry and `npm install --package-lock-only`
+ * died with E404. The whole bump failed, so the rc stream could never publish anything.
+ *
+ * Two review lenses reported this as three consumers; it is five. The `*` pair was missed by both.
+ */
+function workspaceManifestPaths() {
+  const root = readJson(join(ROOT, 'package.json'));
+  const globs = Array.isArray(root.workspaces) ? root.workspaces : [];
+  const out = [];
+  for (const glob of globs) {
+    const m = /^(.+)\/\*$/.exec(glob);
+    if (!m) continue;
+    const base = join(ROOT, m[1]);
+    if (!existsSync(base)) continue;
+    for (const entry of readdirSync(base, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const p = join(base, entry.name, 'package.json');
+      if (existsSync(p)) out.push(p);
+    }
+  }
+  if (out.length === 0) {
+    throw new Error('no workspace manifests found — refusing to bump over an empty workspace');
+  }
+  return out;
 }
 
 function refuse(problems) {
@@ -141,19 +193,42 @@ function refuse(problems) {
 
 function main({ dryRun }) {
   const pkgs = publishable(join(ROOT, 'packages'));
-  const withManifests = pkgs.map((p) => ({ ...p, manifest: readManifest(p.dir) }));
+  const withManifests = pkgs.map((p) => ({
+    ...p,
+    path: packageManifestPath(p.dir),
+    manifest: readJson(packageManifestPath(p.dir)),
+  }));
 
   const plan = planBump(withManifests);
   if (plan.problems.length > 0) refuse(plan.problems);
 
   const rewrittenAll = [];
+
+  // 1. The publishable set: new version AND rewritten intra-scope ranges.
   const results = withManifests.map((p) => {
     const { manifest, rewrites } = rewriteManifest(p.manifest, plan.next, plan.range);
     rewrittenAll.push(...rewrites);
-    return { ...p, manifest };
+    return { path: p.path, manifest };
   });
 
-  const unresolved = unresolvedRanges(results.map((r) => r.manifest), plan.next);
+  // 2. Every OTHER workspace member: ranges only, never a version bump — they are not published.
+  //    Skipping these is what made the bump fail outright (see workspaceManifestPaths).
+  const publishedPaths = new Set(results.map((r) => r.path));
+  for (const wsPath of workspaceManifestPaths()) {
+    if (publishedPaths.has(wsPath)) continue;
+    const { manifest, rewrites } = rewriteManifest(readJson(wsPath), plan.next, plan.range, {
+      setVersion: false,
+    });
+    if (rewrites.length === 0) continue;
+    rewrittenAll.push(...rewrites);
+    results.push({ path: wsPath, manifest });
+  }
+
+  // Keyed on what each package will ACTUALLY carry, not on what we meant to write.
+  const writtenVersions = new Map(
+    results.filter((r) => plan.names.includes(r.manifest.name)).map((r) => [r.manifest.name, r.manifest.version]),
+  );
+  const unresolved = unresolvedRanges(results.map((r) => r.manifest), writtenVersions);
   if (unresolved.length > 0) refuse(unresolved);
 
   console.log(`bumping ${plan.names.length} publishable package(s): ${plan.current} -> ${plan.next}`);
@@ -166,11 +241,23 @@ function main({ dryRun }) {
   }
 
   for (const r of results) {
-    writeFileSync(manifestPath(r.dir), `${JSON.stringify(r.manifest, null, 2)}\n`);
+    writeFileSync(r.path, `${JSON.stringify(r.manifest, null, 2)}\n`);
   }
   // ONCE, and only after every manifest is on disk. This is an npm workspace with a single root
   // lockfile; regenerating per package would resolve against manifests that are still half-bumped.
-  execFileSync('npm', ['install', '--package-lock-only'], { cwd: ROOT, stdio: 'inherit' });
+  // Captured rather than inherited, so a failure can be REPORTED. With `stdio: 'inherit'` the
+  // throw surfaced as a raw Node Error with `stdout: null, stderr: null` — a stack trace that
+  // tells an operator nothing about what npm actually objected to.
+  try {
+    execFileSync('npm', ['install', '--package-lock-only'], { cwd: ROOT, encoding: 'utf8' });
+  } catch (e) {
+    const detail = `${e.stdout ?? ''}${e.stderr ?? ''}`.trim();
+    refuse([
+      'npm install --package-lock-only failed after the manifests were written, so the workspace',
+      'is now half-bumped. npm said:',
+      ...(detail ? detail.split('\n').slice(-12) : ['(no output captured)']),
+    ]);
+  }
   console.log(`\n✅ ${plan.names.length} package(s) at ${plan.next}; lockfile regenerated.`);
 }
 
@@ -239,11 +326,11 @@ if (process.argv.includes('--selftest')) {
       },
     ],
     [
-      'the post-condition CATCHES a version-only bump (ranges left at ^1.0.0)',
+      'the post-condition CATCHES a stale range (left at ^1.0.0)',
       () =>
         unresolvedRanges(
           [{ name: '@spec-kitty/styles', peerDependencies: { '@spec-kitty/tokens': '^1.0.0' } }],
-          '1.1.0-rc.0',
+          new Map([['@spec-kitty/tokens', '1.1.0-rc.0']]),
         ).length > 0,
     ],
     [
@@ -251,8 +338,40 @@ if (process.argv.includes('--selftest')) {
       () =>
         unresolvedRanges(
           [{ name: '@spec-kitty/styles', peerDependencies: { '@spec-kitty/tokens': '^1.1.0-rc.0' } }],
-          '1.1.0-rc.0',
+          new Map([['@spec-kitty/tokens', '1.1.0-rc.0']]),
         ).length === 0,
+    ],
+    [
+      'THE MUTANT THIS KEYING EXISTS FOR: ranges rewritten but the DEP never bumped -> caught',
+      () =>
+        unresolvedRanges(
+          [{ name: '@spec-kitty/styles', peerDependencies: { '@spec-kitty/tokens': '^1.1.0-rc.0' } }],
+          new Map([['@spec-kitty/tokens', '1.0.0']]),
+        ).length > 0,
+    ],
+    [
+      'a scoped dep that is not ours to publish is left alone',
+      () =>
+        unresolvedRanges(
+          [{ name: 'x', devDependencies: { '@spec-kitty/nope': '^9.9.9' } }],
+          new Map([['@spec-kitty/tokens', '1.1.0-rc.0']]),
+        ).length === 0,
+    ],
+    [
+      'a bare `*` does NOT admit a prerelease — why the fixtures had to be rewritten too',
+      () => semver.satisfies('1.1.0-rc.0', '*') === false,
+    ],
+    [
+      'rewriteManifest with setVersion:false rewrites ranges but leaves version alone',
+      () => {
+        const { manifest } = rewriteManifest(
+          { name: 'apps/storybook', version: '0.0.0', devDependencies: { '@spec-kitty/tokens': '*' } },
+          '1.1.0-rc.0',
+          admittingRange('1.1.0-rc.0'),
+          { setVersion: false },
+        );
+        return manifest.version === '0.0.0' && manifest.devDependencies['@spec-kitty/tokens'] === '^1.1.0-rc.0';
+      },
     ],
   ];
 
@@ -272,7 +391,11 @@ if (process.argv.includes('--selftest')) {
     }
   }
 
-  const PROBE_FLOOR = 13;
+  // 17, counted from the table rather than from a diagnostic. I set this to 18 believing I had
+  // added five probes to thirteen; one of the five replaced an existing entry rather than adding
+  // to it. The floor caught the error instead of me — which is the whole reason it is not derived
+  // from PROBES.length.
+  const PROBE_FLOOR = 17;
   if (PROBES.length < PROBE_FLOOR) {
     console.error(`\n❌ the probe table has shrunk: ${PROBES.length} against a floor of ${PROBE_FLOOR}.`);
     process.exit(1);

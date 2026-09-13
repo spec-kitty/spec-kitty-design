@@ -37,5 +37,13 @@
     "lit": "^3.3.3",
     "@spec-kitty/styles": "^1.0.0",
     "@spec-kitty/tokens": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spec-kitty/spec-kitty-design.git",
+    "directory": "packages/elements"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }
