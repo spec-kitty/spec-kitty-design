@@ -166,13 +166,28 @@ jobs:
           # followed by nothing and succeeded. The one surface an operator has for confirming the
           # publish landed was blind AND green, which is the failure mode this whole mission is about.
           FAILED=""
-          for pkg in ${{ steps.graph.outputs.dirs }}; do
+          # A GREEN LINE OVER ZERO PACKAGES IS THE FOUNDING DEFECT OF THIS GATE FAMILY.
+          REPORT_PKGS="${{ steps.graph.outputs.dirs }}"
+          [ -n "$REPORT_PKGS" ] || { echo "::error::empty publish set reached the dist-tag report"; exit 1; }
+          for pkg in $REPORT_PKGS; do
             NAME="$(node -p "require('./packages/$pkg/package.json').name")"
             echo "=== $NAME ==="
-            OUT="$(npm dist-tag ls "$NAME" 2>&1)" || true
+            # STATUS CAPTURED ON ITS OWN LINE, and stderr kept OUT of the success test. The first
+            # version wrote `OUT="$(npm dist-tag ls "$NAME" 2>&1)" || true`, which folded an E404 or
+            # E401 body INTO $OUT — so an authentication failure sailed through the emptiness check
+            # as a non-empty "reading", and `|| true` threw the exit code away. That is the same
+            # blind-and-green shape this step was rewritten to fix, one layer in.
+            set +e
+            OUT="$(npm dist-tag ls "$NAME" 2>/tmp/disttag.err)"
+            RC=$?
+            set -e
             printf '%s\n' "$OUT"
-            # An empty read is a FAILED read on this registry, not an absent tag.
-            if [ -z "$(printf '%s' "$OUT" | tr -d '[:space:]')" ]; then
+            if [ "$RC" -ne 0 ]; then
+              echo "::error::$NAME: npm dist-tag ls exited $RC"
+              sed 's/^/    /' /tmp/disttag.err
+              FAILED="$FAILED $NAME"
+            elif [ -z "$(printf '%s' "$OUT" | tr -d '[:space:]')" ]; then
+              # An empty read is a FAILED read on this registry, not an absent tag.
               echo "::error::$NAME returned an empty dist-tag listing — that is a failed read, not an absent tag"
               FAILED="$FAILED $NAME"
             fi

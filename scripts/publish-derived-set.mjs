@@ -18,15 +18,13 @@
  * by construction (DIRECTIVE_043), and that means the refusal has to run at publish time over the
  * value actually in hand, not over the text somebody typed.
  *
- * THE AUTHORITY FOR `latest` IS THE RUNNER'S EVENT FILE. Two earlier versions of this guard keyed
- * on environment variables and both fell: `GITHUB_REF_TYPE` alone to a one-line
- * `run: GITHUB_REF_TYPE=tag node …` (pure POSIX — the platform's refusal to let a workflow override
- * `GITHUB_*` never applied, because nothing was overridden), and adding `GITHUB_REF` only raised
- * the price to two assignments on the same line. Both are authored text in the very file being
- * guarded, which is what the design claimed not to depend on. `latest` now additionally requires
- * the ref recorded in `GITHUB_EVENT_PATH`'s runner-written JSON to agree — so a spoof means forging
- * a file on the runner, not typing a word in the workflow. Any disagreement, or an unreadable
- * event file, is a refusal.
+ * `latest` IS UNREACHABLE FROM HERE, unconditionally. Four earlier versions of this guard tried to
+ * let the payload publish `latest` safely by deciding from evidence — a regex over `--tag`, three
+ * regexes over the shell, GITHUB_REF_TYPE, then GITHUB_REF plus the runner's event file — and
+ * review defeated every one, because the file supplying the evidence is the file being guarded.
+ * Enriching the evidence never raised the attacker's price. So there is no decision left to
+ * subvert: this payload publishes prereleases and has no path to the prod channel. `release.yml`
+ * owns `latest`, through its own loop, on a tag trigger.
  *
  * AND THE DECISION IS BRANDED. `publishAll()` accepts only a token minted by `decidePublish`,
  * because pass 4 deleted one line from `main()` — the call itself — and published four packages
@@ -95,24 +93,7 @@ export function unknownArgv(argv) {
  */
 const AUTHORIZED = Symbol('publish-authorized');
 
-/**
- * The ref as the RUNNER recorded it, from the event JSON it writes before the job starts.
- * Returns null on anything unreadable — a missing signal is never permission.
- *
- * Injectable (`pathOverride`) so the probe table can drive it without touching the environment.
- */
-export function readEventRef(pathOverride) {
-  const p = pathOverride ?? process.env.GITHUB_EVENT_PATH;
-  if (typeof p !== 'string' || p === '') return null;
-  try {
-    const ev = JSON.parse(readFileSync(p, 'utf8'));
-    return typeof ev?.ref === 'string' ? ev.ref : null;
-  } catch {
-    return null;
-  }
-}
-
-export function decidePublish({ tag, refType, ref, eventPath }) {
+export function decidePublish({ tag }) {
   if (typeof tag !== 'string' || tag.trim() === '') {
     return { ok: false, why: 'no dist-tag supplied; refusing to let npm default to `latest`' };
   }
@@ -125,38 +106,37 @@ export function decidePublish({ tag, refType, ref, eventPath }) {
   if (t.includes('${{') || t.includes('}}')) {
     return { ok: false, why: `dist-tag ${JSON.stringify(t)} is an unevaluated workflow expression` };
   }
+  // `latest` IS UNREACHABLE FROM THIS PAYLOAD. UNCONDITIONALLY. NO SIGNAL CAN UNLOCK IT.
+  //
+  // This is the fifth version of this guard and the first that does not lose. The previous four all
+  // tried to let the payload publish `latest` *safely*, by deciding from evidence:
+  //
+  //   pass 2  a regex over the workflow's `--tag`        -> defeated by deleting it
+  //   pass 3  three regexes over the shell               -> defeated by prose, and by TAG=latest
+  //   pass 4  GITHUB_REF_TYPE                            -> defeated by `run: GITHUB_REF_TYPE=tag …`
+  //   pass 5  + GITHUB_REF + the runner's event file     -> defeated by a SECOND step, and by a
+  //                                                         prior step overwriting the event JSON
+  //
+  // Every one was beaten because the thing being guarded — the payload — is also the thing that
+  // supplies the evidence. Enriching the evidence never raised the attacker's price; it just moved
+  // where they type. So the decision is gone. There is no signal to forge, because nothing is
+  // being decided: this file cannot write the prod channel, and no edit to the workflow that calls
+  // it can make it.
+  //
+  // WHAT THIS COSTS, stated plainly: the reusable payload can never serve prod. `release.yml`
+  // publishes `latest` through its own loop, and REL3's fold must give prod a separately audited
+  // path rather than passing `dist-tag: latest` here. That is a real architectural constraint, and
+  // it is the honest one — an rc payload that CAN claim the prod channel is a payload one edit away
+  // from claiming it, which is precisely what five passes demonstrated.
   if (t === 'latest') {
-    // THE AUTHORITY IS THE RUNNER-WRITTEN EVENT FILE, not an environment variable.
-    //
-    // Env vars were the wrong source and review proved it twice. `GITHUB_REF_TYPE` alone fell to a
-    // one-line `run: GITHUB_REF_TYPE=tag node …` — pure POSIX, no Actions semantics involved, so
-    // the platform's own refusal to let a workflow override `GITHUB_*` never even applied. Adding
-    // `GITHUB_REF` as a second signal only raised the price to two assignments on the same line.
-    // Both are still *authored text in the file being guarded*, which is precisely what the design
-    // claimed not to depend on.
-    //
-    // `GITHUB_EVENT_PATH` points at JSON the RUNNER writes before the job starts. A workflow can
-    // point the variable elsewhere, but then the file it names will not contain a matching event —
-    // and this refuses on any disagreement, including an unreadable or absent file. So a spoof now
-    // requires forging a file on the runner rather than typing a word in the workflow.
-    //
-    // The env vars are still required to agree. Three sources, one of them outside the file's
-    // reach, and any disagreement is a refusal.
-    const eventRef = readEventRef(eventPath);
-    const refSaysTag = typeof ref === 'string' && ref.startsWith('refs/tags/');
-    const eventSaysTag = typeof eventRef === 'string' && eventRef.startsWith('refs/tags/');
-    if (refType !== 'tag' || !refSaysTag || !eventSaysTag || eventRef !== ref) {
-      return {
-        ok: false,
-        why:
-          'refusing to publish dist-tag `latest`: the three ref signals do not all agree on a tag ' +
-          `(GITHUB_REF_TYPE=${JSON.stringify(refType ?? '(unset)')}, ` +
-          `GITHUB_REF=${JSON.stringify(ref ?? '(unset)')}, ` +
-          `event file ref=${JSON.stringify(eventRef ?? '(unreadable)')}). Claiming the prod channel ` +
-          'from a prerelease stream is irreversible; only a genuine tag-triggered release may write ' +
-          '`latest`, and the event file is the runner\'s word for that rather than the workflow\'s.',
-      };
-    }
+    return {
+      ok: false,
+      why:
+        'refusing dist-tag `latest`: this payload publishes prereleases and has no path to the prod ' +
+        'channel at all. Claiming `latest` on a package with no existing versions is irreversible, ' +
+        'and four earlier versions of this guard were each defeated by an edit to the workflow that ' +
+        'calls it. There is deliberately no signal, environment variable or input that permits it.',
+    };
   }
   return { ok: true, tag: t, [AUTHORIZED]: true };
 }
@@ -283,32 +263,39 @@ function withRawEventFile(body, fn) {
 }
 const withEventFile = (ref, fn) => withRawEventFile(JSON.stringify({ ref }), fn);
 
+/** Run fn with env vars set, then restore. Used to prove the refusal ignores them entirely. */
+function withEnv(vars, fn) {
+  const saved = {};
+  for (const [k, v] of Object.entries(vars)) {
+    saved[k] = process.env[k];
+    process.env[k] = v;
+  }
+  try {
+    return fn();
+  } finally {
+    for (const [k, v] of Object.entries(saved)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+  }
+}
+
 const PROBES = [
   ['refuses an empty dist-tag', () => decidePublish({ tag: '', refType: 'branch' }).ok === false],
   ['refuses a missing dist-tag', () => decidePublish({ tag: undefined, refType: 'branch' }).ok === false],
   ['refuses a whitespace-only dist-tag', () => decidePublish({ tag: '   ', refType: 'branch' }).ok === false],
   ['refuses a dist-tag containing whitespace', () => decidePublish({ tag: 'rc 1', refType: 'branch' }).ok === false],
-  ['refuses `latest` on a branch ref', () => decidePublish({ tag: 'latest', refType: 'branch', ref: 'refs/heads/develop' }).ok === false],
-  ['refuses `latest` when the ref type is unset', () => decidePublish({ tag: 'latest', refType: undefined, ref: undefined }).ok === false],
-  ['refuses `latest` when the ref type is a lookalike', () => decidePublish({ tag: 'latest', refType: 'tags', ref: 'refs/tags/v1' }).ok === false],
-  ['refuses ` latest ` (padded) on a branch ref', () => decidePublish({ tag: ' latest ', refType: 'branch', ref: 'refs/heads/develop' }).ok === false],
-  // THE TWO SIGNALS MUST AGREE: forging either one alone is refused.
-  ['refuses `latest` when REF_TYPE says tag but REF says a branch', () => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/heads/develop' }).ok === false],
-  ['refuses `latest` when REF says a tag but REF_TYPE says branch', () => decidePublish({ tag: 'latest', refType: 'branch', ref: 'refs/tags/v1.2.3' }).ok === false],
-  ['refuses `latest` when REF is unset even if REF_TYPE says tag', () => decidePublish({ tag: 'latest', refType: 'tag', ref: undefined }).ok === false],
-  ['refuses an unevaluated workflow expression as a dist-tag', () => decidePublish({ tag: '${{ vars.RC_CHANNEL }}', refType: 'branch', ref: 'refs/heads/develop' }).ok === false],
-  // THE EVENT FILE IS THE THIRD SIGNAL, and the only one the guarded workflow cannot author.
-  // These write real temp files rather than stubbing the reader, so the parse path is exercised.
-  ['ALLOWS `latest` when all three signals agree on a tag (prod)', () => withEventFile('refs/tags/v1.2.3', (ep) => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1.2.3', eventPath: ep }).ok === true)],
-  ['refuses `latest` when the env says tag but the EVENT FILE says a branch', () => withEventFile('refs/heads/develop', (ep) => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1.2.3', eventPath: ep }).ok === false)],
-  ['refuses `latest` when the event file names a DIFFERENT tag than GITHUB_REF', () => withEventFile('refs/tags/v9.9.9', (ep) => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1.2.3', eventPath: ep }).ok === false)],
-  ['refuses `latest` when the event file is missing', () => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1.2.3', eventPath: '/nonexistent/event.json' }).ok === false],
-  ['refuses `latest` when the event file is unparseable', () => withRawEventFile('not json at all', (ep) => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1.2.3', eventPath: ep }).ok === false)],
-  ['readEventRef returns null for an absent path', () => readEventRef(undefined) === null || typeof process.env.GITHUB_EVENT_PATH === 'string'],
-  ['readEventRef reads the ref from real JSON', () => withEventFile('refs/tags/v2', (ep) => readEventRef(ep) === 'refs/tags/v2')],
-  ['`rc` is unaffected by the event file (no tag authority needed)', () => withEventFile('refs/heads/develop', (ep) => decidePublish({ tag: 'rc', refType: 'branch', ref: 'refs/heads/develop', eventPath: ep }).ok === true)],
-  ['an authorization carries the private brand', () => Object.getOwnPropertySymbols(decidePublish({ tag: 'rc', refType: 'branch', ref: 'refs/heads/develop' })).length === 1],
-  ['a hand-built decision carries no brand', () => Object.getOwnPropertySymbols({ ok: true, tag: 'latest' }).length === 0],
+  // `latest` IS REFUSED IN EVERY SHAPE — there is no environment that permits it, which is the
+  // whole point. These probes exist to prove the refusal is unconditional rather than conditional
+  // on something a workflow could arrange.
+  ['refuses `latest` on a branch ref', () => decidePublish({ tag: 'latest' }).ok === false],
+  ['refuses `latest` even with a tag-shaped environment', () => withEnv({ GITHUB_REF_TYPE: 'tag', GITHUB_REF: 'refs/tags/v1.2.3' }, () => decidePublish({ tag: 'latest' }).ok === false)],
+  ['refuses `latest` even with a tag-shaped event file on disk', () => withEventFile('refs/tags/v1.2.3', (ep) => withEnv({ GITHUB_EVENT_PATH: ep, GITHUB_REF_TYPE: 'tag', GITHUB_REF: 'refs/tags/v1.2.3' }, () => decidePublish({ tag: 'latest' }).ok === false))],
+  ['refuses ` latest ` (padded)', () => decidePublish({ tag: ' latest ' }).ok === false],
+  ['refuses `latest` however the extra keys are passed', () => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1', eventPath: '/whatever' }).ok === false],
+  // Case variants are NOT the prod channel: npm writes the tag verbatim, so `Latest` is a distinct
+  // tag. Recorded as checked rather than guarded, so nobody re-derives it.
+  ['`Latest` is a distinct tag, not the prod channel, and is allowed', () => decidePublish({ tag: 'Latest' }).ok === true],
   ['allows `rc` on a branch ref', () => decidePublish({ tag: 'rc', refType: 'branch', ref: 'refs/heads/develop' }).ok === true],
   ['allows `next` on a branch ref', () => decidePublish({ tag: 'next', refType: 'branch', ref: 'refs/heads/develop' }).ok === true],
   ['trims the returned tag', () => decidePublish({ tag: '  rc  ', refType: 'branch', ref: 'refs/heads/develop' }).tag === 'rc'],
@@ -442,7 +429,13 @@ function effectProbes() {
 }
 
 // The floor lives OUTSIDE the table, so a table that silently emptied cannot report green.
-const PROBE_FLOOR = 34;
+// LOWERED 34 -> 22, DELIBERATELY, and this is the one direction that needs a reason written down.
+// Twelve probes drove the three-signal `latest` decision — GITHUB_REF_TYPE, GITHUB_REF, the event
+// file and their disagreements. That decision no longer exists: `latest` is refused
+// unconditionally, so there is nothing left for those probes to assert. Removing a guard and its
+// probes together is a smaller surface; removing probes while the guard remains would be the
+// defect this floor exists to catch.
+const PROBE_FLOOR = 22;
 // Effect probes have their own floor: they are the only ones a bypassed `main()` cannot satisfy.
 const EFFECT_FLOOR = 8;
 

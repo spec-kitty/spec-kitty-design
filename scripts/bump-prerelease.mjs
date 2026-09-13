@@ -605,6 +605,16 @@ if (isDirectInvocation(process.argv[1], import.meta.url)) {
 }
 
 if (isDirectInvocation(process.argv[1], import.meta.url) && !process.argv.includes('--selftest')) {
+  // NOT FROM A WORKSTATION, same as the publish script. With ZERO arguments this rewrites four
+  // manifests, five workspace consumers and the lockfile — the destructive action is the default
+  // for no argv at all, which the allowlist above cannot cover because nothing unrecognised was
+  // passed. Review measured it still doing exactly that after the allowlist landed, and it did it
+  // to my own working tree twice in this mission.
+  if (process.env.GITHUB_ACTIONS !== 'true' && !process.argv.includes('--dry-run')) {
+    console.error('::error::refusing to bump outside GitHub Actions (GITHUB_ACTIONS is not "true").');
+    console.error('For a local check use --dry-run, which plans the bump and writes nothing.');
+    process.exit(1);
+  }
   main({
     dryRun: process.argv.includes('--dry-run'),
     fromRegistry: process.argv.includes('--from-registry'),

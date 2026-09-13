@@ -233,12 +233,29 @@ jobs:
         run: |
           set -euo pipefail
           FAILED=""
-          for pkg in ${{ steps.graph.outputs.dirs }}; do
+          # A GREEN LINE OVER ZERO PACKAGES IS THE FOUNDING DEFECT OF THIS GATE FAMILY. With `dirs`
+          # empty the loop iterated zero times and the step exited 0, reporting a confirmed publish
+          # having confirmed nothing.
+          REPORT_PKGS="${{ steps.graph.outputs.dirs }}"
+          [ -n "$REPORT_PKGS" ] || { echo "::error::empty publish set reached the dist-tag report"; exit 1; }
+          for pkg in $REPORT_PKGS; do
             NAME="$(node -p "require('./packages/$pkg/package.json').name")"
             echo "=== $NAME ==="
-            OUT="$(npm dist-tag ls "$NAME" 2>&1)" || true
+            # STATUS ON ITS OWN LINE, and stderr kept OUT of the success test. The first version
+            # wrote `OUT="$(npm dist-tag ls "$NAME" 2>&1)" || true`, folding an E404/E401 body INTO
+            # $OUT — so an auth failure sailed through the emptiness check as a non-empty "reading"
+            # and `|| true` discarded the status. Same blind-and-green shape this step was written
+            # to fix, one layer in.
+            set +e
+            OUT="$(npm dist-tag ls "$NAME" 2>/tmp/disttag.err)"
+            RC=$?
+            set -e
             printf '%s\n' "$OUT"
-            if [ -z "$(printf '%s' "$OUT" | tr -d '[:space:]')" ]; then
+            if [ "$RC" -ne 0 ]; then
+              echo "::error::$NAME: npm dist-tag ls exited $RC"
+              sed 's/^/    /' /tmp/disttag.err
+              FAILED="$FAILED $NAME"
+            elif [ -z "$(printf '%s' "$OUT" | tr -d '[:space:]')" ]; then
               echo "::error::$NAME returned an empty dist-tag listing — a failed read, not an absent tag"
               FAILED="$FAILED $NAME"
             fi

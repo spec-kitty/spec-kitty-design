@@ -666,10 +666,22 @@ export function checkWorkflowUsesDerivedSet(
     // stream at run time rather than leak `latest`, but a gate that certifies a payload which
     // cannot publish is still a gate reporting green over a broken artifact. Fourth occurrence of
     // "a token test standing in for a data-flow assertion" in this file, so it gets the parse.
-    const publishStep = steps.find((st) => /publish-derived-set\.mjs/.test(String(st?.run ?? '')));
-    if (!publishStep) {
+    // EVERY matching step, not the first. `steps.find` bound all three rules below to whichever
+    // step named the script FIRST, so a SECOND step — `run: GITHUB_REF_TYPE=tag node
+    // scripts/publish-derived-set.mjs` — was audited by nothing at all. Reproduced against the real
+    // workflow: gate green, wiring green, defeat table green. `latest` is unreachable now whatever
+    // that second step says, but these rules also carry the `--dry-run` and env-forgery refusals,
+    // so binding them to one arbitrary step is wrong on its own terms.
+    const publishSteps = steps.filter((st) => /publish-derived-set\.mjs/.test(String(st?.run ?? '')));
+    if (publishSteps.length === 0) {
       problems.push(`${label} has no step invoking the publish script`);
-    } else {
+    } else if (publishSteps.length > 1) {
+      problems.push(
+        `${label} invokes the publish script in ${publishSteps.length} steps; exactly one is ` +
+          'expected, and extra invocations are audited by nothing',
+      );
+    }
+    for (const publishStep of publishSteps) {
       const handoff = publishStep.env?.DIST_TAG;
       if (typeof handoff !== 'string' || !handoff.includes('inputs.dist-tag')) {
         problems.push(
