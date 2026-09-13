@@ -88,6 +88,39 @@ if [ "${1:-}" = "--selftest" ]; then
   # mutant that renders the WRONG token name stays green as long as that word contains the same
   # letter somewhere. An `expect_grep` prefixed with `EXACT:` is matched as a whole LINE
   # (`grep -qxF`) against the RENDERED "   - <token>" line instead of a loose substring.
+  # #438 pass 4 (architect + debugger lenses). The assertion logic is now a PURE function, for two
+  # measured reasons.
+  #
+  # (a) The old inline form was `printf '%s\n' "$out" | grep -q …` under this file's own
+  #     `set -o pipefail` — the exact SIGPIPE-under-pipefail shape this script condemns at the
+  #     `for-each-ref` site below. `grep -q` exits on first match, the writer gets SIGPIPE,
+  #     pipefail surfaces 141, and `|| ok=0` converts a PASSING probe into a false red. Measured:
+  #     1.6 MB of output with a first-line match -> pipeline status 141; last-line match -> 0;
+  #     small input -> 0. No shipped probe is big enough to trip it today, which is exactly why it
+  #     would have survived. A herestring redirects from a temp file, not a pipe, so it cannot
+  #     SIGPIPE at all.
+  #
+  # (b) The whole assertion block could be replaced with `if false; then` and the suite still
+  #     reported 18/18 green — re-opening the very mutant this file exists to kill. A pure
+  #     function can be meta-probed with known-good and known-bad inputs; an inline block cannot.
+  #
+  # Matchers: EXACT: whole line, fixed string · EXACTRE: whole line, ERE — lets a probe pin the
+  # RENDERING without pinning a value git chose for us · MAXLINES:n output is at most n lines ·
+  # anything else, loose substring.
+  assert_probe() {
+    local rc="$1" expect_exit="$2" expect_grep="$3" out="$4" ok=1
+    [ "$rc" -eq "$expect_exit" ] || ok=0
+    if [ -n "$expect_grep" ]; then
+      case "$expect_grep" in
+        EXACT:*)    grep -qxF "${expect_grep#EXACT:}" <<< "$out" || ok=0 ;;
+        EXACTRE:*)  grep -qxE "${expect_grep#EXACTRE:}" <<< "$out" || ok=0 ;;
+        MAXLINES:*) [ "$(wc -l <<< "$out")" -le "${expect_grep#MAXLINES:}" ] || ok=0 ;;
+        *)          grep -qF "$expect_grep" <<< "$out" || ok=0 ;;
+      esac
+    fi
+    [ "$ok" -eq 1 ]
+  }
+
   probe() {
     local name="$1" expect_exit="$2" expect_grep="$3" cwd="$4"
     shift 4
@@ -98,17 +131,7 @@ if [ "${1:-}" = "--selftest" ]; then
     out="$(cd "$cwd" && bash "$SELF" "$@" 2>&1)"
     rc=$?
     set -e
-    [ "$rc" -eq "$expect_exit" ] || ok=0
-    if [ -n "$expect_grep" ]; then
-      case "$expect_grep" in
-        EXACT:*)
-          printf '%s\n' "$out" | grep -qxF "${expect_grep#EXACT:}" || ok=0
-          ;;
-        *)
-          printf '%s\n' "$out" | grep -qF "$expect_grep" || ok=0
-          ;;
-      esac
-    fi
+    assert_probe "$rc" "$expect_exit" "$expect_grep" "$out" || ok=0
     if [ "$ok" -eq 1 ]; then
       echo "  ✓ [$TOTAL] $name"
     else
@@ -313,8 +336,13 @@ if [ "${1:-}" = "--selftest" ]; then
   #    branch F2b probes above), at a scale that reproduces the defect. A handful of unreachable
   #    tags is not enough: the pre-fix `git tag --list "$GLOB" | head -1` only SIGPIPEs when
   #    `head -1` closes the pipe's read end before `git` finishes writing all matching refs, which
-  #    needs enough output to exceed the pipe buffer. ~20,000 tags reproduces it 10/10 locally;
-  #    fewer did not reproduce reliably. Built with `git update-ref --stdin` against one throwaway
+  #    needs enough output to exceed the pipe buffer. MEASURED (pass 4, reducer lens, 10 runs per
+  #    scale against the pre-fix shape): 20,000 tags -> 10/10, 2,000 -> 10/10, 500 -> 7/10; the
+  #    post-fix `for-each-ref --count=1` is 0/10 at every scale. An earlier revision of this
+  #    comment claimed "fewer did not reproduce reliably", which was false — 2,000 reproduces just
+  #    as consistently. The probe stays at 20,000 anyway: the whole 19-probe table runs in ~1.6 s,
+  #    so the margin costs nothing and buys headroom against a smaller pipe buffer elsewhere.
+  #    Built with `git update-ref --stdin` against one throwaway
   #    orphan commit (sub-second, so this stays cheap enough for CI) rather than 20,000 individual
   #    `git tag` invocations. On the reverted code this probe is RED: the script aborts with exit
   #    141, not the exit 2 this asserts — a silent crash inside the branch whose entire job is to
@@ -326,20 +354,70 @@ if [ "${1:-}" = "--selftest" ]; then
   git -C "$REPO_F" commit -q -m "root, no reachable release tag"
   ORPHAN_SHA="$(git -C "$REPO_F" commit-tree 4b825dc642cb6eb9a060e54bf8d69288fbee4904 -m "unreachable orphan carrying the release tags")"
   { for i in $(seq 1 20000); do printf 'create refs/tags/v%d.0.0 %s\n' "$i" "$ORPHAN_SHA"; done; } | git -C "$REPO_F" update-ref --stdin
-  #    Pass 4: this asserts the rendered line EXACTLY, not the substring 'not reachable'. With only
-  #    the loose substring, dropping `--count=1` from the lookup survived: the mutant still exits 2
-  #    and still says "not reachable", it just interpolates all 20,000 tag names and renders 20,002
-  #    lines of them. `--count=1` is what keeps the refusal legible, and nothing asserted that.
-  #    `v1.0.0` is deterministic here — `for-each-ref` sorts by refname, and '.' (0x2E) < '0' (0x30)
-  #    puts v1.0.0 ahead of v10.0.0 — so the whole line is a stable expectation.
-  probe "D: ~20,000 unreachable release tags don't SIGPIPE the lookup -> exit 2, ONE legible line (not a silent 141, not 20,000 tag names)" 2 "EXACT:   A release tag exists in this repository (v1.0.0) but is not reachable" "$REPO_F"
+  #    Pass 4: asserts the rendered line as a whole LINE, not the substring 'not reachable'. With
+  #    only the loose substring, dropping `--count=1` survived: the mutant still exits 2 and still
+  #    says "not reachable", it just interpolates all 20,000 tag names across 20,002 lines.
+  #
+  #    Two corrections from the pass-4 gate. (1) The tag name is a PATTERN, not the literal
+  #    `v1.0.0`. `v1.0.0` is genuinely deterministic — `for-each-ref` sorts by refname, '.' (0x2E)
+  #    < '0' (0x30), and hostile config (`tag.sort=version:refname`, `versionsort.suffix`) does not
+  #    move it, because `tag.sort` governs `git tag -l` and not `for-each-ref`. But determinism was
+  #    never the objection: pinning the literal couples this probe to git's COLLATION, so a
+  #    behaviour-neutral improvement (say `--sort=version:refname`, to report the newest release
+  #    tag) would red it for a reason unrelated to SIGPIPE or legibility. The pattern pins the
+  #    rendering — one line, right shape, right sentence — and leaves the choice of tag free.
+  #    (2) `EXACT:`/`EXACTRE:` assert only that SOME line matches; neither bounds output size, so
+  #    the probe's own name ("ONE legible line") was a claim it did not make. A mutant keeping
+  #    `--count=1` while dumping the tag list on another line satisfied it. The MAXLINES probe
+  #    below is what actually holds the legibility half.
+  probe "D: ~20,000 unreachable release tags don't SIGPIPE the lookup -> exit 2, and the refusal names ONE tag (not a silent 141)" 2 "EXACTRE:   A release tag exists in this repository \(v[0-9]+\.[0-9]+\.[0-9]+\) but is not reachable" "$REPO_F"
+  probe "D2: that same refusal stays LEGIBLE -> the whole output is a handful of lines, not 20,000 tag names" 2 "MAXLINES:12" "$REPO_F"
+
+  # ── Meta-probes: assert_probe itself (#438 pass 4, debugger lens finding 2) ──────────────────
+  # Neutering the assertion block (`if [ -n "$expect_grep" ]` -> `if false`, or blanking the
+  # EXACT: arm, or dropping the exit-code comparison) left all 18 probes reporting green — which
+  # re-opens every mutant the table is supposed to catch. Probes assert the SCRIPT; these assert
+  # the thing that asserts. Known-good and known-bad inputs, driven directly, no subprocess.
+  META_TOTAL=0
+  META_BAD=0
+  meta() {
+    local name="$1" expect="$2"
+    shift 2
+    META_TOTAL=$((META_TOTAL + 1))
+    local got=ok
+    assert_probe "$@" || got=fail
+    if [ "$got" = "$expect" ]; then
+      echo "  ✓ [meta] $name"
+    else
+      META_BAD=$((META_BAD + 1))
+      echo "  ✗ [meta] $name — expected assert_probe to report '$expect', got '$got'"
+    fi
+  }
+  meta "matching exit + matching EXACT whole line -> ok"          ok   0 0 "EXACT:hello"     "hello"
+  meta "exit code differs -> fail"                                 fail 1 0 ""                "hello"
+  meta "EXACT line absent -> fail"                                 fail 0 0 "EXACT:nope"      "hello"
+  meta "EXACT is a WHOLE-line match, not a substring -> fail"      fail 0 0 "EXACT:hell"      "hello"
+  meta "EXACT finds its line among several -> ok"                  ok   0 0 "EXACT:b"         $'a\nb\nc'
+  meta "EXACTRE matches a whole line by pattern -> ok"             ok   0 0 "EXACTRE:h.llo"   "hello"
+  meta "EXACTRE is anchored: a partial-line pattern -> fail"       fail 0 0 "EXACTRE:h.l"     "hello"
+  meta "MAXLINES satisfied -> ok"                                  ok   0 0 "MAXLINES:2"      $'a\nb'
+  meta "MAXLINES exceeded -> fail"                                 fail 0 0 "MAXLINES:2"      $'a\nb\nc'
+  meta "loose substring present -> ok"                             ok   0 0 "ell"             "hello"
+  meta "loose substring absent -> fail"                            fail 0 0 "zzz"             "hello"
+  META_FLOOR=11
+  if [ "$META_TOTAL" -lt "$META_FLOOR" ] || [ "$META_BAD" -gt 0 ]; then
+    echo ""
+    echo "❌ assert_probe meta-probes: $META_BAD of $META_TOTAL failed (floor $META_FLOOR) — the"
+    echo "   probe harness's own assertions are not trustworthy, so the table above proves nothing."
+    exit 1
+  fi
 
   # Total floor OUTSIDE the table (same shape as check-develop-ruleset-parity.mjs's PROBE_FLOOR):
   # a probe count silently shrinking must itself be caught.
-  FLOOR=18
-  if [ "$TOTAL" -lt "$FLOOR" ]; then
+  PROBE_FLOOR=19
+  if [ "$TOTAL" -lt "$PROBE_FLOOR" ]; then
     echo ""
-    echo "❌ the probe set has shrunk: $TOTAL probe(s) against a floor of $FLOOR."
+    echo "❌ the probe set has shrunk: $TOTAL probe(s) against a floor of $PROBE_FLOOR."
     exit 1
   fi
 
