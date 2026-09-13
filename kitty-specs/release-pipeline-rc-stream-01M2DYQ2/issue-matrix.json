@@ -25,7 +25,7 @@
       "wp": null
     },
     "#363": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "PR #439 \u2014 the rc stream: publish-packages.yml (reusable payload) + release-rc.yml (thin caller) + bump-prerelease.mjs. FR-001..005, 008..011 mapped to WP01. Criteria stay pending until the payload executes once for real.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,8 +33,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#364": {
       "evidence_ref": "<link or commit>",
