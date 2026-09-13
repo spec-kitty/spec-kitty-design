@@ -321,6 +321,19 @@ export function checkWorkflowUsesDerivedSet(
   if (jobName !== 'release' && !/npm\s+publish\b/.test(commands)) {
     problems.push(`${label} has no step running npm publish at all`);
   }
+  // ...AND IT MUST CARRY `--tag`. Measured: deleting `--tag "$TAG"` from the publish loop left
+  // every gate in the repository green, including this one — the bare-`npm publish` assertion
+  // above still matched, because a tagless publish IS a publish. That is the single irreversible
+  // mistake this whole reshape exists to prevent: with no `--tag`, npm writes `latest`, and the
+  // first publish of a package with no existing versions claims the prod channel from the rc
+  // stream. `checkPublishingCallersDelegate` proves the CALLER passes a dist-tag; nothing proved
+  // the payload still forwards it. Prod is exempt: release.yml publishes to `latest` by design.
+  if (jobName !== 'release' && !/npm\s+publish\b[^\n]*--tag\b/.test(commands)) {
+    problems.push(
+      `${label} runs npm publish without \`--tag\` — npm defaults to \`latest\`, which claims the ` +
+        'prod channel from the rc stream and cannot be undone',
+    );
+  }
   for (const s2 of steps) {
     if (s2['continue-on-error']) problems.push(`${label} step "${s2.name ?? s2.run}" carries continue-on-error`);
   }
@@ -813,6 +826,23 @@ const PROBES = [
       ),
   },
   {
+    // MEASURED GREEN BEFORE THE GUARD EXISTED. Deleting `--tag "$TAG"` from the real
+    // publish-packages.yml left `check-release-graph.mjs` (and every other gate in the repo)
+    // passing, because the bare-publish assertion above still matched. A tagless publish writes
+    // `latest`, and on a package with no existing versions that claims the prod channel from the
+    // rc stream — irreversibly. The mutation keeps `npm publish` intact so it can only be caught
+    // by the `--tag` assertion, not by the one above it.
+    what: 'the reusable publish payload publishing WITHOUT --tag (npm would write `latest`)',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        REUSABLE_PAYLOAD_FIXTURE.replace(/npm publish --tag rc/, 'npm publish'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
     what: 'the reusable publish payload not publishing at all',
     run: () =>
       checkWorkflowUsesDerivedSet(
@@ -921,7 +951,7 @@ function selftest() {
   // payload and caller delegation. Taken from the table's own reported count rather than from
   // arithmetic. Left at 27 the six new probes could have been deleted with the gate still green —
   // the unfloored-table shape this file's own header exists to refuse.
-  if (PROBES.length < 34) {
+  if (PROBES.length < 35) {
     console.error(`❌ only ${PROBES.length} probes — the selftest floor is 34`);
     process.exit(1);
   }
