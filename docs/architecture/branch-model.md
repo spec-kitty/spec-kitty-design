@@ -9,7 +9,7 @@ branch is for, which branch a given kind of change targets, and how code moves b
 | Branch | What it is | Who writes to it | How |
 |---|---|---|---|
 | `main` | Production. The default branch. | The operator, only. | The train lands on `main` once, at the end, by an operator act — never a mission PR, never an automated push. |
-| `train/elements-first` | The integration line (ADR-8). Where mission work lands. | Mission and contributor PRs. | A mission branches off `train/elements-first`, PRs back into it (`base: train/elements-first`), and the loop or a maintainer merges it once CI is green and review evidence is posted. See `docs/architecture/elements-first-run-prompt.md` for the full procedure — that doc's own standing order is "never branch from `main`, and never PR into `main`." |
+| `train/elements-first` | The integration line (per the operator standing order in `docs/architecture/elements-first-run-prompt.md`, 2026-09-02 — not ADR-8, which is the custom-elements component-layer decision). Where mission work lands. | Mission and contributor PRs. | A mission branches off `train/elements-first`, PRs back into it (`base: train/elements-first`), and the loop or a maintainer merges it once CI is green and review evidence is posted. See `docs/architecture/elements-first-run-prompt.md` for the full procedure — that doc's own standing order is "never branch from `main`, and never PR into `main`." |
 | `develop` | The release-candidate (RC) line (epic #361 Decision A). Feeds REL2's (#363) rc-publish workflow. | The promotion mechanism only (below). | Nothing is ever PR'd or pushed to `develop` directly. |
 
 **Which branch does my mission PR target?** `train/elements-first`, always. This does not change
@@ -95,8 +95,8 @@ mission does not have to re-derive it from epic #361's comment thread:
 
 One **public** `@spec-kitty/{elements,styles,tokens}` package per name — created **private**
 initially and flipped to **public on first publish** — with the rc and prod streams separated
-**only by dist-tag** (e.g. `next`/`latest`), never by a second package name or a second
-registry. No package currently exists under any of these three names (confirmed 404 on npmjs
+**only by dist-tag** — `rc` from the `develop` RC line, `latest` from `main` (epic #361, operator
+ruling 2026-09-11) — never by a second package name or a second registry. No package currently exists under any of these three names (confirmed 404 on npmjs
 and "no such package" on npm.pkg.github.com as of the ruling date).
 
 This document records the ruling; it does not implement it. The `.npmrc` flip, registry
