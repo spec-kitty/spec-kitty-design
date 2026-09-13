@@ -55,8 +55,105 @@ export const GH_PACKAGES = 'https://npm.pkg.github.com';
 export const PAYLOAD_PERMISSIONS = { contents: 'read', packages: 'write' };
 const PERMISSION_RANK = { none: 0, read: 1, write: 2 };
 
-export function checkPublishingCallersDelegate(workflows) {
+/**
+ * Read the payload's OWN declared permissions, rather than trusting a constant to mirror them.
+ *
+ * ALL FOUR REVIEW LENSES CONVERGED ON THIS INDEPENDENTLY. The first version of the ceiling check
+ * compared each caller's grant against the hard-coded `PAYLOAD_PERMISSIONS` above and never opened
+ * `publish-packages.yml`. So the relation was instrumented in one direction only — and the
+ * direction that actually broke was the unchecked one:
+ *
+ *   caller lowered to `packages: read`  -> RED   (caught)
+ *   payload raised to `contents: write` -> GREEN (the pass-2 BLOCKER, restorable, gate silent)
+ *
+ * Measured: reverting the payload to `contents: write` produced byte-identical output from the
+ * full check and 51/51 green from the selftest. That is the co-edited-baseline defect this repo
+ * has a standing rule about — the constant and the payload agreed by hand, and `release-rc.yml`'s
+ * comment claiming "a checker asserts it" was not true of the payload side.
+ *
+ * Now the constant is the CEILING the payload may not exceed, and the parsed value is what callers
+ * are held against. Both directions are live.
+ */
+export function payloadDeclaredPermissions(payloadText) {
+  let wf;
+  try {
+    wf = parse(payloadText);
+  } catch {
+    return { problems: ['the reusable publish workflow does not parse; cannot read its permissions'], declared: null };
+  }
+  const declared = wf?.jobs?.publish?.permissions;
+  if (typeof declared === 'string') {
+    // `write-all` / `read-all` are real forms. `write-all` on the payload is a blanket escalation
+    // and must not pass silently just because it is not an object.
+    return {
+      problems: [
+        `the publish payload declares \`permissions: ${declared}\` — a blanket grant. Declare the ` +
+          'explicit minimum instead, so the ceiling check has something to compare.',
+      ],
+      declared: null,
+    };
+  }
+  if (typeof declared !== 'object' || declared === null) {
+    return {
+      problems: ['the publish payload declares no `permissions:` block, so it inherits more than it needs'],
+      declared: null,
+    };
+  }
   const problems = [];
+  for (const [scope, level] of Object.entries(declared)) {
+    const allowed = PAYLOAD_PERMISSIONS[scope];
+    if (allowed === undefined) {
+      problems.push(
+        `the publish payload declares \`${scope}: ${level}\`, which is not in its recorded minimum ` +
+          `(${Object.keys(PAYLOAD_PERMISSIONS).join(', ')}). Every scope a caller must grant has to ` +
+          'be justified here first.',
+      );
+      continue;
+    }
+    if ((PERMISSION_RANK[level] ?? 99) > PERMISSION_RANK[allowed]) {
+      problems.push(
+        `the publish payload declares \`${scope}: ${level}\` but its recorded minimum is ` +
+          `\`${scope}: ${allowed}\`. A called workflow declaring above what a caller grants fails ` +
+          'workflow validation and the run never starts — this is exactly the defect that made the ' +
+          'rc stream unstartable.',
+      );
+    }
+  }
+  return { problems, declared };
+}
+
+
+/** Workflows allowed to run `npm publish` without delegating. EXACT paths: a suffix test exempted
+ *  `nightly-release.yml` as well, because it ends with `release.yml`. `release.yml` is the
+ *  sanctioned holdout until REL3 (#364) converts it into a caller. */
+const INLINE_PUBLISH_EXEMPT = new Set(['.github/workflows/publish-packages.yml', '.github/workflows/release.yml']);
+
+/** Only THIS repo's payload counts as delegation. `uses.includes(...)` accepted a third-party
+ *  `some-org/evil/.github/workflows/publish-packages.yml@main`, which satisfied the floor while
+ *  publishing through code nobody here reviews. */
+function isOwnPayload(uses) {
+  return /^\.\/\.github\/workflows\/publish-packages\.yml$/.test(uses.trim());
+}
+
+/** Tag-triggered, read from the PARSED trigger rather than by looking for `tags:` anywhere in the
+ *  file — a comment containing that substring was enough to license `dist-tag: latest`. */
+function isTagTriggered(wf) {
+  const on = wf?.on ?? wf?.true; // YAML 1.1 parses a bare `on:` key as the boolean true
+  if (!on || typeof on !== 'object') return false;
+  if (on.release) return true;
+  const push = on.push;
+  return Boolean(push && typeof push === 'object' && push.tags);
+}
+
+export function checkPublishingCallersDelegate(workflows, payloadText = null) {
+  const problems = [];
+  // The ceiling the payload actually declares, not a constant hoping to match it.
+  let ceiling = PAYLOAD_PERMISSIONS;
+  if (typeof payloadText === 'string') {
+    const { problems: payloadProblems, declared } = payloadDeclaredPermissions(payloadText);
+    problems.push(...payloadProblems);
+    if (declared) ceiling = declared;
+  }
   if (!Array.isArray(workflows) || workflows.length === 0) {
     return ['no workflow files found — refusing to certify caller delegation over nothing'];
   }
@@ -71,7 +168,7 @@ export function checkPublishingCallersDelegate(workflows) {
     }
     for (const [jobName, job] of Object.entries(wf?.jobs ?? {})) {
       const uses = typeof job?.uses === 'string' ? job.uses : null;
-      if (!uses || !uses.includes('publish-packages.yml')) {
+      if (!uses || !isOwnPayload(uses)) {
         // A workflow that publishes with its own inline steps instead of delegating is the exact
         // state the reshape undid. `release.yml` is the one sanctioned holdout until REL3 folds it
         // in; anything else re-inlining a payload is a regression that must not pass silently.
@@ -81,7 +178,10 @@ export function checkPublishingCallersDelegate(workflows) {
         // Two exemptions, both deliberate. `publish-packages.yml` IS the payload — it is supposed
         // to publish inline, and flagging it would make the check reject the thing it protects.
         // `release.yml` is the sanctioned holdout until REL3 folds it in.
-        const isPayloadOrProd = file.endsWith('publish-packages.yml') || file.endsWith('release.yml');
+        // EXACT paths. A suffix test exempted `nightly-release.yml` too, because
+        // `'nightly-release.yml'.endsWith('release.yml')` is true — so any workflow whose name
+        // happened to end that way could publish inline, unnoticed.
+        const isPayloadOrProd = INLINE_PUBLISH_EXEMPT.has(file);
         if (/npm\s+publish\b/.test(inline) && !isPayloadOrProd) {
           inlinePublishers.push(`${file} job \`${jobName}\``);
         }
@@ -94,7 +194,7 @@ export function checkPublishingCallersDelegate(workflows) {
           `${file} job \`${jobName}\` delegates to the reusable publish workflow without a ` +
             'non-empty `dist-tag`; npm would default to `latest` and claim the prod channel',
         );
-      } else if (tag.trim() === 'latest' && !/tags:/.test(text)) {
+      } else if (tag.trim() === 'latest' && !isTagTriggered(wf)) {
         // NON-EMPTY IS NOT ENOUGH. `dist-tag: latest` from a branch-triggered caller claims the
         // prod channel just as surely as omitting `--tag` — the value, not merely its presence, is
         // the irreversible thing. Only a tag-triggered workflow may legitimately write `latest`.
@@ -118,8 +218,17 @@ export function checkPublishingCallersDelegate(workflows) {
       // fails validation before any job starts. Job-level `permissions:` wins where present;
       // otherwise the workflow-level block applies.
       const granted = job?.permissions ?? wf?.permissions;
-      for (const [scope, needed] of Object.entries(PAYLOAD_PERMISSIONS)) {
-        const have = typeof granted === 'object' && granted !== null ? granted[scope] : undefined;
+      for (const [scope, needed] of Object.entries(ceiling)) {
+        // `permissions: write-all` is a real, more-than-sufficient grant; the object test alone
+        // rejected it. `read-all` grants read on every scope and nothing more.
+        const have =
+          granted === 'write-all'
+            ? 'write'
+            : granted === 'read-all'
+              ? 'read'
+              : typeof granted === 'object' && granted !== null
+                ? granted[scope]
+                : undefined;
         if (PERMISSION_RANK[have] === undefined || PERMISSION_RANK[have] < PERMISSION_RANK[needed]) {
           problems.push(
             `${file} job \`${jobName}\` grants \`${scope}: ${have ?? '(unset)'}\` but the payload ` +
@@ -182,11 +291,33 @@ export function checkRegistryAuthorityAgrees(packages, workflows) {
       continue;
     }
     for (const job of Object.values(wf?.jobs ?? {})) {
-      if (typeof job?.uses === 'string' && job.uses.includes('publish-packages.yml')) {
+      if (typeof job?.uses === 'string' && isOwnPayload(job.uses)) {
         const r = job?.with?.registry;
         if (typeof r === 'string' && r.trim() !== '') declared.add(r.trim().replace(/\/+$/, ''));
       }
+      // ...AND EVERY INLINE PUBLISHER'S OWN `setup-node` registry-url. Collecting only from
+      // delegating callers meant the check could not see `release.yml` — which still points
+      // `registry-url` at npmjs.org while `publishConfig` sends the tarball to GitHub Packages, so
+      // the next prod release authenticates against a host it never contacts. Review measured the
+      // docstring's claim that this check "makes that fold fail loudly at PR time" to be false: it
+      // would only have seen release.yml AFTER REL3 converted it, i.e. after the hazard. Reading
+      // every publishing workflow's own registry-url puts it inside the window today.
+      const steps = Array.isArray(job?.steps) ? job.steps : [];
+      const publishes = steps.some((st) => /npm\s+publish\b/.test(String(st?.run ?? '')));
+      if (!publishes) continue;
+      for (const st of steps) {
+        const url = String(st?.uses ?? '').startsWith('actions/setup-node@') ? st?.with?.['registry-url'] : null;
+        if (typeof url === 'string' && url.trim() !== '') declared.add(url.trim().replace(/\/+$/, ''));
+      }
     }
+  }
+  // A GATE MUST REFUSE AN EMPTY SET. With no declared registry anywhere the cross-check below
+  // silently compares against nothing and reports green.
+  if (declared.size === 0) {
+    problems.push(
+      'no workflow declares a publish registry — refusing to certify manifest/registry agreement ' +
+        'over nothing',
+    );
   }
   for (const p of packages) {
     if (p.private) continue;
@@ -208,8 +339,9 @@ export function checkRegistryAuthorityAgrees(packages, workflows) {
     for (const d of declared) {
       if (d !== norm) {
         problems.push(
-          `${p.name} publishes to \`${norm}\` via publishConfig, but a caller declares ` +
-            `\`registry: ${d}\` — publishConfig wins, so that stream's registry input is decorative`,
+          `${p.name} publishes to \`${norm}\` via publishConfig, but a publishing workflow declares ` +
+            `\`${d}\` — publishConfig selects the DESTINATION and the workflow's registry only the ` +
+            'AUTH LINE, so that stream authenticates against a host it never contacts',
         );
       }
     }
@@ -458,8 +590,18 @@ export function checkWorkflowUsesDerivedSet(
   // them is the substance of this reshape. Getting this wrong in the first draft turned the real
   // run red while the selftest stayed green, because every fixture used the default job.
   const PROD_ONLY_STEPS = [
-    [/npm\s+publish\b[^\n]*--provenance[^\n]*--access\s+public/, 'publish with provenance'],
-    [/cyclonedx/i, 'the SBOM'],
+    // PROVENANCE IS NO LONGER REQUIRED, AND THAT IS A LOSS RECORDED RATHER THAN A RULE RELAXED.
+    // This used to be `npm publish --provenance --access public`. npm provenance is an npmjs.org
+    // feature, unsupported on GitHub Packages, and prod moved to GitHub Packages by operator
+    // decision once review measured that `publishConfig` was already redirecting its tarballs
+    // there. FR-044 cannot be satisfied on this registry by ANY configuration, so asserting it
+    // would be asserting something no correct workflow can do. REL3 (#364) owns the question of
+    // what replaces it (attestations, or a second npmjs stream).
+    //
+    // What remains asserted is that prod actually publishes — dropping the flag must not be a
+    // route to dropping the publish.
+    [/npm\s+publish\b/, 'a publish step'],
+    [/cyclonedx/i, 'the SBOM'],  // prod-only as a RELEASE input; the rc stream still emits one as an artifact
   ];
   const EVERY_STREAM_STEPS = [
     [/npm\s+pack\b/, 'the contents audit'],
@@ -467,58 +609,46 @@ export function checkWorkflowUsesDerivedSet(
     [/check-release-graph\.mjs\s+--selftest/, "the gate's own blindness check on the publishing path"],
     [/check-vue-packed-types\.mjs/, 'the packed Vue declaration check on the publishing path'],
     [/measure-elements-sizes\.mjs\s+--check/, 'the size and SRI drift check on the publishing path'],
-    // BOTH ADDED AFTER REVIEW MEASURED THEIR DELETION AS GREEN. The audit gate carries an
+    // ADDED AFTER REVIEW MEASURED ITS DELETION AS GREEN. The audit gate carries an
     // `[ENFORCED]` label in the payload, and in this repo that prefix means "registered in a wiring
-    // checker" — it was decoration until now. The bump is the mechanism that stops the second run
-    // dying on EPUBLISHCONFLICT, and removing it silently reverted the fix for that.
+    // checker" — it was decoration until now. (The bump is asserted separately below, not here.)
     [/npm-audit-gate\.sh/, 'the ADR-005 security gate before publish'],
   ];
   const REQUIRED_STEPS = jobName === 'release' ? [...PROD_ONLY_STEPS, ...EVERY_STREAM_STEPS] : EVERY_STREAM_STEPS;
   for (const [re, what] of REQUIRED_STEPS) {
     if (!re.test(commands)) problems.push(`${label} has no step running ${what}`);
   }
-  // The rc payload must still publish SOMETHING, or the five shared gates guard an empty act.
-  if (jobName !== 'release' && !/npm\s+publish\b/.test(commands)) {
-    problems.push(`${label} has no step running npm publish at all`);
-  }
-  // ...AND EVERY `npm publish` MUST CARRY `--tag`, ON ITS OWN LINE. Measured: deleting
-  // `--tag "$TAG"` from the publish loop left every gate in the repository green, including this
-  // one — the bare-`npm publish` assertion above still matched, because a tagless publish IS a
-  // publish. That is the single irreversible mistake this whole reshape exists to prevent: with no
-  // `--tag`, npm writes `latest`, and the first publish of a package with no existing versions
-  // claims the prod channel from the rc stream.
-  //
-  // WHY EVERY LINE, not "does --tag appear anywhere". A job-wide test is satisfied by one tagged
-  // publish while a second, tagless one rides along beside it — reproduced by a lens. The check has
-  // to hold per invocation, and `--tag` has to be on the same physical line as the `npm publish` it
-  // is meant to modify. `checkPublishingCallersDelegate` proves the CALLER passes a dist-tag;
-  // this proves the payload forwards it on every publish. Prod is exempt: release.yml writes
-  // `latest` by design.
   if (jobName !== 'release') {
-    const taglessPublishes = commands
-      .split('\n')
-      .filter((l) => /npm\s+publish\b/.test(l) && !/--tag\b/.test(l));
-    for (const line of taglessPublishes) {
+    // THE PUBLISH MUST GO THROUGH THE SCRIPT. Three regex rules used to live here — per-line
+    // `--tag`, a hard-coded-`latest` refusal, and a TAG-from-input requirement — and review
+    // defeated the set with two lines of shell (`TAG=latest` after the input-derived assignment
+    // satisfied all three at once). The refusal now lives in `publish-derived-set.mjs`, which keys
+    // `latest` on GITHUB_REF_TYPE — something the runner emits, not something an author types — so
+    // the rc stream cannot claim the prod channel however this file is edited.
+    //
+    // What is left to assert here is exactly two things, and neither is defeatable by prose,
+    // because both are about what the job RUNS rather than what it says.
+    if (!/publish-derived-set\.mjs/.test(commands)) {
       problems.push(
-        `${label} runs \`${line.trim()}\` without \`--tag\` — npm defaults to \`latest\`, which ` +
-          'claims the prod channel from the rc stream and cannot be undone',
+        `${label} does not publish through scripts/publish-derived-set.mjs — the dist-tag refusal ` +
+          'lives in that script, and an inline publish bypasses it entirely',
       );
     }
-    // AND THE TAG MUST COME FROM THE INPUT. A hard-coded `--tag latest` in the payload satisfies
-    // the per-line rule above while doing exactly the damage it exists to prevent.
-    if (/npm\s+publish\b[^\n]*--tag\s+["']?latest\b/.test(commands)) {
-      problems.push(`${label} hard-codes \`--tag latest\` in a prerelease payload — that claims the prod channel`);
+    // ...AND NOTHING ELSE MAY PUBLISH. The script is only a guarantee if it is the sole route.
+    for (const line of commands.split('\n')) {
+      if (/npm\s+publish\b/.test(line)) {
+        problems.push(
+          `${label} runs \`${line.trim()}\` directly instead of going through ` +
+            'scripts/publish-derived-set.mjs, which is where the `latest` refusal lives',
+        );
+      }
     }
-    if (!/TAG=.*inputs\.dist-tag/.test(commands)) {
-      problems.push(
-        `${label} never assigns its publish tag from \`inputs.dist-tag\` — the caller's dist-tag is ` +
-          'then decorative and the payload publishes under whatever it hard-codes',
-      );
+    if (!/DIST_TAG/.test(workflowText)) {
+      problems.push(`${label} never passes DIST_TAG to the publish script, so it would refuse on an empty tag`);
     }
     // THE BUMP, and its `--from-registry`. Deleting either was green. Nothing commits the bump
     // back to `develop`, so without `--from-registry` every run recomputes the same version and
-    // publish #2 dies on EPUBLISHCONFLICT — the "it can publish exactly once" defect this mission
-    // exists to fix, removable in one line with no gate reacting.
+    // publish #2 dies on EPUBLISHCONFLICT.
     if (!/bump-prerelease\.mjs/.test(commands)) {
       problems.push(`${label} has no step running the prerelease bump — the stream can publish exactly once`);
     } else if (!/bump-prerelease\.mjs[^\n]*--from-registry/.test(commands)) {
@@ -527,19 +657,36 @@ export function checkWorkflowUsesDerivedSet(
           'every run recomputes the same version and the second publish dies on EPUBLISHCONFLICT',
       );
     }
-    // ORDER IS LOAD-BEARING. The bump rewrites every publishable manifest, and `package.json` is
-    // inside every tarball, so it moves each package's `unpackedSize`. A byte-exact size record
-    // checked AFTER the bump compares the committed record against manifests just mutated — and
-    // cannot be re-recorded to match, because the committed record must match the unbumped tree.
-    // Measured: `@spec-kitty/styles` sat one byte below a rendering bucket and the bump added seven.
-    const bumpAt = commandLines.findIndex((c) => /bump-prerelease\.mjs/.test(c));
-    const sizeAt = commandLines.findIndex((c) => /measure-elements-sizes\.mjs\s+--check/.test(c));
-    if (bumpAt !== -1 && sizeAt !== -1 && bumpAt < sizeAt) {
-      problems.push(
-        `${label} runs the prerelease bump BEFORE \`measure-elements-sizes.mjs --check\`; the bump ` +
-          'mutates the manifests the size record measures, so the check compares the committed ' +
-          'record against a tree it can never match. Move the bump below the verification steps.',
-      );
+    // THE FULL ORDERING CHAIN: size-check < bump < publish, asserted over FLATTENED LINE positions
+    // rather than step indices. Two defects in the first version, both found by review: it had no
+    // upper bound (moving the bump BELOW the publish was green, restoring "publishes exactly
+    // once"), and step-index comparison made a same-step violation invisible in both directions —
+    // consolidating the bump and the size check into one `run:` block is an ordinary refactor that
+    // silently disabled the rule.
+    const flat = [];
+    commandLines.forEach((c, stepIdx) => c.split('\n').forEach((line, lineIdx) => flat.push({ line, at: stepIdx * 1000 + lineIdx })));
+    const posOf = (re) => flat.find((f) => re.test(f.line))?.at ?? -1;
+    const sizeAt = posOf(/measure-elements-sizes\.mjs\s+--check/);
+    const bumpAt = posOf(/bump-prerelease\.mjs/);
+    const publishAt = posOf(/publish-derived-set\.mjs/);
+    if (bumpAt !== -1) {
+      if (sizeAt === -1) {
+        problems.push(`${label} bumps without ever running the size check — the record is then never verified`);
+      } else if (sizeAt > bumpAt) {
+        problems.push(
+          `${label} runs the prerelease bump BEFORE \`measure-elements-sizes.mjs --check\`; the bump ` +
+            'mutates the manifests the size record measures, so the check compares the committed ' +
+            'record against a tree it can never match. Move the bump below the verification steps.',
+        );
+      }
+      if (publishAt === -1) {
+        problems.push(`${label} bumps but never publishes — the bump is then pure tree mutation`);
+      } else if (bumpAt > publishAt) {
+        problems.push(
+          `${label} runs the prerelease bump AFTER the publish, so it publishes the committed ` +
+            'version and the next run recomputes the same one — EPUBLISHCONFLICT on publish #2',
+        );
+      }
     }
   }
   for (const s2 of steps) {
@@ -848,7 +995,7 @@ const VALID_RELEASE_WORKFLOW = `jobs:
         run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json
       - name: Publish
         run: |
-          for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm publish --provenance --access public ); done
+          for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm publish ); done
 `;
 
 /**
@@ -889,15 +1036,16 @@ const REUSABLE_PAYLOAD_FIXTURE = `jobs:
       - name: Sizes
         run: node scripts/measure-elements-sizes.mjs --check
       - name: Audit
-        run: npm pack --dry-run
+        run: |
+          for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm pack --dry-run ); done
       - name: Security
         run: bash scripts/npm-audit-gate.sh
       - name: Bump
         run: node scripts/bump-prerelease.mjs --from-registry
       - name: Publish
-        run: |
-          TAG="\${{ inputs.dist-tag }}"
-          for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm publish --tag "$TAG" ); done
+        env:
+          DIST_TAG: \${{ inputs.dist-tag }}
+        run: node scripts/publish-derived-set.mjs
 `;
 
 /** A caller fixture, for the delegation checks. Mirrors release-rc.yml's real shape. */
@@ -949,7 +1097,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 51;
+const PROBE_FLOOR = 57;
 
 const PROBES = [
   {
@@ -1030,7 +1178,7 @@ const PROBES = [
       checkWorkflowUsesDerivedSet(
         withDefect(
           /      - name: Publish\n        run: \|\n          for pkg in[^\n]*\n/,
-          '      - name: "was: npm publish --provenance --access public over the derived set"\n        run: echo done\n',
+          '      - name: "was: npm publish over the derived set"\n        run: echo done\n',
         ),
         ['@spec-kitty/tokens'], ['tokens'],
       ),
@@ -1047,7 +1195,7 @@ const PROBES = [
     what: 'one hand-written step per package, identified by working-directory',
     run: () =>
       checkWorkflowUsesDerivedSet(
-        withDefect('      - name: SBOM', '      - name: Publish tokens\n        run: npm publish --provenance --access public\n        working-directory: packages/tokens\n      - name: SBOM'),
+        withDefect('      - name: SBOM', '      - name: Publish tokens\n        run: npm publish\n        working-directory: packages/tokens\n      - name: SBOM'),
         ['@spec-kitty/tokens'], ['tokens'],
       ),
   },
@@ -1076,7 +1224,7 @@ const PROBES = [
     what: 'the reusable publish payload missing a gate every stream must run',
     run: () =>
       checkWorkflowUsesDerivedSet(
-        withPayloadDefect('      - name: Audit\n        run: npm pack --dry-run\n', ''),
+        withPayloadDefect(/ {6}- name: Audit\n {8}run: \|\n {10}for pkg in [^\n]*npm pack[^\n]*\n/, ''),
         ['@spec-kitty/tokens'],
         ['tokens'],
         'publish',
@@ -1093,7 +1241,7 @@ const PROBES = [
     what: 'the reusable publish payload publishing WITHOUT --tag (npm would write `latest`)',
     run: () =>
       checkWorkflowUsesDerivedSet(
-        withPayloadDefect(/npm publish --tag "\$TAG"/, 'npm publish'),
+        withPayloadDefect(/run: node scripts\/publish-derived-set\.mjs/, 'run: npm publish'),
         ['@spec-kitty/tokens'],
         ['tokens'],
         'publish',
@@ -1108,7 +1256,7 @@ const PROBES = [
         // than with a bare command. `withPayloadDefect` THROWS when the anchor stops matching —
         // without that, the "mutant" is identical to the pristine fixture and the probe certifies
         // nothing while still reporting itself as passing. A lens demonstrated exactly that.
-        withPayloadDefect(/npm publish --tag "\$TAG"/, 'echo "published"'),
+        withPayloadDefect(/run: node scripts\/publish-derived-set\.mjs/, 'run: echo "published"'),
         ['@spec-kitty/tokens'],
         ['tokens'],
         'publish',
@@ -1119,15 +1267,18 @@ const PROBES = [
   // Four lenses independently defeated the reshape's own guarantees. Each entry below is one of
   // those defeats, turned into a re-runnable probe — the evidence dies with the review otherwise.
   {
-    // Alphonso, Experiment A. `--tag` deleted for real, and a shell COMMENT left behind that
-    // mentions it. The assertion regexed over the joined `run:` text, comments included, so prose
-    // restored green over an irreversible `latest` claim.
-    what: 'a tagless publish excused by a shell comment that merely MENTIONS --tag',
+    // Alphonso Experiment A / Renata M21, in their final form. Every prose-based defeat of the old
+    // regex rules — a full-line comment mentioning `--tag`, a TRAILING one, `--tag latest`
+    // hard-coded, `TAG=latest` reassigned after the input-derived line — worked by making the
+    // workflow TEXT look right while the publish did something else. None of them is expressible
+    // any more, because the payload no longer decides the tag: it invokes a script that refuses.
+    // What remains catchable here is bypassing the script, and that is what these two probe.
+    what: 'the payload publishing inline instead of through the refusing script',
     run: () =>
       checkWorkflowUsesDerivedSet(
         withPayloadDefect(
-          /npm publish --tag "\$TAG"/,
-          '# historical: npm publish --tag "$TAG" used to run here\n          npm publish',
+          /run: node scripts\/publish-derived-set\.mjs/,
+          'run: |\n          # publishes via scripts/publish-derived-set.mjs\n          npm publish --tag "$TAG"',
         ),
         ['@spec-kitty/tokens'],
         ['tokens'],
@@ -1136,12 +1287,15 @@ const PROBES = [
       ),
   },
   {
-    // Renata, M19. The per-line rule alone is satisfied by `--tag latest` — presence was never the
-    // dangerous part, the VALUE is.
-    what: 'the payload hard-coding `--tag latest` instead of forwarding the input',
+    // A SECOND publish riding alongside the script call — the script is only a guarantee if it is
+    // the sole route to the registry.
+    what: 'a stray `npm publish` beside a correct call to the publish script',
     run: () =>
       checkWorkflowUsesDerivedSet(
-        withPayloadDefect(/npm publish --tag "\$TAG"/, 'npm publish --tag latest'),
+        withPayloadDefect(
+          /run: node scripts\/publish-derived-set\.mjs/,
+          'run: |\n          node scripts/publish-derived-set.mjs\n          npm publish --tag latest',
+        ),
         ['@spec-kitty/tokens'],
         ['tokens'],
         'publish',
@@ -1149,15 +1303,12 @@ const PROBES = [
       ),
   },
   {
-    // A SECOND, tagless publish beside the tagged one. A job-wide "does --tag appear" test passes
-    // this; only a per-invocation test catches it.
-    what: 'a second, tagless `npm publish` riding alongside a correctly tagged one',
+    // Debbie/Randy: the DIST_TAG hand-off had no probe, and the script refuses without it — so
+    // dropping the env block turns every publish into a hard refusal at run time.
+    what: 'the payload dropping the DIST_TAG env hand-off to the publish script',
     run: () =>
       checkWorkflowUsesDerivedSet(
-        withPayloadDefect(
-          /npm publish --tag "\$TAG"/,
-          'npm publish --tag "$TAG" ); done\n          for pkg in $EXTRA; do ( cd "packages/$pkg" && npm publish',
-        ),
+        withPayloadDefect(/ {8}env:\n {10}DIST_TAG: [^\n]*\n/, ''),
         ['@spec-kitty/tokens'],
         ['tokens'],
         'publish',
@@ -1253,6 +1404,68 @@ const PROBES = [
     run: () =>
       checkPublishingCallersDelegate([
         { file: 'release-rc.yml', text: withCallerDefect(GH_PACKAGES, 'https://registry.npmjs.org') },
+      ]),
+  },
+  {
+    // THE PASS-3 BLOCKER, from the other side. All four lenses restored `contents: write` in the
+    // payload and watched the whole gate stay green, because the ceiling was a hand-copied constant
+    // and nothing opened the payload. This probe is the payload-side direction.
+    what: 'the payload declaring a permission above its recorded minimum (the pass-2 blocker, restored)',
+    run: () =>
+      checkPublishingCallersDelegate(
+        [{ file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }],
+        'jobs:\n  publish:\n    permissions:\n      contents: write\n      packages: write\n',
+      ),
+  },
+  {
+    what: 'the payload declaring a blanket `permissions: write-all`',
+    run: () =>
+      checkPublishingCallersDelegate(
+        [{ file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }],
+        'jobs:\n  publish:\n    permissions: write-all\n',
+      ),
+  },
+  {
+    what: 'the payload declaring no `permissions:` block at all',
+    run: () =>
+      checkPublishingCallersDelegate(
+        [{ file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }],
+        'jobs:\n  publish:\n    runs-on: ubuntu-latest\n',
+      ),
+  },
+  {
+    // Alphonso: `'nightly-release.yml'.endsWith('release.yml')` is true, so any workflow named
+    // that way could publish inline while exempt.
+    what: 'an inline publisher hiding behind a name that merely ENDS WITH release.yml',
+    run: () =>
+      checkPublishingCallersDelegate([
+        { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE },
+        {
+          file: '.github/workflows/nightly-release.yml',
+          text: 'jobs:\n  ship:\n    steps:\n      - run: npm publish\n',
+        },
+      ]),
+  },
+  {
+    // Alphonso: a comment containing `tags:` was enough to license `dist-tag: latest`.
+    what: 'a branch-triggered caller passing `dist-tag: latest` with a comment mentioning tags:',
+    run: () =>
+      checkPublishingCallersDelegate([
+        {
+          file: '.github/workflows/release-rc.yml',
+          text: '# note: prod uses tags: for its trigger\n' + VALID_CALLER_FIXTURE.replace('dist-tag: rc', 'dist-tag: latest'),
+        },
+      ]),
+  },
+  {
+    // Alphonso: `uses.includes('publish-packages.yml')` accepted a third-party payload.
+    what: 'a caller delegating to a THIRD-PARTY workflow whose path merely contains the filename',
+    run: () =>
+      checkPublishingCallersDelegate([
+        {
+          file: '.github/workflows/release-rc.yml',
+          text: VALID_CALLER_FIXTURE.replace('./.github/workflows/publish-packages.yml', 'evil-org/evil/.github/workflows/publish-packages.yml@main'),
+        },
       ]),
   },
   {
@@ -1470,6 +1683,8 @@ function main() {
       readdirSync(join(ROOT, '.github/workflows'))
         .filter((f) => /\.ya?ml$/.test(f))
         .map((f) => ({ file: `.github/workflows/${f}`, text: readFileSync(join(ROOT, '.github/workflows', f), 'utf8') })),
+      // The payload's own text, so the ceiling is PARSED rather than mirrored by a constant.
+      existsSync(join(ROOT, REUSABLE_WORKFLOW)) ? readFileSync(join(ROOT, REUSABLE_WORKFLOW), 'utf8') : null,
     ),
     ...checkRegistryAuthorityAgrees(
       pub,

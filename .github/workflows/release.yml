@@ -4,16 +4,34 @@ on:
   push:
     tags: ['v*.*.*']
 
+# RETARGETED TO GITHUB PACKAGES (operator decision, REL2 review). This workflow pointed at
+# npmjs.org, and REL2 added `publishConfig.registry` to all four manifests — which OUTRANKS the
+# npmrc that `setup-node`'s `registry-url` writes. The result would have been a prod release that
+# sends tarballs to GitHub Packages while holding credentials for npmjs: an auth failure on the
+# next tag, introduced by a PR that never touched this file. Review measured it; the operator chose
+# to make prod consistent with the standing GitHub-Packages-only ruling rather than defer.
+#
+# Three consequences, all deliberate:
+#   `packages: write`  is now required — without it GITHUB_TOKEN cannot publish here at all, and
+#                      this workflow did not have it, so it would have 403'd even after the
+#                      registry change.
+#   `id-token: write`  is gone with `--provenance` below. npm provenance is an npmjs.org feature
+#                      and is UNSUPPORTED on GitHub Packages, so FR-044 cannot be satisfied on this
+#                      registry by any configuration. That is REL3's (#364) question to settle, not
+#                      something this file can quietly keep claiming.
+#   `NPM_TOKEN`        never existed as a secret (verified: zero secrets by that name), so prod
+#                      could not publish to npmjs today regardless. GITHUB_TOKEN is a credential
+#                      that actually exists.
 permissions:
   contents: write   # for GitHub Release creation
-  id-token: write   # for npm provenance attestation (FR-044)
+  packages: write   # to publish to GitHub Packages — load-bearing, and absent before this change
 
 jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
         with: { fetch-depth: 0 }
@@ -21,7 +39,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: 'https://npm.pkg.github.com'
       - run: npm ci --ignore-scripts
 
       - name: "[ENFORCED] Security gate before publish (ADR-005)"
@@ -144,7 +162,18 @@ jobs:
           failed=""
           for pkg in $PKGS; do
             echo "=== publishing packages/$pkg ==="
-            if out="$( cd "packages/$pkg" && npm publish --provenance --access public 2>&1 )"; then
+            # `--provenance` REMOVED with the registry move, not as a preference: npm provenance is
+            # an npmjs.org feature, unsupported on GitHub Packages, and it hard-fails without the
+            # `id-token: write` this workflow no longer declares. FR-044 cannot be satisfied on this
+            # registry by any configuration — REL3 (#364) owns that question. `--access public` went
+            # with it: it is an npmjs access model, and GitHub Packages governs visibility per
+            # package outside the publish call.
+            #
+            # This loop is deliberately NOT routed through scripts/publish-derived-set.mjs yet. That
+            # is REL3's fold, and the operator scoped this change to the registry alone. The script
+            # would permit `latest` here — it keys on GITHUB_REF_TYPE, and this workflow is
+            # tag-triggered — so the fold is available whenever REL3 takes it.
+            if out="$( cd "packages/$pkg" && npm publish 2>&1 )"; then
               echo "$out"
             else
               echo "$out"

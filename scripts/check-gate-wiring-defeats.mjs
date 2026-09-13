@@ -122,6 +122,7 @@ const CASES = [
   // so check-gate-wiring.mjs's existence assertion stays green while the gate itself stops being
   // able to fail. That is #205's hole, and this proves it is refused for the new gate too.
   ['#363 the prerelease bump selftest weakened with a `|| true` tail', fallback('scripts/bump-prerelease.mjs --selftest', '|| true')],
+  ['#363 the publish-refusal selftest weakened with a `|| true` tail', fallback('scripts/publish-derived-set.mjs --selftest', '|| true')],
   // ── #202: the gate job's failure disjunction, matched as shell TEXT ──────────────────
   ['#202 conjunct on the lint-code disjunct', conjunct('lint-code')],
   ['#202 conjunct on the test disjunct', conjunct('test')],
@@ -300,7 +301,7 @@ const CASES = [
 // That was false: #436 is an ISSUE about charter.md and never touched this file. Two review
 // lenses caught it independently. Corrected rather than carried forward, because a wrong note
 // here misdirects exactly the person doing the next rebase.
-const MIN_CASES = 37;
+const MIN_CASES = 38;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });

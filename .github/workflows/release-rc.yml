@@ -19,16 +19,6 @@ on:
   push:
     branches: [develop]
 
-# THIS IS A CEILING, NOT A FILTER — the correction that mattered most in review. An earlier
-# revision declared `contents: write` in the payload on the belief that this smaller block would
-# narrow it back down. It does the opposite: a called workflow declaring ABOVE what its caller
-# grants fails workflow VALIDATION and the run never starts ("the nested job is requesting
-# 'contents: write', but is only allowed 'contents: read'"). The rc stream could not have run at
-# all. The payload now declares exactly what these two lines permit, and a checker asserts it.
-permissions:
-  contents: read
-  packages: write
-
 concurrency:
   group: publish-rc-${{ github.ref }}
   cancel-in-progress: false
@@ -36,6 +26,20 @@ concurrency:
 jobs:
   rc:
     uses: ./.github/workflows/publish-packages.yml
+    # THIS IS A CEILING, NOT A FILTER — the correction that mattered most in review, and it lives
+    # here because THIS is the block GitHub reads: a job-level `permissions:` overrides the
+    # workflow-level one, and an earlier revision attached this same explanation to a
+    # workflow-level block that job `rc` ignored entirely. A reducer lens caught that the obvious
+    # tidy-up — deleting the duplicate block — would have deleted the argument with it.
+    #
+    # An earlier revision declared `contents: write` in the PAYLOAD, believing this smaller block
+    # would narrow it back down. It does the opposite: a called workflow declaring ABOVE what its
+    # caller grants fails workflow VALIDATION and the run never starts ("the nested job is
+    # requesting 'contents: write', but is only allowed 'contents: read'"). The rc stream could not
+    # have run at all. The payload now declares exactly what these two lines permit, and
+    # check-release-graph.mjs asserts BOTH directions — it parses the payload's own block rather
+    # than comparing against a constant, because four review lenses each restored `contents: write`
+    # in the payload and watched every gate stay green.
     permissions:
       contents: read
       packages: write

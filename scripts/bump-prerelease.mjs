@@ -46,6 +46,22 @@ const PRERELEASE_ID = 'rc';
 const RANGE_FIELDS = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
 
 /**
+ * Tokens this script understands. AN UNRECOGNISED FLAG IS REFUSED, NOT IGNORED.
+ *
+ * Measured in review: `--self-test`, `--selftest=true`, `--SELFTEST`, `-selftest`, `--selftest2`
+ * and a bare `selftest` each fell through to `main()` and performed a REAL BUMP of all four
+ * manifests plus the lockfile — exiting 0 and printing a success line. The destructive action was
+ * the default for anything unrecognised, and every one of those spellings is what a person types
+ * when they believe they are running a check.
+ */
+const KNOWN_ARGV = new Set(['--selftest', '--dry-run', '--from-registry', '--']);
+
+export function unknownArgv(argv) {
+  return argv.filter((a) => a.startsWith('-') && !KNOWN_ARGV.has(a));
+}
+
+
+/**
  * PURE. Is this module being RUN, rather than imported?
  *
  * WHY THIS EXISTS, learned the hard way. `main()` used to run at module scope, so merely
@@ -574,6 +590,15 @@ if (isDirectInvocation(process.argv[1], import.meta.url) && process.argv.include
 // comment. `!--selftest` stops the probe table above from falling through into one: the selftest
 // block no longer exits, so without this conjunct `--selftest` bumps every manifest in the
 // repository and regenerates the lockfile. A checking mode must never mutate the thing it checks.
+if (isDirectInvocation(process.argv[1], import.meta.url)) {
+  const stray = unknownArgv(process.argv.slice(2));
+  if (stray.length > 0) {
+    console.error(`::error::unrecognised argument(s): ${stray.join(' ')}`);
+    console.error(`Known: ${[...KNOWN_ARGV].join(' ')}. Refusing rather than falling through to a bump.`);
+    process.exit(2);
+  }
+}
+
 if (isDirectInvocation(process.argv[1], import.meta.url) && !process.argv.includes('--selftest')) {
   main({
     dryRun: process.argv.includes('--dry-run'),

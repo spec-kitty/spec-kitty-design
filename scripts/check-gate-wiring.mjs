@@ -865,6 +865,11 @@ else {
     // entry here and a lens showed both its CI lines could then be deleted with this checker
     // still green.
     [/node\s+scripts\/bump-prerelease\.mjs\s+--selftest(\s|$)/, "the prerelease bump's own probe table", 'scripts/bump-prerelease.mjs --selftest'],
+    // #363 pass 3. Without an entry here the publish refusal's probe table could be dropped from
+    // `lint-code` with this checker still green — and that table is the ONLY pre-merge evidence
+    // that the `latest` refusal fires, now that the guard is executed code rather than a regex a
+    // reviewer can read.
+    [/node\s+scripts\/publish-derived-set\.mjs\s+--selftest(\s|$)/, "the publish refusal's own probe table", 'scripts/publish-derived-set.mjs --selftest'],
     [/node\s+scripts\/check-adopted-css-boundaries\.mjs(?!\s*--selftest)(\s|$)/, 'the cross-root selector gate', 'scripts/check-adopted-css-boundaries.mjs'],
     [/node\s+scripts\/check-adopted-css-boundaries\.mjs\s+--selftest(\s|$)/, "the cross-root gate's own probe table", 'scripts/check-adopted-css-boundaries.mjs --selftest'],
     [/node\s+scripts\/check-elements-entries\.mjs(?!\s*--selftest)(\s|$)/, 'the distribution-entry gate', 'scripts/check-elements-entries.mjs'],

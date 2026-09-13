@@ -134,43 +134,26 @@ jobs:
         if: ${{ inputs.bump }}
         run: node scripts/bump-prerelease.mjs --from-registry
 
-      # `set -euo pipefail` is load-bearing: without it a failing `npm publish` inside a `for` loop
-      # does not fail the step, and the workflow reports a successful release having published a
-      # subset. EPUBLISHCONFLICT is tolerated only on a re-run, matching release.yml's reasoning:
-      # a conflict on attempt 1 means the name+version is on the registry and this workflow did not
-      # put it there.
+      # THE PUBLISH IS A SCRIPT, NOT INLINE SHELL — and that is the whole point.
+      #
+      # This step used to be a 20-line `for` loop, and three review passes defeated the guards
+      # written to police it: `--tag "$TAG"` deleted outright; then excused by a full-line comment
+      # mentioning it; then by a TRAILING comment on the same line; then by `TAG=latest` reassigned
+      # after the input-derived line, which satisfied all three regexes at once and published
+      # `latest` with every gate green. Pattern-matching shell was the wrong mechanism for an
+      # irreversible act, and a sixth regex would only buy a fourth evasion.
+      #
+      # `publish-derived-set.mjs` refuses in EXECUTED CODE, over the value actually in hand, and
+      # keys the one dangerous decision on something the runner emits rather than something an
+      # author types: `latest` is permitted only when GITHUB_REF_TYPE is `tag`. A branch push — the
+      # rc stream — cannot produce that, so the rc stream cannot claim the prod channel no matter
+      # what a caller passes or a future editor writes here. It derives its own set from
+      # release-graph.mjs (refusing an empty one), publishes in topological order, halts rather than
+      # accumulating failures, and treats EPUBLISHCONFLICT as resumption only on a re-run.
       - name: Publish every package in the derived set
-        run: |
-          set -euo pipefail
-          PKGS="${{ steps.graph.outputs.dirs }}"
-          TAG="${{ inputs.dist-tag }}"
-          [ -n "$PKGS" ] || { echo "::error::empty publish set reached the publish loop"; exit 1; }
-          [ -n "$TAG" ]  || { echo "::error::no dist-tag supplied; refusing to let npm default to latest"; exit 1; }
-          failed=""
-          for pkg in $PKGS; do
-            echo "=== publishing packages/$pkg under $TAG ==="
-            if out="$( cd "packages/$pkg" && npm publish --tag "$TAG" 2>&1 )"; then
-              echo "$out"
-            else
-              echo "$out"
-              if echo "$out" | grep -qE "code (EPUBLISHCONFLICT|E409)" && [ "${GITHUB_RUN_ATTEMPT:-1}" -gt 1 ]; then
-                echo "::warning::packages/$pkg already published at this version — treating as resumption"
-              else
-                # HALT, do not accumulate. Ported from release.yml, which argues it at length and
-                # which this file was supposed to consolidate rather than diverge from: the set is
-                # published in TOPOLOGICAL order precisely so a package goes out after everything it
-                # depends on. Continuing past a real failure spends that guarantee in the only case
-                # it was for — if `tokens` fails, `styles`, `elements` and `react` publish anyway
-                # (npm publish does not resolve peers, so all three succeed) and every consumer
-                # install then hard-fails E404 on the missing peer. Those versions are permanent.
-                # Resumability comes from the skip-on-conflict branch above, not from continuing.
-                echo "::error::halting — every package after $pkg in the derived set may depend on it"
-                failed="$failed $pkg"
-                break
-              fi
-            fi
-          done
-          [ -z "$failed" ] || { echo "::error::failed to publish:$failed"; exit 1; }
+        env:
+          DIST_TAG: ${{ inputs.dist-tag }}
+        run: node scripts/publish-derived-set.mjs
 
       # Non-`latest` dist-tags never appear in the GitHub web UI version list, so this is the only
       # place an operator can see that the publish actually landed.
@@ -196,6 +179,9 @@ jobs:
       - name: Upload the SBOM for the caller to attach
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         with:
-          name: sbom
+          # Run-unique: actions/upload-artifact@v4 errors on a duplicate name within a run, so a
+          # fixed name breaks the moment this payload is called twice (a matrix, or rc + prod in
+          # one workflow). Inert today with one caller; cheaper to name correctly now.
+          name: sbom-${{ inputs.dist-tag }}
           path: spec-kitty-design-sbom.cdx.json
           if-no-files-found: error
