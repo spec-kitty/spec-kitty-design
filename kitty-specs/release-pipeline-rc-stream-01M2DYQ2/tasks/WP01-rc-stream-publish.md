@@ -28,6 +28,8 @@ execution_mode: code_change
 model: ''
 owned_files:
 - .npmrc
+- package.json
+- package-lock.json
 - .github/workflows/release-rc.yml
 - .github/workflows/ci-quality.yml
 - scripts/bump-prerelease.mjs
@@ -146,13 +148,31 @@ workspace lockfile consistent.
 
 **Steps**:
 1. Create `scripts/bump-prerelease.mjs`. Derive the package set from `release-graph.mjs` — import
-   it, do not re-scan and do not hand-list.
-2. Compute the next prerelease from the current versions. All buildable packages must already agree;
-   **refuse** if they do not, naming the divergent set.
-3. Write each `package.json`, then run `npm install --package-lock-only` **once**, after all
+   `publishable()`, do not re-scan and do not hand-list.
+2. Bump the **publishable** set (all four), not the buildable three. `@spec-kitty/react` has no
+   build target but peer-depends on `elements`, so leaving it behind breaks the rc set.
+3. Compute the next prerelease from the current versions. All publishable packages must already
+   agree; **refuse** if they do not, naming the divergent set.
+4. **Rewrite intra-scope peer ranges** to `^<major>.<minor>.<patch>-rc.0`. Measured with semver
+   7.7.4: `1.1.0-rc.1` does NOT satisfy `^1.0.0`, so a version-only bump publishes packages that
+   cannot resolve each other. `^1.1.0-rc.0` admits every later rc *and* the eventual `1.1.0`, so it
+   does not need rewriting on each rc.
+5. Assert as a post-condition that every intra-scope range is satisfied by the new version, computed
+   with semver rather than by re-reading the strings just written.
+6. Write each `package.json`, then run `npm install --package-lock-only` **once**, after all
    manifests are written.
-4. Refuse an empty package set (reuse the fail-closed accessors that already exist).
-5. Print the resulting version and the packages it was applied to.
+7. Refuse an empty package set.
+8. Print the resulting version, the packages it was applied to, and every range it rewrote.
+9. **Declare `semver` as a devDependency** and commit the regenerated lockfile with it. Found during
+   implementation: `semver` appears **zero** times in the root `package.json` and resolves only by
+   transitive hoisting into `node_modules`. A module-scope import of an undeclared package is the
+   local-green/CI-red shape — it works on a developer machine and hard-crashes the release path on
+   a clean install. Do not hand-roll the logic instead: caret-range-versus-prerelease matching is
+   precisely the subtlety this script exists to get right.
+
+**Verify BOTH paths, not one.** `--selftest` exercises the pure functions over fixtures; `--dry-run`
+exercises the real import, the real package discovery and the real manifests. A fixture-only green
+proves nothing about integration — that gap is what blocked #438 for two gate rounds.
 
 **Files**: `scripts/bump-prerelease.mjs` (new), `packages/*/package.json` and `package-lock.json`
 (written at run time, not committed by this subtask).
