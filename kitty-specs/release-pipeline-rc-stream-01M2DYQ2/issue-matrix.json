@@ -13,7 +13,7 @@
       "wp": null
     },
     "#362": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "REL1, its own mission. Unblocked but uninstalled: the GitHub App has zero installations, so develop is still advanced by an explicit push rather than tracking the train automatically. Does not block REL2.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,7 +21,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#363": {
