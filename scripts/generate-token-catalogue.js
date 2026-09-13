@@ -76,13 +76,22 @@ function sortKeysDeep(value) {
 // gate disproved that. Pass 3's review shrank the guard's then-hardcoded copy to `['match']` in
 // the same edit that swapped the stale-content probe away, and the suite stayed green. That
 // two-edit mutation now reds: `compareCatalogue` throws on the first non-match probe it reaches
-// (the process dies there; the remaining probes never run). But a THREE-edit variant still
-// passes — drop the kind, delete the stale probe, and add another non-match probe, and nothing
-// reaches the branch that would throw. A fourth variant leaves production untouched by swapping
-// one `mkVerdict('stale', …)` for a bare object literal. So the honest claim is: this raises the
-// cost of the shrink-and-swap from two coordinated edits to three, and forces the third to be a
-// visible production edit. It does not make the guard unbreakable, and the `--selftest` probe
-// below that drives `mkVerdict` with a bogus kind is what keeps the one load-bearing `if` alive.
+// (the process dies there; the remaining probes never run).
+//
+// The cost of defeating it, RE-DERIVED against this tree after the pass-5 gate falsified two
+// earlier attempts at this same sentence — first by overstating ("closed by construction"), then
+// by understating. Both were written against a tree they no longer described. Executed here:
+//   · drop the kind + swap the pure stale probe ............ REDS (mkVerdict throws)
+//   · + delete the stale probe entirely .................... REDS — the `--check` subprocess row
+//     drives production into `mkVerdict('stale', …)` inside the spawned process, so `--check`
+//     exits 2 where the probe expects 1. The CLI table below is what kills this one.
+//   · drop the kind + swap `return mkVerdict('stale', …)` for a bare object literal + swap the
+//     pure stale probe ...................................... PASSES.
+// So the minimum surviving path is three edits, TWO OF THEM IN PRODUCTION (`VERDICT_KINDS`, and
+// the return site inside `compareCatalogue`, which is what `--check` calls). The bare-literal
+// swap leaves VERDICT_KINDS untouched — not production. This guard is not unbreakable; it makes
+// the break visible in a production diff instead of hiding it in a test table. The `[guard]`
+// probe below keeps the one load-bearing `if` alive.
 const VERDICT_KINDS = Object.freeze(['invalid-json', 'invalid-generated_at', 'stale', 'reformatted', 'match']);
 
 function mkVerdict(kind, message) {
@@ -203,11 +212,18 @@ if (process.argv.includes('--selftest')) {
   //
   // That is the #362 fail-open/silent-fallback shape this PR exists to close, sitting on the PR's
   // own newly-shipped release-gate surface. These probes spawn THIS FILE as a real subprocess
-  // against a scratch tree — the shape check-token-breaking-changes.sh already uses one file
-  // over — so they exercise the shipped exit codes, not a reimplementation of them (#434).
+  // against a scratch tree — the shape check-token-breaking-changes.sh already uses one file over.
+  //
+  // SCOPE, stated precisely (pass 5, reviewer lens): the fixture catalogue is built by the script
+  // under test, so both sides of every comparison come from the same binary. This table therefore
+  // pins the COMPARISON CONTRACT — verdict, message and exit code — and NOT the content the
+  // generator extracts. A generator that corrupts extraction consistently passes here; what
+  // catches that is `release-gate` running `--check` against the repo's real committed catalogue.
   //
   // No test hook is added to production code to make this possible: cssPath/outPath are
-  // `path.resolve` of RELATIVE paths, so setting `cwd` alone redirects both.
+  // `path.resolve` of RELATIVE paths, so setting `cwd` alone redirects both. That property is the
+  // seam the whole table rests on, so the `scratch-cwd` row below ASSERTS it rather than trusting
+  // this comment (pass 5, architect lens).
   const { spawnSync } = require('child_process');
   const os = require('os');
 
@@ -216,86 +232,125 @@ if (process.argv.includes('--selftest')) {
   const mkTree = (cssText) => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tokcat-selftest-'));
     fs.mkdirSync(path.join(dir, 'packages', 'tokens', 'src'), { recursive: true });
-    fs.writeFileSync(path.join(dir, 'packages', 'tokens', 'src', 'tokens.css'), cssText);
+    if (cssText !== null) fs.writeFileSync(path.join(dir, 'packages', 'tokens', 'src', 'tokens.css'), cssText);
     return dir;
   };
+  // Pinned so a mutant cannot point the table at a different file and certify that instead
+  // (pass 5, debugger lens: two added lines spawning `git show HEAD:…` gave a green selftest and a
+  // real fail-open).
+  const SPAWN_TARGET = __filename;
+  // ASSERTED, not merely named: repointing SPAWN_TARGET at a pristine copy of this file (two added
+  // lines writing `git show HEAD:…` to a temp path) gave a green selftest over a real fail-open —
+  // the table dutifully certified a file that was not the one under test. Verified: without this
+  // check that mutation survives; with it, the mutant must also delete this check.
+  if (SPAWN_TARGET !== __filename) {
+    console.error('\n❌ refusing to report green: the --check probe table is not spawning this file.');
+    process.exit(1);
+  }
   const run = (dir, args) =>
-    spawnSync(process.execPath, [__filename, ...args], { cwd: dir, encoding: 'utf8' });
+    spawnSync(process.execPath, [SPAWN_TARGET, ...args], { cwd: dir, encoding: 'utf8' });
 
-  // `null` mutate == delete the committed catalogue entirely.
+  // Every row declares the CAUSE it drives and a `sig` the shipped script must actually print for
+  // it, so the cause is OBSERVED rather than merely declared. Coverage below is asserted over
+  // causes, NOT exit codes — the pass-5 gate blocked on exactly that distinction: `stale` and
+  // `reformatted` both exit 1, so an exit-code guard let the stale row be swapped for another
+  // exit-1 row with everything green, and two edits then reopened the fail-open (mutant `--check`
+  // rc=0 over a genuinely stale catalogue, control rc=1). Two lenses reached that independently.
+  //
+  // `mutate: null` == delete the committed catalogue. `build: false` == the generate step cannot
+  // run for this fixture, so skip it. Both the zero-token and cwd rows live IN this table rather
+  // than beside it, so the count is observed; a `+ 1` standing in for an out-of-table probe let
+  // that probe be deleted while the floor and the summary still reported the old number (three
+  // lenses, independently).
   const CLI_PROBES = [
-    ['fresh, byte-identical committed catalogue -> exit 0', (raw) => raw, 0],
-    [
-      'THE BLOCKER THIS TABLE EXISTS FOR: a token genuinely removed from the committed catalogue -> exit 1',
-      (raw) => {
+    { note: 'fresh, byte-identical committed catalogue -> exit 0', mutate: (raw) => raw, exit: 0, cause: 'match', sig: 'matches a fresh, canonical build' },
+    {
+      note: 'THE BLOCKER THIS TABLE EXISTS FOR: a token genuinely removed from the committed catalogue -> exit 1',
+      mutate: (raw) => {
         const o = JSON.parse(raw);
         o.categories.color.tokens = o.categories.color.tokens.slice(0, 1);
         return JSON.stringify(o, null, 2) + '\n';
       },
-      1,
-    ],
-    ['content identical but minified -> exit 1 (reformatted, NFR-006)', (raw) => JSON.stringify(JSON.parse(raw)), 1],
-    [
-      'generated_at is not a real date -> exit 2 (cannot compare — NOT a content verdict)',
-      (raw) => {
+      exit: 1,
+      cause: 'stale',
+      sig: 'is stale relative to',
+    },
+    { note: 'content identical but minified -> exit 1 (reformatted, NFR-006)', mutate: (raw) => JSON.stringify(JSON.parse(raw)), exit: 1, cause: 'reformatted', sig: 'not byte-identical to a canonical regeneration' },
+    {
+      note: 'generated_at is not a real date -> exit 2 (cannot compare — NOT a content verdict)',
+      mutate: (raw) => {
         const o = JSON.parse(raw);
         o.generated_at = 'not-a-date';
         return JSON.stringify(o, null, 2) + '\n';
       },
-      2,
-    ],
-    ['committed catalogue is not valid JSON -> exit 2', () => 'not json {', 2],
-    ['committed catalogue absent entirely -> exit 2', null, 2],
+      exit: 2,
+      cause: 'invalid-generated_at',
+      sig: 'generated_at is absent or invalid',
+    },
+    { note: 'committed catalogue is not valid JSON -> exit 2', mutate: () => 'not json {', exit: 2, cause: 'invalid-json', sig: 'not valid JSON' },
+    { note: 'committed catalogue absent entirely -> exit 2', mutate: null, exit: 2, cause: 'absent', sig: 'does not exist' },
+    {
+      // Cited by check-token-breaking-changes.sh in PROSE as the justification for its own
+      // zero-token floor, but nothing asserted it: deleting the refusal left every suite green.
+      note: 'source CSS defines no --sk-* tokens -> refuse (exit 1), never certify an empty catalogue',
+      css: '/* no --sk-* tokens at all */\n:root { color: red; }\n',
+      build: false,
+      exit: 1,
+      cause: 'zero-token',
+      sig: 'No --sk-* tokens found',
+    },
+    {
+      // Asserts the seam itself: the subprocess must read the SCRATCH tree, so its refusal has to
+      // name the scratch path. Resolving paths from `__dirname` — a plausible "improvement" —
+      // breaks the table and, before this row existed, did so by writing the tracked catalogue.
+      note: 'the subprocess reads the SCRATCH tree, not the repo (the cwd-relativity seam, asserted)',
+      css: null,
+      build: false,
+      exit: 1,
+      cause: 'scratch-cwd',
+      sig: 'Source file not found',
+      expectScratchPath: true,
+    },
   ];
 
   let cliBad = 0;
-  const seenExits = new Set();
-  for (const [note, mutate, expectExit] of CLI_PROBES) {
-    const dir = mkTree(FIXTURE_CSS);
+  let cliRan = 0;
+  const seenCauses = new Set();
+  for (const p of CLI_PROBES) {
+    const dir = mkTree(p.css === undefined ? FIXTURE_CSS : p.css);
+    cliRan++;
     try {
-      const build = run(dir, []);
-      if (build.status !== 0) throw new Error(`fixture build failed (${build.status}): ${build.stderr}`);
-      const catAbs = path.join(dir, CAT_REL);
-      if (mutate === null) fs.rmSync(catAbs);
-      else fs.writeFileSync(catAbs, mutate(fs.readFileSync(catAbs, 'utf8')));
+      if (p.build !== false) {
+        const build = run(dir, []);
+        if (build.status !== 0) throw new Error(`fixture build failed (${build.status}): ${build.stderr}`);
+        const catAbs = path.join(dir, CAT_REL);
+        if (p.mutate === null) fs.rmSync(catAbs);
+        else fs.writeFileSync(catAbs, p.mutate(fs.readFileSync(catAbs, 'utf8')));
+      }
       const r = run(dir, ['--check']);
-      seenExits.add(r.status);
-      if (r.status !== expectExit) {
-        console.error(`  ✗ [cli] ${note}: expected exit ${expectExit}, got ${r.status}`);
-        console.error(`      ${(r.stderr || r.stdout || '').trim().split('\n')[0]}`);
+      const out = `${r.stderr || ''}${r.stdout || ''}`;
+      const problems = [];
+      if (r.status !== p.exit) problems.push(`expected exit ${p.exit}, got ${r.status}`);
+      if (!out.includes(p.sig)) problems.push(`output does not contain ${JSON.stringify(p.sig)}`);
+      if (p.expectScratchPath && !out.includes(dir)) problems.push('output does not name the scratch dir');
+      if (problems.length > 0) {
+        console.error(`  ✗ [cli] ${p.note}: ${problems.join('; ')}`);
+        console.error(`      ${out.trim().split('\n')[0]}`);
         cliBad++;
       } else {
-        console.log(`  ✓ [cli] ${note}`);
+        seenCauses.add(p.cause);
+        console.log(`  ✓ [cli] ${p.note}`);
       }
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   }
 
-  // The zero-token refusal (`tokenCount === 0`) is cited by check-token-breaking-changes.sh in
-  // PROSE as the justification for its own zero-token floor, but nothing asserted it — deleting it
-  // left every suite green (pass 4, debugger lens). A cross-file invariant that lives only in a
-  // comment is not an invariant.
-  {
-    const dir = mkTree('/* no --sk-* tokens at all */\n:root { color: red; }\n');
-    try {
-      const r = run(dir, ['--check']);
-      seenExits.add(r.status);
-      if (r.status !== 1) {
-        console.error(`  ✗ [cli] source CSS defines no --sk-* tokens -> refuse: expected exit 1, got ${r.status}`);
-        cliBad++;
-      } else {
-        console.log('  ✓ [cli] source CSS defines no --sk-* tokens -> refuse (exit 1), never certify an empty catalogue');
-      }
-    } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
-    }
-  }
-  const CLI_TOTAL = CLI_PROBES.length + 1;
-
-  // `mkVerdict`'s single `if` is the one load-bearing line behind the coverage guard below.
+  // `mkVerdict`'s single `if` is the one load-bearing line behind the kind-coverage guard below.
   // Deleting it left the pure table 8/8 green, after which the whole pass-3 defect returns in one
-  // edit. The guard's own guard is now a probe rather than a comment.
+  // edit. Counted in `cliRan` and required in REQUIRED_CAUSES, because when this probe sat outside
+  // both it could simply be deleted (pass 5: deleting it AND neutering the throw stayed green).
+  cliRan++;
   let mkVerdictRefusedBogus = false;
   try {
     mkVerdict('not-a-real-kind', 'should never be constructed');
@@ -303,11 +358,13 @@ if (process.argv.includes('--selftest')) {
     mkVerdictRefusedBogus = true;
   }
   if (mkVerdictRefusedBogus) {
+    seenCauses.add('mkverdict-guard');
     console.log('  ✓ [guard] mkVerdict refuses a kind absent from VERDICT_KINDS');
   } else {
-    console.error('  ✗ [guard] mkVerdict accepted a bogus verdict kind — the coverage guard is inert');
+    console.error('  ✗ [guard] mkVerdict accepted a bogus verdict kind — the kind-coverage guard is inert');
     cliBad++;
   }
+  const CLI_TOTAL = cliRan;
 
   // Floors OUTSIDE their tables (check-develop-ruleset-parity.mjs's PROBE_FLOOR shape).
   const PROBE_FLOOR = 8;
@@ -315,17 +372,26 @@ if (process.argv.includes('--selftest')) {
     console.error(`\n❌ the probe table has shrunk: ${PROBES.length} probe(s) against a floor of ${PROBE_FLOOR}.`);
     process.exit(1);
   }
-  const CLI_PROBE_FLOOR = 7;
+  const CLI_PROBE_FLOOR = 9;
   if (CLI_TOTAL < CLI_PROBE_FLOOR) {
-    console.error(`\n❌ the --check probe table has shrunk: ${CLI_TOTAL} probe(s) against a floor of ${CLI_PROBE_FLOOR}.`);
+    console.error(`\n❌ the --check probe set has shrunk: ${CLI_TOTAL} probe(s) against a floor of ${CLI_PROBE_FLOOR}.`);
     process.exit(1);
   }
-  // Exit-code coverage, the CLI analogue of the verdict-kind guard: all three documented outcomes
-  // (0 clean, 1 content verdict, 2 cannot compare) must be observed from a real subprocess, so
-  // the table cannot drift into asserting only one of them.
-  const missingExits = [0, 1, 2].filter((e) => !seenExits.has(e));
-  if (missingExits.length > 0) {
-    console.error(`\n❌ refusing to report green: no --check probe observes exit code(s): ${missingExits.join(', ')}.`);
+  // CAUSE coverage — the CLI analogue of VERDICT_KINDS, and the pass-5 blocker fix.
+  //
+  // This replaces an exit-code coverage guard, which was too coarse to do the job: four distinct
+  // causes collapse into exits 1 and 2, so swapping the stale row for any other exit-1 row kept
+  // coverage satisfied and reopened the fail-open. Cause coverage strictly subsumes exit-code
+  // coverage (every cause pins an exit code), so nothing was lost by dropping it — and the
+  // debugger lens showed it was never the sole detector of anything anyway, which also means an
+  // earlier commit message of mine that credited it with a kill was wrong.
+  const REQUIRED_CAUSES = [
+    'match', 'stale', 'reformatted', 'invalid-generated_at', 'invalid-json',
+    'absent', 'zero-token', 'scratch-cwd', 'mkverdict-guard',
+  ];
+  const missingCauses = REQUIRED_CAUSES.filter((c) => !seenCauses.has(c));
+  if (missingCauses.length > 0) {
+    console.error(`\n❌ refusing to report green: no --check probe observes cause(s): ${missingCauses.join(', ')}.`);
     process.exit(1);
   }
   // #438 pass 2, finding F8, corrected in pass 3: a pass/fail SPLIT floor alone does not protect
@@ -343,12 +409,12 @@ if (process.argv.includes('--selftest')) {
     process.exit(1);
   }
   if (bad || cliBad) {
-    console.error(`\n❌ ${bad} of ${PROBES.length} compareCatalogue probe(s) and ${cliBad} of ${CLI_TOTAL} --check subprocess probe(s) did not behave as recorded.`);
+    console.error(`\n❌ ${bad} of ${PROBES.length} compareCatalogue probe(s) and ${cliBad} of ${CLI_TOTAL} CLI probe(s) did not behave as recorded.`);
     process.exit(1);
   }
   console.log(
     `\n✅ All ${PROBES.length} compareCatalogue probes (${passKind} expect-match, ${failKind} expect-non-match) ` +
-      `and all ${CLI_TOTAL} --check subprocess probes behaved as recorded.`,
+      `and all ${CLI_TOTAL} CLI probes (${CLI_PROBES.length} --check subprocess + 1 guard) behaved as recorded.`,
   );
   process.exit(0);
 }

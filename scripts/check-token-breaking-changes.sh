@@ -107,8 +107,17 @@ if [ "${1:-}" = "--selftest" ]; then
   # Matchers: EXACT: whole line, fixed string · EXACTRE: whole line, ERE — lets a probe pin the
   # RENDERING without pinning a value git chose for us · MAXLINES:n output is at most n lines ·
   # anything else, loose substring.
+  # Counts its own invocations. Pass 5, debugger lens: `assert_probe` was meta-probed eleven ways,
+  # but NOTHING asserted that `probe()` ever calls it — deleting the single call site left all 19
+  # probes reporting green while the real gate returned exit 0 over a genuinely removed token. A
+  # correct assertion that is never reached is the same defect as a wrong one, one level up. The
+  # ASSERT_CALLS == TOTAL invariant below closes it: the counter lives INSIDE this function, so
+  # removing the call stops the count.
+  ASSERT_CALLS=0
+  PROBE_NAMES=""
   assert_probe() {
     local rc="$1" expect_exit="$2" expect_grep="$3" out="$4" ok=1
+    ASSERT_CALLS=$((ASSERT_CALLS + 1))
     [ "$rc" -eq "$expect_exit" ] || ok=0
     if [ -n "$expect_grep" ]; then
       case "$expect_grep" in
@@ -125,6 +134,8 @@ if [ "${1:-}" = "--selftest" ]; then
     local name="$1" expect_exit="$2" expect_grep="$3" cwd="$4"
     shift 4
     TOTAL=$((TOTAL + 1))
+    PROBE_NAMES="$PROBE_NAMES
+$name"
     if [ "$expect_exit" -eq 0 ]; then PASS_KIND_COUNT=$((PASS_KIND_COUNT + 1)); else FAIL_KIND_COUNT=$((FAIL_KIND_COUNT + 1)); fi
     local out rc ok=1
     set +e
@@ -337,7 +348,8 @@ if [ "${1:-}" = "--selftest" ]; then
   #    tags is not enough: the pre-fix `git tag --list "$GLOB" | head -1` only SIGPIPEs when
   #    `head -1` closes the pipe's read end before `git` finishes writing all matching refs, which
   #    needs enough output to exceed the pipe buffer. MEASURED (pass 4, reducer lens, 10 runs per
-  #    scale against the pre-fix shape): 20,000 tags -> 10/10, 2,000 -> 10/10, 500 -> 7/10; the
+  #    scale against the pre-fix shape): 20,000 tags -> 10/10, 2,000 -> 10/10, 500 -> intermittent
+  #    (~50-70%: separate runs gave 7/10, 5/10 and 24/40 — it is a race, not a stable figure); the
   #    post-fix `for-each-ref --count=1` is 0/10 at every scale. An earlier revision of this
   #    comment claimed "fewer did not reproduce reliably", which was false — 2,000 reproduces just
   #    as consistently. The probe stays at 20,000 anyway: the whole 19-probe table runs in ~1.6 s,
@@ -371,7 +383,11 @@ if [ "${1:-}" = "--selftest" ]; then
   #    `--count=1` while dumping the tag list on another line satisfied it. The MAXLINES probe
   #    below is what actually holds the legibility half.
   probe "D: ~20,000 unreachable release tags don't SIGPIPE the lookup -> exit 2, and the refusal names ONE tag (not a silent 141)" 2 "EXACTRE:   A release tag exists in this repository \(v[0-9]+\.[0-9]+\.[0-9]+\) but is not reachable" "$REPO_F"
-  probe "D2: that same refusal stays LEGIBLE -> the whole output is a handful of lines, not 20,000 tag names" 2 "MAXLINES:12" "$REPO_F"
+  #    MAXLINES is 6 against a MEASURED 3: the real refusal is exactly three lines (the headline,
+  #    the named tag, and the "verify this checkout" line). 6 leaves room for one more explanatory
+  #    line without permitting a tag dump. An earlier revision used 12, which was 4x the measured
+  #    value and left nine lines a mutant could hide in (pass 5, reviewer lens).
+  probe "D2: that same refusal stays LEGIBLE -> the whole output is a handful of lines, not 20,000 tag names" 2 "MAXLINES:6" "$REPO_F"
 
   # ── Meta-probes: assert_probe itself (#438 pass 4, debugger lens finding 2) ──────────────────
   # Neutering the assertion block (`if [ -n "$expect_grep" ]` -> `if false`, or blanking the
@@ -409,6 +425,41 @@ if [ "${1:-}" = "--selftest" ]; then
     echo ""
     echo "❌ assert_probe meta-probes: $META_BAD of $META_TOTAL failed (floor $META_FLOOR) — the"
     echo "   probe harness's own assertions are not trustworthy, so the table above proves nothing."
+    exit 1
+  fi
+
+  # Every probe must actually have run its assertions (pass 5, debugger lens — see assert_probe).
+  # Both callers count: the table calls assert_probe once per probe, and meta() once per meta-row,
+  # so the invariant is TOTAL + META_TOTAL. (Written as bare TOTAL first, which reds on correct
+  # code — a guard that fires on a healthy tree is worse than none, and the baseline caught it.)
+  EXPECTED_ASSERT_CALLS=$((TOTAL + META_TOTAL))
+  if [ "$ASSERT_CALLS" -ne "$EXPECTED_ASSERT_CALLS" ]; then
+    echo ""
+    echo "❌ $TOTAL probe(s) and $META_TOTAL meta-probe(s) ran, but assert_probe was called"
+    echo "   $ASSERT_CALLS time(s) instead of $EXPECTED_ASSERT_CALLS — results are being reported"
+    echo "   without being asserted. Every ✓ above is meaningless."
+    exit 1
+  fi
+
+  # ── Branch coverage: the shell analogue of VERDICT_KINDS / REQUIRED_CAUSES ───────────────────
+  # Pass 5, reviewer lens: the total floor and the pass/fail split both survive swapping probes D
+  # and D2 for filler expect-fail probes — TOTAL stays 19, the split stays non-degenerate, and the
+  # ENTIRE #438 SIGPIPE fix can then be reverted with the suite reporting "All 19 ... behaved as
+  # recorded". Counting probes never protected any particular refusal branch. This does.
+  REQUIRED_BRANCHES="SIGPIPE
+LEGIBLE
+shallow clone
+unreachable from HEAD
+zero tokens
+categories:\[\]"
+  MISSING_BRANCHES=""
+  while IFS= read -r branch; do
+    [ -n "$branch" ] || continue
+    printf '%s\n' "$PROBE_NAMES" | grep -qE "$branch" || MISSING_BRANCHES="$MISSING_BRANCHES $branch;"
+  done <<< "$REQUIRED_BRANCHES"
+  if [ -n "$MISSING_BRANCHES" ]; then
+    echo ""
+    echo "❌ refusing to report green: no probe covers refusal branch(es):$MISSING_BRANCHES"
     exit 1
   fi
 
