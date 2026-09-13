@@ -1,0 +1,105 @@
+name: Publish rc
+
+# REL2 (#363, epic #361). The rc half of the dual-stream pipeline.
+#
+# WHY A SEPARATE WORKFLOW AND NOT A BRANCH IN release.yml. The two streams differ in trigger
+# (branch push vs. tag), in identity, in dist-tag, and in attestation posture. Folding both into one
+# file would put four conditionals around every step. `release.yml` keeps the prod path and REL3
+# (#364) owns it; this file never touches it.
+#
+# `develop` does not yet track the train automatically — REL1's promotion App is pending — so
+# `develop` is advanced by an explicit push, and that push is this trigger. That limits how OFTEN
+# this runs, not whether it is correct.
+on:
+  push:
+    branches: [develop]
+
+# `packages: write` is the single load-bearing line in this file. Without it GITHUB_TOKEN cannot
+# publish to GitHub Packages at all, and there is no other credential in play: NPM_TOKEN has never
+# existed in this repository.
+#
+# NO `id-token: write`, and no `--provenance` below: npm provenance is an npmjs.org registry feature
+# and is unsupported on GitHub Packages. GitHub artifact attestations, which ARE supported, are
+# prod-only and belong to REL3.
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: publish-rc-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish-rc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+          registry-url: 'https://npm.pkg.github.com'
+      - run: npm ci --ignore-scripts
+
+      - name: "[ENFORCED] Security gate before publish (ADR-005)"
+        run: bash scripts/npm-audit-gate.sh
+
+      # DERIVED, not listed — same single source release.yml uses. CAPTURED INTO VARIABLES AND
+      # ASSERTED, never interpolated into `echo`: `set -e` does not propagate a failed command
+      # substitution when the enclosing command is `echo`, so `dirs=` would be written empty, the
+      # step would exit 0, and `for pkg in ; do` would iterate zero times and succeed — publishing
+      # nothing while reporting a green release. A bare assignment DOES trip `set -e`.
+      - name: Resolve the publishable package set
+        id: graph
+        run: |
+          set -euo pipefail
+          PROJECTS="$(node scripts/release-graph.mjs --projects)"
+          DIRS="$(node scripts/release-graph.mjs --dirs)"
+          [ -n "$PROJECTS" ] || { echo "::error::empty build set"; exit 1; }
+          [ -n "$DIRS" ]     || { echo "::error::empty publish set"; exit 1; }
+          echo "projects=$PROJECTS" >> "$GITHUB_OUTPUT"
+          echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
+          echo "Publishing: $DIRS"
+
+      - name: Build the buildable set
+        run: npx nx run-many --target=build --projects=${{ steps.graph.outputs.projects }}
+
+      # Bumps the PUBLISHABLE set (all four) in lockstep and rewrites intra-scope peer ranges onto a
+      # prerelease-admitting form. Measured: `1.1.0-rc.1` does NOT satisfy `^1.0.0`, so a
+      # version-only bump would publish an rc set whose packages cannot resolve each other.
+      - name: Bump all publishable packages to the next prerelease (FR-003, FR-010)
+        run: node scripts/bump-prerelease.mjs
+
+      - name: "[ENFORCED] Release graph is still coherent after the bump (FR-003, FR-004)"
+        run: node scripts/check-release-graph.mjs
+
+      # ONE step over the derived set. `set -euo pipefail` is load-bearing: without it a failing
+      # `npm publish` inside a `for` loop does not fail the step, and the workflow reports a
+      # successful release having published a subset.
+      #
+      # `--tag rc` is mandatory. Omitting it makes npm write `latest`, and the FIRST publish of a
+      # package with no existing versions would then claim the prod channel from the rc stream.
+      - name: Publish every package under dist-tag rc (FR-001, FR-009)
+        run: |
+          set -euo pipefail
+          PKGS="${{ steps.graph.outputs.dirs }}"
+          [ -n "$PKGS" ] || { echo "::error::empty publish set reached the publish loop"; exit 1; }
+          for pkg in $PKGS; do
+            echo "=== publishing packages/$pkg under rc ==="
+            ( cd "packages/$pkg" && npm publish --tag rc )
+          done
+
+      - name: Report the published dist-tags
+        run: |
+          set -euo pipefail
+          for pkg in ${{ steps.graph.outputs.dirs }}; do
+            NAME="$(node -p "require('./packages/$pkg/package.json').name")"
+            echo "=== $NAME ==="
+            # Non-`latest` dist-tags do not appear in the GitHub web UI version list, so this is
+            # the only place an operator can see that the rc actually landed.
+            npm view "$NAME" dist-tags || echo "(not yet readable — first publish propagating)"
+          done
