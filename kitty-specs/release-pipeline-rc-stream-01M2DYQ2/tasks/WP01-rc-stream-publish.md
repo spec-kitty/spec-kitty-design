@@ -84,12 +84,23 @@ repo's older documents imply:
 REL1's promotion App.** First publish creates each package **private**; making them public is
 irreversible, needs the org to permit it, and is an operator act outside this mission.
 
-**Commit-scope rule** (`commitlint.config.cjs` / CLAUDE.md §3): scopes are limited to `tokens`,
-`storybook`, `doctrine`, `ci`, `docs`, `release`, `deps`, `security`, `styles`, `elements`, `react`,
-`acceptance`, `merge`, `team-overview`. Use **`release`** for `.npmrc` and the publish workflows,
-**`ci`** for `ci-quality.yml` and `scripts/**`. `spec`, `specs`, `chore` and `test` are not scopes.
-Run `npx commitlint --from=origin/train/elements-first --to=HEAD` after every commit; fix failures
-with a new commit, never `--amend` one a hook already rejected.
+**Commit-message rule** (`commitlint.config.cjs` / CLAUDE.md §3) — **TYPE and SCOPE are different
+enums, and conflating them is the trap.** Verified the hard way in this WP: `release: …` was
+rejected with `type must be one of [build, chore, ci, docs, feat, fix, perf, refactor, revert,
+style, test]`, because `release` is a valid *scope* and not a valid *type*.
+
+- **Types** (before the colon or parenthesis): `build`, `chore`, `ci`, `docs`, `feat`, `fix`,
+  `perf`, `refactor`, `revert`, `style`, `test`.
+- **Scopes** (inside the parentheses): `tokens`, `storybook`, `doctrine`, `ci`, `docs`, `release`,
+  `deps`, `security`, `styles`, `elements`, `react`, `acceptance`, `merge`, `team-overview`.
+- Use `ci(release):` for `.npmrc` and the publish workflows, `ci:` for `ci-quality.yml` and
+  `scripts/**`, `docs:` for mission artifacts. Note `ci` and `docs` appear in *both* enums, which
+  is why the mistake is easy to make.
+
+Run `npx commitlint --from=origin/train/elements-first --to=HEAD` after every commit. A rejected
+message cannot be laundered by a follow-up commit — commitlint checks the whole range — so amend it
+while it is local and unpushed; never rewrite a commit that has already been pushed or that a hook
+has acted on.
 
 **Fold-in rule** (operator standing order): fix small, domain-matched debt in the same commit rather
 than deferring. If something is mission-sized or outside this WP's domain, name it and stop — do not
