@@ -65,24 +65,40 @@ function sortKeysDeep(value) {
  *                             rewritten.
  *   'match'                — genuinely a fresh, canonical build (generated_at aside)
  */
+
+// #438 pass 4: the verdict kinds `compareCatalogue` can return, declared ONCE. Every return site
+// goes through `mkVerdict`, which refuses a kind absent from this list, and the `--selftest`
+// coverage guard reads the same list. That is what makes the guard hold BY CONSTRUCTION: pass 3's
+// review shrank the guard's then-hardcoded copy to `['match']` in the same edit that swapped the
+// stale-content probe away, and the suite stayed green. Doing that now makes `compareCatalogue`
+// throw on the six non-match probes, so the mutation reds instead of silently demanding less.
+const VERDICT_KINDS = Object.freeze(['invalid-json', 'invalid-generated_at', 'stale', 'reformatted', 'match']);
+
+function mkVerdict(kind, message) {
+  if (!VERDICT_KINDS.includes(kind)) {
+    throw new Error(`internal: '${kind}' is not a declared verdict kind (VERDICT_KINDS: ${VERDICT_KINDS.join(', ')})`);
+  }
+  return { verdict: kind, message };
+}
+
 function compareCatalogue(freshCatalogue, committedRaw) {
   let committed;
   try {
     committed = JSON.parse(committedRaw);
   } catch (e) {
-    return { verdict: 'invalid-json', message: `not valid JSON: ${e.message}` };
+    return mkVerdict('invalid-json', `not valid JSON: ${e.message}`);
   }
   if (!isValidTimestamp(committed && committed.generated_at)) {
-    return {
-      verdict: 'invalid-generated_at',
-      message: 'generated_at is absent or invalid (must be a string Date.parse accepts)',
-    };
+    return mkVerdict(
+      'invalid-generated_at',
+      'generated_at is absent or invalid (must be a string Date.parse accepts)',
+    );
   }
   const contentMatches =
     JSON.stringify(sortKeysDeep(withoutGeneratedAt(committed))) ===
     JSON.stringify(sortKeysDeep(withoutGeneratedAt(freshCatalogue)));
   if (!contentMatches) {
-    return { verdict: 'stale', message: 'content differs from a fresh build, ignoring generated_at' };
+    return mkVerdict('stale', 'content differs from a fresh build, ignoring generated_at');
   }
   // Content matches, order-independent. Now require BYTE-IDENTICAL against the canonical form
   // this generator itself writes, with only the committed timestamp spliced in (the sole field
@@ -90,12 +106,12 @@ function compareCatalogue(freshCatalogue, committedRaw) {
   // own key order, which is the order this generator always writes.
   const canonical = JSON.stringify({ ...freshCatalogue, generated_at: committed.generated_at }, null, 2) + '\n';
   if (committedRaw !== canonical) {
-    return {
-      verdict: 'reformatted',
-      message: 'content matches but the file is not byte-identical to a canonical regeneration (hand-edited, reordered, or reformatted)',
-    };
+    return mkVerdict(
+      'reformatted',
+      'content matches but the file is not byte-identical to a canonical regeneration (hand-edited, reordered, or reformatted)',
+    );
   }
-  return { verdict: 'match', message: 'matches a fresh, canonical build' };
+  return mkVerdict('match', 'matches a fresh, canonical build');
 }
 
 // ── --selftest: fixture pairs, no disk I/O, floor outside the table (#438 pass 2, finding A) ──
@@ -171,8 +187,10 @@ if (process.argv.includes('--selftest')) {
   // keeps the split non-degenerate (still 2 match / 6 non-match) and the total unchanged, so that
   // guard alone would go green with the one probe the table exists for gone. Asserting every
   // VERDICT KIND `compareCatalogue` can return is covered is what actually prevents that swap.
-  const REQUIRED_VERDICTS = ['match', 'stale', 'reformatted', 'invalid-json', 'invalid-generated_at'];
-  const missingVerdicts = REQUIRED_VERDICTS.filter((v) => !seenVerdicts.has(v));
+  // Pass 4: this is no longer a second hardcoded copy of the kind list. It reads VERDICT_KINDS —
+  // the same declaration `mkVerdict` validates every `compareCatalogue` return against — so the
+  // "shrink the guard and swap the probe in one edit" mutation now reds (see VERDICT_KINDS).
+  const missingVerdicts = VERDICT_KINDS.filter((v) => !seenVerdicts.has(v));
   if (missingVerdicts.length > 0) {
     console.error(`\n❌ refusing to report green: no probe covers verdict kind(s): ${missingVerdicts.join(', ')}.`);
     process.exit(1);
@@ -259,9 +277,16 @@ if (process.argv.includes('--check')) {
       console.error('   NFR-006 requires generated outputs to regenerate byte-identically; run: node scripts/generate-token-catalogue.js');
       process.exit(1);
       break;
-    default:
+    case 'match':
       console.log(`✅ ${outPath} ${message} from ${cssPath} (${tokenCount} tokens, generated_at excluded).`);
       process.exit(0);
+      break;
+    default:
+      // Pass 4: 'match' used to BE this `default:`, which made the success path the fallback —
+      // any verdict kind added later without a branch here would have printed ✅ and exited 0.
+      // Unreachable while `mkVerdict` guards every return; failing closed regardless.
+      console.error(`❌ internal: unhandled verdict '${verdict}' from compareCatalogue.`);
+      process.exit(2);
   }
 }
 

@@ -326,7 +326,13 @@ if [ "${1:-}" = "--selftest" ]; then
   git -C "$REPO_F" commit -q -m "root, no reachable release tag"
   ORPHAN_SHA="$(git -C "$REPO_F" commit-tree 4b825dc642cb6eb9a060e54bf8d69288fbee4904 -m "unreachable orphan carrying the release tags")"
   { for i in $(seq 1 20000); do printf 'create refs/tags/v%d.0.0 %s\n' "$i" "$ORPHAN_SHA"; done; } | git -C "$REPO_F" update-ref --stdin
-  probe "D: ~20,000 unreachable release tags don't SIGPIPE the lookup -> exit 2, 'not reachable' (not a silent 141)" 2 "not reachable" "$REPO_F"
+  #    Pass 4: this asserts the rendered line EXACTLY, not the substring 'not reachable'. With only
+  #    the loose substring, dropping `--count=1` from the lookup survived: the mutant still exits 2
+  #    and still says "not reachable", it just interpolates all 20,000 tag names and renders 20,002
+  #    lines of them. `--count=1` is what keeps the refusal legible, and nothing asserted that.
+  #    `v1.0.0` is deterministic here — `for-each-ref` sorts by refname, and '.' (0x2E) < '0' (0x30)
+  #    puts v1.0.0 ahead of v10.0.0 — so the whole line is a stable expectation.
+  probe "D: ~20,000 unreachable release tags don't SIGPIPE the lookup -> exit 2, ONE legible line (not a silent 141, not 20,000 tag names)" 2 "EXACT:   A release tag exists in this repository (v1.0.0) but is not reachable" "$REPO_F"
 
   # Total floor OUTSIDE the table (same shape as check-develop-ruleset-parity.mjs's PROBE_FLOOR):
   # a probe count silently shrinking must itself be caught.
