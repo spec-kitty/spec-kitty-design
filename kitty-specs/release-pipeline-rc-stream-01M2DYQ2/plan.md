@@ -82,7 +82,7 @@ kitty-specs/release-pipeline-rc-stream-01M2DYQ2/
 ```
 .github/workflows/
 ├── release-rc.yml            # NEW — push to develop; packages: write; publishes --tag rc
-└── release.yml               # EDITED — remove the dead NPM_TOKEN + provenance wiring
+└── release.yml               # UNTOUCHED — prod path, owned by REL3 (#364); see IC-01
 
 scripts/
 ├── release-graph.mjs         # UNCHANGED — consumed for --projects / --dirs / --json
@@ -108,13 +108,24 @@ every step; `release.yml` keeps the prod path and this mission does not repurpos
 > Implementation concerns are NOT work packages. `/spec-kitty.tasks` translates these into
 > executable WPs.
 
-### IC-01 — Registry cutover
+### IC-01 — Registry cutover (`.npmrc` only)
 
-- **Purpose**: Point the `@spec-kitty` scope at GitHub Packages and remove the npmjs-era wiring that provably cannot work.
-- **Relevant requirements**: FR-005, FR-006, FR-007
-- **Affected surfaces**: `.npmrc`, `.github/workflows/release.yml`
+- **Purpose**: Point the `@spec-kitty` scope at GitHub Packages.
+- **Relevant requirements**: FR-005
+- **Affected surfaces**: `.npmrc` — **one line, and nothing else**
 - **Sequencing/depends-on**: none
-- **Risks**: `release.yml` is tag-triggered and has never executed, so nothing here is exercised by CI. Changes must be justified by reading, and limited to what is provably dead: `NPM_TOKEN` (no such secret has ever existed) and `--provenance` (unsupported on the target registry).
+- **Narrowed during implementation, and why.** This concern originally included cutting
+  `release.yml` over too. That was scope creep: #363 names `.npmrc`, and `release.yml` is the
+  tag-triggered *prod* path. Making the edit turned `check-release-graph.mjs` red with
+  `release.yml has no step running publish with provenance` — the gate **enforces** FR-044, which
+  ADR-5 ratifies as a supply-chain control and which `system-context-canvas.md`,
+  `release-runbook.md` and a mission-review record all cite. Removing it is an ADR amendment, not a
+  cleanup. The edits were reverted, the gate is green again (28/28 probes trip), and the prod
+  cutover plus the FR-044 decision belong to REL3 (#364), which already owns attestations.
+- **Risks**: leaving `.npmrc` on GitHub Packages while `release.yml` still names npmjs is a real
+  inconsistency — but a harmless one today, because `release.yml` is tag-triggered, has never run,
+  and has no credential (`NPM_TOKEN` has never existed). Say so in the PR rather than fixing it
+  here.
 
 ### IC-02 — Lockstep prerelease versioning
 

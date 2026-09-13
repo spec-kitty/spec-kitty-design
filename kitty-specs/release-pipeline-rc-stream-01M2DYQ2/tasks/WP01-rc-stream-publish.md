@@ -8,8 +8,6 @@ requirement_refs:
 - FR-003
 - FR-004
 - FR-005
-- FR-006
-- FR-007
 - FR-008
 - FR-009
 planning_base_branch: mission/release-pipeline-rc-stream
@@ -30,7 +28,6 @@ execution_mode: code_change
 model: ''
 owned_files:
 - .npmrc
-- .github/workflows/release.yml
 - .github/workflows/release-rc.yml
 - .github/workflows/ci-quality.yml
 - scripts/bump-prerelease.mjs
@@ -113,20 +110,21 @@ provably cannot work.
 
 **Steps**:
 1. `.npmrc`: change `@spec-kitty:registry=https://registry.npmjs.org/` to
-   `@spec-kitty:registry=https://npm.pkg.github.com`.
-2. `.github/workflows/release.yml`: remove `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}`, remove
-   `id-token: write`, remove `--provenance` from the publish invocation, and change
-   `registry-url` to `https://npm.pkg.github.com`. Add `packages: write` to its `permissions`.
-3. Leave `release.yml`'s tag trigger and its `--access public` semantics alone beyond the above —
-   REL3 owns that path.
+   `@spec-kitty:registry=https://npm.pkg.github.com`. **That is the whole subtask.**
+2. **Do not touch `.github/workflows/release.yml`.** An earlier revision of this WP told you to cut
+   it over as well. Doing so turns `check-release-graph.mjs` red with `release.yml has no step
+   running publish with provenance`: the gate **enforces** FR-044, which ADR-5 ratifies as a
+   supply-chain control. Retiring it is an ADR amendment and belongs to REL3 (#364).
 
-**Files**: `.npmrc`, `.github/workflows/release.yml`.
+**Files**: `.npmrc`.
 
-**Red-first test expectation**: declarative config; no unit test. The non-fakeable evidence is that
-`grep -rn 'registry.npmjs.org\|NPM_TOKEN\|--provenance' .npmrc .github/workflows/` returns nothing.
+**Red-first test expectation**: declarative config; no unit test. Non-fakeable evidence is that
+`grep -n 'registry.npmjs.org' .npmrc` returns nothing and the scope line names `npm.pkg.github.com`.
 
-**Definition of Done**: that grep is empty; `bash scripts/check-action-pins.sh` is green;
-`node scripts/check-release-graph.mjs` still passes.
+**Definition of Done**: `.npmrc` names `npm.pkg.github.com`; `bash scripts/check-action-pins.sh`
+green; `node scripts/check-release-graph.mjs` green; `node scripts/check-release-graph.mjs
+--selftest` green (28 probes trip). Note the DoD deliberately does **not** grep the whole
+`.github/workflows/` tree for `--provenance` — that string legitimately remains in `release.yml`.
 
 ---
 
@@ -217,3 +215,7 @@ with `--tag rc`, and `node scripts/check-release-graph.mjs` still passes.
 - Creating or configuring REL1's GitHub App, or enabling automatic `train → develop` promotion.
 - REL3's prod/`latest` stream and artifact attestations (#364).
 - Applying a ruleset to `develop`.
+- **Any edit to `.github/workflows/release.yml`**, including its registry, its dead `NPM_TOKEN`
+  reference, and `--provenance`. REL3 (#364) owns the prod path.
+- **Retiring FR-044 / amending ADR-5.** Provenance is unsupported on GitHub Packages, so REL3 must
+  resolve it — with an ADR amendment and an operator decision, not a deleted flag.

@@ -36,8 +36,8 @@ These were measured against the repository tonight and are the premises the plan
 | FR-003 | Versions are bumped in **lockstep**: all three buildable packages move to the same next prerelease (e.g. `1.1.0-rc.1`), derived — never hand-listed — from `release-graph.mjs`. | High |
 | FR-004 | `package-lock.json` is regenerated (`npm install --package-lock-only`) and committed in the same change, so the workspace lockfile never drifts from the bumped manifests. | High |
 | FR-005 | The root `.npmrc` scope mapping moves off `registry.npmjs.org` to `npm.pkg.github.com`. | High |
-| FR-006 | `--provenance` and `id-token: write` are **removed**: npm provenance is unsupported on GitHub Packages (recorded in #363's constraints). Artifact attestations remain prod-only, out of scope here. | High |
-| FR-007 | The dead `NPM_TOKEN` reference is removed. It has never existed as a secret, so nothing is being revoked. | Medium |
+| ~~FR-006~~ | **Withdrawn — moved to REL3 (#364).** An earlier revision of this spec required removing `--provenance` and `id-token: write` from `release.yml`. Implementation showed why that is not this mission's to make: `check-release-graph.mjs` **enforces** provenance in `REQUIRED_STEPS`, and FR-044 is a *ratified* control — ADR-5 (npm supply-chain posture) names it as a mitigation, `system-context-canvas.md` lists it as a quality attribute, `release-runbook.md` documents it, and a mission-review record marks it ADEQUATE. Retiring it is an ADR amendment, not a workflow edit. | — |
+| ~~FR-007~~ | **Withdrawn — moved to REL3 (#364).** Same reason: `release.yml` is the tag-triggered *prod* path. #363's scope names `.npmrc`, not `release.yml`; editing it was scope creep introduced by this spec, and it broke a green gate. | — |
 | FR-008 | Publishing refuses over an empty package set, reusing `release-graph.mjs`'s existing fail-closed accessors rather than a second list. | High |
 | FR-009 | The rc publish never writes dist-tag `latest`. | High |
 
@@ -62,7 +62,13 @@ These were measured against the repository tonight and are the premises the plan
 - The prod/`latest` stream and artifact attestations — REL3 (#364).
 - Automatic `train → develop` promotion — REL1's App, pending.
 - Flipping package visibility to public — operator act, needs org permission.
-- Any change to `release.yml`'s tag-triggered prod path beyond removing what is provably dead.
+- **Any change to `release.yml` at all** — it is the tag-triggered prod path and REL3 owns it. This
+  includes the registry cutover, the dead `NPM_TOKEN` reference, and `--provenance`.
+- **Retiring FR-044 (npm provenance).** It is unsupported on GitHub Packages, so REL3's prod cutover
+  must deal with it — but it is a control ratified by ADR-5 and asserted by
+  `check-release-graph.mjs`. Retiring it requires an ADR amendment and an operator decision, and
+  the replacement (GitHub artifact attestations) is already REL3's scope. **Named exclusion with a
+  concrete owner, not a deferral.**
 
 ## Recorded decisions this mission inherits
 
