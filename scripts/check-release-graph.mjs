@@ -32,6 +32,48 @@ import { publishable, buildable, all } from './release-graph.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const WORKFLOW = '.github/workflows/release.yml';
+const REUSABLE_WORKFLOW = '.github/workflows/publish-packages.yml';
+
+/**
+ * A thin caller has NO publish step of its own — the payload is in the reusable workflow — so a
+ * checker keyed on job steps would pass it while auditing nothing. That is the blind spot the
+ * reshape exists to close, and it must not be rebuilt one level up.
+ *
+ * So: any workflow that delegates to the reusable publish workflow must pass a NON-EMPTY
+ * `dist-tag`. Omitting `--tag` is the one irreversible mistake available here — npm then writes
+ * `latest`, and the first publish of a package with no existing versions claims the prod channel.
+ *
+ * PURE over `{file, text}` pairs so the probe table can drive it.
+ */
+export function checkPublishingCallersDelegate(workflows) {
+  const problems = [];
+  if (!Array.isArray(workflows) || workflows.length === 0) {
+    return ['no workflow files found — refusing to certify caller delegation over nothing'];
+  }
+  for (const { file, text } of workflows) {
+    let wf;
+    try {
+      wf = parse(text);
+    } catch {
+      continue; // not our concern here; other checks own malformed YAML
+    }
+    for (const [jobName, job] of Object.entries(wf?.jobs ?? {})) {
+      const uses = typeof job?.uses === 'string' ? job.uses : null;
+      if (!uses || !uses.includes('publish-packages.yml')) continue;
+      const tag = job?.with?.['dist-tag'];
+      if (typeof tag !== 'string' || tag.trim() === '') {
+        problems.push(
+          `${file} job \`${jobName}\` delegates to the reusable publish workflow without a ` +
+            'non-empty `dist-tag`; npm would default to `latest` and claim the prod channel',
+        );
+      }
+      if (typeof job?.with?.registry !== 'string' || job.with.registry.trim() === '') {
+        problems.push(`${file} job \`${jobName}\` delegates to the publish workflow without a \`registry\``);
+      }
+    }
+  }
+  return problems;
+}
 
 /**
  * Packages deliberately kept unpublishable. EMPTY, and that is the point: a package acquiring
@@ -204,12 +246,26 @@ export function checkForbiddenContents(tarballs) {
  * second list living beside it. So this also refuses any `run:` block in the release job that
  * names two or more known packages literally.
  */
-export function checkWorkflowUsesDerivedSet(workflowText, packageNames, packageDirs) {
+export function checkWorkflowUsesDerivedSet(
+  workflowText,
+  packageNames,
+  packageDirs,
+  // PARAMETERISED (REL2, #363). This used to hard-code `jobs.release`, so every one of the seven
+  // REQUIRED_STEPS assertions below applied to release.yml and nothing else. When the rc stream
+  // arrived as a second publishing workflow with a differently-named job, it inherited none of
+  // them: measured at the time, deleting its publish step — or its `--tag` — left every gate in
+  // the repository green. All four review lenses reached that independently.
+  //
+  // Defaulted to 'release' so the probe table and VALID_RELEASE_WORKFLOW keep exercising the
+  // original shape unchanged; the real call-sites name their job explicitly.
+  jobName = 'release',
+  label = `${jobName === 'release' ? 'release.yml' : 'the workflow'}`,
+) {
   const problems = [];
   const wf = parse(workflowText);
-  const steps = wf?.jobs?.release?.steps;
+  const steps = wf?.jobs?.[jobName]?.steps;
   if (!Array.isArray(steps) || steps.length === 0) {
-    return ['release.yml has no release job steps to check'];
+    return [`${label} has no \`${jobName}\` job steps to check`];
   }
   // THE WHOLE STEP, not just `run:`. A lens re-added the two original per-package steps verbatim
   // —
@@ -235,20 +291,38 @@ export function checkWorkflowUsesDerivedSet(workflowText, packageNames, packageD
   // THE PAYLOAD. A lens deleted the entire publish step and this check still exited 0: it
   // asserted that the derived set was USED, never that anything was published. A release
   // workflow that publishes nothing is the mission's own stated defect class.
-  const REQUIRED_STEPS = [
+  // PER-STREAM, because the gate set is a property of the ARTIFACT, not of which workflow happens
+  // to publish it — but two of these are genuinely prod-only and demanding them everywhere is a
+  // false failure, not a stricter gate:
+  //
+  //   provenance — npm provenance is an npmjs.org feature and is UNSUPPORTED on GitHub Packages
+  //                (recorded in #363's constraints). The rc stream cannot satisfy it, ever.
+  //   the SBOM   — feeds the GitHub Release that only the prod stream cuts.
+  //
+  // The other five are the ones the rc path dropped when it was a separate file, and restoring
+  // them is the substance of this reshape. Getting this wrong in the first draft turned the real
+  // run red while the selftest stayed green, because every fixture used the default job.
+  const PROD_ONLY_STEPS = [
     [/npm\s+publish\b[^\n]*--provenance[^\n]*--access\s+public/, 'publish with provenance'],
-    [/npm\s+pack\b/, 'the contents audit'],
     [/cyclonedx/i, 'the SBOM'],
+  ];
+  const EVERY_STREAM_STEPS = [
+    [/npm\s+pack\b/, 'the contents audit'],
     [/check-release-graph\.mjs(?!\s*--selftest)/, 'the release-graph assertion on the publishing path'],
     [/check-release-graph\.mjs\s+--selftest/, "the gate's own blindness check on the publishing path"],
     [/check-vue-packed-types\.mjs/, 'the packed Vue declaration check on the publishing path'],
     [/measure-elements-sizes\.mjs\s+--check/, 'the size and SRI drift check on the publishing path'],
   ];
+  const REQUIRED_STEPS = jobName === 'release' ? [...PROD_ONLY_STEPS, ...EVERY_STREAM_STEPS] : EVERY_STREAM_STEPS;
   for (const [re, what] of REQUIRED_STEPS) {
-    if (!re.test(commands)) problems.push(`release.yml has no step running ${what}`);
+    if (!re.test(commands)) problems.push(`${label} has no step running ${what}`);
+  }
+  // The rc payload must still publish SOMETHING, or the five shared gates guard an empty act.
+  if (jobName !== 'release' && !/npm\s+publish\b/.test(commands)) {
+    problems.push(`${label} has no step running npm publish at all`);
   }
   for (const s2 of steps) {
-    if (s2['continue-on-error']) problems.push(`release.yml step "${s2.name ?? s2.run}" carries continue-on-error`);
+    if (s2['continue-on-error']) problems.push(`${label} step "${s2.name ?? s2.run}" carries continue-on-error`);
   }
 
   // ANCHORED ON THE INVOCATION, not on the filename appearing anywhere. `check-release-graph.mjs`
@@ -261,11 +335,14 @@ export function checkWorkflowUsesDerivedSet(workflowText, packageNames, packageD
     problems.push('release.yml never invokes scripts/release-graph.mjs to derive the set');
   }
   if (!/id:\s*graph\b/.test(workflowText)) {
-    problems.push('release.yml has no step with `id: graph` — the `steps.graph.outputs.*` references below resolve to the empty string');
+    problems.push(
+      `${label} has no step with \`id: graph\` — the \`steps.graph.outputs.*\` references below ` +
+        'resolve to the empty string',
+    );
   }
   for (const key of ['outputs.projects', 'outputs.dirs']) {
     if (!commands.includes(key)) {
-      problems.push(`release.yml does not consume steps.graph.${key}`);
+      problems.push(`${label} does not consume steps.graph.${key}`);
     }
   }
   // A hand-written enumeration is two or more package identifiers in one run block.
@@ -284,7 +361,7 @@ export function checkWorkflowUsesDerivedSet(workflowText, packageNames, packageD
   const perPackage = runs.filter((r) => r.isPerPackageDir);
   if (perPackage.length) {
     problems.push(
-      `release.yml has ${perPackage.length} step(s) with a per-package \`working-directory\` ` +
+      `${label} has ${perPackage.length} step(s) with a per-package \`working-directory\` ` +
         `(${perPackage.map((r) => r.name).join(', ')}) — that is one hand-written step per package, ` +
         `which is how the three lists drifted apart. Loop over the derived set instead.`,
     );
@@ -303,7 +380,7 @@ export function checkWorkflowUsesDerivedSet(workflowText, packageNames, packageD
     const named = [...new Set(ids.filter((id) => new RegExp(`(?<![\\w@/-])${escapeRe(id)}(?![\\w/-])`).test(code)))];
     if (named.length >= 2) {
       problems.push(
-        `release.yml step "${r.name}" names ${named.length} packages literally (${named.join(', ')}) — ` +
+        `${label} step "${r.name}" names ${named.length} packages literally (${named.join(', ')}) — ` +
           `that is a second list beside the derived one, which is how the three lists drifted apart`,
       );
     }
@@ -559,6 +636,42 @@ const VALID_RELEASE_WORKFLOW = `jobs:
  * a future edit to the baseline would quietly disarm probes while the count stayed at 24. That is
  * the same certifying-absence shape this whole file is about, one level up in the test harness.
  */
+/**
+ * A minimal, VALID reusable publish payload — the `publish` job shape, carrying the five gates
+ * every stream must run plus a publish. Probes mutate a copy of it; the pristine form must pass,
+ * or a probe would red for the wrong reason.
+ *
+ * Deliberately NOT built from the real file: a fixture that reads the artifact it guards passes
+ * whenever they drift together, which is the co-edited-baseline defect recorded elsewhere in this
+ * repo.
+ */
+const REUSABLE_PAYLOAD_FIXTURE = `jobs:
+  publish:
+    steps:
+      - name: Resolve
+        id: graph
+        run: |
+          PROJECTS="$(node scripts/release-graph.mjs --projects)"
+          DIRS="$(node scripts/release-graph.mjs --dirs)"
+          echo "projects=\${PROJECTS}" >> "$GITHUB_OUTPUT"
+          echo "dirs=\${DIRS}" >> "$GITHUB_OUTPUT"
+      - name: Build
+        run: npx nx run-many --target=build --projects=\${{ steps.graph.outputs.projects }}
+      - name: Selftest
+        run: node scripts/check-release-graph.mjs --selftest
+      - name: Assert
+        run: node scripts/check-release-graph.mjs
+      - name: Vue
+        run: node scripts/check-vue-packed-types.mjs
+      - name: Sizes
+        run: node scripts/measure-elements-sizes.mjs --check
+      - name: Audit
+        run: npm pack --dry-run
+      - name: Publish
+        run: |
+          for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm publish --tag rc ); done
+`;
+
 const withDefect = (anchor, withText) => {
   const out = VALID_RELEASE_WORKFLOW.replace(anchor, withText);
   if (out === VALID_RELEASE_WORKFLOW) {
@@ -683,6 +796,71 @@ const PROBES = [
         ['@spec-kitty/tokens'], ['tokens'],
       ),
   },
+  // ── REL2 (#363): the reusable publish payload and its thin callers ───────────────────────
+  // Both of these guards were demonstrated by hand before being fixtured, and a hand
+  // demonstration protects nothing — it lives in a shell history, not in the table. The
+  // `publish`-job path and checkPublishingCallersDelegate had zero coverage between them, which
+  // is the same unfixtured-guard shape this file exists to refuse.
+  {
+    what: 'the reusable publish payload missing a gate every stream must run',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        REUSABLE_PAYLOAD_FIXTURE.replace('      - name: Audit\n        run: npm pack --dry-run\n', ''),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'the reusable publish payload not publishing at all',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        // Anchored on the loop body, because the fixture publishes over the derived set rather
+        // than with a bare command. An anchor that no longer matches makes the "mutant" identical
+        // to the pristine fixture, and the probe then certifies nothing — so this is asserted
+        // below rather than trusted.
+        REUSABLE_PAYLOAD_FIXTURE.replace(/npm publish --tag rc/, 'echo "published"'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'a caller delegating to the publish workflow with NO dist-tag (npm would write `latest`)',
+    run: () =>
+      checkPublishingCallersDelegate([
+        {
+          file: 'caller.yml',
+          text: 'jobs:\n  rc:\n    uses: ./.github/workflows/publish-packages.yml\n    with:\n      registry: https://npm.pkg.github.com\n',
+        },
+      ]),
+  },
+  {
+    what: 'a caller delegating with an EMPTY dist-tag',
+    run: () =>
+      checkPublishingCallersDelegate([
+        {
+          file: 'caller.yml',
+          text: 'jobs:\n  rc:\n    uses: ./.github/workflows/publish-packages.yml\n    with:\n      registry: https://npm.pkg.github.com\n      dist-tag: "  "\n',
+        },
+      ]),
+  },
+  {
+    what: 'a caller delegating without a registry',
+    run: () =>
+      checkPublishingCallersDelegate([
+        {
+          file: 'caller.yml',
+          text: 'jobs:\n  rc:\n    uses: ./.github/workflows/publish-packages.yml\n    with:\n      dist-tag: rc\n',
+        },
+      ]),
+  },
+  {
+    what: 'the caller scan asserted over zero workflow files',
+    run: () => checkPublishingCallersDelegate([]),
+  },
   {
     what: 'a sourcemap in the tarball',
     run: () => checkForbiddenContents([{ name: '@x/a', files: ['dist/index.js', 'dist/index.js.map'] }]),
@@ -739,8 +917,12 @@ function selftest() {
   }
   // The floor is asserted, not implied: a probe list that silently emptied would print nothing
   // and exit 0, which is the defect this script is about.
-  if (PROBES.length < 27) {
-    console.error(`❌ only ${PROBES.length} probes — the selftest floor is 27`);
+  // 34, raised from 27 by REL2 (#363), which added six probes covering the reusable publish
+  // payload and caller delegation. Taken from the table's own reported count rather than from
+  // arithmetic. Left at 27 the six new probes could have been deleted with the gate still green —
+  // the unfloored-table shape this file's own header exists to refuse.
+  if (PROBES.length < 34) {
+    console.error(`❌ only ${PROBES.length} probes — the selftest floor is 34`);
     process.exit(1);
   }
   console.log(`\n✅ all ${PROBES.length} probes tripped the gate.`);
@@ -778,7 +960,25 @@ function main() {
       Object.keys(JSON.parse(readFileSync(join(ROOT, 'packages/styles/package.json'), 'utf8')).exports ?? {}),
       '@spec-kitty/styles',
     ),
-    ...checkWorkflowUsesDerivedSet(readFileSync(join(ROOT, WORKFLOW), 'utf8'), pkgs.map((p) => p.name), pkgs.map((p) => p.dir)),
+    // BOTH payloads, not one. `release.yml` still carries the prod path inline; the rc path's
+    // payload now lives in the reusable `publish-packages.yml`, and its `publish` job is what
+    // actually resolves, builds, verifies and publishes. Auditing only the first is what left the
+    // second unguarded.
+    ...checkWorkflowUsesDerivedSet(readFileSync(join(ROOT, WORKFLOW), 'utf8'), pkgs.map((p) => p.name), pkgs.map((p) => p.dir), 'release', WORKFLOW),
+    ...(existsSync(join(ROOT, REUSABLE_WORKFLOW))
+      ? checkWorkflowUsesDerivedSet(
+          readFileSync(join(ROOT, REUSABLE_WORKFLOW), 'utf8'),
+          pkgs.map((p) => p.name),
+          pkgs.map((p) => p.dir),
+          'publish',
+          REUSABLE_WORKFLOW,
+        )
+      : [`${REUSABLE_WORKFLOW} is missing — the rc stream's publish payload has nowhere to live`]),
+    ...checkPublishingCallersDelegate(
+      readdirSync(join(ROOT, '.github/workflows'))
+        .filter((f) => /\.ya?ml$/.test(f))
+        .map((f) => ({ file: `.github/workflows/${f}`, text: readFileSync(join(ROOT, '.github/workflows', f), 'utf8') })),
+    ),
     ...checkNoHandWrittenListsAnywhere(
       // Composite actions too: a list moved into .github/actions/*/action.yml was invisible,
       // because only .github/workflows was ever read.

@@ -1,0 +1,168 @@
+name: Publish packages (reusable)
+
+# THE SHARED PUBLISH SPINE (REL2, #363, epic #361).
+#
+# WHY THIS EXISTS. `release.yml` (prod, tag-triggered) and `release-rc.yml` (rc, develop-triggered)
+# were split by FILE when they differ only by INPUT — trigger, registry, dist-tag, whether to bump,
+# whether to cut a GitHub Release. Splitting by file duplicated the entire resolve -> build ->
+# verify -> publish structure, dropped five gates on the copy, and — the part that mattered — put
+# the copy outside `check-release-graph.mjs`, whose seven payload assertions key on
+# `jobs.release.steps` in one named file. All four review lenses reached that independently.
+#
+# So the payload lives HERE, once, and the callers are thin. `check-release-graph.mjs` audits this
+# job; a separate, much smaller assertion checks that each caller actually delegates here and
+# passes a dist-tag — because a thin caller has no publish step of its own, and a checker keyed on
+# caller steps would pass it while auditing nothing. That blind spot is the one this reshape is
+# meant to close, so it does not get rebuilt one level up.
+
+on:
+  workflow_call:
+    inputs:
+      registry:
+        description: 'npm registry to publish to.'
+        required: true
+        type: string
+      dist-tag:
+        description: >-
+          npm dist-tag. MANDATORY and never defaulted: omitting `--tag` makes npm write `latest`,
+          and the first publish of a package with no existing versions would claim the prod
+          channel from the rc stream. That is irreversible.
+        required: true
+        type: string
+      bump:
+        description: 'Bump the publishable set to the next prerelease before publishing (rc only).'
+        required: false
+        default: false
+        type: boolean
+      cut-release:
+        description: 'Create a GitHub Release with the SBOM attached (prod only).'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # `packages: write` is the load-bearing permission: without it GITHUB_TOKEN cannot publish to
+    # GitHub Packages at all. `contents: write` is needed only when cutting a Release; it is
+    # granted here because a reusable workflow cannot vary its own permissions by input, and the
+    # caller's own `permissions:` block is the narrowing mechanism.
+    permissions:
+      contents: write
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+          registry-url: ${{ inputs.registry }}
+      - run: npm ci --ignore-scripts
+
+      - name: "[ENFORCED] Security gate before publish (ADR-005)"
+        run: bash scripts/npm-audit-gate.sh
+
+      # DERIVED, not listed. CAPTURED INTO VARIABLES AND ASSERTED, never interpolated into `echo`:
+      # `set -e` does not propagate a failed command substitution when the enclosing command is
+      # `echo`, so `dirs=` would be written empty, the step would exit 0, and `for pkg in ; do`
+      # would iterate zero times and succeed — publishing nothing while reporting a green release.
+      - name: Resolve the publishable package set
+        id: graph
+        run: |
+          set -euo pipefail
+          PROJECTS="$(node scripts/release-graph.mjs --projects)"
+          DIRS="$(node scripts/release-graph.mjs --dirs)"
+          [ -n "$PROJECTS" ] || { echo "::error::empty build set"; exit 1; }
+          [ -n "$DIRS" ]     || { echo "::error::empty publish set"; exit 1; }
+          echo "projects=$PROJECTS" >> "$GITHUB_OUTPUT"
+          echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
+          echo "Publishing: $DIRS"
+
+      - name: Build the buildable set
+        run: npx nx run-many --target=build --projects=${{ steps.graph.outputs.projects }}
+
+      # Bumps the PUBLISHABLE set in lockstep and rewrites intra-scope ranges across EVERY
+      # workspace member onto a prerelease-admitting form. `--from-registry` derives the next rc
+      # from what is already published rather than from the committed version, because nothing
+      # commits the bump back: without it every run recomputes the same version and the second
+      # publish dies on EPUBLISHCONFLICT.
+      - name: Bump the publishable set to the next prerelease
+        if: ${{ inputs.bump }}
+        run: node scripts/bump-prerelease.mjs --from-registry
+
+      - name: "[ENFORCED] The release gate can see its own failures (SC-003)"
+        run: node scripts/check-release-graph.mjs --selftest
+      - name: "[ENFORCED] Release graph is coherent (FR-003, FR-004)"
+        run: node scripts/check-release-graph.mjs
+      - name: "[ENFORCED] Packed Vue declarations compile without workspace paths (#149)"
+        run: node scripts/check-vue-packed-types.mjs
+      - name: "[ENFORCED] Sizes and the SRI hash match the built artifacts (FR-005, NFR-004)"
+        run: node scripts/measure-elements-sizes.mjs --check
+
+      # ADR-005. Dropped from the rc path when it was a separate file; restored here because the
+      # gate set is a property of the artifact, not of which workflow happens to publish it.
+      - name: "[ENFORCED] Dist contents audit — no secrets/sourcemaps (ADR-005)"
+        run: |
+          set -euo pipefail
+          PKGS="${{ steps.graph.outputs.dirs }}"
+          [ -n "$PKGS" ] || { echo "::error::empty publish set reached the audit loop"; exit 1; }
+          for pkg in $PKGS; do
+            echo "=== packages/$pkg ==="
+            ( cd "packages/$pkg" && npm pack --dry-run 2>&1 | grep "npm notice" | grep -v "===" )
+          done
+
+      - name: Generate CycloneDX SBOM (FR-045)
+        run: |
+          npx @cyclonedx/cyclonedx-npm \
+            --output-format json \
+            --output-file spec-kitty-design-sbom.cdx.json
+
+      # `set -euo pipefail` is load-bearing: without it a failing `npm publish` inside a `for` loop
+      # does not fail the step, and the workflow reports a successful release having published a
+      # subset. EPUBLISHCONFLICT is tolerated only on a re-run, matching release.yml's reasoning:
+      # a conflict on attempt 1 means the name+version is on the registry and this workflow did not
+      # put it there.
+      - name: Publish every package in the derived set
+        run: |
+          set -euo pipefail
+          PKGS="${{ steps.graph.outputs.dirs }}"
+          TAG="${{ inputs.dist-tag }}"
+          [ -n "$PKGS" ] || { echo "::error::empty publish set reached the publish loop"; exit 1; }
+          [ -n "$TAG" ]  || { echo "::error::no dist-tag supplied; refusing to let npm default to latest"; exit 1; }
+          failed=""
+          for pkg in $PKGS; do
+            echo "=== publishing packages/$pkg under $TAG ==="
+            if out="$( cd "packages/$pkg" && npm publish --tag "$TAG" 2>&1 )"; then
+              echo "$out"
+            else
+              echo "$out"
+              if echo "$out" | grep -qE "code (EPUBLISHCONFLICT|E409)" && [ "${GITHUB_RUN_ATTEMPT:-1}" -gt 1 ]; then
+                echo "::warning::packages/$pkg already published at this version — treating as resumption"
+              else
+                failed="$failed $pkg"
+              fi
+            fi
+          done
+          [ -z "$failed" ] || { echo "::error::failed to publish:$failed"; exit 1; }
+
+      # Non-`latest` dist-tags never appear in the GitHub web UI version list, so this is the only
+      # place an operator can see that the publish actually landed.
+      - name: Report the published dist-tags
+        run: |
+          set -euo pipefail
+          for pkg in ${{ steps.graph.outputs.dirs }}; do
+            NAME="$(node -p "require('./packages/$pkg/package.json').name")"
+            echo "=== $NAME ==="
+            npm view "$NAME" dist-tags || echo "(not yet readable — first publish propagating)"
+          done
+
+      - name: Create GitHub Release with SBOM
+        if: ${{ inputs.cut-release }}
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # softprops/action-gh-release v3.0.0
+        with:
+          files: spec-kitty-design-sbom.cdx.json
+          generate_release_notes: true

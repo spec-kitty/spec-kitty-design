@@ -28,7 +28,7 @@
 
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import semver from 'semver';
 import { publishable } from './release-graph.mjs';
@@ -44,6 +44,28 @@ const PRERELEASE_ID = 'rc';
 // failing at its last step. Measured by running the real command, which is the only thing that
 // shows it: `--selftest` and `--dry-run` both reported success.
 const RANGE_FIELDS = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
+
+/**
+ * PURE. Is this module being RUN, rather than imported?
+ *
+ * WHY THIS EXISTS, learned the hard way. `main()` used to run at module scope, so merely
+ * importing this file to inspect an export EXECUTED A REAL BUMP: four manifests, five workspace
+ * consumers and the lockfile rewritten in a live working tree, by an `import` statement. Two
+ * review lenses flagged it as a hazard on the previous pass and I left it as a residual; it then
+ * did exactly that to me while I was investigating something unrelated.
+ *
+ * `release-graph.mjs:151` already guards its CLI this way — this copies an in-repo pattern rather
+ * than inventing one, and it is a named predicate rather than an inline condition so it can be
+ * probed instead of merely believed.
+ */
+export function isDirectInvocation(argv1, moduleUrl) {
+  if (!argv1 || !moduleUrl) return false;
+  try {
+    return resolve(argv1) === resolve(fileURLToPath(moduleUrl));
+  } catch {
+    return false;
+  }
+}
 
 /** The range that admits every rc in `next`'s line, and the eventual final. */
 export function admittingRange(next, id = PRERELEASE_ID) {
@@ -88,6 +110,66 @@ export function planBump(pkgs, { id = PRERELEASE_ID } = {}) {
     return { problems, current, next: null, range: null, names };
   }
   return { problems, current, next, range: admittingRange(next, id), names };
+}
+
+/**
+ * PURE. Parse `npm dist-tag ls` output for the prerelease tag.
+ *
+ * `npm view` DOES NOT WORK against GitHub Packages — measured: `npm view <pkg> versions --json`,
+ * `... version --json` and `... dist-tags --json` all return **exit 0 with zero bytes**, while
+ * `npm dist-tag ls`, the raw packument and the GitHub REST API all return the data. So the version
+ * source is `dist-tag ls`, and an EMPTY body is treated as a FAILURE rather than as "no tags":
+ * on this registry a successful-looking empty response is exactly what a broken read looks like.
+ */
+export function parseDistTags(out, id = PRERELEASE_ID) {
+  if (typeof out !== 'string' || out.trim() === '') {
+    return {
+      problem:
+        'empty dist-tag listing — this registry returns exit 0 with no body on some queries, so an ' +
+        'empty read is a failed read, not an absent tag',
+    };
+  }
+  const m = new RegExp(`^${id}:\\s*(\\S+)\\s*$`, 'm').exec(out);
+  return { version: m ? m[1] : null };
+}
+
+/**
+ * PURE. The next version, given what is COMMITTED and what is already PUBLISHED under the
+ * prerelease tag (`null` when nothing is published yet).
+ *
+ * Takes whichever is higher. Deriving purely from the registry would be wrong when someone has
+ * bumped the committed line ahead; deriving purely from the committed version is what made the rc
+ * stream republish the same version on every run and die on EPUBLISHCONFLICT.
+ */
+export function planNext(committed, publishedPrerelease, id = PRERELEASE_ID) {
+  const fromCommitted = semver.prerelease(committed)
+    ? semver.inc(committed, 'prerelease', id)
+    : semver.inc(committed, 'preminor', id);
+  if (!publishedPrerelease) return fromCommitted;
+  const fromPublished = semver.inc(publishedPrerelease, 'prerelease', id);
+  return semver.gt(fromPublished, fromCommitted) ? fromPublished : fromCommitted;
+}
+
+/**
+ * The published prerelease for one package, or `null` if the package has never been published.
+ *
+ * FAILS CLOSED on anything else. A registry that cannot be read must REFUSE, never silently fall
+ * back to the committed version — that fallback is precisely how the same version gets published
+ * twice.
+ */
+function readPublishedPrerelease(name) {
+  let out;
+  try {
+    out = execFileSync('npm', ['dist-tag', 'ls', name], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  } catch (e) {
+    const err = `${e.stdout ?? ''}${e.stderr ?? ''}${e.message ?? ''}`;
+    // Never published at all is a legitimate "no prior version" — the first publish must work.
+    if (/E404|404 Not Found|is not in this registry|code E404/.test(err)) return null;
+    throw new Error(`could not read published versions for ${name}: ${err.trim().split('\n').slice(-3).join(' | ')}`);
+  }
+  const parsed = parseDistTags(out);
+  if (parsed.problem) throw new Error(`${name}: ${parsed.problem}`);
+  return parsed.version;
 }
 
 /**
@@ -191,7 +273,7 @@ function refuse(problems) {
   process.exit(1);
 }
 
-function main({ dryRun }) {
+function main({ dryRun, fromRegistry }) {
   const pkgs = publishable(join(ROOT, 'packages'));
   const withManifests = pkgs.map((p) => ({
     ...p,
@@ -199,8 +281,27 @@ function main({ dryRun }) {
     manifest: readJson(packageManifestPath(p.dir)),
   }));
 
-  const plan = planBump(withManifests);
+  let plan = planBump(withManifests);
   if (plan.problems.length > 0) refuse(plan.problems);
+
+  // `--from-registry`: derive the next version from what is already published, not from the
+  // committed manifests. Nothing commits the bump back, so without this every run recomputes the
+  // same version and the second publish dies on EPUBLISHCONFLICT — the rc line could never
+  // advance past its first release.
+  if (fromRegistry) {
+    let highest = null;
+    try {
+      for (const p of withManifests) {
+        const v = readPublishedPrerelease(p.manifest.name);
+        if (v && (!highest || semver.gt(v, highest))) highest = v;
+      }
+    } catch (e) {
+      refuse([e.message, 'refusing to guess a version from the committed manifests instead']);
+    }
+    const next = planNext(plan.current, highest, PRERELEASE_ID);
+    plan = { ...plan, next, range: admittingRange(next, PRERELEASE_ID) };
+    console.log(`registry: highest published ${PRERELEASE_ID} = ${highest ?? '(none published yet)'}`);
+  }
 
   const rewrittenAll = [];
 
@@ -362,6 +463,52 @@ if (process.argv.includes('--selftest')) {
       () => semver.satisfies('1.1.0-rc.0', '*') === false,
     ],
     [
+      'THE HAZARD THIS CLOSES: an import is not a direct invocation, so it cannot bump',
+      () => isDirectInvocation('/somewhere/else/other-script.mjs', import.meta.url) === false,
+    ],
+    [
+      'running the file itself IS a direct invocation',
+      () => isDirectInvocation(fileURLToPath(import.meta.url), import.meta.url) === true,
+    ],
+    [
+      'isDirectInvocation is defensive about missing argv/url rather than throwing',
+      () => isDirectInvocation(undefined, import.meta.url) === false && isDirectInvocation('/x', undefined) === false,
+    ],
+    [
+      'the admitting range pins the .0 floor as the rc advances, so peers do not churn every rc',
+      () =>
+        admittingRange('1.1.0-rc.7') === '^1.1.0-rc.0' &&
+        semver.satisfies('1.1.0-rc.7', admittingRange('1.1.0-rc.7')) &&
+        semver.satisfies('1.1.0', admittingRange('1.1.0-rc.7')),
+    ],
+    [
+      'planNext: nothing published yet -> open the next minor prerelease from the committed version',
+      () => planNext('1.0.0', null) === '1.1.0-rc.0',
+    ],
+    [
+      'THE BLOCKER THIS CLOSES: an already-published rc advances instead of repeating',
+      () => planNext('1.0.0', '1.1.0-rc.0') === '1.1.0-rc.1',
+    ],
+    [
+      'planNext: a committed version moved AHEAD of the registry wins',
+      () => planNext('1.2.0', '1.1.0-rc.3') === '1.3.0-rc.0',
+    ],
+    [
+      'parseDistTags finds the rc pointer',
+      () => parseDistTags('latest: 2.0.0\nrc: 1.1.0-rc.4\n').version === '1.1.0-rc.4',
+    ],
+    [
+      'parseDistTags: a package with tags but no rc yet is null, not an error',
+      () => {
+        const r = parseDistTags('latest: 2.0.0\n');
+        return r.version === null && r.problem === undefined;
+      },
+    ],
+    [
+      'THE REGISTRY TRAP: an EMPTY read is a failure, never "no tags" (npm view returns exit 0 + 0 bytes on GHP)',
+      () => typeof parseDistTags('').problem === 'string' && typeof parseDistTags('   ').problem === 'string',
+    ],
+    [
       'rewriteManifest with setVersion:false rewrites ranges but leaves version alone',
       () => {
         const { manifest } = rewriteManifest(
@@ -395,7 +542,10 @@ if (process.argv.includes('--selftest')) {
   // added five probes to thirteen; one of the five replaced an existing entry rather than adding
   // to it. The floor caught the error instead of me — which is the whole reason it is not derived
   // from PROBES.length.
-  const PROBE_FLOOR = 17;
+  // 27, taken from the table's own reported count rather than from arithmetic. Two of the three
+  // times I have set this constant tonight the number was wrong, and each time the floor caught
+  // it — which is the argument for not deriving it from PROBES.length.
+  const PROBE_FLOOR = 27;
   if (PROBES.length < PROBE_FLOOR) {
     console.error(`\n❌ the probe table has shrunk: ${PROBES.length} against a floor of ${PROBE_FLOOR}.`);
     process.exit(1);
@@ -408,4 +558,10 @@ if (process.argv.includes('--selftest')) {
   process.exit(0);
 }
 
-main({ dryRun: process.argv.includes('--dry-run') });
+// GUARDED. Without this, `import`ing the module runs a real bump — see isDirectInvocation.
+if (isDirectInvocation(process.argv[1], import.meta.url)) {
+  main({
+    dryRun: process.argv.includes('--dry-run'),
+    fromRegistry: process.argv.includes('--from-registry'),
+  });
+}
