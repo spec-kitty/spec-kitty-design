@@ -1,7 +1,7 @@
 {
   "rows": {
     "#361": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Parent epic. Not closed by this mission \u2014 REL3 (#364) and REL4 (#396) remain, and children close only when the train lands on main.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,7 +9,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "in-mission",
       "wp": null
     },
     "#362": {
