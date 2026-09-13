@@ -18,12 +18,15 @@
  * by construction (DIRECTIVE_043), and that means the refusal has to run at publish time over the
  * value actually in hand, not over the text somebody typed.
  *
- * THE AUTHORITY FOR `latest` IS THE REF, NOT A FLAG. `latest` requires GITHUB_REF_TYPE to be `tag`
- * AND GITHUB_REF to start with `refs/tags/` — two signals that must agree. One scalar was not
- * enough: a step's own `env:` block can populate `GITHUB_REF_TYPE`, so keying on it alone made the
- * claim "something the runner emits, not something an author types" an assertion rather than an
- * enforcement. Two agreeing signals make the forgery conspicuous, and their disagreement is itself
- * a refusal.
+ * THE AUTHORITY FOR `latest` IS THE RUNNER'S EVENT FILE. Two earlier versions of this guard keyed
+ * on environment variables and both fell: `GITHUB_REF_TYPE` alone to a one-line
+ * `run: GITHUB_REF_TYPE=tag node …` (pure POSIX — the platform's refusal to let a workflow override
+ * `GITHUB_*` never applied, because nothing was overridden), and adding `GITHUB_REF` only raised
+ * the price to two assignments on the same line. Both are authored text in the very file being
+ * guarded, which is what the design claimed not to depend on. `latest` now additionally requires
+ * the ref recorded in `GITHUB_EVENT_PATH`'s runner-written JSON to agree — so a spoof means forging
+ * a file on the runner, not typing a word in the workflow. Any disagreement, or an unreadable
+ * event file, is a refusal.
  *
  * AND THE DECISION IS BRANDED. `publishAll()` accepts only a token minted by `decidePublish`,
  * because pass 4 deleted one line from `main()` — the call itself — and published four packages
@@ -33,7 +36,7 @@
  * invocations: those cannot be satisfied by a bypassed `main()`.
  */
 import { spawnSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, rmSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -50,21 +53,36 @@ const KNOWN_ARGV = new Set(['--dry-run', '--selftest', '--']);
 
 export function isDirectInvocation(argv1, moduleUrl) {
   if (!argv1 || !moduleUrl) return false;
+  // realpath BOTH SIDES. Plain `resolve` made an invocation through a symlink compare unequal, so
+  // the module went inert and `--selftest` printed nothing and exited 0 — a fail-open entry point
+  // in the one file whose whole thesis is fail-closed, and indistinguishable from a green run.
+  const real = (x) => {
+    try {
+      return realpathSync(x);
+    } catch {
+      return resolve(x);
+    }
+  };
   try {
-    return resolve(argv1) === resolve(fileURLToPath(moduleUrl));
+    return real(argv1) === real(fileURLToPath(moduleUrl));
   } catch {
     return false;
   }
 }
 
 export function unknownArgv(argv) {
-  return argv.filter((a) => a.startsWith('-') && !KNOWN_ARGV.has(a));
+  // NO `startsWith('-')` PREDICATE. It structurally could not see a bare word, so a plain
+  // `selftest` — the sixth spelling this file's own docstring enumerates — still fell through
+  // to the destructive default and mutated the tree while five dash-prefixed variants were
+  // correctly refused. The probes pinned exactly the half that worked. Anything not in
+  // KNOWN_ARGV is refused now, positional or not.
+  return argv.filter((a) => !KNOWN_ARGV.has(a));
 }
 
 /**
- * THE DECISION, as a pure function so the probe table can drive it, AND THE ONLY MINT FOR AN AUTHORIZATION. `publishAll()` will not accept anything but a token produced
- * here, so `main()` cannot construct permission it did not obtain — the bypass is unrepresentable
- * rather than merely discouraged.
+ * THE DECISION — a pure function, so the probe table can drive it — AND THE ONLY MINT FOR AN
+ * AUTHORIZATION. `publishAll()` accepts nothing but a token produced here, so `main()` cannot
+ * construct permission it did not obtain: the bypass is unrepresentable, not merely discouraged.
  *
  * `refType`/`ref` are GITHUB_REF_TYPE and GITHUB_REF as the runner reports them. Anything that is
  * not a tag — including undefined — is treated as not-a-tag: a missing signal is not permission.
@@ -77,7 +95,24 @@ export function unknownArgv(argv) {
  */
 const AUTHORIZED = Symbol('publish-authorized');
 
-export function decidePublish({ tag, refType, ref }) {
+/**
+ * The ref as the RUNNER recorded it, from the event JSON it writes before the job starts.
+ * Returns null on anything unreadable — a missing signal is never permission.
+ *
+ * Injectable (`pathOverride`) so the probe table can drive it without touching the environment.
+ */
+export function readEventRef(pathOverride) {
+  const p = pathOverride ?? process.env.GITHUB_EVENT_PATH;
+  if (typeof p !== 'string' || p === '') return null;
+  try {
+    const ev = JSON.parse(readFileSync(p, 'utf8'));
+    return typeof ev?.ref === 'string' ? ev.ref : null;
+  } catch {
+    return null;
+  }
+}
+
+export function decidePublish({ tag, refType, ref, eventPath }) {
   if (typeof tag !== 'string' || tag.trim() === '') {
     return { ok: false, why: 'no dist-tag supplied; refusing to let npm default to `latest`' };
   }
@@ -91,20 +126,35 @@ export function decidePublish({ tag, refType, ref }) {
     return { ok: false, why: `dist-tag ${JSON.stringify(t)} is an unevaluated workflow expression` };
   }
   if (t === 'latest') {
-    // TWO SIGNALS THAT MUST AGREE, not one. `GITHUB_REF_TYPE` alone is a single scalar that the
-    // step's own `env:` block can populate, so the design's claim — "keys on something the runner
-    // emits, not something an author types" — was asserted rather than enforced. Faking one
-    // variable is a one-line edit; faking `GITHUB_REF` and `GITHUB_REF_TYPE` consistently is a
-    // conspicuous one, and the disagreement itself is now a refusal.
+    // THE AUTHORITY IS THE RUNNER-WRITTEN EVENT FILE, not an environment variable.
+    //
+    // Env vars were the wrong source and review proved it twice. `GITHUB_REF_TYPE` alone fell to a
+    // one-line `run: GITHUB_REF_TYPE=tag node …` — pure POSIX, no Actions semantics involved, so
+    // the platform's own refusal to let a workflow override `GITHUB_*` never even applied. Adding
+    // `GITHUB_REF` as a second signal only raised the price to two assignments on the same line.
+    // Both are still *authored text in the file being guarded*, which is precisely what the design
+    // claimed not to depend on.
+    //
+    // `GITHUB_EVENT_PATH` points at JSON the RUNNER writes before the job starts. A workflow can
+    // point the variable elsewhere, but then the file it names will not contain a matching event —
+    // and this refuses on any disagreement, including an unreadable or absent file. So a spoof now
+    // requires forging a file on the runner rather than typing a word in the workflow.
+    //
+    // The env vars are still required to agree. Three sources, one of them outside the file's
+    // reach, and any disagreement is a refusal.
+    const eventRef = readEventRef(eventPath);
     const refSaysTag = typeof ref === 'string' && ref.startsWith('refs/tags/');
-    if (refType !== 'tag' || !refSaysTag) {
+    const eventSaysTag = typeof eventRef === 'string' && eventRef.startsWith('refs/tags/');
+    if (refType !== 'tag' || !refSaysTag || !eventSaysTag || eventRef !== ref) {
       return {
         ok: false,
         why:
-          'refusing to publish dist-tag `latest` outside a tag ref ' +
+          'refusing to publish dist-tag `latest`: the three ref signals do not all agree on a tag ' +
           `(GITHUB_REF_TYPE=${JSON.stringify(refType ?? '(unset)')}, ` +
-          `GITHUB_REF=${JSON.stringify(ref ?? '(unset)')}). Claiming the prod channel from a ` +
-          'prerelease stream is irreversible; only a tag-triggered release may write `latest`.',
+          `GITHUB_REF=${JSON.stringify(ref ?? '(unset)')}, ` +
+          `event file ref=${JSON.stringify(eventRef ?? '(unreadable)')}). Claiming the prod channel ` +
+          'from a prerelease stream is irreversible; only a genuine tag-triggered release may write ' +
+          '`latest`, and the event file is the runner\'s word for that rather than the workflow\'s.',
       };
     }
   }
@@ -220,6 +270,19 @@ function main({ dryRun }) {
 
 /* ────────────────────────────── --selftest ────────────────────────────── */
 
+/** Write a runner-shaped event file for a probe, and clean it up. */
+function withRawEventFile(body, fn) {
+  const dir = mkdtempSync(join(tmpdir(), 'pds-ev-'));
+  const f = join(dir, 'event.json');
+  writeFileSync(f, body);
+  try {
+    return fn(f);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+const withEventFile = (ref, fn) => withRawEventFile(JSON.stringify({ ref }), fn);
+
 const PROBES = [
   ['refuses an empty dist-tag', () => decidePublish({ tag: '', refType: 'branch' }).ok === false],
   ['refuses a missing dist-tag', () => decidePublish({ tag: undefined, refType: 'branch' }).ok === false],
@@ -234,7 +297,16 @@ const PROBES = [
   ['refuses `latest` when REF says a tag but REF_TYPE says branch', () => decidePublish({ tag: 'latest', refType: 'branch', ref: 'refs/tags/v1.2.3' }).ok === false],
   ['refuses `latest` when REF is unset even if REF_TYPE says tag', () => decidePublish({ tag: 'latest', refType: 'tag', ref: undefined }).ok === false],
   ['refuses an unevaluated workflow expression as a dist-tag', () => decidePublish({ tag: '${{ vars.RC_CHANNEL }}', refType: 'branch', ref: 'refs/heads/develop' }).ok === false],
-  ['ALLOWS `latest` when BOTH signals say tag (prod)', () => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1.2.3' }).ok === true],
+  // THE EVENT FILE IS THE THIRD SIGNAL, and the only one the guarded workflow cannot author.
+  // These write real temp files rather than stubbing the reader, so the parse path is exercised.
+  ['ALLOWS `latest` when all three signals agree on a tag (prod)', () => withEventFile('refs/tags/v1.2.3', (ep) => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1.2.3', eventPath: ep }).ok === true)],
+  ['refuses `latest` when the env says tag but the EVENT FILE says a branch', () => withEventFile('refs/heads/develop', (ep) => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1.2.3', eventPath: ep }).ok === false)],
+  ['refuses `latest` when the event file names a DIFFERENT tag than GITHUB_REF', () => withEventFile('refs/tags/v9.9.9', (ep) => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1.2.3', eventPath: ep }).ok === false)],
+  ['refuses `latest` when the event file is missing', () => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1.2.3', eventPath: '/nonexistent/event.json' }).ok === false],
+  ['refuses `latest` when the event file is unparseable', () => withRawEventFile('not json at all', (ep) => decidePublish({ tag: 'latest', refType: 'tag', ref: 'refs/tags/v1.2.3', eventPath: ep }).ok === false)],
+  ['readEventRef returns null for an absent path', () => readEventRef(undefined) === null || typeof process.env.GITHUB_EVENT_PATH === 'string'],
+  ['readEventRef reads the ref from real JSON', () => withEventFile('refs/tags/v2', (ep) => readEventRef(ep) === 'refs/tags/v2')],
+  ['`rc` is unaffected by the event file (no tag authority needed)', () => withEventFile('refs/heads/develop', (ep) => decidePublish({ tag: 'rc', refType: 'branch', ref: 'refs/heads/develop', eventPath: ep }).ok === true)],
   ['an authorization carries the private brand', () => Object.getOwnPropertySymbols(decidePublish({ tag: 'rc', refType: 'branch', ref: 'refs/heads/develop' })).length === 1],
   ['a hand-built decision carries no brand', () => Object.getOwnPropertySymbols({ ok: true, tag: 'latest' }).length === 0],
   ['allows `rc` on a branch ref', () => decidePublish({ tag: 'rc', refType: 'branch', ref: 'refs/heads/develop' }).ok === true],
@@ -318,6 +390,19 @@ function effectProbes() {
       },
     ],
     [
+      // Debbie pass 4, G10: replacing the halt with `continue` was invisible to all 21 probes,
+      // while the file spends five lines explaining that continuing past a failed `tokens` makes
+      // its three dependents publish against a peer that does not exist — permanently.
+      'EFFECT: a failing publish HALTS the set rather than continuing past it',
+      () => {
+        writeFileSync(join(bin, 'npm'), `#!/bin/sh\necho "npm $*" >> "${log}"\ncase "$PWD" in *tokens) exit 1;; esac\nexit 0\n`, { mode: 0o755 });
+        const r = run({ DIST_TAG: 'rc', GITHUB_REF_TYPE: 'branch', GITHUB_REF: 'refs/heads/develop' });
+        writeFileSync(join(bin, 'npm'), `#!/bin/sh\necho "npm $*" >> "${log}"\nexit 0\n`, { mode: 0o755 });
+        // tokens is first in topological order: exactly one call, then a halt.
+        return r.status !== 0 && r.calls.length === 1;
+      },
+    ],
+    [
       'EFFECT: refuses to publish outside GitHub Actions',
       () => {
         writeFileSync(log, '');
@@ -357,9 +442,9 @@ function effectProbes() {
 }
 
 // The floor lives OUTSIDE the table, so a table that silently emptied cannot report green.
-const PROBE_FLOOR = 27;
+const PROBE_FLOOR = 34;
 // Effect probes have their own floor: they are the only ones a bypassed `main()` cannot satisfy.
-const EFFECT_FLOOR = 7;
+const EFFECT_FLOOR = 8;
 
 function selftest() {
   let bad = 0;

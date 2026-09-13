@@ -686,6 +686,26 @@ export function checkWorkflowUsesDerivedSet(
         );
       }
     }
+    // THE PAYLOAD MAY NOT AUTHOR THE SIGNALS ITS OWN GUARD READS. The publish script decides
+    // `latest` from GITHUB_REF/GITHUB_REF_TYPE and the runner's event file; a step that sets any of
+    // those — or GITHUB_RUN_ATTEMPT, which turns an unexpected first-attempt conflict into a silent
+    // "resumption" — is forging the evidence the guard weighs. The bare-invocation rule above
+    // already refuses a run-line assignment and a `$GITHUB_ENV` write; this closes the `env:` block
+    // at every level.
+    const FORGEABLE = ['GITHUB_REF', 'GITHUB_REF_TYPE', 'GITHUB_EVENT_PATH', 'GITHUB_RUN_ATTEMPT'];
+    const envBlocks = [wf?.env, wf?.jobs?.[jobName]?.env, ...steps.map((st) => st?.env)];
+    for (const block of envBlocks) {
+      if (typeof block !== 'object' || block === null) continue;
+      for (const key of Object.keys(block)) {
+        if (FORGEABLE.includes(key)) {
+          problems.push(
+            `${label} sets \`${key}\` in an \`env:\` block — that is the evidence the publish ` +
+              'guard weighs, and a payload that can author it is a payload that can authorise itself',
+          );
+        }
+      }
+    }
+
     // THE BUMP, and its `--from-registry`. Deleting either was green. Nothing commits the bump
     // back to `develop`, so without `--from-registry` every run recomputes the same version and
     // publish #2 dies on EPUBLISHCONFLICT.
@@ -703,8 +723,18 @@ export function checkWorkflowUsesDerivedSet(
     // once"), and step-index comparison made a same-step violation invisible in both directions —
     // consolidating the bump and the size check into one `run:` block is an ordinary refactor that
     // silently disabled the rule.
+    // PER COMMAND, NOT PER LINE. Flattening to line positions closed the same-STEP hole and left a
+    // same-LINE one: `node …bump… && node …measure…` on one physical line gave both the same
+    // position, so `sizeAt > bumpAt` was false whatever the order. Splitting on shell separators is
+    // what makes the comparison mean "runs before".
     const flat = [];
-    commandLines.forEach((c, stepIdx) => c.split('\n').forEach((line, lineIdx) => flat.push({ line, at: stepIdx * 1000 + lineIdx })));
+    commandLines.forEach((c, stepIdx) =>
+      c.split('\n').forEach((line, lineIdx) =>
+        line
+          .split(/&&|\|\||;|\|/)
+          .forEach((cmd, cmdIdx) => flat.push({ line: cmd, at: stepIdx * 1000000 + lineIdx * 1000 + cmdIdx })),
+      ),
+    );
     const posOf = (re) => flat.find((f) => re.test(f.line))?.at ?? -1;
     const sizeAt = posOf(/measure-elements-sizes\.mjs\s+--check/);
     const bumpAt = posOf(/bump-prerelease\.mjs/);
@@ -1141,7 +1171,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 62;
+const PROBE_FLOOR = 64;
 
 const PROBES = [
   {
@@ -1340,6 +1370,35 @@ const PROBES = [
           /run: node scripts\/publish-derived-set\.mjs/,
           'run: |\n          node scripts/publish-derived-set.mjs\n          npm publish --tag latest',
         ),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    // Debbie pass 4, the BLOCKER's `env:` variant: a step that sets the very signal the publish
+    // guard reads is forging the evidence it weighs.
+    what: 'the payload setting GITHUB_REF_TYPE in a step `env:` block',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {10}DIST_TAG: [^\n]*\n/, '          DIST_TAG: ${{ inputs.dist-tag }}\n          GITHUB_REF_TYPE: tag\n'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    // Debbie pass 4: flattening to LINE positions closed the same-step hole and left a same-LINE
+    // one — `bump && size-check` tied, so the ordering comparison was false whatever the order.
+    what: 'the bump and the size check consolidated onto ONE line, bump first',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(
+          / {6}- name: Sizes\n {8}run: node scripts\/measure-elements-sizes\.mjs --check\n/,
+          '      - name: consolidated\n        run: node scripts/bump-prerelease.mjs --from-registry && node scripts/measure-elements-sizes.mjs --check\n',
+        ).replace('      - name: Bump\n        run: node scripts/bump-prerelease.mjs --from-registry\n', ''),
         ['@spec-kitty/tokens'],
         ['tokens'],
         'publish',

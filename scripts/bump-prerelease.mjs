@@ -57,7 +57,12 @@ const RANGE_FIELDS = ['dependencies', 'devDependencies', 'peerDependencies', 'op
 const KNOWN_ARGV = new Set(['--selftest', '--dry-run', '--from-registry', '--']);
 
 export function unknownArgv(argv) {
-  return argv.filter((a) => a.startsWith('-') && !KNOWN_ARGV.has(a));
+  // NO `startsWith('-')` PREDICATE. It structurally could not see a bare word, so a plain
+  // `selftest` — the sixth spelling this file's own docstring enumerates — still fell through
+  // to the destructive default and mutated the tree while five dash-prefixed variants were
+  // correctly refused. The probes pinned exactly the half that worked. Anything not in
+  // KNOWN_ARGV is refused now, positional or not.
+  return argv.filter((a) => !KNOWN_ARGV.has(a));
 }
 
 
