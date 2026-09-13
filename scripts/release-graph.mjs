@@ -75,6 +75,12 @@ function scan(root = PACKAGES) {
       targets,
       peerDependencies: pkg.peerDependencies,
       dependencies: pkg.dependencies,
+      // THE REAL REGISTRY AUTHORITY. Measured by a review lens with a control: a manifest's
+      // `publishConfig.registry` outranks the userconfig npmrc that `setup-node`'s `registry-url`
+      // writes, so the workflow input selects the AUTH LINE while this selects the DESTINATION.
+      // (An explicit `--registry` CLI flag would beat both — neither release workflow passes one.)
+      // Carried here so a checker can hold the two into agreement instead of trusting they match.
+      publishConfig: pkg.publishConfig,
     };
   });
 }

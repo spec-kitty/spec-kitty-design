@@ -146,6 +146,78 @@ export function checkPublishingCallersDelegate(workflows) {
 }
 
 /**
+ * The registry a package will ACTUALLY publish to must equal the one the invoking stream declares.
+ *
+ * WHY THIS IS NOT REDUNDANT with the `registry` assertion in checkPublishingCallersDelegate. Those
+ * are two different mechanisms and only one of them picks the destination. Measured by a review
+ * lens with a control — two identical throwaway manifests differing only by `publishConfig`, no
+ * `--registry` flag, under a userconfig npmrc mimicking `setup-node`:
+ *
+ *   with publishConfig    -> npm targeted the publishConfig host
+ *   without (the control) -> npm targeted the userconfig host
+ *
+ * So `setup-node`'s `registry-url` writes the auth line, and `publishConfig.registry` overrides
+ * where the tarball goes. They agree today only by coincidence — both are GitHub Packages — and
+ * nothing held them together. The live hazard is prod: `release.yml` still sets
+ * `registry-url: https://registry.npmjs.org` and publishes `--provenance`, and with
+ * `publishConfig` in place that publish is silently redirected to GitHub Packages, where the auth
+ * line does not match and where provenance is unsupported anyway. REL3 (#364) folds `release.yml`
+ * in; this check is what makes that fold fail loudly at PR time instead of at release time.
+ *
+ * PURE over `{packages, workflows}` so the probe table can drive it.
+ */
+export function checkRegistryAuthorityAgrees(packages, workflows) {
+  const problems = [];
+  if (!Array.isArray(packages) || packages.length === 0) {
+    return ['no packages to check registry authority over — refusing to certify agreement over nothing'];
+  }
+  // The registries any caller actually asks for. A stream that declares nothing cannot disagree
+  // with anything, which is checkPublishingCallersDelegate's problem, not this one.
+  const declared = new Set();
+  for (const { text } of workflows ?? []) {
+    let wf;
+    try {
+      wf = parse(text);
+    } catch {
+      continue;
+    }
+    for (const job of Object.values(wf?.jobs ?? {})) {
+      if (typeof job?.uses === 'string' && job.uses.includes('publish-packages.yml')) {
+        const r = job?.with?.registry;
+        if (typeof r === 'string' && r.trim() !== '') declared.add(r.trim().replace(/\/+$/, ''));
+      }
+    }
+  }
+  for (const p of packages) {
+    if (p.private) continue;
+    const effective = p.publishConfig?.registry;
+    if (typeof effective !== 'string' || effective.trim() === '') {
+      problems.push(
+        `${p.name} declares no \`publishConfig.registry\`, so its destination is whatever npmrc the ` +
+          'runner happens to carry rather than a property of the package',
+      );
+      continue;
+    }
+    const norm = effective.trim().replace(/\/+$/, '');
+    if (norm !== GH_PACKAGES) {
+      problems.push(
+        `${p.name} has \`publishConfig.registry: ${norm}\`; the standing ruling is GitHub Packages ` +
+          `only (${GH_PACKAGES})`,
+      );
+    }
+    for (const d of declared) {
+      if (d !== norm) {
+        problems.push(
+          `${p.name} publishes to \`${norm}\` via publishConfig, but a caller declares ` +
+            `\`registry: ${d}\` — publishConfig wins, so that stream's registry input is decorative`,
+        );
+      }
+    }
+  }
+  return problems;
+}
+
+/**
  * Packages deliberately kept unpublishable. EMPTY, and that is the point: a package acquiring
  * `private: true` must acquire an entry here in the same commit, so the exclusion is a decision
  * someone wrote down rather than a flag someone set. Re-adding `private: true` to elements or
@@ -877,7 +949,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 48;
+const PROBE_FLOOR = 51;
 
 const PROBES = [
   {
@@ -1203,6 +1275,28 @@ const PROBES = [
       ]),
   },
   {
+    // Alphonso's measured finding: publishConfig outranks setup-node's registry-url, so a manifest
+    // can silently redirect the publish while the workflow input still reads correct.
+    what: 'a manifest whose publishConfig.registry disagrees with the caller\'s declared registry',
+    run: () =>
+      checkRegistryAuthorityAgrees(
+        [{ name: '@spec-kitty/tokens', dir: 'tokens', private: false, publishConfig: { registry: 'https://registry.npmjs.org' } }],
+        [{ file: 'release-rc.yml', text: VALID_CALLER_FIXTURE }],
+      ),
+  },
+  {
+    what: 'a publishable manifest with no publishConfig.registry at all (destination left to the runner)',
+    run: () =>
+      checkRegistryAuthorityAgrees(
+        [{ name: '@spec-kitty/tokens', dir: 'tokens', private: false }],
+        [{ file: 'release-rc.yml', text: VALID_CALLER_FIXTURE }],
+      ),
+  },
+  {
+    what: 'the registry-authority check asserted over zero packages',
+    run: () => checkRegistryAuthorityAgrees([], [{ file: 'release-rc.yml', text: VALID_CALLER_FIXTURE }]),
+  },
+  {
     what: 'a caller delegating to the publish workflow with NO dist-tag (npm would write `latest`)',
     run: () =>
       checkPublishingCallersDelegate([
@@ -1373,6 +1467,12 @@ function main() {
         )
       : [`${REUSABLE_WORKFLOW} is missing — the rc stream's publish payload has nowhere to live`]),
     ...checkPublishingCallersDelegate(
+      readdirSync(join(ROOT, '.github/workflows'))
+        .filter((f) => /\.ya?ml$/.test(f))
+        .map((f) => ({ file: `.github/workflows/${f}`, text: readFileSync(join(ROOT, '.github/workflows', f), 'utf8') })),
+    ),
+    ...checkRegistryAuthorityAgrees(
+      pub,
       readdirSync(join(ROOT, '.github/workflows'))
         .filter((f) => /\.ya?ml$/.test(f))
         .map((f) => ({ file: `.github/workflows/${f}`, text: readFileSync(join(ROOT, '.github/workflows', f), 'utf8') })),

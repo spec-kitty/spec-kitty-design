@@ -10,6 +10,8 @@ requirement_refs:
 - FR-005
 - FR-008
 - FR-009
+- FR-010
+- FR-011
 planning_base_branch: mission/release-pipeline-rc-stream
 merge_target_branch: mission/release-pipeline-rc-stream
 branch_strategy: Planning artifacts for this mission were generated on mission/release-pipeline-rc-stream. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/release-pipeline-rc-stream unless the human explicitly redirects the landing branch.
@@ -18,6 +20,10 @@ subtasks:
 - T002
 - T003
 - T004
+assignee: claude
+agent: claude
+shell_pid: 2241584
+shell_pid_created_at: '1789322824.43'
 history: []
 agent_profile: node-norris
 authoritative_surface: .
