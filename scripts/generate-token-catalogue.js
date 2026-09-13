@@ -239,16 +239,35 @@ if (process.argv.includes('--selftest')) {
   // (pass 5, debugger lens: two added lines spawning `git show HEAD:…` gave a green selftest and a
   // real fail-open).
   const SPAWN_TARGET = __filename;
-  // ASSERTED, not merely named: repointing SPAWN_TARGET at a pristine copy of this file (two added
-  // lines writing `git show HEAD:…` to a temp path) gave a green selftest over a real fail-open —
-  // the table dutifully certified a file that was not the one under test. Verified: without this
-  // check that mutation survives; with it, the mutant must also delete this check.
-  if (SPAWN_TARGET !== __filename) {
-    console.error('\n❌ refusing to report green: the --check probe table is not spawning this file.');
-    process.exit(1);
-  }
-  const run = (dir, args) =>
-    spawnSync(process.execPath, [SPAWN_TARGET, ...args], { cwd: dir, encoding: 'utf8' });
+  // Whatever is spawned must be BYTE-IDENTICAL to the file under test, checked at each spawn.
+  //
+  // Pass 6, debugger lens: the previous form (`SPAWN_TARGET === __filename`) guarded the CONSTANT,
+  // not the spawn. Leaving both the constant and its assertion untouched and repointing `run()`'s
+  // own argument at a pristine copy was green while production's stale arm exited 0 — a real
+  // fail-open, and the assertion added zero cost against anyone who noticed. A name cannot express
+  // "the code under test"; content can. A repoint to a byte-identical copy is harmless by
+  // definition, and any other file — pristine, older, or `git show HEAD:…` — reds here.
+  const crypto = require('crypto');
+  const sha = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
+  const SELF_HASH = sha(fs.readFileSync(__filename));
+  // PURE and testable, and it inspects THE PATH ACTUALLY SPAWNED. The first attempt at this hashed
+  // the SPAWN_TARGET constant and then spawned whatever the call site passed, so replacing the
+  // `spawnSync` line alone still certified a pristine copy — a name guard wearing a hash costume,
+  // the very class this was meant to close. Returns a problem string rather than exiting, so the
+  // meta-probes below can drive it.
+  const spawnTargetProblem = (target) =>
+    sha(fs.readFileSync(target)) === SELF_HASH
+      ? null
+      : `spawned ${target}, whose contents differ from the file under test`;
+  const run = (dir, args) => {
+    const target = SPAWN_TARGET;
+    const problem = spawnTargetProblem(target);
+    if (problem) {
+      console.error(`\n❌ refusing to report green: the --check probe table ${problem}.`);
+      process.exit(1);
+    }
+    return spawnSync(process.execPath, [target, ...args], { cwd: dir, encoding: 'utf8' });
+  };
 
   // Every row declares the CAUSE it drives and a `sig` the shipped script must actually print for
   // it, so the cause is OBSERVED rather than merely declared. Coverage below is asserted over
@@ -262,8 +281,25 @@ if (process.argv.includes('--selftest')) {
   // than beside it, so the count is observed; a `+ 1` standing in for an out-of-table probe let
   // that probe be deleted while the floor and the summary still reported the old number (three
   // lenses, independently).
+  // The expected exit is derived from the CAUSE through this frozen map, which lives OUTSIDE the
+  // table. Pass 6, debugger lens: while each row declared the exit it would accept, inverting
+  // production's stale arm (exit 1 -> 0) together with that row's `exit` was TWO edits, green, and
+  // a real fail-open — `--check` rc=0 over a genuinely stale catalogue against a control of rc=1
+  // (reproduced independently before folding). A row must not get to say what counts as correct
+  // for its own cause.
+  const CAUSE_EXIT = Object.freeze({
+    match: 0,
+    stale: 1,
+    reformatted: 1,
+    'invalid-generated_at': 2,
+    'invalid-json': 2,
+    absent: 2,
+    'zero-token': 1,
+    'scratch-cwd': 1,
+  });
+
   const CLI_PROBES = [
-    { note: 'fresh, byte-identical committed catalogue -> exit 0', mutate: (raw) => raw, exit: 0, cause: 'match', sig: 'matches a fresh, canonical build' },
+    { note: 'fresh, byte-identical committed catalogue -> exit 0', mutate: (raw) => raw, cause: 'match', sig: 'matches a fresh, canonical build' },
     {
       note: 'THE BLOCKER THIS TABLE EXISTS FOR: a token genuinely removed from the committed catalogue -> exit 1',
       mutate: (raw) => {
@@ -271,11 +307,10 @@ if (process.argv.includes('--selftest')) {
         o.categories.color.tokens = o.categories.color.tokens.slice(0, 1);
         return JSON.stringify(o, null, 2) + '\n';
       },
-      exit: 1,
       cause: 'stale',
       sig: 'is stale relative to',
     },
-    { note: 'content identical but minified -> exit 1 (reformatted, NFR-006)', mutate: (raw) => JSON.stringify(JSON.parse(raw)), exit: 1, cause: 'reformatted', sig: 'not byte-identical to a canonical regeneration' },
+    { note: 'content identical but minified -> exit 1 (reformatted, NFR-006)', mutate: (raw) => JSON.stringify(JSON.parse(raw)), cause: 'reformatted', sig: 'not byte-identical to a canonical regeneration' },
     {
       note: 'generated_at is not a real date -> exit 2 (cannot compare — NOT a content verdict)',
       mutate: (raw) => {
@@ -283,19 +318,17 @@ if (process.argv.includes('--selftest')) {
         o.generated_at = 'not-a-date';
         return JSON.stringify(o, null, 2) + '\n';
       },
-      exit: 2,
       cause: 'invalid-generated_at',
       sig: 'generated_at is absent or invalid',
     },
-    { note: 'committed catalogue is not valid JSON -> exit 2', mutate: () => 'not json {', exit: 2, cause: 'invalid-json', sig: 'not valid JSON' },
-    { note: 'committed catalogue absent entirely -> exit 2', mutate: null, exit: 2, cause: 'absent', sig: 'does not exist' },
+    { note: 'committed catalogue is not valid JSON -> exit 2', mutate: () => 'not json {', cause: 'invalid-json', sig: 'not valid JSON' },
+    { note: 'committed catalogue absent entirely -> exit 2', mutate: null, cause: 'absent', sig: 'does not exist' },
     {
       // Cited by check-token-breaking-changes.sh in PROSE as the justification for its own
       // zero-token floor, but nothing asserted it: deleting the refusal left every suite green.
       note: 'source CSS defines no --sk-* tokens -> refuse (exit 1), never certify an empty catalogue',
       css: '/* no --sk-* tokens at all */\n:root { color: red; }\n',
       build: false,
-      exit: 1,
       cause: 'zero-token',
       sig: 'No --sk-* tokens found',
     },
@@ -306,16 +339,128 @@ if (process.argv.includes('--selftest')) {
       note: 'the subprocess reads the SCRATCH tree, not the repo (the cwd-relativity seam, asserted)',
       css: null,
       build: false,
-      exit: 1,
       cause: 'scratch-cwd',
       sig: 'Source file not found',
       expectScratchPath: true,
     },
   ];
 
+  // Schema validation BEFORE the table runs. A `sig` is the entire observation mechanism, so a
+  // weak one silently converts "observed" back into "declared": pass 6, reviewer lens weakened one
+  // row's sig to '❌' — printed by four of five verdict branches — and that row then certified
+  // cause 'stale' while never reaching the stale branch. Dead config is rejected too (architect
+  // lens: `mutate` on a `build: false` row was silently ignored).
+  const SIG_MIN = 12;
+  for (const p of CLI_PROBES) {
+    const bad = [];
+    if (typeof p.sig !== 'string' || p.sig.trim().length < SIG_MIN) bad.push(`sig must be a specific string of at least ${SIG_MIN} chars`);
+    if (CAUSE_EXIT[p.cause] === undefined) bad.push(`cause '${p.cause}' has no entry in CAUSE_EXIT`);
+    if (p.build === false && p.mutate !== undefined) bad.push('mutate is dead config on a build:false row');
+    if (bad.length > 0) {
+      console.error(`\n❌ malformed --check probe row (${p.cause}): ${bad.join('; ')}.`);
+      process.exit(1);
+    }
+  }
+
+  // The assertion is a PURE function so it can be meta-probed, and every call site registers its
+  // own expectation so the reach invariant stays correct as callers are added. Pass 6, reviewer
+  // lens: this logic was an inline block with no meta-probes and no reach guard, so a single
+  // `if (problems.length > 0)` -> `if (false)` left the whole suite green over any production
+  // fail-open — the pass-5 shell defect, un-ported, one file over.
+  let assertCliCalls = 0;
+  let expectedAssertCliCalls = 0;
+  const assertCliProbe = (p, status, out, dir) => {
+    assertCliCalls++;
+    const problems = [];
+    const expectExit = CAUSE_EXIT[p.cause];
+    if (status !== expectExit) problems.push(`expected exit ${expectExit} for cause '${p.cause}', got ${status}`);
+    if (!out.includes(p.sig)) problems.push(`output does not contain ${JSON.stringify(p.sig)}`);
+    if (p.expectScratchPath && !out.includes(dir)) problems.push('output does not name the scratch dir');
+    return problems;
+  };
+
+  // A content hash CANNOT stop a mutant from replacing the spawn statement itself and pointing it
+  // at a pristine copy — verified twice, it survived both times, and the honest conclusion is that
+  // no check preceding a separately-editable spawn line can prevent this. What this does is make
+  // `spawnSync` provably single-site, so ADDING a call site reds unless the count is edited too.
+  // DISCLOSED RESIDUAL: editing the one existing call site plus this constant is still a two-edit
+  // test-side defeat. Cost raised, class not closed; said plainly rather than dressed up.
+  const SPAWN_SITES = (fs.readFileSync(__filename, 'utf8').match(/spawnSync\(/g) || []).length;
+  const EXPECTED_SPAWN_SITES = 1;
+  if (SPAWN_SITES !== EXPECTED_SPAWN_SITES) {
+    console.error(`\n❌ refusing to report green: ${SPAWN_SITES} spawnSync call site(s), expected ${EXPECTED_SPAWN_SITES}.`);
+    console.error('   Probes must exercise the file under test through exactly one spawn.');
+    process.exit(1);
+  }
+
+  // Registration belongs at the CALL SITE, not in the meta loop. Incrementing once per meta row
+  // assumed every row calls the asserter — the two spawnTargetProblem rows do not, so the
+  // invariant demanded 14 calls against 12 and reddened correct code. Third time I have made this
+  // exact arithmetic mistake; a wrapper that registers as it calls cannot make it a fourth.
+  const metaAssert = (...a) => {
+    expectedAssertCliCalls++;
+    return assertCliProbe(...a);
+  };
+
+  const stub = (over) => ({ note: 'meta', cause: 'stale', sig: 'is stale relative to', ...over });
+  const CLI_METAS = [
+    ['spawnTargetProblem accepts the file under test', () => spawnTargetProblem(__filename) === null],
+    [
+      'spawnTargetProblem rejects a file with different contents',
+      () => {
+        const p = path.join(os.tmpdir(), `st-${process.pid}.js`);
+        fs.writeFileSync(p, '// deliberately not this file\n');
+        const r = spawnTargetProblem(p);
+        fs.rmSync(p, { force: true });
+        return typeof r === 'string';
+      },
+    ],
+    ['matching exit + matching sig -> no problems', () => metaAssert(stub(), 1, 'is stale relative to', '/d').length === 0],
+    ['exit differs from the cause map -> problem', () => metaAssert(stub(), 0, 'is stale relative to', '/d').length > 0],
+    ['sig absent from output -> problem', () => metaAssert(stub(), 1, 'nothing matching here', '/d').length > 0],
+    ['expectScratchPath unmet -> problem', () => metaAssert(stub({ expectScratchPath: true }), 1, 'is stale relative to', '/scratch-abc').length > 0],
+    ['expectScratchPath met -> no problems', () => metaAssert(stub({ expectScratchPath: true }), 1, 'is stale relative to /scratch-abc/x', '/scratch-abc').length === 0],
+  ];
+  let cliMetaBad = 0;
+  for (const [note, fn] of CLI_METAS) {
+    if (fn()) {
+      console.log(`  ✓ [cli-meta] ${note}`);
+    } else {
+      console.error(`  ✗ [cli-meta] ${note}`);
+      cliMetaBad++;
+    }
+  }
+  const CLI_META_FLOOR = 7;
+  if (CLI_METAS.length < CLI_META_FLOOR || cliMetaBad > 0) {
+    console.error(`\n❌ assertCliProbe meta-probes: ${cliMetaBad} of ${CLI_METAS.length} failed (floor ${CLI_META_FLOOR}) —`);
+    console.error('   the CLI table\'s own assertion is not trustworthy, so its probes prove nothing.');
+    process.exit(1);
+  }
+
   let cliBad = 0;
   let cliRan = 0;
   const seenCauses = new Set();
+  const capturedOut = new Map();
+
+  // The loop body is a function so the CALLER can be meta-probed. Proving `assertCliProbe` returns
+  // the right problems, and proving it was called, are both satisfied while the caller ignores the
+  // answer: `if (problems.length > 0)` -> `if (false)` survived both. Consumption is only
+  // demonstrable by driving this function with a row that MUST fail and watching cliBad move —
+  // the same shape that works on the shell side.
+  const reportCliProbe = (p, status, out, dir) => {
+    expectedAssertCliCalls++;
+    const problems = assertCliProbe(p, status, out, dir);
+    if (problems.length > 0) {
+      console.error(`  ✗ [cli] ${p.note}: ${problems.join('; ')}`);
+      console.error(`      ${out.trim().split('\n')[0]}`);
+      cliBad++;
+      return false;
+    }
+    seenCauses.add(p.cause);
+    console.log(`  ✓ [cli] ${p.note}`);
+    return true;
+  };
+
   for (const p of CLI_PROBES) {
     const dir = mkTree(p.css === undefined ? FIXTURE_CSS : p.css);
     cliRan++;
@@ -329,21 +474,59 @@ if (process.argv.includes('--selftest')) {
       }
       const r = run(dir, ['--check']);
       const out = `${r.stderr || ''}${r.stdout || ''}`;
-      const problems = [];
-      if (r.status !== p.exit) problems.push(`expected exit ${p.exit}, got ${r.status}`);
-      if (!out.includes(p.sig)) problems.push(`output does not contain ${JSON.stringify(p.sig)}`);
-      if (p.expectScratchPath && !out.includes(dir)) problems.push('output does not name the scratch dir');
-      if (problems.length > 0) {
-        console.error(`  ✗ [cli] ${p.note}: ${problems.join('; ')}`);
-        console.error(`      ${out.trim().split('\n')[0]}`);
-        cliBad++;
-      } else {
-        seenCauses.add(p.cause);
-        console.log(`  ✓ [cli] ${p.note}`);
-      }
+      capturedOut.set(p.cause, out);
+      reportCliProbe(p, r.status, out, dir);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
+  }
+
+  // ── The caller must CONSUME the verdict (pass 6 fold, self-caught) ───────────────────────────
+  // Drive reportCliProbe with a row that cannot pass, and require it to have counted a failure.
+  // Restores the counters afterwards so the visible tally is unchanged.
+  {
+    const bad0 = cliBad;
+    const ran0 = seenCauses.size;
+    const silence = console.error;
+    console.error = () => {};
+    const reported = reportCliProbe(stub(), 99, 'nothing matching at all', '/d');
+    console.error = silence;
+    if (reported !== false || cliBad !== bad0 + 1) {
+      console.error('\n❌ reportCliProbe did not count a guaranteed-failing probe as a failure —');
+      console.error('   the CLI table reports results without consuming them. Every ✓ is meaningless.');
+      process.exit(1);
+    }
+    cliBad = bad0;
+    if (seenCauses.size !== ran0) {
+      console.error('\n❌ a failing CLI probe recorded its cause as observed.');
+      process.exit(1);
+    }
+    console.log('  ✓ [cli-meta] reportCliProbe counts a guaranteed-failing probe as a failure');
+  }
+
+  // Cross-row signature disjointness: a row's sig must not appear in ANY other row's real output.
+  // Without this, a sig can be weakened to something several branches print and the row certifies
+  // a cause it never reached. Checked against captured output, so it keys on what the shipped
+  // script emits rather than on what this table claims.
+  for (const a of CLI_PROBES) {
+    for (const b of CLI_PROBES) {
+      if (a.cause === b.cause) continue;
+      const other = capturedOut.get(b.cause);
+      if (other !== undefined && other.includes(a.sig)) {
+        console.error(`\n❌ sig for cause '${a.cause}' also appears in the output of '${b.cause}' —`);
+        console.error('   it cannot distinguish the branch it claims to observe.');
+        process.exit(1);
+      }
+    }
+  }
+
+  // Reach invariant: every registered call must have happened. The counter lives INSIDE
+  // assertCliProbe and each caller registers its own expectation, so adding a caller cannot make
+  // this red on correct code (the arithmetic mistake the shell side shipped one pass earlier).
+  if (assertCliCalls !== expectedAssertCliCalls) {
+    console.error(`\n❌ ${expectedAssertCliCalls} CLI assertion(s) were registered but assertCliProbe ran`);
+    console.error(`   ${assertCliCalls} time(s) — results are being reported without being asserted.`);
+    process.exit(1);
   }
 
   // `mkVerdict`'s single `if` is the one load-bearing line behind the kind-coverage guard below.

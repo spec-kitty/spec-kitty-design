@@ -115,6 +115,7 @@ if [ "${1:-}" = "--selftest" ]; then
   # removing the call stops the count.
   ASSERT_CALLS=0
   PROBE_NAMES=""
+  ALL_OUTPUT=""
   assert_probe() {
     local rc="$1" expect_exit="$2" expect_grep="$3" out="$4" ok=1
     ASSERT_CALLS=$((ASSERT_CALLS + 1))
@@ -142,6 +143,11 @@ $name"
     out="$(cd "$cwd" && bash "$SELF" "$@" 2>&1)"
     rc=$?
     set -e
+    # Every probe's real output is accumulated so branch coverage can be asserted against what the
+    # shipped script EMITTED, never against probe titles (pass 6: all four lenses defeated a
+    # name-keyed guard).
+    ALL_OUTPUT="$ALL_OUTPUT
+$out"
     assert_probe "$rc" "$expect_exit" "$expect_grep" "$out" || ok=0
     if [ "$ok" -eq 1 ]; then
       echo "  ✓ [$TOTAL] $name"
@@ -366,6 +372,29 @@ $name"
   git -C "$REPO_F" commit -q -m "root, no reachable release tag"
   ORPHAN_SHA="$(git -C "$REPO_F" commit-tree 4b825dc642cb6eb9a060e54bf8d69288fbee4904 -m "unreachable orphan carrying the release tags")"
   { for i in $(seq 1 20000); do printf 'create refs/tags/v%d.0.0 %s\n' "$i" "$ORPHAN_SHA"; done; } | git -C "$REPO_F" update-ref --stdin
+  # The SIGPIPE branch is invisible in output: the 20,000-tag and one-tag refusals are
+  # BYTE-IDENTICAL (measured). So the only thing that binds probes D/D2 to the defect they exist
+  # for is the FIXTURE'S SCALE — and nothing asserted it. Pass 6, all four lenses: repoint D and D2
+  # at a one-tag repo, leave their names alone, and the whole #438 SIGPIPE fix reverts with the
+  # suite reporting 19/19 green. This asserts the scale directly, at the fixture.
+  SIGPIPE_FIXTURE_MIN=2000
+  # STRUCTURAL binding: the SIGPIPE probes go through this helper, which hardcodes the fixture, so
+  # the repo is NOT a caller parameter. A standalone assertion that REPO_F holds 20,000 tags did
+  # NOT bind which repo probes D/D2 actually used — repointing them at the one-tag repo, names
+  # untouched, still reverted the whole #438 SIGPIPE fix with the suite green (self-caught on the
+  # fourth attempt at this guard, after three lenses defeated the name- and count-based versions).
+  # Redirecting these probes now means editing this function, where the scale check lives.
+  sigpipe_probe() {
+    local n
+    n="$(git -C "$REPO_F" for-each-ref --format='x' "refs/tags/$RELEASE_TAG_GLOB" | wc -l)"
+    if [ "$n" -lt "$SIGPIPE_FIXTURE_MIN" ]; then
+      echo ""
+      echo "❌ the SIGPIPE fixture carries $n tag(s), below the $SIGPIPE_FIXTURE_MIN needed to"
+      echo "   reproduce the defect. These probes would pass without exercising the pipe at all."
+      exit 1
+    fi
+    probe "$1" "$2" "$3" "$REPO_F"
+  }
   #    Pass 4: asserts the rendered line as a whole LINE, not the substring 'not reachable'. With
   #    only the loose substring, dropping `--count=1` survived: the mutant still exits 2 and still
   #    says "not reachable", it just interpolates all 20,000 tag names across 20,002 lines.
@@ -382,12 +411,12 @@ $name"
   #    the probe's own name ("ONE legible line") was a claim it did not make. A mutant keeping
   #    `--count=1` while dumping the tag list on another line satisfied it. The MAXLINES probe
   #    below is what actually holds the legibility half.
-  probe "D: ~20,000 unreachable release tags don't SIGPIPE the lookup -> exit 2, and the refusal names ONE tag (not a silent 141)" 2 "EXACTRE:   A release tag exists in this repository \(v[0-9]+\.[0-9]+\.[0-9]+\) but is not reachable" "$REPO_F"
+  sigpipe_probe "D: ~20,000 unreachable release tags don't SIGPIPE the lookup -> exit 2, and the refusal names ONE tag (not a silent 141)" 2 "EXACTRE:   A release tag exists in this repository \(v[0-9]+\.[0-9]+\.[0-9]+\) but is not reachable"
   #    MAXLINES is 6 against a MEASURED 3: the real refusal is exactly three lines (the headline,
   #    the named tag, and the "verify this checkout" line). 6 leaves room for one more explanatory
   #    line without permitting a tag dump. An earlier revision used 12, which was 4x the measured
   #    value and left nine lines a mutant could hide in (pass 5, reviewer lens).
-  probe "D2: that same refusal stays LEGIBLE -> the whole output is a handful of lines, not 20,000 tag names" 2 "MAXLINES:6" "$REPO_F"
+  sigpipe_probe "D2: that same refusal stays LEGIBLE -> the whole output is a handful of lines, not 20,000 tag names" 2 "MAXLINES:6"
 
   # ── Meta-probes: assert_probe itself (#438 pass 4, debugger lens finding 2) ──────────────────
   # Neutering the assertion block (`if [ -n "$expect_grep" ]` -> `if false`, or blanking the
@@ -441,25 +470,51 @@ $name"
     exit 1
   fi
 
-  # ── Branch coverage: the shell analogue of VERDICT_KINDS / REQUIRED_CAUSES ───────────────────
-  # Pass 5, reviewer lens: the total floor and the pass/fail split both survive swapping probes D
-  # and D2 for filler expect-fail probes — TOTAL stays 19, the split stays non-degenerate, and the
-  # ENTIRE #438 SIGPIPE fix can then be reverted with the suite reporting "All 19 ... behaved as
-  # recorded". Counting probes never protected any particular refusal branch. This does.
-  REQUIRED_BRANCHES="SIGPIPE
-LEGIBLE
-shallow clone
-unreachable from HEAD
-zero tokens
-categories:\[\]"
-  MISSING_BRANCHES=""
-  while IFS= read -r branch; do
-    [ -n "$branch" ] || continue
-    printf '%s\n' "$PROBE_NAMES" | grep -qE "$branch" || MISSING_BRANCHES="$MISSING_BRANCHES $branch;"
-  done <<< "$REQUIRED_BRANCHES"
-  if [ -n "$MISSING_BRANCHES" ]; then
+  # ── probe() must CONSUME the verdict, not merely call the asserter ───────────────────────────
+  # Pass 6, debugger lens: `assert_probe … || ok=0` -> `|| ok=1` is a ONE-EDIT total neuter of all
+  # 19 probes, and ASSERT_CALLS reports satisfied throughout, because a call counter proves
+  # INVOCATION and never CONSUMPTION. Verified end-to-end before folding: dropping `--match` from
+  # `git describe` alone reds (2 probes); the same defect with `|| ok=1` goes green. A counter
+  # cannot close this — only driving probe() itself against a known-bad expectation can, because
+  # any single assignment can be inverted but a failing probe must still be REPORTED as failing.
+  _T=$TOTAL; _B=$BAD; _P=$PASS_KIND_COUNT; _F=$FAIL_KIND_COUNT; _N=$PROBE_NAMES; _A=$ASSERT_CALLS
+  probe "META: a deliberately impossible expectation MUST be reported as failing" 99 "" "$REPO_A" >/dev/null 2>&1 || true
+  if [ "$BAD" -ne "$((_B + 1))" ]; then
     echo ""
-    echo "❌ refusing to report green: no probe covers refusal branch(es):$MISSING_BRANCHES"
+    echo "❌ probe() did not report a known-bad expectation as failing — its verdict is not"
+    echo "   consumed, so every ✓ above is meaningless."
+    exit 1
+  fi
+  echo "  ✓ [meta] probe() reports a known-bad expectation as failing"
+  TOTAL=$_T; BAD=$_B; PASS_KIND_COUNT=$_P; FAIL_KIND_COUNT=$_F; PROBE_NAMES=$_N; ASSERT_CALLS=$_A
+
+  # ── Branch coverage, keyed on EMITTED OUTPUT rather than probe names ─────────────────────────
+  # The previous revision grepped PROBE_NAMES — the probe's free-text title. All four pass-6 lenses
+  # defeated it: keep the names and repoint the fixtures (or name a filler probe "SIGPIPE") and the
+  # entire #438 SIGPIPE fix reverts with the suite reporting 19/19 green. It also RED on a benign
+  # rename. Asserting a proxy the test author types is both vacuous and brittle; this asserts text
+  # the shipped script actually printed during the run.
+  #
+  # SIGPIPE/legibility is deliberately NOT in this list: the 20,000-tag and one-tag refusals are
+  # BYTE-IDENTICAL (measured), so no emitted-output guard can distinguish them. That branch is
+  # bound by the fixture-scale assertion at REPO_F instead.
+  # Single-quoted: these are VERBATIM strings captured from a real run's accumulated output, not
+  # written from memory. The first attempt guessed two of them ("tokens, which is below the floor",
+  # "is not an array") and neither exists — the baseline went red and caught it, which is the whole
+  # reason a guard gets a control before it gets trusted.
+  REQUIRED_OUTPUT='This checkout is a SHALLOW clone
+but is not reachable
+contains zero tokens
+missing or non-object "categories" key'
+  MISSING_OUTPUT=""
+  while IFS= read -r want; do
+    [ -n "$want" ] || continue
+    printf '%s' "$ALL_OUTPUT" | grep -qF "$want" || MISSING_OUTPUT="$MISSING_OUTPUT
+   - $want"
+  done <<< "$REQUIRED_OUTPUT"
+  if [ -n "$MISSING_OUTPUT" ]; then
+    echo ""
+    echo "❌ refusing to report green: no probe made the shipped script emit these refusals:$MISSING_OUTPUT"
     exit 1
   fi
 
