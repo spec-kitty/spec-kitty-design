@@ -3114,6 +3114,89 @@ for (const visual of accountFrontDoorFullCases) {
   });
 }
 
+// #382 Team Activity truth-region matrix. These eighteen screenshots are the canonical
+// visual inventory for L1-L5, TL1, OA1, DM1, and the required presentation stress states.
+// The focused functional suite owns the fresh DPR-2, exactly-halved-viewport 200% zoom evidence
+// and the separately named supplemental CSS-zoom stress check.
+type TeamActivityVisualStoryId =
+  | 'default'
+  | 'l-2-repository-quiet'
+  | 'l-3-repository-degraded'
+  | 'l-4-repository-sequence-gap'
+  | 'l-5-repository-unauthorized'
+  | 'tl-1-team-mixed'
+  | 'oa-1-observed-populated'
+  | 'oa-1-observed-retained-degraded'
+  | 'oa-1-observed-quiet'
+  | 'oa-1-observed-loading'
+  | 'dm-1-decision'
+  | 'light-mode'
+  | 'narrow'
+  | 'intermediate'
+  | 'long-content'
+  | 'rtl'
+  | 'forced-colors'
+  | 'reduced-motion';
+
+const teamActivityVisuals = [
+  { id: 'default', width: 1440, height: 1024, name: 'team-activity-l1-default.png' },
+  { id: 'l-2-repository-quiet', width: 960, height: 720, name: 'team-activity-l2-quiet.png' },
+  { id: 'l-3-repository-degraded', width: 960, height: 720, name: 'team-activity-l3-degraded.png' },
+  { id: 'l-4-repository-sequence-gap', width: 960, height: 900, name: 'team-activity-l4-gap.png' },
+  { id: 'l-5-repository-unauthorized', width: 960, height: 720, name: 'team-activity-l5-denial.png' },
+  { id: 'tl-1-team-mixed', width: 1440, height: 1200, name: 'team-activity-tl1-mixed.png' },
+  { id: 'oa-1-observed-populated', width: 960, height: 900, name: 'team-activity-oa1-populated.png' },
+  { id: 'oa-1-observed-retained-degraded', width: 960, height: 900, name: 'team-activity-oa1-degraded.png' },
+  { id: 'oa-1-observed-quiet', width: 960, height: 720, name: 'team-activity-oa1-quiet.png' },
+  { id: 'oa-1-observed-loading', width: 960, height: 720, name: 'team-activity-oa1-loading.png' },
+  { id: 'dm-1-decision', width: 960, height: 720, name: 'team-activity-dm1-decision.png' },
+  { id: 'light-mode', width: 1440, height: 1024, name: 'team-activity-light-mode.png' },
+  { id: 'narrow', width: 390, height: 1000, name: 'team-activity-narrow.png' },
+  { id: 'intermediate', width: 768, height: 900, name: 'team-activity-intermediate.png' },
+  { id: 'long-content', width: 390, height: 1400, name: 'team-activity-long-content.png' },
+  { id: 'rtl', width: 960, height: 1200, name: 'team-activity-rtl.png' },
+  { id: 'forced-colors', width: 960, height: 900, name: 'team-activity-forced-colors.png', forcedColors: true },
+  { id: 'reduced-motion', width: 960, height: 900, name: 'team-activity-reduced-motion.png', reducedMotion: true },
+] as const satisfies ReadonlyArray<{
+  id: TeamActivityVisualStoryId;
+  width: number;
+  height: number;
+  name: `team-activity-${string}.png`;
+  forcedColors?: boolean;
+  reducedMotion?: boolean;
+}>;
+
+for (const visual of teamActivityVisuals) {
+  test(`Team Activity ${visual.id} — truth-region baseline`, async ({ page }) => {
+    if ('forcedColors' in visual && visual.forcedColors) {
+      await page.emulateMedia({ forcedColors: 'active' });
+    }
+    if ('reducedMotion' in visual && visual.reducedMotion) {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+    }
+    await page.setViewportSize({ width: visual.width, height: visual.height });
+    await page.goto(`/iframe.html?id=patterns-team-activity--${visual.id}&viewMode=story`);
+    const denial = visual.id === 'l-5-repository-unauthorized';
+    const root = page.locator(
+      denial ? 'main.sk-team-activity-denial' : '[data-team-activity-pattern]',
+    ).first();
+    await root.waitFor({ state: 'visible', timeout: 20000 });
+    if (denial) {
+      await expect(root).toHaveText("Not authorized to watch this repository's live activity.");
+    } else {
+      await expect(root).toHaveAttribute('data-render-complete', 'true');
+      await expect(root).toHaveAttribute('data-play-proof', 'passed');
+    }
+    await page.evaluate(() => document.fonts.ready);
+    await expect(root).not.toBeEmpty();
+    await expect.soft(root).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+      timeout: 20000,
+    });
+  });
+}
+
 test('Account Front Door forced colors — visual baseline', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
   await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
