@@ -34,22 +34,25 @@ on:
         required: false
         default: false
         type: boolean
-      cut-release:
-        description: 'Create a GitHub Release with the SBOM attached (prod only).'
-        required: false
-        default: false
-        type: boolean
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    # `packages: write` is the load-bearing permission: without it GITHUB_TOKEN cannot publish to
-    # GitHub Packages at all. `contents: write` is needed only when cutting a Release; it is
-    # granted here because a reusable workflow cannot vary its own permissions by input, and the
-    # caller's own `permissions:` block is the narrowing mechanism.
+    # THE CALLER'S `permissions:` IS A CEILING, NOT A NARROWING FILTER. An earlier revision of this
+    # file declared `contents: write` here on the belief that the caller's smaller block would take
+    # it away again. That is backwards: a called workflow declaring ABOVE the caller's grant fails
+    # workflow validation and the run never starts — "The nested job is requesting 'contents:
+    # write', but is only allowed 'contents: read'". The rc caller grants `contents: read`, so the
+    # rc stream could not have started at all.
+    #
+    # So this declares the payload's true minimum. `packages: write` is load-bearing — without it
+    # GITHUB_TOKEN cannot publish to GitHub Packages. Nothing else in this job writes to contents:
+    # the audit gate runs `npm audit` only, and the bump touches manifests on the runner's disk and
+    # never commits or pushes. Cutting a GitHub Release DOES need `contents: write`, which is
+    # exactly why it is no longer here — see the SBOM upload below.
     permissions:
-      contents: write
+      contents: read
       packages: write
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -85,15 +88,6 @@ jobs:
       - name: Build the buildable set
         run: npx nx run-many --target=build --projects=${{ steps.graph.outputs.projects }}
 
-      # Bumps the PUBLISHABLE set in lockstep and rewrites intra-scope ranges across EVERY
-      # workspace member onto a prerelease-admitting form. `--from-registry` derives the next rc
-      # from what is already published rather than from the committed version, because nothing
-      # commits the bump back: without it every run recomputes the same version and the second
-      # publish dies on EPUBLISHCONFLICT.
-      - name: Bump the publishable set to the next prerelease
-        if: ${{ inputs.bump }}
-        run: node scripts/bump-prerelease.mjs --from-registry
-
       - name: "[ENFORCED] The release gate can see its own failures (SC-003)"
         run: node scripts/check-release-graph.mjs --selftest
       - name: "[ENFORCED] Release graph is coherent (FR-003, FR-004)"
@@ -121,6 +115,25 @@ jobs:
             --output-format json \
             --output-file spec-kitty-design-sbom.cdx.json
 
+      # LAST BEFORE PUBLISH, DELIBERATELY. This step rewrites `version` and every intra-scope range
+      # in all four publishable manifests, and `package.json` is inside every tarball — so it moves
+      # each package's `unpackedSize`. Running it BEFORE the size gate (where it used to sit) meant
+      # `measure-elements-sizes.mjs --check` compared the committed record against manifests the
+      # previous step had just mutated. Measured: `@spec-kitty/styles` renders at 844.1 KiB and sits
+      # ONE byte below the next 0.1-KiB bucket, and the bump adds seven — so the very first rc run
+      # died on size drift before reaching publish. Re-recording cannot fix that: the committed
+      # record must match the UNBUMPED tree, which is what every PR checks.
+      #
+      # Nothing above this line needs the bumped versions: the four `[ENFORCED]` gates and the
+      # contents audit assert artifact CONTENTS, not version strings.
+      #
+      # `--from-registry` derives the next rc from what is already published rather than from the
+      # committed version, because nothing commits the bump back: without it every run recomputes
+      # the same version and the second publish dies on EPUBLISHCONFLICT.
+      - name: Bump the publishable set to the next prerelease
+        if: ${{ inputs.bump }}
+        run: node scripts/bump-prerelease.mjs --from-registry
+
       # `set -euo pipefail` is load-bearing: without it a failing `npm publish` inside a `for` loop
       # does not fail the step, and the workflow reports a successful release having published a
       # subset. EPUBLISHCONFLICT is tolerated only on a re-run, matching release.yml's reasoning:
@@ -143,7 +156,17 @@ jobs:
               if echo "$out" | grep -qE "code (EPUBLISHCONFLICT|E409)" && [ "${GITHUB_RUN_ATTEMPT:-1}" -gt 1 ]; then
                 echo "::warning::packages/$pkg already published at this version — treating as resumption"
               else
+                # HALT, do not accumulate. Ported from release.yml, which argues it at length and
+                # which this file was supposed to consolidate rather than diverge from: the set is
+                # published in TOPOLOGICAL order precisely so a package goes out after everything it
+                # depends on. Continuing past a real failure spends that guarantee in the only case
+                # it was for — if `tokens` fails, `styles`, `elements` and `react` publish anyway
+                # (npm publish does not resolve peers, so all three succeed) and every consumer
+                # install then hard-fails E404 on the missing peer. Those versions are permanent.
+                # Resumability comes from the skip-on-conflict branch above, not from continuing.
+                echo "::error::halting — every package after $pkg in the derived set may depend on it"
                 failed="$failed $pkg"
+                break
               fi
             fi
           done
@@ -160,9 +183,19 @@ jobs:
             npm view "$NAME" dist-tags || echo "(not yet readable — first publish propagating)"
           done
 
-      - name: Create GitHub Release with SBOM
-        if: ${{ inputs.cut-release }}
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # softprops/action-gh-release v3.0.0
+      # THE RELEASE STEP IS DELIBERATELY NOT HERE. Cutting a GitHub Release needs `contents: write`,
+      # and declaring that in this job is what made the rc stream unstartable (see the permissions
+      # block above). It is also prod-only, so it does not belong in a shared spine. The SBOM leaves
+      # as an artifact instead, and REL3's prod caller attaches it from a job of its own that grants
+      # itself `contents: write` — the caller can hold a permission this payload must not.
+      #
+      # REL3 NOTE, recorded so the fold does not silently downgrade prod: converting `release.yml`
+      # to a caller must also restore `id-token: write` (npm provenance, FR-044) and `--access
+      # public` on the publish. Both are absent here because the rc stream needs neither, and both
+      # fail QUIETLY — provenance degrades without an error, scoped packages default to restricted.
+      - name: Upload the SBOM for the caller to attach
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         with:
-          files: spec-kitty-design-sbom.cdx.json
-          generate_release_notes: true
+          name: sbom
+          path: spec-kitty-design-sbom.cdx.json
+          if-no-files-found: error

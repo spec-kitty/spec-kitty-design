@@ -19,10 +19,12 @@ on:
   push:
     branches: [develop]
 
-# NARROWED HERE, deliberately. A `workflow_call` job cannot vary its own permissions by input, so
-# `publish-packages.yml` declares `contents: write` for the prod path's GitHub Release. The rc
-# stream cuts no Release and needs no write to contents; the caller's block is the mechanism that
-# takes it away again.
+# THIS IS A CEILING, NOT A FILTER — the correction that mattered most in review. An earlier
+# revision declared `contents: write` in the payload on the belief that this smaller block would
+# narrow it back down. It does the opposite: a called workflow declaring ABOVE what its caller
+# grants fails workflow VALIDATION and the run never starts ("the nested job is requesting
+# 'contents: write', but is only allowed 'contents: read'"). The rc stream could not have run at
+# all. The payload now declares exactly what these two lines permit, and a checker asserts it.
 permissions:
   contents: read
   packages: write
@@ -46,5 +48,8 @@ jobs:
       # `develop`: without this every run recomputes the same version and publish #2 dies on
       # EPUBLISHCONFLICT.
       bump: true
-      cut-release: false
-    secrets: inherit
+    # NO `secrets: inherit`. The payload uses only `secrets.GITHUB_TOKEN`, which a called workflow
+    # receives without inheriting anything. `inherit` additionally handed this job the repository's
+    # GitHub App private key — into a job that runs `npm publish` and `npx cyclonedx` over
+    # third-party code. If the payload ever needs a named secret, declare it under the payload's
+    # `on.workflow_call.secrets:` and pass that one by name.

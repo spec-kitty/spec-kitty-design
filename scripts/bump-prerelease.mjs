@@ -365,7 +365,15 @@ function main({ dryRun, fromRegistry }) {
 // ── --selftest ────────────────────────────────────────────────────────────────────────────────
 // Probes drive the PURE functions with fixtures and assert computed outcomes. Floor lives outside
 // the table.
-if (process.argv.includes('--selftest')) {
+//
+// GUARDED THE SAME WAY `main()` IS, and for a worse reason. This block used to test only
+// `process.argv`, which is the IMPORTER's argv: any process that imported this module while `--
+// selftest` happened to be on its command line ran the probe table instead of its own code, and
+// the `process.exit(0)` below then killed it — reporting success for assertions that never ran.
+// `main()`'s version of this bug corrupts a tree noisily; this one manufactures a green, which is
+// the direction that actually gets believed. Demonstrated by a lens: an importer intending exit 3
+// exited 0 with none of its own code executed.
+if (isDirectInvocation(process.argv[1], import.meta.url) && process.argv.includes('--selftest')) {
   const pkg = (name, version, peers) => ({
     name,
     version,
@@ -554,12 +562,19 @@ if (process.argv.includes('--selftest')) {
     console.error(`\n❌ ${bad} of ${PROBES.length} probe(s) did not behave as recorded.`);
     process.exit(1);
   }
+  // NO `process.exit(0)` ON THE SUCCESS PATH — but only because the `main()` guard below now
+  // excludes `--selftest` explicitly. Removing this exit WITHOUT that change made control fall
+  // straight through into `main()`, and `--selftest` performed a real bump of all four manifests
+  // plus the lockfile. Caught immediately, on my own working tree; the two lines are one mechanism
+  // and must be read together.
   console.log(`\n✅ All ${PROBES.length} bump-prerelease probes behaved as recorded.`);
-  process.exit(0);
 }
 
-// GUARDED. Without this, `import`ing the module runs a real bump — see isDirectInvocation.
-if (isDirectInvocation(process.argv[1], import.meta.url)) {
+// GUARDED TWICE. `isDirectInvocation` stops an `import` from running a real bump — see its own
+// comment. `!--selftest` stops the probe table above from falling through into one: the selftest
+// block no longer exits, so without this conjunct `--selftest` bumps every manifest in the
+// repository and regenerates the lockfile. A checking mode must never mutate the thing it checks.
+if (isDirectInvocation(process.argv[1], import.meta.url) && !process.argv.includes('--selftest')) {
   main({
     dryRun: process.argv.includes('--dry-run'),
     fromRegistry: process.argv.includes('--from-registry'),
