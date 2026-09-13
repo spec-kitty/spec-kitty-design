@@ -970,6 +970,12 @@ else {
     // workflow comment at its call site for why the real check stays manual), so only that half
     // is registered.
     [/node\s+scripts\/verify-visual-spec-zero-drift\.mjs\s+--selftest(\s|$)/, "the NI-001 visual-spec zero-drift gate's own probe table", 'scripts/verify-visual-spec-zero-drift.mjs --selftest'],
+    // #436, both entries with the gate itself, per every comment above. Without an entry here,
+    // either the charter served-surface drift check (Policy Summary is the ONLY half of
+    // charter.md an agent ever receives) or its own probe table could be deleted from
+    // `lint-code` with this checker still green.
+    [/node\s+scripts\/check-charter-served-surface\.mjs(?!\s*--selftest)(\s|$)/, 'the charter served-surface drift gate', 'scripts/check-charter-served-surface.mjs'],
+    [/node\s+scripts\/check-charter-served-surface\.mjs\s+--selftest(\s|$)/, "the served-surface gate's own probe table", 'scripts/check-charter-served-surface.mjs --selftest'],
   ];
 
   /**

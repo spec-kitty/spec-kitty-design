@@ -279,6 +279,26 @@ const CASES = [
   ["G: lint-code `verify-visual-spec-zero-drift.mjs --selftest` step deleted", deleteStepExact('lint-code', 'node scripts/verify-visual-spec-zero-drift.mjs --selftest')],
   ["G: release-gate `generate-token-catalogue.js --check` step deleted", deleteStepExact('release-gate', 'node scripts/generate-token-catalogue.js --check')],
   ["G: release-gate `generate-token-catalogue.js --selftest` step deleted", deleteStepExact('release-gate', 'node scripts/generate-token-catalogue.js --selftest')],
+  // ── #436: the charter served-surface gate's two new REQUIRED_LINT entries ───────────────
+  //
+  // Located by exact run text rather than the shared `lintStep`/`fallback` helpers above:
+  // both the check step and its `--selftest` step contain the substring
+  // `check-charter-served-surface.mjs`, so a needle-based lookup would always resolve to
+  // whichever step appears first in the job and could silently stop exercising the other.
+  ['#436 `|| true` on the charter served-surface check step (not --selftest)', (wf) => {
+    const step = (wf.jobs?.['lint-code']?.steps ?? []).find(
+      (s) => String(s.run ?? '').trim() === 'node scripts/check-charter-served-surface.mjs',
+    );
+    if (!step) throw new Error('no lint-code step running exactly `node scripts/check-charter-served-surface.mjs`');
+    step.run = `${String(step.run).trimEnd()} || true\n`;
+  }],
+  ["#436 continue-on-error on the served-surface gate's own --selftest step", (wf) => {
+    const step = (wf.jobs?.['lint-code']?.steps ?? []).find((s) =>
+      String(s.run ?? '').includes('check-charter-served-surface.mjs --selftest'),
+    );
+    if (!step) throw new Error('no lint-code step running the served-surface gate --selftest');
+    step['continue-on-error'] = true;
+  }],
 ];
 
 /**
@@ -286,7 +306,7 @@ const CASES = [
  * REMOVED by lowering it in the same commit, which is a reviewable edit rather than a deletion
  * that hides in a digit.
  */
-const MIN_CASES = 36;
+const MIN_CASES = 38;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });
