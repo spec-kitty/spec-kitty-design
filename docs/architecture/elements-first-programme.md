@@ -83,7 +83,7 @@ Tier A earns squads at the earlier point-cuts too because each one sets somethin
 
 **N1 · Own the `@spec-kitty` npm scope.** Blocks M14 and nothing else. **The npm organisation was created on 2026-09-02** — the part with unbounded lead time is done, and the org-ownership question that ADR-2 flagged as a pre-flight is settled.
 
-Remaining, all short: enable 2FA on the org; issue a granular publish token scoped to `@spec-kitty/*`; add it as `NPM_TOKEN` in this repository's secrets; prove the path end to end with `npm publish --dry-run`. That last step matters — tag `v1.0.0`'s release run failed with `404 PUT .../@spec-kitty%2ftokens`, and a dry run is what converts "the org exists" into "the workflow can actually publish". Until it passes, treat M14 as blocked rather than ready.
+**SUPERSEDED 2026-09-13 by the registry move (REL2, #363).** This paragraph told the operator to issue an npm publish token and add it as `NPM_TOKEN`. That is no longer the path: publishing moved to GitHub Packages, `release.yml` authenticates with the built-in `GITHUB_TOKEN`, and no `NPM_TOKEN` secret has ever existed in this repository. What remains is GitHub org 2FA, and proving the path end to end — which still matters for exactly the reason the original gave: tag `v1.0.0`'s release run failed with `404 PUT .../@spec-kitty%2ftokens`, and nothing since has executed the prod path. Consumers need a token carrying `read:packages`; GitHub Packages requires auth even for public packages.
 
 **N2 · Storybook Pages hosting identity.** The published URL is `stijn-dejongh.github.io/spec-kitty-design` while the repository is `spec-kitty/spec-kitty-design`. Ownership question, not code.
 
@@ -319,7 +319,7 @@ a generated string, not an authoring site.
 
 **This mission prepares the release; it does not perform it.** `release.yml` fires on `push: tags: ['v*.*.*']`, not on a merge. Tagging from the integration branch would publish 1.0.0 out of a state that has not been reviewed as a whole, so the tag is pushed **after the train lands on `main`, by the operator** — the same authority as the merge itself.
 
-**Consequence, stated plainly: no mission in this programme needs npm write access.** N1's remaining steps (2FA, publish token, `NPM_TOKEN`, dry run) gate the operator's release, not any mission's work. N1 is therefore not a hard prerequisite for this mission — only for the tag that follows it.
+**Consequence, stated plainly: no mission in this programme needs npm write access.** N1's remaining steps (GitHub org 2FA and a real dry run — the npm publish token and `NPM_TOKEN` are superseded, see above) gate the operator's release, not any mission's work. N1 is therefore not a hard prerequisite for this mission — only for the tag that follows it.
 
 **Exit:** `npm publish --dry-run` passes for every package in the new graph, proving the rebuilt pipeline end to end; a `file://` page loads the **locally built** classic-script bundle with no network; the integrity hash is generated and recorded; and the release runbook states the post-merge sequence — land the train, tag, workflow publishes.
 

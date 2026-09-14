@@ -1,0 +1,77 @@
+{
+  "rows": {
+    "#361": {
+      "evidence_ref": "Follow-up: #364 (REL3) and #396 (REL4) remain. Parent epic, not resolved by REL2 and deliberately not referenced as closing - children close when the train lands on main.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "Epic: Release pipeline \u2014 dual-stream rc/prod publishing",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#362": {
+      "evidence_ref": "Follow-up: #362 (REL1, its own mission). Unblocked but uninstalled - the GitHub App has zero installations, so develop is advanced by an explicit push rather than tracking the train. Does not block REL2.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "[REL1] develop branch and RC-line governance",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#363": {
+      "evidence_ref": "PR #439, head 21ae4430: reusable publish payload, thin rc caller, lockstep prerelease bump, publish refusal in executed code. Six adversarial passes folded; CI 13/13 green. Acceptance criteria remain pending until the pipeline executes once for real - nothing in the diff has run yet.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "[REL2] rc stream \u2014 lockstep prerelease publish to GitHub Packages",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#364": {
+      "evidence_ref": "Follow-up: #364 (REL3). Carries the release.yml fold, attestations replacing npm provenance per the 2026-09-11 amendment on #361, and prod dist-tag latest - which this payload now refuses unconditionally, so REL3 needs a separately audited path.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "[REL3] prod stream on GitHub Packages and registry routing",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#438": {
+      "evidence_ref": "Merged to train/elements-first as f3b105de before this mission rebased onto it. Referenced here only because REL2 raised MIN_CASES on the defeat table it added.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#80": {
+      "evidence_ref": "Closed. Referenced only because check-release-graph.mjs, which REL2 extends, was created for it. No REL2 work item.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    }
+  },
+  "schema_version": 1
+}

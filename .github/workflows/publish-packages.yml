@@ -1,0 +1,221 @@
+name: Publish packages (reusable)
+
+# THE SHARED PUBLISH SPINE (REL2, #363, epic #361).
+#
+# WHY THIS EXISTS. `release.yml` (prod, tag-triggered) and `release-rc.yml` (rc, develop-triggered)
+# were split by FILE when they differ only by INPUT — trigger, registry, dist-tag, whether to bump,
+# whether to cut a GitHub Release. Splitting by file duplicated the entire resolve -> build ->
+# verify -> publish structure, dropped five gates on the copy, and — the part that mattered — put
+# the copy outside `check-release-graph.mjs`, whose seven payload assertions key on
+# `jobs.release.steps` in one named file. All four review lenses reached that independently.
+#
+# So the payload lives HERE, once, and the callers are thin. `check-release-graph.mjs` audits this
+# job; a separate, much smaller assertion checks that each caller actually delegates here and
+# passes a dist-tag — because a thin caller has no publish step of its own, and a checker keyed on
+# caller steps would pass it while auditing nothing. That blind spot is the one this reshape is
+# meant to close, so it does not get rebuilt one level up.
+
+on:
+  workflow_call:
+    inputs:
+      registry:
+        description: 'npm registry to publish to.'
+        required: true
+        type: string
+      dist-tag:
+        description: >-
+          npm dist-tag. MANDATORY and never defaulted: omitting `--tag` makes npm write `latest`,
+          and the first publish of a package with no existing versions would claim the prod
+          channel from the rc stream. That is irreversible.
+        required: true
+        type: string
+      bump:
+        description: 'Bump the publishable set to the next prerelease before publishing (rc only).'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # THE CALLER'S `permissions:` IS A CEILING, NOT A NARROWING FILTER. An earlier revision of this
+    # file declared `contents: write` here on the belief that the caller's smaller block would take
+    # it away again. That is backwards: a called workflow declaring ABOVE the caller's grant fails
+    # workflow validation and the run never starts — "The nested job is requesting 'contents:
+    # write', but is only allowed 'contents: read'". The rc caller grants `contents: read`, so the
+    # rc stream could not have started at all.
+    #
+    # So this declares the payload's true minimum. `packages: write` is load-bearing — without it
+    # GITHUB_TOKEN cannot publish to GitHub Packages. Nothing else in this job writes to contents:
+    # the audit gate runs `npm audit` only, and the bump touches manifests on the runner's disk and
+    # never commits or pushes. Cutting a GitHub Release DOES need `contents: write`, which is
+    # exactly why it is no longer here — see the SBOM upload below.
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+          registry-url: ${{ inputs.registry }}
+      - run: npm ci --ignore-scripts
+
+      - name: "[ENFORCED] Security gate before publish (ADR-005)"
+        run: bash scripts/npm-audit-gate.sh
+
+      # DERIVED, not listed. CAPTURED INTO VARIABLES AND ASSERTED, never interpolated into `echo`:
+      # `set -e` does not propagate a failed command substitution when the enclosing command is
+      # `echo`, so `dirs=` would be written empty, the step would exit 0, and `for pkg in ; do`
+      # would iterate zero times and succeed — publishing nothing while reporting a green release.
+      - name: Resolve the publishable package set
+        id: graph
+        run: |
+          set -euo pipefail
+          PROJECTS="$(node scripts/release-graph.mjs --projects)"
+          DIRS="$(node scripts/release-graph.mjs --dirs)"
+          [ -n "$PROJECTS" ] || { echo "::error::empty build set"; exit 1; }
+          [ -n "$DIRS" ]     || { echo "::error::empty publish set"; exit 1; }
+          echo "projects=$PROJECTS" >> "$GITHUB_OUTPUT"
+          echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
+          echo "Publishing: $DIRS"
+
+      - name: Build the buildable set
+        run: npx nx run-many --target=build --projects=${{ steps.graph.outputs.projects }}
+
+      - name: "[ENFORCED] The release gate can see its own failures (SC-003)"
+        run: node scripts/check-release-graph.mjs --selftest
+      - name: "[ENFORCED] Release graph is coherent (FR-003, FR-004)"
+        run: node scripts/check-release-graph.mjs
+      - name: "[ENFORCED] Packed Vue declarations compile without workspace paths (#149)"
+        run: node scripts/check-vue-packed-types.mjs
+      - name: "[ENFORCED] Sizes and the SRI hash match the built artifacts (FR-005, NFR-004)"
+        run: node scripts/measure-elements-sizes.mjs --check
+
+      # ADR-005. Dropped from the rc path when it was a separate file; restored here because the
+      # gate set is a property of the artifact, not of which workflow happens to publish it.
+      - name: "[ENFORCED] Dist contents audit — no secrets/sourcemaps (ADR-005)"
+        run: |
+          set -euo pipefail
+          PKGS="${{ steps.graph.outputs.dirs }}"
+          [ -n "$PKGS" ] || { echo "::error::empty publish set reached the audit loop"; exit 1; }
+          for pkg in $PKGS; do
+            echo "=== packages/$pkg ==="
+            ( cd "packages/$pkg" && npm pack --dry-run 2>&1 | grep "npm notice" | grep -v "===" )
+          done
+
+      - name: Generate CycloneDX SBOM (FR-045)
+        run: |
+          npx @cyclonedx/cyclonedx-npm \
+            --output-format json \
+            --output-file spec-kitty-design-sbom.cdx.json
+
+      # LAST BEFORE PUBLISH, DELIBERATELY. This step rewrites `version` and every intra-scope range
+      # in all four publishable manifests, and `package.json` is inside every tarball — so it moves
+      # each package's `unpackedSize`. Running it BEFORE the size gate (where it used to sit) meant
+      # `measure-elements-sizes.mjs --check` compared the committed record against manifests the
+      # previous step had just mutated. Measured: `@spec-kitty/styles` renders at 844.1 KiB and sits
+      # ONE byte below the next 0.1-KiB bucket, and the bump adds seven — so the very first rc run
+      # died on size drift before reaching publish. Re-recording cannot fix that: the committed
+      # record must match the UNBUMPED tree, which is what every PR checks.
+      #
+      # Nothing above this line needs the bumped versions: the four `[ENFORCED]` gates and the
+      # contents audit assert artifact CONTENTS, not version strings.
+      #
+      # `--from-registry` derives the next rc from what is already published rather than from the
+      # committed version, because nothing commits the bump back: without it every run recomputes
+      # the same version and the second publish dies on EPUBLISHCONFLICT.
+      - name: Bump the publishable set to the next prerelease
+        if: ${{ inputs.bump }}
+        run: node scripts/bump-prerelease.mjs --from-registry
+
+      # THE PUBLISH IS A SCRIPT, NOT INLINE SHELL — and that is the whole point.
+      #
+      # This step used to be a 20-line `for` loop, and three review passes defeated the guards
+      # written to police it: `--tag "$TAG"` deleted outright; then excused by a full-line comment
+      # mentioning it; then by a TRAILING comment on the same line; then by `TAG=latest` reassigned
+      # after the input-derived line, which satisfied all three regexes at once and published
+      # `latest` with every gate green. Pattern-matching shell was the wrong mechanism for an
+      # irreversible act, and a sixth regex would only buy a fourth evasion.
+      #
+      # `publish-derived-set.mjs` refuses in EXECUTED CODE, over the value actually in hand, and
+      # keys the one dangerous decision on something the runner emits rather than something an
+      # author types: `latest` is permitted only when GITHUB_REF_TYPE is `tag`. A branch push — the
+      # rc stream — cannot produce that, so the rc stream cannot claim the prod channel no matter
+      # what a caller passes or a future editor writes here. It derives its own set from
+      # release-graph.mjs (refusing an empty one), publishes in topological order, halts rather than
+      # accumulating failures, and treats EPUBLISHCONFLICT as resumption only on a re-run.
+      - name: Publish every package in the derived set
+        env:
+          DIST_TAG: ${{ inputs.dist-tag }}
+        run: node scripts/publish-derived-set.mjs
+
+      # Non-`latest` dist-tags never appear in the GitHub web UI version list, so this is the only
+      # place an operator can see that the publish actually landed.
+      - name: "[ENFORCED] Report the published dist-tags"
+        run: |
+          set -euo pipefail
+          # `npm dist-tag ls`, NOT `npm view`. This PR's own bump script records the measurement:
+          # `npm view` returns EXIT 0 WITH ZERO BYTES against GitHub Packages, so the previous
+          # `npm view ... || echo` never even reached its fallback — the step printed a package name
+          # followed by nothing and succeeded. The one surface an operator has for confirming the
+          # publish landed was blind AND green, which is the failure mode this whole mission is about.
+          FAILED=""
+          # A GREEN LINE OVER ZERO PACKAGES IS THE FOUNDING DEFECT OF THIS GATE FAMILY.
+          REPORT_PKGS="${{ steps.graph.outputs.dirs }}"
+          [ -n "$REPORT_PKGS" ] || { echo "::error::empty publish set reached the dist-tag report"; exit 1; }
+          for pkg in $REPORT_PKGS; do
+            NAME="$(node -p "require('./packages/$pkg/package.json').name")"
+            echo "=== $NAME ==="
+            # STATUS CAPTURED ON ITS OWN LINE, and stderr kept OUT of the success test. The first
+            # version wrote `OUT="$(npm dist-tag ls "$NAME" 2>&1)" || true`, which folded an E404 or
+            # E401 body INTO $OUT — so an authentication failure sailed through the emptiness check
+            # as a non-empty "reading", and `|| true` threw the exit code away. That is the same
+            # blind-and-green shape this step was rewritten to fix, one layer in.
+            set +e
+            OUT="$(npm dist-tag ls "$NAME" 2>/tmp/disttag.err)"
+            RC=$?
+            set -e
+            printf '%s\n' "$OUT"
+            if [ "$RC" -ne 0 ]; then
+              echo "::error::$NAME: npm dist-tag ls exited $RC"
+              sed 's/^/    /' /tmp/disttag.err
+              FAILED="$FAILED $NAME"
+            elif [ -z "$(printf '%s' "$OUT" | tr -d '[:space:]')" ]; then
+              # An empty read is a FAILED read on this registry, not an absent tag.
+              echo "::error::$NAME returned an empty dist-tag listing — that is a failed read, not an absent tag"
+              FAILED="$FAILED $NAME"
+            fi
+          done
+          [ -z "$FAILED" ] || { echo "::error::could not confirm dist-tags for:$FAILED"; exit 1; }
+
+      # THE RELEASE STEP IS DELIBERATELY NOT HERE. Cutting a GitHub Release needs `contents: write`,
+      # and declaring that in this job is what made the rc stream unstartable (see the permissions
+      # block above). It is also prod-only, so it does not belong in a shared spine. The SBOM leaves
+      # as an artifact instead, and REL3's prod caller attaches it from a job of its own that grants
+      # itself `contents: write` — the caller can hold a permission this payload must not.
+      #
+      # REL3 NOTE, rewritten after review caught the previous version instructing the exact opposite
+      # of what the same commit made true. Converting `release.yml` to a caller must:
+      #   - pass `dist-tag: latest` (this payload refuses an unset tag, so a naive fold fails closed);
+      #   - add `attestations: write` + `id-token: write` and run `actions/attest-build-provenance`
+      #     over the packed tarballs — #364 scope item 3, per the 2026-09-11 operator amendment on
+      #     #361. Do NOT restore `--provenance`: it is the npmjs mechanism and hard-fails here.
+      #   - NOT restore `--access public`: that is an npmjs access model; GitHub Packages governs
+      #     visibility per package outside the publish call.
+      #   - cut the GitHub Release from a CALLER job holding `contents: write`, which downloads the
+      #     SBOM artifact below. The payload must never hold that permission — see the ceiling.
+      - name: Upload the SBOM for the caller to attach
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
+        with:
+          # Run-unique: actions/upload-artifact@v4 errors on a duplicate name within a run, so a
+          # fixed name breaks the moment this payload is called twice (a matrix, or rc + prod in
+          # one workflow). Inert today with one caller; cheaper to name correctly now.
+          name: sbom-${{ inputs.dist-tag }}
+          path: spec-kitty-design-sbom.cdx.json
+          if-no-files-found: error

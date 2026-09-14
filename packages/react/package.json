@@ -21,5 +21,13 @@
   },
   "devDependencies": {
     "@types/react": "19.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spec-kitty/spec-kitty-design.git",
+    "directory": "packages/react"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }

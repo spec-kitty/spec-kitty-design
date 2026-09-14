@@ -75,6 +75,16 @@ function scan(root = PACKAGES) {
       targets,
       peerDependencies: pkg.peerDependencies,
       dependencies: pkg.dependencies,
+      // THE REAL REGISTRY AUTHORITY. Measured by a review lens with a control: a manifest's
+      // `publishConfig.registry` outranks the userconfig npmrc that `setup-node`'s `registry-url`
+      // writes, so the workflow input selects the AUTH LINE while this selects the DESTINATION.
+      // (An explicit `--registry` CLI flag would beat both — neither release workflow passes one.)
+      // Carried here so a checker can hold the two into agreement instead of trusting they match.
+      publishConfig: pkg.publishConfig,
+      // npm resolves the published dist-tag as `manifest.tag || defaultTag` (libnpmpublish
+      // publish.js:99), so this key silently overrides `npm publish --tag` — including to `latest`,
+      // while the run log still reports the flag's value. Carried so a checker can refuse it.
+      tag: pkg.tag,
     };
   });
 }

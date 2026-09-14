@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "mission_slug": "release-pipeline-rc-stream-01M2DYQ2",
+  "mission_id": "01M2DYQ2ADBQGVPXTJ7K0E63HS",
+  "mission_branch": "kitty/mission-release-pipeline-rc-stream-01M2DYQ2",
+  "target_branch": "mission/release-pipeline-rc-stream",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        ".github/workflows/ci-quality.yml",
+        ".github/workflows/release-rc.yml",
+        ".github/workflows/release.yml",
+        ".npmrc",
+        "scripts/bump-prerelease.mjs",
+        "scripts/check-gate-wiring-defeats.mjs",
+        "scripts/check-gate-wiring.mjs"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "workspace"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-13T18:05:31.842789+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "492d1da7c146e0b35a8e89c5728c62b372dac52b"
+}

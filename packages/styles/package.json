@@ -69,5 +69,13 @@
   ],
   "peerDependencies": {
     "@spec-kitty/tokens": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spec-kitty/spec-kitty-design.git",
+    "directory": "packages/styles"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }

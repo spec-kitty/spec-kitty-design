@@ -254,6 +254,21 @@ jobs:
         run: node scripts/build-theme-bootstrap.mjs --check
       - name: "[ENFORCED] Theme-bootstrap drift gate self-check (#323)"
         run: node scripts/build-theme-bootstrap.mjs --selftest
+      # REL2 (#363). The rc publish path runs this bump on every push to `develop`, and that path
+      # is never exercised by a pull request — the same blindness that let three hand-written
+      # package lists drift apart in release.yml. Its probe table runs HERE so the logic is
+      # exercised pre-merge, including the peer-range post-condition: measured, `1.1.0-rc.1` does
+      # not satisfy `^1.0.0`, so a version-only bump would publish an rc set that cannot resolve
+      # itself.
+      - name: "[ENFORCED] Prerelease bump's own probe table (#363, FR-003, FR-010, FR-011)"
+        run: node scripts/bump-prerelease.mjs --selftest
+      # The publish REFUSAL now lives in executed code rather than in a regex over workflow YAML:
+      # three review passes each defeated a text-matching guard on the inline publish loop, the last
+      # by reassigning `TAG=latest` after the input-derived line while satisfying all three rules at
+      # once. This table is the evidence that the refusal actually refuses — `latest` is permitted
+      # only when GITHUB_REF_TYPE is `tag`, which a branch push cannot produce.
+      - name: "[ENFORCED] Publish refusal's own probe table (#363, FR-009)"
+        run: node scripts/publish-derived-set.mjs --selftest
       # The published token build derives the no-JS System/light media fallback from the one
       # authored light block. Generate then compare in this clean job, and probe the missing,
       # duplicate and stale forms independently.

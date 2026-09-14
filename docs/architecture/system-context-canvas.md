@@ -115,7 +115,7 @@
 | Security | No `*` or `latest` version specifiers in `package.json` | C-009 |
 | Pre-implementation gate | Token schema value reconciliation (FR-034) must complete before `@spec-kitty/tokens` v1 implementation begins | ADR-003 |
 | Pre-implementation gate | `@spec-kitty` npm scope must be confirmed owned before release pipeline is built | ADR-005 |
-| Publishing | npm packages published with `--provenance`; SBOM generated at release | FR-044, FR-045 |
+| Publishing | Packages published to GitHub Packages; SBOM generated at release. `--provenance` removed 2026-09-13 (unsupported there); FR-044's control moves to GitHub artifact attestations per #364. | FR-044, FR-045 |
 
 ---
 

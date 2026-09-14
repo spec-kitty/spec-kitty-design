@@ -4,16 +4,39 @@ on:
   push:
     tags: ['v*.*.*']
 
+# RETARGETED TO GITHUB PACKAGES (operator decision, REL2 review). This workflow pointed at
+# npmjs.org, and REL2 added `publishConfig.registry` to all four manifests — which OUTRANKS the
+# npmrc that `setup-node`'s `registry-url` writes. The result would have been a prod release that
+# sends tarballs to GitHub Packages while holding credentials for npmjs: an auth failure on the
+# next tag, introduced by a PR that never touched this file. Review measured it; the operator chose
+# to make prod consistent with the standing GitHub-Packages-only ruling rather than defer.
+#
+# Three consequences, all deliberate:
+#   `packages: write`  is now required — without it GITHUB_TOKEN cannot publish here at all, and
+#                      this workflow did not have it, so it would have 403'd even after the
+#                      registry change.
+#   `id-token: write`  is gone with `--provenance` below. npm provenance is an npmjs.org MECHANISM
+#                      and is unsupported on GitHub Packages. The CONTROL it implements is not lost:
+#                      #364 scope item 3 replaces it with `actions/attest-build-provenance` over the
+#                      packed tarballs, needing `attestations: write` and `id-token: write` — under
+#                      the operator amendment of 2026-09-11 (#361), "GitHub artifact attestations
+#                      replace npm provenance". So FR-044 is RELOCATED, not retired, and this file
+#                      must not say otherwise: an earlier revision of this comment claimed it "cannot
+#                      be satisfied by any configuration", which is false and is exactly the kind of
+#                      confident wrong statement a later mission cites as settled.
+#   `NPM_TOKEN`        never existed as a secret (verified: zero secrets by that name), so prod
+#                      could not publish to npmjs today regardless. GITHUB_TOKEN is a credential
+#                      that actually exists.
 permissions:
   contents: write   # for GitHub Release creation
-  id-token: write   # for npm provenance attestation (FR-044)
+  packages: write   # to publish to GitHub Packages — load-bearing, and absent before this change
 
 jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
         with: { fetch-depth: 0 }
@@ -21,7 +44,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: 'https://npm.pkg.github.com'
       - run: npm ci --ignore-scripts
 
       - name: "[ENFORCED] Security gate before publish (ADR-005)"
@@ -136,7 +159,7 @@ jobs:
       # exempts the condition of an `if` from `set -e`, and both handled commands are if-conditions.
       # Dropping `-e` therefore bought nothing and silently removed protection from every
       # *unhandled* command in the block.
-      - name: Publish every package in the derived set (FR-044)
+      - name: Publish every package in the derived set
         run: |
           set -euo pipefail
           PKGS="${{ steps.graph.outputs.dirs }}"
@@ -144,7 +167,18 @@ jobs:
           failed=""
           for pkg in $PKGS; do
             echo "=== publishing packages/$pkg ==="
-            if out="$( cd "packages/$pkg" && npm publish --provenance --access public 2>&1 )"; then
+            # `--provenance` REMOVED with the registry move, not as a preference: it is the npmjs
+            # MECHANISM, unsupported on GitHub Packages, and it hard-fails without the
+            # `id-token: write` this workflow no longer declares. FR-044's control is relocated, not
+            # retired — #364 scope item 3 replaces it with `actions/attest-build-provenance`.
+            # `--access public` went with it: an npmjs access model; GitHub Packages governs
+            # visibility per package outside the publish call.
+            #
+            # This loop is deliberately NOT routed through scripts/publish-derived-set.mjs yet. That
+            # is REL3's fold, and the operator scoped this change to the registry alone. The script
+            # would permit `latest` here — it keys on GITHUB_REF_TYPE, and this workflow is
+            # tag-triggered — so the fold is available whenever REL3 takes it.
+            if out="$( cd "packages/$pkg" && npm publish 2>&1 )"; then
               echo "$out"
             else
               echo "$out"
@@ -191,6 +225,42 @@ jobs:
             echo "packages are skipped, so the retry completes the set."
             exit 1
           fi
+
+      # SAME REASONING AS THE RC PAYLOAD, and it applies here now that prod publishes to GitHub
+      # Packages too: `npm view` returns exit 0 with zero bytes against this registry, so a report
+      # built on it is blind and green. `npm dist-tag ls` works, and an empty read is a FAILED read.
+      - name: "[ENFORCED] Report the published dist-tags"
+        run: |
+          set -euo pipefail
+          FAILED=""
+          # A GREEN LINE OVER ZERO PACKAGES IS THE FOUNDING DEFECT OF THIS GATE FAMILY. With `dirs`
+          # empty the loop iterated zero times and the step exited 0, reporting a confirmed publish
+          # having confirmed nothing.
+          REPORT_PKGS="${{ steps.graph.outputs.dirs }}"
+          [ -n "$REPORT_PKGS" ] || { echo "::error::empty publish set reached the dist-tag report"; exit 1; }
+          for pkg in $REPORT_PKGS; do
+            NAME="$(node -p "require('./packages/$pkg/package.json').name")"
+            echo "=== $NAME ==="
+            # STATUS ON ITS OWN LINE, and stderr kept OUT of the success test. The first version
+            # wrote `OUT="$(npm dist-tag ls "$NAME" 2>&1)" || true`, folding an E404/E401 body INTO
+            # $OUT — so an auth failure sailed through the emptiness check as a non-empty "reading"
+            # and `|| true` discarded the status. Same blind-and-green shape this step was written
+            # to fix, one layer in.
+            set +e
+            OUT="$(npm dist-tag ls "$NAME" 2>/tmp/disttag.err)"
+            RC=$?
+            set -e
+            printf '%s\n' "$OUT"
+            if [ "$RC" -ne 0 ]; then
+              echo "::error::$NAME: npm dist-tag ls exited $RC"
+              sed 's/^/    /' /tmp/disttag.err
+              FAILED="$FAILED $NAME"
+            elif [ -z "$(printf '%s' "$OUT" | tr -d '[:space:]')" ]; then
+              echo "::error::$NAME returned an empty dist-tag listing — a failed read, not an absent tag"
+              FAILED="$FAILED $NAME"
+            fi
+          done
+          [ -z "$FAILED" ] || { echo "::error::could not confirm dist-tags for:$FAILED"; exit 1; }
 
       - name: Create GitHub Release with SBOM
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # softprops/action-gh-release v3.0.0

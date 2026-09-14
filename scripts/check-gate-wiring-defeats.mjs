@@ -116,6 +116,13 @@ const deleteStepExact = (jobName, exactRun) => (wf) => {
 };
 
 const CASES = [
+  // ── REL2 (#363): the prerelease bump's probe table ───────────────────────────────────────
+  // Registered in REQUIRED_LINT, so it needs the same defence every other registered gate has.
+  // A `|| true` tail is the shape that matters: the step text still matches the registry regex,
+  // so check-gate-wiring.mjs's existence assertion stays green while the gate itself stops being
+  // able to fail. That is #205's hole, and this proves it is refused for the new gate too.
+  ['#363 the prerelease bump selftest weakened with a `|| true` tail', fallback('scripts/bump-prerelease.mjs --selftest', '|| true')],
+  ['#363 the publish-refusal selftest weakened with a `|| true` tail', fallback('scripts/publish-derived-set.mjs --selftest', '|| true')],
   // ── #202: the gate job's failure disjunction, matched as shell TEXT ──────────────────
   ['#202 conjunct on the lint-code disjunct', conjunct('lint-code')],
   ['#202 conjunct on the test disjunct', conjunct('test')],
@@ -286,7 +293,15 @@ const CASES = [
  * REMOVED by lowering it in the same commit, which is a reviewable edit rather than a deletion
  * that hides in a digit.
  */
-const MIN_CASES = 36;
+// 37 = 36 (the eight cases #438 landed) + 1 (REL2's, below). Resolved to the SUM on rebase:
+// taking 36 would have silently absorbed REL2's case and taking 29 would have discarded #438's
+// eight — either way a floor that stopped counting.
+//
+// An earlier revision of this comment also named #436 as a third claimant raising it to 30.
+// That was false: #436 is an ISSUE about charter.md and never touched this file. Two review
+// lenses caught it independently. Corrected rather than carried forward, because a wrong note
+// here misdirects exactly the person doing the next rebase.
+const MIN_CASES = 38;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });

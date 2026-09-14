@@ -18,8 +18,8 @@ mission needs npm write access, and none has it.
 |---|---|---|---|
 | 1 | Land `train/elements-first` on `main` | operator | the epic is integrated |
 | 2 | Create the `spec-kitty` npm organisation | operator, **once** | the scope exists to publish into |
-| 3 | Enable 2FA on the org | operator, once | ADR-5 operational policy |
-| 4 | Add a granular publish token as `NPM_TOKEN` in repository secrets | operator, once | `release.yml` can authenticate — that secret name is what the workflow already reads |
+| 3 | Enable 2FA on the org | operator, once | ADR-5 operational policy. Note: since the 2026-09-13 move to GitHub Packages this is GitHub org 2FA, not npm-account 2FA — there is no `@spec-kitty` npm account in the publish path any more. |
+| 4 | ~~Add a granular publish token as `NPM_TOKEN`~~ **No longer required (2026-09-13).** `release.yml` publishes to GitHub Packages with the built-in `GITHUB_TOKEN`; no `NPM_TOKEN` secret has ever existed in this repository. Consumers still need a token carrying `read:packages` — GitHub Packages requires auth even for public packages. | — | — |
 | 5 | Re-run the release for the **existing** `v1.0.0` tag (see below) | operator | starts the release |
 | 6 | The workflow builds, audits, SBOMs, publishes, and creates a GitHub Release | CI | see below |
 
@@ -117,7 +117,7 @@ For every release after this one, step 5 is the ordinary `git tag vX.Y.Z && git 
    resolve, no sourcemaps, tests or dev files), then `npm pack --dry-run` lists them for the log.
    The assertion is the gate; the listing is for a human reading the release afterwards
 5. **CycloneDX SBOM** (ADR-5 FR-045)
-6. **Publishes** each package with `--provenance --access public` (ADR-5 FR-044)
+6. **Publishes** each package to GitHub Packages under dist-tag `latest`. `--provenance` was removed on 2026-09-13: it is the npmjs mechanism and is unsupported on GitHub Packages. FR-044's control relocates to `actions/attest-build-provenance` (#364 scope item 3), per the operator amendment of 2026-09-11 on #361.
 7. **GitHub Release** with the SBOM attached
 
 There is one package list, and it is computed. Until #80 there were three hand-written ones and they
@@ -133,7 +133,7 @@ call with `if (!dryRun)`), verified by running it with a full GitHub Actions env
 provenance was never exercised. So a green dry run says nothing about:
 
 - **provenance** — needs a real GHA OIDC token
-- **authentication** — needs `NPM_TOKEN`
+- **authentication** — the built-in `GITHUB_TOKEN` with `packages: write` (was `NPM_TOKEN`, which never existed; changed with the 2026-09-13 registry move)
 - **registry acceptance** — name availability, scope ownership, version collision
 
 And on its own it does not even prove a package will be published. `npm publish` on a package marked
