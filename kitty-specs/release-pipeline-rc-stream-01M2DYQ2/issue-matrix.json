@@ -59,6 +59,18 @@
       "title": null,
       "verdict": "verified-already-fixed",
       "wp": null
+    },
+    "#80": {
+      "evidence_ref": "Closed. Referenced only because check-release-graph.mjs, which REL2 extends, was created for it. No REL2 work item.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
     }
   },
   "schema_version": 1
