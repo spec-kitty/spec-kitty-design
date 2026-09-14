@@ -51,7 +51,7 @@
     "@storybook/addon-docs": "^10.3.6",
     "@storybook/angular": "^10.3.6",
     "@storybook/html": "^10.3.6",
-    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/eslint-plugin": "^8.70.0",
     "@typescript-eslint/parser": "^8.59.1",
     "axe-playwright": "^2.2.2",
     "eslint": "^9.39.4",
