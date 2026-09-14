@@ -1,7 +1,7 @@
 {
   "rows": {
     "#361": {
-      "evidence_ref": "Parent epic. Not closed by this mission \u2014 REL3 (#364) and REL4 (#396) remain, and children close only when the train lands on main.",
+      "evidence_ref": "Follow-up: #364 (REL3) and #396 (REL4) remain. Parent epic, not resolved by REL2 and deliberately not referenced as closing - children close when the train lands on main.",
       "fr": null,
       "nfr": null,
       "repo": "spec-kitty/spec-kitty-design",
@@ -9,7 +9,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "Epic: Release pipeline \u2014 dual-stream rc/prod publishing",
-      "verdict": "in-mission",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#362": {
