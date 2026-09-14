@@ -47,6 +47,18 @@
       "title": "[REL3] prod stream on GitHub Packages and registry routing",
       "verdict": "deferred-with-followup",
       "wp": null
+    },
+    "#438": {
+      "evidence_ref": "Merged to train/elements-first as f3b105de before this mission rebased onto it. Referenced here only because REL2 raised MIN_CASES on the defeat table it added.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
     }
   },
   "schema_version": 1
