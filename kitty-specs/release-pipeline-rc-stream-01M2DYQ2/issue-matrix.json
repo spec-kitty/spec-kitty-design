@@ -25,7 +25,7 @@
       "wp": null
     },
     "#363": {
-      "evidence_ref": "PR #439 \u2014 the rc stream: publish-packages.yml (reusable payload) + release-rc.yml (thin caller) + bump-prerelease.mjs. FR-001..005, 008..011 mapped to WP01. Criteria stay pending until the payload executes once for real.",
+      "evidence_ref": "PR #439, head 21ae4430: reusable publish payload, thin rc caller, lockstep prerelease bump, publish refusal in executed code. Six adversarial passes folded; CI 13/13 green. Acceptance criteria remain pending until the pipeline executes once for real - nothing in the diff has run yet.",
       "fr": null,
       "nfr": null,
       "repo": "spec-kitty/spec-kitty-design",
@@ -33,7 +33,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "[REL2] rc stream \u2014 lockstep prerelease publish to GitHub Packages",
-      "verdict": "in-mission",
+      "verdict": "fixed",
       "wp": "WP01"
     },
     "#364": {
