@@ -1,16 +1,16 @@
 {
-  "event_count": 6,
-  "last_event_id": "01M2FCS19E055ZAXH444SJ1ZYA",
-  "materialized_at": "2026-09-14T07:23:18.702058+00:00",
+  "event_count": 7,
+  "last_event_id": "01M2FCTG7563MCSNAC2X9C39AF",
+  "materialized_at": "2026-09-14T07:24:06.758014+00:00",
   "mission_number": "",
   "mission_slug": "release-pipeline-rc-stream-01M2DYQ2",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 1,
+    "approved": 0,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
-    "done": 0,
+    "done": 1,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
@@ -23,14 +23,15 @@
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "assignee": "claude",
-      "force_count": 2,
-      "lane": "approved",
-      "last_event_id": "01M2FCS19E055ZAXH444SJ1ZYA",
-      "last_transition_at": "2026-09-14T07:23:18.702058+00:00",
+      "force_count": 3,
+      "lane": "done",
+      "last_event_id": "01M2FCTG7563MCSNAC2X9C39AF",
+      "last_transition_at": "2026-09-14T07:24:06.758014+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Subtasks T001-T004 verified done against their deliverables (.npmrc + publishConfig on all four manifests; bump-prerelease.mjs --dry-run rc=0; its 27-probe table green; both workflow files present and audited by check-release-graph.mjs). --force is required because this single_branch mission was scaffolded with no tasks.md, so mark-status has no file to record checkbox state in and move-task reads every subtask as permanently unchecked.",
-        "Six adversarial passes on #439; all findings folded. CI 13/13 green on 21ae4430."
+        "Six adversarial passes on #439; all findings folded. CI 13/13 green on 21ae4430.",
+        "Six adversarial passes folded; CI 13/13 green on 21ae4430; operator authorised merge"
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
