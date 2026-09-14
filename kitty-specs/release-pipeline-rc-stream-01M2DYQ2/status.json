@@ -31,7 +31,8 @@
       "notes": [
         "Subtasks T001-T004 verified done against their deliverables (.npmrc + publishConfig on all four manifests; bump-prerelease.mjs --dry-run rc=0; its 27-probe table green; both workflow files present and audited by check-release-graph.mjs). --force is required because this single_branch mission was scaffolded with no tasks.md, so mark-status has no file to record checkbox state in and move-task reads every subtask as permanently unchecked.",
         "Six adversarial passes on #439; all findings folded. CI 13/13 green on 21ae4430.",
-        "Six adversarial passes folded; CI 13/13 green on 21ae4430; operator authorised merge"
+        "Six adversarial passes folded; CI 13/13 green on 21ae4430; operator authorised merge",
+        "Done override: Squash merge to train strands an approved WP; recording done first. No tasks.md in this single_branch scaffold so subtasks read as permanently unchecked; each verified against its deliverable. Six passes folded, CI 13/13 on 21ae4430, operator authorised."
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
