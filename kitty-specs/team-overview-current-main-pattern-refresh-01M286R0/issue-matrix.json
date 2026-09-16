@@ -1,0 +1,53 @@
+{
+  "rows": {
+    "#150": {
+      "evidence_ref": "The #150 Delivery return/Flow health/operational-dashboard composition is explicitly historical/deprecated in the migration contract and validation README. Six current TO1/TO2 story IDs and 21 current visual cases replace its retired inventory at corrective code head 48580637 on train base 57fe4ce7.",
+      "fr": "FR-001, FR-012, FR-013",
+      "nfr": "NFR-006",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001, SC-005",
+      "scope": "historical dependency retired from current product evidence",
+      "source_file": "spec.md",
+      "title": "[TKO6] team-overview pattern story — approved composition and data-integrity fixture",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#286": {
+      "evidence_ref": "WP01 uses fixture/consumer-supplied visible and accessibility copy throughout. Unsafe populated destinations retain their supplied label as passive text, and no new element default or runtime copy API is introduced. quality:all, source guards, 845 Vitest tests, and focused Playwright pass at corrective code head 48580637.",
+      "fr": "FR-002, FR-006, FR-009, FR-010",
+      "nfr": "NFR-001, NFR-003",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-002, SC-003, SC-004",
+      "scope": "cross-cutting consumer-copy constraint",
+      "source_file": "spec.md",
+      "title": "No user-visible literal in an element's render() — shadow DOM makes them untranslatable by any consumer",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#381": {
+      "evidence_ref": "WP01 delivers epic #381's #383 Team Overview child: current TO1 TeamMoment and six-response TO2 evidence, with authoritative repository/Mission routes, authorization, compact-navigation, single-mounted-response, and load-bearing media findings corrected at 48580637 on exact train base 57fe4ce7. The epic remains open and is not closed by this mission.",
+      "fr": "FR-001..FR-015",
+      "nfr": "NFR-001..NFR-008",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001..SC-006",
+      "scope": "parent epic reference; this WP owns only the #383 child",
+      "source_file": "spec.md",
+      "title": "Epic: Team workspace and activity — truthful live/observed regions and current Team Overview patterns",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#383": {
+      "evidence_ref": "Current TO1/TO2 Storybook composition, immutable fixtures, pinned owner/repository and /m/ Mission route correspondence, passive unsafe-route fallback, one selected authorization response in document DOM, independent forced-colors/reduced-motion proof, 21 owned visuals, and migration evidence are complete at corrective code head 48580637 on exact train base 57fe4ce7. Three fresh independent publication lenses passed pre-harvest head f9ddc9db with no findings; hosted run 34677426105 supplied the inspected CI-authoritative raster set.",
+      "fr": "FR-001..FR-015",
+      "nfr": "NFR-001..NFR-008",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001..SC-006",
+      "scope": "owned child mission",
+      "source_file": "spec.md",
+      "title": "[TKTW2] Team Overview current-main pattern refresh — TeamMoment populated and role-aware first run",
+      "verdict": "fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}
