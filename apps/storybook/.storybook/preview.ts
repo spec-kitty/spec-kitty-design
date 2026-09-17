@@ -1,4 +1,25 @@
-import "../../../packages/tokens/src/tokens.css";
+// BUILT dist/tokens.css, not the src/ source, and deliberately so (mission #1673's font swap).
+// tokens.css declares every @font-face as a relative `url('./fonts/...')`, resolved by the
+// browser AGAINST WHEREVER THE STYLESHEET ITSELF ENDS UP SERVED FROM. `packages/tokens/fonts/`
+// is a sibling of `dist/`, populated there by `nx run tokens:build`'s `cp -r`
+// (packages/tokens/project.json) — so importing dist/tokens.css resolves correctly, exactly the
+// way a real npm consumer's `dist/tokens.css` + `dist/fonts/` does. It is NOT a sibling of `src/`,
+// which has never had a fonts/ directory in any commit, so importing src/tokens.css (the prior
+// state here) made every @font-face 404 in Storybook's own dev-server and built contexts — verified
+// directly: a real headless-Chromium load of a Falling-Sky-dependent story showed
+// `document.fonts` entries at `status: "error"` for exactly the weights that story used, with
+// zero visual difference from a font that had never been declared at all. This was silent
+// because every consuming test still passed: nothing here asserts on the rendered TYPEFACE, only
+// on layout/contrast/semantics, which font-display: swap's system-font fallback still satisfies.
+//
+// Safe to depend on the built artifact: both the `storybook` (dev) and `storybook:build` Nx
+// targets already declare `dependsOn: ["^build"]` (apps/storybook/project.json), which nx's
+// dependency graph already resolves to include `tokens:build` — dist/tokens.css and dist/fonts/
+// already existed by the time this file loads, before this change, for the OTHER dist-rooted
+// imports already below (packages/elements/dist via main.ts's staticDirs) and for
+// scripts/check-offline-load.mjs / assemble-demo-dist.sh, which have always read dist/, never
+// src/. This makes tokens.css consistent with that same convention rather than the outlier.
+import "../../../packages/tokens/dist/tokens.css";
 // #176's content primitives, loaded globally for the same reason tokens.css is: they style
 // LIGHT-DOM markup. #177 composes facts and disclosure inside an <sk-card>'s default slot, and
 // #213 composes empty-state beside check bullets when there are no subtasks — all stay in the
