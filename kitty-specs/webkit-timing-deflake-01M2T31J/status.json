@@ -20,10 +20,14 @@
     "WP01": {
       "actor": "claude",
       "agent": null,
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
       "lane": "in_progress",
       "last_event_id": "01M2T6Z62S9P0RQVTES0DAEEK6",
       "last_transition_at": "2026-09-18T12:13:27.512709+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
       "review": null,
       "review_result": {
         "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/453/spec-kitty-design/kitty-specs/webkit-timing-deflake-01M2T31J/tasks/WP01-webkit-repeat-run-rig/review-cycle-1.md",
@@ -31,8 +35,9 @@
         "reviewer": "user",
         "verdict": "changes_requested"
       },
-      "shell_pid": null,
-      "shell_pid_created_at": null,
+      "role": "implementer",
+      "shell_pid": 640044,
+      "shell_pid_created_at": "1789733605.46",
       "subtasks": {
         "T001": "planned",
         "T002": "planned",
