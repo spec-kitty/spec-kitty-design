@@ -563,3 +563,12 @@ async function settleComposition(page: Page, host: Locator): Promise<void> {
     `loadComposition: shell did not settle within 5000ms — missing or unstable: ${lastMissing.join(", ")}`,
   );
 }
+
+/*
+ * RED-FIRST-PROOF — settleComposition's two failure paths, both reverted after capture:
+ *   RED-FIRST-PROOF (a) a required shadow part removed -> throws naming the missing part
+ *   RED-FIRST-PROOF (b) a nonexistent host testid -> throws rather than passing silently
+ * Both confirm the helper fails loudly rather than settling on a wrong composition. Item 9-dark
+ * improved (7/10 -> 9-10/10); items 6 and 7 showed no delta above the rig's own cross-run noise
+ * and are reported unfixed under FR-013 rather than claimed.
+ */

@@ -395,3 +395,12 @@ test('route focus transition is disabled under reduced motion', async ({ page })
   const host = await load(page, 'route');
   await expect(host.locator('[part="trigger"]')).toHaveCSS('transition-property', 'none');
 });
+
+/*
+ * RED-FIRST-PROOF — item 12 (the six-mode "external controls" family), CI run 35354582083
+ * (webkit, --retries=0, --repeat-each=3). Mutation: `sk-action-row.stories.ts:129` href
+ * `#details` -> `#not-details`, reverted in `ee093dbe`. Result: 0/3 in all six modes, failing at
+ * this file's rewritten `expect.poll` with `Expected: "#details", Received: "#not-details"`,
+ * bounded at 5000ms. The href was CHANGED rather than removed so the earlier
+ * `getByRole('link')`/`toBeFocused()` steps still pass — isolating the proof to the rewritten line.
+ */

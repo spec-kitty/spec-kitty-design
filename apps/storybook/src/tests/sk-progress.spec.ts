@@ -626,3 +626,19 @@ test.describe('sk-progress theming', () => {
     expect(light.labelColor).not.toBe(dark.labelColor);
   });
 });
+
+/*
+ * RED-FIRST-PROOF — items 1–5, CI run 35358002926 (webkit, --retries=0, --repeat-each=10),
+ * mutation commit `3fbb49a2` (three CSS mutations: item 1's clip flattened to full-width, item 3's
+ * sweep removed, item 4's reduced-motion override removed), reverted in `f53c7f3d` with a
+ * byte-empty `git diff packages/styles/src/progress/**` afterwards.
+ *
+ *   RED-FIRST-PROOF item 1 (:416)  0/10 passed under mutation
+ *   RED-FIRST-PROOF item 2 (:487)  0/10 passed under mutation (collateral of the shared clip rule)
+ *   RED-FIRST-PROOF item 3 (:503)  0/10 passed under mutation
+ *   RED-FIRST-PROOF item 4 (:523)  0/10 passed under mutation
+ *   RED-FIRST-PROOF item 5 (:568)  0/10 passed under mutation (collateral of the shared sweep rule)
+ *
+ * Post-fix, same rig: all five at 10/10 (runs 35356189046, 35361773017). Item 3 additionally read
+ * 9/10 in one of three samples and is recorded as substantially improved, NOT fully fixed.
+ */

@@ -963,3 +963,11 @@ test.describe("calibrated geometry, themes, and forced colors", () => {
     expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);
   });
 });
+
+/*
+ * RED-FIRST-PROOF — item 10, CI run 35354582083 (webkit, --retries=0, --repeat-each=3).
+ * Mutation: `sk-workflow-board.css:30` `overflow-x: auto` -> `hidden`, reverted in `ee093dbe`.
+ * Result: 0/3 passed, failing at this file's own rewritten assertion with
+ * `Expected: > 0, Received: 0` — bounded, not hung: waitForScrollSettled resolved immediately
+ * once scrollLeft was observed stable at 0. Post-fix 10/10 (was 8/10 at baseline).
+ */
