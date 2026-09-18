@@ -280,17 +280,43 @@ async function assertScrollerSkippedBySequentialFocus(
  * away from its pre-press value; bounded by the same `timeoutMs`, naming the
  * last observed value on timeout, exactly as before (not lengthened).
  */
+// T035 (mission 453, shared-cause investigation). `from` is the caller's scrollLeft reading
+// taken BEFORE the key press. Without it this helper read its own baseline inside the
+// evaluate below -- i.e. after `page.keyboard.press()` had already resolved -- so a scroll
+// that completed in that gap was invisible to it: `initial` was already the settled value,
+// `current !== initial` never became true, `hasMoved` stayed false, and it rejected at the
+// full timeout even though the scroll had worked. The observed failure proves this rather
+// than suggesting it: the message read `last observed 97, 307/3 consecutive stable reads`
+// -- 307 stable reads against a requirement of 3, which is only reachable when the value is
+// perfectly at rest and the `hasMoved` guard is what blocks resolution. The test's own
+// assertion (`movedRight > 0`) would have passed on that very value.
+//
+// So item 10 failed precisely when the scroll was FAST, and the wider the gap between
+// `press()` resolving and this evaluate starting -- which is what `workers: 2` contention
+// widens -- the likelier the miss. Passing the pre-press baseline removes the race entirely:
+// a scroll that already finished is detected on the first tick instead of never.
 async function waitForScrollSettled(
   scroller: Locator,
   reason: string,
-  { timeoutMs = 5000, stableFrames = 3 }: { timeoutMs?: number; stableFrames?: number } = {},
+  {
+    timeoutMs = 5000,
+    stableFrames = 3,
+    from,
+  }: { timeoutMs?: number; stableFrames?: number; from?: number } = {},
 ): Promise<number> {
   try {
     return await scroller.evaluate(
       (node, opts) =>
         new Promise<number>((resolve, reject) => {
           const deadline = performance.now() + opts.timeoutMs;
-          const initial = node.scrollLeft;
+          // The caller's pre-press reading when supplied; only fall back to reading it here
+          // (the racy baseline described above) when no caller baseline exists.
+          const initial = opts.from ?? node.scrollLeft;
+          const baselineOrigin =
+            opts.from === undefined
+              ? "was read inside this helper, so a scroll that completed before it started " +
+                "would be invisible"
+              : "was supplied by the caller before the key press";
           let lastValue = initial, stableCount = 0, hasMoved = false;
           const tick = () => {
             const current = node.scrollLeft; if (current !== initial) hasMoved = true;
@@ -307,9 +333,17 @@ async function waitForScrollSettled(
             if (performance.now() >= deadline) {
               reject(
                 new Error(
-                  `scrollLeft did not settle within ${opts.timeoutMs}ms ` +
-                    `(last observed ${current}, ${stableCount}/${opts.stableFrames} ` +
-                    "consecutive stable reads)",
+                  hasMoved
+                    ? `scrollLeft did not settle within ${opts.timeoutMs}ms ` +
+                      `(last observed ${current}, ${stableCount}/${opts.stableFrames} ` +
+                      "consecutive stable reads)"
+                    : // Never left the baseline. Distinguished explicitly because the
+                      // "did not settle" wording is exactly backwards for this case: the
+                      // value was perfectly at rest the whole time and the `hasMoved` guard
+                      // is what withheld resolution.
+                      `scrollLeft never moved from its baseline of ${initial} within ` +
+                      `${opts.timeoutMs}ms (still ${current} after ${stableCount} stable ` +
+                      `reads; baseline ${baselineOrigin})`
                 ),
               );
               return;
@@ -318,7 +352,7 @@ async function waitForScrollSettled(
           };
           requestAnimationFrame(tick);
         }),
-      { timeoutMs, stableFrames },
+      { timeoutMs, stableFrames, from },
     );
   } catch (error) {
     throw new Error(
@@ -641,13 +675,21 @@ test.describe("conditional overflow semantics and keyboard operation", () => {
     // first frame `scrollLeft` differs from 0 — before reading it as "the" scrolled
     // position, and keep asserting focus retention around each key press (both
     // halves of the claim: the scroll happens AND focus is retained).
+    // T035: baseline captured BEFORE the press, so a scroll that completes between
+    // `press()` resolving and the settle helper starting is still detected as movement.
+    const beforeRight = await scroller.evaluate((node) => node.scrollLeft);
     await page.keyboard.press("ArrowRight");
-    const movedRight = await waitForScrollSettled(scroller, "after ArrowRight");
+    const movedRight = await waitForScrollSettled(scroller, "after ArrowRight", {
+      from: beforeRight,
+    });
     expect(movedRight).toBeGreaterThan(0);
     await expect(scroller).toBeFocused();
 
+    const beforeLeft = await scroller.evaluate((node) => node.scrollLeft);
     await page.keyboard.press("ArrowLeft");
-    const movedLeft = await waitForScrollSettled(scroller, "after ArrowLeft");
+    const movedLeft = await waitForScrollSettled(scroller, "after ArrowLeft", {
+      from: beforeLeft,
+    });
     expect(movedLeft).toBeLessThan(movedRight);
     await expect(scroller).toBeFocused();
   });
