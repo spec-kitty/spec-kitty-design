@@ -156,6 +156,12 @@ instrument (suite self-time). n=11, 16.5–25.6 min, 55.2% spread with no code c
 On that basis the original NFR-004 ("within 5% of 25.6 min") would have fired on **8 of the 11**
 unmodified pre-mission runs.
 
+**A second closeout run settles it.** Run `35381688538` @ `d4dc70d0` reads **19.5 min** suite
+self-time (`2776 passed (19.5m)`, job wall-clock 20.87 min) on effectively identical code — 2.7
+min from the other closeout reading, both inside the band. The variance between two runs of the
+same code is larger than the "speedup" that was previously explained. There was no effect to
+explain.
+
 ## Verbatim: `scripts/report-playwright-duration.mjs --seconds=1008`
 
 ```
