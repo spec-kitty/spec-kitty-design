@@ -107,6 +107,13 @@ const attachPaintDiagnostic = async (page: Page, label: string) => {
   test.info().annotations.push({ type: `T010-paint-diag:${label}`, description: JSON.stringify(diag) });
 };
 
+/** T010: attaches the RAW sampled pixel values already computed by the test, so a failure's
+ * cause can be read directly (what colour was actually sampled) rather than inferred from a
+ * pass/fail boolean alone. */
+const attachSample = (label: string, sample: Pixels) => {
+  test.info().annotations.push({ type: `T010-sample:${label}`, description: JSON.stringify(sample) });
+};
+
 /** `getComputedStyle(...).borderColor` / `.backgroundColor` come back as `rgb(r, g, b)` or
  * `rgba(r, g, b, a)` strings; extract the numeric components for a pixel-tolerance compare
  * against a canvas-sampled RGBA array via `pixelsEqual`. */
@@ -437,9 +444,11 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     const complete = await story(page, 'complete');
     const completeSample = await samplePixels(page, await complete.locator('progress').screenshot());
     await attachPaintDiagnostic(page, 'item1-comparison-complete'); // T010
+    attachSample('item1-comparison-complete', completeSample); // T010
     const zero = await story(page, 'zero');
     const zeroSample = await samplePixels(page, await zero.locator('progress').screenshot());
     await attachPaintDiagnostic(page, 'item1-comparison-zero'); // T010
+    attachSample('item1-comparison-zero', zeroSample); // T010
 
     const host = await story(page, 'indeterminate-forced-colors');
     const bar = host.locator('progress');
@@ -463,9 +472,11 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
 
     const sample1 = await samplePixels(page, await bar.screenshot());
     await attachPaintDiagnostic(page, 'item1-subject-sample1'); // T010
+    attachSample('item1-subject-sample1', sample1); // T010
     await page.waitForTimeout(300);
     const sample2 = await samplePixels(page, await bar.screenshot());
     await attachPaintDiagnostic(page, 'item1-subject-sample2'); // T010
+    attachSample('item1-subject-sample2', sample2); // T010
 
     const bodyRgb = parseRgb(bodyBackground);
 
@@ -524,9 +535,11 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     const complete = await story(page, 'complete');
     const completePixels = await samplePixels(page, await complete.locator('progress').screenshot());
     await attachPaintDiagnostic(page, 'item4-comparison-complete'); // T010
+    attachSample('item4-comparison-complete', completePixels); // T010
     const zero = await story(page, 'zero');
     const zeroPixels = await samplePixels(page, await zero.locator('progress').screenshot());
     await attachPaintDiagnostic(page, 'item4-comparison-zero'); // T010
+    attachSample('item4-comparison-zero', zeroPixels); // T010
 
     await page.emulateMedia({ reducedMotion: 'reduce' });
     const host = await story(page, 'indeterminate');
@@ -535,9 +548,11 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     // (a) the animation is not running: two captures 400ms apart are identical.
     const frame1 = await samplePixels(page, await bar.screenshot());
     await attachPaintDiagnostic(page, 'item4-subject-frame1'); // T010
+    attachSample('item4-subject-frame1', frame1); // T010
     await page.waitForTimeout(400);
     const frame2 = await samplePixels(page, await bar.screenshot());
     await attachPaintDiagnostic(page, 'item4-subject-frame2'); // T010
+    attachSample('item4-subject-frame2', frame2); // T010
     expect(samplesEqual(frame1, frame2)).toBe(true);
 
     // (b) the frozen frame is distinguishable from BOTH the Complete determinate
