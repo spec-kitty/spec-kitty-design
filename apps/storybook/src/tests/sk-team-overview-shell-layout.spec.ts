@@ -496,22 +496,50 @@ for (const light of [false, true]) {
 //
 // T031: the settledness postcondition FR-007 asks for. `loadComposition`
 // now returns only once (a) the fonts actually used have finished loading,
-// (b) the host is visible, (c) its four structural shadow parts are present
-// with non-zero size, and (d) four consecutive reads of that geometry, each
-// a rendered frame apart (double `requestAnimationFrame`, not a wall-clock
-// guess), agree — or it throws, naming exactly which of those was missing or
-// still moving, in place of Playwright's generic "not visible" timeout.
-// The 5000ms ceiling is the SAME ceiling `expect(host).toBeVisible()`
-// already ran under by default (C-003: this does not lengthen any wait;
-// raising the stable-read count from an earlier 2 to 4, measured against
-// items 6-9 on this branch's own CI runs, is a stricter settledness BAR
-// within that unchanged ceiling, not a longer one).
+// (b) the host is visible, (c) its four structural shadow parts AND the
+// page-header's own title text are present with non-zero size, and (d) four
+// consecutive reads of that geometry, each a rendered frame apart (double
+// `requestAnimationFrame`, not a wall-clock guess), agree — or it throws,
+// naming exactly which of those was missing or still moving, in place of
+// Playwright's generic "not visible" timeout.
+//
+// T033 (F4 fix, three corrections to the above, found by squad review):
+//
+// (a) The four shadow parts alone cannot make this loop detect anything at
+// desktop widths: `.sk-app-shell` uses fixed grid tracks with `min-width: 0`
+// (T032), so their geometry is determined by viewport + CSS the instant they
+// exist, and four-consecutive-reads was ~5 frames of unconditional delay for
+// items 6, 8 and 9, not detection. The title text node (`[slot="title"]`,
+// rendered in `--sk-font-sans`) IS what T030 found moving — its rendered
+// width changes when the fallback stack is replaced by Inter — so it is now
+// part of the measured geometry. At 1280/1440px this makes the stable-read
+// loop a genuine settledness bar again instead of a fixed-length pause; at
+// 390/414px it still also detects real reflow, as before.
+//
+// (b) `document.fonts.ready` used to sit OUTSIDE the 5000ms deadline, so a
+// slow (or never-resolving) font load could add up to another full 5000ms —
+// or hang to Playwright's own test timeout — on top of it, contradicting the
+// old comment's claim that this "does not lengthen any wait". It is now
+// raced against the SAME deadline the geometry loop already runs under, so
+// the two together are still bounded by one 5000ms ceiling, not two.
+//
+// (c) The one real failure mode (every part present, geometry never
+// stabilizing) used to throw "missing or unstable: " with nothing after the
+// colon, because `lastMissing` is empty in exactly that case — contradicting
+// the doc comment's promise to name what was still moving. It now names the
+// last two distinct geometry readings instead.
 async function settleComposition(page: Page, host: Locator): Promise<void> {
-  await page.evaluate(() => document.fonts.ready);
-  const requiredParts = ["shell", "personal", "context", "content"] as const;
   const deadline = Date.now() + 5000;
+  // (b): bounded by the same deadline via Promise.race, so a slow or
+  // never-resolving font load cannot add its own unbounded wait on top.
+  await Promise.race([
+    page.evaluate(() => document.fonts.ready),
+    page.waitForTimeout(Math.max(0, deadline - Date.now())),
+  ]);
+  const requiredParts = ["shell", "personal", "context", "content"] as const;
   let lastMissing: string[] = ["host is not visible"];
-  let stableGeometry: string | null = null;
+  let previousGeometry: string | null = null;
+  let currentGeometry: string | null = null;
   let stableReads = 0;
   while (Date.now() < deadline) {
     if (await host.isVisible()) {
@@ -534,15 +562,28 @@ async function settleComposition(page: Page, host: Locator): Promise<void> {
             `${part}:${box.left.toFixed(2)},${box.top.toFixed(2)},${box.width.toFixed(2)},${box.height.toFixed(2)}`,
           );
         }
+        // (a): the only part of this measurement that can actually move at
+        // desktop widths — see T033 above.
+        const title = element.querySelector<HTMLElement>('[slot="title"]');
+        if (!title) {
+          missing.push("title text node");
+        } else {
+          const box = title.getBoundingClientRect();
+          if (box.width === 0 || box.height === 0) {
+            missing.push("title text node has zero size");
+          }
+          geometry.push(`title:${box.width.toFixed(2)},${box.height.toFixed(2)}`);
+        }
         return { missing, geometry: geometry.join("|") };
       }, requiredParts);
       lastMissing = report.missing;
       if (report.missing.length === 0) {
-        if (report.geometry === stableGeometry) {
+        if (report.geometry === currentGeometry) {
           stableReads += 1;
           if (stableReads >= 4) return;
         } else {
-          stableGeometry = report.geometry;
+          previousGeometry = currentGeometry;
+          currentGeometry = report.geometry;
           stableReads = 0;
         }
       } else {
@@ -559,16 +600,31 @@ async function settleComposition(page: Page, host: Locator): Promise<void> {
         }),
     );
   }
+  // (c): when every part was present but geometry never stabilized,
+  // `lastMissing` is empty — name the last two distinct readings instead of
+  // leaving the message with nothing after the colon.
+  const detail =
+    lastMissing.length > 0
+      ? lastMissing.join(", ")
+      : `geometry still moving — last two reads: ${previousGeometry ?? "(none)"} -> ${currentGeometry ?? "(none)"}`;
   throw new Error(
-    `loadComposition: shell did not settle within 5000ms — missing or unstable: ${lastMissing.join(", ")}`,
+    `loadComposition: shell did not settle within 5000ms — missing or unstable: ${detail}`,
   );
 }
 
 /*
- * Red-first proofs — settleComposition's two failure paths, both reverted after capture:
+ * Red-first proofs — settleComposition's failure paths, all reverted after capture:
  *   RED-FIRST-PROOF (a) a required shadow part removed -> throws naming the missing part
  *   RED-FIRST-PROOF (b) a nonexistent host testid -> throws rather than passing silently
- * Both confirm the helper fails loudly rather than settling on a wrong composition. Item 9-dark
- * improved (7/10 -> 9-10/10); items 6 and 7 showed no delta above the rig's own cross-run noise
- * and are reported unfixed under FR-013 rather than claimed.
+ *   RED-FIRST-PROOF (c) `document.fonts.ready` stubbed to never resolve -> throws at ~5000ms
+ *     naming "host is not visible" rather than hanging past the deadline (chromium, local
+ *     `storybook-static`; confirms fix (b) — see this file's own commit history for the run).
+ *   RED-FIRST-PROOF (d) title text pinned to a fixed width while the four shadow parts are
+ *     mutated to disagree on every read -> throws naming "geometry still moving — last two
+ *     reads: ..." with both operands populated, not "missing or unstable: " with nothing after
+ *     it (confirms fix (c)).
+ * Item 9-dark improved (7/10 -> 9-10/10) under the original T031 fix; items 6 and 7 showed no
+ * delta above the rig's own cross-run noise. Items 8 and 9's own before/after counts under this
+ * T033 revision are tracked in kitty-specs/webkit-timing-deflake-01M2T31J/acceptance-matrix.json
+ * (SC-007) with CI run ids, per FR-013.
  */

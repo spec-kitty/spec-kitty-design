@@ -274,11 +274,11 @@ async function assertScrollerSkippedBySequentialFocus(
  * captures a value from mid-scroll, which is an unstable reference for the
  * comparison that follows it.
  *
- * Bounded failure mode: this polls at most `timeoutMs` (default matches this
- * suite's own default assertion timeout — not lengthened beyond it) and rejects
- * with an error naming what it was waiting for (the last observed value and how
- * many consecutive stable reads it had) rather than hanging past that bound or
- * resolving on a value that never actually settled.
+ * T034 (F2 fix): three unchanged reads of the pre-press value ALSO satisfied
+ * "stable" — a real scroll is not guaranteed to move before the first frame this
+ * polls, so `stableCount` now only counts once `scrollLeft` has actually moved
+ * away from its pre-press value; bounded by the same `timeoutMs`, naming the
+ * last observed value on timeout, exactly as before (not lengthened).
  */
 async function waitForScrollSettled(
   scroller: Locator,
@@ -290,13 +290,13 @@ async function waitForScrollSettled(
       (node, opts) =>
         new Promise<number>((resolve, reject) => {
           const deadline = performance.now() + opts.timeoutMs;
-          let lastValue = node.scrollLeft;
-          let stableCount = 0;
+          const initial = node.scrollLeft;
+          let lastValue = initial, stableCount = 0, hasMoved = false;
           const tick = () => {
-            const current = node.scrollLeft;
+            const current = node.scrollLeft; if (current !== initial) hasMoved = true;
             if (current === lastValue) {
               stableCount += 1;
-              if (stableCount >= opts.stableFrames) {
+              if (hasMoved && stableCount >= opts.stableFrames) {
                 resolve(current);
                 return;
               }
@@ -970,4 +970,18 @@ test.describe("calibrated geometry, themes, and forced colors", () => {
  * Result: 0/3 passed, failing at this file's own rewritten assertion with
  * `Expected: > 0, Received: 0` — bounded, not hung: waitForScrollSettled resolved immediately
  * once scrollLeft was observed stable at 0. Post-fix 10/10 (was 8/10 at baseline).
+ */
+
+/*
+ * RED-FIRST-PROOF — T034 (F2), item 10's waitForScrollSettled, captured locally on chromium
+ * against this repo's own `storybook-static` (both reverted after capture):
+ *   Setup: intercept the native ArrowRight scroll and replace it with an equivalent jump
+ *   120ms later, reproducing the squad's own "scroll begins 120ms after the call" measurement
+ *   without touching any component source.
+ *   RED (motion-blind helper — three consecutive reads of the pre-scroll value also counted
+ *     as "settled"): waitForScrollSettled resolved with 0 in 5/5 local runs; the true final
+ *     scrollLeft 250ms later was 40 — the exact false-settle this finding described.
+ *   GREEN (this fix — stability only counts once scrollLeft has moved away from its pre-press
+ *     value): waitForScrollSettled resolved with 40 in 5/5 local runs, matching the true final
+ *     value every time.
  */
