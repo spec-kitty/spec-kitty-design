@@ -64,6 +64,55 @@ jobs:
           ARGS=(--json-dir=webkit-repeat-run-results "--repeat-each=${REPEAT_EACH:-10}")
           if [ -n "${ITEMS:-}" ]; then ARGS+=("--items=${ITEMS}"); fi
           node scripts/webkit-repeat-run.mjs "${ARGS[@]}"
+      # ---------------------------------------------------------------------------------------
+      # SHARED-CAUSE EXPERIMENT (mission 453) — paired arms, ONE runner, ONE build, ONE SHA.
+      #
+      # Four samples of the rig showed items 6-10 failing in a ROTATING pattern: every one of
+      # the shell-layout sub-tests and the workflow-board scroll test has been both green and
+      # red across runs, none consistently broken, while the colour and computed-style items
+      # (1-5, 11, 12) stayed stable at 10/10 every time. Rotation across TWO different spec
+      # files is not a defect in any one test, so the operator directed an investigation into
+      # what those five share.
+      #
+      # The candidate: playwright.config.ts sets `fullyParallel: true` + `workers: 2` under CI,
+      # so repeats of one test run CONCURRENTLY in two webkit contexts on a two-core runner.
+      # The five rotating items are all geometry-after-layout measurements (exact 56/240px
+      # columns, region order, scroll offset); the stable ones assert colour and computed style
+      # and do not care how long layout took.
+      #
+      # Both arms run the SAME items on the SAME runner against the SAME build, so
+      # runner-to-runner variance cannot explain a difference between them. Arm A runs first and
+      # therefore warms the machine, which makes arm B the easier condition -- read a clean B as
+      # suggestive, not conclusive, and read a still-rotating B as strong evidence AGAINST the
+      # contention hypothesis.
+      #
+      # `continue-on-error` on both: the rig exits non-zero whenever any repeat fails, which is
+      # its correct behaviour, and arm A failing must not prevent arm B from running.
+      # ---------------------------------------------------------------------------------------
+      - name: "[EXPERIMENT] Arm A — items 6-10 at the INHERITED worker count (2 under CI)"
+        id: arm_a
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          node scripts/webkit-repeat-run.mjs \
+            --json-dir=webkit-repeat-run-results/arm-a-workers-2 \
+            --repeat-each=10 --items=6,7,8,9,10
+      - name: "[EXPERIMENT] Arm B — the same items at --workers=1 (measurement control)"
+        id: arm_b
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          node scripts/webkit-repeat-run.mjs \
+            --json-dir=webkit-repeat-run-results/arm-b-workers-1 \
+            --repeat-each=10 --items=6,7,8,9,10 --workers=1
+      - name: "[EXPERIMENT] Arm outcomes (neither arm's exit code gates this job)"
+        if: always()
+        run: |
+          echo "arm A (workers=2, inherited): ${{ steps.arm_a.outcome }}"
+          echo "arm B (workers=1, control):   ${{ steps.arm_b.outcome }}"
+          echo "Read the per-item tables in each arm's log section, not these outcomes:"
+          echo "the rig exits non-zero if ANY repeat of ANY item failed, so both arms can"
+          echo "report 'failure' while differing sharply in WHICH items rotated and by how much."
       # `if: always()` — a failing run (expected for the pre-fix baseline, items 1 and 4) is
       # exactly the run whose JSON evidence a reviewer needs to re-derive the counts printed in
       # the job log.

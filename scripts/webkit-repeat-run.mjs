@@ -40,6 +40,19 @@
  *
  * USAGE
  *   node scripts/webkit-repeat-run.mjs [--repeat-each=10] [--items=1,2,3,...,12] [--json-dir=DIR]
+ *                                      [--workers=N]
+ *
+ * WHY `--workers` EXISTS (mission 453, shared-cause investigation)
+ *
+ *   playwright.config.ts sets `fullyParallel: true` and `workers: process.env['CI'] ? 2 : 0-or-2`,
+ *   so under CI the repeats of a single test run CONCURRENTLY in two webkit contexts on a
+ *   two-core runner. Four samples of this rig showed the shell-layout and workflow-board
+ *   geometry items (6-10) failing in a ROTATING pattern -- every one of them both green and
+ *   red across runs, none consistently broken -- while the colour and computed-style items
+ *   (1-5, 11, 12) stayed stable. `--workers=N` exists to test whether that rotation is CPU
+ *   contention between co-scheduled heavy layout tests rather than a defect in any one test.
+ *   It is a MEASUREMENT control, not a fix: pinning workers=1 here would not change what the
+ *   ordinary `playwright` job does, and must never be used to manufacture a green count.
  *
  * Exit code is non-zero if any selected item shows a failure — this is a measurement tool, not
  * a merge gate, so a non-zero exit on the pre-fix baseline run is the CORRECT and EXPECTED
@@ -52,6 +65,10 @@ import { basename, join } from 'node:path';
 
 const RETRIES = 0; // NFR-002 — never read from CI env, never inherited from playwright.config.ts.
 const PROJECT = 'webkit'; // C-005 — the only engine this mission's affected tests run under.
+/** Scheduling condition for this process's runs. `null` = inherit playwright.config.ts
+ *  (`fullyParallel: true`, `workers: 2` under CI). Recorded, not defaulted, so no count can
+ *  ever be read without knowing whether its repeats were co-scheduled. */
+let workersSetting = null;
 
 /** spec.md's "Canonical scope" table, items 1–11: each addressable as an exact file:line. */
 const LINE_ITEMS = [
@@ -95,14 +112,18 @@ const GREP_ITEM = {
 };
 
 function parseArgs(argv) {
-  const opts = { repeatEach: 10, items: null, jsonDir: null };
+  const opts = { repeatEach: 10, items: null, jsonDir: null, workers: null };
   for (const arg of argv) {
     if (arg.startsWith('--repeat-each=')) opts.repeatEach = Number(arg.split('=')[1]);
     else if (arg.startsWith('--items=')) opts.items = new Set(arg.split('=')[1].split(',').map(Number));
     else if (arg.startsWith('--json-dir=')) opts.jsonDir = arg.split('=')[1];
+    else if (arg.startsWith('--workers=')) opts.workers = Number(arg.split('=')[1]);
   }
   if (!Number.isInteger(opts.repeatEach) || opts.repeatEach < 1) {
     throw new Error(`--repeat-each must be a positive integer, got ${opts.repeatEach}`);
+  }
+  if (opts.workers !== null && (!Number.isInteger(opts.workers) || opts.workers < 1)) {
+    throw new Error(`--workers must be a positive integer when given, got ${opts.workers}`);
   }
   return opts;
 }
@@ -116,11 +137,21 @@ function printRetrySetting() {
       `whether CI is set, so a flaky-at-exit-0 result cannot arrive by inheritance).`,
   );
   console.log(`Engine: ${PROJECT} (NFR-007 — every count below is a webkit result, nothing else).`);
+  console.log(
+    workersSetting === null
+      ? 'Workers: inherited from playwright.config.ts (fullyParallel: true; 2 under CI) — ' +
+          'repeats of one test may run CONCURRENTLY in separate webkit contexts.'
+      : `Workers: ${workersSetting} (explicit --workers=${workersSetting} CLI flag on every ` +
+          `invocation below, overriding playwright.config.ts). This is a MEASUREMENT CONTROL: ` +
+          `a count taken at workers=1 does NOT describe the ordinary playwright job, which ` +
+          `runs at 2.`,
+  );
 }
 
 function runPlaywright(args, jsonOutputPath) {
   const env = { ...process.env, PLAYWRIGHT_JSON_OUTPUT_NAME: jsonOutputPath };
   const fullArgs = [...args, `--project=${PROJECT}`, `--retries=${RETRIES}`, '--reporter=list,json'];
+  if (workersSetting !== null) fullArgs.push(`--workers=${workersSetting}`);
   console.log(`\n$ npx playwright test ${fullArgs.join(' ')}`);
   try {
     execFileSync('npx', ['playwright', 'test', ...fullArgs], { env, stdio: 'inherit' });
@@ -205,6 +236,8 @@ function printReport(itemLabel, subTests) {
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
+  workersSetting = opts.workers; // bound BEFORE printRetrySetting() so the banner cannot
+                                 // report a scheduling condition the runs did not use.
   const selectedLineItems = LINE_ITEMS.filter((it) => !opts.items || opts.items.has(it.item));
   const includeGrepItem = !opts.items || opts.items.has(GREP_ITEM.item);
   const jsonDir = opts.jsonDir ?? mkdtempSync(join(tmpdir(), 'webkit-repeat-run-'));
