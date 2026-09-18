@@ -664,9 +664,21 @@ async function settleComposition(page: Page, host: Locator): Promise<void> {
  * Red-first proofs — settleComposition's failure paths, all reverted after capture:
  *   RED-FIRST-PROOF (a) a required shadow part removed -> throws naming the missing part
  *   RED-FIRST-PROOF (b) a nonexistent host testid -> throws rather than passing silently
- *   RED-FIRST-PROOF (c) `document.fonts.ready` stubbed to never resolve -> throws at ~5000ms
- *     naming "host is not visible" rather than hanging past the deadline (chromium, local
- *     `storybook-static`; confirms fix (b) — see this file's own commit history for the run).
+ *   RED-FIRST-PROOF (c) — **WITHDRAWN. This proof certified the defect.** It stubbed
+ *     `document.fonts.ready` to never resolve, observed a throw at ~5000ms naming
+ *     "host is not visible", and recorded that as confirmation the guard worked. That throw
+ *     WAS the bug: the font wait was raced against the whole 5000ms budget, so the poll loop
+ *     ran zero iterations and threw `lastMissing`'s initializer — the literal string
+ *     "host is not visible" — without ever checking visibility. The mutation and the
+ *     unmutated failures in CI produced the same message for the same reason, which is why
+ *     four rounds of reading those messages made no progress.
+ *     Post-fix, this mutation must NOT throw: the font wait is bounded separately at 1500ms,
+ *     the settle loop then gets its own full 5000ms, the host is visible and its geometry
+ *     stabilises, so a hung font load no longer fails the test. Re-capture is required before
+ *     any proof is claimed here again; nothing in this block asserts one.
+ *     Lesson, recorded because it generalises: a red-first proof confirms whatever the code
+ *     currently does. It is evidence that a mutation changes behaviour, never that the
+ *     behaviour it lands on is correct.
  *   RED-FIRST-PROOF (d) title text pinned to a fixed width while the four shadow parts are
  *     mutated to disagree on every read -> throws naming "geometry still moving — last two
  *     reads: ..." with both operands populated, not "missing or unstable: " with nothing after
