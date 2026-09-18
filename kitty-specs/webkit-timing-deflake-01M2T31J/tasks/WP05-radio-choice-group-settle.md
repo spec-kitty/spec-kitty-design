@@ -43,7 +43,7 @@ tracker_refs: []
   - T040 Await each story to a settled state before reading its legend cue.
   - T041 Red-first: make the required and ordinary legends identical; show the test fails.
   - T042 Repeat-run; report counts.
-- **Independent test**: 10/10 repeats green; one red-first proof.
+- **Independent test**: **item 11 is already 10/10 at baseline — this package's entire scope passes before any work, so "10/10 repeats green" is satisfiable by doing nothing and is NOT an acceptable close.** Either demonstrate item 11 failing under another condition (higher repeat count, or full-suite contention) and then hold it green, or report it **not reproduced** under FR-013/SC-008 with the evidence. The red-first proof is still required for any assertion actually rewritten. This package may not close on an empty diff.
 - **Dependencies**: WP01.
 
 ---

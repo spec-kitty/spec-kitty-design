@@ -48,7 +48,7 @@ tracker_refs: []
   - T021 Board scroller: await scroll settling, preserving **both** halves of the claim — the scroll happens **and** focus is retained.
   - T022 Red-first: remove the handler each depends on; show the test **fails** rather than hanging or passing.
   - T023 Repeat-run both specs under the rig; report counts.
-- **Independent test**: 10/10 repeats green; two red-first proofs.
+- **Independent test**: item 10 at 10/10 repeats green (baseline 8/10, so this is a real delta), plus two red-first proofs. **Item 12 is already 60/60 at baseline** — a green result for it proves nothing about this work. It must either be demonstrated failing under another condition (higher repeat count, or full-suite contention, which is the standing hypothesis for why the rig runs it clean) and then held green, or reported **not reproduced** under FR-013/SC-008. It may not be counted as fixed, and this package may not close on an empty diff for it.
 - **Dependencies**: WP01.
 - **Risks**: an unbounded await turns a flake into a hang. Every await needs a bounded failure mode naming what it waited for.
 
