@@ -340,19 +340,29 @@ test('an unknown variant or gap THROWS on the authoring path', () => {
   // draft of the markup module guarded only the variant: `'constructor' in GRID_GAPS` is true
   // and `GRID_GAPS['constructor']` is a function, so the gap arm emitted
   // `class="sk-grid function Object() { [native code] }"` into real markup, exit 0.
-  for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
-    expect(() => gridStaticHtml({ variant: key }), `${key} must not be a variant`).toThrow(
-      /unknown grid variant/,
-    );
-    expect(
-      () => gridStaticHtml({ gap: key as unknown as number }),
-      `${key} must not be a gap`,
-    ).toThrow(/unknown grid gap/);
-    expect(gridClasses(key).trim(), `${key} must degrade to the base grid`).toBe('sk-grid');
-    expect(
-      gridClasses(undefined, key as unknown as number).trim(),
-      `${key} as a gap must degrade to the base grid, not stringify a function into the class list`,
-    ).toBe('sk-grid');
+  // console.warn is intercepted for this loop only (WP06, FR-010/NFR-006): `gridClasses` warns
+  // on every degrade below, and that replay volume is a large share of what pushed the
+  // behaviour-suite job log past its truncation cap. Only the side channel is suppressed; every
+  // expectation below still runs unchanged (FR-011).
+  const loopWarn = console.warn;
+  console.warn = () => {};
+  try {
+    for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+      expect(() => gridStaticHtml({ variant: key }), `${key} must not be a variant`).toThrow(
+        /unknown grid variant/,
+      );
+      expect(
+        () => gridStaticHtml({ gap: key as unknown as number }),
+        `${key} must not be a gap`,
+      ).toThrow(/unknown grid gap/);
+      expect(gridClasses(key).trim(), `${key} must degrade to the base grid`).toBe('sk-grid');
+      expect(
+        gridClasses(undefined, key as unknown as number).trim(),
+        `${key} as a gap must degrade to the base grid, not stringify a function into the class list`,
+      ).toBe('sk-grid');
+    }
+  } finally {
+    console.warn = loopWarn;
   }
   expect(gridStaticHtml({ variant: 'cols-4' })).toContain('sk-grid--cols-4');
   expect(gridClasses('cols-3', 3)).toBe('sk-grid sk-grid--cols-3 sk-grid--gap-3');
