@@ -104,3 +104,28 @@ during a package's lifetime.
 
 - **Item 7 has no disaggregated post-fix count.** WP04 reports items 6 and 7 together ("no measurable improvement above the rig's own cross-run noise"). The FR-013 conclusion is unambiguous and was not silently folded in, but the mission report needs item 7's own number, not a lumped one.
 - **Item 6's T032 refutation is chromium-only.** The CSS-Grid mechanism (fixed tracks + `min-width: 0`) is spec-level and engine-independent in principle, and it is corroborated by webkit behaviour — item 6 received the same font fix that measurably helped items 8/9 and still showed no improvement, which is what you would expect if its residual failure is not font-metric-driven. No webkit font-probe was run. Residual, non-blocking, but state it rather than implying a webkit measurement exists.
+
+## 11. Pushing the revert cancels the run that was capturing the red-first proof
+
+`ci-quality.yml` and the rig both set `concurrency: cancel-in-progress: true`. So the obvious
+sequence — mutate, push, revert, push — **kills the mutation run mid-flight** and the proof is never
+captured. The revert is correct and T015a is satisfied; what is lost is T015.
+
+Observed on WP02: run `35357051318` at the mutation commit came back `completed/cancelled` with
+**zero item output**, superseded by the revert push about two minutes later. No other run existed at
+that SHA, so the red-first evidence for four rewritten assertions simply did not exist, while the
+lane looked clean and finished.
+
+**This is hard to notice** precisely because everything downstream looks right: the diff is clean, the
+fix is green, the WP is ready to close. Only the *absence* of a proof gives it away — and an absence
+is what nobody checks.
+
+**The order that works** (WP03 did this correctly): mutate → push → **wait for the run to complete and
+capture its output** → then revert → push → reconfirm green. Never push while the capture run is in
+flight.
+
+**Cheaper alternative**: a targeted `workflow_dispatch` of the rig with `items=<n> repeat_each=3`.
+Three repeats is ample for a red-first — the claim is that the assertion *can* fail, not a rate.
+
+**Check at merge**: for every rewritten assertion, a completed (not cancelled) run must exist at the
+mutation SHA showing the failure. `gh run list` and confirm `conclusion` is not `cancelled`.
