@@ -1,6 +1,6 @@
 ---
 work_package_id: WP01
-title: "Measurement rig, cost accounting, and the suppression scan"
+title: Measurement rig, cost accounting, and the suppression scan
 dependencies: []
 requirement_refs:
 - NFR-001
@@ -9,11 +9,6 @@ requirement_refs:
 - NFR-007
 - C-005
 - C-009
-- SC-002
-- SC-003
-- SC-005
-- SC-006
-- SC-008
 - C-010
 planning_base_branch: mission/webkit-deflake
 merge_target_branch: mission/webkit-deflake
