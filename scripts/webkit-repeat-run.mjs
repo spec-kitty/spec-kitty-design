@@ -48,7 +48,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 
 const RETRIES = 0; // NFR-002 — never read from CI env, never inherited from playwright.config.ts.
 const PROJECT = 'webkit'; // C-005 — the only engine this mission's affected tests run under.
@@ -223,10 +223,18 @@ async function main() {
   let anyFailureReported = false;
   let anyEmptyReported = false;
 
+  // BUG FIXED HERE (found against a real CI run, not reasoned about): Playwright's JSON
+  // reporter reports `spec.file` as the BARE FILENAME (`sk-progress.spec.ts`), never the full
+  // relative path this script's own item table uses to select tests on the CLI. The original
+  // `r.file.endsWith(it.file)` compared a SHORT string against a LONGER one and could never
+  // match — every item printed "NO MATCHING RESULTS" against a run whose own list reporter, in
+  // the same log, showed real ✓/✘ per-test lines. Comparing basenames is what the two actually
+  // share.
+  const lineJsonPath = allResults.find((r) => r.kind === 'line')?.jsonPath;
+  const lineResults = lineJsonPath ? loadResults(lineJsonPath) : [];
   for (const it of selectedLineItems) {
-    const lineJsonPath = allResults.find((r) => r.kind === 'line')?.jsonPath;
-    const results = loadResults(lineJsonPath);
-    const subTests = summarize(results, (r) => r.file.endsWith(it.file) && r.line === it.line);
+    const wantBase = basename(it.file);
+    const subTests = summarize(lineResults, (r) => basename(r.file) === wantBase && r.line === it.line);
     const hadFailure = printReport(`${it.item} (${it.label})`, subTests);
     anyFailureReported = anyFailureReported || hadFailure;
     if (subTests.length === 0) anyEmptyReported = true;
@@ -235,7 +243,8 @@ async function main() {
   if (includeGrepItem) {
     const grepJsonPath = allResults.find((r) => r.kind === 'grep')?.jsonPath;
     const results = loadResults(grepJsonPath);
-    const subTests = summarize(results, (r) => r.file.endsWith(GREP_ITEM.file));
+    const wantBase = basename(GREP_ITEM.file);
+    const subTests = summarize(results, (r) => basename(r.file) === wantBase);
     const hadFailure = printReport(`${GREP_ITEM.item} (${GREP_ITEM.label})`, subTests);
     anyFailureReported = anyFailureReported || hadFailure;
     if (subTests.length === 0) anyEmptyReported = true;

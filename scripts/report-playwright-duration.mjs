@@ -4,17 +4,27 @@
  *
  * WHAT THIS IS
  *
- * T006 records the pre-mission `playwright` job duration — **25.6 min (1536 s)**, measured at
- * the train tip before this mission touched anything — and provides the means to compare a
- * later run's duration against it. T006a is the act of RUNNING this tool once, after the
- * mission's final `playwright` run, to produce the actual delta; T006 alone does not satisfy
- * SC-005, only this file's `--minutes=<N>` invocation against a real number does.
+ * T006 records the pre-mission `playwright` job's OWN run-to-run noise and provides the means
+ * to compare a later run's duration against it. T006a is the act of RUNNING this tool once,
+ * after the mission's final `playwright` run, to produce the actual reading; T006 alone does
+ * not satisfy SC-005, only this file's `--minutes=<N>` invocation against a real number does.
  *
- * DO NOT ROUND THE BASELINE. tasks.md is explicit that "~27 min" disagrees with the 25.6 min
- * figure by 5.5% — OVER NFR-004's 5% tolerance — so a rounded baseline can make an unchanged
- * job read as already failing (or a genuinely regressed job read as passing). `BASELINE_SECONDS`
- * below is computed from the exact stated figure, never a re-typed decimal, so the two cannot
- * drift apart.
+ * REVISED, mid-WP01 (coordinator, 981a3f88 / 0e11c490 on mission/webkit-deflake): the ORIGINAL
+ * NFR-004 ("within 5% of 25.6 min") was measured against a single run. Three runs of
+ * substantially the same suite then came back at **25.6, 26.7 and 22.5 min — an 18.7% spread**.
+ * A 5% tolerance sits well INSIDE that band, so it could fire on nothing (a genuinely healthy
+ * run reading as a regression) and prove nothing (a genuine regression hiding inside the noise
+ * reading as clean) — the exact defect this repository has already recorded twice (#233: "the
+ * 25s ceiling is inside its own run-to-run noise"; #358). NFR-004/SC-005 are revised: report the
+ * final duration AGAINST THE MEASURED BAND, never gated on a fixed percentage. A result inside
+ * the band passes; one outside it is investigated and explained, never silently accepted or
+ * silently failed — this file's exit code reflects "inside/outside the band", not a verdict on
+ * whether an outside reading is acceptable, which stays a human judgement (analogous to
+ * NFR-005's own semantic claim staying a reviewer judgement in scripts/scan-mission-suppressions.mjs).
+ *
+ * DO NOT hardcode a percentage here again — that is precisely the mistake being corrected.
+ * `BASELINE_RUNS_SECONDS` below is the exact, un-rounded set of observed runs; the band is
+ * DERIVED from them (min/max), never a second, independently-typed figure.
  *
  * WHAT THIS DOES NOT DO
  *
@@ -33,25 +43,25 @@
  */
 import { execFileSync } from 'node:child_process';
 
-// 25.6 min, exactly — the pre-mission figure at the train tip (tasks.md, NFR-004's baseline).
-// Stated in minutes because that is how every mission artifact quotes it; converted once, here,
-// to the seconds this file actually compares against.
-export const BASELINE_MINUTES = 25.6;
-export const BASELINE_SECONDS = BASELINE_MINUTES * 60;
-export const TOLERANCE_FRACTION = 0.05; // NFR-004: within 5%.
+// The three pre-mission `playwright` job runs actually measured, in minutes, exact — never
+// re-typed as a rounded or averaged figure. This is the mission's own evidence that a fixed
+// percentage tolerance cannot work here: 25.6 -> 26.7 alone is already a +4.3% swing with NO
+// code change at all.
+export const BASELINE_RUNS_MINUTES = [25.6, 26.7, 22.5];
+export const BASELINE_RUNS_SECONDS = BASELINE_RUNS_MINUTES.map((m) => m * 60);
+export const BAND_MIN_SECONDS = Math.min(...BASELINE_RUNS_SECONDS);
+export const BAND_MAX_SECONDS = Math.max(...BASELINE_RUNS_SECONDS);
+export const BAND_SPREAD_FRACTION = (BAND_MAX_SECONDS - BAND_MIN_SECONDS) / BAND_MIN_SECONDS;
 
-/** Pure. `{ deltaPercent, withinTolerance }` for an actual duration in seconds against the
- *  pinned pre-mission baseline. Exported so `--selftest` can drive it directly without shelling
- *  out, and so a caller embedding this in another script does not have to re-derive the math. */
+/** Pure. `{ insideBand }` for an actual duration in seconds against the measured pre-mission
+ *  band — no percentage math, deliberately (see file header). Exported so `--selftest` can
+ *  drive it directly, and so a caller does not have to re-derive the comparison. */
 export function compare(actualSeconds) {
-  const deltaFraction = (actualSeconds - BASELINE_SECONDS) / BASELINE_SECONDS;
-  const deltaPercent = deltaFraction * 100;
-  // EPSILON guards the boundary against float round-trip noise (1536 * 1.05 does not land on
-  // exactly 0.05 when divided back out) — a real regression is never this close to the wire,
-  // so a hair of slack here cannot hide one; it only stops the exact-5% boundary from reading
-  // as "outside" for a reason that has nothing to do with NFR-004.
+  // EPSILON: same float round-trip guard as the earlier percentage-based version carried at its
+  // boundary — here it only matters if a caller passes exactly BAND_MIN_SECONDS/BAND_MAX_SECONDS
+  // recomputed through a different arithmetic path than this file's own constants.
   const EPSILON = 1e-9;
-  return { deltaPercent, withinTolerance: Math.abs(deltaFraction) <= TOLERANCE_FRACTION + EPSILON };
+  return { insideBand: actualSeconds >= BAND_MIN_SECONDS - EPSILON && actualSeconds <= BAND_MAX_SECONDS + EPSILON };
 }
 
 function fmtMinutes(seconds) {
@@ -77,38 +87,45 @@ function resolveFromRun(runId, jobName) {
 }
 
 function report(actualSeconds, label) {
-  const { deltaPercent, withinTolerance } = compare(actualSeconds);
-  const sign = deltaPercent >= 0 ? '+' : '';
-  console.log(`NFR-004 / SC-005 — playwright job duration`);
-  console.log(`  pre-mission baseline: ${BASELINE_MINUTES} min (${BASELINE_SECONDS}s), exact, not rounded`);
+  const { insideBand } = compare(actualSeconds);
+  console.log(`NFR-004 / SC-005 — playwright job duration (band-reported, not percentage-gated)`);
+  console.log(
+    `  pre-mission runs: ${BASELINE_RUNS_MINUTES.map((m) => `${m} min`).join(', ')} ` +
+      `(spread: ${(BAND_SPREAD_FRACTION * 100).toFixed(1)}% — this is why there is no fixed tolerance)`,
+  );
+  console.log(`  measured band: ${fmtMinutes(BAND_MIN_SECONDS)} – ${fmtMinutes(BAND_MAX_SECONDS)}`);
   console.log(`  ${label}: ${fmtMinutes(actualSeconds)} (${actualSeconds.toFixed(1)}s)`);
-  console.log(`  delta: ${sign}${deltaPercent.toFixed(2)}% (tolerance: ±${TOLERANCE_FRACTION * 100}%)`);
-  console.log(withinTolerance ? '  ✅ within tolerance' : '  ❌ OUTSIDE tolerance — NFR-004 not met');
-  return withinTolerance;
+  console.log(
+    insideBand
+      ? '  ✅ inside the measured band'
+      : '  ⚠️  OUTSIDE the measured band — investigate and explain; this is a flag for a human, not an automatic NFR-004 failure',
+  );
+  return insideBand;
 }
 
 function selftest() {
   const cases = [
-    { name: 'unchanged duration is within tolerance', seconds: BASELINE_SECONDS, expect: true },
-    { name: 'exactly +5% is within tolerance (boundary, inclusive)', seconds: BASELINE_SECONDS * 1.05, expect: true },
-    { name: 'exactly -5% is within tolerance (boundary, inclusive)', seconds: BASELINE_SECONDS * 0.95, expect: true },
-    { name: '+5.0001% is OUTSIDE tolerance', seconds: BASELINE_SECONDS * 1.050001, expect: false },
-    { name: '"~27 min" (5.5% off) is OUTSIDE tolerance — the exact drift this file exists to catch', seconds: 27 * 60, expect: false },
-    { name: 'a large regression is OUTSIDE tolerance', seconds: BASELINE_SECONDS * 2, expect: false },
+    { name: 'the low end of the band (22.5 min) reads inside', seconds: 22.5 * 60, expect: true },
+    { name: 'the high end of the band (26.7 min) reads inside', seconds: 26.7 * 60, expect: true },
+    { name: 'the original single-run baseline (25.6 min) reads inside', seconds: 25.6 * 60, expect: true },
+    { name: 'a value inside the band but not equal to any of the three runs reads inside', seconds: 24 * 60, expect: true },
+    { name: 'just below the band (22.4 min) reads OUTSIDE', seconds: 22.4 * 60, expect: false },
+    { name: 'just above the band (26.8 min) reads OUTSIDE', seconds: 26.8 * 60, expect: false },
+    { name: 'a large regression (double the high end) reads OUTSIDE', seconds: 26.7 * 60 * 2, expect: false },
   ];
   let allOk = true;
   for (const c of cases) {
-    const { withinTolerance } = compare(c.seconds);
-    const ok = withinTolerance === c.expect;
+    const { insideBand } = compare(c.seconds);
+    const ok = insideBand === c.expect;
     allOk = allOk && ok;
-    console.log(`${ok ? '✅' : '❌'} ${c.name} (${c.seconds.toFixed(1)}s -> withinTolerance=${withinTolerance})`);
+    console.log(`${ok ? '✅' : '❌'} ${c.name} (${c.seconds.toFixed(1)}s -> insideBand=${insideBand})`);
   }
   if (!allOk) {
     console.error('\n❌ selftest failed.');
     process.exitCode = 1;
     return;
   }
-  console.log('\n✅ all selftest cases matched.');
+  console.log('\n✅ all selftest cases matched — band-based, no fixed percentage.');
 }
 
 function main() {
@@ -146,8 +163,10 @@ function main() {
     process.exitCode = 1;
     return;
   }
-  const ok = report(actualSeconds, label);
-  process.exitCode = ok ? 0 : 1;
+  // Band-outside is reported loudly but does not itself fail the process — T006a's own header
+  // is explicit that an outside reading needs investigation and explanation, not an automatic
+  // NFR-004 failure the way the old percentage gate was.
+  report(actualSeconds, label);
 }
 
 main();
