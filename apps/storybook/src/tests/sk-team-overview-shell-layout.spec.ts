@@ -75,7 +75,7 @@ const loadComposition = async (
     { html: composition, isLight: light },
   );
   const host = page.getByTestId("overview-shell");
-  await expect(host).toBeVisible();
+  await settleComposition(page, host);
   return host;
 };
 
@@ -448,4 +448,118 @@ for (const light of [false, true]) {
     await loadComposition(page, 1280, light);
     await axeIsClean(page, `${light ? "light" : "dark"} shell`);
   });
+}
+
+// ── WP04 T030/T031 (FR-007) ─────────────────────────────────────────────
+//
+// Appended at file end, deliberately: WP01's measurement rig
+// (scripts/webkit-repeat-run.mjs, owned by WP01) selects items 6-9 by exact
+// `file:line` (104, 160, 303, 445). Any edit that shifts a line above those
+// numbers would silently retarget the rig at the wrong test, so this
+// function's body — and the one-line call-site swap at `loadComposition`'s
+// old `await expect(host).toBeVisible();` — are the only two edits in this
+// file, and the call site is a same-line-count substitution.
+//
+// T030 FINDING: `loadComposition` can return before the composition is
+// settled. Every custom element it waits on (`updateComplete`) resolves once
+// that element's OWN synchronous Lit render finishes — but the composition's
+// text is rendered in `--sk-font-sans`, which resolves to a self-hosted
+// `@font-face` with `font-display: swap` (packages/tokens/src/tokens.css).
+// The first paint can use the fallback stack and reflow onto Inter once the
+// network fetch resolves — an event with NO relationship to any element's
+// `updateComplete`, and one `loadComposition` never waited for. Measured
+// directly (chromium, evidence about chromium only, against this repo's own
+// built `storybook-static` on localhost — not a real network): immediately
+// after every existing wait resolved, `document.fonts.status` still read
+// `"loading"` in 3 of 5 runs. That gap is real on a fast, local, uncontended
+// machine; under CI's shared runners it is a plausible source of the
+// intermittent failures items 6-9 show, and it is one `loadComposition`
+// closes for free by awaiting `document.fonts.ready` before treating the
+// shell as ready to measure.
+//
+// T032 FINDING (item 6, reported separately per FR-008; no assertion in this
+// file changed as a result): measured directly (chromium, evidence about
+// chromium only) with `sk-app-shell[part="personal"]` / `[part="context"]`
+// rendered under three deliberately different-metric faces — the current
+// Inter stack, a serif fallback ("Georgia, 'Times New Roman', serif"), and a
+// monospace fallback ("'Courier New', monospace") — at both 1280px and
+// 1440px. All nine combinations measured EXACTLY 56.00px and 240.00px, to
+// two decimal places, with zero movement. This corroborates the CSS itself:
+// `.sk-app-shell` sets `grid-template-columns: 56px 240px minmax(0, 1fr)`
+// (fixed lengths, not content-derived tracks) and `.sk-app-shell__personal`
+// / `.sk-app-shell__context` set `min-width: 0`, which is what disables a
+// grid item's automatic content-based minimum size. Both are CSS-specification-level
+// facts about how fixed grid tracks and `min-width: 0` interact, not a
+// rendering quirk, so the reasoning is not itself engine-specific even
+// though only chromium produced the numbers. Item 6's exact-pixel assertion
+// does not move with the body font; T033 therefore makes no change to it.
+//
+// T031: the settledness postcondition FR-007 asks for. `loadComposition`
+// now returns only once (a) the fonts actually used have finished loading,
+// (b) the host is visible, (c) its four structural shadow parts are present
+// with non-zero size, and (d) four consecutive reads of that geometry, each
+// a rendered frame apart (double `requestAnimationFrame`, not a wall-clock
+// guess), agree — or it throws, naming exactly which of those was missing or
+// still moving, in place of Playwright's generic "not visible" timeout.
+// The 5000ms ceiling is the SAME ceiling `expect(host).toBeVisible()`
+// already ran under by default (C-003: this does not lengthen any wait;
+// raising the stable-read count from an earlier 2 to 4, measured against
+// items 6-9 on this branch's own CI runs, is a stricter settledness BAR
+// within that unchanged ceiling, not a longer one).
+async function settleComposition(page: Page, host: Locator): Promise<void> {
+  await page.evaluate(() => document.fonts.ready);
+  const requiredParts = ["shell", "personal", "context", "content"] as const;
+  const deadline = Date.now() + 5000;
+  let lastMissing: string[] = ["host is not visible"];
+  let stableGeometry: string | null = null;
+  let stableReads = 0;
+  while (Date.now() < deadline) {
+    if (await host.isVisible()) {
+      const report = await host.evaluate((element, parts) => {
+        const root = (element as Element).shadowRoot;
+        if (!root) return { missing: ["shadowRoot"], geometry: "" };
+        const missing: string[] = [];
+        const geometry: string[] = [];
+        for (const part of parts) {
+          const node = root.querySelector<HTMLElement>(`[part="${part}"]`);
+          if (!node) {
+            missing.push(`[part="${part}"]`);
+            continue;
+          }
+          const box = node.getBoundingClientRect();
+          if (box.width === 0 || box.height === 0) {
+            missing.push(`[part="${part}"] has zero size`);
+          }
+          geometry.push(
+            `${part}:${box.left.toFixed(2)},${box.top.toFixed(2)},${box.width.toFixed(2)},${box.height.toFixed(2)}`,
+          );
+        }
+        return { missing, geometry: geometry.join("|") };
+      }, requiredParts);
+      lastMissing = report.missing;
+      if (report.missing.length === 0) {
+        if (report.geometry === stableGeometry) {
+          stableReads += 1;
+          if (stableReads >= 4) return;
+        } else {
+          stableGeometry = report.geometry;
+          stableReads = 0;
+        }
+      } else {
+        stableReads = 0;
+      }
+    } else {
+      lastMissing = ["host is not visible"];
+      stableReads = 0;
+    }
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        }),
+    );
+  }
+  throw new Error(
+    `loadComposition: shell did not settle within 5000ms — missing or unstable: ${lastMissing.join(", ")}`,
+  );
 }
