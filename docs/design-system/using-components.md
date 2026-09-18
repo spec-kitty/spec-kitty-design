@@ -613,6 +613,23 @@ header gives the browser no reason to scroll — so it stays hidden. An unsatisf
 default-density story, against a 214px header: at `0px` and at `64px` the focused row stayed at
 y=88, entirely behind the header; at `288px` it moved to y=288, clear.
 
+**And the margin needs somewhere to go.** `scroll-margin-block-start` asks the browser to scroll;
+it cannot create scroll range that does not exist. At the *bottom* of a scroll container there is
+none left, so a row under the sticky header stays under it **at any margin value** — this is not a
+matter of setting the token higher. So the container needs trailing room:
+
+```css
+[data-scroller] {
+  padding-block-end: var(--sk-layout-page-header-sticky-scroll-margin);
+}
+```
+
+Measured under webkit at `--repeat-each=30` (#456): without it, the two sticky stories failed 12/30
+and 4/30, and **every single failure reported `atMaxScroll=true, scrollRemaining=0`** — four of them
+against an 18rem (288px) margin over a 205.8px header, i.e. a margin far larger than the obstruction
+it had to clear. The margin was never the variable. It does not reproduce on chromium, which is why
+the contract could look complete for so long.
+
 The element does not measure its own live box to close this gap, because observing layout is the
 class of behaviour it is deliberately barred from owning — the same boundary that keeps the timer
 out of it.
