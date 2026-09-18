@@ -1,6 +1,6 @@
 ---
 work_package_id: WP05
-title: "Settle both states before comparing them"
+title: Settle both states before comparing them
 dependencies:
 - WP01
 requirement_refs:
@@ -12,9 +12,9 @@ requirement_refs:
 planning_base_branch: mission/webkit-deflake
 merge_target_branch: mission/webkit-deflake
 branch_strategy: Planning artifacts for this mission were generated on mission/webkit-deflake. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/webkit-deflake unless the human explicitly redirects the landing branch.
-base_branch: mission/webkit-deflake
-base_commit: 371de6a8dcd18d4ad8aef9f7915444778837844b
-created_at: '2026-09-18T11:13:32Z'
+base_branch: kitty/mission-webkit-timing-deflake-01M2T31J
+base_commit: d3d6ae76c69e650798c1bf18cf3474b5413196eb
+created_at: '2026-09-18T13:37:19.656139+00:00'
 subtasks:
 - T040
 - T041
@@ -43,7 +43,7 @@ tracker_refs: []
   - T040 Await each story to a settled state before reading its legend cue.
   - T041 Red-first: make the required and ordinary legends identical; show the test fails.
   - T042 Repeat-run; report counts.
-- **Independent test**: 10/10 repeats green; one red-first proof.
+- **Independent test**: **item 11 is already 10/10 at baseline — this package's entire scope passes before any work, so "10/10 repeats green" is satisfiable by doing nothing and is NOT an acceptable close.** Either demonstrate item 11 failing under another condition (higher repeat count, or full-suite contention) and then hold it green, or report it **not reproduced** under FR-013/SC-008 with the evidence. The red-first proof is still required for any assertion actually rewritten. This package may not close on an empty diff.
 - **Dependencies**: WP01.
 
 ---
