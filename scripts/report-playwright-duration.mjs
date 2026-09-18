@@ -65,44 +65,64 @@
  */
 import { execFileSync } from 'node:child_process';
 
-// PROVENANCE GAP CLOSED (pre-merge squad finding F9, PR #454).
+// BAND PROVENANCE — corrected TWICE, and the second correction was the important one.
 //
-// The previous constant was `[25.6, 26.7, 22.5]` with NO run id recorded for any of the three
-// figures, anywhere in this mission's tree. One of them (26.7) coincided with run 35352049054 --
-// a MID-MISSION run on a lane branch that already carried the rig -- so the set was not a
-// pre-mission reference at all. The squad's instruction was to name the run ids and confirm each
-// is pre-mission, or widen/withdraw the band. It is named, not widened: every figure below was
-// re-measured from the GitHub Actions API at closeout.
+// (a) The original constant `[25.6, 26.7, 22.5]` carried NO run id for any figure, and 26.7 was a
+//     MID-mission lane run. Squad finding F9. Withdrawn.
 //
-// Method, so this is reproducible rather than asserted: for each `CI Quality` run on
-// `train/elements-first` BEFORE this mission's base commit (e90858da), the duration of the job
-// named exactly `playwright`, computed as completedAt - startedAt, keeping only runs whose
-// `playwright` job concluded `success` (a failed or cancelled job measures how long it took to
-// break, not how long the suite takes).
+// (b) Its first replacement named ten run ids and stated the method "every CI Quality run on
+//     train/elements-first before the mission base whose `playwright` job succeeded". **The set
+//     was not what that method yields.** The squad's evidence lens ran the stated method and got
+//     109 qualifying runs; the ten shipped were ranks 94–109 — the slowest tail — with 93
+//     qualifying runs BELOW the claimed floor. The run ids were checkable; the method that was
+//     claimed to generate them was false. That is F9 recurring in a subtler form, and it was
+//     caught because a lens re-ran the method instead of re-reading the list.
 //
-// run id      | head sha | date       | minutes
-// ------------|----------|------------|--------
-// 34650920361 | e696278c | 2026-09-11 | 19.17   <- band floor
-// 34777305434 | f3b105de | 2026-09-13 | 20.02
-// 34606532461 | 16948194 | 2026-09-11 | 21.67
-// 34632185898 | 04565d55 | 2026-09-11 | 23.92
-// 34657971585 | 40155d58 | 2026-09-11 | 24.33
-// 34660223036 | d3263e94 | 2026-09-12 | 25.52
-// 34767078079 | 25120c70 | 2026-09-13 | 25.57
-// 34637284298 | 9c269b3c | 2026-09-11 | 26.00
-// 34673156155 | 57fe4ce7 | 2026-09-12 | 26.15
-// 34820757579 | ee324f84 | 2026-09-14 | 26.85   <- band ceiling
+// TWO real defects were hiding under that:
 //
-// n = 10, band 19.17-26.85 min, spread 40.1% with NO code change at all. That is nearly
-// twice the 18.7% the old three-run set implied, and it is why a percentage tolerance was
-// always the wrong instrument here: the mission's original NFR-004 ("within 5% of 25.6 min")
-// would have fired on six of these ten unmodified pre-mission runs.
+//   1. THE SET WAS INCOMPARABLE. The suite GREW from 1229 to 2777 tests across the sampled
+//      window, and duration tracks test count. A band over "every run" mixes 245-test runs with
+//      2777-test runs and means nothing. The honest filter is comparable WORK, and it is stated
+//      and checkable: `passed >= 2600`, i.e. within 6.4% of the closeout run's 2777. Applying it
+//      adds two runs the ten missed (34629381528, 34665531460) and removes one they wrongly
+//      included (34606532461, only 2324 tests).
 //
-// NOTE on 34820757579: this mission previously recorded it as 25.6 min. Measured job-wall-clock
-// it is 26.85. The discrepancy is not reconciled and the measured figure is used, because the
-// method above is stated and repeatable while the origin of 25.6 is not.
+//   2. THE INSTRUMENT WAS MIXED. 25.6 — the figure the ORIGINAL NFR-004 was written against — is
+//      Playwright's own SUITE SELF-TIME, printed as `2777 passed (25.6m)` by run 34820757579.
+//      26.85 is that same run's JOB WALL-CLOCK. They are two instruments, not an unreconciled
+//      discrepancy (an earlier revision of this file recorded them as one). Comparing a
+//      wall-clock reading against a band anchored on a self-time figure manufactured an
+//      out-of-band result that did not exist, and then an explanation was built on top of it.
+//
+// CURRENT BASIS: suite self-time, over pre-mission runs doing comparable work.
+// Filter: `CI Quality` on `train/elements-first`, created before the mission base run
+// (e90858da), `playwright` job concluded `success`, and `passed >= 2600`. Value = the largest
+// `N passed (M.Mm)` line in the job log, which is the full-suite line rather than the 346-test
+// project line.
+//
+// run id      | head sha | date       | passed | suite min | job min
+// ------------|----------|------------|--------|-----------|--------
+// 34650920361 | e696278c | 2026-09-11 |   2674 |   16.5    | 19.17   <- floor
+// 34777305434 | f3b105de | 2026-09-13 |   2776 |   18.7    | 20.02
+// 34632185898 | 04565d55 | 2026-09-11 |   2650 |   22.7    | 23.92
+// 34657971585 | 40155d58 | 2026-09-11 |   2674 |   23.1    | 24.33
+// 34629381528 | bf251f33 | 2026-09-11 |   2649 |   23.8    | 25.02
+// 34660223036 | d3263e94 | 2026-09-12 |   2678 |   24.2    | 25.52
+// 34767078079 | 25120c70 | 2026-09-13 |   2776 |   24.3    | 25.57
+// 34637284298 | 9c269b3c | 2026-09-11 |   2674 |   24.3    | 26.00
+// 34673156155 | 57fe4ce7 | 2026-09-12 |   2775 |   24.6    | 26.15
+// 34665531460 | b38b40e7 | 2026-09-12 |   2775 |   24.9    | 26.15
+// 34820757579 | ee324f84 | 2026-09-14 |   2777 |   25.6    | 26.85   <- ceiling, and the
+//                                                                       original single-run
+//                                                                       baseline
+//
+// n = 11, band **16.5–25.6 min suite self-time**, spread 55.2% on comparable work with no code
+// change. The ORIGINAL NFR-004 ("within 5% of 25.6 min") would have fired on **8 of these 11**
+// unmodified pre-mission runs — which is why a fixed percentage was always the wrong instrument.
+//
+// PASS SUITE SELF-TIME TO THIS TOOL, not job wall-clock. They differ by 1-2 minutes of setup.
 export const BASELINE_RUNS_MINUTES = [
-  19.17, 20.02, 21.67, 23.92, 24.33, 25.52, 25.57, 26.0, 26.15, 26.85,
+  16.5, 18.7, 22.7, 23.1, 23.8, 24.2, 24.3, 24.3, 24.6, 24.9, 25.6,
 ];
 export const BASELINE_RUNS_SECONDS = BASELINE_RUNS_MINUTES.map((m) => m * 60);
 export const BAND_MIN_SECONDS = Math.min(...BASELINE_RUNS_SECONDS);
@@ -165,14 +185,14 @@ function selftest() {
   // re-measured from ten verified pre-mission runs -- recorded because a boundary case that
   // silently keeps passing after the boundary moves proves nothing.
   const cases = [
-    { name: 'the band floor (19.17 min, run 34650920361) reads inside', seconds: 19.17 * 60, expect: true },
-    { name: 'the band ceiling (26.85 min, run 34820757579) reads inside', seconds: 26.85 * 60, expect: true },
+    { name: 'the band floor (16.5 min suite self-time, run 34650920361) reads inside', seconds: 16.5 * 60, expect: true },
+    { name: 'the band ceiling (25.6 min, run 34820757579 — the original single-run baseline) reads inside', seconds: 25.6 * 60, expect: true },
     { name: 'the original single-run baseline (25.6 min) reads inside', seconds: 25.6 * 60, expect: true },
-    { name: 'a value inside the band but equal to none of the ten runs reads inside', seconds: 24 * 60, expect: true },
-    { name: 'just below the band floor (19.1 min) reads OUTSIDE', seconds: 19.1 * 60, expect: false },
-    { name: 'just above the band ceiling (26.9 min) reads OUTSIDE', seconds: 26.9 * 60, expect: false },
-    { name: 'the old narrow band would have mis-read this: 22.4 min is now INSIDE', seconds: 22.4 * 60, expect: true },
-    { name: 'a large regression (double the ceiling) reads OUTSIDE', seconds: 26.85 * 60 * 2, expect: false },
+    { name: 'a value inside the band but equal to none of the eleven runs reads inside', seconds: 20 * 60, expect: true },
+    { name: 'just below the band floor (16.4 min) reads OUTSIDE', seconds: 16.4 * 60, expect: false },
+    { name: 'just above the band ceiling (25.7 min) reads OUTSIDE', seconds: 25.7 * 60, expect: false },
+    { name: "the closeout reading (16.8 min suite self-time) reads INSIDE — it was reported OUTSIDE only by comparing job wall-clock against a self-time band", seconds: 16.8 * 60, expect: true },
+    { name: 'a large regression (double the ceiling) reads OUTSIDE', seconds: 25.6 * 60 * 2, expect: false },
   ];
   let allOk = true;
   for (const c of cases) {

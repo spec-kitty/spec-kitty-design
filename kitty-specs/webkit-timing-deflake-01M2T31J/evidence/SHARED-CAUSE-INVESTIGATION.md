@@ -140,7 +140,7 @@ Both fixed in `4c311809`.
 
 ## What is measured, and what is inferred
 
-- **Measured**: the rotation across five samples; the ≈5.7% uniform rate; the byte-identical
+- **Measured**: the rotation across five samples; the ≈5.7% OVERALL rate (8 failures in 140 executions, spread across five of the seven sub-tests, per-sub-test rates 0–10% — **not** uniform, as this document's own correction above records); the byte-identical
   error on 8/8 failures; the 307-stable-reads figure; that the guard fires and clears.
 - **Established by reading the code**: that a zero-iteration poll loop throws its initializer;
   that the scroll baseline is captured after the press.

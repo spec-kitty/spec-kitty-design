@@ -15,14 +15,30 @@
 name: WebKit repeat-run rig
 
 on:
-  # `push` DELIBERATELY REMOVED at closeout. Both globs -- `mission/webkit-deflake` and
-  # `kitty/mission-webkit-timing-deflake-01M2T31J-lane-*` -- name branches that are deleted when
-  # this PR merges, so post-merge they matched nothing and the file carried two dead triggers
-  # advertising an automatic run that could never fire. Found by the pre-merge squad.
+  # A `push` trigger is RETAINED, on a generic glob, and that is a deliberate reversal.
+  #
+  # The mission-specific globs (`mission/webkit-deflake`, `kitty/mission-…-lane-*`) genuinely did
+  # go dead at merge and are gone. But removing `push` entirely — which an earlier revision of this
+  # file did — left the rig dispatchable by NOBODY: GitHub only offers `workflow_dispatch` once the
+  # workflow exists on the DEFAULT branch, and this PR targets `train/elements-first`, not `main`.
+  # So between this merge and the train landing, a `workflow_dispatch`-only rig is unrunnable.
+  # Caught by the pre-merge squad's evidence lens.
+  #
+  # `rig/**` is the escape hatch: push a branch under that prefix to take a measurement, from any
+  # base, without editing this file. It matches nothing that exists today, so it cannot fire by
+  # accident.
+  push:
+    branches:
+      - 'rig/**'
+
+  # The two mission-specific globs that used to live here -- `mission/webkit-deflake` and
+  # `kitty/mission-webkit-timing-deflake-01M2T31J-lane-*` -- named branches deleted at merge, so
+  # post-merge they matched nothing and advertised an automatic run that could never fire.
   #
   # `workflow_dispatch` becomes usable once this file lands on the default branch (GitHub requires
-  # the workflow to exist there before the trigger is offered), which is the point at which this
-  # rig stops being a mission instrument and becomes a repository one.
+  # the workflow to exist there before the trigger is offered), at which point it supersedes the
+  # `rig/**` escape hatch above and this rig becomes a repository instrument rather than a mission
+  # one.
   workflow_dispatch:
     inputs:
       repeat_each:

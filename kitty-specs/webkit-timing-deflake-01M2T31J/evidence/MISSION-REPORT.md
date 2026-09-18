@@ -10,8 +10,8 @@ embedded verbatim. Both are below, unedited, including a non-zero exit code.
 
 | | count |
 |---|---|
-| pass | 33 |
-| partial | 7 |
+| pass | 34 |
+| partial | 6 |
 | pending | 0 |
 | **fail** | **0** |
 
@@ -99,22 +99,71 @@ by the author noticing.
    mission's original NFR-004 ("within 5% of 25.6 min") would have fired on **six of those ten
    unmodified runs**.
 
+## Per-item verdicts (SC-008's actual requirement)
+
+Every scope item, its verdict, and the engine the claim came from. All stability figures are
+**webkit**; the two chromium-only measurements are marked, and they are why four criteria stay
+`partial`.
+
+| # | Item | Verdict | Engine |
+|---|---|---|---|
+| 1 | `sk-progress` forced-colors, two points in cycle | **Fixed** — 0/10 → 10/10. Cause: `samplePixels` read the unfilled track on every fixture | webkit |
+| 2 | `sk-progress` forced-colors + reduced-motion | **Fixed** — 10/10 | webkit |
+| 3 | `sk-progress` the sweep actually runs | **Fixed** — was 9/10 in one sample and 3/10 at baseline; 10/10 in the three most recent | webkit |
+| 4 | `sk-progress` reduced-motion freeze | **Fixed** — 0/10 → 10/10, same cause as item 1 | webkit |
+| 5 | `sk-progress` no animation leak onto determinate | **Fixed** — 10/10 | webkit |
+| 6 | shell exact 56/240px columns | **Fixed** — story-render race; 10/10 | webkit (premise probe: **chromium only**) |
+| 7 | narrow shell region order | **Fixed** — same race; 10/10 | webkit |
+| 8 | landmarks / labels / grouping | **Fixed** — same race; 10/10 | webkit |
+| 9 | axe-clean, dark and light | **Fixed** — same race; 10/10 both | webkit |
+| 10 | focused overflow keyboard scroll | **Fixed** — baseline captured after the key press, so it failed when the scroll was *fast*; 10/10 | webkit |
+| 11 | required legend cue across two stories | **NOT REPRODUCED** — clean in four samples including the exact full-suite contention condition of its original sighting (`35352049054`). No defect found, no code change, WP05 closed on a negative result per FR-013 | webkit |
+| 12 | external controls, six modes | **Already green at baseline** — 10/10 in every sample; no change claimed | webkit |
+| 13 | behaviour-suite lane stop (WP06) | **Observability improved, stop NOT fixed** — the package never promised to fix it. The job log no longer truncates before the error; the underlying stop is unchanged | n/a (log volume) |
+
+### Reported unfixed, carried forward
+
+- **`openStory()`'s flat `page.waitForTimeout(50)`** — `sk-radio-choice-group.spec.ts:258` and
+  `sk-checkbox-choice-group.spec.ts:94`. This is exactly the "wait on elapsed time" shape the
+  mission exists to remove, and it is **not fixed**: item 11 never reproduced, so there was no
+  failing state to drive a red-first proof, and rewriting a helper used by every story in those
+  files without a reproduction would be an unmeasured change. Named here rather than dropped,
+  as `PRE-MERGE-GATES.md` §7 requires.
+- **The webkit lane beyond these thirteen** — at least four other specs flake; see #456.
+- **The story-render race in sibling specs** — `visual.spec.ts` and two others; see #455.
+
 ## Duration (NFR-004 / SC-005)
 
-Investigated rather than accepted, although the reading is *faster* than the band — the direction
-that invites waving through. The ordinary job runs `retries: 2`, so each flaky test cost up to
-three attempts plus the timeout each attempt burned; removing flakes removes that cost. Pre-mission
-runs carried 1–3 flaky, two of which were this mission's items. 2777 passed, 147 skipped — the
-suite did not do less work.
+**16.8 min suite self-time, INSIDE the measured band of 16.5–25.6 min (n=11).**
 
-## Verbatim: `scripts/report-playwright-duration.mjs --seconds=1076`
+This section previously reported the reading as **OUTSIDE** the band and explained it by retry
+cost. **Both were wrong, and both are retracted** — the squad's evidence lens caught it:
+
+- The "outside" result came from comparing **job wall-clock** (17.93) against a band anchored on a
+  **suite self-time** figure (25.6, which is literally `2777 passed (25.6m)` in run `34820757579`).
+  Two instruments. On one instrument there is no anomaly to explain.
+- The retry explanation was independently falsified: `34820757579` and the closeout run report the
+  **same 1 flaky and the same 2777 passed / 147 skipped**, 8.8 min apart. Retry cost cannot
+  account for that.
+- "Pre-mission runs carried 1–3 flaky" was also false — `34606532461` carried **5**.
+
+The band itself was rebuilt for the same reason. Its first replacement stated a method that its
+own set did not satisfy: re-running the stated method yields 109 qualifying runs, and the ten
+shipped were ranks 94–109. The suite grew 1229 → 2777 tests over the window and duration tracks
+test count, so the honest filter is comparable **work** (`passed >= 2600`), on a consistent
+instrument (suite self-time). n=11, 16.5–25.6 min, 55.2% spread with no code change.
+
+On that basis the original NFR-004 ("within 5% of 25.6 min") would have fired on **8 of the 11**
+unmodified pre-mission runs.
+
+## Verbatim: `scripts/report-playwright-duration.mjs --seconds=1008`
 
 ```
 NFR-004 / SC-005 — playwright job duration (band-reported, not percentage-gated)
-  pre-mission runs: 19.17 min, 20.02 min, 21.67 min, 23.92 min, 24.33 min, 25.52 min, 25.57 min, 26 min, 26.15 min, 26.85 min (spread: 40.1% — this is why there is no fixed tolerance)
-  measured band: 19.17 min – 26.85 min
-  this run: 17.93 min (1076.0s)
-  ⚠️  OUTSIDE the measured band — investigate and explain; this is a flag for a human, not an automatic NFR-004 failure
+  pre-mission runs: 16.5 min, 18.7 min, 22.7 min, 23.1 min, 23.8 min, 24.2 min, 24.3 min, 24.3 min, 24.6 min, 24.9 min, 25.6 min (spread: 55.2% — this is why there is no fixed tolerance)
+  measured band: 16.50 min – 25.60 min
+  this run: 16.80 min (1008.0s)
+  ✅ inside the measured band
 ```
 
 ## Verbatim: `scripts/scan-mission-suppressions.mjs --base=origin/train/elements-first`
@@ -162,16 +211,13 @@ author to avoid the rule rather than disclose under it.
 
 ## Standing partials
 
-Seven criteria remain `partial`. Six are evidence-completeness rather than defects: FR-008 (no direct
+Six criteria remain `partial`, all evidence-completeness rather than defects: FR-008 (no direct
 webkit font-probe of the 56.00/240.00 px premise), FR-010, NFR-006 and SC-004 (chromium-only
 measurements standing in for webkit claims), and NFR-003/SC-002 (one red-first proof **withdrawn**
 as affirmatively wrong, one **superseded in part**, and no replacement claimed because none was
 captured).
 
-The seventh is **SC-005**, and it is a genuine miss rather than an evidence gap: the criterion
-says "duration **within** the measured band" and 17.93 min is outside it. The instrument prints
-`⚠️ OUTSIDE the measured band`. Marking it pass because the miss is in the *favourable* direction
-would be the manufactured green this mission spent its length refusing, and a verdict must not
-disagree with its own instrument. NFR-004 — which asks only that an outside reading be
-investigated rather than silently accepted — does pass. They are different questions and the
-matrix answers them differently.
+SC-005 is **not** among them. It was briefly downgraded to `partial` on the reading that 17.93 min
+sat outside the band — but that reading compared two different instruments, and on a consistent
+one (16.8 min suite self-time against a 16.5–25.6 min band) it is inside. It is `pass` on the
+corrected measurement, not on a reinterpretation of the criterion.
