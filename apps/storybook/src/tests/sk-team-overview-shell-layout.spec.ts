@@ -39,42 +39,38 @@ const loadComposition = async (
 ): Promise<Locator> => {
   await page.setViewportSize({ width, height: 900 });
   await page.goto(SHELL_STORY);
-  // T036 (mission 453). Storybook renders the story into #storybook-root on the CLIENT, after
-  // `load` fires -- and `page.goto` resolves at `load`. Injecting immediately therefore races
-  // that render, and when Storybook's render lands second it replaces #storybook-root's
-  // children and destroys the composition injected below. The host is then absent for the
-  // whole of settleComposition's budget, which is exactly what the failures show:
+  // T036 (mission 453). `page.goto` resolves at `load`, but Storybook renders the story into
+  // #storybook-root on the CLIENT, after that. Injecting immediately therefore races that
+  // render: the composition below can be written into a root Storybook has not populated yet,
+  // and the shell is then not usable for the whole of settleComposition's budget. Observed as
   // `host is not visible [polls=148, stableReads=0, fonts=ready]` -- ~150 consecutive checks
   // at a healthy 33ms cadence (two rAF at 60fps, so nothing was CPU-starved) with the font
-  // wait already satisfied. The element was not late; it was gone.
+  // wait already satisfied. The shell was not late.
   //
-  // Every stable story-driven spec in this repo already waits for the story's own root before
-  // touching the page (see `openStory` in sk-workflow-board.spec.ts, which waits for its root
-  // selector to be visible). This one did not, and it is the only one that injects over the
-  // rendered story, which is why it is the only one that rotates.
+  // The precondition is the repo's existing convention, not a bespoke one: wait for a selector
+  // only the story's own render can produce. Compare `openStory` in sk-workflow-board.spec.ts
+  // (waits for its root content selector) and the `[data-render-complete="true"]` waits in the
+  // pattern specs. An earlier revision of this fix hand-rolled a frame-counting probe on a
+  // `window.__skStoryRenderProbe` global; the pre-merge squad was right that it was
+  // content-agnostic, that the global was never reset (so a second call in one test would pass
+  // vacuously on the first tick and silently restore the race), and that calling a
+  // `frames >= 3` counter "observable state rather than a duration" was simply wrong -- under
+  // rAF polling that IS a frame budget. This waits for the story's own element instead, which
+  // is what the sentence claimed all along.
   //
-  // Waiting for the root to be non-empty AND unchanged for three consecutive animation frames
-  // covers a Storybook render that arrives in more than one paint. This is a precondition,
-  // not a tolerance: it waits for an observable state rather than a duration.
-  await page.waitForFunction(
-    () => {
-      const root = document.querySelector("#storybook-root");
-      if (!root || root.childElementCount === 0) return false;
-      const probeHolder = window as unknown as {
-        __skStoryRenderProbe?: { size: number; frames: number };
-      };
-      const size = root.innerHTML.length;
-      const probe = probeHolder.__skStoryRenderProbe;
-      if (!probe || probe.size !== size) {
-        probeHolder.__skStoryRenderProbe = { size, frames: 0 };
-        return false;
-      }
-      probe.frames += 1;
-      return probe.frames >= 3;
-    },
-    undefined,
-    { timeout: 20000 },
-  );
+  // DISCLOSED for the suppression scan (SC-003 / C-001, "wait durations increased = 0"): this
+  // is a NEW 10000ms budget. It is NOT the 20000ms the sibling `openStory` helpers use, and
+  // deliberately so -- Playwright's default per-test timeout is 30000ms and this file declares
+  // no override, so 20000 here plus settleComposition's 6500ms worst case leaves under 3.5s for
+  // the assertions, the axe run included. A partial stall would then surface as a bare
+  // "Test timeout of 30000ms exceeded" instead of settleComposition's self-describing message
+  // -- losing exactly the diagnostic this mission exists to produce. 10000ms is far above the
+  // sub-second render actually observed and keeps the whole helper under ~19s worst case.
+  await page
+    .locator('#storybook-root sk-app-shell')
+    .first()
+    .waitFor({ state: 'attached', timeout: 10000 });
+
   await page.addScriptTag({ url: "/elements-dist/elements.js" });
   await page.evaluate(
     async ({ html, isLight }) => {
@@ -601,8 +597,14 @@ async function settleComposition(page: Page, host: Locator): Promise<void> {
   const FONT_BUDGET_MS = 1500;
   const SETTLE_BUDGET_MS = 5000;
 
+  // `.catch(() => false)` on the losing arm: when document.fonts.ready never resolves -- the
+  // precise case this budget exists for -- that evaluate settles only when the context is torn
+  // down, and without a catch that is an unhandled rejection surfacing in an unrelated test.
   const fontsSettled = await Promise.race([
-    page.evaluate(() => document.fonts.ready).then(() => true),
+    page
+      .evaluate(() => document.fonts.ready)
+      .then(() => true)
+      .catch(() => false),
     page.waitForTimeout(FONT_BUDGET_MS).then(() => false),
   ]);
 
@@ -681,12 +683,23 @@ async function settleComposition(page: Page, host: Locator): Promise<void> {
   // (c): when every part was present but geometry never stabilized,
   // `lastMissing` is empty — name the last two distinct readings instead of
   // leaving the message with nothing after the colon.
+  // `stableReads` is the number of CONSECUTIVE matching reads already banked. With every part
+  // present, 0 means the geometry really was still moving, whereas 1-3 means it had stopped
+  // moving and simply ran out of budget before banking the fourth match. Saying "still moving"
+  // for the latter asserts something the code did not observe -- the same defect class this
+  // helper's own history documents, and it was reintroduced by the fix for (c).
   const detail =
     lastMissing === null
-      ? "no reading was taken — the poll loop did not complete a single pass"
+      ? // Defensive only: the do/while below banks a reading before any exit, so this branch is
+        // unreachable today. It is retained so that reverting the loop shape cannot silently
+        // resurrect the "throw the initializer as a measurement" bug.
+        "no reading was taken — the poll loop did not complete a single pass"
       : lastMissing.length > 0
         ? lastMissing.join(", ")
-        : `geometry still moving — last two reads: ${previousGeometry ?? "(none)"} -> ${currentGeometry ?? "(none)"}`;
+        : stableReads === 0
+          ? `geometry still moving — last two reads: ${previousGeometry ?? "(none)"} -> ${currentGeometry ?? "(none)"}`
+          : `geometry had stopped moving but ran out of budget with only ${stableReads} of 4 ` +
+            `consecutive stable reads banked — last read: ${currentGeometry ?? "(none)"}`;
   // Every figure a reader needs to tell the failure modes apart, in the message itself:
   // a low `polls` with `fonts=timed-out` is budget starvation, a high `polls` with
   // "host is not visible" is a composition that genuinely never rendered.

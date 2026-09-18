@@ -95,10 +95,10 @@ const LINE_ITEMS = [
   { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 512, label: 'the sweep actually runs' },
   { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 537, label: 'reduced-motion freeze' }, // corrected from 523 — see note above the item-1 entry.
   { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 582, label: 'no animation leak onto determinate' }, // corrected from 568 — see note above the item-1 entry.
-  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 140, label: 'exact 56/240px columns' },
-  { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 196, label: 'narrow shell region order' },
-  { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 339, label: 'landmarks/labels/grouping' },
-  { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 481, label: 'axe-clean in dark mode' },
+  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 136, label: 'exact 56/240px columns' },
+  { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 192, label: 'narrow shell region order' },
+  { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 335, label: 'landmarks/labels/grouping' },
+  { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 477, label: 'axe-clean in dark mode' },
   { item: 10, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', line: 654, label: 'focused overflow keyboard scroll' }, // WP03: was 557; T021's waitForScrollSettled helper (added ahead of this test) shifted it. See tmp/finding/wp03-lane-c-rig-line-number-drift.md.
   { item: 11, file: 'apps/storybook/src/tests/sk-radio-choice-group.spec.ts', line: 1113, label: 'legend cue across two stories' },
 ];
@@ -136,6 +136,27 @@ function assertSelectorsResolve(lineItems) {
           line.trim().slice(0, 72) || '(end of file)'
         }`,
       );
+      continue;
+    }
+    // Resolvability is not identity. A drift that lands one item's line on a DIFFERENT test(
+    // passes the check above and then prints a count under the wrong label -- precisely the
+    // harm this guard's docstring names, and this file records six drifts. So each item's
+    // `label` must also be recognisable in the declaration it points at. Matching on the
+    // longest word of four-plus characters keeps the labels free to stay short without
+    // pinning them to the test titles byte-for-byte.
+    // ANY substantial word from the label must appear in the declaration. The labels are
+    // deliberate abbreviations, not title prefixes -- item 11's label says "across two
+    // stories" while its title says "distinct from an ordinary, non-required legend" -- so
+    // requiring the longest word, or a prefix match, fails on correct selectors. Requiring one
+    // shared word is loose enough for the labels to stay short and strict enough that a
+    // selector landing on a DIFFERENT test is caught, which is the actual failure mode.
+    const anchors = (it.label.match(/[A-Za-z][A-Za-z-]{3,}/g) ?? []).map((w) => w.toLowerCase());
+    const haystack = line.toLowerCase();
+    if (anchors.length > 0 && !anchors.some((w) => haystack.includes(w))) {
+      broken.push(
+        `  item ${it.item}: ${it.file}:${it.line} IS a test( declaration, but not the labelled ` +
+          `one — no word of label "${it.label}" appears in: ${line.trim().slice(0, 72)}`,
+      );
     }
   }
   if (broken.length > 0) {
@@ -163,6 +184,23 @@ function parseArgs(argv) {
   }
   if (opts.workers !== null && (!Number.isInteger(opts.workers) || opts.workers < 1)) {
     throw new Error(`--workers must be a positive integer when given, got ${opts.workers}`);
+  }
+  // `--items` was the one option with no validation. `--items=13` or `--items=abc` (which maps
+  // to Set{NaN}) selected NOTHING, Playwright was never invoked, and the script still printed
+  // "every selected item passed every repeat" and exited 0 -- a green over an empty set, which
+  // is the defect class this repository has written down twice, here in the tool whose whole
+  // job is to be believed. Found by the pre-merge squad.
+  if (opts.items !== null) {
+    const known = new Set([...LINE_ITEMS.map((it) => it.item), GREP_ITEM.item]);
+    const unknown = [...opts.items].filter((n) => !known.has(n));
+    if (unknown.length > 0) {
+      throw new Error(
+        `--items names ${unknown.length} item(s) this rig does not define: ` +
+          `${unknown.map((n) => (Number.isNaN(n) ? 'NaN' : n)).join(', ')}. ` +
+          `Known items are ${[...known].sort((a, b) => a - b).join(', ')}. ` +
+          'Refusing rather than measuring a smaller set than you asked for.',
+      );
+    }
   }
   return opts;
 }

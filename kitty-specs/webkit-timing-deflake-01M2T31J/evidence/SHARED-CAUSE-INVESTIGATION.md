@@ -7,10 +7,22 @@
 ## Why this investigation exists
 
 Five rig samples were taken. Across them, **every** shell-layout sub-test and the
-workflow-board scroll test was both green and red; **none** was consistently broken, while
-items 1–5, 11 and 12 were 10/10 in every sample.
+workflow-board scroll test was both green and red; **none** was consistently broken.
 
-| sub-test | baseline | 2nd | `a4facaa2` | `026e225b` | 20-repeat @ `026e225b` |
+**Correction (pre-merge squad, evidence lens).** An earlier revision of this paragraph added
+"while items 1–5, 11 and 12 were 10/10 in every sample". **That was false** and is struck
+rather than edited away. Items 1, 3, 4 and 5 all failed in the baseline sample (0/10, 3/10,
+0/10, 1/10 — see `evidence/T003-baseline.md`), items 1, 4 and 5 failed in the 2nd, and the
+20-repeat sample ran `--items=6,7,8,9` so never measured them at all: only 2 of the 5 samples
+support the claim. What is true, and is all that the argument below needs, is that **items 1–5
+became stable once WP02's fixes landed and stayed 10/10 across the three most recent samples**,
+while items 6–10 kept rotating. Rounding the weaker statement up to "every sample" is the same
+error the squad corrected once already as F6.
+
+Each column names the CI run it came from, so no figure here rests on an unlabelled sample —
+a provenance defect commit `026e225b` in this very PR exists to fix for the duration band.
+
+| sub-test | baseline<br>`35346013373` | 2nd<br>`35351684955` | `a4facaa2`<br>`35364818013` | `026e225b`<br>`35368301281` | 20-repeat @ `026e225b`<br>`35368849015` |
 |---|---|---|---|---|---|
 | 6 @1280 | 9/10 | 10/10 | 10/10 | **7/10** | 20/20 |
 | 6 @1440 | 10/10 | **9/10** | 10/10 | 10/10 | 20/20 |
@@ -25,9 +37,13 @@ Chasing whichever item was red in the latest sample was therefore unbounded: eac
 green some and red others, and the reported progress would really be resampling. The operator
 directed an investigation into what the rotating set shares instead.
 
-**The 20-repeat sample is the one that settled it**: 8 failures in 140 executions (≈5.7%),
-spread across every sub-test rather than concentrated in any. A single shared failure rate
-being sampled is exactly what produces a rotating identity for "the broken test".
+**The 20-repeat sample is the one that settled it**: 8 failures in 140 executions (≈5.7%
+overall), spread across **five of the seven** sub-tests rather than concentrated in one. Item 6
+was 20/20 at both viewports in that sample, so "every sub-test" — the earlier wording — was an
+overstatement, and the per-sub-test rates range from 0% to 10% rather than being uniform. The
+argument the table supports is the weaker and sufficient one: **no single sub-test carries the
+failures**, so no single sub-test is "the broken one", and the identity of whichever is red
+rotates between samples.
 
 ## Finding 1 — one 5000ms budget was being spent twice
 
@@ -73,7 +89,9 @@ whether fonts timed out, which separates budget starvation from a composition th
 never rendered. No assertion is weakened — the four required parts, the zero-size checks, the
 title-node check and the four-stable-reads requirement are unchanged.
 
-**Disclosed for the suppression scan** (SC-002/NFR-003, "wait durations increased = 0"): the
+**Disclosed for the suppression scan** (**SC-003 / C-001**, "wait durations increased = 0" — an
+earlier revision filed this against SC-002/NFR-003, which are the *red-first-proof* rows and do
+not own it; the squad found that misfiling is why the 20000ms budget below went unnoticed): the
 settle poll's own budget is unchanged at 5000ms; it is simply no longer reduced by the font
 wait. The separate 1500ms font budget takes the helper's worst case from 5000ms to 6500ms.
 That is a double-spent budget being corrected, not a tolerance being widened.
@@ -188,8 +206,28 @@ host absent rather than late, and the contention sensitivity — contention dela
 render *past* the injection.
 
 **The repo already had the right pattern.** `openStory` in `sk-workflow-board.spec.ts` waits for
-the story's own root to be visible and never injects over it. `sk-team-overview-shell-layout` was
-the only spec injecting over a rendered story, and the only one that rotated.
+the story's own root to be visible and never injects over it, and 8+ pattern specs wait on a
+`[data-render-complete="true"]` attribute that only the story's own render produces.
+
+**Correction (pre-merge squad, root-cause and architecture lenses).** An earlier revision of this
+section claimed `sk-team-overview-shell-layout` "was the only spec injecting over a rendered
+story, and the only one that rotated". **Both halves are false**, and the correlation was
+carrying more of the argument's weight than any evidence did:
+
+- **Not the only injector.** `apps/storybook/src/tests/visual.spec.ts:250-268` performs the
+  identical `goto` → `addScriptTag` → `root.innerHTML =` against the *same* story id with no
+  render wait. Two further specs touch the page after `goto` without waiting:
+  `elements-load.spec.ts:190-194` (sets `document.body.innerHTML`, destroying `#storybook-root`
+  itself) and `sk-mission-reading-pattern.spec.ts:810-823` (an `expect.poll` containment check an
+  empty root satisfies trivially).
+- **Not the only rotator.** Item 10 lives in `sk-workflow-board.spec.ts`, does not inject at all,
+  and rotated too — for the unrelated reason recorded as Finding 2.
+
+`visual.spec.ts` is chromium-only and `testIgnore`d by default, so the webkit rig cannot see it,
+and a wiped root there surfaces as a screenshot diff rather than an error. **The class is not
+closed by this PR.** It is deferred with an owner rather than folded in, because the file is
+outside this mission's owned surfaces and outside the rig's measurement — both sibling specs are
+recorded in **issue #455**, filed before being cited here.
 
 **Fixed** in `e150b8f9`: wait for `#storybook-root` to be non-empty and unchanged across three
 consecutive animation frames before injecting — a precondition on observable state, not a
@@ -220,7 +258,7 @@ suite that still flaked.
 | # | Finding | Status |
 |---|---|---|
 | 1 | `settleComposition` spent one budget twice; threw its initializer as a measurement | Fixed (`5a3d2ddc`). Real defect; **not** the cause of the observed failures. Its diagnostic found the cause. |
-| 2 | Item 10's scroll baseline captured after the key press | Fixed (`90aa3a50`). Item 10: 8–9/10 across four samples → **10/10 across 30 executions**. |
+| 2 | Item 10's scroll baseline captured after the key press | Fixed (`90aa3a50`). Item 10: 8/10, 9/10, **10/10**, 9/10 across the four samples in the table above — not "8–9/10", which the table itself contradicts — → **10/10 across 30 executions** post-fix. |
 | 3 | Rig dropped stale selectors silently; both arms skipped while the job reported success | Fixed (`4c311809`). The guard refused four stale selectors one commit later. |
 | 4 | Injection raced Storybook's client render — **root cause** | Fixed (`e150b8f9`). 360/360. |
 

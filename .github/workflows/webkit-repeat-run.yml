@@ -64,69 +64,19 @@ jobs:
           ARGS=(--json-dir=webkit-repeat-run-results "--repeat-each=${REPEAT_EACH:-10}")
           if [ -n "${ITEMS:-}" ]; then ARGS+=("--items=${ITEMS}"); fi
           node scripts/webkit-repeat-run.mjs "${ARGS[@]}"
-      # ---------------------------------------------------------------------------------------
-      # SHARED-CAUSE EXPERIMENT (mission 453) — paired arms, ONE runner, ONE build, ONE SHA.
+      # The paired worker-count experiment that lived here has been REMOVED, deliberately.
       #
-      # Four samples of the rig showed items 6-10 failing in a ROTATING pattern: every one of
-      # the shell-layout sub-tests and the workflow-board scroll test has been both green and
-      # red across runs, none consistently broken, while the colour and computed-style items
-      # (1-5, 11, 12) stayed stable at 10/10 every time. Rotation across TWO different spec
-      # files is not a defect in any one test, so the operator directed an investigation into
-      # what those five share.
+      # It answered its question: at `workers: 2` items 6-10 failed 6 times in 80 against 1 in 80
+      # at `--workers=1`, which established contention as a trigger; the render-race fix then took
+      # arm A to 80/80, which established it was a CONSEQUENCE of that race rather than an
+      # independent cause. Leaving a concluded hypothesis wired into CI means a permanently
+      # running experiment with `continue-on-error: true` on both arms -- it could never fail,
+      # so it could never be noticed going stale.
       #
-      # The candidate: playwright.config.ts sets `fullyParallel: true` + `workers: 2` under CI,
-      # so repeats of one test run CONCURRENTLY in two webkit contexts on a two-core runner.
-      # The five rotating items are all geometry-after-layout measurements (exact 56/240px
-      # columns, region order, scroll offset); the stable ones assert colour and computed style
-      # and do not care how long layout took.
-      #
-      # Both arms run the SAME items on the SAME runner against the SAME build, so
-      # runner-to-runner variance cannot explain a difference between them. Arm A runs first and
-      # therefore warms the machine, which makes arm B the easier condition -- read a clean B as
-      # suggestive, not conclusive, and read a still-rotating B as strong evidence AGAINST the
-      # contention hypothesis.
-      #
-      # `continue-on-error` on both: the rig exits non-zero whenever any repeat fails, which is
-      # its correct behaviour, and arm A failing must not prevent arm B from running.
-      # ---------------------------------------------------------------------------------------
-      - name: "[EXPERIMENT] Arm A — items 6-10 at the INHERITED worker count (2 under CI)"
-        id: arm_a
-        # `if: always()` as well as `continue-on-error`: the two cover different things.
-        # continue-on-error stops THIS step's own failure from failing the job; `always()`
-        # stops the PRECEDING step's failure from skipping it. The rig step above exits
-        # non-zero whenever any item fails, which is its correct behaviour and the normal
-        # case here -- without `always()` both arms are silently skipped and the job still
-        # reports as though the experiment ran. It did exactly that on run 35369475589.
-        if: always()
-        continue-on-error: true
-        run: |
-          set -uo pipefail
-          node scripts/webkit-repeat-run.mjs \
-            --json-dir=webkit-repeat-run-results/arm-a-workers-2 \
-            --repeat-each=10 --items=6,7,8,9,10
-      - name: "[EXPERIMENT] Arm B — the same items at --workers=1 (measurement control)"
-        id: arm_b
-        # `if: always()` as well as `continue-on-error`: the two cover different things.
-        # continue-on-error stops THIS step's own failure from failing the job; `always()`
-        # stops the PRECEDING step's failure from skipping it. The rig step above exits
-        # non-zero whenever any item fails, which is its correct behaviour and the normal
-        # case here -- without `always()` both arms are silently skipped and the job still
-        # reports as though the experiment ran. It did exactly that on run 35369475589.
-        if: always()
-        continue-on-error: true
-        run: |
-          set -uo pipefail
-          node scripts/webkit-repeat-run.mjs \
-            --json-dir=webkit-repeat-run-results/arm-b-workers-1 \
-            --repeat-each=10 --items=6,7,8,9,10 --workers=1
-      - name: "[EXPERIMENT] Arm outcomes (neither arm's exit code gates this job)"
-        if: always()
-        run: |
-          echo "arm A (workers=2, inherited): ${{ steps.arm_a.outcome }}"
-          echo "arm B (workers=1, control):   ${{ steps.arm_b.outcome }}"
-          echo "Read the per-item tables in each arm's log section, not these outcomes:"
-          echo "the rig exits non-zero if ANY repeat of ANY item failed, so both arms can"
-          echo "report 'failure' while differing sharply in WHICH items rotated and by how much."
+      # What is KEPT is the reusable part: the rig job, `workflow_dispatch`, and the rig's own
+      # `--workers=N` measurement control, which remains available for re-running the comparison
+      # deliberately. See kitty-specs/webkit-timing-deflake-01M2T31J/evidence/
+      # SHARED-CAUSE-INVESTIGATION.md for the arm figures this removal preserves.
       # `if: always()` — a failing run (expected for the pre-fix baseline, items 1 and 4) is
       # exactly the run whose JSON evidence a reviewer needs to re-derive the counts printed in
       # the job log.

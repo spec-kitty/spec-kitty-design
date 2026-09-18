@@ -1010,8 +1010,24 @@ test.describe("calibrated geometry, themes, and forced colors", () => {
  * RED-FIRST-PROOF — item 10, CI run 35354582083 (webkit, --retries=0, --repeat-each=3).
  * Mutation: `sk-workflow-board.css:30` `overflow-x: auto` -> `hidden`, reverted in `ee093dbe`.
  * Result: 0/3 passed, failing at this file's own rewritten assertion with
- * `Expected: > 0, Received: 0` — bounded, not hung: waitForScrollSettled resolved immediately
- * once scrollLeft was observed stable at 0. Post-fix 10/10 (was 8/10 at baseline).
+ * `Expected: > 0, Received: 0`.
+ *
+ * SUPERSEDED IN PART by T035, and recorded rather than quietly rewritten. The verdict above
+ * (0/3, the mutation is caught) still holds. The MECHANISM described in the original text --
+ * "bounded, not hung: waitForScrollSettled resolved immediately once scrollLeft was observed
+ * stable at 0" -- no longer describes this code. T035 made the baseline a caller-supplied
+ * pre-press reading, so with `from` = 0 and no movement the `hasMoved` guard is never
+ * satisfied, `resolve` is unreachable, and the helper now burns its full 5000ms and REJECTS.
+ * The mutation is still caught, one assertion earlier and by a different path.
+ *
+ * Both claims in the struck sentence were falsified by a fix landed in the same commit range
+ * that withdrew RED-FIRST-PROOF (c) in sk-team-overview-shell-layout.spec.ts for the same
+ * class of reason. Found by the pre-merge squad, which noted the lesson had been applied in
+ * one file and not the other. A red-first proof records what the code did when it was
+ * captured; it does not stay true across later fixes, and it is not evidence about code that
+ * has since changed.
+ *
+ * Post-fix 10/10 (was 8/10 at baseline).
  */
 
 /*
