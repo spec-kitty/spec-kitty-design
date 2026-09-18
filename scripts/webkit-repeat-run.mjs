@@ -39,6 +39,27 @@
  * responsible for that, the same separation the ordinary `playwright` job already has from
  * `storybook-build`.
  *
+ *
+ * A KNOWN ENVIRONMENTAL FAULT, SO IT IS NOT CHASED AS A TEST DEFECT
+ *
+ *   Error: page.goto: WebKit encountered an internal error
+ *
+ * This is a browser-level crash during navigation, not an assertion failure, and it lands on
+ * whichever test happens to be running when it occurs. Three sightings so far, each on a
+ * DIFFERENT test, none reproducing on an immediate re-measurement:
+ *
+ *   #453  run 35375265259 attempt 1  sk-progress item 4        199/200, 200/200 on attempt 2
+ *   #456  run 35396510928            sk-notice item 13         29/30,  60/60 and 40/40 after
+ *   #456  PR #457 CI 35401059899     sk-public-header item 17  1 failure, 40/40 after
+ *
+ * Failure accounting across this mission's ~1,270 measured executions: every failure was either
+ * the sk-page-header sticky/WCAG-2.4.11 defect (38 + 3 + 17, fixed, zero in the two runs since)
+ * or this fault (1). Nothing else.
+ *
+ * WHY THIS MATTERS FOR READING A COUNT: a single occurrence turns an otherwise clean item into
+ * "29/30" and invites a de-flaking change to a test that has nothing wrong with it. Before
+ * treating any one-off as a test defect, read the error. If it is this one, re-measure instead.
+ * Two of the five specs #456 originally named were flagged on exactly this basis.
  * USAGE
  *   node scripts/webkit-repeat-run.mjs [--repeat-each=10] [--items=1,2,3,...,12] [--json-dir=DIR]
  *                                      [--workers=N]
@@ -115,6 +136,14 @@ const LINE_ITEMS = [
   // up is handled in-mission, and a rig that finds a flake and then writes an issue about it is
   // doing half its job.
   { item: 17, file: 'apps/storybook/src/tests/sk-public-header.spec.ts', label: 'focus outlines unclipped at narrow and wide widths', titleAnchor: 'focus outlines remain visible' },
+  // Item 18 (#456, found by this mission's own CI, second of two). PR #457 run 35403525734:
+  // `TimeoutError: locator.waitFor: Timeout 20000ms exceeded — waiting for
+  // locator('.sk-empty-state--inline').first() to be visible`, i.e. the story element never became
+  // visible at all. Flaky, not failed: it passed on retry. Absent from the three pre-mission runs
+  // checked, in a spec this branch never touched, and NOT the environmental WebKit-internal-error
+  // signature documented in this file's header -- so it is measured rather than assumed to be
+  // either a defect or noise.
+  { item: 18, file: 'apps/storybook/src/tests/sk-empty-state-inline.spec.ts', label: 'long supplied copy wraps in the inline empty state', titleAnchor: 'long supplied copy wraps' },
 ];
 
 /** Item 12: parameterized across six modes, no single line — selected by title grep instead. */

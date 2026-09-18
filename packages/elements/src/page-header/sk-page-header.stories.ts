@@ -121,11 +121,17 @@ const longBody = (rows = 40) => `
 // `scroll-padding-block-start` is the mechanism for this: it declares the scrollport's own top
 // inset, so an occluded row counts as OUT of view and focus scrolls it clear.
 //
-// This repo already measured the identical defect on the inline axis and reached the identical
-// conclusion — see sk-section-nav.css, where `scroll-margin-inline` on the link "had zero effect
-// on that specific defect" and a single `scroll-padding-inline` on the container replaced it. The
-// page-header contract had asked consumers for the row-margin form that section-nav had already
-// found insufficient. It does not reproduce on chromium (20/20 locally), which is why it survived.
+// This repo already measured the identical defect on the INLINE axis and reached the identical
+// conclusion — see the section-nav stylesheet under packages/styles/src/section-nav/, where
+// `scroll-margin-inline` on the link "had zero effect on that specific defect" and a single
+// `scroll-padding-inline` on the container replaced it. The page-header contract had asked
+// consumers for the row-margin form that surface had already found insufficient. It does not
+// reproduce on chromium (20/20 locally), which is why it survived.
+//
+// Named by DIRECTORY, never by its `sk-` filename: that surface has a contract test asserting its
+// name appears nowhere under packages/elements/src, because it is styles-only with no element-tree
+// presence. Citing it by filename here reddened that gate, correctly — twice, because the first
+// fix named the gate itself and put the token straight back.
 // WCAG 2.4.11 UNDER WEBKIT NEEDS THIS, AND CSS CANNOT DO IT (#456).
 //
 // Measured, --retries=0, repeat-each=60: focusing a row occluded by the sticky header does NOT
