@@ -3,6 +3,426 @@
   "mission_number": "",
   "mission_type": "software-dev",
   "overall_verdict": "pending",
-  "criteria": [],
-  "negative_invariants": []
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Settle before sampling",
+      "proof_type": "automated_test",
+      "evidence": "WP02 T010 diagnostic refuted the unsettled-fixture hypothesis (fixtures had 9-42 rendered frames, fonts resolved 80-180ms, before the failing screenshot). WP04 found and fixed a real settling defect: loadComposition never awaited fonts despite font-display:swap. WP01 rig, webkit, --retries=0, --repeat-each=10.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Preserve the forced-colors distinction",
+      "proof_type": "automated_test",
+      "evidence": "sk-progress:369 assertions unchanged in substance; red-first run 35358002926 shows 0/10 when the fill is made full-width under forced colors.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Preserve the reduced-motion assertion",
+      "proof_type": "automated_test",
+      "evidence": "sk-progress:465; red-first 0/10 when the reduced-motion rule is removed (run 35358002926).",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Select animation phases explicitly",
+      "proof_type": "automated_test",
+      "evidence": "pinAnimationPhase pauses and seeks currentTime via getAnimations({subtree:true}); run 35361773017 confirms on webkit, pseudoElement=null (host-element animation).",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Await navigation effects",
+      "proof_type": "automated_test",
+      "evidence": "WP03 T020: expect.poll on location hash, matching the idiom at line 72 of the same file. Red-first 0/10 x6 modes (run 35354582083).",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Await scroll and focus settling",
+      "proof_type": "automated_test",
+      "evidence": "WP03 T021 waitForScrollSettled, rAF-polled to 3 stable frames; item 10 8/10 -> 10/10. Red-first 0/10 (run 35354582083).",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Guarantee the composition is present",
+      "proof_type": "automated_test",
+      "evidence": "WP04 settleComposition: awaits document.fonts.ready, host visibility, four shadow parts non-zero, four frame-tied stable geometry reads; throws naming what was missing. Two red-first proofs, reverted.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Establish the geometry assertion's premise",
+      "proof_type": "measurement",
+      "evidence": "WP04 T032: three faces (Inter, Georgia, Courier) x two viewports = nine readings, all exactly 56.00/240.00px. Corroborated by fixed grid tracks + min-width:0. CHROMIUM-ONLY probe; no webkit font-probe was run.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Refutation is chromium-measured; the CSS mechanism is engine-independent and webkit behaviour corroborates it indirectly."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Settle both states before cross-story comparison",
+      "proof_type": "not_applicable",
+      "evidence": "WP05 item 11 did not reproduce across four samples including full-suite contention; no assertion was rewritten, so nothing to settle. Reported not-reproduced under FR-013.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Closed by not-reproduced, not by a fix."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Bring the behaviour-suite log under the cap",
+      "proof_type": "measurement",
+      "evidence": "WP06: 40,942 -> 24,674 bytes (-39.7%), final line is the reporter verdict in both. LOCAL CHROMIUM PROXY; the CI webkit job log, which is the artifact that truncates at ~219KB, was never measured.",
+      "pass_fail": "partial",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Gap recorded and carried; see SC-004."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Preserve warn-and-degrade coverage",
+      "proof_type": "automated_test",
+      "evidence": "WP06: nine sites across seven fixtures wrapped in scoped console.warn intercepts; every expect() byte-identical, re-indented only; restore in finally at all nine sites (reviewer-verified).",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Keep the mutation harness armed",
+      "proof_type": "automated_test",
+      "evidence": "scripts/suite-selftest.mjs re-derived red-first for all 272 mutations including the 24 whose subject is a touched file; manifests untouched.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Reviewer could not re-run all 272 to completion; partial re-run all green."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Report what is not fixed",
+      "proof_type": "document",
+      "evidence": "Items 7, 11, 12 reported not-reproduced with evidence. Item 3 reported as three samples (10/10, 9/10, 10/10), not folded into a flat claim. Three WP02 unknowns disclosed, one since resolved. openStory's waitForTimeout(50) reported unfixed with reasoning.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "Repeat-run stability",
+      "proof_type": "automated_test",
+      "evidence": "Items 1,2,4,5 at 10/10; item 10 10/10; items 6-9 measured as deltas. ITEM 3 IS 9/10 IN ONE OF THREE SAMPLES.",
+      "pass_fail": "partial",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Not met for item 3. Recorded rather than rounded up."
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Measurement must not retry",
+      "proof_type": "automated_test",
+      "evidence": "Every rig invocation passes --retries=0 explicitly, overriding playwright.config.ts:19; the rig prints the setting each run. Playwright cannot emit 'flaky' at retries=0 by its own semantics (reviewer-verified).",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "Red-first proof per fix",
+      "proof_type": "automated_test",
+      "evidence": "WP02 five items 0/10 (35358002926); WP03 items 10 and 12 0/10 at the exact rewritten lines (35354582083); WP04 two proofs; WP06 harness derivation. Proof count equals rewritten-assertion count.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "No added wall-clock",
+      "proof_type": "measurement",
+      "evidence": "Revised mid-mission: a 5% tolerance sat inside the suite's own 18.7% run-to-run spread (25.6/26.7/22.5 min). Now reported against that band.",
+      "pass_fail": "pending",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Final figure taken from the merge CI run."
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "Assertion strength preserved",
+      "proof_type": "code_review",
+      "evidence": "Zero assertions deleted. WP03 added a toBeFocused() after ArrowRight the original lacked; WP06's expect() calls byte-identical; WP02's sampling offsets widened away from a band that carried no signal for any fixture.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "Log completeness",
+      "proof_type": "measurement",
+      "evidence": "Final line is the reporter verdict before and after; sizes reported. Local chromium proxy only.",
+      "pass_fail": "partial",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Same gap as FR-010."
+    },
+    {
+      "criterion_id": "NFR-007",
+      "description": "Engine disclosure",
+      "proof_type": "document",
+      "evidence": "Every count in the evidence files names webkit and the retry setting; chromium-only measurements are labelled as such in WP04, WP06 and WP02.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "C-001",
+      "description": "No suppression",
+      "proof_type": "code_review",
+      "evidence": "Reviewers independently verified: zero skip/fixme/.only/retry-wrap/tolerance-widening; zero assertions removed; WP02's four retained waitForTimeout calls byte-identical in duration to the pre-mission file, two waits removed and replaced by event-driven pinning.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "C-002",
+      "description": "No assertion deletion",
+      "proof_type": "code_review",
+      "evidence": "Reviewers independently verified: zero skip/fixme/.only/retry-wrap/tolerance-widening; zero assertions removed; WP02's four retained waitForTimeout calls byte-identical in duration to the pre-mission file, two waits removed and replaced by event-driven pinning.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "C-003",
+      "description": "No timeout inflation",
+      "proof_type": "code_review",
+      "evidence": "Reviewers independently verified: zero skip/fixme/.only/retry-wrap/tolerance-widening; zero assertions removed; WP02's four retained waitForTimeout calls byte-identical in duration to the pre-mission file, two waits removed and replaced by event-driven pinning.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "C-004",
+      "description": "No unproven cause claims",
+      "proof_type": "document",
+      "evidence": "WP06 states plainly that no lane stop occurred during the mission and claims no root cause for it.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "C-005",
+      "description": "CI is the authority",
+      "proof_type": "document",
+      "evidence": "Webkit confirmed unable to launch locally, with a chromium positive control. Every webkit verdict comes from CI.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "C-006",
+      "description": "Train-only merge",
+      "proof_type": "process",
+      "evidence": "PR 454 targets train/elements-first. Merging the train into main is out of scope.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "C-007",
+      "description": "Component changes are findings",
+      "proof_type": "code_review",
+      "evidence": "No packages/ change landed. WP02's fix is test-only; all red-first CSS mutations reverted with byte-empty diffs, verified independently.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "C-008",
+      "description": "Do not disarm the mutation harness",
+      "proof_type": "automated_test",
+      "evidence": "mutations.json, behaviours.json, suite-budget.json untouched; 272 arms re-derived.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "C-009",
+      "description": "Do not change the ordinary suite",
+      "proof_type": "code_review",
+      "evidence": "ci-quality.yml's playwright job untouched by the rig; rig is a separate workflow. check-gate-wiring and check-ci-quality-trigger-parity both exit 0.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "C-010",
+      "description": "Findings log is shared across lanes",
+      "proof_type": "process",
+      "evidence": "Every lane symlinked tmp/finding to the repo root. Four findings logged and harvested into evidence/findings/ before worktree cleanup.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "C-011",
+      "description": "Component changes need visual diff and approval",
+      "proof_type": "not_applicable",
+      "evidence": "No component change landed, so the clause was never triggered.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "C-012",
+      "description": "Red-first is the charter's own bar",
+      "proof_type": "automated_test",
+      "evidence": "WP06 used the enforced harness rather than a parallel proof; others recorded per-assertion red-first runs.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "SC-001",
+      "description": "All twelve items green across 10 repeats",
+      "proof_type": "automated_test",
+      "evidence": "Items 1,2,4,5,10,11,12 clean. ITEM 3 9/10 in one of three samples. Items 6,7,8,9 measured but within the rig's own cross-run noise.",
+      "pass_fail": "partial",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Not a clean sweep. See NFR-001."
+    },
+    {
+      "criterion_id": "SC-002",
+      "description": "Red-first proofs equal rewritten assertions",
+      "proof_type": "automated_test",
+      "evidence": "Equal and non-zero. WP01's scan reports both counts.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "SC-003",
+      "description": "Zero suppressions",
+      "proof_type": "automated_test",
+      "evidence": "WP01's scan-mission-suppressions.mjs, proven to detect a planted violation by two independent parties.",
+      "pass_fail": "pending",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Run against the final merged diff before the PR is marked ready."
+    },
+    {
+      "criterion_id": "SC-004",
+      "description": "Behaviour-suite log ends with the verdict",
+      "proof_type": "measurement",
+      "evidence": "Confirmed on a local chromium proxy, not on the CI webkit job log that actually truncates.",
+      "pass_fail": "partial",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Carried to closeout as an open gap."
+    },
+    {
+      "criterion_id": "SC-005",
+      "description": "Duration within the measured band",
+      "proof_type": "measurement",
+      "evidence": "Band is 22.5-26.7 min across three reference runs.",
+      "pass_fail": "pending",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Taken from the merge CI run."
+    },
+    {
+      "criterion_id": "SC-006",
+      "description": "Every scope item fixed or reported",
+      "proof_type": "document",
+      "evidence": "Thirteen items: twelve tests plus the lane stop. Each is either fixed with a demonstrated cause or reported not-reproduced/unfixed with evidence.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": ""
+    },
+    {
+      "criterion_id": "SC-007",
+      "description": "Zero failures in the final pre-merge run",
+      "proof_type": "automated_test",
+      "evidence": "",
+      "pass_fail": "pending",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Evaluated on the final PR head SHA."
+    },
+    {
+      "criterion_id": "SC-008",
+      "description": "One mission report with verdicts, engines, duration",
+      "proof_type": "document",
+      "evidence": "",
+      "pass_fail": "pending",
+      "verified_by": "orchestrator",
+      "verified_at": "2026-09-18T15:37:02.507409+00:00",
+      "notes": "Authored at closeout; must embed both scripts' output verbatim."
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "No test in scope is skipped, fixme'd, quarantined or retry-wrapped to obtain green",
+      "detection": "scripts/scan-mission-suppressions.mjs over the mission diff",
+      "status": "holds"
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "No red-first CSS mutation survives into the merged tree",
+      "detection": "git diff packages/ against the train; grep for the specific mutation strings",
+      "status": "holds"
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "The rig's file:line selectors resolve to their intended tests in the composed tree",
+      "detection": "sed -n on each selector line after merging all six lanes",
+      "status": "holds"
+    }
+  ]
 }
