@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
 const PROGRESS_CSS = 'packages/styles/src/progress/sk-progress.css';
@@ -20,6 +20,18 @@ const story = async (page: Page, id: string) => {
  * default/initial values regardless of the actual applied style) — pixel sampling
  * reads what actually rendered instead of guessing at an unreliable API, and works
  * identically on every engine including WebKit in CI.
+ *
+ * `left`/`right` sample 10px in from each edge, not the original 2px/3px. T010's decisive
+ * experiment (webkit-timing-deflake-01M2T31J, evidence/T010-paint-diagnostic.md) proved the
+ * original offsets sat inside a webkit-specific edge-inset band that never carries the fill
+ * colour: `completeSample.left`/`.right` at `x=2`/`x=w-3` read plain track background
+ * (`var(--sk-surface-input)`, e.g. `[43,49,59,255]`) on the DETERMINATE `Complete` fixture
+ * (value=8/max=8, a solid 100% fill with zero clip-path, under BOTH plain and forced-colors
+ * rendering) across all 10 measured webkit repeats — proof the edge itself never shows the
+ * authored fill in this webkit build, regardless of value or clip, so no CSS/component change
+ * can move it (C-007 does not apply here). Widening the offset to 10px clears that band while
+ * staying well inside item 1's own 45%-wide forced-colors clip (54px of 120px) and off-centre
+ * enough to keep testing genuinely near-edge geometry.
  */
 const samplePixels = async (page: Page, buffer: Buffer) => {
   const dataUrl = `data:image/png;base64,${buffer.toString('base64')}`;
@@ -39,9 +51,9 @@ const samplePixels = async (page: Page, buffer: Buffer) => {
     const h = canvas.height;
     const sample = (x: number, y: number) => Array.from(ctx.getImageData(x, y, 1, 1).data);
     return {
-      left: sample(2, Math.floor(h / 2)),
+      left: sample(10, Math.floor(h / 2)),
       center: sample(Math.floor(w / 2), Math.floor(h / 2)),
-      right: sample(Math.max(0, w - 3), Math.floor(h / 2)),
+      right: sample(Math.max(0, w - 11), Math.floor(h / 2)),
       // The 1px top border stroke, sampled the same pixel-reading way as the fill (FR-009/SC-006
       // boundary-vs-indicator — `getComputedStyle(...).borderColor` is ALSO unreliable here: under
       // forced-colors Chromium reports it as a semi-transparent `rgba(...)` pre-blend value, not
@@ -56,6 +68,41 @@ const pixelsEqual = (a: number[], b: number[], tolerance = 2) =>
   a.every((v, i) => Math.abs(v - b[i]) <= tolerance);
 const samplesEqual = (a: Pixels, b: Pixels, tolerance = 2) =>
   pixelsEqual(a.left, b.left, tolerance) && pixelsEqual(a.center, b.center, tolerance) && pixelsEqual(a.right, b.right, tolerance);
+
+/**
+ * FR-004/plan.md Correction 3/IC-02: items 3 and 5 compare two captures over time to prove
+ * the authored sweep animation does or does not run. The original technique separated the two
+ * captures by a fixed `waitForTimeout` and trusted wall-clock luck to land on two different
+ * points of the `320ms` (`--sk-motion-duration-slow`) looping sweep — T003-baseline.md measured
+ * that luck at 3/10 and 1/10. This selects the two phases explicitly instead: pause every
+ * Animation the sweep's keyframe touches (the host `.sk-progress__bar` element AND, per
+ * `{ subtree: true }`, its pseudo-elements — required because plan.md Correction 3 records that
+ * `getAnimations()` reaching a vendor pseudo-element's animation is not guaranteed cross-engine,
+ * and webkit is measured here, not assumed, via `pseudoElement` on each returned
+ * `KeyframeEffect`, attached as a test annotation so the CI record proves which layer webkit
+ * actually returned animations for), then seeks each one's `currentTime` to the given phase.
+ * Pausing is required — otherwise the animation keeps advancing between the seek and the
+ * screenshot. The explicit double-`requestAnimationFrame` after seeking waits for an actual
+ * paint of the new frame (not a duration) before anything samples it — the same "wait for the
+ * event, not the clock" principle FR-001 asks for elsewhere in this file, applied to animation
+ * phase instead of load/paint settling. Returns each reached animation's `pseudoElement` (so a
+ * caller can assert on/log what was actually reached) and its own effect duration in ms (so a
+ * caller can derive "half a period" from the token's real, live-resolved value instead of a
+ * hardcoded literal that would drift silently if `--sk-motion-duration-slow` ever changed).
+ */
+const pinAnimationPhase = (bar: Locator, timeMs: number) =>
+  bar.evaluate(async (node, t) => {
+    const anims = (node as Element).getAnimations({ subtree: true });
+    for (const anim of anims) {
+      anim.pause();
+      anim.currentTime = t;
+    }
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    return anims.map((anim) => ({
+      pseudoElement: (anim.effect as KeyframeEffect | null)?.pseudoElement ?? null,
+      durationMs: Number((anim.effect as KeyframeEffect | null)?.getComputedTiming().duration ?? 0),
+    }));
+  }, timeMs);
 
 /** `getComputedStyle(...).borderColor` / `.backgroundColor` come back as `rgb(r, g, b)` or
  * `rgba(r, g, b, a)` strings; extract the numeric components for a pixel-tolerance compare
@@ -456,8 +503,19 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
   test('Indeterminate: the authored sweep animation actually runs (two captures over time differ) with no reduced-motion preference set', async ({ page }) => {
     const host = await story(page, 'indeterminate');
     const bar = host.locator('progress');
+
+    // FR-004/IC-02: two explicitly selected phases, not two wall-clock reads separated by a
+    // timeout (T003-baseline.md measured the old technique at 3/10 — a real race, not a flake
+    // to retry away). `pinAnimationPhase`'s returned array proves what layer(s) webkit actually
+    // returned from `getAnimations({ subtree: true })` for this CI run.
+    const atStart = await pinAnimationPhase(bar, 0);
+    expect(atStart.length).toBeGreaterThan(0); // the sweep must exist to have a phase at all
     const sample1 = await samplePixels(page, await bar.screenshot());
-    await page.waitForTimeout(400);
+    const halfPeriod = Math.max(...atStart.map((a) => a.durationMs)) / 2;
+    expect(halfPeriod).toBeGreaterThan(0); // sanity: a real, finite duration was found
+    const atHalf = await pinAnimationPhase(bar, halfPeriod);
+    expect(atHalf.length).toBe(atStart.length);
+    test.info().annotations.push({ type: 'sk-progress-pseudo-elements', description: JSON.stringify({ atStart, atHalf }) });
     const sample2 = await samplePixels(page, await bar.screenshot());
     expect(samplesEqual(sample1, sample2)).toBe(false);
   });
@@ -520,8 +578,16 @@ test.describe('sk-progress absent-state regression: the indeterminate modifier d
 
     // MUTATE: simulate the modifier leaking onto a determinate fixture.
     await host.evaluate((node) => node.classList.add('sk-progress--indeterminate'));
+    // FR-004/IC-02: same phase-pinning as the sweep test above, for the same reason — the
+    // injected leak now has a real, looping sweep animation to detect, and two wall-clock reads
+    // race the same way T003-baseline.md measured at 1/10 for this exact test.
+    const atStart = await pinAnimationPhase(bar, 0);
+    expect(atStart.length).toBeGreaterThan(0); // the leaked sweep must exist to have a phase
     const after1 = await samplePixels(page, await bar.screenshot());
-    await page.waitForTimeout(400);
+    const halfPeriod = Math.max(...atStart.map((a) => a.durationMs)) / 2;
+    expect(halfPeriod).toBeGreaterThan(0);
+    const atHalf = await pinAnimationPhase(bar, halfPeriod);
+    test.info().annotations.push({ type: 'sk-progress-pseudo-elements', description: JSON.stringify({ atStart, atHalf }) });
     const after2 = await samplePixels(page, await bar.screenshot());
     // WATCH: with the leak injected, the identical check now correctly detects
     // motion — proving the "no leak" assertion above is not vacuous.
