@@ -103,5 +103,5 @@ Reported as counts, and for suppressions from WP01's scan rather than self-repor
 - tolerances widened = 0; wait durations increased = 0 *(from the scan)*
 - every measurement ran with `retries: 0`, and said so
 - items fixed with a demonstrated cause + items reported unfixed = **13** (the twelve test items plus the lane-stop item, per SC-006)
-- final `playwright` suite duration reported against the measured band (25.6 / 26.7 / 22.5 min); outside the band = investigated, not silently accepted
+- final `playwright` suite duration reported against the measured band — **now 16.5–25.6 min suite self-time, n=11** (the 25.6 / 26.7 / 22.5 figures quoted here are WITHDRAWN: no run id existed for any, and one was a mid-mission lane run; a wall-clock replacement was withdrawn in turn for selection bias — see `scripts/report-playwright-duration.mjs`); outside the band = investigated, not silently accepted
 - every verification claim names its engine

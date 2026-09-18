@@ -26,7 +26,7 @@ git diff --stat <train> <merge-result> -- packages/styles/ packages/elements/
 Every hunk must be either absent or a declared C-007 finding carrying C-011's visual diff and
 maintainer approval. `grep` the final diff for `overflow-x: hidden` and `#not-details` specifically.
 
-## 2. The rig selects tests by hardcoded `file:line`
+## 2. The rig selected tests by hardcoded `file:line` (CLOSED — it now resolves each item from a unique `titleAnchor` at run time; see NI-003)
 
 `scripts/webkit-repeat-run.mjs` picks each item by exact line. **Any edit that inserts lines above a
 selected test silently points the selector at a different test.** WP01's rig fails loudly

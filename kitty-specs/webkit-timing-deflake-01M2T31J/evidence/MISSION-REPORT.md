@@ -68,7 +68,7 @@ via the attempts API. Recorded, not discarded — tracked in #456.
 does **not** mean the whole `playwright` job is flake-free. The closeout CI run `35375268744` is
 fully green (`gate: success`) and still reports **1 flaky** — `sk-notice-forced-colors.spec.ts:121`,
 never in scope. Pre-mission runs carried flaky tests too — including, in at least one run, items
-6, 9 and 10, which are fixed. No single number characterises a run: counts vary BETWEEN runs of identical code: run 35375268744 reports 1 flaky and run 35381688538 reports 2, on the same tree, which is why the earlier "1–3 flaky each"
+6, 9 and 10, which are fixed. No single number characterises a run: counts vary between runs of **effectively** identical code: run `35375268744` @ `afe7be3c` reports 1 flaky and run `35381688538` @ `d4dc70d0` reports 2. Those trees are NOT byte-identical — 29 insertions / 2 deletions in one spec between them, and they report 2777 vs 2776 tests — so the honest qualifier is *effectively*. The only executable delta is a `.catch` on a raced timer, which cannot change a flaky count, which is why the earlier "1–3 flaky each"
 claim is retracted below rather than replaced with another figure. The rest is enumerated with run ids in **#456**, so #453 closing cannot be read as "the
 webkit lane is de-flaked".
 
@@ -159,7 +159,15 @@ cost. **Both were wrong, and both are retracted** — the squad's evidence lens 
   account for that.
 - "Pre-mission runs carried 1–3 flaky" was also false — `34606532461` carried **5**, and its five
   include items 6, 9 and 10. The deeper error was quoting a single flaky number per run at all —
-  counts vary BETWEEN runs of identical code: run 35375268744 reports 1 flaky and run 35381688538 reports 2, on the same tree.
+  counts vary between runs of **effectively** identical code: run `35375268744` @ `afe7be3c` reports 1 flaky and run `35381688538` @ `d4dc70d0` reports 2. Those trees are NOT byte-identical — 29 insertions / 2 deletions in one spec between them, and they report 2777 vs 2776 tests — so the honest qualifier is *effectively*. The only executable delta is a `.catch` on a raced timer, which cannot change a flaky count.
+
+  **A THIRD correction, to this bullet's own replacement text.** An earlier revision said
+  "identical code", which overstates it for the reason just given. That makes three rounds in
+  which a correction introduced a smaller error of the same family: the band replacement was
+  selection-biased, its retraction cited this mission's own prose as a measurement, and that
+  retraction's replacement overstated "identical". Each smaller than the last, each caught — but
+  the pattern says the risk had migrated from the original claim into the FIX, and the last two
+  rounds shipped without anyone re-deriving the new sentence's premise before writing it.
 
   **A correction to this very bullet, found by the pre-merge squad's evidence lens.** An earlier
   revision of it claimed run `35381688538` "prints 1, 2 *and* 3" flaky counts. It does not: its
