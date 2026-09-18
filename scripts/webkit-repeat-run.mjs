@@ -55,11 +55,19 @@ const PROJECT = 'webkit'; // C-005 — the only engine this mission's affected t
 
 /** spec.md's "Canonical scope" table, items 1–11: each addressable as an exact file:line. */
 const LINE_ITEMS = [
-  { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 369, label: 'forced-colors, two points in cycle' },
-  { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 440, label: 'forced-colors + reduced-motion' },
-  { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 456, label: 'the sweep actually runs' },
-  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 465, label: 'reduced-motion freeze' },
-  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 510, label: 'no animation leak onto determinate' },
+  // Lines 58-62 corrected by WP02 (webkit-timing-deflake-01M2T31J) — DISCLOSED
+  // ACTIVE_WP_SCOPE_VIOLATION override: this file is WP01's, not WP02's, but WP02's own owned
+  // surface IS apps/storybook/src/tests/sk-progress.spec.ts, and its T012/T013 fix necessarily
+  // added real lines to that file (paint-diagnostic offset fix + phase-pinning for items 3/5),
+  // moving every one of these five declarations down from their original 369/440/456/465/510.
+  // A rig that cannot select this WP's own five items is worse than a disclosed one-line
+  // mechanical correction; see the mission's tmp/finding/ log for the class of defect (hardcoded
+  // absolute file:line addressing racing an owning WP's necessary edits to that same file).
+  { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 416, label: 'forced-colors, two points in cycle' },
+  { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 487, label: 'forced-colors + reduced-motion' },
+  { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 503, label: 'the sweep actually runs' },
+  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 522, label: 'reduced-motion freeze' },
+  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 567, label: 'no animation leak onto determinate' },
   { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 104, label: 'exact 56/240px columns' },
   { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 160, label: 'narrow shell region order' },
   { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 303, label: 'landmarks/labels/grouping' },

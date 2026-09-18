@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
 const PROGRESS_CSS = 'packages/styles/src/progress/sk-progress.css';
@@ -20,6 +20,18 @@ const story = async (page: Page, id: string) => {
  * default/initial values regardless of the actual applied style) — pixel sampling
  * reads what actually rendered instead of guessing at an unreliable API, and works
  * identically on every engine including WebKit in CI.
+ *
+ * `left`/`right` sample 10px in from each edge, not the original 2px/3px. T010's decisive
+ * experiment (webkit-timing-deflake-01M2T31J, evidence/T010-paint-diagnostic.md) proved the
+ * original offsets sat inside a webkit-specific edge-inset band that never carries the fill
+ * colour: `completeSample.left`/`.right` at `x=2`/`x=w-3` read plain track background
+ * (`var(--sk-surface-input)`, e.g. `[43,49,59,255]`) on the DETERMINATE `Complete` fixture
+ * (value=8/max=8, a solid 100% fill with zero clip-path, under BOTH plain and forced-colors
+ * rendering) across all 10 measured webkit repeats — proof the edge itself never shows the
+ * authored fill in this webkit build, regardless of value or clip, so no CSS/component change
+ * can move it (C-007 does not apply here). Widening the offset to 10px clears that band while
+ * staying well inside item 1's own 45%-wide forced-colors clip (54px of 120px) and off-centre
+ * enough to keep testing genuinely near-edge geometry.
  */
 const samplePixels = async (page: Page, buffer: Buffer) => {
   const dataUrl = `data:image/png;base64,${buffer.toString('base64')}`;
@@ -39,9 +51,9 @@ const samplePixels = async (page: Page, buffer: Buffer) => {
     const h = canvas.height;
     const sample = (x: number, y: number) => Array.from(ctx.getImageData(x, y, 1, 1).data);
     return {
-      left: sample(2, Math.floor(h / 2)),
+      left: sample(10, Math.floor(h / 2)),
       center: sample(Math.floor(w / 2), Math.floor(h / 2)),
-      right: sample(Math.max(0, w - 3), Math.floor(h / 2)),
+      right: sample(Math.max(0, w - 11), Math.floor(h / 2)),
       // The 1px top border stroke, sampled the same pixel-reading way as the fill (FR-009/SC-006
       // boundary-vs-indicator — `getComputedStyle(...).borderColor` is ALSO unreliable here: under
       // forced-colors Chromium reports it as a semi-transparent `rgba(...)` pre-blend value, not
@@ -56,6 +68,41 @@ const pixelsEqual = (a: number[], b: number[], tolerance = 2) =>
   a.every((v, i) => Math.abs(v - b[i]) <= tolerance);
 const samplesEqual = (a: Pixels, b: Pixels, tolerance = 2) =>
   pixelsEqual(a.left, b.left, tolerance) && pixelsEqual(a.center, b.center, tolerance) && pixelsEqual(a.right, b.right, tolerance);
+
+/**
+ * FR-004/plan.md Correction 3/IC-02: items 3 and 5 compare two captures over time to prove
+ * the authored sweep animation does or does not run. The original technique separated the two
+ * captures by a fixed `waitForTimeout` and trusted wall-clock luck to land on two different
+ * points of the `320ms` (`--sk-motion-duration-slow`) looping sweep — T003-baseline.md measured
+ * that luck at 3/10 and 1/10. This selects the two phases explicitly instead: pause every
+ * Animation the sweep's keyframe touches (the host `.sk-progress__bar` element AND, per
+ * `{ subtree: true }`, its pseudo-elements — required because plan.md Correction 3 records that
+ * `getAnimations()` reaching a vendor pseudo-element's animation is not guaranteed cross-engine,
+ * and webkit is measured here, not assumed, via `pseudoElement` on each returned
+ * `KeyframeEffect`, attached as a test annotation so the CI record proves which layer webkit
+ * actually returned animations for), then seeks each one's `currentTime` to the given phase.
+ * Pausing is required — otherwise the animation keeps advancing between the seek and the
+ * screenshot. The explicit double-`requestAnimationFrame` after seeking waits for an actual
+ * paint of the new frame (not a duration) before anything samples it — the same "wait for the
+ * event, not the clock" principle FR-001 asks for elsewhere in this file, applied to animation
+ * phase instead of load/paint settling. Returns each reached animation's `pseudoElement` (so a
+ * caller can assert on/log what was actually reached) and its own effect duration in ms (so a
+ * caller can derive "half a period" from the token's real, live-resolved value instead of a
+ * hardcoded literal that would drift silently if `--sk-motion-duration-slow` ever changed).
+ */
+const pinAnimationPhase = (bar: Locator, timeMs: number) =>
+  bar.evaluate(async (node, t) => {
+    const anims = (node as Element).getAnimations({ subtree: true });
+    for (const anim of anims) {
+      anim.pause();
+      anim.currentTime = t;
+    }
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    return anims.map((anim) => ({
+      pseudoElement: (anim.effect as KeyframeEffect | null)?.pseudoElement ?? null,
+      durationMs: Number((anim.effect as KeyframeEffect | null)?.getComputedTiming().duration ?? 0),
+    }));
+  }, timeMs);
 
 /** `getComputedStyle(...).borderColor` / `.backgroundColor` come back as `rgb(r, g, b)` or
  * `rgba(r, g, b, a)` strings; extract the numeric components for a pixel-tolerance compare
@@ -381,12 +428,12 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     // forced-colors, confirmed by an isolated probe — `clip-path` is pure geometry, so it
     // survives). This test asserts the fixed shape directly against both Complete and Zero, not
     // merely against the page background.
-    await installPaintDiagnostic(page); await page.emulateMedia({ forcedColors: 'active' }); // T010
+    await page.emulateMedia({ forcedColors: 'active' });
 
     const complete = await story(page, 'complete');
-    const completeSample = await samplePixels(page, await complete.locator('progress').screenshot()); await attachPaintDiagnostic(page, 'item1-comparison-complete'); attachSample('item1-comparison-complete', completeSample); // T010
+    const completeSample = await samplePixels(page, await complete.locator('progress').screenshot());
     const zero = await story(page, 'zero');
-    const zeroSample = await samplePixels(page, await zero.locator('progress').screenshot()); await attachPaintDiagnostic(page, 'item1-comparison-zero'); attachSample('item1-comparison-zero', zeroSample); // T010
+    const zeroSample = await samplePixels(page, await zero.locator('progress').screenshot());
 
     const host = await story(page, 'indeterminate-forced-colors');
     const bar = host.locator('progress');
@@ -408,9 +455,9 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     const indicatorColor = await bar.evaluate((node) => getComputedStyle(node).backgroundColor);
     expect(borderColor).not.toBe(indicatorColor);
 
-    const sample1 = await samplePixels(page, await bar.screenshot()); await attachPaintDiagnostic(page, 'item1-subject-sample1'); attachSample('item1-subject-sample1', sample1); // T010
+    const sample1 = await samplePixels(page, await bar.screenshot());
     await page.waitForTimeout(300);
-    const sample2 = await samplePixels(page, await bar.screenshot()); await attachPaintDiagnostic(page, 'item1-subject-sample2'); attachSample('item1-subject-sample2', sample2); // T010
+    const sample2 = await samplePixels(page, await bar.screenshot());
 
     const bodyRgb = parseRgb(bodyBackground);
 
@@ -456,8 +503,18 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
   test('Indeterminate: the authored sweep animation actually runs (two captures over time differ) with no reduced-motion preference set', async ({ page }) => {
     const host = await story(page, 'indeterminate');
     const bar = host.locator('progress');
+
+    // FR-004/IC-02: two explicitly selected phases, not two wall-clock reads separated by a
+    // timeout (T003-baseline.md measured the old technique at 3/10 — a real race, not a flake
+    // to retry away). `pinAnimationPhase`'s returned array proves what layer(s) webkit actually
+    // returned from `getAnimations({ subtree: true })` for this CI run.
+    const atStart = await pinAnimationPhase(bar, 0);
+    expect(atStart.length).toBeGreaterThan(0); // the sweep must exist to have a phase at all
     const sample1 = await samplePixels(page, await bar.screenshot());
-    await page.waitForTimeout(400);
+    const halfPeriod = Math.max(...atStart.map((a) => a.durationMs)) / 2;
+    expect(halfPeriod).toBeGreaterThan(0); // sanity: a real, finite duration was found
+    const atHalf = await pinAnimationPhase(bar, halfPeriod);
+    expect(atHalf.length).toBe(atStart.length);
     const sample2 = await samplePixels(page, await bar.screenshot());
     expect(samplesEqual(sample1, sample2)).toBe(false);
   });
@@ -465,19 +522,19 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
   test('Indeterminate under prefers-reduced-motion: reduce — the animation stops (two captures over time are identical) and the frozen frame is neither the Complete nor the Zero determinate visual', async ({ page }) => {
     // Complete/Zero baselines, unaffected by reduced-motion (they carry no
     // authored transition/animation at all — see the vacuous-guard test above).
-    await installPaintDiagnostic(page); const complete = await story(page, 'complete'); // T010
-    const completePixels = await samplePixels(page, await complete.locator('progress').screenshot()); await attachPaintDiagnostic(page, 'item4-comparison-complete'); attachSample('item4-comparison-complete', completePixels); // T010
+    const complete = await story(page, 'complete');
+    const completePixels = await samplePixels(page, await complete.locator('progress').screenshot());
     const zero = await story(page, 'zero');
-    const zeroPixels = await samplePixels(page, await zero.locator('progress').screenshot()); await attachPaintDiagnostic(page, 'item4-comparison-zero'); attachSample('item4-comparison-zero', zeroPixels); // T010
+    const zeroPixels = await samplePixels(page, await zero.locator('progress').screenshot());
 
     await page.emulateMedia({ reducedMotion: 'reduce' });
     const host = await story(page, 'indeterminate');
     const bar = host.locator('progress');
 
     // (a) the animation is not running: two captures 400ms apart are identical.
-    const frame1 = await samplePixels(page, await bar.screenshot()); await attachPaintDiagnostic(page, 'item4-subject-frame1'); attachSample('item4-subject-frame1', frame1); // T010
+    const frame1 = await samplePixels(page, await bar.screenshot());
     await page.waitForTimeout(400);
-    const frame2 = await samplePixels(page, await bar.screenshot()); await attachPaintDiagnostic(page, 'item4-subject-frame2'); attachSample('item4-subject-frame2', frame2); // T010
+    const frame2 = await samplePixels(page, await bar.screenshot());
     expect(samplesEqual(frame1, frame2)).toBe(true);
 
     // (b) the frozen frame is distinguishable from BOTH the Complete determinate
@@ -520,8 +577,15 @@ test.describe('sk-progress absent-state regression: the indeterminate modifier d
 
     // MUTATE: simulate the modifier leaking onto a determinate fixture.
     await host.evaluate((node) => node.classList.add('sk-progress--indeterminate'));
+    // FR-004/IC-02: same phase-pinning as the sweep test above, for the same reason — the
+    // injected leak now has a real, looping sweep animation to detect, and two wall-clock reads
+    // race the same way T003-baseline.md measured at 1/10 for this exact test.
+    const atStart = await pinAnimationPhase(bar, 0);
+    expect(atStart.length).toBeGreaterThan(0); // the leaked sweep must exist to have a phase
     const after1 = await samplePixels(page, await bar.screenshot());
-    await page.waitForTimeout(400);
+    const halfPeriod = Math.max(...atStart.map((a) => a.durationMs)) / 2;
+    expect(halfPeriod).toBeGreaterThan(0);
+    await pinAnimationPhase(bar, halfPeriod);
     const after2 = await samplePixels(page, await bar.screenshot());
     // WATCH: with the leak injected, the identical check now correctly detects
     // motion — proving the "no leak" assertion above is not vacuous.
@@ -560,69 +624,3 @@ test.describe('sk-progress theming', () => {
     expect(light.labelColor).not.toBe(dark.labelColor);
   });
 });
-
-/**
- * T010 (webkit-timing-deflake-01M2T31J, WP02) — decisive-experiment instrumentation, NOT a
- * fix. Records, at the moment each fixture is sampled, whether it has had a chance to paint,
- * without itself waiting or altering the sampling it measures (that would make the experiment
- * mutate the thing it is trying to observe). Two independent signals, since the plan's named
- * suspect is an extra webfont fetch introduced by the font change between the passing run at
- * `ee324f84` and the first failing one:
- *   - `rafCount`: how many animation frames this document has rendered since navigation.
- *     `requestAnimationFrame` callbacks run after style/layout for the previous frame have been
- *     committed, so a low count at sample time means few-to-zero paint cycles have had a chance
- *     to run before the screenshot was taken.
- *   - `fontsLoaded`/`fontsReadyAtRaf`/`fontsReadyAtMs`: whether `document.fonts.ready` had
- *     resolved by sample time, and if so, how many frames/ms after navigation start.
- * Installed once per test via `page.addInitScript`, so it re-arms on every `story()` navigation
- * within that test (each fixture load is a full `page.goto`). Read (not waited on) via
- * `attachPaintDiagnostic`, which records the snapshot as a test annotation so it survives into
- * the JSON report this mission's rig already uploads as an artifact — including on a failing
- * repeat, which is the case that matters here (items 1 and 4 are 0/10 per T003-baseline.md).
- *
- * Deliberately placed at the END of the file rather than near `samplePixels`: WP01's rig
- * (`scripts/webkit-repeat-run.mjs`, outside WP02's owned surface) selects items 1–5 by
- * hardcoded absolute `file:line`. Inserting this block earlier in the file once already shifted
- * every test below it and silently dropped all five `sk-progress` items from a rig run with no
- * error (see tmp/finding/wp02-t010-rig-line-number-drift.md). A top-level `const` declared here
- * is still safely available to every test callback above: Playwright finishes registering every
- * `test()` in this module (synchronous, top-to-bottom) before it invokes any callback, so by the
- * time a callback actually runs, this declaration has long since been initialised.
- */
-const installPaintDiagnostic = (page: Page) =>
-  page.addInitScript(() => {
-    const diag = {
-      navStart: performance.now(),
-      rafCount: 0,
-      fontsLoaded: document.fonts ? document.fonts.status === 'loaded' : true,
-      fontsReadyAtRaf: null as number | null,
-      fontsReadyAtMs: null as number | null,
-    };
-    (window as unknown as { __skPaintDiag: typeof diag }).__skPaintDiag = diag;
-    const tick = () => {
-      diag.rafCount += 1;
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-    if (document.fonts) {
-      document.fonts.ready.then(() => {
-        diag.fontsLoaded = true;
-        diag.fontsReadyAtRaf = diag.rafCount;
-        diag.fontsReadyAtMs = performance.now() - diag.navStart;
-      });
-    }
-  });
-
-const attachPaintDiagnostic = async (page: Page, label: string) => {
-  const diag = await page.evaluate(
-    () => (window as unknown as { __skPaintDiag?: unknown }).__skPaintDiag ?? null,
-  );
-  test.info().annotations.push({ type: `T010-paint-diag:${label}`, description: JSON.stringify(diag) });
-};
-
-/** T010: attaches the RAW sampled pixel values already computed by the test, so a failure's
- * cause can be read directly (what colour was actually sampled) rather than inferred from a
- * pass/fail boolean alone. */
-const attachSample = (label: string, sample: Pixels) => {
-  test.info().annotations.push({ type: `T010-sample:${label}`, description: JSON.stringify(sample) });
-};
