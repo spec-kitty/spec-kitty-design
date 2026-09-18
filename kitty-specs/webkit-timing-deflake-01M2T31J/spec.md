@@ -68,8 +68,10 @@ when it was taken. Captures happen after the thing being measured has painted; w
 animation are compared, those points are explicitly selected rather than separated by a timeout.
 
 **Why this priority**: Items 1 and 4 are hard failures on both the PR and the train, so they are what
-turns the aggregate gate red — and a red gate on the train **skips the `promote-develop` job**, which
-blocks the release promotion entirely. These assertions were also written to close two recorded
+turns the aggregate gate red — and a red gate on the train skips the `promote-develop` job. That makes
+this mission **necessary but not sufficient** for release promotion, which also needs
+`vars.PROMOTE_DEVELOP_ENABLED`; SC-007 is scoped accordingly and the promotion itself is post-merge
+follow-up. These assertions were also written to close two recorded
 defects (an indeterminate fill rendering indistinguishable from Complete under forced colors), so they
 protect real behaviour and must survive intact.
 
@@ -238,9 +240,10 @@ unhandled-errors section and the reporter's verdict line are both present.
 
 - **SC-001**: All twelve scope items report zero failures and zero flakes across 10 repeats under the rig, with `retries: 0`.
 - **SC-002**: Recorded red-first proofs equal rewritten assertions; neither is zero. **WP01's scan reports both counts**; equality is not left to per-WP self-report.
-- **SC-008**: A single mission report enumerates every scope item with its verdict, the engine each claim came from (NFR-007), and the `playwright` duration delta against 25.6 min. FR-013 and NFR-004's after-reading are delivered here.
 - **SC-003**: Zero assertions deleted, skipped, `fixme`-ed, quarantined or retry-wrapped; zero tolerances widened; zero wait durations increased. **Verified mechanically** by a scan of the mission diff for `test.skip`, `test.fixme`, `.only`, added `retries`, and increased numeric timeout literals — not by self-report alone.
 - **SC-004**: The behaviour-suite job log ends with the reporter's verdict line; before/after sizes reported.
 - **SC-005**: The final `playwright` job duration is within 5% of 25.6 min.
 - **SC-006**: Every scope item is either fixed with a demonstrated cause, or reported unfixed with its evidence. The two counts sum to **thirteen** — the twelve test items **plus the lane-stop/log-truncation item**, which is in scope and must not fall outside the denominator of the one criterion whose job is to stop items being dropped.
 - **SC-007**: Zero of the twelve items fail or flake in the mission's final pre-merge CI run on this PR. *(Stated as what the mission controls. The train's `gate` aggregates seven jobs this mission does not own, a train push run only exists after landing, and `promote-develop` additionally requires `vars.PROMOTE_DEVELOP_ENABLED == 'true'` — so a green gate alone would not establish that promotion runs. Whether promotion actually resumes is tracked as post-merge follow-up, not as this mission's success criterion.)*
+
+- **SC-008**: A single mission report enumerates every scope item with its verdict, the engine each claim came from (NFR-007), and the `playwright` duration delta against 25.6 min. FR-013 and NFR-004's after-reading are delivered here.

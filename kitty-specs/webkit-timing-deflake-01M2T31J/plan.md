@@ -3,7 +3,7 @@
 **Mission**: `webkit-timing-deflake-01M2T31J`
 **Branch**: `mission/webkit-deflake`
 **PR base**: `train/elements-first`
-**Revised**: 2026-09-18, after the cross-artifact analysis returned `blocked` (7 high, 7 medium).
+**Revised**: 2026-09-18, after three rounds of cross-artifact analysis (round 1: 7 high; round 2: 2 high; round 3: 2 high).
 
 ## Summary
 
@@ -17,8 +17,10 @@ wrong tool — and one earlier draft of this plan did exactly that.
 The merged font change left the **train's own push run red**: `playwright` 3 failed / 2 flaky, so
 `gate` failed, so the `promote-develop` job was **skipped** (it declares `needs: [gate]` with no
 `always()`). `develop` is synced from the train by that job opening and merging a `promote/<40-hex>`
-PR — never by a direct push. So until the train's gate is green, the release promotion cannot run.
-SC-007 exists for this reason.
+PR — never by a direct push, and it additionally requires `vars.PROMOTE_DEVELOP_ENABLED == 'true'`.
+So this mission is **necessary but not sufficient** for promotion resuming. SC-007 is therefore
+scoped to what the mission controls — zero failures or flakes in its own final pre-merge run — and
+the promotion itself is tracked as post-merge follow-up.
 
 ## Technical Context
 
@@ -73,13 +75,14 @@ forbids. NFR-002 now requires `retries: 0` for every measurement, and a `flaky` 
 run counts as a failure.
 
 This also resolves a wording drift: NFR-001 says ten **repeats within one job**, not ten separate CI
-runs. Ten sequential 27-minute jobs was never viable and the artifacts should not have implied it.
+runs. Ten sequential 25.6-minute jobs was never viable and the artifacts should not have implied it.
 
 ### Correction 5 — the shell-layout tests share a helper, and it is the suspect
 
-Items 6–9 all obtain their subject through `loadComposition`. On the train, item 7 failed with
-`expect(getByTestId('overview-shell')).toBeVisible()` timing out at 5000ms — *element(s) not found*.
-The composition never appeared. One shared helper, four affected tests, and a failure mode that is
+Items 6–9 all obtain their subject through `loadComposition`. On the train, item 7's failing attempt
+reported `expect(getByTestId('overview-shell')).toBeVisible()` timing out at 5000ms — *element(s) not
+found*. The composition never appeared. (It was reported `flaky`, i.e. it passed on retry — the
+failure is real, the retry merely hid it.) One shared helper, four affected tests, and a failure mode that is
 precisely "the helper's product is absent". This is a far stronger lead than the font-metric theory,
 which remains worth measuring (IC-04) but is no longer the primary hypothesis.
 
@@ -94,7 +97,13 @@ it proves to be an active cause.
 Test-layer work plus possible component findings. No new dependency, no public API change, no token
 change. `packages/styles/src/progress/**` is owned by WP02 **solely** so it can perform C-007 fixes
 and the red-first mutations of FR-002/FR-003; any change there is a reported finding, never a silent
-green-making edit.
+green-making edit, and T015a requires every red-first mutation to be reverted.
+
+Three charter clauses bind directly and are carried as constraints rather than left implicit:
+
+- **C-010** (Findings Log Practice) — a lane worktree's `tmp/finding/` must be **symlinked** to the repository root's, never an isolated directory.
+- **C-011** (Review Policy / Quality Gates) — a PR touching component files needs a screenshot or visual diff **and one maintainer approval**. So a landed `packages/styles/**` change cannot self-merge. Note the safety net is engine-mismatched: `visual-regression` runs chromium-only while every test in scope is webkit.
+- **C-012** (Quality Gate 5) — red-first is the charter's own bar, tied to the ADR-11 required-behaviours list; the mission's red-first requirement restates it rather than inventing it.
 
 ## Project Structure
 
@@ -210,7 +219,9 @@ The pre-mission `playwright` duration is **25.6 min** (the run at the train tip)
 run's duration and the delta. Added as an explicit concern because the analysis found NFR-004/SC-005
 had zero subtasks owning them.
 
-### IC-08 — Make the suppression count mechanical
+### IC-08 — Make the suppression count mechanical, and report the mission once
+
+**Covers**: SC-003, SC-006, SC-008, FR-013, NFR-004's after-reading, NFR-007.
 
 **Covers**: SC-003.
 
@@ -218,7 +229,14 @@ Scan the mission diff for `test.skip`, `test.fixme`, `.only`, added `retries`, a
 timeout literals, and report the counts from that scan. The analysis correctly observed that SC-002,
 SC-003 and NFR-005 were otherwise purely self-certifying — a wrong count would pass unchallenged.
 A scan does not cover NFR-005's semantic claim, which stays a reviewer judgement, but it removes the
-mechanical part from the honour system.
+mechanical part from the honour system. The scan also reports the rewritten-assertion and
+red-first-proof counts, because SC-002 asserts they are equal (WP01/T007).
+
+SC-006 and SC-008 close here too: one mission report enumerates all **thirteen** scope items — the
+twelve tests plus the lane stop — each with a verdict, the engine behind every claim (NFR-007), and
+the `playwright` duration delta against 25.6 min taken by WP01/T006a. SC-007 is scoped to the
+mission's own final pre-merge run; whether promotion resumes is post-merge follow-up, since it also
+needs `vars.PROMOTE_DEVELOP_ENABLED`.
 
 ## Sequencing
 

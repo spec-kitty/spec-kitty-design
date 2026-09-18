@@ -65,7 +65,7 @@ pasted it into nine places and the copies immediately disagreed with each other.
 ## Work Package WP03: Await observable effects rather than intervals
 
 - **Goal**: Items 10 and 12 await the effect they assert.
-- **Priority**: P1 — item 12 lands in unrelated missions' output, costing other people a wrong first hypothesis; item 10 failed on the train.
+- **Priority**: P1 — item 12 lands in unrelated missions' output, costing other people a wrong first hypothesis; item 10 flaked on the train (failed, then passed on retry).
 - **Owns**: `apps/storybook/src/tests/sk-action-row.spec.ts`, `apps/storybook/src/tests/sk-workflow-board.spec.ts`.
 - **Dependencies**: WP01.
 - **Subtasks, risks, independent test**: `tasks/WP03-await-observable-effects.md`
@@ -102,6 +102,6 @@ Reported as counts, and for suppressions from WP01's scan rather than self-repor
 - assertions deleted / skipped / `fixme` / quarantined / retry-wrapped = 0 *(from the scan)*
 - tolerances widened = 0; wait durations increased = 0 *(from the scan)*
 - every measurement ran with `retries: 0`, and said so
-- items fixed with a demonstrated cause + items reported unfixed = 12
+- items fixed with a demonstrated cause + items reported unfixed = **13** (the twelve test items plus the lane-stop item, per SC-006)
 - final `playwright` duration within 5% of 25.6 min
 - every verification claim names its engine
