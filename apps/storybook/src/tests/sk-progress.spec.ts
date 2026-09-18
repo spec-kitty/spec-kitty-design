@@ -628,7 +628,7 @@ test.describe('sk-progress theming', () => {
 });
 
 /*
- * RED-FIRST-PROOF — items 1–5, CI run 35358002926 (webkit, --retries=0, --repeat-each=10),
+ * Red-first proofs — items 1-5, CI run 35358002926 (webkit, --retries=0, --repeat-each=10),
  * mutation commit `3fbb49a2` (three CSS mutations: item 1's clip flattened to full-width, item 3's
  * sweep removed, item 4's reduced-motion override removed), reverted in `f53c7f3d` with a
  * byte-empty `git diff packages/styles/src/progress/**` afterwards.

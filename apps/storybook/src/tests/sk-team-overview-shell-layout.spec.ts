@@ -565,7 +565,7 @@ async function settleComposition(page: Page, host: Locator): Promise<void> {
 }
 
 /*
- * RED-FIRST-PROOF — settleComposition's two failure paths, both reverted after capture:
+ * Red-first proofs — settleComposition's two failure paths, both reverted after capture:
  *   RED-FIRST-PROOF (a) a required shadow part removed -> throws naming the missing part
  *   RED-FIRST-PROOF (b) a nonexistent host testid -> throws rather than passing silently
  * Both confirm the helper fails loudly rather than settling on a wrong composition. Item 9-dark
