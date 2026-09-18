@@ -9,10 +9,22 @@
  * after the mission's final `playwright` run, to produce the actual reading; T006 alone does
  * not satisfy SC-005, only this file's `--minutes=<N>` invocation against a real number does.
  *
- * REVISED, mid-WP01 (coordinator, 981a3f88 / 0e11c490 on mission/webkit-deflake): the ORIGINAL
+ * REVISED TWICE. Both revisions are kept because the first one's reasoning is still the reason
+ * this tool exists, while its NUMBERS were withdrawn — see the constant below for the current
+ * band, which is the only figure any caller should use.
+ *
+ * (1) mid-WP01 (coordinator, 981a3f88 / 0e11c490 on mission/webkit-deflake): the ORIGINAL
  * NFR-004 ("within 5% of 25.6 min") was measured against a single run. Three runs of
- * substantially the same suite then came back at **25.6, 26.7 and 22.5 min — an 18.7% spread**.
- * A 5% tolerance sits well INSIDE that band, so it could fire on nothing (a genuinely healthy
+ * substantially the same suite came back at 25.6, 26.7 and 22.5 min — an apparent 18.7% spread.
+ *
+ * (2) at closeout, after the pre-merge squad (finding F9): **those three figures were WITHDRAWN.**
+ * No run id existed for any of them anywhere in the mission tree, and 26.7 turned out to match a
+ * MID-mission lane run, so the set was never a pre-mission reference at all. The band was
+ * re-measured from ten named, verified, pre-mission runs and is now **19.17–26.85 min, a 40.1%
+ * spread** — more than twice what the withdrawn set implied. Do not quote 25.6 / 26.7 / 22.5 or
+ * "18.7%" from this file; they survive only in this paragraph, as the thing that was wrong.
+ * A 5% tolerance sits well inside even the UNDERSTATED spread, so it could fire on nothing (a
+ * genuinely healthy
  * run reading as a regression) and prove nothing (a genuine regression hiding inside the noise
  * reading as clean) — the exact defect this repository has already recorded twice (#233: "the
  * 25s ceiling is inside its own run-to-run noise"; #358). NFR-004/SC-005 are revised: report the
@@ -35,6 +47,16 @@
  * either directly (`--seconds`/`--minutes`) or by naming a GitHub Actions run id
  * (`--run-id=<id> --job-name=<name>`, resolved via `gh run view --json jobs`).
  *
+ *
+ * LIFECYCLE / OWNERSHIP (pre-merge squad, architecture lens). This script has NO automated
+ * caller by design: it is not in package.json scripts, not in any workflow, and deliberately not
+ * registered in check-gate-wiring.mjs -- wiring it as a gate would make it fail the repository
+ * on any honest new precondition wait. It is an OPERATOR instrument, run by hand at a mission's
+ * closeout and quoted verbatim into that mission's report. That means nothing will exercise its
+ * `--selftest` unless a human does, so run `--selftest` before trusting any figure it prints;
+ * it is written to fail loudly when its own rules are neutered. If a future maintainer finds no
+ * mission is using it, deleting it is the right call -- leaving it unowned and unrun is not.
+ * Tracked alongside the mission-tooling follow-ups in issue #456.
  * USAGE
  *   node scripts/report-playwright-duration.mjs --minutes=25.9
  *   node scripts/report-playwright-duration.mjs --seconds=1550

@@ -229,11 +229,41 @@ closed by this PR.** It is deferred with an owner rather than folded in, because
 outside this mission's owned surfaces and outside the rig's measurement — both sibling specs are
 recorded in **issue #455**, filed before being cited here.
 
-**Fixed** in `e150b8f9`: wait for `#storybook-root` to be non-empty and unchanged across three
-consecutive animation frames before injecting — a precondition on observable state, not a
-duration, covering a render that arrives in more than one paint. The failure path also snapshots
-the DOM (host count, `#storybook-root`'s children) so "the root was replaced" and "the host is
-present but not rendering" stop sharing one message.
+**Fixed — and the first fix was itself replaced, which the record must say.**
+
+`e150b8f9` waited for `#storybook-root` to be non-empty and unchanged across three consecutive
+animation frames, via a `page.waitForFunction` keeping state on a `window.__skStoryRenderProbe`
+global. **That is not what merged.** The pre-merge squad's correctness and architecture lenses
+found three defects in it: the global was never reset, so a second `loadComposition` in one test
+would pass vacuously on its first tick and silently restore the race; it keyed on
+`innerHTML.length` rather than content; and its own comment called `frames >= 3` "a precondition
+on observable state, not a duration" when under rAF polling that **is** a frame budget. It also
+carried an undisclosed `{ timeout: 20000 }` that pushed the helper's worst case to ~26.5s against
+Playwright's 30000ms default per-test timeout.
+
+**What merged, at `f1c9cc5c`,** is the repo's existing convention instead — wait for a selector
+only the story's own render can produce:
+
+```ts
+await page
+  .locator('#storybook-root sk-app-shell')
+  .first()
+  .waitFor({ state: 'attached', timeout: 10000 });
+```
+
+No global, content-based, and 10000ms rather than 20000 so the helper's worst case (~16.5s) leaves
+ample headroom under the 30000ms per-test budget for the assertions, item 9's axe run included.
+
+**Why `attached` is sufficient, and why that is not obvious.** `DesktopComposition` renders
+`storyFrame(composition())`, which returns a **string**; Storybook 10.6 takes the string branch,
+`canvasElement.innerHTML = element`, a single synchronous assignment. So any attached
+`sk-app-shell` implies the whole render landed — `attached` is a *stronger* guarantee here than
+the frame counter it replaced, not a weaker one. It is also the right state rather than `visible`:
+`/elements-dist/elements.js` is injected on the next line, so at wait time the element is an
+un-upgraded unknown element with a possibly zero box, and `visible` would have introduced a new
+flake into the helper this mission exists to de-flake. **This reasoning depends on the story
+returning a string.** If it is ever changed to return a `TemplateResult`, Storybook takes a
+different branch and this precondition must be re-derived.
 
 ## Final measurement — run `35371247321` @ `e150b8f9`
 
@@ -248,10 +278,19 @@ webkit, `retries: 0`, selectors verified to resolve before each invocation (11, 
 **360 webkit executions, zero failures, zero flakes.** Every one of the twelve items 10/10,
 including 6–9 and 10.
 
-Arm A went **74/80 → 80/80** across the fix. That is the confirmation: the contention sensitivity
-was a *consequence* of the render race, and removing the race removed it too. Had the mission
-acted on the contention measurement alone, the result would have been a serialized rig and a
-suite that still flaked.
+Arm A went **74/80 → 80/80** across the fix. The contention sensitivity was a *consequence* of the
+render race, and removing the race removed it too. Had the mission acted on the contention
+measurement alone, the result would have been a serialized rig and a suite that still flaked.
+
+**Provenance caveat on the arm figures, raised by the squad's root-cause lens (D2).** Those
+80/80 arm readings were taken at `e150b8f9`, whose cure was the hand-rolled `waitForFunction`
+frame counter. That cure was **replaced** at `f1c9cc5c` after the correctness and architecture
+lenses falsified it, and the experiment arms were removed from the workflow in the same round —
+so **there is no post-`f1c9cc5c` `--workers=1` arm reading**, and this document does not claim one.
+What covers the shipped cure instead is 400 executions at `workers: 2`, which is the *harder*
+condition the arms were comparing against: runs `35374639239` (@ `38d2b145`) and `35375265259`
+(@ `afe7be3c`), 200 each, 0 failures, plus `35379093636` (@ `c591764a`). `git diff f1c9cc5c
+c591764a -- apps/storybook/src/tests/` is empty, so all three measured byte-identical spec files.
 
 ## Disposition of the four findings
 
@@ -318,13 +357,28 @@ The probe reproduced the contention sensitivity too, which is a second independe
 is measuring the same phenomenon: arm A (`workers: 2`) failed several times, arm B (`--workers=1`)
 once.
 
+**A third hypothesis survives the reading and is excluded separately (H3: the document was
+replaced).** A reload or navigation would also produce `hosts-in-dom=0` with `children=div`. It is
+excluded by three things, named here so the next reader does not have to re-derive them:
+`simulatePageLoad` dispatches synthetic events and never navigates; a real navigation mid-poll
+would have surfaced `Execution context was destroyed`, which appears nowhere in the run; and
+`polls` of 140–150 shows one live context across the whole budget rather than a context that went
+away. H2 is refuted by measurement; H3 is excluded by evidence. Neither is left implicit.
+
+**A second, independent refutation of H2, found by the squad's root-cause lens rather than by this
+document's author:** Storybook 10.6's `renderToCanvas` calls `showMain()` *before* the innerHTML
+assignment. So the `.sb-show-preparing-story` hidden state can only exist while the render has not
+landed — and `children=div` proves it had. H2 is therefore refuted twice over, by measurement and
+by source.
+
 **Classification, applying this document's own measured-versus-inferred discipline to its own
 headline claim:**
 
 | claim | status |
 |---|---|
 | The host is absent during the failure, not hidden or late | **Measured** — 18/18 `hosts-in-dom=0` |
-| What occupies `#storybook-root` instead is Storybook's own render | **Measured** — `children=div` |
+| `#storybook-root`'s only child at failure time is a single `div` | **Measured** — `children=div` |
+| That `div` is Storybook's own render | **Measured + established by reading** — the tag name is measured; identifying it needs `sk-app-shell.stories.ts:78-79,153` (`storyFrame` returns a **string** whose one top-level node is a `div`) and Storybook 10.6's string branch, `canvasElement.innerHTML = element` |
 | Storybook's string-returning story branch assigns `canvasElement.innerHTML` | **Established by reading** Storybook 10.6 source; `sk-app-shell.stories.ts` returns a string |
 | `page.goto` resolves at `load`, before that client render | **Established by reading** |
 | Contention is a trigger, not the mechanism | **Measured** — 6/80 at `workers: 2` vs 1/80 at `workers: 1`, then 80/80 both after the fix |

@@ -15,10 +15,14 @@
 name: WebKit repeat-run rig
 
 on:
-  push:
-    branches:
-      - mission/webkit-deflake
-      - 'kitty/mission-webkit-timing-deflake-01M2T31J-lane-*'
+  # `push` DELIBERATELY REMOVED at closeout. Both globs -- `mission/webkit-deflake` and
+  # `kitty/mission-webkit-timing-deflake-01M2T31J-lane-*` -- name branches that are deleted when
+  # this PR merges, so post-merge they matched nothing and the file carried two dead triggers
+  # advertising an automatic run that could never fire. Found by the pre-merge squad.
+  #
+  # `workflow_dispatch` becomes usable once this file lands on the default branch (GitHub requires
+  # the workflow to exist there before the trigger is offered), which is the point at which this
+  # rig stops being a mission instrument and becomes a repository one.
   workflow_dispatch:
     inputs:
       repeat_each:
@@ -29,10 +33,18 @@ on:
         description: 'Comma-separated item numbers to run (default: all twelve)'
         required: false
         default: ''
+      workers:
+        description: 'Optional --workers=N measurement control. Leave blank to inherit playwright.config.ts (2 under CI).'
+        required: false
+        default: ''
 
 concurrency:
+  # `false`, not `true`. Superseding an in-flight run made sense while pushes triggered this on a
+  # mission branch; with `workflow_dispatch` as the only trigger, every run is a DELIBERATE
+  # measurement and cancelling one silently destroys the sample somebody asked for. A cancelled
+  # run also reports as a failure, which reads as a verdict rather than as "superseded".
   group: webkit-repeat-run-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -59,10 +71,12 @@ jobs:
         env:
           REPEAT_EACH: ${{ github.event.inputs.repeat_each }}
           ITEMS: ${{ github.event.inputs.items }}
+          WORKERS: ${{ github.event.inputs.workers }}
         run: |
           set -euo pipefail
           ARGS=(--json-dir=webkit-repeat-run-results "--repeat-each=${REPEAT_EACH:-10}")
           if [ -n "${ITEMS:-}" ]; then ARGS+=("--items=${ITEMS}"); fi
+          if [ -n "${WORKERS:-}" ]; then ARGS+=("--workers=${WORKERS}"); fi
           node scripts/webkit-repeat-run.mjs "${ARGS[@]}"
       # The paired worker-count experiment that lived here has been REMOVED, deliberately.
       #
@@ -77,9 +91,10 @@ jobs:
       # `--workers=N` measurement control, which remains available for re-running the comparison
       # deliberately. See kitty-specs/webkit-timing-deflake-01M2T31J/evidence/
       # SHARED-CAUSE-INVESTIGATION.md for the arm figures this removal preserves.
-      # `if: always()` — a failing run (expected for the pre-fix baseline, items 1 and 4) is
-      # exactly the run whose JSON evidence a reviewer needs to re-derive the counts printed in
-      # the job log.
+      # `if: always()` — a FAILING run is exactly the one whose JSON evidence a reviewer needs, in
+      # order to re-derive the counts printed in the job log rather than taking them on trust.
+      # (This note used to say "expected for the pre-fix baseline, items 1 and 4"; those items are
+      # 10/10 now, so the reason is stated generally instead of against a state that has passed.)
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         if: always()
         with:

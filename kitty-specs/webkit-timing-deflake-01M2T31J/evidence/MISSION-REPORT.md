@@ -11,7 +11,7 @@ embedded verbatim. Both are below, unedited, including a non-zero exit code.
 | | count |
 |---|---|
 | pass | 33 |
-| partial | 6 |
+| partial | 7 |
 | pending | 0 |
 | **fail** | **0** |
 
@@ -162,8 +162,16 @@ author to avoid the rule rather than disclose under it.
 
 ## Standing partials
 
-Six criteria remain `partial`, all evidence-completeness rather than defects: FR-008 (no direct
+Seven criteria remain `partial`. Six are evidence-completeness rather than defects: FR-008 (no direct
 webkit font-probe of the 56.00/240.00 px premise), FR-010, NFR-006 and SC-004 (chromium-only
 measurements standing in for webkit claims), and NFR-003/SC-002 (one red-first proof **withdrawn**
 as affirmatively wrong, one **superseded in part**, and no replacement claimed because none was
 captured).
+
+The seventh is **SC-005**, and it is a genuine miss rather than an evidence gap: the criterion
+says "duration **within** the measured band" and 17.93 min is outside it. The instrument prints
+`⚠️ OUTSIDE the measured band`. Marking it pass because the miss is in the *favourable* direction
+would be the manufactured green this mission spent its length refusing, and a verdict must not
+disagree with its own instrument. NFR-004 — which asks only that an outside reading be
+investigated rather than silently accepted — does pass. They are different questions and the
+matrix answers them differently.

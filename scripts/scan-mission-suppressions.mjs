@@ -65,6 +65,16 @@
  * see `acceptance-matrix.json`'s SC-002/NFR-003 rows and `evidence/PRE-MERGE-GATES.md` for the
  * mission's real, marker-by-marker accounting.
  *
+ *
+ * LIFECYCLE / OWNERSHIP (pre-merge squad, architecture lens). This script has NO automated
+ * caller by design: it is not in package.json scripts, not in any workflow, and deliberately not
+ * registered in check-gate-wiring.mjs -- wiring it as a gate would make it fail the repository
+ * on any honest new precondition wait. It is an OPERATOR instrument, run by hand at a mission's
+ * closeout and quoted verbatim into that mission's report. That means nothing will exercise its
+ * `--selftest` unless a human does, so run `--selftest` before trusting any figure it prints;
+ * it is written to fail loudly when its own rules are neutered. If a future maintainer finds no
+ * mission is using it, deleting it is the right call -- leaving it unowned and unrun is not.
+ * Tracked alongside the mission-tooling follow-ups in issue #456.
  * USAGE
  *   node scripts/scan-mission-suppressions.mjs --base=<ref> [--target=<ref>]
  *   node scripts/scan-mission-suppressions.mjs --selftest
@@ -114,7 +124,11 @@ const removedOf = (hunk) => hunk.lines.filter((l) => l.startsWith('-') && !l.sta
 const SCANNABLE_FILE_RE = /(\.spec\.tsx?$)|(\.test\.tsx?$)|(^|\/)playwright\.config\.ts$/;
 const isScannable = (file) => typeof file === 'string' && SCANNABLE_FILE_RE.test(file);
 
-const NUMERIC_TIMEOUT_RE = /\b(?:timeout|waitForTimeout|setTimeout)\s*[:(]\s*(\d+)/g;
+// `[\d_]+` not `\d+`: a JS numeric separator silently truncated the value. `timeout: 20_000`
+// read as **20**, so an inflation from 5000 to 20_000 reported NO inflation -- the rule ran,
+// matched, and compared the wrong number. Found by the squad's correctness lens. Separators are
+// stripped before Number() below.
+const NUMERIC_TIMEOUT_RE = /\b(?:timeout|waitForTimeout|setTimeout)\s*[:(]\s*([\d_]+)/g;
 
 /**
  * A wait budget declared as a NAMED CONSTANT rather than written inline.
@@ -131,12 +145,13 @@ const NUMERIC_TIMEOUT_RE = /\b(?:timeout|waitForTimeout|setTimeout)\s*[:(]\s*(\d
  * real parser, which this script's header already declines to be.
  */
 const NAMED_BUDGET_RE =
-  /\b(?:const|let|var)?\s*([A-Za-z_$][\w$]*(?:_MS|Ms|Timeout|timeout|Delay|Budget)[\w$]*)\s*=\s*(\d+)\b/g;
+  /\b(?:const|let|var)?\s*([A-Za-z_$][\w$]*(?:_MS|Ms|Timeout|timeout|Delay|Budget|Deadline|Wait)[\w$]*)\s*=\s*([\d_]+)\b/g;
 
 function extractTimeoutValues(text) {
   const values = [];
-  for (const m of text.matchAll(NUMERIC_TIMEOUT_RE)) values.push(Number(m[1]));
-  for (const m of text.matchAll(NAMED_BUDGET_RE)) values.push(Number(m[2]));
+  const toNumber = (raw) => Number(String(raw).replace(/_/g, ''));
+  for (const m of text.matchAll(NUMERIC_TIMEOUT_RE)) values.push(toNumber(m[1]));
+  for (const m of text.matchAll(NAMED_BUDGET_RE)) values.push(toNumber(m[2]));
   return values;
 }
 
@@ -339,6 +354,29 @@ function selftest() {
       "+  await expect(x).toBeVisible({ timeout: 5000 });",
     ].join('\n'),
     (f) => f.increasedTimeout.length === 0,
+  );
+
+  define(
+    'a NAMED budget constant is flagged — NAMED_BUDGET_RE had zero coverage, proved by deleting it and watching all cases still pass',
+    [
+      'diff --git a/apps/storybook/src/tests/x.spec.ts b/apps/storybook/src/tests/x.spec.ts',
+      '@@ -1,1 +1,2 @@',
+      '   const host = page.getByTestId("x");',
+      '+  const FONT_BUDGET_MS = 1500;',
+    ].join('\n'),
+    (f) => f.newTimeout.length === 1 && f.newTimeout[0].value === 1500,
+  );
+
+  define(
+    'a numeric separator does NOT truncate the value — `20_000` must read as 20000, not 20',
+    [
+      'diff --git a/apps/storybook/src/tests/x.spec.ts b/apps/storybook/src/tests/x.spec.ts',
+      '@@ -1,1 +1,1 @@',
+      '-  await expect(x).toBeVisible({ timeout: 5000 });',
+      '+  await expect(x).toBeVisible({ timeout: 20_000 });',
+    ].join('\n'),
+    // Before the fix this read 20 and reported a DECREASE, i.e. no inflation, on a 4x increase.
+    (f) => f.increasedTimeout.length === 1 && f.increasedTimeout[0].from === 5000 && f.increasedTimeout[0].to === 20000,
   );
 
   define(

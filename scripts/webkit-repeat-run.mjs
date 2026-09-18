@@ -90,17 +90,17 @@ const LINE_ITEMS = [
   // (item 3's own body grew by 5 more lines ahead of them). Re-verified by grepping each test's
   // title against these exact line numbers after the edit — see the mission record for the
   // one-time correction commit.
-  { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 425, label: 'forced-colors, two points in cycle' },
-  { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 496, label: 'forced-colors + reduced-motion' },
-  { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 512, label: 'the sweep actually runs' },
-  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 537, label: 'reduced-motion freeze' }, // corrected from 523 — see note above the item-1 entry.
-  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 582, label: 'no animation leak onto determinate' }, // corrected from 568 — see note above the item-1 entry.
-  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 136, label: 'exact 56/240px columns' },
-  { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 192, label: 'narrow shell region order' },
-  { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 335, label: 'landmarks/labels/grouping' },
-  { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 477, label: 'axe-clean in dark mode' },
-  { item: 10, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', line: 654, label: 'focused overflow keyboard scroll' }, // WP03: was 557; T021's waitForScrollSettled helper (added ahead of this test) shifted it. See tmp/finding/wp03-lane-c-rig-line-number-drift.md.
-  { item: 11, file: 'apps/storybook/src/tests/sk-radio-choice-group.spec.ts', line: 1113, label: 'legend cue across two stories' },
+  { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 425, label: 'forced-colors, two points in cycle', titleAnchor: 'legible' },
+  { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 496, label: 'forced-colors + reduced-motion', titleAnchor: 'together' },
+  { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 512, label: 'the sweep actually runs', titleAnchor: 'sweep' },
+  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 537, label: 'reduced-motion freeze', titleAnchor: 'stops' }, // corrected from 523 — see note above the item-1 entry.
+  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 582, label: 'no animation leak onto determinate', titleAnchor: 'teeth' }, // corrected from 568 — see note above the item-1 entry.
+  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 136, label: 'exact 56/240px columns', titleAnchor: 'preserves exact' },
+  { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 192, label: 'narrow shell region order', titleAnchor: 'reachable' },
+  { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 335, label: 'landmarks/labels/grouping', titleAnchor: 'landmarks' },
+  { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 477, label: 'axe-clean in dark mode', titleAnchor: 'axe-clean' },
+  { item: 10, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', line: 654, label: 'focused overflow keyboard scroll', titleAnchor: 'outline' }, // WP03: was 557; T021's waitForScrollSettled helper (added ahead of this test) shifted it. See tmp/finding/wp03-lane-c-rig-line-number-drift.md.
+  { item: 11, file: 'apps/storybook/src/tests/sk-radio-choice-group.spec.ts', line: 1113, label: 'legend cue across two stories', titleAnchor: 'non-required legend' },
 ];
 
 /** Item 12: parameterized across six modes, no single line — selected by title grep instead. */
@@ -144,18 +144,41 @@ function assertSelectorsResolve(lineItems) {
     // `label` must also be recognisable in the declaration it points at. Matching on the
     // longest word of four-plus characters keeps the labels free to stay short without
     // pinning them to the test titles byte-for-byte.
-    // ANY substantial word from the label must appear in the declaration. The labels are
-    // deliberate abbreviations, not title prefixes -- item 11's label says "across two
-    // stories" while its title says "distinct from an ordinary, non-required legend" -- so
-    // requiring the longest word, or a prefix match, fails on correct selectors. Requiring one
-    // shared word is loose enough for the labels to stay short and strict enough that a
-    // selector landing on a DIFFERENT test is caught, which is the actual failure mode.
-    const anchors = (it.label.match(/[A-Za-z][A-Za-z-]{3,}/g) ?? []).map((w) => w.toLowerCase());
-    const haystack = line.toLowerCase();
-    if (anchors.length > 0 && !anchors.some((w) => haystack.includes(w))) {
+    // IDENTITY, pinned -- not "a label word appears somewhere".
+    //
+    // The first version of this check accepted ANY 4+ character word from the item's label. The
+    // squad's correctness lens proved it false for SAME-FILE drift, which is the only drift this
+    // mission ever had: a cross-matrix over the real items found **12 false-pass pairs**, e.g.
+    // item 5's label would have accepted items 1, 2, 3 and 4's declarations, and item 7's would
+    // have accepted item 6's. A guard that cannot distinguish neighbours in one file cannot
+    // catch the six drifts this file records.
+    //
+    // Each item now pins an explicit `titleAnchor` that must appear in its declaration, and the
+    // anchor is additionally required to be UNIQUE among that file's test( declarations -- so a
+    // future edit that makes two titles share an anchor fails here loudly instead of quietly
+    // weakening the guard back to where it started.
+    const anchor = (it.titleAnchor ?? '').toLowerCase();
+    if (!anchor) {
       broken.push(
-        `  item ${it.item}: ${it.file}:${it.line} IS a test( declaration, but not the labelled ` +
-          `one — no word of label "${it.label}" appears in: ${line.trim().slice(0, 72)}`,
+        `  item ${it.item}: no titleAnchor declared — every line-item must pin one, or the ` +
+          'identity check silently degrades into a resolvability check.',
+      );
+      continue;
+    }
+    if (!line.toLowerCase().includes(anchor)) {
+      broken.push(
+        `  item ${it.item}: ${it.file}:${it.line} IS a test( declaration, but not the pinned one ` +
+          `— titleAnchor "${it.titleAnchor}" is absent from: ${line.trim().slice(0, 72)}`,
+      );
+      continue;
+    }
+    const declarations = lines.filter((l) => /^\s*test\(/.test(l));
+    const matches = declarations.filter((l) => l.toLowerCase().includes(anchor)).length;
+    if (matches !== 1) {
+      broken.push(
+        `  item ${it.item}: titleAnchor "${it.titleAnchor}" matches ${matches} test( declarations ` +
+          `in ${it.file} — an anchor must identify exactly one test or it cannot detect drift ` +
+          'between neighbours.',
       );
     }
   }

@@ -65,7 +65,25 @@ const loadComposition = async (
   // the assertions, the axe run included. A partial stall would then surface as a bare
   // "Test timeout of 30000ms exceeded" instead of settleComposition's self-describing message
   // -- losing exactly the diagnostic this mission exists to produce. 10000ms is far above the
-  // sub-second render actually observed and keeps the whole helper under ~19s worst case.
+  // sub-second render actually observed and keeps the whole helper's bounded waits at ~16.5s,
+  // leaving ample headroom under the 30000ms default for the assertions, item 9's axe run
+  // included. (`page.goto`, `addScriptTag` and the `customElements.whenDefined` chain below are
+  // not included in that figure and carry their own Playwright-level timeouts.)
+  //
+  // WHY `attached` IS ENOUGH, and why it is not obvious -- the superseded probe explicitly
+  // covered "a render arriving in more than one paint", and this does not, so the reason it no
+  // longer needs to matters. `DesktopComposition` renders `storyFrame(composition())`, which
+  // returns a **string**; Storybook 10.6 therefore takes the string branch,
+  // `canvasElement.innerHTML = element` -- ONE synchronous assignment. Any attached
+  // `sk-app-shell` thus implies the whole render landed, which makes `attached` a STRONGER
+  // guarantee than a frame counter, not a weaker one. `attached` is also correct rather than
+  // `visible`: `/elements-dist/elements.js` is injected on the very next line, so at wait time
+  // this is an un-upgraded unknown element with a possibly zero box, and `visible` would add a
+  // new flake to the helper this mission exists to de-flake.
+  //
+  // THIS DEPENDS ON THE STORY RETURNING A STRING. If it is ever changed to return a
+  // `TemplateResult`, Storybook takes a different branch and this precondition must be
+  // re-derived -- otherwise the race reopens silently.
   await page
     .locator('#storybook-root sk-app-shell')
     .first()
@@ -605,7 +623,16 @@ async function settleComposition(page: Page, host: Locator): Promise<void> {
       .evaluate(() => document.fonts.ready)
       .then(() => true)
       .catch(() => false),
-    page.waitForTimeout(FONT_BUDGET_MS).then(() => false),
+    // `.catch` on BOTH arms, not just the evaluate. The squad's correctness lens found the
+    // first fix put it only on the arm that loses in the RARE case; `waitForTimeout` is a
+    // channel call that rejects on page close, and it is the arm orphaned in the COMMON case
+    // (fonts resolve first, so this timer is still pending at teardown). An unhandled rejection
+    // there surfaces as a failure in an unrelated test -- a new flake vector introduced inside
+    // the file whose whole purpose is removing them.
+    page
+      .waitForTimeout(FONT_BUDGET_MS)
+      .then(() => false)
+      .catch(() => false),
   ]);
 
   const deadline = Date.now() + SETTLE_BUDGET_MS;
