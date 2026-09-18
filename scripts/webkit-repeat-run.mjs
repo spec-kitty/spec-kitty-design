@@ -105,6 +105,16 @@ const LINE_ITEMS = [
   { item: 14, file: 'apps/storybook/src/tests/sk-page-header-sticky.spec.ts', label: 'focused row lifted clear of sticky header', titleAnchor: 'lifted clear' },
   { item: 15, file: 'apps/storybook/src/tests/sk-work-explorer-pattern.spec.ts', label: 'W4 rail/context/overflow at shell edges', titleAnchor: 'W4 retains' },
   { item: 16, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', label: '220px smallest qualifying candidate in sweep', titleAnchor: '220px is the smallest' },
+  // Item 17 (#456, found BY this mission rather than named by it). Surfaced in PR #457's own CI
+  // run 35401059899 -- a webkit failure in a spec this branch never touched, absent from the four
+  // pre-mission runs checked (34820757579, 34673156155, 34637284298, 34606532461) and sharing no
+  // story file or helper with anything changed here. So it is an independent member of the
+  // population #456 describes, not a consequence of this work.
+  //
+  // Added rather than filed: the operator ruled that anything this mission's own measurement turns
+  // up is handled in-mission, and a rig that finds a flake and then writes an issue about it is
+  // doing half its job.
+  { item: 17, file: 'apps/storybook/src/tests/sk-public-header.spec.ts', label: 'focus outlines unclipped at narrow and wide widths', titleAnchor: 'focus outlines remain visible' },
 ];
 
 /** Item 12: parameterized across six modes, no single line — selected by title grep instead. */
