@@ -31,7 +31,13 @@ truncates before the error text.
 ## Canonical scope
 
 This table is the single source of truth for what is in scope. Any count stated elsewhere must agree
-with it. **Twelve items across five specs, plus one adopted test family.**
+with it: **twelve items across five specs** (item 12 is itself the adopted action-row family).
+Separately in scope, and NOT one of the twelve because it is not a test, is the behaviour-suite lane
+stop and its log truncation (WP06).
+
+Observed states are quoted exactly as the runs reported them. Note that under `retries: 2` a CI
+`flaky` line means the test **did fail at least once** and passed on retry — it is a failure that was
+retried into a pass, not a clean result.
 
 | # | Test | Observed | Owner |
 |---|---|---|---|
@@ -41,20 +47,17 @@ with it. **Twelve items across five specs, plus one adopted test family.**
 | 4 | `sk-progress.spec.ts:465` reduced-motion freeze | **failed** (PR run and train run) | WP02 |
 | 5 | `sk-progress.spec.ts:510` no animation leak onto determinate | flaky (PR) | WP02 |
 | 6 | `sk-team-overview-shell-layout.spec.ts:104` exact 56/240px columns | flaky (PR) | WP04 |
-| 7 | `sk-team-overview-shell-layout.spec.ts:160` narrow shell region order | **failed** (train) | WP04 |
+| 7 | `sk-team-overview-shell-layout.spec.ts:160` narrow shell region order | flaky (train) | WP04 |
 | 8 | `sk-team-overview-shell-layout.spec.ts:303` landmarks/labels/grouping | flaky (pre-mission train) | WP04 |
 | 9 | `sk-team-overview-shell-layout.spec.ts:445` axe-clean in dark mode | flaky (PR) | WP04 |
-| 10 | `sk-workflow-board.spec.ts:557` focused overflow keyboard scroll | flaky (PR), **failed** (train) | WP03 |
+| 10 | `sk-workflow-board.spec.ts:557` focused overflow keyboard scroll | flaky (PR), flaky (train) | WP03 |
 | 11 | `sk-radio-choice-group.spec.ts:1113` legend cue across two stories | flaky (PR) | WP05 |
 | 12 | `sk-action-row.spec.ts` "external controls" family (adopted; parameterized, no single line) | reproduced on two independent trees | WP03 |
 
 Item 2 is included because it has the identical capture-wait-capture shape as its failing siblings and
 sits between them in the same file; excluding it would leave a known-fragile assertion behind.
-Items 7 and 8 were added after the analysis: 7 failed on the train after the font change landed, 8 was
+Items 7 and 8 were added after the analysis: 7 flaked on the train after the font change landed, 8 was
 the single flaky test on the pre-mission train.
-
-Separately in scope, not a test: the behaviour suite's webkit lane stop and the log truncation that
-hides its cause (WP06).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -93,7 +96,7 @@ navigation, a scroll position, a focus change — rather than asserting after an
 **Why this priority**: Item 12 is already diagnosed and reproduced on two independent trees including
 the untouched train, with a stated direction. It lands in unrelated missions' output, where the first
 hypothesis is always "my diff broke it", so it costs other people time repeatedly. Item 10 has the
-same press-then-assert shape and failed on the train.
+same press-then-assert shape and flaked on the train (i.e. failed, then passed on retry).
 
 **Independent Test**: Repeat-run each affected spec with retries disabled; the sub-tests pass every
 repeat rather than a varying subset.
@@ -109,9 +112,10 @@ repeat rather than a varying subset.
 ### User Story 3 - The shell-layout composition is present before anything measures it (Priority: P2)
 
 All four affected tests in `sk-team-overview-shell-layout.spec.ts` (items 6–9) obtain their subject
-through the same helper, `loadComposition`. On the train, item 7 failed with
+through the same helper, `loadComposition`. On the train, item 7's failing attempt reported
 `expect(getByTestId('overview-shell')).toBeVisible()` timing out at 5000ms — *element(s) not found*.
-The composition never appeared. That is one shared suspect, not four coincidences.
+The composition never appeared. (It was reported `flaky`, meaning it then passed on retry — the
+failure is real, the retry merely hid it.) That is one shared suspect, not four coincidences.
 
 **Why this priority**: raised from P3 after the analysis. This spec is the repository's most
 persistent webkit offender — four of the twelve items, spanning the pre-mission train, the PR run and
@@ -218,6 +222,9 @@ unhandled-errors section and the reporter's verdict line are both present.
 | C-007 | Component changes are findings | Changes to component source (as opposed to test source) are permitted only where a genuine component defect is demonstrated, and must be reported as such. | Technical | High | Open |
 | C-008 | Do not disarm the mutation harness | `mutations.json`, `behaviours.json` and `suite-budget.json` govern an enforced gate over the same fixture files this mission edits. Any edit there must keep every subject's red-first derivation working. | Technical | High | Open |
 | C-009 | Do not change the ordinary suite | The measurement rig must not alter what the ordinary `playwright` job runs. Gate-wiring parity checks are enforced and will reject ad-hoc step shapes. | Technical | High | Open |
+| C-010 | Findings log is shared across lanes | Charter, Findings Log Practice: a lane worktree's `tmp/finding/` **must be symlinked to the repository root's**, never created as an isolated directory. Every reasoning-loop failure, recovery or `spec-kitty` skill error is logged there with what was attempted, the verbatim error, the workaround, a root-cause hypothesis and a proposed remediation. | Process | Medium | Open |
+| C-011 | Component changes need a visual diff and maintainer approval | Charter, Review Policy and Quality Gates: a PR touching component files requires a screenshot or visual diff, and **one maintainer approval**. Any C-007 change under `packages/styles/**` therefore cannot self-merge, and the mission must surface it rather than folding it in silently. Note the safety net is engine-mismatched: `visual-regression` runs chromium-only while every test in scope is webkit. | Process | High | Open |
+| C-012 | Red-first is the charter's own bar | Charter, Quality Gate (5): every applicable ADR-11 required-behaviour has a test demonstrated to fail before it passes. The mission's red-first requirement is this clause, not an invention of it — prefer the existing harness derivation over a parallel hand-rolled proof. | Technical | High | Open |
 
 ### Key Entities
 
@@ -230,9 +237,10 @@ unhandled-errors section and the reporter's verdict line are both present.
 ### Measurable Outcomes
 
 - **SC-001**: All twelve scope items report zero failures and zero flakes across 10 repeats under the rig, with `retries: 0`.
-- **SC-002**: Recorded red-first proofs equal rewritten assertions; neither is zero.
+- **SC-002**: Recorded red-first proofs equal rewritten assertions; neither is zero. **WP01's scan reports both counts**; equality is not left to per-WP self-report.
+- **SC-008**: A single mission report enumerates every scope item with its verdict, the engine each claim came from (NFR-007), and the `playwright` duration delta against 25.6 min. FR-013 and NFR-004's after-reading are delivered here.
 - **SC-003**: Zero assertions deleted, skipped, `fixme`-ed, quarantined or retry-wrapped; zero tolerances widened; zero wait durations increased. **Verified mechanically** by a scan of the mission diff for `test.skip`, `test.fixme`, `.only`, added `retries`, and increased numeric timeout literals — not by self-report alone.
 - **SC-004**: The behaviour-suite job log ends with the reporter's verdict line; before/after sizes reported.
 - **SC-005**: The final `playwright` job duration is within 5% of 25.6 min.
-- **SC-006**: Every scope item is either fixed with a demonstrated cause, or reported unfixed with its evidence. The two counts sum to twelve.
-- **SC-007**: The train's `gate` job passes, so `promote-develop` is no longer skipped on a train push.
+- **SC-006**: Every scope item is either fixed with a demonstrated cause, or reported unfixed with its evidence. The two counts sum to **thirteen** — the twelve test items **plus the lane-stop/log-truncation item**, which is in scope and must not fall outside the denominator of the one criterion whose job is to stop items being dropped.
+- **SC-007**: Zero of the twelve items fail or flake in the mission's final pre-merge CI run on this PR. *(Stated as what the mission controls. The train's `gate` aggregates seven jobs this mission does not own, a train push run only exists after landing, and `promote-develop` additionally requires `vars.PROMOTE_DEVELOP_ENABLED == 'true'` — so a green gate alone would not establish that promotion runs. Whether promotion actually resumes is tracked as post-merge follow-up, not as this mission's success criterion.)*
