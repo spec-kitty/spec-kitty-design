@@ -77,3 +77,7 @@ tmp/
 # is why check-part-ratchet.mjs needs its isFile() filter.
 .vitest-attachments/
 **/__screenshots__/
+
+# Spec Kitty lane worktrees (created by `agent action implement`); never committed.
+# Without this the untracked dir fails the CLI recorder with DIRTY_WORKTREE.
+.worktrees/
