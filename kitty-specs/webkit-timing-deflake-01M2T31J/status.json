@@ -1,7 +1,7 @@
 {
-  "event_count": 39,
-  "last_event_id": "01M2TGQD4YEX7TMJ79HES2Z54P",
-  "materialized_at": "2026-09-18T15:03:58.366120+00:00",
+  "event_count": 41,
+  "last_event_id": "01M2TGSB8NWSSG3A4Q7JMNQ1HS",
+  "materialized_at": "2026-09-18T15:05:01.973649+00:00",
   "mission_number": "",
   "mission_slug": "webkit-timing-deflake-01M2T31J",
   "mission_type": "software-dev",
@@ -12,9 +12,9 @@
     "claimed": 0,
     "done": 0,
     "for_review": 0,
-    "in_progress": 0,
+    "in_progress": 1,
     "in_review": 0,
-    "planned": 1
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
@@ -53,37 +53,38 @@
       }
     },
     "WP02": {
-      "actor": "user",
-      "agent": "claude",
+      "actor": "claude",
+      "agent": null,
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
-      "lane": "planned",
-      "last_event_id": "01M2TGQD4YEX7TMJ79HES2Z54P",
-      "last_transition_at": "2026-09-18T15:03:58.366120+00:00",
+      "lane": "in_progress",
+      "last_event_id": "01M2TGSB8NWSSG3A4Q7JMNQ1HS",
+      "last_transition_at": "2026-09-18T15:05:01.973649+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Items 1 and 4 (hard failures, 0/10 baseline) and items 3/5 (flaky, 3/10 and 1/10 baseline)\nfixed with a demonstrated cause. Item 2 (already 10/10) given the same treatment per T014.\nFix is TEST-ONLY: git diff packages/styles/src/progress/** against base d3d6ae76 is empty.\n\nT011 verdict, per test, with evidence: the unsettled-fixture hypothesis is REFUTED for BOTH\nitem 1 and item 4, not just item 1. T010's paint diagnostic (webkit, retries=0, all 10/10\nfailing repeats) showed every fixture sampled -- the subject AND every comparison fixture --\nhad already rendered 9-42 animation frames and had document.fonts.ready resolved 80-180ms\nbefore the screenshot that failed the assertion. Nothing was unsettled at sample time.\n\nActual cause (real webkit data): samplePixels' x=2/x=w-3 edge offsets sample inside a\nwebkit-specific edge-inset band of ::-webkit-progress-value that never carries the fill\ncolour. Proof: the Complete fixture -- value=8/max=8, 100% filled, ZERO clip-path, so no CSS\nchange could move this -- reads plain track background ([43,49,59,255],\nvar(--sk-surface-input)) at both x=2 and x=w-3 on every one of 10 repeats, both under\nforced-colors (item 1's comparison) and plain (item 4's comparison), while its own centre\npixel correctly shows the fill colour. Item 1's failure (sample1.left == zeroSample.left) and\nitem 4's failure (frame1.left/right == completePixels.left/right) both reduce to \"track\nbackground == track background\" for reasons unrelated to either fixture's real fill state.\nThis is a test-sampling defect, not a component defect -- C-007 does not apply.\n\nFix (T012/T014): samplePixels' left/right offsets moved from x=2/x=w-3 to x=10/x=w-11 --\nclear of the demonstrated band, still well inside item 1's 45%-wide forced-colors clip.\nApplied uniformly, so item 2 gets the same correction (it was 10/10 already, but for the\nsame wrong reason -- its check happened to hold between two different \"not the fill\" colours).\n\nItems 3 and 5 (T013): different fix -- they compare two captures OVER TIME, and the old\nwall-clock waitForTimeout raced the 320ms sweep loop (T003-baseline.md: 3/10, 1/10). Added\npinAnimationPhase: pauses every Animation getAnimations({ subtree: true }) returns and seeks\ncurrentTime to an explicit phase (0 and duration/2, read live from getComputedTiming() rather\nthan a hardcoded literal), waiting for an actual repaint (double requestAnimationFrame) before\nsampling. CAVEAT, stated plainly: I did NOT independently capture positive evidence that\ngetAnimations({ subtree: true }) returns a pseudo-element-targeted Animation under webkit --\nmy only {pseudoElement, durationMs} annotation capture happened during the red-first run,\nwhere the base sweep was removed and the array came back empty (correctly, given the\nmutation). The mechanism works functionally, which is what the fix depends on, but the\nnarrower \"reaches the pseudo\" claim from plan.md Correction 3 is unconfirmed either way.\n\nPost-fix repeat counts, webkit, retries=0 (TWO independent samples, per this mission's own\nrule that one run does not settle an item -- item 7 read 20/20 then 8/10 elsewhere in this\nmission):\n  sample 1 (run 35356189046, head 39154a7e): item1 10/10, item2 10/10, item3 10/10,\n    item4 10/10, item5 10/10.\n  sample 2 (run 35357249473, head f53c7f3d, post-revert reconfirmation): item1 10/10,\n    item2 10/10, item3 9/10 (failed once, at its own samplesEqual(sample1,sample2)===false\n    assertion -- same assertion, no new error shape), item4 10/10, item5 10/10.\nItem 3 is NOT clean across both samples -- a large improvement over its 3/10 baseline, but\nnot the zero-flake result SC-001 asks for. I do not know whether the one residual failure\nshares item 1/4's root cause, is CI resource contention affecting the double-rAF paint wait,\nor a genuine edge case in phase selection -- not established, stated plainly rather than\nguessed.\n\nRed-first proofs (T015), one CI run (35358002926, head 3fbb49a2, mutation applied), all\nsk-progress items 0/10, each failing at its OWN targeted assertion:\n  - item 1: full-width clip-path on the 3 forced-colors indeterminate rules -> failed at its\n    own \"distinguishable from Zero\" assertion.\n  - item 2: same mutation (shares the fixture) -> failed at its own \"non-full-width\"\n    assertion -- expected collateral, reinforces rather than undermines validity.\n  - item 3: animation-name:none on the 3 base indeterminate rules -> failed at its own \"sweep\n    must exist to have a phase\" sanity check.\n  - item 4: reduced-motion block's animation-name flipped back to the sweep -> failed at its\n    own \"frames are identical\" assertion.\n  - item 5: same sweep-removal mutation (shares the base rule via the injected class) ->\n    failed at its own sanity precondition -- expected collateral, same reasoning as item 2.\n3 CSS mutations, all 5 tests demonstrated to fail for a reason tied to what was mutated.\nMutation reverted; git diff packages/styles/src/progress/** against base d3d6ae76 is empty --\nconfirmed both by direct diff and by the tree being identical to 39154a7e on that path.\nOne process note: the first red-first CI push was cancelled by an immediately-following\nrevert push (both target the same concurrency group) and produced no data; the cycle was\nredone waiting fully for CI completion before touching the branch again, which produced the\nresult above.\n\nT016 (samplePixels edge-offset fragility): reported as the demonstrated ACTIVE cause of items\n1 and 4's hard failures, not merely a latent one. The x=10/x=w-11 replacement offsets are a\nconsidered choice (clear of the demonstrated 2-3px band, inside item 1's 54px clip) but were\nnot independently re-measured for exactly where the band ends; a future maintainer touching\nthis file should know the offsets are empirically-chosen, not derived from a measured edge.\n\nOpen question, answered honestly rather than guessed: why did items 1 and 4 PASS at ee324f84\nif samplePixels' x=2/x=w-3 offsets were always wrong? NOT ESTABLISHED. My evidence only\ncharacterises the CURRENT failure (this webkit build, this CI run); I have no comparable\nmeasurement from ee324f84's webkit build/CI environment. Two candidate mechanisms, neither\nconfirmed: (a) the webkit/Playwright browser binary version changed between then and now,\nindependent of the font change, and renders ::-webkit-progress-value's edge differently now;\n(b) the font change shifted the bar's rendered box by a sub-pixel amount that moved x=2/x=w-3\nfrom just-outside to just-inside the inset band. I did not run the pre-font-change code under\ntoday's CI, and had no comparable older webkit build available, so I cannot distinguish these.\nThe font-change theory should not be presented as demonstrated.\n\nTwo rig-line-number-drift incidents logged at tmp/finding/wp02-t010-rig-line-number-drift.md;\nscripts/webkit-repeat-run.mjs's LINE_ITEMS for items 1-5 corrected (disclosed\nACTIVE_WP_SCOPE_VIOLATION overrides, outside WP02's owned_files) to 416/487/503/525/570."
       ],
       "provider": "__resolved_provider_absent__",
+      "review": null,
       "review_result": {
         "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/453/spec-kitty-design/kitty-specs/webkit-timing-deflake-01M2T31J/tasks/WP02-sk-progress-hard-failures/review-cycle-1.md",
         "reference": "review-cycle://webkit-timing-deflake-01M2T31J/WP02-sk-progress-hard-failures/review-cycle-1.md",
         "reviewer": "user",
         "verdict": "changes_requested"
       },
-      "role": "reviewer",
-      "shell_pid": 995392,
-      "shell_pid_created_at": "1789743250.43",
+      "role": "implementer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T010": "done",
-        "T011": "done",
-        "T012": "done",
-        "T013": "done",
-        "T014": "done",
-        "T015": "done",
-        "T015a": "done",
-        "T016": "done"
+        "T010": "planned",
+        "T011": "planned",
+        "T012": "planned",
+        "T013": "planned",
+        "T014": "planned",
+        "T015": "planned",
+        "T015a": "planned",
+        "T016": "planned"
       }
     },
     "WP03": {
