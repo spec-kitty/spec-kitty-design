@@ -16,8 +16,7 @@
         "scripts/**"
       ],
       "predicted_surfaces": [
-        "api",
-        "tracker-integration"
+        "api"
       ],
       "depends_on_lanes": [],
       "parallel_group": 0
@@ -34,8 +33,7 @@
         "suite-budget.json"
       ],
       "predicted_surfaces": [
-        "artifact-rendering",
-        "tracker-integration"
+        "artifact-rendering"
       ],
       "depends_on_lanes": [],
       "parallel_group": 0
@@ -50,8 +48,7 @@
         "packages/styles/src/progress/**"
       ],
       "predicted_surfaces": [
-        "legacy-cleanup",
-        "tracker-integration"
+        "legacy-cleanup"
       ],
       "depends_on_lanes": [
         "lane-a"
@@ -68,8 +65,7 @@
         "apps/storybook/src/tests/sk-workflow-board.spec.ts"
       ],
       "predicted_surfaces": [
-        "legacy-cleanup",
-        "tracker-integration"
+        "legacy-cleanup"
       ],
       "depends_on_lanes": [
         "lane-a"
@@ -86,8 +82,7 @@
       ],
       "predicted_surfaces": [
         "api",
-        "app-shell",
-        "tracker-integration"
+        "app-shell"
       ],
       "depends_on_lanes": [
         "lane-a"
@@ -102,16 +97,14 @@
       "write_scope": [
         "apps/storybook/src/tests/sk-radio-choice-group.spec.ts"
       ],
-      "predicted_surfaces": [
-        "tracker-integration"
-      ],
+      "predicted_surfaces": [],
       "depends_on_lanes": [
         "lane-a"
       ],
       "parallel_group": 1
     }
   ],
-  "computed_at": "2026-09-18T11:35:25.491580+00:00",
+  "computed_at": "2026-09-18T11:49:10.489925+00:00",
   "computed_from": "dependency_graph+ownership",
   "planning_artifact_wps": [],
   "planning_commit_sha": "a9bb34e3c95970c863d1c1f7bac3653eca90d96c"

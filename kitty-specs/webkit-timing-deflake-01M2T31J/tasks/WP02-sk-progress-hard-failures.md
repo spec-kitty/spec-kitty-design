@@ -18,7 +18,7 @@ planning_base_branch: mission/webkit-deflake
 merge_target_branch: mission/webkit-deflake
 branch_strategy: Planning artifacts for this mission were generated on mission/webkit-deflake. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/webkit-deflake unless the human explicitly redirects the landing branch.
 base_branch: mission/webkit-deflake
-base_commit: 5282172751063b05385756837bb93af5c5149647
+base_commit: d6af259572eb3e0ac64ee1808d65d9d24bc2518d
 created_at: '2026-09-18T11:13:32Z'
 subtasks:
 - T010
@@ -63,27 +63,13 @@ tracker_refs: []
 
 ---
 
-## Verification reality (read before planning any task)
+## Canonical sources — read these, do not rely on this file alone
 
-Every test in scope is `[webkit]`-only, and **webkit cannot launch on the development workstation**.
-Measured here, with a positive control:
+- `kitty-specs/webkit-timing-deflake-01M2T31J/spec.md` — **Canonical scope** (the twelve items and their observed states), all FR/NFR/C/SC requirements.
+- `kitty-specs/webkit-timing-deflake-01M2T31J/plan.md` — **Corrections 1–5**, the ownership map, the authorised fallback.
+- `kitty-specs/webkit-timing-deflake-01M2T31J/tasks.md` — **Verification reality** (six standing rules), mission-wide acceptance.
 
-```
-webkit:   FAILED — Host system is missing dependencies to run browsers
-chromium: LAUNCHED — Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 …
-```
-
-The named packages (`libgtk-4-1`, `libicu74`, …) are Debian/Ubuntu soname-pinned; this host is
-Fedora. The repository's existing claim in `vitest.config.mts` is **confirmed**, not inherited.
-
-1. **CI is the only webkit authority.** A local chromium pass is evidence about chromium and nothing else.
-2. **A full `playwright` job is ~27 minutes**, so ten sequential CI runs per item is not viable. NFR-001 means ten **repeats inside one job**.
-3. **`playwright.config.ts:19` sets `retries: 2` under CI.** A rig inheriting that reports a failing test as `flaky` at exit 0 — a retry-wrapped green by inheritance. Every measurement in this mission runs with `retries: 0`, and a `flaky` line counts as a **failure** (NFR-002, C-001).
-4. A repeat loop over a test that performs a one-way mutation to a shared fixture measures the mutation, not the flake. Check for that shape before reporting a count.
-
-## Why this is on a critical path
-
-The train's own push run is red (`playwright` 3 failed / 2 flaky → `gate` failed), which **skips the
-`promote-develop` job** (`needs: [gate]`, no `always()`). `develop` is synced only by that job opening
-and merging a `promote/<40-hex>` PR. Until the train's gate is green, release promotion cannot run
-(SC-007).
+The six rules in tasks.md's *Verification reality* bind every package. The three that most often get
+missed: measurements run with **`retries: 0`** (a CI `flaky` line is a failure retried into a pass);
+symlink your lane's `tmp/finding/` to the repository root's before anything else (charter C-010); and
+never `git add -A` from the repository root checkout, which holds live lane worktrees.
