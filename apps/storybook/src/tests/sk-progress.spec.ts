@@ -86,21 +86,30 @@ const samplesEqual = (a: Pixels, b: Pixels, tolerance = 2) =>
  * paint of the new frame (not a duration) before anything samples it — the same "wait for the
  * event, not the clock" principle FR-001 asks for elsewhere in this file, applied to animation
  * phase instead of load/paint settling. Returns each reached animation's `pseudoElement` (so a
- * caller can assert on/log what was actually reached) and its own effect duration in ms (so a
+ * caller can assert on/log what was actually reached), its own effect duration in ms (so a
  * caller can derive "half a period" from the token's real, live-resolved value instead of a
- * hardcoded literal that would drift silently if `--sk-motion-duration-slow` ever changed).
+ * hardcoded literal that would drift silently if `--sk-motion-duration-slow` ever changed), and
+ * its `playState` as read BEFORE `pause()` runs. That order matters: pausing is this helper's own
+ * measurement technique, not the thing under test, so the state read AFTER pause() is always
+ * `'paused'` by construction — asserting on that would be a vacuous tautology and would false-pass
+ * an animation that is authored `animation-play-state: paused` (frozen for every real user) just
+ * as readily as a genuinely running one, since both look identical once THIS helper has paused
+ * them. Reading it first lets a caller assert the animation was actually running prior to the
+ * measurement, not merely that it exists and is pausable.
  */
 const pinAnimationPhase = (bar: Locator, timeMs: number) =>
   bar.evaluate(async (node, t) => {
     const anims = (node as Element).getAnimations({ subtree: true });
+    const prePauseStates = anims.map((anim) => anim.playState);
     for (const anim of anims) {
       anim.pause();
       anim.currentTime = t;
     }
     await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-    return anims.map((anim) => ({
+    return anims.map((anim, i) => ({
       pseudoElement: (anim.effect as KeyframeEffect | null)?.pseudoElement ?? null,
       durationMs: Number((anim.effect as KeyframeEffect | null)?.getComputedTiming().duration ?? 0),
+      playState: prePauseStates[i],
     }));
   }, timeMs);
 
@@ -510,6 +519,11 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     // returned from `getAnimations({ subtree: true })` for this CI run.
     const atStart = await pinAnimationPhase(bar, 0);
     expect(atStart.length).toBeGreaterThan(0); // the sweep must exist to have a phase at all
+    // F1: it must have been RUNNING before this helper paused it to seek a phase — otherwise a
+    // bar frozen by e.g. `animation-play-state: paused` (every real user sees a static bar) has
+    // an animation to pause and a phase to seek, and the two captures below would still differ
+    // in APPEARANCE between phase 0 and half-period, false-passing a sweep nobody ever sees move.
+    expect(atStart.every((a) => a.playState === 'running')).toBe(true);
     const sample1 = await samplePixels(page, await bar.screenshot());
     const halfPeriod = Math.max(...atStart.map((a) => a.durationMs)) / 2;
     expect(halfPeriod).toBeGreaterThan(0); // sanity: a real, finite duration was found
@@ -575,6 +589,11 @@ test.describe('sk-progress absent-state regression: the indeterminate modifier d
     const before2 = await samplePixels(page, await bar.screenshot());
     // No leak: no motion on the unmodified determinate fixture.
     expect(samplesEqual(before1, before2)).toBe(true);
+    // F3: the SAME check the leaked half below re-runs after mutation — both sides count
+    // `getAnimations({ subtree: true })` on this element. Before the leak there is nothing to
+    // count at all.
+    const beforeAnimCount = await bar.evaluate((node) => (node as Element).getAnimations({ subtree: true }).length);
+    expect(beforeAnimCount).toBe(0);
 
     // MUTATE: simulate the modifier leaking onto a determinate fixture.
     await host.evaluate((node) => node.classList.add('sk-progress--indeterminate'));
@@ -583,14 +602,22 @@ test.describe('sk-progress absent-state regression: the indeterminate modifier d
     // race the same way T003-baseline.md measured at 1/10 for this exact test.
     const atStart = await pinAnimationPhase(bar, 0);
     expect(atStart.length).toBeGreaterThan(0); // the leaked sweep must exist to have a phase
+    // F1: the leaked animation must have been RUNNING before this helper paused it to seek a
+    // phase — see the sibling assertion and comment on the sweep test above.
+    expect(atStart.every((a) => a.playState === 'running')).toBe(true);
     const after1 = await samplePixels(page, await bar.screenshot());
     const halfPeriod = Math.max(...atStart.map((a) => a.durationMs)) / 2;
     expect(halfPeriod).toBeGreaterThan(0);
     const atHalf = await pinAnimationPhase(bar, halfPeriod);
+    expect(atHalf.length).toBe(atStart.length); // F6: parity with the sweep test's own guard above
     test.info().annotations.push({ type: 'sk-progress-pseudo-elements', description: JSON.stringify({ atStart, atHalf }) });
     const after2 = await samplePixels(page, await bar.screenshot());
-    // WATCH: with the leak injected, the identical check now correctly detects
-    // motion — proving the "no leak" assertion above is not vacuous.
+    // WATCH: with the leak injected, the SAME check as `beforeAnimCount` above (counting
+    // `getAnimations({ subtree: true })` on this element — see `atStart.length` asserted `> 0`
+    // above) now correctly finds an animation where there was none — proving the "no leak"
+    // assertion above (that same count was 0) is not vacuous. The pixel-motion assertion below is
+    // additional, corroborating evidence that the leaked animation is not merely present but
+    // visibly running.
     expect(samplesEqual(after1, after2)).toBe(false);
   });
 });

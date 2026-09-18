@@ -161,6 +161,7 @@
   animation-duration: var(--sk-motion-duration-slow);
   animation-timing-function: var(--sk-motion-ease-in-out);
   animation-iteration-count: infinite;
+  animation-play-state: paused; /* TEMPORARY RED-FIRST MUTATION — PR #454 F1 proof. DO NOT MERGE. */
 }
 
 /* The pseudo-element layer (Firefox; a harmless no-op where Chromium/WebKit

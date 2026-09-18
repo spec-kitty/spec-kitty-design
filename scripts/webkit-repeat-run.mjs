@@ -63,11 +63,21 @@ const LINE_ITEMS = [
   // A rig that cannot select this WP's own five items is worse than a disclosed one-line
   // mechanical correction; see the mission's tmp/finding/ log for the class of defect (hardcoded
   // absolute file:line addressing racing an owning WP's necessary edits to that same file).
-  { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 416, label: 'forced-colors, two points in cycle' },
-  { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 487, label: 'forced-colors + reduced-motion' },
-  { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 503, label: 'the sweep actually runs' },
-  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 523, label: 'reduced-motion freeze' }, // WP02: was 522; the review-fix's real-annotation edit (see doc comment above pinAnimationPhase) added one line ahead of this declaration. See tmp/finding/.
-  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 568, label: 'no animation leak onto determinate' }, // WP02: was 567; same edit added one more line ahead of this declaration.
+  //
+  // Corrected again for PR #454's pre-merge squad fix (F1/F3/F6): `pinAnimationPhase` now
+  // captures each Animation's pre-pause `playState` (so items 3/5 can assert it was 'running'
+  // before the helper paused it — the false-pass the squad demonstrated against
+  // `animation-play-state: paused`), item 5 gained a `getAnimations().length === 0` before-count
+  // paired with its existing after-count (F3) and the `atHalf.length === atStart.length` parity
+  // guard item 3 already had (F6). Net effect: items 1/2/3 moved +9 lines, items 4/5 +14 lines
+  // (item 3's own body grew by 5 more lines ahead of them). Re-verified by grepping each test's
+  // title against these exact line numbers after the edit — see the mission record for the
+  // one-time correction commit.
+  { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 425, label: 'forced-colors, two points in cycle' },
+  { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 496, label: 'forced-colors + reduced-motion' },
+  { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 512, label: 'the sweep actually runs' },
+  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 537, label: 'reduced-motion freeze' }, // corrected from 523 — see note above the item-1 entry.
+  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 582, label: 'no animation leak onto determinate' }, // corrected from 568 — see note above the item-1 entry.
   { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 104, label: 'exact 56/240px columns' },
   { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 160, label: 'narrow shell region order' },
   { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 303, label: 'landmarks/labels/grouping' },
