@@ -1,7 +1,7 @@
 {
-  "event_count": 36,
-  "last_event_id": "01M2TET3MCBP8H38T1ARDZ9V1H",
-  "materialized_at": "2026-09-18T14:30:29.772318+00:00",
+  "event_count": 37,
+  "last_event_id": "01M2TG2H4A01W8NC4MZQSSAT4Z",
+  "materialized_at": "2026-09-18T14:52:34.314521+00:00",
   "mission_number": "",
   "mission_slug": "webkit-timing-deflake-01M2T31J",
   "mission_type": "software-dev",
@@ -11,8 +11,8 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 0,
-    "in_progress": 1,
+    "for_review": 1,
+    "in_progress": 0,
     "in_review": 0,
     "planned": 0
   },
@@ -58,14 +58,24 @@
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "in_progress",
-      "last_event_id": "01M2TBQZ9V7G8AJFBVBGGJENDB",
-      "last_transition_at": "2026-09-18T13:36:54.074639+00:00",
+      "lane": "for_review",
+      "last_event_id": "01M2TG2H4A01W8NC4MZQSSAT4Z",
+      "last_transition_at": "2026-09-18T14:52:34.314521+00:00",
       "model": "__resolved_model_absent__",
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
       "shell_pid": 837111,
-      "shell_pid_created_at": "1789738612.48"
+      "shell_pid_created_at": "1789738612.48",
+      "subtasks": {
+        "T010": "done",
+        "T011": "done",
+        "T012": "done",
+        "T013": "done",
+        "T014": "done",
+        "T015": "done",
+        "T015a": "done",
+        "T016": "done"
+      }
     },
     "WP03": {
       "actor": "user",
@@ -78,7 +88,8 @@
       "last_transition_at": "2026-09-18T14:30:29.772318+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "Item 10 (sk-workflow-board.spec.ts, workflow-board scroller): rewrote to await scroll settling (bounded waitForScrollSettled helper, requestAnimationFrame-polled, 5000ms bound matching this suite's existing default assertion timeout) instead of a threshold-crossing poll; both halves of the claim preserved and strengthened (scroll happens + focus retained, now checked after each arrow press). Delta: 8/10 -> 10/10, webkit, retries=0 (baseline T003 vs. post-fix run 35353960983).\n\nItem 12 (sk-action-row.spec.ts, \"external controls\" family, six modes: static/static-flush/button/button-flush/route/route-flush): rewrote the Enter-key hash assertion to await the location change via expect.poll, matching the idiom already used at line 72 of the same file (adopted issue's stated direction, FR-005). NOT REPRODUCED verdict (FR-013/SC-008) across four samples, all webkit: 60/60 @repeat-10 pre-fix (T003), 600/600 @repeat-100 near-isolated pre-fix (run 35352216424), 60/60 @repeat-10 near-isolated post-fix (run 35353960983 and reconfirmed at 35355085697), and clean under full-suite contention (2770 tests, 2 workers, retries:2, run 35352049054 on lane-e -- pre-fix sample, caveat stated). No untested candidate condition remains. The rewrite still lands on its own merits, not manufactured to force a reproduction.\n\nRed-first (T022, both bounded, both isolate the rewritten line, confirmed in run 35354582083 then reverted in ee093dbe with a verified-clean diff before this note): item 10 -- overflow-x:auto->hidden, \"Expected: > 0, Received: 0\" at the exact rewritten line; item 12 -- href #details->#not-details (chosen over removing href so earlier Tab/focus steps still pass and only the rewritten assertion catches it), \"Expected: #details, Received: #not-details, Timeout 5000ms exceeded\" in all six modes.\n\nAlso fixed and disclosed: T021's helper shifted item 10's test from line 557 to 620, silently breaking WP01's rig selector (which matches by exact file:line). Corrected scripts/webkit-repeat-run.mjs (one line, outside owned_files, logged at tmp/finding/wp03-lane-c-rig-line-number-drift.md with a mission-wide hypothesis) -- this same class of drift was independently found to affect WP02's item selection.\n\nEngine: every count above is webkit, retries=0 unless stated otherwise (the one retries=2 contention sample is explicitly labeled). Final HEAD: ee093dbe. Diff to WP03 owned files is exactly the T020/T021 rewrite; sk-workflow-board.css and sk-action-row.stories.ts are unchanged from mission base."
+        "Item 10 (sk-workflow-board.spec.ts, workflow-board scroller): rewrote to await scroll settling (bounded waitForScrollSettled helper, requestAnimationFrame-polled, 5000ms bound matching this suite's existing default assertion timeout) instead of a threshold-crossing poll; both halves of the claim preserved and strengthened (scroll happens + focus retained, now checked after each arrow press). Delta: 8/10 -> 10/10, webkit, retries=0 (baseline T003 vs. post-fix run 35353960983).\n\nItem 12 (sk-action-row.spec.ts, \"external controls\" family, six modes: static/static-flush/button/button-flush/route/route-flush): rewrote the Enter-key hash assertion to await the location change via expect.poll, matching the idiom already used at line 72 of the same file (adopted issue's stated direction, FR-005). NOT REPRODUCED verdict (FR-013/SC-008) across four samples, all webkit: 60/60 @repeat-10 pre-fix (T003), 600/600 @repeat-100 near-isolated pre-fix (run 35352216424), 60/60 @repeat-10 near-isolated post-fix (run 35353960983 and reconfirmed at 35355085697), and clean under full-suite contention (2770 tests, 2 workers, retries:2, run 35352049054 on lane-e -- pre-fix sample, caveat stated). No untested candidate condition remains. The rewrite still lands on its own merits, not manufactured to force a reproduction.\n\nRed-first (T022, both bounded, both isolate the rewritten line, confirmed in run 35354582083 then reverted in ee093dbe with a verified-clean diff before this note): item 10 -- overflow-x:auto->hidden, \"Expected: > 0, Received: 0\" at the exact rewritten line; item 12 -- href #details->#not-details (chosen over removing href so earlier Tab/focus steps still pass and only the rewritten assertion catches it), \"Expected: #details, Received: #not-details, Timeout 5000ms exceeded\" in all six modes.\n\nAlso fixed and disclosed: T021's helper shifted item 10's test from line 557 to 620, silently breaking WP01's rig selector (which matches by exact file:line). Corrected scripts/webkit-repeat-run.mjs (one line, outside owned_files, logged at tmp/finding/wp03-lane-c-rig-line-number-drift.md with a mission-wide hypothesis) -- this same class of drift was independently found to affect WP02's item selection.\n\nEngine: every count above is webkit, retries=0 unless stated otherwise (the one retries=2 contention sample is explicitly labeled). Final HEAD: ee093dbe. Diff to WP03 owned files is exactly the T020/T021 rewrite; sk-workflow-board.css and sk-action-row.stories.ts are unchanged from mission base.",
+        "Review passed: T020/T021 rewrites verified sound (waitForScrollSettled cannot make the toBeGreaterThan(0) check vacuous — it settles at a stable-but-wrong value rather than skipping the check; getByRole('link',{name:'Details'}) locator is href-independent, confirming the item-12 mutation isolates cleanly). C-003 claim verified true against playwright.config.ts (no expect.timeout override -> Playwright's 5000ms default, not inflated). Item-10 and item-12 red-first proofs verified line-for-line against the mutation commit. Item-12 not-reproduced verdict independently reconfirmed via gh: run 35352216424 shows 600/600 @repeat-100 retries=0 webkit, and run 35352049054 (full-suite, 2 workers, retries:2) shows items 11/12 both passing on first attempt with zero retries consumed (not retry-masked) -- stronger than claimed. C-010 symlink + finding file present. WP01-owned scripts/webkit-repeat-run.mjs one-line edit is a disclosed, mechanical, coordinator-authorized exception (three disclosures: commit message, finding file, mission PRE-MERGE-GATES.md); a WP02-style line-neutral alternative existed and would have avoided the cross-boundary edit, noted as a stylistic nit, not blocking. Mutation f11a33c2 fully reverted, verified byte-empty diff and zero grep hits for both mutated strings. Staleness check: mission corrections 8ab93ec3 and f9ed30d9 are not ancestors of this lane, but neither contradicts WP03's own item-10/item-12 premises (only WP04's item-7 premise was reversed). No C-001 suppressions introduced; pre-existing chromium-only test.skip predates this WP and is unrelated."
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
