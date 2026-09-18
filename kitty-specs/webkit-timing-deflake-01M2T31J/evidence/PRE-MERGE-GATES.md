@@ -129,3 +129,34 @@ Three repeats is ample for a red-first — the claim is that the assertion *can*
 
 **Check at merge**: for every rewritten assertion, a completed (not cancelled) run must exist at the
 mutation SHA showing the failure. `gh run list` and confirm `conclusion` is not `cancelled`.
+
+## 12. The merged rig's selectors — verify, do not assume
+
+Three lanes corrected `scripts/webkit-repeat-run.mjs` for line drift, each fixing a *different*
+selector in the same file:
+
+| lane | `sk-progress` items 1–5 | `sk-workflow-board` item 10 |
+|---|---|---|
+| lane-b (WP02) | **416 / 487 / 503 / 523 / 568** — corrected | 557 — stale |
+| lane-c (WP03) | 369 / 440 / 456 / 465 / 510 — stale | **620** — corrected |
+| lane-a (WP01) | original 369 / 440 / 456 / 465 / 510 | original 557 |
+
+Because they touched different lines, git merges both cleanly and the composed rig **should** carry
+`416/487/503/523/568` *and* `620`. That is a prediction, not a result.
+
+**This mission has been bitten by stale selectors three times**, and the third time — run
+`35360910036` — items 4 and 5 came back `NO MATCHING RESULTS` because the numbers were one line off.
+Playwright **silently drops a `file:line` selector that matches nothing** when it is mixed with valid
+ones, so the run looks normal and simply omits the item; only WP01's rig guard turns that into a
+visible failure rather than a false zero.
+
+**Check on the merged tree, before the final push:**
+
+```sh
+for n in 416 487 503 523 568; do sed -n "${n}p" apps/storybook/src/tests/sk-progress.spec.ts; done
+sed -n '620p' apps/storybook/src/tests/sk-workflow-board.spec.ts
+```
+
+Every line must be a `test(` declaration for the intended item. If any is not, the merged rig is
+wrong even though every lane was individually right — and the failure mode is a silently missing
+measurement, not a red run.
