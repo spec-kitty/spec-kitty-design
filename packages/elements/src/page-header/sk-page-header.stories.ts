@@ -111,14 +111,8 @@ const longBody = (rows = 40) => `
       </p>`).join('')}
   </div>`;
 
-// `padding-block-end` is REQUIRED, not cosmetic (#456). `scroll-margin-block-start` can only lift
-// a focused row clear of the sticky header if the container still has scroll range to spend. At
-// maximum scroll there is none, so the last rows stay under the header at ANY margin value —
-// measured under webkit: 16 of 16 failures reported `atMaxScroll=true, scrollRemaining=0`, four of
-// them against an 18rem (288px) margin over a 205.8px header, which is far more than large enough.
-// Trailing room equal to the margin guarantees the final row can always be scrolled clear.
 const scroller = (content: string, height = '100vh', className = '', extraStyle = '') => `
-  <div data-scroller${className ? ` class="${className}"` : ''} style="${storyFrameStyle}; min-height: 0; height: ${height}; overflow: auto; padding-block-end: var(--sk-layout-page-header-sticky-scroll-margin)${extraStyle ? `; ${extraStyle}` : ''}">
+  <div data-scroller${className ? ` class="${className}"` : ''} style="${storyFrameStyle}; min-height: 0; height: ${height}; overflow: auto${extraStyle ? `; ${extraStyle}` : ''}">
     ${content}
   </div>`;
 

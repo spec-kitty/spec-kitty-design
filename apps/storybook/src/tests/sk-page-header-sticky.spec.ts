@@ -162,6 +162,16 @@ for (const { label, id } of WCAG_STORIES) {
         'exhibit the defect',
     ).not.toBe(null);
 
+    // #456. Capture the scroll position BEFORE focus, so the failure message can say whether
+    // focus moved the scroller at all. That is the discriminator this test was missing: a
+    // `scroll-margin` that is too small produces a scroll that lands short, while a browser that
+    // considers an occluded-but-in-scrollport row "already visible" produces NO scroll at all,
+    // and those need different fixes. An earlier round read `atMaxScroll=true` in 16 of 16
+    // failures as the cause, shipped a fix for it, and the failures continued at the same rate --
+    // it was where the test had left the scroller, not why focus failed to lift the row.
+    const scrollBeforeFocus = await page.evaluate(
+      () => document.querySelector('[data-scroller]')!.scrollTop,
+    );
     await page.locator(`a[href="${target.href}"]`).focus();
 
     const geometry = await page.evaluate(() => {
@@ -186,6 +196,7 @@ for (const { label, id } of WCAG_STORIES) {
         focusedBottom: focused.bottom,
         focusedHeight: focused.height,
         scrollTop: Math.round(scroller.scrollTop),
+        scrollPaddingBlockStart: getComputedStyle(scroller).scrollPaddingBlockStart,
         scrollRemaining: Math.round(remaining),
         atMaxScroll: remaining <= 1,
         appliedScrollMargin: getComputedStyle(active).scrollMarginBlockStart,
@@ -206,11 +217,17 @@ for (const { label, id } of WCAG_STORIES) {
       `${label}: the focused row spans ${geometry.focusedTop}-${geometry.focusedBottom} against a ` +
         `header bottom edge at ${geometry.headerBottom} (header height ${geometry.headerHeight}) ` +
         '— the sticky header covers it. ' +
-        `[scrollTop=${geometry.scrollTop}, scrollRemaining=${geometry.scrollRemaining}, ` +
+        `[scrollBeforeFocus=${scrollBeforeFocus}, scrollTop=${geometry.scrollTop}, ` +
+        `focusMovedScroller=${geometry.scrollTop !== scrollBeforeFocus}, ` +
+        `scrollPadding=${geometry.scrollPaddingBlockStart}, ` +
+        `scrollRemaining=${geometry.scrollRemaining}, ` +
         `atMaxScroll=${geometry.atMaxScroll}, scroll-margin-block-start=` +
         `${geometry.appliedScrollMargin}] — atMaxScroll=true means the container had no range ` +
         'left to honour the margin, which no token value can fix; atMaxScroll=false with a ' +
-        'margin smaller than the header height means the token is short.',
+        'margin smaller than the header height means the token is short. ' +
+        'focusMovedScroller=false means focus did not scroll AT ALL — the browser treated an ' +
+        'occluded row as already visible, which no margin value can change and which ' +
+        'scroll-padding on the container is the mechanism for.',
     ).toBeGreaterThanOrEqual(geometry.headerBottom);
   });
 }
