@@ -141,3 +141,94 @@ not conclusive, and a still-rotating B as strong evidence against the contention
 `--workers` is a measurement control and is stated in the rig banner alongside retries and
 engine, so no count can be read without its scheduling condition. It is never a fix: pinning
 it would not change what the ordinary `playwright` job does.
+
+---
+
+# Result
+
+## The paired experiment refuted the budget hypothesis
+
+Run `35370228073` @ `4c311809`, with the settle-budget fix already in place, still failed — and
+the diagnostic added by that fix is what identified the real cause:
+
+```
+host is not visible [polls=148, stableReads=0, fonts=ready]
+```
+
+- `fonts=ready` — the font wait **never timed out**. Finding 1 was a real defect but was **not
+  the cause of these failures**.
+- `polls≈148` over a 5000ms budget is ~33ms per poll: two rAF at 60fps. **Nothing was
+  CPU-starved.** Starvation would have shown far fewer polls.
+- The host was absent for ~150 consecutive checks. It was not slow. It was **gone**.
+
+Recorded plainly because the investigation was directed at finding a shared cause, and the first
+one proposed was wrong: the fix stands on its own merits (a budget spent twice, and a message
+that threw its own initializer), but it did not fix these failures. What it contributed was the
+diagnostic that made the next step possible.
+
+**The experiment's own measurement, at `4c311809`, same runner, same build:**
+
+| arm | workers | failures / 80 |
+|---|---|---|
+| A (inherited) | 2 | **6** (7.5%) |
+| B (control) | 1 | **1** (1.25%) |
+
+Real, ~6×, and arm B ran second on the warmed machine — the harder condition. But contention was
+the *trigger*, not the mechanism.
+
+## Finding 4 — the root cause: injecting over a story that had not rendered yet
+
+`page.goto` resolves at `load`. Storybook renders the story into `#storybook-root` **on the
+client, after that**. `loadComposition` overwrote the root immediately, so whenever Storybook's
+render landed second it replaced the root's children and destroyed the injected composition —
+which is then never re-added, for the whole budget.
+
+This explains every observation at once: the healthy poll cadence, the satisfied font wait, the
+host absent rather than late, and the contention sensitivity — contention delays Storybook's
+render *past* the injection.
+
+**The repo already had the right pattern.** `openStory` in `sk-workflow-board.spec.ts` waits for
+the story's own root to be visible and never injects over it. `sk-team-overview-shell-layout` was
+the only spec injecting over a rendered story, and the only one that rotated.
+
+**Fixed** in `e150b8f9`: wait for `#storybook-root` to be non-empty and unchanged across three
+consecutive animation frames before injecting — a precondition on observable state, not a
+duration, covering a render that arrives in more than one paint. The failure path also snapshots
+the DOM (host count, `#storybook-root`'s children) so "the root was replaced" and "the host is
+present but not rendering" stop sharing one message.
+
+## Final measurement — run `35371247321` @ `e150b8f9`
+
+webkit, `retries: 0`, selectors verified to resolve before each invocation (11, 5, 5).
+
+| section | workers | executions | result |
+|---|---|---|---|
+| Main rig, all 12 items | 2 (inherited) | 200 | **200 passed, 0 failed** |
+| Arm A | 2 (inherited) | 80 | **80 passed, 0 failed** |
+| Arm B | 1 (control) | 80 | **80 passed, 0 failed** |
+
+**360 webkit executions, zero failures, zero flakes.** Every one of the twelve items 10/10,
+including 6–9 and 10.
+
+Arm A went **74/80 → 80/80** across the fix. That is the confirmation: the contention sensitivity
+was a *consequence* of the render race, and removing the race removed it too. Had the mission
+acted on the contention measurement alone, the result would have been a serialized rig and a
+suite that still flaked.
+
+## Disposition of the four findings
+
+| # | Finding | Status |
+|---|---|---|
+| 1 | `settleComposition` spent one budget twice; threw its initializer as a measurement | Fixed (`5a3d2ddc`). Real defect; **not** the cause of the observed failures. Its diagnostic found the cause. |
+| 2 | Item 10's scroll baseline captured after the key press | Fixed (`90aa3a50`). Item 10: 8–9/10 across four samples → **10/10 across 30 executions**. |
+| 3 | Rig dropped stale selectors silently; both arms skipped while the job reported success | Fixed (`4c311809`). The guard refused four stale selectors one commit later. |
+| 4 | Injection raced Storybook's client render — **root cause** | Fixed (`e150b8f9`). 360/360. |
+
+## Withdrawn
+
+WP04's `RED-FIRST-PROOF (c)` stubbed `document.fonts.ready` to never resolve, observed a throw at
+~5000ms naming "host is not visible", and recorded it as proof the guard worked. That throw was
+Finding 1's bug — the zero-iteration path throwing its initializer. The marker is retained and
+labelled WITHDRAWN rather than deleted, and **no replacement proof is claimed**, because none has
+been captured. A red-first proof confirms whatever the code currently does; it is evidence that a
+mutation changes behaviour, never that the behaviour it lands on is correct.

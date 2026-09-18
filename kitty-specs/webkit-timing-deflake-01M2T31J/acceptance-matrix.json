@@ -2,7 +2,7 @@
   "mission_slug": "webkit-timing-deflake-01M2T31J",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "blocked-on-sc-007",
+  "overall_verdict": "sc-007-met; remaining partials are evidence-completeness, not defects",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -18,7 +18,7 @@
       "criterion_id": "FR-002",
       "description": "Preserve the forced-colors distinction",
       "proof_type": "automated_test",
-      "evidence": "sk-progress:416 (not :369, which at the reviewed SHA is inside an unrelated earlier test's comment \u2014 see FR-013's own precedent for citing by test title where lines drift) assertions unchanged in substance; red-first run 35358002926 shows 0/10 when the fill is made full-width under forced colors.",
+      "evidence": "sk-progress:416 (not :369, which at the reviewed SHA is inside an unrelated earlier test's comment — see FR-013's own precedent for citing by test title where lines drift) assertions unchanged in substance; red-first run 35358002926 shows 0/10 when the fill is made full-width under forced colors.",
       "pass_fail": "pass",
       "verified_by": "orchestrator",
       "verified_at": "2026-09-18T16:03:18.897139+00:00",
@@ -68,20 +68,20 @@
       "criterion_id": "FR-007",
       "description": "Guarantee the composition is present",
       "proof_type": "automated_test",
-      "evidence": "WP04 settleComposition: awaits document.fonts.ready, host visibility, four shadow parts non-zero, four frame-tied stable geometry reads; throws naming what was missing. The two RED-FIRST-PROOF markers for this helper name no run id, no mutation commit, no revert commit and no engine, unlike the mission's other seven markers (see evidence/PRE-MERGE-GATES.md #14, C-005 requires webkit CI as authority and none was produced for this pair) -- reachability of both throw paths was established by code trace and reviewer inspection (WP04 review-cycle-1: 'verified by code trace, not by executing webkit/chromium locally... Could not independently verify the exact CI run IDs'), which is a real but different, weaker form of verification than the CI-captured red-first proofs the mission otherwise relies on. Separately, the comment's 'Item 9-dark improved (7/10 -> 9-10/10)' and item-8 '8/10 pre-fix' claims are not demonstrated deltas: evidence/T003-baseline.md's second sample reads 9/10 dark and 10/10 respectively on UNMODIFIED code -- both inside the claimed post-fix range, from baseline noise alone.",
-      "pass_fail": "partial",
-      "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T16:03:18.897139+00:00",
-      "notes": "Downgraded by the pre-merge squad, findings F2 and F4. The settling defect itself is real (WP04's fonts.ready + structural-presence fix is genuine and reviewed), but 'two red-first proofs, reverted' overstated what exists for settleComposition specifically, and the item 8/9-dark improvement language is not supported against baseline's own noise. A concurrent seat is adding real chromium-local red-first proofs to this same helper for an unrelated code finding (F1); the marker text and improvement claim in the .spec.ts file itself were not hand-edited here to avoid colliding with that in-flight work, and still need the same correction once it lands."
+      "evidence": "Run 35371247321 @ e150b8f9: 360 webkit executions across three sections, zero failures, where the failing mode was specifically 'the composition is absent'. The guarantee is now structural as well as empirical: loadComposition waits for Storybook's own render to settle before injecting, so the composition can no longer be destroyed by a render arriving second, and settleComposition's poll loop is do/while so a zero-reading throw is impossible.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator (claude)",
+      "verified_at": "2026-09-18",
+      "notes": "Upgraded on the functional claim. DISCLOSED, and the reason this is not a clean upgrade: WP04's RED-FIRST-PROOF (c) for this helper has been WITHDRAWN -- it stubbed document.fonts.ready to never resolve, saw a throw naming 'host is not visible', and recorded that as proof the guard worked, when that throw WAS the zero-iteration defect throwing its own initializer. No replacement proof is claimed because none has been captured. The red-first-proof shortfall therefore still stands and is carried by NFR-003 and SC-002, which remain partial; it is not resolved by this row."
     },
     {
       "criterion_id": "FR-008",
       "description": "Establish the geometry assertion's premise",
       "proof_type": "measurement",
-      "evidence": "WP04 T032: three faces (Inter, Georgia, Courier) x two viewports = nine readings, all exactly 56.00/240.00px. Corroborated by fixed grid tracks + min-width:0. CHROMIUM-ONLY probe; no webkit font-probe was run.",
+      "evidence": "WP04 T032: three faces (Inter, Georgia, Courier) x two viewports = nine readings, all exactly 56.00/240.00px. Corroborated by fixed grid tracks + min-width:0. CHROMIUM-ONLY probe; no webkit font-probe was run. UPDATE (run 35371247321 @ e150b8f9): item 6 is now 10/10 at both 1280px and 1440px in all three sections, which strengthens the indirect corroboration -- but a direct webkit font-probe of the 56.00/240.00px premise still has not been run, so this stays partial for exactly the reason recorded below.",
       "pass_fail": "partial",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "verified_at": "2026-09-18",
       "notes": "Downgraded by the pre-merge squad, finding F7, for consistency with FR-010/NFR-006/SC-004, which carry 'partial' for the identical reason (a chromium-only measurement standing in for a webkit claim). The CSS-Grid mechanism is engine-independent in principle and item 6's own webkit post-fix data is corroborating (it got the same font/structural fix that measurably helped items 8/9 and showed no improvement, consistent with a non-font-metric residual cause) -- but that is indirect corroboration of item 6's overall pass rate, not a direct webkit measurement of the 56.00/240.00px premise itself. No webkit font-probe was run, so the direct claim stays chromium-only exactly like the other three criteria."
     },
     {
@@ -138,11 +138,11 @@
       "criterion_id": "NFR-001",
       "description": "Repeat-run stability",
       "proof_type": "automated_test",
-      "evidence": "Items 1,2,5 at 10/10; item 10 10/10; items 6-9 measured as deltas. ITEM 3 IS 9/10 IN ONE OF THREE SAMPLES. ITEM 4 IS 9/10 IN TWO OF THREE SAMPLES (run 35362552560 in addition to the earlier one).",
-      "pass_fail": "partial",
-      "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T16:03:18.897139+00:00",
-      "notes": "Not met for items 3 and 4. Corrected by the pre-merge squad, finding F6: item 4 was previously omitted from this row despite its own results table (evidence/WP02-sk-progress.md) showing a non-10/10 sample; a third sample (35362552560) confirms it. Recorded rather than rounded up."
+      "evidence": "Items 3 and 4 -- the two that previously read 9/10 -- are 10/10 in each of the three most recent samples: runs 35368301281 @ 026e225b, 35370228073 @ 4c311809 and 35371247321 @ e150b8f9. Items 6-9 are 10/10 in all three sections of 35371247321. Item 10 is 10/10 across 30 executions in that run, having been 8-9/10 in four earlier samples.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator (claude)",
+      "verified_at": "2026-09-18",
+      "notes": "Met. The earlier non-10/10 readings for items 3 and 4 are retained in the record rather than rounded away -- they are real measurements that predate the fixes, not noise to be discarded. Item 10's own cause was Finding 2: its scroll baseline was captured after the key press, so it failed precisely when the scroll was fast."
     },
     {
       "criterion_id": "NFR-002",
@@ -328,11 +328,11 @@
       "criterion_id": "SC-001",
       "description": "All twelve items green across 10 repeats",
       "proof_type": "automated_test",
-      "evidence": "Items 1,2,5,10,11,12 clean. ITEM 3 9/10 in one of three samples. ITEM 4 9/10 in two of three samples (35362552560). Items 6,7,8,9 measured but within the rig's own cross-run noise.",
-      "pass_fail": "partial",
-      "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T16:03:18.897139+00:00",
-      "notes": "Not a clean sweep. See NFR-001. Corrected by the pre-merge squad, finding F6, to move item 4 out of the 'clean' list."
+      "evidence": "Run 35371247321 @ e150b8f9: all twelve items 10/10 under webkit at --retries=0. Items 1-5 10/10; items 6-9 10/10 at both parameterized viewports/themes; item 10 10/10; item 11 10/10; item 12 10/10 across all six modes. Corroborated for items 6-10 by two further sections (arms A and B) at 80/80 each.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator (claude)",
+      "verified_at": "2026-09-18",
+      "notes": "Clean sweep achieved. The earlier 'not a clean sweep' entry is superseded rather than deleted: items 3 and 4 read 9/10 in samples taken before WP02's phase-pinning correction, and items 6-9 rotated before Finding 4 was fixed. Both are recorded in evidence/SHARED-CAUSE-INVESTIGATION.md."
     },
     {
       "criterion_id": "SC-002",
@@ -388,11 +388,11 @@
       "criterion_id": "SC-007",
       "description": "Zero failures in the final pre-merge run",
       "proof_type": "automated_test",
-      "evidence": "Run 35364818013 at the reviewed SHA a4facaa2, webkit, --retries=0, --repeat-each=10: items 1-7 all 10/10 (both viewports where parameterized); ITEM 8 = 8/10 (2 failed); ITEM 9 = 9/10 dark AND 9/10 light. Items 10, 11, 12 clean.",
-      "pass_fail": "fail",
-      "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T16:03:18.897139+00:00",
-      "notes": "FAILS as written. Recorded as fail rather than rewritten to fit the result. The criterion was MIS-SPECIFIED by the orchestrator: it demands zero failures across all twelve items, while FR-013 explicitly permits items to be reported unfixed with evidence - and WP04 did exactly that for items 6-9, stating they showed no measurable improvement above the rig's own cross-run noise. So the mission never claimed items 8 and 9 were fixed; SC-007 asserted a bar the mission had already, openly, declined to clear. Note also that items 6 and 7 are 10/10 in THIS run having been the doubtful ones earlier, while 8 and 9 moved the other way - which is the cross-run instability the mission documented, not a regression introduced by the fixes."
+      "evidence": "Run 35371247321 @ e150b8f9, webkit, --retries=0, selectors verified to resolve before each invocation. THREE independent sections on one runner: main rig over all twelve items (140+60 = 200 executions) = 200 passed / 0 failed / 0 flaky; experiment arm A, items 6-10 at the inherited workers=2 (80 executions) = 80 passed; arm B, same items at --workers=1 (80 executions) = 80 passed. 360 webkit executions total, zero failures. Every one of the twelve items 10/10.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator (claude)",
+      "verified_at": "2026-09-18",
+      "notes": "PASSES as written, and as written it demanded zero failures across all twelve items -- the bar the previous entry recorded as mis-specified and unmet. It is now met on its own terms rather than reinterpreted. Root cause was Finding 4 (evidence/SHARED-CAUSE-INVESTIGATION.md): loadComposition injected over #storybook-root before Storybook's client-side render had run, so a render landing second destroyed the composition and the host was absent for the whole settle budget. Fixed in e150b8f9 by waiting for the story root to be non-empty and unchanged across three animation frames. Arm A went 74/80 -> 80/80 across that fix, which is what establishes the earlier contention sensitivity as a consequence of the render race rather than an independent cause."
     },
     {
       "criterion_id": "SC-008",
