@@ -57,3 +57,36 @@ tests are sound.
 Between the rig's first run and this one — same unmodified code, about five minutes apart — several
 counts moved (item 3: 6/10 → 3/10; item 9 dark: 10/10 → 7/10). That is CI-side confirmation that
 these are genuinely non-deterministic under webkit, from a source independent of this workstation.
+
+---
+
+## Second sample: the baseline is one reading, not ground truth
+
+Run [35351684955](https://github.com/spec-kitty/spec-kitty-design/actions/runs/35351684955), same rig,
+same settings (webkit, `--retries=0 --repeat-each=10`), from a sibling lane on substantially the same
+code. It disagrees with the table above on four items:
+
+| item | first sample (T003) | second sample |
+|---|---|---|
+| 6 | 9/10 @1280, 10/10 @1440 | 10/10 @1280, **9/10 @1440** |
+| 7 | 10/10 @390, 10/10 @414 | 10/10 @390, **8/10 @414** |
+| 8 | 8/10 | **10/10** |
+| 9 | 7/10 dark, 10/10 light | 9/10 dark, **9/10 light** |
+| 10 | 8/10 | 9/10 |
+| 11 | 10/10 | 10/10 |
+| 12 | 60/60 | 60/60 |
+
+**Item 7 reproduces after all** — at 414px, roughly a 20% rate. The first sample's 20/20 was
+undersampling, not evidence of soundness. Item 6 has now failed at *both* viewports across the two
+samples, and item 9 has now failed in *light* mode as well as dark.
+
+**Consequences, and they bind the mission's grading:**
+
+1. **A single 10-repeat run does not establish that an item is clean**, and does not pin a failure rate. SC-001's delta rule still holds, but "already green at baseline" must mean green across more than one sample before an item is set aside as not-reproduced.
+2. **The per-item counts in the first table are one observation each.** Where a number carries a conclusion, take more than one reading and state how many.
+3. Items 11 and 12 are now clean across **two** independent samples, which is meaningfully stronger evidence than one — though still not proof.
+4. The shell-layout items' failures move between viewports and themes across runs. That argues against a viewport- or theme-specific cause and for something common to all four, which supports Correction 5's shared-helper thesis rather than the font-metric one.
+
+This entry exists because the first table was about to be used as ground truth by four work packages.
+It is a measurement, and measurements have variance; the mission should have sampled twice before
+grading anything against one run.
