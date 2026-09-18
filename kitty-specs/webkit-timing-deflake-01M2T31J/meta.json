@@ -10,5 +10,7 @@
   "purpose_tldr": "webkit timing deflake",
   "slug": "webkit-timing-deflake-01M2T31J",
   "target_branch": "mission/webkit-deflake",
-  "topology": "single_branch"
+  "topology": "single_branch",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-18T11:30:36.488689+00:00"
 }

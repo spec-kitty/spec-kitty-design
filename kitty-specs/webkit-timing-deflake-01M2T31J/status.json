@@ -19,19 +19,29 @@
   "work_packages": {
     "WP01": {
       "actor": "user",
-      "agent": "claude",
+      "agent": null,
       "force_count": 1,
       "lane": "planned",
       "last_event_id": "01M2T4TEYQRRHMVS7V5QAYVTJW",
       "last_transition_at": "2026-09-18T11:35:55.607696+00:00",
+      "review": null,
       "review_result": {
         "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/453/spec-kitty-design/kitty-specs/webkit-timing-deflake-01M2T31J/tasks/WP01-webkit-repeat-run-rig/review-cycle-1.md",
         "reference": "review-cycle://webkit-timing-deflake-01M2T31J/WP01-webkit-repeat-run-rig/review-cycle-1.md",
         "reviewer": "user",
         "verdict": "changes_requested"
       },
-      "shell_pid": 562438,
-      "shell_pid_created_at": "1789731035.33"
+      "shell_pid": null,
+      "shell_pid_created_at": null,
+      "subtasks": {
+        "T001": "planned",
+        "T002": "planned",
+        "T003": "planned",
+        "T004": "planned",
+        "T005": "planned",
+        "T006": "planned",
+        "T007": "planned"
+      }
     },
     "WP02": {
       "actor": "finalize-tasks",
