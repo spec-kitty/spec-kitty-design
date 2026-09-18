@@ -84,6 +84,20 @@ export function parseDiffHunks(diffText) {
 const addedOf = (hunk) => hunk.lines.filter((l) => l.startsWith('+') && !l.startsWith('+++')).map((l) => l.slice(1));
 const removedOf = (hunk) => hunk.lines.filter((l) => l.startsWith('-') && !l.startsWith('---')).map((l) => l.slice(1));
 
+/**
+ * SCOPE, deliberately narrow: only Playwright spec files and playwright.config.ts can carry a
+ * real suppression of THESE tests — `test.skip(`, `retries:`, a timeout literal. Without this
+ * filter, the scan false-positives on every mission markdown artifact that merely QUOTES these
+ * patterns in prose (spec.md/plan.md/tasks.md all discuss `test.skip`, `retries: 2`, etc. at
+ * length — reproduced: running this scan unfiltered over this mission's own planning artifacts
+ * reports dozens of "violations" that are sentences, not code) and on this script's OWN source
+ * (its pattern definitions and --selftest fixtures literally contain the strings it looks for).
+ * A scan that cries wolf on prose is exactly as untrustworthy as one that misses real code — the
+ * "does not cry wolf" selftest case below is what holds this filter to that.
+ */
+const SCANNABLE_FILE_RE = /(\.spec\.tsx?$)|(\.test\.tsx?$)|(^|\/)playwright\.config\.ts$/;
+const isScannable = (file) => typeof file === 'string' && SCANNABLE_FILE_RE.test(file);
+
 const NUMERIC_TIMEOUT_RE = /\b(?:timeout|waitForTimeout|setTimeout)\s*[:(]\s*(\d+)/g;
 
 function extractTimeoutValues(text) {
@@ -109,6 +123,7 @@ export function scan(hunks) {
   };
 
   for (const hunk of hunks) {
+    if (!isScannable(hunk.file)) continue;
     const added = addedOf(hunk);
     const removed = removedOf(hunk);
     const addedText = added.join('\n');
@@ -279,6 +294,18 @@ function selftest() {
   );
 
   define(
+    'a markdown file merely QUOTING test.skip( in prose is NOT flagged — the file-scope filter, ' +
+      'the exact regression reproduced against this mission\'s own spec.md/plan.md/tasks.md',
+    [
+      'diff --git a/kitty-specs/some-mission/notes.md b/kitty-specs/some-mission/notes.md',
+      '@@ -1,1 +1,2 @@',
+      '-Old prose.',
+      "+The scan looks for `test.skip(`, `.only(`, and `retries: 2` across the mission diff.",
+    ].join('\n'),
+    (f) => suppressionCount(f) === 0,
+  );
+
+  define(
     'an entirely unrelated, clean diff produces zero findings across every rule — the scan does not cry wolf',
     [
       'diff --git a/docs/design-system/using-tokens.md b/docs/design-system/using-tokens.md',
@@ -303,7 +330,7 @@ function selftest() {
     console.log(`${ok ? '✅' : '❌'} ${c.name}${error ? ` (threw: ${error})` : ''}`);
   }
 
-  const PROBE_FLOOR = 9;
+  const PROBE_FLOOR = 10;
   if (cases.length < PROBE_FLOOR) {
     console.error(`\n❌ the probe table has shrunk: ${cases.length} against a floor of ${PROBE_FLOOR}.`);
     process.exitCode = 1;
