@@ -79,10 +79,18 @@ runs. Ten sequential ~25-minute jobs was never viable and the artifacts should n
 
 ### Correction 5 — the shell-layout tests share a helper, and it is the suspect
 
-Items 6–9 all obtain their subject through `loadComposition`. On the train, item 7's failing attempt
-reported `expect(getByTestId('overview-shell')).toBeVisible()` timing out at 5000ms — *element(s) not
-found*. The composition never appeared. (It was reported `flaky`, i.e. it passed on retry — the
-failure is real, the retry merely hid it.) One shared helper, four affected tests, and a failure mode that is
+Items 6–9 all obtain their subject through `loadComposition`.
+
+**The evidence originally offered for this was the wrong item.** It rested on item 7's
+`expect(getByTestId('overview-shell')).toBeVisible()` timing out at 5000ms — but WP01's measured
+baseline puts item **7 at 20/20, the one shell-layout item the rig cannot reproduce**, while its
+three file-mates all show real distributions: item 6 at 9/10 (1280px), item 8 at 8/10, item 9 at 7/10
+(dark). So the inference stands on 6, 8 and 9; the evidence quoted for it does not.
+
+The `loadComposition` timeout **has** been observed — on the train run and on this branch's own
+baseline run, where item 8 (`:303`) failed inside the helper at `sk-team-overview-shell-layout.spec.ts:78`.
+That is the citation to use. Item 7's 20/20 is recorded here so a seat does not hunt a signature the
+rig never shows. One shared helper, four affected tests, and a failure mode that is
 precisely "the helper's product is absent". This is a far stronger lead than the font-metric theory,
 which remains worth measuring (IC-04) but is no longer the primary hypothesis.
 
@@ -215,8 +223,9 @@ Claim no root cause for the stop before its error text has been read (C-004).
 
 **Covers**: NFR-004, SC-005.
 
-The pre-mission `playwright` duration is **25.6 min** (the run at the train tip). Record the final
-run's duration and the delta. Added as an explicit concern because the analysis found NFR-004/SC-005
+Three runs of substantially the same suite measured **25.6, 26.7 and 22.5 min** — an 18.7% spread.
+Record the final run's duration **against that band**, not as a delta from any single figure: a
+result inside 22.5–26.7 passes, one outside is investigated and explained. Added as an explicit concern because the analysis found NFR-004/SC-005
 had zero subtasks owning them.
 
 ### IC-08 — Make the suppression count mechanical, and report the mission once

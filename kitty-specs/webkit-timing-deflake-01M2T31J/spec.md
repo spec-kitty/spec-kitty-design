@@ -21,8 +21,15 @@ one Storybook config path; it does not touch four of the five specs affected. Th
 any one branch — the pre-mission flaky test is in the same spec as three of the others.
 
 The recurring shape is that a test waits for a **duration** and then asserts on whatever the runner
-happened to render by then. Every affected test asserts something real; the defect is in *when* it
-looks, not in *what* it claims.
+happened to render by then. Every affected test asserts something real.
+
+**This framing is falsified for items 1 and 4 and must not be applied to them.** WP01's measured
+baseline (`evidence/T003-baseline.md`) has both at **0/10** under `retries: 0` — they fail every
+repeat, while other items in the same run show real distributions (3/10, 7/10, 8/10, 9/10). A
+deterministic failure is not a race. Both passed before the font change, so a **component regression
+under webkit is a live candidate for them**, alongside the plan's unsettled-fixture hypothesis (which
+0/10 does not refute — a fixture that never paints inside the wait also fails every repeat). WP02
+must keep both branches open; see C-007 and C-011 for what to do if the component is implicated.
 
 One adopted item is different in kind and is kept separate throughout: the behaviour suite's webkit
 lane stops mid-queue with **zero test failures**, and its cause is unreadable because the job log
@@ -34,6 +41,11 @@ This table is the single source of truth for what is in scope. Any count stated 
 with it: **twelve items across five specs** (item 12 is itself the adopted action-row family).
 Separately in scope, and NOT one of the twelve because it is not a test, is the behaviour-suite lane
 stop and its log truncation (WP06).
+
+**For grading NFR-001 and SC-001, `evidence/T003-baseline.md` governs, not this column.** The
+Observed column records how each item first surfaced, under ordinary CI with `retries: 2`; the
+baseline records measured pass counts under `retries: 0`. Where they disagree, the baseline is the
+measurement and this column is the history.
 
 Observed states are quoted exactly as the runs reported them. Note that under `retries: 2` a CI
 `flaky` line means the test **did fail at least once** and passed on retry — it is a failure that was
@@ -87,6 +99,7 @@ all pass every repeat. Then reintroduce the defect each one guards and watch tha
 5. **Given** the fixes, **When** the indeterminate fill is made full-width under forced colors, **Then** item 1 fails.
 6. **Given** the fixes, **When** the reduced-motion rule is removed, **Then** item 4 fails.
 7. **Given** the fixes, **When** the sweep animation is removed, **Then** item 3 fails.
+8. **Given** T010's instrumentation shows the fixtures **were** painted when sampled, **Then** the unsettled-fixture hypothesis is refuted for that item and the remaining candidate is a rendering difference under webkit — which is reported as a **C-007 component finding** (and, if it lands as a change, carries C-011's visual diff and maintainer approval), never worked around in the test.
 
 ---
 
@@ -238,7 +251,7 @@ unhandled-errors section and the reporter's verdict line are both present.
 
 ### Measurable Outcomes
 
-- **SC-001**: All twelve scope items report zero failures and zero flakes across 10 repeats under the rig, with `retries: 0`.
+- **SC-001**: All twelve scope items report zero failures and zero flakes across 10 repeats under the rig, with `retries: 0` — **measured as a delta against the T003 baseline, never as an absolute**. Items 7, 11 and 12 already pass at baseline (20/20, 10/10, 60/60), so a green result for them proves nothing about this mission's work. Each such item must either (a) be demonstrated failing under some other condition — greater repeat count, full-suite contention — and then held green, or (b) be reported **not reproduced** under FR-013 and SC-008. Neither may be counted as fixed. A work package whose entire scope is already green at baseline cannot be closed on an empty diff.
 - **SC-002**: Recorded red-first proofs equal rewritten assertions; neither is zero. **WP01's scan reports both counts**; equality is not left to per-WP self-report.
 - **SC-003**: Zero assertions deleted, skipped, `fixme`-ed, quarantined or retry-wrapped; zero tolerances widened; zero wait durations increased. **Verified mechanically** by a scan of the mission diff for `test.skip`, `test.fixme`, `.only`, added `retries`, and increased numeric timeout literals — not by self-report alone.
 - **SC-004**: The behaviour-suite job log ends with the reporter's verdict line; before/after sizes reported.
@@ -246,4 +259,4 @@ unhandled-errors section and the reporter's verdict line are both present.
 - **SC-006**: Every scope item is either fixed with a demonstrated cause, or reported unfixed with its evidence. The two counts sum to **thirteen** — the twelve test items **plus the lane-stop/log-truncation item**, which is in scope and must not fall outside the denominator of the one criterion whose job is to stop items being dropped.
 - **SC-007**: Zero of the twelve items fail or flake in the mission's final pre-merge CI run on this PR. *(Stated as what the mission controls. The train's `gate` aggregates seven jobs this mission does not own, a train push run only exists after landing, and `promote-develop` additionally requires `vars.PROMOTE_DEVELOP_ENABLED == 'true'` — so a green gate alone would not establish that promotion runs. Whether promotion actually resumes is tracked as post-merge follow-up, not as this mission's success criterion.)*
 
-- **SC-008**: A single mission report enumerates every scope item with its verdict, the engine each claim came from (NFR-007), and the `playwright` suite duration against the measured band (25.6 / 26.7 / 22.5 min). FR-013 and NFR-004's after-reading are delivered here.
+- **SC-008**: A single mission report enumerates every scope item with its verdict, the engine each claim came from (NFR-007), and the `playwright` suite duration against the measured band (25.6 / 26.7 / 22.5 min). **It must also embed the output of `scripts/scan-mission-suppressions.mjs` and `scripts/report-playwright-duration.mjs` verbatim.** Neither script is wired into any gate, so SC-002, SC-003 and SC-005 otherwise rest on someone remembering to run them — the same self-certification defect one level along. Binding them into the report means the report cannot be assembled without the numbers. FR-013 and NFR-004's after-reading are delivered here.
