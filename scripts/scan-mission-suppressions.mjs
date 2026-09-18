@@ -368,6 +368,20 @@ function selftest() {
   );
 
   define(
+    'NAMED_BUDGET_RE does NOT fire on an identifier that merely ends in a digit assignment',
+    [
+      'diff --git a/apps/storybook/src/tests/x.spec.ts b/apps/storybook/src/tests/x.spec.ts',
+      '@@ -1,1 +1,2 @@',
+      '   const host = page.getByTestId("x");',
+      '+  const laneCount = 3;',
+    ].join('\n'),
+    // The rule matches identifiers that ANNOUNCE a duration (_MS/Ms/Timeout/Delay/Budget/Deadline/
+    // Wait). A plain count must not be reported as a wait budget, or the disclosure section fills
+    // with noise and stops being read -- which is how a real budget would then slip past.
+    (f) => f.newTimeout.length === 0,
+  );
+
+  define(
     'a numeric separator does NOT truncate the value — `20_000` must read as 20000, not 20',
     [
       'diff --git a/apps/storybook/src/tests/x.spec.ts b/apps/storybook/src/tests/x.spec.ts',
@@ -457,7 +471,7 @@ function selftest() {
     console.log(`${ok ? '✅' : '❌'} ${c.name}${error ? ` (threw: ${error})` : ''}`);
   }
 
-  const PROBE_FLOOR = 10;
+  const PROBE_FLOOR = 14;
   if (cases.length < PROBE_FLOOR) {
     console.error(`\n❌ the probe table has shrunk: ${cases.length} against a floor of ${PROBE_FLOOR}.`);
     process.exitCode = 1;

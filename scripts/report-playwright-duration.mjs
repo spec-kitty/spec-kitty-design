@@ -20,9 +20,10 @@
  * (2) at closeout, after the pre-merge squad (finding F9): **those three figures were WITHDRAWN.**
  * No run id existed for any of them anywhere in the mission tree, and 26.7 turned out to match a
  * MID-mission lane run, so the set was never a pre-mission reference at all. The band was
- * re-measured from ten named, verified, pre-mission runs and is now **19.17–26.85 min, a 40.1%
- * spread** — more than twice what the withdrawn set implied. Do not quote 25.6 / 26.7 / 22.5 or
- * "18.7%" from this file; they survive only in this paragraph, as the thing that was wrong.
+ * re-measured from named, verified, pre-mission runs. **That replacement was itself withdrawn** —
+ * see the constant's own block below, which is the ONLY current statement of the band. Do not
+ * quote 25.6 / 26.7 / 22.5, "18.7%", or the intermediate 19.17–26.85 / 40.1% figures from this
+ * header; all three sets survive here only as the things that were wrong.
  * A 5% tolerance sits well inside even the UNDERSTATED spread, so it could fire on nothing (a
  * genuinely healthy
  * run reading as a regression) and prove nothing (a genuine regression hiding inside the noise
@@ -35,7 +36,8 @@
  * NFR-005's own semantic claim staying a reviewer judgement in scripts/scan-mission-suppressions.mjs).
  *
  * DO NOT hardcode a percentage here again — that is precisely the mistake being corrected.
- * `BASELINE_RUNS_SECONDS` below is the exact, un-rounded set of observed runs; the band is
+ * `BASELINE_RUNS_SECONDS` below is the set of observed readings exactly as Playwright printed
+ * them (one decimal, its own precision — not rounded by this file); the band is
  * DERIVED from them (min/max), never a second, independently-typed figure.
  *
  * WHAT THIS DOES NOT DO
@@ -180,14 +182,14 @@ function report(actualSeconds, label) {
 }
 
 function selftest() {
-  // Boundary cases are pinned to the CURRENT band's edges (19.17 / 26.85). They were pinned to
-  // the previous three-run band's edges (22.5 / 26.7) and had to move when the band was
-  // re-measured from ten verified pre-mission runs -- recorded because a boundary case that
-  // silently keeps passing after the boundary moves proves nothing.
+  // Boundary cases are pinned to the CURRENT band's edges (16.5 / 25.6) and have moved TWICE:
+  // from the withdrawn three-run band (22.5 / 26.7), then from the selection-biased wall-clock
+  // band (19.17 / 26.85). Recorded because a boundary case that silently keeps passing after the
+  // boundary moves proves nothing -- which is exactly what a stale comment claiming the old edges
+  // would have concealed here.
   const cases = [
     { name: 'the band floor (16.5 min suite self-time, run 34650920361) reads inside', seconds: 16.5 * 60, expect: true },
     { name: 'the band ceiling (25.6 min, run 34820757579 — the original single-run baseline) reads inside', seconds: 25.6 * 60, expect: true },
-    { name: 'the original single-run baseline (25.6 min) reads inside', seconds: 25.6 * 60, expect: true },
     { name: 'a value inside the band but equal to none of the eleven runs reads inside', seconds: 20 * 60, expect: true },
     { name: 'just below the band floor (16.4 min) reads OUTSIDE', seconds: 16.4 * 60, expect: false },
     { name: 'just above the band ceiling (25.7 min) reads OUTSIDE', seconds: 25.7 * 60, expect: false },

@@ -57,16 +57,20 @@ verified to resolve before each invocation:
 
 The first attempt at `afe7be3c` read 199/200; the single failure was
 `page.goto: WebKit encountered an internal error`, a browser-level fault absent from ~960 prior
-executions, which did not reproduce on an immediate resample at the same SHA. Recorded, not
-discarded — tracked in #456.
+executions, which did not reproduce. Precisely: run `35375265259` was RE-RUN, so it has two
+attempts — attempt 1 read 199/200, attempt 2 read 200/200. GitHub surfaces only the latest
+attempt, so opening that run id shows `success` and no trace of the fault; attempt 1 is reachable
+via the attempts API. Recorded, not discarded — tracked in #456.
 
 ## Scope of the claim
 
 "Zero failures" means **the mission's twelve canonical items under webkit at `--retries=0`**. It
 does **not** mean the whole `playwright` job is flake-free. The closeout CI run `35375268744` is
 fully green (`gate: success`) and still reports **1 flaky** — `sk-notice-forced-colors.spec.ts:121`,
-never in scope. Pre-mission runs carried 1–3 flaky each; two of those were mission items and are
-fixed. The rest is enumerated with run ids in **#456**, so #453 closing cannot be read as "the
+never in scope. Pre-mission runs carried flaky tests too — including, in at least one run, items
+6, 9 and 10, which are fixed. No single number characterises a run: one run's log prints several
+different flaky counts across its invocations, which is why the earlier "1–3 flaky each" claim is
+retracted below rather than replaced with another figure. The rest is enumerated with run ids in **#456**, so #453 closing cannot be read as "the
 webkit lane is de-flaked".
 
 ## What this mission got wrong, in order
@@ -95,9 +99,18 @@ by the author noticing.
    fired if the hunk also *removed* a timeout. Four new budgets were invisible. Repaired; all four
    are now visible.
 9. **The duration band `[25.6, 26.7, 22.5]` had no run id for any figure**, and one was a
-   mid-mission lane run. Re-measured from ten named pre-mission runs: **19.17–26.85 min**. The
-   mission's original NFR-004 ("within 5% of 25.6 min") would have fired on **six of those ten
-   unmodified runs**.
+   mid-mission lane run.
+10. **Its first replacement was selection-biased.** It named ten run ids and stated a method —
+   but re-running that method yields 109 qualifying runs and the ten shipped were ranks 94–109,
+   the slowest tail, with 93 qualifying runs below the claimed floor. The ids were checkable; the
+   method was not.
+11. **And it mixed instruments.** 25.6 is Playwright's suite self-time; 26.85 is job wall-clock.
+   Comparing a wall-clock reading against a self-time band manufactured an "OUTSIDE the band"
+   result that did not exist, and a retry-cost explanation was built on top of it. Both retracted.
+   Corrected basis: suite self-time over comparable work, n=11, **16.5–25.6 min**, closeout 16.8
+   min **inside**. The original "within 5% of 25.6" would have fired on **8 of the 11** — an
+   earlier revision said "six of ten", which was computed on the biased set *and* inverted the
+   pass count for the fire count.
 
 ## Per-item verdicts (SC-008's actual requirement)
 
@@ -118,7 +131,7 @@ Every scope item, its verdict, and the engine the claim came from. All stability
 | 9 | axe-clean, dark and light | **Fixed** — same race; 10/10 both | webkit |
 | 10 | focused overflow keyboard scroll | **Fixed** — baseline captured after the key press, so it failed when the scroll was *fast*; 10/10 | webkit |
 | 11 | required legend cue across two stories | **NOT REPRODUCED** — clean in four samples including the exact full-suite contention condition of its original sighting (`35352049054`). No defect found, no code change, WP05 closed on a negative result per FR-013 | webkit |
-| 12 | external controls, six modes | **Already green at baseline** — 10/10 in every sample; no change claimed | webkit |
+| 12 | external controls, six modes | **Already green at baseline** — 10/10 in every sample. The spec WAS rewritten (15 insertions in `sk-action-row.spec.ts`) and red-first proved (`35354582083`, mutation `f11a33c2`, revert `ee093dbe`); what is not claimed is a *stability* improvement, since there was no instability to improve | webkit |
 | 13 | behaviour-suite lane stop (WP06) | **Observability improved, stop NOT fixed** — the package never promised to fix it. The job log no longer truncates before the error; the underlying stop is unchanged | n/a (log volume) |
 
 ### Reported unfixed, carried forward
@@ -145,7 +158,9 @@ cost. **Both were wrong, and both are retracted** — the squad's evidence lens 
 - The retry explanation was independently falsified: `34820757579` and the closeout run report the
   **same 1 flaky and the same 2777 passed / 147 skipped**, 8.8 min apart. Retry cost cannot
   account for that.
-- "Pre-mission runs carried 1–3 flaky" was also false — `34606532461` carried **5**.
+- "Pre-mission runs carried 1–3 flaky" was also false — `34606532461` carried **5**, and its five
+  include items 6, 9 and 10. The deeper error was quoting a single flaky number per run at all: a
+  run's log prints a separate count per invocation (run `35381688538` prints 1, 2 *and* 3).
 
 The band itself was rebuilt for the same reason. Its first replacement stated a method that its
 own set did not satisfy: re-running the stated method yields 109 qualifying runs, and the ten

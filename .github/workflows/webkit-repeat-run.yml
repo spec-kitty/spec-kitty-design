@@ -8,10 +8,10 @@
 # WHY `on.push` AS WELL AS `workflow_dispatch`: `workflow_dispatch` alone is not usable until
 # this exact file reaches the repository's default branch — ci-quality.yml's own
 # `workflow_dispatch` entry carries the identical caveat in a comment for the identical reason
-# (research.md R18). Scoping `on.push` to this mission's own branches (its integration branch
-# and its lane worktree branches) is what lets the rig actually run — and be measured — WHILE
-# the mission is still in flight, which is the whole point of a pre-fix baseline (T003).
-# `workflow_dispatch` stays declared for reuse once this file lands on main.
+# (research.md R18). During the mission `on.push` was scoped to its integration and lane
+# branches; those are deleted at merge, so the glob is now the branch-name namespace declared
+# under `on.push` below. The reasoning is unchanged: without a push trigger this rig is
+# dispatchable by nobody until the train lands on the default branch.
 name: WebKit repeat-run rig
 
 on:
@@ -24,12 +24,13 @@ on:
   # So between this merge and the train landing, a `workflow_dispatch`-only rig is unrunnable.
   # Caught by the pre-merge squad's evidence lens.
   #
-  # `rig/**` is the escape hatch: push a branch under that prefix to take a measurement, from any
-  # base, without editing this file. It matches nothing that exists today, so it cannot fire by
-  # accident.
+  # `rig/webkit-repeat/**` is the escape hatch: push a branch under that prefix to take a
+  # measurement, from any base, without editing this file. NAMESPACED deliberately -- a bare
+  # `rig/**` is an unscoped claim on a shared branch namespace in a public repository that an
+  # external fleet also pushes to, and would fire this webkit job on unrelated work.
   push:
     branches:
-      - 'rig/**'
+      - 'rig/webkit-repeat/**'
 
   # The two mission-specific globs that used to live here -- `mission/webkit-deflake` and
   # `kitty/mission-webkit-timing-deflake-01M2T31J-lane-*` -- named branches deleted at merge, so
@@ -56,9 +57,10 @@ on:
 
 concurrency:
   # `false`, not `true`. Superseding an in-flight run made sense while pushes triggered this on a
-  # mission branch; with `workflow_dispatch` as the only trigger, every run is a DELIBERATE
-  # measurement and cancelling one silently destroys the sample somebody asked for. A cancelled
-  # run also reports as a failure, which reads as a verdict rather than as "superseded".
+  # mission branch, where a later push genuinely superseded an earlier one. Now every trigger --
+  # a `rig/webkit-repeat/**` push or a dispatch -- is a DELIBERATE measurement, and cancelling one
+  # silently destroys the sample somebody asked for. A cancelled run also reports as a failure,
+  # which reads as a verdict rather than as "superseded".
   group: webkit-repeat-run-${{ github.ref }}
   cancel-in-progress: false
 
