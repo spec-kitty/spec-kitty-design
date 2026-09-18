@@ -134,6 +134,7 @@ export function scan(hunks) {
     only: [],
     addedRetries: [],
     increasedTimeout: [],
+    newTimeout: [],
     rewrittenAssertionSites: 0,
     redFirstProofs: 0,
   };
@@ -173,6 +174,20 @@ export function scan(hunks) {
       if (maxAdded > maxRemoved) {
         findings.increasedTimeout.push({ file: hunk.file, from: maxRemoved, to: maxAdded });
       }
+    } else if (addedTimeouts.length && !removedTimeouts.length) {
+      // A PURE-ADDITION hunk: a brand-new wait budget where the diff removed none. The rule
+      // above compared max-added to max-removed and therefore required a removal to exist,
+      // so every wholly new timeout was invisible and the report still printed
+      // "increased numeric timeout literal: 0" — a green over an empty set, which is the
+      // defect class this repository has written down twice (gates must refuse empty sets).
+      //
+      // Found by the pre-merge squad against THIS mission's own diff, which added
+      // `{ timeout: 20000 }` and two new budget constants while the scan reported zero. The
+      // shape below is copied from the `retries:` rule twenty lines above, which already got
+      // added-with-no-removed right.
+      for (const value of addedTimeouts) {
+        findings.newTimeout.push({ file: hunk.file, value });
+      }
     }
 
     const removedExpect = removed.some((l) => /\bexpect\s*\(/.test(l));
@@ -186,7 +201,8 @@ export function scan(hunks) {
 }
 
 const suppressionCount = (f) =>
-  f.testSkip.length + f.testFixme.length + f.only.length + f.addedRetries.length + f.increasedTimeout.length;
+  f.testSkip.length + f.testFixme.length + f.only.length + f.addedRetries.length +
+  f.increasedTimeout.length + f.newTimeout.length;
 
 function printReport(findings) {
   console.log('SC-003 — mechanical suppression scan:');
@@ -196,6 +212,7 @@ function printReport(findings) {
     ['.only', findings.only],
     ['added retries', findings.addedRetries],
     ['increased numeric timeout literal', findings.increasedTimeout],
+    ['NEW wait budget added (no removal to compare against)', findings.newTimeout],
   ];
   for (const [label, list] of rows) {
     console.log(`  ${list.length === 0 ? '✅' : '❌'} ${label}: ${list.length}`);
@@ -280,6 +297,20 @@ function selftest() {
       "+  await expect(x).toBeVisible({ timeout: 5000 });",
     ].join('\n'),
     (f) => f.increasedTimeout.length === 0,
+  );
+
+  define(
+    'a PURE-ADDITION wait budget is flagged — the empty-set green this scan used to print',
+    [
+      'diff --git a/apps/storybook/src/tests/x.spec.ts b/apps/storybook/src/tests/x.spec.ts',
+      '@@ -1,2 +1,3 @@',
+      '   const host = page.getByTestId("x");',
+      '+  await page.waitForFunction(() => true, undefined, { timeout: 20000 });',
+      '   await expect(host).toBeVisible();',
+    ].join('\n'),
+    // Before the fix this hunk produced increasedTimeout=[] AND newTimeout undefined, and the
+    // report printed a clean "increased numeric timeout literal: 0" over it.
+    (f) => f.newTimeout.length === 1 && f.newTimeout[0].value === 20000 && f.increasedTimeout.length === 0,
   );
 
   define(
