@@ -57,63 +57,6 @@ const pixelsEqual = (a: number[], b: number[], tolerance = 2) =>
 const samplesEqual = (a: Pixels, b: Pixels, tolerance = 2) =>
   pixelsEqual(a.left, b.left, tolerance) && pixelsEqual(a.center, b.center, tolerance) && pixelsEqual(a.right, b.right, tolerance);
 
-/**
- * T010 (webkit-timing-deflake-01M2T31J, WP02) — decisive-experiment instrumentation, NOT a
- * fix. Records, at the moment each fixture is sampled, whether it has had a chance to paint,
- * without itself waiting or altering the sampling it measures (that would make the experiment
- * mutate the thing it is trying to observe). Two independent signals, since the plan's named
- * suspect is an extra webfont fetch introduced by the font change between the passing run at
- * `ee324f84` and the first failing one:
- *   - `rafCount`: how many animation frames this document has rendered since navigation.
- *     `requestAnimationFrame` callbacks run after style/layout for the previous frame have been
- *     committed, so a low count at sample time means few-to-zero paint cycles have had a chance
- *     to run before the screenshot was taken.
- *   - `fontsLoaded`/`fontsReadyAtRaf`/`fontsReadyAtMs`: whether `document.fonts.ready` had
- *     resolved by sample time, and if so, how many frames/ms after navigation start.
- * Installed once per test via `page.addInitScript`, so it re-arms on every `story()` navigation
- * within that test (each fixture load is a full `page.goto`). Read (not waited on) via
- * `attachPaintDiagnostic`, which records the snapshot as a test annotation so it survives into
- * the JSON report this mission's rig already uploads as an artifact — including on a failing
- * repeat, which is the case that matters here (items 1 and 4 are 0/10 per T003-baseline.md).
- */
-const installPaintDiagnostic = (page: Page) =>
-  page.addInitScript(() => {
-    const diag = {
-      navStart: performance.now(),
-      rafCount: 0,
-      fontsLoaded: document.fonts ? document.fonts.status === 'loaded' : true,
-      fontsReadyAtRaf: null as number | null,
-      fontsReadyAtMs: null as number | null,
-    };
-    (window as unknown as { __skPaintDiag: typeof diag }).__skPaintDiag = diag;
-    const tick = () => {
-      diag.rafCount += 1;
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-    if (document.fonts) {
-      document.fonts.ready.then(() => {
-        diag.fontsLoaded = true;
-        diag.fontsReadyAtRaf = diag.rafCount;
-        diag.fontsReadyAtMs = performance.now() - diag.navStart;
-      });
-    }
-  });
-
-const attachPaintDiagnostic = async (page: Page, label: string) => {
-  const diag = await page.evaluate(
-    () => (window as unknown as { __skPaintDiag?: unknown }).__skPaintDiag ?? null,
-  );
-  test.info().annotations.push({ type: `T010-paint-diag:${label}`, description: JSON.stringify(diag) });
-};
-
-/** T010: attaches the RAW sampled pixel values already computed by the test, so a failure's
- * cause can be read directly (what colour was actually sampled) rather than inferred from a
- * pass/fail boolean alone. */
-const attachSample = (label: string, sample: Pixels) => {
-  test.info().annotations.push({ type: `T010-sample:${label}`, description: JSON.stringify(sample) });
-};
-
 /** `getComputedStyle(...).borderColor` / `.backgroundColor` come back as `rgb(r, g, b)` or
  * `rgba(r, g, b, a)` strings; extract the numeric components for a pixel-tolerance compare
  * against a canvas-sampled RGBA array via `pixelsEqual`. */
@@ -438,17 +381,12 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     // forced-colors, confirmed by an isolated probe — `clip-path` is pure geometry, so it
     // survives). This test asserts the fixed shape directly against both Complete and Zero, not
     // merely against the page background.
-    await installPaintDiagnostic(page);
-    await page.emulateMedia({ forcedColors: 'active' });
+    await installPaintDiagnostic(page); await page.emulateMedia({ forcedColors: 'active' }); // T010
 
     const complete = await story(page, 'complete');
-    const completeSample = await samplePixels(page, await complete.locator('progress').screenshot());
-    await attachPaintDiagnostic(page, 'item1-comparison-complete'); // T010
-    attachSample('item1-comparison-complete', completeSample); // T010
+    const completeSample = await samplePixels(page, await complete.locator('progress').screenshot()); await attachPaintDiagnostic(page, 'item1-comparison-complete'); attachSample('item1-comparison-complete', completeSample); // T010
     const zero = await story(page, 'zero');
-    const zeroSample = await samplePixels(page, await zero.locator('progress').screenshot());
-    await attachPaintDiagnostic(page, 'item1-comparison-zero'); // T010
-    attachSample('item1-comparison-zero', zeroSample); // T010
+    const zeroSample = await samplePixels(page, await zero.locator('progress').screenshot()); await attachPaintDiagnostic(page, 'item1-comparison-zero'); attachSample('item1-comparison-zero', zeroSample); // T010
 
     const host = await story(page, 'indeterminate-forced-colors');
     const bar = host.locator('progress');
@@ -470,13 +408,9 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     const indicatorColor = await bar.evaluate((node) => getComputedStyle(node).backgroundColor);
     expect(borderColor).not.toBe(indicatorColor);
 
-    const sample1 = await samplePixels(page, await bar.screenshot());
-    await attachPaintDiagnostic(page, 'item1-subject-sample1'); // T010
-    attachSample('item1-subject-sample1', sample1); // T010
+    const sample1 = await samplePixels(page, await bar.screenshot()); await attachPaintDiagnostic(page, 'item1-subject-sample1'); attachSample('item1-subject-sample1', sample1); // T010
     await page.waitForTimeout(300);
-    const sample2 = await samplePixels(page, await bar.screenshot());
-    await attachPaintDiagnostic(page, 'item1-subject-sample2'); // T010
-    attachSample('item1-subject-sample2', sample2); // T010
+    const sample2 = await samplePixels(page, await bar.screenshot()); await attachPaintDiagnostic(page, 'item1-subject-sample2'); attachSample('item1-subject-sample2', sample2); // T010
 
     const bodyRgb = parseRgb(bodyBackground);
 
@@ -529,30 +463,21 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
   });
 
   test('Indeterminate under prefers-reduced-motion: reduce — the animation stops (two captures over time are identical) and the frozen frame is neither the Complete nor the Zero determinate visual', async ({ page }) => {
-    await installPaintDiagnostic(page);
     // Complete/Zero baselines, unaffected by reduced-motion (they carry no
     // authored transition/animation at all — see the vacuous-guard test above).
-    const complete = await story(page, 'complete');
-    const completePixels = await samplePixels(page, await complete.locator('progress').screenshot());
-    await attachPaintDiagnostic(page, 'item4-comparison-complete'); // T010
-    attachSample('item4-comparison-complete', completePixels); // T010
+    await installPaintDiagnostic(page); const complete = await story(page, 'complete'); // T010
+    const completePixels = await samplePixels(page, await complete.locator('progress').screenshot()); await attachPaintDiagnostic(page, 'item4-comparison-complete'); attachSample('item4-comparison-complete', completePixels); // T010
     const zero = await story(page, 'zero');
-    const zeroPixels = await samplePixels(page, await zero.locator('progress').screenshot());
-    await attachPaintDiagnostic(page, 'item4-comparison-zero'); // T010
-    attachSample('item4-comparison-zero', zeroPixels); // T010
+    const zeroPixels = await samplePixels(page, await zero.locator('progress').screenshot()); await attachPaintDiagnostic(page, 'item4-comparison-zero'); attachSample('item4-comparison-zero', zeroPixels); // T010
 
     await page.emulateMedia({ reducedMotion: 'reduce' });
     const host = await story(page, 'indeterminate');
     const bar = host.locator('progress');
 
     // (a) the animation is not running: two captures 400ms apart are identical.
-    const frame1 = await samplePixels(page, await bar.screenshot());
-    await attachPaintDiagnostic(page, 'item4-subject-frame1'); // T010
-    attachSample('item4-subject-frame1', frame1); // T010
+    const frame1 = await samplePixels(page, await bar.screenshot()); await attachPaintDiagnostic(page, 'item4-subject-frame1'); attachSample('item4-subject-frame1', frame1); // T010
     await page.waitForTimeout(400);
-    const frame2 = await samplePixels(page, await bar.screenshot());
-    await attachPaintDiagnostic(page, 'item4-subject-frame2'); // T010
-    attachSample('item4-subject-frame2', frame2); // T010
+    const frame2 = await samplePixels(page, await bar.screenshot()); await attachPaintDiagnostic(page, 'item4-subject-frame2'); attachSample('item4-subject-frame2', frame2); // T010
     expect(samplesEqual(frame1, frame2)).toBe(true);
 
     // (b) the frozen frame is distinguishable from BOTH the Complete determinate
@@ -635,3 +560,69 @@ test.describe('sk-progress theming', () => {
     expect(light.labelColor).not.toBe(dark.labelColor);
   });
 });
+
+/**
+ * T010 (webkit-timing-deflake-01M2T31J, WP02) — decisive-experiment instrumentation, NOT a
+ * fix. Records, at the moment each fixture is sampled, whether it has had a chance to paint,
+ * without itself waiting or altering the sampling it measures (that would make the experiment
+ * mutate the thing it is trying to observe). Two independent signals, since the plan's named
+ * suspect is an extra webfont fetch introduced by the font change between the passing run at
+ * `ee324f84` and the first failing one:
+ *   - `rafCount`: how many animation frames this document has rendered since navigation.
+ *     `requestAnimationFrame` callbacks run after style/layout for the previous frame have been
+ *     committed, so a low count at sample time means few-to-zero paint cycles have had a chance
+ *     to run before the screenshot was taken.
+ *   - `fontsLoaded`/`fontsReadyAtRaf`/`fontsReadyAtMs`: whether `document.fonts.ready` had
+ *     resolved by sample time, and if so, how many frames/ms after navigation start.
+ * Installed once per test via `page.addInitScript`, so it re-arms on every `story()` navigation
+ * within that test (each fixture load is a full `page.goto`). Read (not waited on) via
+ * `attachPaintDiagnostic`, which records the snapshot as a test annotation so it survives into
+ * the JSON report this mission's rig already uploads as an artifact — including on a failing
+ * repeat, which is the case that matters here (items 1 and 4 are 0/10 per T003-baseline.md).
+ *
+ * Deliberately placed at the END of the file rather than near `samplePixels`: WP01's rig
+ * (`scripts/webkit-repeat-run.mjs`, outside WP02's owned surface) selects items 1–5 by
+ * hardcoded absolute `file:line`. Inserting this block earlier in the file once already shifted
+ * every test below it and silently dropped all five `sk-progress` items from a rig run with no
+ * error (see tmp/finding/wp02-t010-rig-line-number-drift.md). A top-level `const` declared here
+ * is still safely available to every test callback above: Playwright finishes registering every
+ * `test()` in this module (synchronous, top-to-bottom) before it invokes any callback, so by the
+ * time a callback actually runs, this declaration has long since been initialised.
+ */
+const installPaintDiagnostic = (page: Page) =>
+  page.addInitScript(() => {
+    const diag = {
+      navStart: performance.now(),
+      rafCount: 0,
+      fontsLoaded: document.fonts ? document.fonts.status === 'loaded' : true,
+      fontsReadyAtRaf: null as number | null,
+      fontsReadyAtMs: null as number | null,
+    };
+    (window as unknown as { __skPaintDiag: typeof diag }).__skPaintDiag = diag;
+    const tick = () => {
+      diag.rafCount += 1;
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        diag.fontsLoaded = true;
+        diag.fontsReadyAtRaf = diag.rafCount;
+        diag.fontsReadyAtMs = performance.now() - diag.navStart;
+      });
+    }
+  });
+
+const attachPaintDiagnostic = async (page: Page, label: string) => {
+  const diag = await page.evaluate(
+    () => (window as unknown as { __skPaintDiag?: unknown }).__skPaintDiag ?? null,
+  );
+  test.info().annotations.push({ type: `T010-paint-diag:${label}`, description: JSON.stringify(diag) });
+};
+
+/** T010: attaches the RAW sampled pixel values already computed by the test, so a failure's
+ * cause can be read directly (what colour was actually sampled) rather than inferred from a
+ * pass/fail boolean alone. */
+const attachSample = (label: string, sample: Pixels) => {
+  test.info().annotations.push({ type: `T010-sample:${label}`, description: JSON.stringify(sample) });
+};
