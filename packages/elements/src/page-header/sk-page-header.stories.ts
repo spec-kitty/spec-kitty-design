@@ -111,8 +111,23 @@ const longBody = (rows = 40) => `
       </p>`).join('')}
   </div>`;
 
+// `scroll-padding-block-start` on the CONTAINER, not margin on the rows (#456). MEASURED under
+// webkit, --retries=0, repeat-each=30: every failure reported `focusMovedScroller=false` with
+// `scrollBeforeFocus` equal to `scrollTop` — focus did not scroll AT ALL. A row already inside the
+// scrollport but occluded by the sticky header is "visible" as far as the browser is concerned, so
+// `scroll-margin-block-start` on the row is never consulted; four of those failures carried a
+// 288px margin over a 205.8px header, i.e. far more than enough, and still failed.
+//
+// `scroll-padding-block-start` is the mechanism for this: it declares the scrollport's own top
+// inset, so an occluded row counts as OUT of view and focus scrolls it clear.
+//
+// This repo already measured the identical defect on the inline axis and reached the identical
+// conclusion — see sk-section-nav.css, where `scroll-margin-inline` on the link "had zero effect
+// on that specific defect" and a single `scroll-padding-inline` on the container replaced it. The
+// page-header contract had asked consumers for the row-margin form that section-nav had already
+// found insufficient. It does not reproduce on chromium (20/20 locally), which is why it survived.
 const scroller = (content: string, height = '100vh', className = '', extraStyle = '') => `
-  <div data-scroller${className ? ` class="${className}"` : ''} style="${storyFrameStyle}; min-height: 0; height: ${height}; overflow: auto${extraStyle ? `; ${extraStyle}` : ''}">
+  <div data-scroller${className ? ` class="${className}"` : ''} style="${storyFrameStyle}; min-height: 0; height: ${height}; overflow: auto; scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin)${extraStyle ? `; ${extraStyle}` : ''}">
     ${content}
   </div>`;
 

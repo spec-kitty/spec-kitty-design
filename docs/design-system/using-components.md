@@ -613,6 +613,29 @@ header gives the browser no reason to scroll — so it stays hidden. An unsatisf
 default-density story, against a 214px header: at `0px` and at `64px` the focused row stayed at
 y=88, entirely behind the header; at `288px` it moved to y=288, clear.
 
+**Set `scroll-padding-block-start` on your scroll container. The row margin alone is not enough**,
+and this is measured, not cautionary:
+
+```css
+[data-scroller] {
+  scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin);
+}
+```
+
+Under webkit at `--repeat-each=30` (#456) the row-margin form failed up to 12 times in 30, and
+**every failure reported that focus had not scrolled at all** — the scroll position before focus
+was identical to the position after it. A row already inside the scrollport but occluded by the
+sticky header is "visible" as far as the browser is concerned, so the row's
+`scroll-margin-block-start` is never consulted. Four of those failures carried a 288px margin over
+a 205.8px header: far more than enough to clear it, and irrelevant. `scroll-padding-block-start`
+declares the scrollport's own top inset, so the occluded row counts as *out* of view and focus
+scrolls it clear.
+
+This repository measured the same defect on the inline axis first and reached the same conclusion —
+see `sk-section-nav.css`, where `scroll-margin-inline` on the link "had zero effect on that
+specific defect" and one `scroll-padding-inline` on the container replaced it. **It does not
+reproduce on chromium**, which is why this contract read as complete for as long as it did.
+
 The element does not measure its own live box to close this gap, because observing layout is the
 class of behaviour it is deliberately barred from owning — the same boundary that keeps the timer
 out of it.
