@@ -1,0 +1,13 @@
+{
+  "wp_id": "WP06",
+  "captured_at": "2026-09-18T12:14:32Z",
+  "base_branch": "mission/webkit-deflake",
+  "base_commit": "15f6715e5cd24f76f94aa5c33f5778dac955aabe",
+  "test_runner": "pytest",
+  "total": 0,
+  "passed": 0,
+  "failed": 0,
+  "skipped": 0,
+  "failures": [],
+  "source_identity": "GateCoverageScopeSource/junit_xml"
+}

@@ -103,5 +103,5 @@ Reported as counts, and for suppressions from WP01's scan rather than self-repor
 - tolerances widened = 0; wait durations increased = 0 *(from the scan)*
 - every measurement ran with `retries: 0`, and said so
 - items fixed with a demonstrated cause + items reported unfixed = **13** (the twelve test items plus the lane-stop item, per SC-006)
-- final `playwright` duration within 5% of 25.6 min
+- final `playwright` suite duration reported against the measured band (25.6 / 26.7 / 22.5 min); outside the band = investigated, not silently accepted
 - every verification claim names its engine

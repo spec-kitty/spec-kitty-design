@@ -53,8 +53,8 @@ tracker_refs: []
   - T003 Capture the **baseline** on the unmodified branch: per-test failure/flake counts for all twelve items, **before any fix lands**. This is the before-figure every later claim is measured against.
   - T004 Check each spec for a one-way mutation of a shared fixture; report which specs are safe to repeat.
   - T005 Record the rig's exact invocation in the mission evidence directory so a reviewer can re-run it.
-  - T006 Record the pre-mission `playwright` duration (**25.6 min**) and provide the means to compare the final run against it (NFR-004, SC-005).
-  - T006a Take the **after-reading**: record the final `playwright` duration and its delta against 25.6 min. T006 only provides the means; this subtask produces the number, and SC-005 is unmet without it.
+  - T006 Record the pre-mission `playwright` duration (**25.6 min**) and the observed band (25.6 / 26.7 / 22.5 min across three runs, an 18.7% spread); provide the means to compare the final run against it (NFR-004, SC-005).
+  - T006a Take the **after-reading**: record the final `playwright` suite duration against the measured band (25.6 / 26.7 / 22.5 min across three runs). Do NOT gate on a fixed percentage — an 18.7% spread means any tighter tolerance fires on noise. T006 only provides the means; this subtask produces the number, and SC-005 is unmet without it.
   - T007 Deliver a **suppression scan** script: counts of `test.skip`, `test.fixme`, `.only`, added `retries`, and increased numeric timeout literals across the mission diff. It must **also report the rewritten-assertion count and the red-first-proof count**, because SC-002 asserts those two are equal and spec.md states this scan is what reports them — without that, SC-002 is self-certified by each WP. The orchestrator runs it before the PR is marked ready (SC-003). It must be able to detect a planted violation — prove that.
 - **Independent test**: the rig runs, emits per-test counts under `retries: 0`, and its baseline reproduces at least one of the known hard failures. The scan script detects a planted `test.skip`.
 - **Dependencies**: none.
