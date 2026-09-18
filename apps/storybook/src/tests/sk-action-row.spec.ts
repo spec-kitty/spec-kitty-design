@@ -143,7 +143,12 @@ for (const mode of [
     }
 
     await page.keyboard.press('Enter');
-    expect(new URL(page.url()).hash).toBe('#details');
+    // T020 (FR-005): await the observable effect — the location change the native
+    // "Details" anchor's `href` produces — instead of asserting immediately after the
+    // keypress. Bounded by expect's own default timeout; a broken/missing href reports
+    // a normal assertion failure naming the expected vs. actual hash, not a hang. The
+    // sibling test at line 72 already uses this exact idiom for the same shape.
+    await expect.poll(() => new URL(page.url()).hash).toBe('#details');
     await pin.click();
     await page.keyboard.press('Tab');
     await expect(inspect).toBeFocused();

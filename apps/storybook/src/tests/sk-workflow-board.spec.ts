@@ -266,6 +266,69 @@ async function assertScrollerSkippedBySequentialFocus(
   ).toBe(false);
 }
 
+/**
+ * T021 (FR-006, item 10): await the scroller's `scrollLeft` settling to a rest value
+ * rather than sampling the instant it first crosses a threshold. A keyboard-triggered
+ * native scroll is not guaranteed to land in a single frame; reading `scrollLeft`
+ * as soon as it differs from its starting value (the previous shape of this test)
+ * captures a value from mid-scroll, which is an unstable reference for the
+ * comparison that follows it.
+ *
+ * Bounded failure mode: this polls at most `timeoutMs` (default matches this
+ * suite's own default assertion timeout — not lengthened beyond it) and rejects
+ * with an error naming what it was waiting for (the last observed value and how
+ * many consecutive stable reads it had) rather than hanging past that bound or
+ * resolving on a value that never actually settled.
+ */
+async function waitForScrollSettled(
+  scroller: Locator,
+  reason: string,
+  { timeoutMs = 5000, stableFrames = 3 }: { timeoutMs?: number; stableFrames?: number } = {},
+): Promise<number> {
+  try {
+    return await scroller.evaluate(
+      (node, opts) =>
+        new Promise<number>((resolve, reject) => {
+          const deadline = performance.now() + opts.timeoutMs;
+          let lastValue = node.scrollLeft;
+          let stableCount = 0;
+          const tick = () => {
+            const current = node.scrollLeft;
+            if (current === lastValue) {
+              stableCount += 1;
+              if (stableCount >= opts.stableFrames) {
+                resolve(current);
+                return;
+              }
+            } else {
+              stableCount = 0;
+              lastValue = current;
+            }
+            if (performance.now() >= deadline) {
+              reject(
+                new Error(
+                  `scrollLeft did not settle within ${opts.timeoutMs}ms ` +
+                    `(last observed ${current}, ${stableCount}/${opts.stableFrames} ` +
+                    "consecutive stable reads)",
+                ),
+              );
+              return;
+            }
+            requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }),
+      { timeoutMs, stableFrames },
+    );
+  } catch (error) {
+    throw new Error(
+      `waitForScrollSettled(${reason}) failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+}
+
 test.describe("workflow board source and distribution contract", () => {
   test("the public CSS inventory is exactly the seven approved classes and contains no adjacent behavior", () => {
     const source = `${readFileSync(BOARD_CSS, "utf8")}\n${readFileSync(LANE_CSS, "utf8")}`;
@@ -574,15 +637,18 @@ test.describe("conditional overflow semantics and keyboard operation", () => {
     expect(focusStyle.outlineStyle).not.toBe("none");
     expect(focusStyle.outlineWidth).toBeGreaterThan(0);
 
+    // T021 (FR-006, item 10): await the scroll settling to a rest value — not the
+    // first frame `scrollLeft` differs from 0 — before reading it as "the" scrolled
+    // position, and keep asserting focus retention around each key press (both
+    // halves of the claim: the scroll happens AND focus is retained).
     await page.keyboard.press("ArrowRight");
-    await expect
-      .poll(() => scroller.evaluate((node) => node.scrollLeft))
-      .toBeGreaterThan(0);
-    const movedRight = await scroller.evaluate((node) => node.scrollLeft);
+    const movedRight = await waitForScrollSettled(scroller, "after ArrowRight");
+    expect(movedRight).toBeGreaterThan(0);
+    await expect(scroller).toBeFocused();
+
     await page.keyboard.press("ArrowLeft");
-    await expect
-      .poll(() => scroller.evaluate((node) => node.scrollLeft))
-      .toBeLessThan(movedRight);
+    const movedLeft = await waitForScrollSettled(scroller, "after ArrowLeft");
+    expect(movedLeft).toBeLessThan(movedRight);
     await expect(scroller).toBeFocused();
   });
 });
