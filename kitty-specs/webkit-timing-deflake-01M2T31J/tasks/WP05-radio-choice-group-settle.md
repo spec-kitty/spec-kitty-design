@@ -1,6 +1,6 @@
 ---
 work_package_id: WP05
-title: "Settle both states before comparing them"
+title: Settle both states before comparing them
 dependencies:
 - WP01
 requirement_refs:
@@ -12,9 +12,9 @@ requirement_refs:
 planning_base_branch: mission/webkit-deflake
 merge_target_branch: mission/webkit-deflake
 branch_strategy: Planning artifacts for this mission were generated on mission/webkit-deflake. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/webkit-deflake unless the human explicitly redirects the landing branch.
-base_branch: mission/webkit-deflake
-base_commit: 371de6a8dcd18d4ad8aef9f7915444778837844b
-created_at: '2026-09-18T11:13:32Z'
+base_branch: kitty/mission-webkit-timing-deflake-01M2T31J
+base_commit: d3d6ae76c69e650798c1bf18cf3474b5413196eb
+created_at: '2026-09-18T13:37:19.656139+00:00'
 subtasks:
 - T040
 - T041
