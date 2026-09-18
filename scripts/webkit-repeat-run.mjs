@@ -99,7 +99,7 @@ const LINE_ITEMS = [
   { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 160, label: 'narrow shell region order' },
   { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 303, label: 'landmarks/labels/grouping' },
   { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 445, label: 'axe-clean in dark mode' },
-  { item: 10, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', line: 620, label: 'focused overflow keyboard scroll' }, // WP03: was 557; T021's waitForScrollSettled helper (added ahead of this test) shifted it. See tmp/finding/wp03-lane-c-rig-line-number-drift.md.
+  { item: 10, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', line: 654, label: 'focused overflow keyboard scroll' }, // WP03: was 557; T021's waitForScrollSettled helper (added ahead of this test) shifted it. See tmp/finding/wp03-lane-c-rig-line-number-drift.md.
   { item: 11, file: 'apps/storybook/src/tests/sk-radio-choice-group.spec.ts', line: 1113, label: 'legend cue across two stories' },
 ];
 
@@ -110,6 +110,45 @@ const GREP_ITEM = {
   grep: 'keeps external controls on their own Tab and activation paths',
   label: 'external controls family (adopted; six modes)',
 };
+
+/**
+ * Refuse to measure through a stale selector.
+ *
+ * Playwright SILENTLY DROPS a `file:line` argument that matches no test when it is mixed with
+ * arguments that do match -- no warning, no non-zero exit. The rig then prints a per-item table
+ * that is missing rows, or prints counts for fewer items than were asked for, and every number
+ * in it still looks correct. This mission corrected these line numbers six times as owning work
+ * packages legitimately edited their own spec files; the last drift (item 10, 620 -> 654) came
+ * from the very commit that fixed item 10.
+ *
+ * So the selectors are verified against the files before any run: every selected line must
+ * actually begin a `test(` declaration. A count over the wrong set of tests is worse than no
+ * count, because it is indistinguishable from a good one.
+ */
+function assertSelectorsResolve(lineItems) {
+  const broken = [];
+  for (const it of lineItems) {
+    const lines = readFileSync(it.file, 'utf8').split('\n');
+    const line = lines[it.line - 1] ?? '';
+    if (!/^\s*test\(/.test(line)) {
+      broken.push(
+        `  item ${it.item}: ${it.file}:${it.line} is not a test( declaration — found: ${
+          line.trim().slice(0, 72) || '(end of file)'
+        }`,
+      );
+    }
+  }
+  if (broken.length > 0) {
+    throw new Error(
+      `${broken.length} of ${lineItems.length} line-item selectors no longer resolve:\n` +
+        `${broken.join('\n')}\n\n` +
+        'Playwright would silently drop these and still exit 0, producing a per-item table ' +
+        'that looks complete. Re-point the LINE_ITEMS entries above at the current line ' +
+        'numbers (grep each test title) before measuring again.',
+    );
+  }
+  console.log(`Selectors: all ${lineItems.length} line-items resolve to a test( declaration.`);
+}
 
 function parseArgs(argv) {
   const opts = { repeatEach: 10, items: null, jsonDir: null, workers: null };
@@ -243,6 +282,7 @@ async function main() {
   const jsonDir = opts.jsonDir ?? mkdtempSync(join(tmpdir(), 'webkit-repeat-run-'));
 
   printRetrySetting();
+  assertSelectorsResolve(selectedLineItems);
   console.log(`Repeat-each: ${opts.repeatEach}`);
   console.log(`JSON reports: ${jsonDir}`);
 
