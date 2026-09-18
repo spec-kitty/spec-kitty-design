@@ -167,7 +167,17 @@ for (const { label, id } of WCAG_STORIES) {
     const geometry = await page.evaluate(() => {
       const host = document.querySelector('sk-page-header')!;
       const header = host.getBoundingClientRect();
-      const focused = document.activeElement!.getBoundingClientRect();
+      const active = document.activeElement!;
+      const focused = active.getBoundingClientRect();
+      // #456. The SCROLL STATE is part of the diagnosis, not decoration. `scroll-margin` can only
+      // lift a row if there is scroll range left to spend: at maximum scroll the container cannot
+      // move further, so a row under the sticky header stays under it no matter how large the
+      // margin token is. A failure message that reports only the two boxes cannot tell that case
+      // apart from a margin that is simply too small -- and they need opposite fixes. This test
+      // deliberately scrolls to `scrollHeight` first, so the exhausted-range case is reachable by
+      // construction.
+      const scroller = document.querySelector('[data-scroller]')!;
+      const remaining = scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
       return {
         headerBottom: header.bottom,
         headerHeight: header.height,
@@ -175,6 +185,10 @@ for (const { label, id } of WCAG_STORIES) {
         focusedTop: focused.top,
         focusedBottom: focused.bottom,
         focusedHeight: focused.height,
+        scrollTop: Math.round(scroller.scrollTop),
+        scrollRemaining: Math.round(remaining),
+        atMaxScroll: remaining <= 1,
+        appliedScrollMargin: getComputedStyle(active).scrollMarginBlockStart,
       };
     });
 
@@ -191,7 +205,12 @@ for (const { label, id } of WCAG_STORIES) {
       geometry.focusedTop,
       `${label}: the focused row spans ${geometry.focusedTop}-${geometry.focusedBottom} against a ` +
         `header bottom edge at ${geometry.headerBottom} (header height ${geometry.headerHeight}) ` +
-        '— the sticky header covers it',
+        '— the sticky header covers it. ' +
+        `[scrollTop=${geometry.scrollTop}, scrollRemaining=${geometry.scrollRemaining}, ` +
+        `atMaxScroll=${geometry.atMaxScroll}, scroll-margin-block-start=` +
+        `${geometry.appliedScrollMargin}] — atMaxScroll=true means the container had no range ` +
+        'left to honour the margin, which no token value can fix; atMaxScroll=false with a ' +
+        'margin smaller than the header height means the token is short.',
     ).toBeGreaterThanOrEqual(geometry.headerBottom);
   });
 }
