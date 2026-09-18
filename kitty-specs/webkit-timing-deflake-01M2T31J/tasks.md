@@ -28,9 +28,9 @@ Note when designing repeats: a repeat loop over a test that performs a one-way m
 fixture is unmeetable unless the fixture is restored per repeat. Check each spec for that shape
 before reporting a repeat count.
 
-## Work Packages
+# Work Packages
 
-### WP01 — A webkit repeat-run rig that can measure flakiness at all
+## Work Package WP01: A webkit repeat-run rig that can measure flakiness at all
 
 - **Goal**: A single, reproducible CI invocation runs the six affected specs under webkit with `--repeat-each=10` and reports a pass/fail count per test. Without this, no other work package can satisfy NFR-001 or SC-001, and no fix can be distinguished from luck.
 - **Priority**: P0 — blocks every other package.
@@ -43,7 +43,7 @@ before reporting a repeat count.
 - **Dependencies**: none.
 - **Risks**: the affected specs may not be selectable independently of the projects that multiply them; if a subset run cannot reproduce the failures that a full run produces, say so — a rig that cannot see the bug is not a rig.
 
-### WP02 — sk-progress: find why the two hard failures fail, then fix that
+## Work Package WP02: sk-progress: find why the two hard failures fail, then fix that
 
 - **Goal**: `sk-progress.spec.ts:369` and `:465` pass repeatedly, for a demonstrated reason, with their assertions no weaker than before. `:456` and `:510` sample chosen animation phases.
 - **Priority**: P0 — these two carry both hard failures and are why the aggregate gate is red.
@@ -58,7 +58,7 @@ before reporting a repeat count.
 - **Dependencies**: WP01.
 - **Risks**: the plan's hypothesis may be wrong (T011 exists to catch that); the Web Animations API may not reach vendor pseudo-elements under webkit (T013 carries the fallback); C-003 forbids buying stability with longer waits.
 
-### WP03 — Await observable effects rather than intervals
+## Work Package WP03: Await observable effects rather than intervals
 
 - **Goal**: The action-row Enter-key family and `sk-workflow-board.spec.ts:557` await the effect they assert — a location change, a scroll settling, a focus state — instead of asserting after a delay.
 - **Priority**: P1 — the action-row flake lands in unrelated missions' output, where it repeatedly costs other people a wrong first hypothesis.
@@ -71,7 +71,7 @@ before reporting a repeat count.
 - **Dependencies**: WP01.
 - **Risks**: an await with no timeout converts a flake into a hang; each await must have a bounded failure mode that reports what it was waiting for.
 
-### WP04 — Settle the shell-layout premise
+## Work Package WP04: Settle the shell-layout premise
 
 - **Goal**: Either `:104` and `:445` are stable for a demonstrated reason, or the mission reports precisely why not, with measurements.
 - **Priority**: P1 — this file is the repository's most persistent webkit offender: it also held the single flaky test on the pre-mission train.
@@ -85,7 +85,7 @@ before reporting a repeat count.
 - **Dependencies**: WP01.
 - **Risks**: the font-metric answer may be "no", leaving this package without a diagnosis; FR-010 and SC-006 require reporting that honestly rather than forcing a fix.
 
-### WP05 — Settle both states before comparing them
+## Work Package WP05: Settle both states before comparing them
 
 - **Goal**: `sk-radio-choice-group.spec.ts:1113` compares two settled states.
 - **Priority**: P2 — one flaky test, no evidence of wider impact.
@@ -96,7 +96,7 @@ before reporting a repeat count.
 - **Independent test**: 10/10 repeats green; one red-first proof.
 - **Dependencies**: WP01.
 
-### WP06 — Make the lane stop readable (observability only)
+## Work Package WP06: Make the lane stop readable (observability only)
 
 - **Goal**: The behaviour suite's job log stops truncating before the error, so that the adopted lane-stop issue becomes diagnosable. **This package does not promise to fix the stop.**
 - **Priority**: P2 — independent of every other package and may run in parallel.
