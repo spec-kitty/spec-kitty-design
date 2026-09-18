@@ -1,0 +1,75 @@
+# WP01's measurement rig (mission webkit-timing-deflake-01M2T31J, C-009, C-005, NFR-001,
+# NFR-002). A SEPARATE workflow, deliberately — the mission's own T001 requires that the
+# ordinary `playwright` job in ci-quality.yml is not altered, and scripts/check-gate-wiring.mjs
+# / scripts/check-ci-quality-trigger-parity.mjs both enforce that job's shape byte-for-byte.
+# Neither checker inspects any workflow file other than ci-quality.yml, so this file's existence
+# and its own job cannot trip either gate — verified by running both against this tree.
+#
+# WHY `on.push` AS WELL AS `workflow_dispatch`: `workflow_dispatch` alone is not usable until
+# this exact file reaches the repository's default branch — ci-quality.yml's own
+# `workflow_dispatch` entry carries the identical caveat in a comment for the identical reason
+# (research.md R18). Scoping `on.push` to this mission's own branches (its integration branch
+# and its lane worktree branches) is what lets the rig actually run — and be measured — WHILE
+# the mission is still in flight, which is the whole point of a pre-fix baseline (T003).
+# `workflow_dispatch` stays declared for reuse once this file lands on main.
+name: WebKit repeat-run rig
+
+on:
+  push:
+    branches:
+      - mission/webkit-deflake
+      - 'kitty/mission-webkit-timing-deflake-01M2T31J-lane-*'
+  workflow_dispatch:
+    inputs:
+      repeat_each:
+        description: 'Repeats per item (NFR-001 default: 10)'
+        required: false
+        default: '10'
+      items:
+        description: 'Comma-separated item numbers to run (default: all twelve)'
+        required: false
+        default: ''
+
+concurrency:
+  group: webkit-repeat-run-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  repeat-run:
+    runs-on: ubuntu-latest
+    # Generous ceiling, not a target (same convention as ci-quality.yml's own header comment):
+    # 200 webkit test executions (140 line-addressable + 60 for item 12's six modes, at
+    # repeat-each=10) is a small fraction of the ordinary `playwright` job's whole testDir run,
+    # which itself budgets under this same figure at 25.6 min for the FULL suite.
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci --ignore-scripts
+      # webkit only (C-005: this mission's affected tests are webkit-only); chromium is NOT
+      # installed here because this job draws no conclusion about chromium at all (NFR-007).
+      - run: npx playwright install --with-deps webkit
+      - name: "[MEASUREMENT] Build Storybook (rig prerequisite — same builder the ordinary playwright job's storybook-build stage runs)"
+        run: node scripts/build-storybook-with-budget.mjs
+      - name: "[MEASUREMENT] WebKit repeat-run rig (NFR-001, NFR-002, C-005, C-009)"
+        env:
+          REPEAT_EACH: ${{ github.event.inputs.repeat_each }}
+          ITEMS: ${{ github.event.inputs.items }}
+        run: |
+          set -euo pipefail
+          ARGS=(--json-dir=webkit-repeat-run-results "--repeat-each=${REPEAT_EACH:-10}")
+          if [ -n "${ITEMS:-}" ]; then ARGS+=("--items=${ITEMS}"); fi
+          node scripts/webkit-repeat-run.mjs "${ARGS[@]}"
+      # `if: always()` — a failing run (expected for the pre-fix baseline, items 1 and 4) is
+      # exactly the run whose JSON evidence a reviewer needs to re-derive the counts printed in
+      # the job log.
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
+        if: always()
+        with:
+          name: webkit-repeat-run-results
+          path: webkit-repeat-run-results/
+          retention-days: 14
