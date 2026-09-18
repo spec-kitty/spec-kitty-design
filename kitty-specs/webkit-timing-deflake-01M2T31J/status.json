@@ -1,16 +1,16 @@
 {
-  "event_count": 49,
-  "last_event_id": "01M2TVMVHV7HCFEZ3T9P7T9Y1W",
-  "materialized_at": "2026-09-18T18:14:49.147969+00:00",
+  "event_count": 50,
+  "last_event_id": "01M2TVN4YJDA7ZGJ8ZBMATAKF5",
+  "materialized_at": "2026-09-18T18:14:58.770969+00:00",
   "mission_number": "",
   "mission_slug": "webkit-timing-deflake-01M2T31J",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 1,
+    "approved": 0,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
-    "done": 5,
+    "done": 6,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
@@ -163,10 +163,10 @@
       "agent": "claude",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
-      "force_count": 2,
-      "lane": "approved",
-      "last_event_id": "01M2TE1NJHT41Q87AQSPZTJRNP",
-      "last_transition_at": "2026-09-18T14:17:08.945075+00:00",
+      "force_count": 3,
+      "lane": "done",
+      "last_event_id": "01M2TVN4YJDA7ZGJ8ZBMATAKF5",
+      "last_transition_at": "2026-09-18T18:14:58.770969+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Item 11 (sk-radio-choice-group.spec.ts:1113) NOT REPRODUCED. Outcome 2 per package brief -- no code change; T040/T041/T042 intentionally left unchecked (not done -- no assertion was rewritten, so there is nothing to red-first-prove). --force used because the CLI cannot express blocked-with-reason; this note is the explanation. Evidence, all webkit/retries=0: (1) T003 baseline (WP01, prior): 10/10. (2) My lane-e push-triggered rig run 35351684955, all 12 items at --repeat-each=10: item 11 10/10 (other items' failures there are pre-existing WP02/WP04 scope, not WP05's). (3) My dispatched rig run 35352122895, item 11 only at --repeat-each=100: 100/100, log line 'every selected item passed every repeat under webkit, retries=0'. Total 120 consecutive webkit passes across 3 independent CI samples and 2 repeat-count regimes (10 and 100). Treated as multiple clean samples, not proof of non-reproducibility (T003 itself notes counts moved run-to-run for other items). Also attempted: dispatched the full ci-quality.yml playwright job via workflow_dispatch on this lane branch (run 35352049054, ~2770 tests, 2 workers, retries 2) to test the full-suite-contention hypothesis matching item 11's original 'flaky (PR)' discovery context -- this run did not complete before finalization was requested, so no contention result is reported; incomplete/abandoned, not a finding. openStory()'s shared 50ms waitForTimeout plus visible-wait was inspected as a candidate root cause but never implicated since the test never failed under any tried condition. FR-013/SC-008: reporting not-fixed with evidence per this package's Independent Test clause. C-010 satisfied: lane tmp/finding symlinked to repo-root tmp/finding; no reasoning-loop failures or spec-kitty errors occurred to log.",
@@ -195,7 +195,8 @@
       "model": "__resolved_model_absent__",
       "notes": [
         "Readability-only deliverable (C-004: no lane stop observed this mission). 9 console.warn sites suppressed across 7 fixtures (enumerated from source, not the artifact list). Local chromium proxy log: 383L/40942B -> 263L/24674B, floor-reporter verdict still the final line both times. Mutation harness re-run in full: 272/272 mutations still produce their named red-first, 0 collateral, 991.6s/2967.3s ceiling. suite-budget.json ceilingSeconds holds (18.6s/66.9s). mutations.json/behaviours.json/suite-budget.json untouched.",
-        "Review passed (independent reviewer): enumeration reproduced exactly (9 sites/7 files); FR-011 confirmed byte-identical assertions, re-indent only; restore-on-throw confirmed in finally at all 9 sites; before/after log figures independently reproduced to within 24 bytes via a throwaway worktree at the base commit; C-008 manifests untouched and 24/272 mutation arms confirmed against the touched files; C-010 symlink verified. CI-verification gap for NFR-006 recorded explicitly: the evidence is a local chromium proxy and the truncating artifact is the CI job log, which runs both engines. Not grounds for rejection - the package does not promise to fix the stop - but carried to closeout under SC-006/SC-008."
+        "Review passed (independent reviewer): enumeration reproduced exactly (9 sites/7 files); FR-011 confirmed byte-identical assertions, re-indent only; restore-on-throw confirmed in finally at all 9 sites; before/after log figures independently reproduced to within 24 bytes via a throwaway worktree at the base commit; C-008 manifests untouched and 24/272 mutation arms confirmed against the touched files; C-010 symlink verified. CI-verification gap for NFR-006 recorded explicitly: the evidence is a local chromium proxy and the truncating artifact is the CI job log, which runs both engines. Not grounds for rejection - the package does not promise to fix the stop - but carried to closeout under SC-006/SC-008.",
+        "Closeout: 12/12 items 10/10 webkit retries=0 (runs 35374639239, 35375265259); CI Quality green @afe7be3c; acceptance 34 pass/6 partial/0 fail"
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
