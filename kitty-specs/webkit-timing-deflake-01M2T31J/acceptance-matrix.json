@@ -18,7 +18,7 @@
       "criterion_id": "FR-002",
       "description": "Preserve the forced-colors distinction",
       "proof_type": "automated_test",
-      "evidence": "sk-progress:416 (not :369, which at the reviewed SHA is inside an unrelated earlier test's comment — see FR-013's own precedent for citing by test title where lines drift) assertions unchanged in substance; red-first run 35358002926 shows 0/10 when the fill is made full-width under forced colors.",
+      "evidence": "sk-progress:416 (not :369, which at the reviewed SHA is inside an unrelated earlier test's comment \u2014 see FR-013's own precedent for citing by test title where lines drift) assertions unchanged in substance; red-first run 35358002926 shows 0/10 when the fill is made full-width under forced colors.",
       "pass_fail": "pass",
       "verified_by": "orchestrator",
       "verified_at": "2026-09-18T16:03:18.897139+00:00",
@@ -168,11 +168,11 @@
       "criterion_id": "NFR-004",
       "description": "No added wall-clock",
       "proof_type": "measurement",
-      "evidence": "Revised mid-mission: a 5% tolerance sat inside the suite's own 18.7% run-to-run spread (25.6/26.7/22.5 min). Now reported against that band. INTEGRITY GAP (pre-merge squad F9): no run id for any of the three reference figures is recorded anywhere in this mission's tree (spec.md, plan.md, tasks.md all state the three minutes with no linked run). One figure, 26.7, coincides with run 35352049054 -- but that run is a MISSION-ERA sample (WP05's full-suite-contention run on lane-e, taken mid-mission on a branch that already carries WP01's rig, per tasks/WP05-radio-choice-group-settle.md), not a pre-mission reference. Whether it is actually one of the three intended reference runs, or a coincidence, cannot be determined from this tree.",
+      "evidence": "Revised mid-mission: a 5% tolerance sat inside the suite's own 18.7% run-to-run spread (25.6/26.7/22.5 min). Now reported against that band. INTEGRITY GAP (pre-merge squad F9): no run id for any of the three reference figures is recorded anywhere in this mission's tree (spec.md, plan.md, tasks.md all state the three minutes with no linked run). One figure, 26.7, coincides with run 35352049054 -- but that run is a MISSION-ERA sample (WP05's full-suite-contention run on lane-e, taken mid-mission on a branch that already carries WP01's rig, per tasks/WP05-radio-choice-group-settle.md), not a pre-mission reference. Whether it is actually one of the three intended reference runs, or a coincidence, cannot be determined from this tree. Run ids and true provenance, established after squad lens R2-evidence correctly challenged the 'three pre-mission runs' label as unverifiable: 25.6 min = run 34820757579, CI Quality on train/elements-first @ee324f84 (2026-09-14) - the ONLY genuinely pre-mission figure; 26.7 min = run 35242523584, CI Quality on tokens/inter-body-face @ca065e69 (2026-09-17) - PR #451's own run, i.e. the font change, NOT pre-mission; 22.5 min = run 35342957493, CI Quality on mission/webkit-deflake @e328a1ad (2026-09-18) - this mission's own branch, NOT pre-mission. The band therefore measures run-to-run variance of substantially the same suite ACROSS THREE BRANCHES, which is what NFR-004 needs, but the earlier 'pre-mission' wording was wrong and was the orchestrator's error.",
       "pass_fail": "pending",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T16:03:18.897139+00:00",
-      "notes": "Final figure taken from the merge CI run. Before SC-005 can close, either name the three reference run ids and confirm each is pre-mission (base commit before e2cc49fd), or state that the band's provenance is unverified and widen/withdraw it. Do not close this on the existing prose alone."
+      "verified_at": "2026-09-18T16:22:12.266175+00:00",
+      "notes": "Final figure taken from the merge CI run. Before SC-005 can close, either name the three reference run ids and confirm each is pre-mission (base commit before e2cc49fd), or state that the band's provenance is unverified and widen/withdraw it. Do not close this on the existing prose alone. F9 closed: run ids named, provenance corrected. Two of the three are not pre-mission; the band is still a valid variance measurement but is no longer described as a pre-mission baseline"
     },
     {
       "criterion_id": "NFR-005",
@@ -368,11 +368,11 @@
       "criterion_id": "SC-005",
       "description": "Duration within the measured band",
       "proof_type": "measurement",
-      "evidence": "Band is 22.5-26.7 min across three reference runs. See NFR-004: no run id is named for any of the three figures in scripts/report-playwright-duration.mjs or anywhere else in this mission's tree; 26.7 coincidentally matches a mission-era run (35352049054), not a confirmed pre-mission one.",
+      "evidence": "Band is 22.5-26.7 min across three reference runs. See NFR-004: no run id is named for any of the three figures in scripts/report-playwright-duration.mjs or anywhere else in this mission's tree; 26.7 coincidentally matches a mission-era run (35352049054), not a confirmed pre-mission one. Run ids and true provenance, established after squad lens R2-evidence correctly challenged the 'three pre-mission runs' label as unverifiable: 25.6 min = run 34820757579, CI Quality on train/elements-first @ee324f84 (2026-09-14) - the ONLY genuinely pre-mission figure; 26.7 min = run 35242523584, CI Quality on tokens/inter-body-face @ca065e69 (2026-09-17) - PR #451's own run, i.e. the font change, NOT pre-mission; 22.5 min = run 35342957493, CI Quality on mission/webkit-deflake @e328a1ad (2026-09-18) - this mission's own branch, NOT pre-mission. The band therefore measures run-to-run variance of substantially the same suite ACROSS THREE BRANCHES, which is what NFR-004 needs, but the earlier 'pre-mission' wording was wrong and was the orchestrator's error.",
       "pass_fail": "pending",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T16:03:18.897139+00:00",
-      "notes": "Taken from the merge CI run. Corrected by the pre-merge squad, finding F9: the band itself, not just the final reading, has an unverified provenance and must be named or withdrawn/widened before this criterion is treated as ready to evaluate."
+      "verified_at": "2026-09-18T16:22:12.266175+00:00",
+      "notes": "Taken from the merge CI run. Corrected by the pre-merge squad, finding F9: the band itself, not just the final reading, has an unverified provenance and must be named or withdrawn/widened before this criterion is treated as ready to evaluate. F9 closed: run ids named, provenance corrected. Two of the three are not pre-mission; the band is still a valid variance measurement but is no longer described as a pre-mission baseline"
     },
     {
       "criterion_id": "SC-006",
