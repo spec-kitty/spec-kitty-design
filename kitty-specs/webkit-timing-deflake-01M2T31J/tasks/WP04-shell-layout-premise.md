@@ -17,7 +17,7 @@ planning_base_branch: mission/webkit-deflake
 merge_target_branch: mission/webkit-deflake
 branch_strategy: Planning artifacts for this mission were generated on mission/webkit-deflake. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/webkit-deflake unless the human explicitly redirects the landing branch.
 base_branch: mission/webkit-deflake
-base_commit: d6af259572eb3e0ac64ee1808d65d9d24bc2518d
+base_commit: 371de6a8dcd18d4ad8aef9f7915444778837844b
 created_at: '2026-09-18T11:13:32Z'
 subtasks:
 - T030
