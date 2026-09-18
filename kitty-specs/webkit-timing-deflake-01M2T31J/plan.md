@@ -75,7 +75,7 @@ forbids. NFR-002 now requires `retries: 0` for every measurement, and a `flaky` 
 run counts as a failure.
 
 This also resolves a wording drift: NFR-001 says ten **repeats within one job**, not ten separate CI
-runs. Ten sequential 25.6-minute jobs was never viable and the artifacts should not have implied it.
+runs. Ten sequential ~25-minute jobs was never viable and the artifacts should not have implied it.
 
 ### Correction 5 — the shell-layout tests share a helper, and it is the suspect
 
@@ -234,7 +234,7 @@ red-first-proof counts, because SC-002 asserts they are equal (WP01/T007).
 
 SC-006 and SC-008 close here too: one mission report enumerates all **thirteen** scope items — the
 twelve tests plus the lane stop — each with a verdict, the engine behind every claim (NFR-007), and
-the `playwright` duration delta against 25.6 min taken by WP01/T006a. SC-007 is scoped to the
+the `playwright` suite duration against the measured band, taken by WP01/T006a. SC-007 is scoped to the
 mission's own final pre-merge run; whether promotion resumes is post-merge follow-up, since it also
 needs `vars.PROMOTE_DEVELOP_ENABLED`.
 
