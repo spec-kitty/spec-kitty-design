@@ -341,10 +341,15 @@ merged and must not be.
 > that branch as routine cleanup makes them unreachable and eligible for garbage collection, and
 > the direct observation behind this mission's central finding loses its anchor.
 >
-> What survives branch deletion is **CI run `35373693252`**, which GitHub retains independently and
-> which contains the readings themselves in its logs. Cite the run id in preference to the SHAs.
-> If the branch must go, keep it as a tag first (`git tag probe/webkit-deflake-dom-snapshot
-> a866420e`) so the tree stays reachable.
+> **The only PERMANENT anchor is a pushed tag.** Before deleting the branch:
+> `git tag probe/webkit-deflake-dom-snapshot a866420e && git push origin probe/webkit-deflake-dom-snapshot`
+> — the remote ref is the authoritative one, so a purely local tag protects nothing.
+>
+> CI run `35373693252` carries the readings in its logs and survives branch deletion, but it is
+> **time-bounded**: Actions logs expire on the repository's retention setting (90 days by default).
+> So prefer the run id for citation convenience, and rely on the pushed tag for durability — an
+> earlier revision of this note had that ordering backwards and described the run as retained
+> "independently", which overstated it. Corrected by the pre-merge squad.
 
 - **Recorded cause** (Storybook's render replaced the root) predicts `hosts-in-dom=0`.
 - **H2** (present but hidden) predicts `hosts-in-dom=1`.

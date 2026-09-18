@@ -22,7 +22,7 @@
  * WHY TWO PLAYWRIGHT INVOCATIONS, NOT ONE
  *
  * Eleven of the twelve items are addressable as an exact `file:line` (Playwright's own
- * test-selection syntax); the twelfth (item 12, the `sk-action-row.spec.ts` "external
+ * test-selection syntax) — RESOLVED from each item's titleAnchor at run time, never stored; the twelfth (item 12, the `sk-action-row.spec.ts` "external
  * controls" family) is parameterized across six modes with no single line, and is selected by
  * a `--grep` title match instead. Mixing a `--grep` filter into the same invocation as the
  * `file:line` selections would apply that filter GLOBALLY, silently dropping the other eleven
@@ -70,32 +70,13 @@ const PROJECT = 'webkit'; // C-005 — the only engine this mission's affected t
  *  ever be read without knowing whether its repeats were co-scheduled. */
 let workersSetting = null;
 
-/** spec.md's "Canonical scope" table, items 1–11: each addressable as an exact file:line. */
+/** spec.md's "Canonical scope" table, items 1–11: each addressable by a unique titleAnchor. */
 const LINE_ITEMS = [
-  // Lines 58-62 corrected by WP02 (webkit-timing-deflake-01M2T31J) — DISCLOSED
-  // ACTIVE_WP_SCOPE_VIOLATION override: this file is WP01's, not WP02's, but WP02's own owned
-  // surface IS apps/storybook/src/tests/sk-progress.spec.ts, and its T012/T013 fix necessarily
-  // added real lines to that file (paint-diagnostic offset fix + phase-pinning for items 3/5),
-  // moving every one of these five declarations down from their original 369/440/456/465/510.
-  // A rig that cannot select this WP's own five items is worse than a disclosed one-line
-  // mechanical correction; see the mission's tmp/finding/ log for the class of defect (hardcoded
-  // absolute file:line addressing racing an owning WP's necessary edits to that same file).
   //
-  // Corrected again for PR #454's pre-merge squad fix (F1/F3/F6): `pinAnimationPhase` now
-  // captures each Animation's pre-pause `playState` (so items 3/5 can assert it was 'running'
-  // before the helper paused it — the false-pass the squad demonstrated against
-  // `animation-play-state: paused`), item 5 gained a `getAnimations().length === 0` before-count
-  // paired with its existing after-count (F3) and the `atHalf.length === atStart.length` parity
-  // guard item 3 already had (F6). Net effect: items 1/2/3 moved +9 lines, items 4/5 +14 lines
-  // (item 3's own body grew by 5 more lines ahead of them). Re-verified by grepping each test's
-  // title against these exact line numbers after the edit — see the mission record for the
-  // one-time correction commit.
   { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'forced-colors, two points in cycle', titleAnchor: 'legible' },
   { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'forced-colors + reduced-motion', titleAnchor: 'together' },
   { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'the sweep actually runs', titleAnchor: 'sweep' },
-  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'reduced-motion freeze', titleAnchor: 'stops' }, // corrected from 523 — see note above the item-1 entry.
-  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'no animation leak onto determinate', titleAnchor: 'teeth' }, // corrected from 568 — see note above the item-1 entry.
-  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'exact 56/240px columns', titleAnchor: 'preserves exact' },
+  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'reduced-motion freeze', titleAnchor: 'stops' },  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'no animation leak onto determinate', titleAnchor: 'teeth' },  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'exact 56/240px columns', titleAnchor: 'preserves exact' },
   { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'narrow shell region order', titleAnchor: 'reachable' },
   { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'landmarks/labels/grouping', titleAnchor: 'landmarks' },
   { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'axe-clean in dark mode', titleAnchor: 'axe-clean' },

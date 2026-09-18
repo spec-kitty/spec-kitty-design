@@ -68,9 +68,8 @@ via the attempts API. Recorded, not discarded — tracked in #456.
 does **not** mean the whole `playwright` job is flake-free. The closeout CI run `35375268744` is
 fully green (`gate: success`) and still reports **1 flaky** — `sk-notice-forced-colors.spec.ts:121`,
 never in scope. Pre-mission runs carried flaky tests too — including, in at least one run, items
-6, 9 and 10, which are fixed. No single number characterises a run: one run's log prints several
-different flaky counts across its invocations, which is why the earlier "1–3 flaky each" claim is
-retracted below rather than replaced with another figure. The rest is enumerated with run ids in **#456**, so #453 closing cannot be read as "the
+6, 9 and 10, which are fixed. No single number characterises a run: counts vary BETWEEN runs of identical code: run 35375268744 reports 1 flaky and run 35381688538 reports 2, on the same tree, which is why the earlier "1–3 flaky each"
+claim is retracted below rather than replaced with another figure. The rest is enumerated with run ids in **#456**, so #453 closing cannot be read as "the
 webkit lane is de-flaked".
 
 ## What this mission got wrong, in order
@@ -159,8 +158,18 @@ cost. **Both were wrong, and both are retracted** — the squad's evidence lens 
   **same 1 flaky and the same 2777 passed / 147 skipped**, 8.8 min apart. Retry cost cannot
   account for that.
 - "Pre-mission runs carried 1–3 flaky" was also false — `34606532461` carried **5**, and its five
-  include items 6, 9 and 10. The deeper error was quoting a single flaky number per run at all: a
-  run's log prints a separate count per invocation (run `35381688538` prints 1, 2 *and* 3).
+  include items 6, 9 and 10. The deeper error was quoting a single flaky number per run at all —
+  counts vary BETWEEN runs of identical code: run 35375268744 reports 1 flaky and run 35381688538 reports 2, on the same tree.
+
+  **A correction to this very bullet, found by the pre-merge squad's evidence lens.** An earlier
+  revision of it claimed run `35381688538` "prints 1, 2 *and* 3" flaky counts. It does not: its
+  `playwright` job prints exactly one, `2 flaky`. The "1" and "3" were the **`lint-code` job
+  echoing this mission's own commit message**, which quotes the retracted "1-3 flaky" prose — so a
+  run was cited as evidence for a retraction, and what it actually showed was the retracted text
+  being read back out of the repository. Inside the paragraph whose subject is not asserting
+  figures as fact. Recorded because the mechanism generalises: `gh run view --log` returns every
+  job's output, and CI echoes commit messages, so a naive grep can match your own prose and
+  return it as a measurement.
 
 The band itself was rebuilt for the same reason. Its first replacement stated a method that its
 own set did not satisfy: re-running the stated method yields 109 qualifying runs, and the ten
