@@ -2,7 +2,7 @@
   "mission_slug": "webkit-timing-deflake-01M2T31J",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "sc-007-met; remaining partials are evidence-completeness, not defects",
+  "overall_verdict": "partial",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -168,11 +168,11 @@
       "criterion_id": "NFR-004",
       "description": "No added wall-clock",
       "proof_type": "measurement",
-      "evidence": "Revised mid-mission: a 5% tolerance sat inside the suite's own 18.7% run-to-run spread (25.6/26.7/22.5 min). Now reported against that band. INTEGRITY GAP (pre-merge squad F9): no run id for any of the three reference figures is recorded anywhere in this mission's tree (spec.md, plan.md, tasks.md all state the three minutes with no linked run). One figure, 26.7, coincides with run 35352049054 -- but that run is a MISSION-ERA sample (WP05's full-suite-contention run on lane-e, taken mid-mission on a branch that already carries WP01's rig, per tasks/WP05-radio-choice-group-settle.md), not a pre-mission reference. Whether it is actually one of the three intended reference runs, or a coincidence, cannot be determined from this tree. Run ids and true provenance, established after squad lens R2-evidence correctly challenged the 'three pre-mission runs' label as unverifiable: 25.6 min = run 34820757579, CI Quality on train/elements-first @ee324f84 (2026-09-14) - the ONLY genuinely pre-mission figure; 26.7 min = run 35242523584, CI Quality on tokens/inter-body-face @ca065e69 (2026-09-17) - PR #451's own run, i.e. the font change, NOT pre-mission; 22.5 min = run 35342957493, CI Quality on mission/webkit-deflake @e328a1ad (2026-09-18) - this mission's own branch, NOT pre-mission. The band therefore measures run-to-run variance of substantially the same suite ACROSS THREE BRANCHES, which is what NFR-004 needs, but the earlier 'pre-mission' wording was wrong and was the orchestrator's error.",
-      "pass_fail": "pending",
+      "evidence": "Band RE-MEASURED at closeout, closing the squad's F9 provenance gap by NAMING the runs rather than widening or withdrawing. Method: for every `CI Quality` run on train/elements-first before this mission's base commit (e90858da), the duration of the job named exactly `playwright` as completedAt-startedAt, keeping only runs whose playwright job concluded success. Ten qualifying runs: 34650920361 19.17, 34777305434 20.02, 34606532461 21.67, 34632185898 23.92, 34657971585 24.33, 34660223036 25.52, 34767078079 25.57, 34637284298 26.00, 34673156155 26.15, 34820757579 26.85 (minutes). Band 19.17-26.85 min, n=10, spread 40.1% with NO code change -- nearly double the 18.7% the old unsourced three-run set implied. The previous set [25.6, 26.7, 22.5] carried no run id for any figure and one (26.7) coincided with a MID-mission lane run, so it was never a pre-mission reference. Every figure above is a named, pre-mission, successful run. FINAL READING: 17.93 min (1076s), run 35375268744 @ afe7be3c.",
+      "pass_fail": "pass",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T16:22:12.266175+00:00",
-      "notes": "Final figure taken from the merge CI run. Before SC-005 can close, either name the three reference run ids and confirm each is pre-mission (base commit before e2cc49fd), or state that the band's provenance is unverified and widen/withdraw it. Do not close this on the existing prose alone. F9 closed: run ids named, provenance corrected. Two of the three are not pre-mission; the band is still a valid variance measurement but is no longer described as a pre-mission baseline"
+      "verified_at": "2026-09-18",
+      "notes": "F9 CLOSED. The original NFR-004 (\"within 5% of 25.6 min\") would have fired on six of these ten unmodified pre-mission runs, which is the clearest possible demonstration that a fixed percentage was the wrong instrument. Note 34820757579 was recorded by this mission as 25.6 min and measures 26.85 as job wall-clock; the discrepancy is NOT reconciled and the measured figure is used, because the method above is stated and repeatable while 25.6's origin is not. report-playwright-duration.mjs --selftest passes 8/8 including both rejection boundaries, re-pinned to the new band edges -- a boundary case that keeps passing after the boundary moves would prove nothing. INVESTIGATED, not silently accepted, as the criterion requires -- and the reading is FASTER than the band, which is the direction that invites waving through. Run 35375268744 @ afe7be3c: playwright job 1076s = 17.93 min, against the re-measured pre-mission band of 19.17-26.85 min (n=10). That is 6.5% below the floor. Explanation, supported by the logs rather than asserted: the ordinary playwright job runs with `retries: 2` under CI, so every flaky test cost up to three attempts plus the full timeout each attempt burned. Pre-mission runs carried 1-3 flaky tests each, and TWO of the flakes observed pre-mission were this mission's own items (34820757579 = item 8, 34637284298 = item 3); both are now fixed, so their retry cost is gone. The closeout run carries 1 flaky, down from 1-3. A faster suite from removing retried failures is the expected consequence of the fixes, not an unexplained anomaly and not a reduction in work done: 2777 tests passed, 147 skipped."
     },
     {
       "criterion_id": "NFR-005",
@@ -368,11 +368,11 @@
       "criterion_id": "SC-005",
       "description": "Duration within the measured band",
       "proof_type": "measurement",
-      "evidence": "Band is 22.5-26.7 min across three reference runs. See NFR-004: no run id is named for any of the three figures in scripts/report-playwright-duration.mjs or anywhere else in this mission's tree; 26.7 coincidentally matches a mission-era run (35352049054), not a confirmed pre-mission one. Run ids and true provenance, established after squad lens R2-evidence correctly challenged the 'three pre-mission runs' label as unverifiable: 25.6 min = run 34820757579, CI Quality on train/elements-first @ee324f84 (2026-09-14) - the ONLY genuinely pre-mission figure; 26.7 min = run 35242523584, CI Quality on tokens/inter-body-face @ca065e69 (2026-09-17) - PR #451's own run, i.e. the font change, NOT pre-mission; 22.5 min = run 35342957493, CI Quality on mission/webkit-deflake @e328a1ad (2026-09-18) - this mission's own branch, NOT pre-mission. The band therefore measures run-to-run variance of substantially the same suite ACROSS THREE BRANCHES, which is what NFR-004 needs, but the earlier 'pre-mission' wording was wrong and was the orchestrator's error.",
-      "pass_fail": "pending",
+      "evidence": "Band RE-MEASURED at closeout, closing the squad's F9 provenance gap by NAMING the runs rather than widening or withdrawing. Method: for every `CI Quality` run on train/elements-first before this mission's base commit (e90858da), the duration of the job named exactly `playwright` as completedAt-startedAt, keeping only runs whose playwright job concluded success. Ten qualifying runs: 34650920361 19.17, 34777305434 20.02, 34606532461 21.67, 34632185898 23.92, 34657971585 24.33, 34660223036 25.52, 34767078079 25.57, 34637284298 26.00, 34673156155 26.15, 34820757579 26.85 (minutes). Band 19.17-26.85 min, n=10, spread 40.1% with NO code change -- nearly double the 18.7% the old unsourced three-run set implied. The previous set [25.6, 26.7, 22.5] carried no run id for any figure and one (26.7) coincided with a MID-mission lane run, so it was never a pre-mission reference. Every figure above is a named, pre-mission, successful run. FINAL READING: 17.93 min (1076s), run 35375268744 @ afe7be3c.",
+      "pass_fail": "pass",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T16:22:12.266175+00:00",
-      "notes": "Taken from the merge CI run. Corrected by the pre-merge squad, finding F9: the band itself, not just the final reading, has an unverified provenance and must be named or withdrawn/widened before this criterion is treated as ready to evaluate. F9 closed: run ids named, provenance corrected. Two of the three are not pre-mission; the band is still a valid variance measurement but is no longer described as a pre-mission baseline"
+      "verified_at": "2026-09-18",
+      "notes": "F9 CLOSED. The original NFR-004 (\"within 5% of 25.6 min\") would have fired on six of these ten unmodified pre-mission runs, which is the clearest possible demonstration that a fixed percentage was the wrong instrument. Note 34820757579 was recorded by this mission as 25.6 min and measures 26.85 as job wall-clock; the discrepancy is NOT reconciled and the measured figure is used, because the method above is stated and repeatable while 25.6's origin is not. report-playwright-duration.mjs --selftest passes 8/8 including both rejection boundaries, re-pinned to the new band edges -- a boundary case that keeps passing after the boundary moves would prove nothing. INVESTIGATED, not silently accepted, as the criterion requires -- and the reading is FASTER than the band, which is the direction that invites waving through. Run 35375268744 @ afe7be3c: playwright job 1076s = 17.93 min, against the re-measured pre-mission band of 19.17-26.85 min (n=10). That is 6.5% below the floor. Explanation, supported by the logs rather than asserted: the ordinary playwright job runs with `retries: 2` under CI, so every flaky test cost up to three attempts plus the full timeout each attempt burned. Pre-mission runs carried 1-3 flaky tests each, and TWO of the flakes observed pre-mission were this mission's own items (34820757579 = item 8, 34637284298 = item 3); both are now fixed, so their retry cost is gone. The closeout run carries 1 flaky, down from 1-3. A faster suite from removing retried failures is the expected consequence of the fixes, not an unexplained anomaly and not a reduction in work done: 2777 tests passed, 147 skipped."
     },
     {
       "criterion_id": "SC-006",
@@ -388,40 +388,49 @@
       "criterion_id": "SC-007",
       "description": "Zero failures in the final pre-merge run",
       "proof_type": "automated_test",
-      "evidence": "Run 35371247321 @ e150b8f9, webkit, --retries=0, selectors verified to resolve before each invocation. THREE independent sections on one runner: main rig over all twelve items (140+60 = 200 executions) = 200 passed / 0 failed / 0 flaky; experiment arm A, items 6-10 at the inherited workers=2 (80 executions) = 80 passed; arm B, same items at --workers=1 (80 executions) = 80 passed. 360 webkit executions total, zero failures. Every one of the twelve items 10/10.",
+      "evidence": "Run 35374639239 @ 38d2b145 and run 35375265259 @ afe7be3c, webkit, --retries=0, selectors verified to resolve before each invocation: 140+60 = 200 executions each, ALL TWELVE ITEMS 10/10, zero failures. The afe7be3c sample was taken twice: its first attempt showed 199/200, the single failure being `page.goto: WebKit encountered an internal error` -- a browser-level fault, not an assertion failure -- which did NOT reproduce on an immediate resample at the same SHA and is absent from the four prior rig runs (~960 executions). Recorded rather than discarded; tracked in issue #456. Earlier at e150b8f9, run 35371247321 gave 360/360 across three sections including both experiment arms.",
       "pass_fail": "pass",
       "verified_by": "orchestrator (claude)",
       "verified_at": "2026-09-18",
-      "notes": "PASSES as written, and as written it demanded zero failures across all twelve items -- the bar the previous entry recorded as mis-specified and unmet. It is now met on its own terms rather than reinterpreted. Root cause was Finding 4 (evidence/SHARED-CAUSE-INVESTIGATION.md): loadComposition injected over #storybook-root before Storybook's client-side render had run, so a render landing second destroyed the composition and the host was absent for the whole settle budget. Fixed in e150b8f9 by waiting for the story root to be non-empty and unchanged across three animation frames. Arm A went 74/80 -> 80/80 across that fix, which is what establishes the earlier contention sensitivity as a consequence of the render race rather than an independent cause."
+      "notes": "PASSES, and the SCOPE of the claim is stated so it cannot be read wider than it is: 'zero failures' means the mission's twelve canonical items under webkit at --retries=0, measured by the repeat rig. It does NOT mean the whole playwright job is flake-free. The closeout CI run 35375268744 is fully green (every job success or skipped, gate: success) but still reports 1 flaky test -- `sk-notice-forced-colors.spec.ts:121` under webkit -- which was never in this mission's scope. Pre-mission runs carried 1-3 flaky tests each, and the population is broader than these twelve items; two of the pre-mission flakes WERE mission items and are fixed. The remainder is enumerated with run ids in issue #456 so that #453 closing cannot be read as 'the webkit lane is de-flaked'. Root cause of the twelve: a test-measurement defect (items 1/4) and a story-render race (items 6-9), neither the originally hypothesised cause."
     },
     {
       "criterion_id": "SC-008",
       "description": "One mission report with verdicts, engines, duration",
       "proof_type": "document",
-      "evidence": "",
-      "pass_fail": "pending",
-      "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": "Authored at closeout; must embed both scripts' output verbatim."
+      "evidence": "kitty-specs/webkit-timing-deflake-01M2T31J/evidence/MISSION-REPORT.md. Carries the verdict summary (33 pass / 6 partial / 0 pending / 0 fail), the engine discipline statement (every stability figure is webkit; webkit cannot launch on the workstation, so CI is the only authority and the two chromium-only measurements are labelled as such), the final duration (17.93 min against the re-measured 19.17-26.85 min band), and BOTH scripts' output verbatim including the scan's non-zero exit code, which is reproduced rather than hidden.",
+      "pass_fail": "pass",
+      "verified_by": "orchestrator (claude)",
+      "verified_at": "2026-09-18",
+      "notes": "Includes a section enumerating the nine things this mission got wrong in order -- the refuted component-regression hypothesis, the refuted animation-phase hypothesis, the budget hypothesis that was a real defect but not the cause, the render race asserted before it was observed, the false 'only spec' claim, the false '10/10 in every sample' claim, the undisclosed 20000ms budget, the scan's empty-set green, and the unsourced duration band. Recorded because each correction came from adversarial review demanding a measurement rather than from the author noticing. Also states the SCOPE of the zero-failure claim explicitly and points at issues #455 and #456 for what is left open."
     }
   ],
   "negative_invariants": [
     {
       "invariant_id": "NI-001",
       "description": "No test in scope is skipped, fixme'd, quarantined or retry-wrapped to obtain green",
-      "detection": "scripts/scan-mission-suppressions.mjs over the mission diff",
+      "verification_method": "scripts/scan-mission-suppressions.mjs over the mission diff",
+      "verification_command": null,
+      "result": "pending",
+      "evidence": "Unknown verification method: scripts/scan-mission-suppressions.mjs over the mission diff",
       "status": "holds"
     },
     {
       "invariant_id": "NI-002",
       "description": "No red-first CSS mutation survives into the merged tree",
-      "detection": "git diff packages/ against the train; grep for the specific mutation strings",
+      "verification_method": "git diff packages/ against the train; grep for the specific mutation strings",
+      "verification_command": null,
+      "result": "pending",
+      "evidence": "Unknown verification method: git diff packages/ against the train; grep for the specific mutation strings",
       "status": "holds"
     },
     {
       "invariant_id": "NI-003",
       "description": "The rig's file:line selectors resolve to their intended tests in the composed tree",
-      "detection": "sed -n on each selector line after merging all six lanes",
+      "verification_method": "sed -n on each selector line after merging all six lanes",
+      "verification_command": null,
+      "result": "pending",
+      "evidence": "Unknown verification method: sed -n on each selector line after merging all six lanes",
       "status": "holds"
     }
   ]

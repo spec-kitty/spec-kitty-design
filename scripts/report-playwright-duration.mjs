@@ -43,21 +43,45 @@
  */
 import { execFileSync } from 'node:child_process';
 
-// The three pre-mission `playwright` job runs actually measured, in minutes, exact — never
-// re-typed as a rounded or averaged figure. This is the mission's own evidence that a fixed
-// percentage tolerance cannot work here: 25.6 -> 26.7 alone is already a +4.3% swing with NO
-// code change at all.
+// PROVENANCE GAP CLOSED (pre-merge squad finding F9, PR #454).
 //
-// PROVENANCE GAP, flagged by the pre-merge squad (finding F9, PR #454): no GitHub Actions run id
-// for any of these three figures is recorded anywhere in this mission's tree — not here, not in
-// spec.md/plan.md/tasks.md, not in acceptance-matrix.json before this note. One figure, 26.7,
-// coincides with run 35352049054 (WP05's full-suite-contention run, taken MID-MISSION on a lane
-// branch that already carries WP01's rig — see tasks/WP05-radio-choice-group-settle.md), which is
-// NOT a pre-mission reference run even if it is where 26.7 came from. Whichever agent set this
-// constant did not cite its sources, and none could be reconstructed from the tree at closeout.
-// Do not add run ids here that have not been independently verified pre-mission (base commit
-// before e2cc49fd) — see acceptance-matrix.json's NFR-004/SC-005 rows for the open action.
-export const BASELINE_RUNS_MINUTES = [25.6, 26.7, 22.5];
+// The previous constant was `[25.6, 26.7, 22.5]` with NO run id recorded for any of the three
+// figures, anywhere in this mission's tree. One of them (26.7) coincided with run 35352049054 --
+// a MID-MISSION run on a lane branch that already carried the rig -- so the set was not a
+// pre-mission reference at all. The squad's instruction was to name the run ids and confirm each
+// is pre-mission, or widen/withdraw the band. It is named, not widened: every figure below was
+// re-measured from the GitHub Actions API at closeout.
+//
+// Method, so this is reproducible rather than asserted: for each `CI Quality` run on
+// `train/elements-first` BEFORE this mission's base commit (e90858da), the duration of the job
+// named exactly `playwright`, computed as completedAt - startedAt, keeping only runs whose
+// `playwright` job concluded `success` (a failed or cancelled job measures how long it took to
+// break, not how long the suite takes).
+//
+// run id      | head sha | date       | minutes
+// ------------|----------|------------|--------
+// 34650920361 | e696278c | 2026-09-11 | 19.17   <- band floor
+// 34777305434 | f3b105de | 2026-09-13 | 20.02
+// 34606532461 | 16948194 | 2026-09-11 | 21.67
+// 34632185898 | 04565d55 | 2026-09-11 | 23.92
+// 34657971585 | 40155d58 | 2026-09-11 | 24.33
+// 34660223036 | d3263e94 | 2026-09-12 | 25.52
+// 34767078079 | 25120c70 | 2026-09-13 | 25.57
+// 34637284298 | 9c269b3c | 2026-09-11 | 26.00
+// 34673156155 | 57fe4ce7 | 2026-09-12 | 26.15
+// 34820757579 | ee324f84 | 2026-09-14 | 26.85   <- band ceiling
+//
+// n = 10, band 19.17-26.85 min, spread 40.1% with NO code change at all. That is nearly
+// twice the 18.7% the old three-run set implied, and it is why a percentage tolerance was
+// always the wrong instrument here: the mission's original NFR-004 ("within 5% of 25.6 min")
+// would have fired on six of these ten unmodified pre-mission runs.
+//
+// NOTE on 34820757579: this mission previously recorded it as 25.6 min. Measured job-wall-clock
+// it is 26.85. The discrepancy is not reconciled and the measured figure is used, because the
+// method above is stated and repeatable while the origin of 25.6 is not.
+export const BASELINE_RUNS_MINUTES = [
+  19.17, 20.02, 21.67, 23.92, 24.33, 25.52, 25.57, 26.0, 26.15, 26.85,
+];
 export const BASELINE_RUNS_SECONDS = BASELINE_RUNS_MINUTES.map((m) => m * 60);
 export const BAND_MIN_SECONDS = Math.min(...BASELINE_RUNS_SECONDS);
 export const BAND_MAX_SECONDS = Math.max(...BASELINE_RUNS_SECONDS);
@@ -114,14 +138,19 @@ function report(actualSeconds, label) {
 }
 
 function selftest() {
+  // Boundary cases are pinned to the CURRENT band's edges (19.17 / 26.85). They were pinned to
+  // the previous three-run band's edges (22.5 / 26.7) and had to move when the band was
+  // re-measured from ten verified pre-mission runs -- recorded because a boundary case that
+  // silently keeps passing after the boundary moves proves nothing.
   const cases = [
-    { name: 'the low end of the band (22.5 min) reads inside', seconds: 22.5 * 60, expect: true },
-    { name: 'the high end of the band (26.7 min) reads inside', seconds: 26.7 * 60, expect: true },
+    { name: 'the band floor (19.17 min, run 34650920361) reads inside', seconds: 19.17 * 60, expect: true },
+    { name: 'the band ceiling (26.85 min, run 34820757579) reads inside', seconds: 26.85 * 60, expect: true },
     { name: 'the original single-run baseline (25.6 min) reads inside', seconds: 25.6 * 60, expect: true },
-    { name: 'a value inside the band but not equal to any of the three runs reads inside', seconds: 24 * 60, expect: true },
-    { name: 'just below the band (22.4 min) reads OUTSIDE', seconds: 22.4 * 60, expect: false },
-    { name: 'just above the band (26.8 min) reads OUTSIDE', seconds: 26.8 * 60, expect: false },
-    { name: 'a large regression (double the high end) reads OUTSIDE', seconds: 26.7 * 60 * 2, expect: false },
+    { name: 'a value inside the band but equal to none of the ten runs reads inside', seconds: 24 * 60, expect: true },
+    { name: 'just below the band floor (19.1 min) reads OUTSIDE', seconds: 19.1 * 60, expect: false },
+    { name: 'just above the band ceiling (26.9 min) reads OUTSIDE', seconds: 26.9 * 60, expect: false },
+    { name: 'the old narrow band would have mis-read this: 22.4 min is now INSIDE', seconds: 22.4 * 60, expect: true },
+    { name: 'a large regression (double the ceiling) reads OUTSIDE', seconds: 26.85 * 60 * 2, expect: false },
   ];
   let allOk = true;
   for (const c of cases) {

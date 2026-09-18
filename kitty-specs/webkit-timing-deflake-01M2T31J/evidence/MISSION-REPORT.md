@@ -1,0 +1,169 @@
+# Mission report — WebKit timing de-flake
+
+**Mission**: `webkit-timing-deflake-01M2T31J` · **Issue**: #453 (adopts #340, #238) · **PR**: #454
+**Base**: `train/elements-first` · **Authored at closeout**, 2026-09-18.
+
+SC-008 requires one report carrying verdicts, engines and duration, with both scripts' output
+embedded verbatim. Both are below, unedited, including a non-zero exit code.
+
+## Verdict summary
+
+| | count |
+|---|---|
+| pass | 33 |
+| partial | 6 |
+| pending | 0 |
+| **fail** | **0** |
+
+**Engine discipline (NFR-007).** Every stability figure in this mission is a **webkit** result.
+webkit cannot launch on the development workstation (confirmed with a chromium positive control),
+so CI is the only webkit authority here and no local pass was ever read as evidence about it. The
+two chromium-only measurements that exist are labelled as such and are exactly why FR-008 and
+three sibling criteria remain `partial` rather than being rounded up.
+
+## What was actually wrong
+
+Neither headline cause was the one the tracking issue proposed.
+
+1. **Items 1 and 4 were not flaky — they failed every repeat (0/10).** `samplePixels` read at
+   `x=2` / `x=w-3`, which return the unfilled track colour on *every* fixture, including the
+   100%-filled `Complete` fixture. A **test-measurement defect**, not a component regression:
+   `git diff origin/train/elements-first...HEAD -- packages/` is byte-empty. The PR previously
+   named a component regression from #451 as a live candidate; that was investigated and refuted.
+
+2. **Items 6–9 rotated because they shared a helper, not an assertion.** `loadComposition`
+   overwrote `#storybook-root` immediately after `page.goto`, which resolves at `load` — while
+   Storybook renders the story into that root on the **client, after** `load`. A render landing
+   second destroyed the injected composition. Directly observed, not inferred: a probe branch
+   reverting only the fix produced **18 failures, 18 readings of `hosts-in-dom=0`, none ≥ 1**,
+   with `#storybook-root children=div`.
+
+3. **Item 10 failed precisely when the scroll was fast.** Its baseline was read *inside* the
+   settle helper, after `page.keyboard.press()` had resolved, so a scroll completing in that gap
+   was invisible. Its error said `did not settle` while reporting 307 stable reads against a
+   requirement of 3 — it had settled instantly.
+
+## Final measurement
+
+Run `35375265259` @ `afe7be3c` (and `35374639239` @ `38d2b145`), webkit, `--retries=0`, selectors
+verified to resolve before each invocation:
+
+| | |
+|---|---|
+| executions | **200** (140 line-addressed + 60 for item 12's six modes) |
+| failures | **0** |
+| flaky | **0** — `--retries=0` is an explicit CLI flag, so a flaky-at-exit-0 cannot arrive by inheritance |
+| items 10/10 | **all twelve** |
+
+The first attempt at `afe7be3c` read 199/200; the single failure was
+`page.goto: WebKit encountered an internal error`, a browser-level fault absent from ~960 prior
+executions, which did not reproduce on an immediate resample at the same SHA. Recorded, not
+discarded — tracked in #456.
+
+## Scope of the claim
+
+"Zero failures" means **the mission's twelve canonical items under webkit at `--retries=0`**. It
+does **not** mean the whole `playwright` job is flake-free. The closeout CI run `35375268744` is
+fully green (`gate: success`) and still reports **1 flaky** — `sk-notice-forced-colors.spec.ts:121`,
+never in scope. Pre-mission runs carried 1–3 flaky each; two of those were mission items and are
+fixed. The rest is enumerated with run ids in **#456**, so #453 closing cannot be read as "the
+webkit lane is de-flaked".
+
+## What this mission got wrong, in order
+
+Recorded because the corrections were produced by adversarial review demanding measurements, not
+by the author noticing.
+
+1. **A component regression from #451** was named as a live candidate. Refuted — the diff is
+   test-only.
+2. **"Animation phase unpinned"** was proposed as the shared cause of the `sk-progress` failures.
+   Refuted by reading the CSS: the reduced-motion frame is deterministic by construction.
+3. **A double-spent settle budget** was declared the shared cause of items 6–9. A real defect,
+   fixed — but **not** the cause. Its own diagnostic refuted it: `fonts=ready` with ~148 polls at
+   a 33ms cadence proved nothing was starved.
+4. **The render race was asserted before it was observed.** The snapshot that would prove it
+   shipped in the same commit as the cure, so it had never fired. A rival hypothesis fit every
+   observation equally. The probe above settled it.
+5. **"The only spec injecting over a rendered story"** — false twice over. `visual.spec.ts` does
+   the identical thing to the same story id; item 10 rotated without injecting. Deferred as #455.
+6. **"Items 1–5, 11 and 12 were 10/10 in every sample"** — false; items 1, 3, 4, 5 all failed at
+   baseline.
+7. **An undisclosed `{ timeout: 20000 }`**, added in a file carrying a nine-line disclosure about
+   a 1500 ms budget, which pushed the helper's worst case to ~26.5 s against a 30 s per-test
+   timeout. Replaced with 10000 ms and disclosed.
+8. **The suppression scan's "0 wait increases" was a green over an empty set** — its rule only
+   fired if the hunk also *removed* a timeout. Four new budgets were invisible. Repaired; all four
+   are now visible.
+9. **The duration band `[25.6, 26.7, 22.5]` had no run id for any figure**, and one was a
+   mid-mission lane run. Re-measured from ten named pre-mission runs: **19.17–26.85 min**. The
+   mission's original NFR-004 ("within 5% of 25.6 min") would have fired on **six of those ten
+   unmodified runs**.
+
+## Duration (NFR-004 / SC-005)
+
+Investigated rather than accepted, although the reading is *faster* than the band — the direction
+that invites waving through. The ordinary job runs `retries: 2`, so each flaky test cost up to
+three attempts plus the timeout each attempt burned; removing flakes removes that cost. Pre-mission
+runs carried 1–3 flaky, two of which were this mission's items. 2777 passed, 147 skipped — the
+suite did not do less work.
+
+## Verbatim: `scripts/report-playwright-duration.mjs --seconds=1076`
+
+```
+NFR-004 / SC-005 — playwright job duration (band-reported, not percentage-gated)
+  pre-mission runs: 19.17 min, 20.02 min, 21.67 min, 23.92 min, 24.33 min, 25.52 min, 25.57 min, 26 min, 26.15 min, 26.85 min (spread: 40.1% — this is why there is no fixed tolerance)
+  measured band: 19.17 min – 26.85 min
+  this run: 17.93 min (1076.0s)
+  ⚠️  OUTSIDE the measured band — investigate and explain; this is a flag for a human, not an automatic NFR-004 failure
+```
+
+## Verbatim: `scripts/scan-mission-suppressions.mjs --base=origin/train/elements-first`
+
+Exit code **1**, reproduced here rather than hidden. It is driven by SC-002's equality, which the
+mission has recorded as **not meaningful**: the two counts pair disjoint populations, established
+by the pre-merge squad. SC-002/NFR-003 remain `partial` for that reason and the scan was
+deliberately **not** re-tuned to make the numbers balance.
+
+```
+SC-003 — mechanical suppression scan:
+  ✅ test.skip: 0
+  ✅ test.fixme: 0
+  ✅ .only: 0
+  ✅ added retries: 0
+  ✅ increased numeric timeout literal: 0
+
+DISCLOSURE — new wait budgets (NOT suppressions; not counted above):
+  4 new wait budget(s). These do not fail this scan — a new precondition wait is not a suppression and not an increase — but every one must be
+  accounted for in the mission acceptance matrix under SC-003/C-001, with its purpose and
+  its effect on the enclosing per-test timeout stated:
+      apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts: 10000ms
+      apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts: 1500ms
+      apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts: 5000ms
+      apps/storybook/src/tests/sk-workflow-board.spec.ts: 5000ms
+
+SC-002 — rewritten assertions vs red-first proofs:
+  rewritten-assertion sites: 9
+  red-first-proof markers:   15
+  ❌ NOT equal-and-non-zero — SC-002 unmet (see this file's header for the RED-FIRST-PROOF marker convention)
+```
+
+The four entries under DISCLOSURE are **new** wait budgets guarding preconditions, not widened
+tolerances, and are individually accounted for in `acceptance-matrix.json` under SC-003/C-001. They
+are deliberately not counted as suppressions: counting them would make SC-003 and C-001
+unachievable for any mission that legitimately adds a precondition wait, which pressures the next
+author to avoid the rule rather than disclose under it.
+
+## Open, with owners
+
+| # | What |
+|---|---|
+| #455 | The same story-render race, unfixed, in `visual.spec.ts` and two further specs |
+| #456 | webkit flakiness beyond this mission's twelve items, enumerated with run ids |
+
+## Standing partials
+
+Six criteria remain `partial`, all evidence-completeness rather than defects: FR-008 (no direct
+webkit font-probe of the 56.00/240.00 px premise), FR-010, NFR-006 and SC-004 (chromium-only
+measurements standing in for webkit claims), and NFR-003/SC-002 (one red-first proof **withdrawn**
+as affirmatively wrong, one **superseded in part**, and no replacement claimed because none was
+captured).
