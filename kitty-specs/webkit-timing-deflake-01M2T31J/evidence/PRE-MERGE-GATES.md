@@ -66,3 +66,21 @@ samples it rests on.
 
 - `#N` in spec/plan/tasks prose gets scraped into a required issue matrix and blocks `move-task --to approved` for **every** WP. Cite issues as bare numbers unless the mission is undertaking them.
 - Re-run the committed-tree scan for absolute `/home/<user>/` paths before any push carrying `status.json`, `status.events.jsonl` or review records.
+
+---
+
+## 7. Carried findings — must appear in the SC-008 mission report, not be lost
+
+**`openStory()`'s flat `page.waitForTimeout(50)`** — `apps/storybook/src/tests/sk-radio-choice-group.spec.ts:~257`, used by every story in that file. This is precisely the "wait on elapsed time" shape the mission exists to remove, and it is **not fixed**.
+
+WP05 found it and deliberately left it alone; its reviewer independently confirmed the code and endorsed the restraint. The reasoning is worth preserving because it is the correct one: across four evidentiary samples nothing ever failed through that helper, so there was **no way to red-first-prove a fix** (C-012). An unprovoked edit to code shared by every test in the file would trade a demonstrated-zero-risk item for an unproven-risk one. The mission's canonical scope is the twelve demonstrated items, not a sweep of every latent timing pattern in a touched file.
+
+Carry it as a **named future-action item**. Reporting a defect you correctly decline to fix is a deliverable; silently dropping it is not.
+
+## 8. The evidence principle this mission arrived at
+
+**Condition diversity beats sample volume.** 100 consecutive passes under one condition is *the same kind of evidence* as 20 under that condition — not a categorically stronger kind. Item 7 proved this: 20/20 in the T003 baseline, then 8/10 in a later run on unmodified code.
+
+What actually resolved item 11 and item 12 was not repeat count but running the **contention condition** — full suite, 2 workers, `retries: 2` — which is the shape under which both were originally observed failing. Both passed clean there.
+
+So when a "not reproduced" verdict is written, it must state **which conditions were tried**, not only how many repeats. A verdict resting on one condition at high volume is weaker than one resting on two conditions at low volume, and the report should make that visible rather than quoting the larger number.
