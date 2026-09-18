@@ -11,7 +11,7 @@ artifacts belong on `mission/webkit-deflake`, not in a WP's diff), so it is pres
 |---|---|---|---|---|
 | 1 | `:369` forced-colors, two points in cycle | **0/10** | 10/10 | 0/10 ✓ |
 | 2 | `:440` forced-colors + reduced-motion | 10/10 | 10/10 | 0/10 ✓ |
-| 3 | `:456` the sweep actually runs | 3/10 | **10/10, then 9/10** | 0/10 ✓ |
+| 3 | `:456` the sweep actually runs | 3/10 | **10/10, 9/10, 10/10** (three samples) | 0/10 ✓ |
 | 4 | `:465` reduced-motion freeze | **0/10** | 10/10, then 9/10 | 0/10 ✓ |
 | 5 | `:510` no leak onto determinate | 1/10 | 10/10 | 0/10 ✓ |
 
@@ -56,10 +56,28 @@ empty.
 ## What is NOT established — stated because it bounds what may be claimed
 
 1. **Why items 1 and 4 passed at `ee324f84`, before the font change.** If the sampling coordinates were always wrong, those tests should always have failed. Two candidate mechanisms were considered — webkit/Playwright version drift unrelated to fonts, or a font-metric-driven sub-pixel geometry shift — and **neither was tested**. The mechanism of the prior pass is unknown. Consequently the font change's role is bounded to "may have changed which pixel a wrong coordinate landed on", and cannot be called either cause or bystander on this evidence.
-2. **T013's narrower claim** — that `getAnimations({subtree: true})` reaches the vendor pseudo-element under webkit — is not independently confirmed. The mechanism works functionally, but no positive pseudo-element evidence was captured from a clean, non-mutated run.
+2. ~~**T013's narrower claim** — that `getAnimations({subtree: true})` reaches the vendor pseudo-element under webkit — is not independently confirmed.~~ **RESOLVED during the review-fix cycle.** A review found that `pinAnimationPhase`'s doc comment claimed the `pseudoElement` was "attached as a test annotation so the CI record proves which layer webkit actually returned animations for" — and nothing was attached anywhere. Rather than strike the claim, a real `test.info().annotations.push()` was wired up at both call sites, making the comment true *and* producing the evidence.
+
+   **The measured answer**: run `35361773017` shows items 3 and 5 at 10/10 on real webkit with the annotation on every repeat, `pseudoElement: null`, `durationMs: 320`. (Item 4 correctly shows `annotations: []` — it never calls the function.) So `getAnimations({subtree: true})` under webkit returns the sweep animation but reports **no pseudo-element**: the phase-pinning reaches the **host element's** animation.
+
+   That is coherent with the component's own architecture rather than surprising — `sk-progress.css` documents that Chromium and WebKit paint no `::-webkit-progress-value` box for an indeterminate `<progress>` at all, so under webkit the sweep genuinely lives on the host. plan.md Correction 3's open question now has a self-consistent measured answer.
 3. **Item 3's residual 1-in-10 failure** has no diagnosis.
 
 ## Process incidents (both logged to the shared findings log)
 
 1. WP02's own diagnostic edits broke WP01's rig line-selection **twice**. Recovered first by line-count-neutral edits, then — once the real fix necessarily added lines — by disclosed `ACTIVE_WP_SCOPE_VIOLATION` corrections to `scripts/webkit-repeat-run.mjs`. Final selectors 416/487/503/522/567, all verified to resolve. *(WP02's own report transcribes two of these as 525/570; the rig itself is correct.)*
 2. A red-first push cancelled its own in-flight capture run via the shared concurrency group, destroying the proof while leaving everything downstream looking clean. Redone by waiting for the capture to complete before touching the branch. See PRE-MERGE-GATES §11.
+
+
+## Review-fix cycle (added after the first review rejected this package)
+
+The rejection was correct and is the mission's sharpest self-catch: a **claim of proof with no
+artifact behind it**, written into the package convened to remove exactly that pattern. Resolved as
+above.
+
+One consequence worth recording: the two-line annotation edit shifted items 4 and 5 down by one line,
+and the rig selects by hardcoded `file:line`. Run `35360910036` therefore returned
+`NO MATCHING RESULTS` for both — Playwright **silently drops a `file:line` selector that matches
+nothing when mixed with valid ones**, so the run completed, looked normal, and simply omitted them.
+Corrected to 523/568 in `7c5061a0` with disclosure. This is the third instance of the same root cause
+in this mission; see `evidence/findings/README.md` for the upstream recommendation.
