@@ -484,11 +484,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/check-develop-ruleset-parity.mjs --check-parity-anchor-tags
+      # Split from the commitlint step below (design issue 453). These were two commands under
+      # one [ENFORCED] name, so deleting the probe-table line left the step running, passing, and
+      # no longer bounding the ~20 ignore regexes in commitlint.config.cjs — with nothing able to
+      # notice: `lint-code` is outside check-gate-wiring's whole-job audit by design, so
+      # REQUIRED_LINT is the only mechanism, and an `if:`-carrying step cannot be registered there.
+      # The probe table has no pull-request dependency — it loads the config and asserts — so it
+      # runs unconditionally and IS registered. The comparison below genuinely needs PR refs.
+      - name: "[ENFORCED] commitlint config probes (FR-020)"
+        run: node scripts/check-commitlint-config.mjs
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
-        run: |
-          node scripts/check-commitlint-config.mjs
-          npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}
+        run: npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}
       - name: "[ENFORCED] Fail if lint errors"
         if: always()
         run: |
