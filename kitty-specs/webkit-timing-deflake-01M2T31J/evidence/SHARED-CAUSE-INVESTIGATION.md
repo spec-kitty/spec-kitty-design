@@ -333,6 +333,19 @@ Branch `kitty/mission-webkit-timing-deflake-01M2T31J-lane-probe` reverts **only*
 wait and keeps everything else, so a real failure prints the discriminating reading. It is not
 merged and must not be.
 
+> **RETENTION WARNING — read before deleting any branch.** The two commits cited below,
+> `dd99459d` and `a866420e`, live **only** on
+> `kitty/mission-webkit-timing-deflake-01M2T31J-lane-probe`. They are deliberately **not** merged
+> (the probe reverts the fix) and are therefore **not ancestors of `mission/webkit-deflake`, of
+> `train/elements-first`, or of `main`** — verified with `git merge-base --is-ancestor`. Deleting
+> that branch as routine cleanup makes them unreachable and eligible for garbage collection, and
+> the direct observation behind this mission's central finding loses its anchor.
+>
+> What survives branch deletion is **CI run `35373693252`**, which GitHub retains independently and
+> which contains the readings themselves in its logs. Cite the run id in preference to the SHAs.
+> If the branch must go, keep it as a tag first (`git tag probe/webkit-deflake-dom-snapshot
+> a866420e`) so the tree stays reachable.
+
 - **Recorded cause** (Storybook's render replaced the root) predicts `hosts-in-dom=0`.
 - **H2** (present but hidden) predicts `hosts-in-dom=1`.
 
