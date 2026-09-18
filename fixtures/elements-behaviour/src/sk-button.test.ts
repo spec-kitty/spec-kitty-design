@@ -603,11 +603,21 @@ test('an unknown variant or size degrades on RENDER and throws on AUTHORING', as
 
   expect(() => buttonStaticHtml({ variant: 'nope' })).toThrow(/unknown button variant/);
   expect(() => buttonStaticHtml({ size: 'nope' })).toThrow(/unknown button size/);
-  for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
-    expect(() => buttonStaticHtml({ variant: key })).toThrow(/unknown button variant/);
-    expect(() => buttonStaticHtml({ size: key })).toThrow(/unknown button size/);
-    expect(buttonClasses(key).trim()).toBe('sk-button');
-    expect(buttonClasses(undefined, key).trim()).toBe('sk-button');
+  // console.warn is intercepted for this loop only: `buttonClasses` warns on every degrade
+  // below, and replaying four keys' worth of warnings into the job log is a large share of what
+  // pushed the behaviour-suite job log past its truncation cap (WP06, FR-010/NFR-006). Only the
+  // side channel is suppressed — every expectation below still runs unchanged (FR-011).
+  const loopWarn = console.warn;
+  console.warn = () => {};
+  try {
+    for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+      expect(() => buttonStaticHtml({ variant: key })).toThrow(/unknown button variant/);
+      expect(() => buttonStaticHtml({ size: key })).toThrow(/unknown button size/);
+      expect(buttonClasses(key).trim()).toBe('sk-button');
+      expect(buttonClasses(undefined, key).trim()).toBe('sk-button');
+    }
+  } finally {
+    console.warn = loopWarn;
   }
 });
 
