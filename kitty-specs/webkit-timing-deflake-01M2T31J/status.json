@@ -1,19 +1,19 @@
 {
-  "event_count": 32,
-  "last_event_id": "01M2TE1NJHT41Q87AQSPZTJRNP",
-  "materialized_at": "2026-09-18T14:17:08.945075+00:00",
+  "event_count": 33,
+  "last_event_id": "01M2TE7R8QDAMQYW7K4HJCAG1S",
+  "materialized_at": "2026-09-18T14:20:28.311984+00:00",
   "mission_number": "",
   "mission_slug": "webkit-timing-deflake-01M2T31J",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 3,
+    "approved": 4,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
     "done": 0,
     "for_review": 0,
     "in_progress": 2,
-    "in_review": 1,
+    "in_review": 0,
     "planned": 0
   },
   "work_packages": {
@@ -80,22 +80,34 @@
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
       "shell_pid": 837933,
-      "shell_pid_created_at": "1789738625.32"
+      "shell_pid_created_at": "1789738625.32",
+      "subtasks": {
+        "T020": "done",
+        "T021": "done",
+        "T022": "done",
+        "T023": "done"
+      }
     },
     "WP04": {
-      "actor": "claude",
+      "actor": "user",
       "agent": "claude",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "in_review",
-      "last_event_id": "01M2TDVCS0QHV53E753DJJF7P5",
-      "last_transition_at": "2026-09-18T14:13:43.328424+00:00",
+      "lane": "approved",
+      "last_event_id": "01M2TE7R8QDAMQYW7K4HJCAG1S",
+      "last_transition_at": "2026-09-18T14:20:28.311984+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "loadComposition never awaited font loading (font-display:swap on --sk-font-sans) and only checked host visibility once, so it could return before the shell settled; fixed with an explicit postcondition (fonts ready + 4 stable frame-tied geometry reads of the 4 structural parts) that fails naming what was missing, red-first proven twice. Item 6 exact-pixel columns measured font-independent (chromium, 3 faces x 2 widths, zero movement) so no assertion changed (T033: nothing to correct). Item 7 reproduces (coordinator correction) and is covered by the same fix but not separately diagnosed. Measured against WP01's CI rig across 3 post-fix runs plus baseline/coordinator runs (5 samples total, webkit, retries=0): items 8 and 9-dark show a plausible improvement (9-10/10 in 2 of 3 post-fix runs vs 8/10 and 7/10 pre-fix) but items 6 and 7 show no measurable improvement above this rig's own documented cross-run noise (baseline itself recorded a 10/10->7/10 swing on unmodified code). Reporting per FR-013: the settling defect is real and fixed; a clean, noise-free 10/10 for items 6/7 is NOT demonstrated and is reported as such rather than forced."
       ],
       "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/453/spec-kitty-design/kitty-specs/webkit-timing-deflake-01M2T31J/tasks/WP04-shell-layout-premise/review-cycle-1.md",
+        "reference": "review-cycle://webkit-timing-deflake-01M2T31J/WP04-shell-layout-premise/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
       "role": "reviewer",
       "shell_pid": 918719,
       "shell_pid_created_at": "1789740822.33",
@@ -119,7 +131,8 @@
       "last_transition_at": "2026-09-18T14:17:08.945075+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "Item 11 (sk-radio-choice-group.spec.ts:1113) NOT REPRODUCED. Outcome 2 per package brief -- no code change; T040/T041/T042 intentionally left unchecked (not done -- no assertion was rewritten, so there is nothing to red-first-prove). --force used because the CLI cannot express blocked-with-reason; this note is the explanation. Evidence, all webkit/retries=0: (1) T003 baseline (WP01, prior): 10/10. (2) My lane-e push-triggered rig run 35351684955, all 12 items at --repeat-each=10: item 11 10/10 (other items' failures there are pre-existing WP02/WP04 scope, not WP05's). (3) My dispatched rig run 35352122895, item 11 only at --repeat-each=100: 100/100, log line 'every selected item passed every repeat under webkit, retries=0'. Total 120 consecutive webkit passes across 3 independent CI samples and 2 repeat-count regimes (10 and 100). Treated as multiple clean samples, not proof of non-reproducibility (T003 itself notes counts moved run-to-run for other items). Also attempted: dispatched the full ci-quality.yml playwright job via workflow_dispatch on this lane branch (run 35352049054, ~2770 tests, 2 workers, retries 2) to test the full-suite-contention hypothesis matching item 11's original 'flaky (PR)' discovery context -- this run did not complete before finalization was requested, so no contention result is reported; incomplete/abandoned, not a finding. openStory()'s shared 50ms waitForTimeout plus visible-wait was inspected as a candidate root cause but never implicated since the test never failed under any tried condition. FR-013/SC-008: reporting not-fixed with evidence per this package's Independent Test clause. C-010 satisfied: lane tmp/finding symlinked to repo-root tmp/finding; no reasoning-loop failures or spec-kitty errors occurred to log."
+        "Item 11 (sk-radio-choice-group.spec.ts:1113) NOT REPRODUCED. Outcome 2 per package brief -- no code change; T040/T041/T042 intentionally left unchecked (not done -- no assertion was rewritten, so there is nothing to red-first-prove). --force used because the CLI cannot express blocked-with-reason; this note is the explanation. Evidence, all webkit/retries=0: (1) T003 baseline (WP01, prior): 10/10. (2) My lane-e push-triggered rig run 35351684955, all 12 items at --repeat-each=10: item 11 10/10 (other items' failures there are pre-existing WP02/WP04 scope, not WP05's). (3) My dispatched rig run 35352122895, item 11 only at --repeat-each=100: 100/100, log line 'every selected item passed every repeat under webkit, retries=0'. Total 120 consecutive webkit passes across 3 independent CI samples and 2 repeat-count regimes (10 and 100). Treated as multiple clean samples, not proof of non-reproducibility (T003 itself notes counts moved run-to-run for other items). Also attempted: dispatched the full ci-quality.yml playwright job via workflow_dispatch on this lane branch (run 35352049054, ~2770 tests, 2 workers, retries 2) to test the full-suite-contention hypothesis matching item 11's original 'flaky (PR)' discovery context -- this run did not complete before finalization was requested, so no contention result is reported; incomplete/abandoned, not a finding. openStory()'s shared 50ms waitForTimeout plus visible-wait was inspected as a candidate root cause but never implicated since the test never failed under any tried condition. FR-013/SC-008: reporting not-fixed with evidence per this package's Independent Test clause. C-010 satisfied: lane tmp/finding symlinked to repo-root tmp/finding; no reasoning-loop failures or spec-kitty errors occurred to log.",
+        "Review passed (--force: T040/T041/T042 legitimately not-done, not unmet -- this package's brief explicitly permits closing on 'not reproduced' with an empty diff, and no assertion was rewritten so there is nothing to red-first-prove; the CLI's unchecked-subtasks gate cannot express that outcome, same limitation WP05 itself hit and forced past on its own for_review transition). Verified independently (not self-report): the abandoned contention run (35352049054, ~2770 tests/2 workers/retries:2, dispatched on this lane) finished during this review at conclusion=failure, but its 2 failed + 3 flaky set is sk-progress:369/465 (items 1/4), sk-connectors-pattern:477 (out of the 12-item scope), sk-progress:510 (item 5), sk-team-overview-shell-layout:160 (item 7) -- item 11 (sk-radio-choice-group.spec.ts:1113) appears in neither list, i.e. it passed clean under the exact 2-worker/retries:2/full-suite conditions matching its own original 'flaky (PR)' discovery mode. That closes the report's largest gap in favour of not-reproduced. Also independently confirmed: run 35351684955's item-11 line reads 10/10 with the other failures in that run being items 1/4 (deterministic, WP02 scope) and not item 11; C-010 tmp/finding is a real symlink to the repo root's; every evidence claim in the note is explicitly webkit/retries=0 (NFR-007) and webkit cannot launch locally per tasks.md, so no local run is or could be mistaken for CI-webkit evidence; the diff is genuinely empty of code (the four script/workflow files in the stat are WP01's, inherited via the lane-a dependency merge, not WP05's own commits). On the openStory() waitForTimeout(50) at apps/storybook/src/tests/sk-radio-choice-group.spec.ts:~257 (confirmed real, inside WP05's own owned file): restraint was correct, not just convenient -- C-012's red-first bar and disciplined-defect-diagnosis require a demonstrated failure before rewriting code shared by every test in the file, and across all four evidentiary samples (10, 10, 100 reps at retries=0, plus now the full-contention run) nothing ever failed through that helper. Mission's canonical scope is the twelve demonstrated items, not a sweep of every latent timing pattern in a touched file, so not fixing it was right for this gate. WP05 did report the finding rather than dropping it silently. Recommend (non-blocking, for the coordinator) that this candidate be carried into the mission's closeout/SC-008 report as a named future-action item. Evidence-weight note: 100 consecutive low-contention CI passes is not categorically stronger than 20 was for item 7 -- same kind of evidence at higher volume, and item 7's 20/20-then-8/10 history warns against trusting repeat-count alone. What actually resolves this is the contention run replicating item 11's original discovery condition and coming back clean; that is qualitatively different evidence and is what makes not-reproduced defensible, not the 10/100 repeat counts by themselves."
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
