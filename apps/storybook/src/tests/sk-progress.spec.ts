@@ -658,7 +658,9 @@ test.describe('sk-progress theming', () => {
  * Red-first proofs — items 1-5, CI run 35358002926 (webkit, --retries=0, --repeat-each=10),
  * mutation commit `3fbb49a2` (three CSS mutations: item 1's clip flattened to full-width, item 3's
  * sweep removed, item 4's reduced-motion override removed), reverted in `f53c7f3d` with a
- * byte-empty `git diff packages/styles/src/progress/**` afterwards.
+ * byte-empty `git diff packages/styles/src/progress/**` afterwards. Line numbers below are as of
+ * that proof; items 3/5 shifted to :512/:582 after the PR #454 fix below — see that proof's own
+ * line numbers instead of these for the current file.
  *
  *   RED-FIRST-PROOF item 1 (:416)  0/10 passed under mutation
  *   RED-FIRST-PROOF item 2 (:487)  0/10 passed under mutation (collateral of the shared clip rule)
@@ -668,4 +670,18 @@ test.describe('sk-progress theming', () => {
  *
  * Post-fix, same rig: all five at 10/10 (runs 35356189046, 35361773017). Item 3 additionally read
  * 9/10 in one of three samples and is recorded as substantially improved, NOT fully fixed.
+ *
+ * PR #454 pre-merge squad F1 fix — CI run 35367151938 (webkit, --retries=0, --repeat-each=10),
+ * mutation commit `557eb49e` (`animation-play-state: paused` added to the indeterminate sweep
+ * rule — the squad's own demonstrated mutant, which the PRE-fix form of these two tests passed),
+ * reverted in `2eed0a4c` with `git diff a4facaa2 -- packages/` (the commit before the mutation)
+ * byte-empty afterwards. Fix: `pinAnimationPhase` now returns each animation's `playState` as
+ * read BEFORE `pause()` runs, and both call sites assert it was `'running'`.
+ *
+ *   RED-FIRST-PROOF item 3 (:512)  0/10 passed under mutation (this run's own log: every failure
+ *     is `expect(atStart.every((a) => a.playState === 'running')).toBe(true)` at :526)
+ *   RED-FIRST-PROOF item 5 (:582)  0/10 passed under mutation (same assertion, at :607)
+ *
+ * Items 1/2/4 (:425/:496/:537) were unaffected by this mutation, 10/10, in the same run —
+ * confirming the new assertion is specific to the paused-sweep case, not a blunt trip-wire.
  */
