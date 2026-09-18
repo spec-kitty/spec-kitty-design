@@ -40,6 +40,9 @@ const generatedMessages = [
   'chore(tracer): append design-decisions finding for team-overview-shell-elements-01M1S8R8',
   'chore(retrospective): author retrospective for team-overview-shell-elements-01M1S8R8',
   'chore(retrospective): backfill 3 retrospective records',
+  // `spec-kitty agent mission record-analysis` (design issue 453): the real subject emitted on the
+  // webkit-timing-deflake-01M2T31J mission branch.
+  'docs(record-analysis): record analysis report for mission webkit-timing-deflake-01M2T31J',
 ];
 
 for (const message of generatedMessages) {
@@ -49,6 +52,11 @@ for (const message of generatedMessages) {
 }
 
 const nearMisses = [
+  // The record-analysis exemption must not become a blanket `docs(record-analysis)` escape: a
+  // different subject, a missing slug, and a malformed slug must each stay outside the pattern.
+  'docs(record-analysis): record analysis report for mission webkit-timing-deflake-01M2T31J and bypass checks',
+  'docs(record-analysis): record analysis report for mission not-a-slug',
+  'docs(record-analysis): delete the analysis report for mission webkit-timing-deflake-01M2T31J',
   'chore(spec-kitty): status transition batch WP04 and bypass checks',
   'chore(spec-kitty): inner-state annotation package-04',
   'chore(spec-kitty): record WP04 arbitrary state',

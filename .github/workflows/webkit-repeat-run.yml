@@ -1,0 +1,121 @@
+# WP01's measurement rig (mission webkit-timing-deflake-01M2T31J, C-009, C-005, NFR-001,
+# NFR-002). A SEPARATE workflow, deliberately — the mission's own T001 requires that the
+# ordinary `playwright` job in ci-quality.yml is not altered, and scripts/check-gate-wiring.mjs
+# / scripts/check-ci-quality-trigger-parity.mjs both enforce that job's shape byte-for-byte.
+# Neither checker inspects any workflow file other than ci-quality.yml, so this file's existence
+# and its own job cannot trip either gate — verified by running both against this tree.
+#
+# WHY `on.push` AS WELL AS `workflow_dispatch`: `workflow_dispatch` alone is not usable until
+# this exact file reaches the repository's default branch — ci-quality.yml's own
+# `workflow_dispatch` entry carries the identical caveat in a comment for the identical reason
+# (research.md R18). During the mission `on.push` was scoped to its integration and lane
+# branches; those are deleted at merge, so the glob is now the branch-name namespace declared
+# under `on.push` below. The reasoning is unchanged: without a push trigger this rig is
+# dispatchable by nobody until the train lands on the default branch.
+name: WebKit repeat-run rig
+
+on:
+  # A `push` trigger is RETAINED, on a generic glob, and that is a deliberate reversal.
+  #
+  # The mission-specific globs (`mission/webkit-deflake`, `kitty/mission-…-lane-*`) genuinely did
+  # go dead at merge and are gone. But removing `push` entirely — which an earlier revision of this
+  # file did — left the rig dispatchable by NOBODY: GitHub only offers `workflow_dispatch` once the
+  # workflow exists on the DEFAULT branch, and this PR targets `train/elements-first`, not `main`.
+  # So between this merge and the train landing, a `workflow_dispatch`-only rig is unrunnable.
+  # Caught by the pre-merge squad's evidence lens.
+  #
+  # `rig/webkit-repeat/**` is the escape hatch: push a branch under that prefix to take a
+  # measurement, from any base, without editing this file. NAMESPACED deliberately -- a bare
+  # `rig/**` is an unscoped claim on a shared branch namespace in a public repository that an
+  # external fleet also pushes to, and would fire this webkit job on unrelated work.
+  push:
+    branches:
+      - 'rig/webkit-repeat/**'
+
+  # The two mission-specific globs that used to live here -- `mission/webkit-deflake` and
+  # `kitty/mission-webkit-timing-deflake-01M2T31J-lane-*` -- named branches deleted at merge, so
+  # post-merge they matched nothing and advertised an automatic run that could never fire.
+  #
+  # `workflow_dispatch` becomes usable once this file lands on the default branch (GitHub requires
+  # the workflow to exist there before the trigger is offered), at which point it supersedes the
+  # `rig/**` escape hatch above and this rig becomes a repository instrument rather than a mission
+  # one.
+  workflow_dispatch:
+    inputs:
+      repeat_each:
+        description: 'Repeats per item (NFR-001 default: 10)'
+        required: false
+        default: '10'
+      items:
+        description: 'Comma-separated item numbers to run (default: all twelve)'
+        required: false
+        default: ''
+      workers:
+        description: 'Optional --workers=N measurement control. Leave blank to inherit playwright.config.ts (2 under CI).'
+        required: false
+        default: ''
+
+concurrency:
+  # `false`, not `true`. Superseding an in-flight run made sense while pushes triggered this on a
+  # mission branch, where a later push genuinely superseded an earlier one. Now every trigger --
+  # a `rig/webkit-repeat/**` push or a dispatch -- is a DELIBERATE measurement, and cancelling one
+  # silently destroys the sample somebody asked for. A cancelled run also reports as a failure,
+  # which reads as a verdict rather than as "superseded".
+  group: webkit-repeat-run-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  repeat-run:
+    runs-on: ubuntu-latest
+    # Generous ceiling, not a target (same convention as ci-quality.yml's own header comment):
+    # 200 webkit test executions (140 line-addressable + 60 for item 12's six modes, at
+    # repeat-each=10) is a small fraction of the ordinary `playwright` job's whole testDir run,
+    # which itself budgets under this same figure at 25.6 min for the FULL suite.
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci --ignore-scripts
+      # webkit only (C-005: this mission's affected tests are webkit-only); chromium is NOT
+      # installed here because this job draws no conclusion about chromium at all (NFR-007).
+      - run: npx playwright install --with-deps webkit
+      - name: "[MEASUREMENT] Build Storybook (rig prerequisite — same builder the ordinary playwright job's storybook-build stage runs)"
+        run: node scripts/build-storybook-with-budget.mjs
+      - name: "[MEASUREMENT] WebKit repeat-run rig (NFR-001, NFR-002, C-005, C-009)"
+        env:
+          REPEAT_EACH: ${{ github.event.inputs.repeat_each }}
+          ITEMS: ${{ github.event.inputs.items }}
+          WORKERS: ${{ github.event.inputs.workers }}
+        run: |
+          set -euo pipefail
+          ARGS=(--json-dir=webkit-repeat-run-results "--repeat-each=${REPEAT_EACH:-10}")
+          if [ -n "${ITEMS:-}" ]; then ARGS+=("--items=${ITEMS}"); fi
+          if [ -n "${WORKERS:-}" ]; then ARGS+=("--workers=${WORKERS}"); fi
+          node scripts/webkit-repeat-run.mjs "${ARGS[@]}"
+      # The paired worker-count experiment that lived here has been REMOVED, deliberately.
+      #
+      # It answered its question: at `workers: 2` items 6-10 failed 6 times in 80 against 1 in 80
+      # at `--workers=1`, which established contention as a trigger; the render-race fix then took
+      # arm A to 80/80, which established it was a CONSEQUENCE of that race rather than an
+      # independent cause. Leaving a concluded hypothesis wired into CI means a permanently
+      # running experiment with `continue-on-error: true` on both arms -- it could never fail,
+      # so it could never be noticed going stale.
+      #
+      # What is KEPT is the reusable part: the rig job, `workflow_dispatch`, and the rig's own
+      # `--workers=N` measurement control, which remains available for re-running the comparison
+      # deliberately. See kitty-specs/webkit-timing-deflake-01M2T31J/evidence/
+      # SHARED-CAUSE-INVESTIGATION.md for the arm figures this removal preserves.
+      # `if: always()` — a FAILING run is exactly the one whose JSON evidence a reviewer needs, in
+      # order to re-derive the counts printed in the job log rather than taking them on trust.
+      # (This note used to say "expected for the pre-fix baseline, items 1 and 4"; those items are
+      # 10/10 now, so the reason is stated generally instead of against a state that has passed.)
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
+        if: always()
+        with:
+          name: webkit-repeat-run-results
+          path: webkit-repeat-run-results/
+          retention-days: 14

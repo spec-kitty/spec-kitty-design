@@ -266,6 +266,103 @@ async function assertScrollerSkippedBySequentialFocus(
   ).toBe(false);
 }
 
+/**
+ * T021 (FR-006, item 10): await the scroller's `scrollLeft` settling to a rest value
+ * rather than sampling the instant it first crosses a threshold. A keyboard-triggered
+ * native scroll is not guaranteed to land in a single frame; reading `scrollLeft`
+ * as soon as it differs from its starting value (the previous shape of this test)
+ * captures a value from mid-scroll, which is an unstable reference for the
+ * comparison that follows it.
+ *
+ * T034 (F2 fix): three unchanged reads of the pre-press value ALSO satisfied
+ * "stable" — a real scroll is not guaranteed to move before the first frame this
+ * polls, so `stableCount` now only counts once `scrollLeft` has actually moved
+ * away from its pre-press value; bounded by the same `timeoutMs`, naming the
+ * last observed value on timeout, exactly as before (not lengthened).
+ */
+// T035 (mission 453, shared-cause investigation). `from` is the caller's scrollLeft reading
+// taken BEFORE the key press. Without it this helper read its own baseline inside the
+// evaluate below -- i.e. after `page.keyboard.press()` had already resolved -- so a scroll
+// that completed in that gap was invisible to it: `initial` was already the settled value,
+// `current !== initial` never became true, `hasMoved` stayed false, and it rejected at the
+// full timeout even though the scroll had worked. The observed failure proves this rather
+// than suggesting it: the message read `last observed 97, 307/3 consecutive stable reads`
+// -- 307 stable reads against a requirement of 3, which is only reachable when the value is
+// perfectly at rest and the `hasMoved` guard is what blocks resolution. The test's own
+// assertion (`movedRight > 0`) would have passed on that very value.
+//
+// So item 10 failed precisely when the scroll was FAST, and the wider the gap between
+// `press()` resolving and this evaluate starting -- which is what `workers: 2` contention
+// widens -- the likelier the miss. Passing the pre-press baseline removes the race entirely:
+// a scroll that already finished is detected on the first tick instead of never.
+async function waitForScrollSettled(
+  scroller: Locator,
+  reason: string,
+  {
+    timeoutMs = 5000,
+    stableFrames = 3,
+    from,
+  }: { timeoutMs?: number; stableFrames?: number; from?: number } = {},
+): Promise<number> {
+  try {
+    return await scroller.evaluate(
+      (node, opts) =>
+        new Promise<number>((resolve, reject) => {
+          const deadline = performance.now() + opts.timeoutMs;
+          // The caller's pre-press reading when supplied; only fall back to reading it here
+          // (the racy baseline described above) when no caller baseline exists.
+          const initial = opts.from ?? node.scrollLeft;
+          const baselineOrigin =
+            opts.from === undefined
+              ? "was read inside this helper, so a scroll that completed before it started " +
+                "would be invisible"
+              : "was supplied by the caller before the key press";
+          let lastValue = initial, stableCount = 0, hasMoved = false;
+          const tick = () => {
+            const current = node.scrollLeft; if (current !== initial) hasMoved = true;
+            if (current === lastValue) {
+              stableCount += 1;
+              if (hasMoved && stableCount >= opts.stableFrames) {
+                resolve(current);
+                return;
+              }
+            } else {
+              stableCount = 0;
+              lastValue = current;
+            }
+            if (performance.now() >= deadline) {
+              reject(
+                new Error(
+                  hasMoved
+                    ? `scrollLeft did not settle within ${opts.timeoutMs}ms ` +
+                      `(last observed ${current}, ${stableCount}/${opts.stableFrames} ` +
+                      "consecutive stable reads)"
+                    : // Never left the baseline. Distinguished explicitly because the
+                      // "did not settle" wording is exactly backwards for this case: the
+                      // value was perfectly at rest the whole time and the `hasMoved` guard
+                      // is what withheld resolution.
+                      `scrollLeft never moved from its baseline of ${initial} within ` +
+                      `${opts.timeoutMs}ms (still ${current} after ${stableCount} stable ` +
+                      `reads; baseline ${baselineOrigin})`
+                ),
+              );
+              return;
+            }
+            requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }),
+      { timeoutMs, stableFrames, from },
+    );
+  } catch (error) {
+    throw new Error(
+      `waitForScrollSettled(${reason}) failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+}
+
 test.describe("workflow board source and distribution contract", () => {
   test("the public CSS inventory is exactly the seven approved classes and contains no adjacent behavior", () => {
     const source = `${readFileSync(BOARD_CSS, "utf8")}\n${readFileSync(LANE_CSS, "utf8")}`;
@@ -574,15 +671,26 @@ test.describe("conditional overflow semantics and keyboard operation", () => {
     expect(focusStyle.outlineStyle).not.toBe("none");
     expect(focusStyle.outlineWidth).toBeGreaterThan(0);
 
+    // T021 (FR-006, item 10): await the scroll settling to a rest value — not the
+    // first frame `scrollLeft` differs from 0 — before reading it as "the" scrolled
+    // position, and keep asserting focus retention around each key press (both
+    // halves of the claim: the scroll happens AND focus is retained).
+    // T035: baseline captured BEFORE the press, so a scroll that completes between
+    // `press()` resolving and the settle helper starting is still detected as movement.
+    const beforeRight = await scroller.evaluate((node) => node.scrollLeft);
     await page.keyboard.press("ArrowRight");
-    await expect
-      .poll(() => scroller.evaluate((node) => node.scrollLeft))
-      .toBeGreaterThan(0);
-    const movedRight = await scroller.evaluate((node) => node.scrollLeft);
+    const movedRight = await waitForScrollSettled(scroller, "after ArrowRight", {
+      from: beforeRight,
+    });
+    expect(movedRight).toBeGreaterThan(0);
+    await expect(scroller).toBeFocused();
+
+    const beforeLeft = await scroller.evaluate((node) => node.scrollLeft);
     await page.keyboard.press("ArrowLeft");
-    await expect
-      .poll(() => scroller.evaluate((node) => node.scrollLeft))
-      .toBeLessThan(movedRight);
+    const movedLeft = await waitForScrollSettled(scroller, "after ArrowLeft", {
+      from: beforeLeft,
+    });
+    expect(movedLeft).toBeLessThan(movedRight);
     await expect(scroller).toBeFocused();
   });
 });
@@ -897,3 +1005,41 @@ test.describe("calibrated geometry, themes, and forced colors", () => {
     expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);
   });
 });
+
+/*
+ * RED-FIRST-PROOF — item 10, CI run 35354582083 (webkit, --retries=0, --repeat-each=3).
+ * Mutation: `sk-workflow-board.css:30` `overflow-x: auto` -> `hidden`, reverted in `ee093dbe`.
+ * Result: 0/3 passed, failing at this file's own rewritten assertion with
+ * `Expected: > 0, Received: 0`.
+ *
+ * SUPERSEDED IN PART by T035, and recorded rather than quietly rewritten. The verdict above
+ * (0/3, the mutation is caught) still holds. The MECHANISM described in the original text --
+ * "bounded, not hung: waitForScrollSettled resolved immediately once scrollLeft was observed
+ * stable at 0" -- no longer describes this code. T035 made the baseline a caller-supplied
+ * pre-press reading, so with `from` = 0 and no movement the `hasMoved` guard is never
+ * satisfied, `resolve` is unreachable, and the helper now burns its full 5000ms and REJECTS.
+ * The mutation is still caught, one assertion earlier and by a different path.
+ *
+ * Both claims in the struck sentence were falsified by a fix landed in the same commit range
+ * that withdrew RED-FIRST-PROOF (c) in sk-team-overview-shell-layout.spec.ts for the same
+ * class of reason. Found by the pre-merge squad, which noted the lesson had been applied in
+ * one file and not the other. A red-first proof records what the code did when it was
+ * captured; it does not stay true across later fixes, and it is not evidence about code that
+ * has since changed.
+ *
+ * Post-fix 10/10 (was 8/10 at baseline).
+ */
+
+/*
+ * RED-FIRST-PROOF — T034 (F2), item 10's waitForScrollSettled, captured locally on chromium
+ * against this repo's own `storybook-static` (both reverted after capture):
+ *   Setup: intercept the native ArrowRight scroll and replace it with an equivalent jump
+ *   120ms later, reproducing the squad's own "scroll begins 120ms after the call" measurement
+ *   without touching any component source.
+ *   RED (motion-blind helper — three consecutive reads of the pre-scroll value also counted
+ *     as "settled"): waitForScrollSettled resolved with 0 in 5/5 local runs; the true final
+ *     scrollLeft 250ms later was 40 — the exact false-settle this finding described.
+ *   GREEN (this fix — stability only counts once scrollLeft has moved away from its pre-press
+ *     value): waitForScrollSettled resolved with 40 in 5/5 local runs, matching the true final
+ *     value every time.
+ */

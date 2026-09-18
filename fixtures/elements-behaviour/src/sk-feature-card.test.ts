@@ -244,16 +244,26 @@ test('an unknown variant or accent degrades on the RENDER path and throws on the
   expect(() => featureCardStaticHtml({ variant: 'nope' })).toThrow(/unknown feature-card variant/);
   expect(() => featureCardStaticHtml({ accent: 'nope' })).toThrow(/unknown feature-card accent/);
   // Prototype-chain keys are not values. `in` reaches them; Object.hasOwn does not.
-  for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
-    expect(() => featureCardStaticHtml({ variant: key }), `${key} must not be a variant`).toThrow(
-      /unknown feature-card variant/,
-    );
-    expect(() => featureCardStaticHtml({ accent: key }), `${key} must not be an accent`).toThrow(
-      /unknown feature-card accent/,
-    );
-    expect(featureCardClasses(key).trim()).toBe('sk-feature-card');
-    expect(featureCardChipClasses(key).trim()).toBe(
-      'sk-feature-card__icon-chip sk-feature-card__icon-chip--yellow',
-    );
+  // console.warn is intercepted for this loop only (WP06, FR-010/NFR-006): the *Classes() calls
+  // below warn on every degrade, and that replay volume is a large share of what pushed the
+  // behaviour-suite job log past its truncation cap. Only the side channel is suppressed; every
+  // expectation below still runs unchanged (FR-011).
+  const loopWarn = console.warn;
+  console.warn = () => {};
+  try {
+    for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+      expect(() => featureCardStaticHtml({ variant: key }), `${key} must not be a variant`).toThrow(
+        /unknown feature-card variant/,
+      );
+      expect(() => featureCardStaticHtml({ accent: key }), `${key} must not be an accent`).toThrow(
+        /unknown feature-card accent/,
+      );
+      expect(featureCardClasses(key).trim()).toBe('sk-feature-card');
+      expect(featureCardChipClasses(key).trim()).toBe(
+        'sk-feature-card__icon-chip sk-feature-card__icon-chip--yellow',
+      );
+    }
+  } finally {
+    console.warn = loopWarn;
   }
 });

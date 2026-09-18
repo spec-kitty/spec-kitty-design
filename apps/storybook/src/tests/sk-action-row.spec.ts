@@ -143,7 +143,12 @@ for (const mode of [
     }
 
     await page.keyboard.press('Enter');
-    expect(new URL(page.url()).hash).toBe('#details');
+    // T020 (FR-005): await the observable effect — the location change the native
+    // "Details" anchor's `href` produces — instead of asserting immediately after the
+    // keypress. Bounded by expect's own default timeout; a broken/missing href reports
+    // a normal assertion failure naming the expected vs. actual hash, not a hang. The
+    // sibling test at line 72 already uses this exact idiom for the same shape.
+    await expect.poll(() => new URL(page.url()).hash).toBe('#details');
     await pin.click();
     await page.keyboard.press('Tab');
     await expect(inspect).toBeFocused();
@@ -390,3 +395,12 @@ test('route focus transition is disabled under reduced motion', async ({ page })
   const host = await load(page, 'route');
   await expect(host.locator('[part="trigger"]')).toHaveCSS('transition-property', 'none');
 });
+
+/*
+ * RED-FIRST-PROOF — item 12 (the six-mode "external controls" family), CI run 35354582083
+ * (webkit, --retries=0, --repeat-each=3). Mutation: `sk-action-row.stories.ts:129` href
+ * `#details` -> `#not-details`, reverted in `ee093dbe`. Result: 0/3 in all six modes, failing at
+ * this file's rewritten `expect.poll` with `Expected: "#details", Received: "#not-details"`,
+ * bounded at 5000ms. The href was CHANGED rather than removed so the earlier
+ * `getByRole('link')`/`toBeFocused()` steps still pass — isolating the proof to the rewritten line.
+ */

@@ -882,6 +882,20 @@ else {
     // entry here, and a lens demonstrated the consequence: delete both its CI lines and this
     // checker still printed green. That is the defect this list was created for, one gate later.
     [/node\s+scripts\/check-element-css-hygiene\.mjs(\s|$)/, 'the adopted-CSS hygiene gate', 'scripts/check-element-css-hygiene.mjs'],
+    // Design issue 453, registered WITH the change that made the table load-bearing rather than
+    // after it — the mistake #74 and #129 both shipped. `lint-code`'s commitlint step is TWO
+    // commands under one [ENFORCED] name: delete the first and the step still runs `npx
+    // commitlint`, still passes, and the probe table bounding ~20 ignore regexes is gone
+    // silently. The whole-job payload audit cannot catch it either, because `lint-code` is
+    // outside `JOBS` by design (its steps use continue-on-error), so REQUIRED_LINT is the only
+    // mechanism holding either command in place. Both are required, separately: a gate whose
+    // probe table stops running is a gate whose defeated forms quietly reopen.
+    [/node\s+scripts\/check-commitlint-config\.mjs(\s|$)/, "the commitlint ignore-list's own probe table", 'scripts/check-commitlint-config.mjs'],
+    // NOT registered: `npx commitlint --from=<pr base>` needs pull-request refs, so its step
+    // legitimately carries an `if:`, and REQUIRED_LINT refuses `if:`-carrying steps (they cannot
+    // fail the job). Registering it makes this checker red — verified. The residual risk is
+    // narrower than what was closed: the comparison line could still be dropped, but the probe
+    // table above, which is what bounds every ignore regex, can no longer be.
     // #75, both entries with the gate itself. The gate's probe table is required separately
     // from the gate: a table that stops running is a gate whose defeated forms quietly reopen.
     [/node\s+scripts\/build-react-wrappers\.mjs\s+--check(?!\s*--selftest)(\s|$)/, 'the React wrapper drift gate', 'scripts/build-react-wrappers.mjs --check'],
