@@ -95,10 +95,10 @@ const LINE_ITEMS = [
   { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 512, label: 'the sweep actually runs' },
   { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 537, label: 'reduced-motion freeze' }, // corrected from 523 — see note above the item-1 entry.
   { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 582, label: 'no animation leak onto determinate' }, // corrected from 568 — see note above the item-1 entry.
-  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 104, label: 'exact 56/240px columns' },
-  { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 160, label: 'narrow shell region order' },
-  { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 303, label: 'landmarks/labels/grouping' },
-  { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 445, label: 'axe-clean in dark mode' },
+  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 140, label: 'exact 56/240px columns' },
+  { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 196, label: 'narrow shell region order' },
+  { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 339, label: 'landmarks/labels/grouping' },
+  { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 481, label: 'axe-clean in dark mode' },
   { item: 10, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', line: 654, label: 'focused overflow keyboard scroll' }, // WP03: was 557; T021's waitForScrollSettled helper (added ahead of this test) shifted it. See tmp/finding/wp03-lane-c-rig-line-number-drift.md.
   { item: 11, file: 'apps/storybook/src/tests/sk-radio-choice-group.spec.ts', line: 1113, label: 'legend cue across two stories' },
 ];
