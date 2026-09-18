@@ -4,7 +4,10 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Typography
 
-Spec Kitty uses three font families. All are loaded automatically when `tokens.css` is imported.
+Spec Kitty uses two brand typefaces — Falling Sky (display) and Inter (body/UI) — plus JetBrains
+Mono for code, and retains Swansea as an unused legacy reference face (see below). All are declared
+in `tokens.css`; Falling Sky and Inter's `@font-face` sources are self-hosted and load automatically
+when `tokens.css` is imported.
 
 ---
 
@@ -75,9 +78,50 @@ Use Condensed for narrow-column headlines where horizontal space is limited.
 
 ---
 
-## Swansea — reference / editorial family
+## Inter — body/UI family
 
-Swansea is used for body copy, editorial prose, and reference documentation.
+**Inter is the body/UI face**, via `--sk-font-sans`. Self-hosted (OFL 1.1, latin + latin-ext
+subsets), it replaced the bare system-font stack that `--sk-font-sans` carried before: with no
+self-hosted body webfont, every consuming page's text reflowed by host OS, and
+spec-kitty-saas's Playwright visual-regression suite (#2203) measured that noise as *larger* than
+the real layout regressions the gate exists to catch. Inter renders identically across CI and
+every workstation. See `docs/design-system/brand-guidelines.md` (Typography) for the full rationale.
+
+<div style={{display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '32px', padding: '24px', background: 'var(--sk-surface-card)', borderRadius: 'var(--sk-radius-lg)', border: '1px solid var(--sk-border-default)'}}>
+  <div style={{display: 'flex', alignItems: 'baseline', gap: '16px'}}>
+    <span style={{fontFamily: 'var(--sk-font-sans)', fontWeight: 400, fontSize: '1.125rem', color: 'var(--sk-fg-default)', minWidth: '280px'}}>A well-crafted design system</span>
+    <code style={{fontSize: '0.75rem', color: 'var(--sk-fg-subtle)'}}>--sk-weight-normal (400)</code>
+  </div>
+  <div style={{display: 'flex', alignItems: 'baseline', gap: '16px'}}>
+    <span style={{fontFamily: 'var(--sk-font-sans)', fontWeight: 500, fontSize: '1.125rem', color: 'var(--sk-fg-default)', minWidth: '280px'}}>A well-crafted design system</span>
+    <code style={{fontSize: '0.75rem', color: 'var(--sk-fg-subtle)'}}>--sk-weight-medium (500)</code>
+  </div>
+  <div style={{display: 'flex', alignItems: 'baseline', gap: '16px'}}>
+    <span style={{fontFamily: 'var(--sk-font-sans)', fontWeight: 600, fontSize: '1.125rem', color: 'var(--sk-fg-default)', minWidth: '280px'}}>A well-crafted design system</span>
+    <code style={{fontSize: '0.75rem', color: 'var(--sk-fg-subtle)'}}>--sk-weight-semibold (600)</code>
+  </div>
+  <div style={{display: 'flex', alignItems: 'baseline', gap: '16px'}}>
+    <span style={{fontFamily: 'var(--sk-font-sans)', fontWeight: 700, fontSize: '1.125rem', color: 'var(--sk-fg-default)', minWidth: '280px'}}>A well-crafted design system</span>
+    <code style={{fontSize: '0.75rem', color: 'var(--sk-fg-subtle)'}}>--sk-weight-bold (700)</code>
+  </div>
+  <div style={{display: 'flex', alignItems: 'baseline', gap: '16px'}}>
+    <span style={{fontFamily: 'var(--sk-font-sans)', fontWeight: 800, fontSize: '1.125rem', color: 'var(--sk-fg-default)', minWidth: '280px'}}>A well-crafted design system</span>
+    <code style={{fontSize: '0.75rem', color: 'var(--sk-fg-subtle)'}}>--sk-weight-extrabold (800)</code>
+  </div>
+  <code style={{fontSize: '0.75rem', color: 'var(--sk-fg-subtle)'}}>--sk-font-sans — Inter, self-hosted, weights 400/500/600/700/800</code>
+</div>
+
+---
+
+## Swansea — unused legacy reference face
+
+Swansea (`--sk-font-reference`) is **not** the body face and is referenced by 0 of the
+`@spec-kitty/styles` package's 57 style sheets — it is retained here only as a font-catalogue
+showcase. Its embedded metadata carries an unresolved "All Rights Reserved" copyright notice with
+no accompanying terms file in this repo, flagged HIGH-risk and blocking in this repo's own mission
+review and never recorded as cleared; see `docs/design-system/brand-guidelines.md` (Typography).
+Its font files are untouched by this change — only the documentation claiming it as the body face
+was corrected.
 
 <div style={{padding: '24px', background: 'var(--sk-surface-card)', borderRadius: 'var(--sk-radius-lg)', border: '1px solid var(--sk-border-default)', marginBottom: '32px'}}>
   <p style={{fontFamily: 'var(--sk-font-reference)', fontWeight: 400, fontStyle: 'normal', fontSize: '1rem', color: 'var(--sk-fg-body)', margin: '0 0 12px', lineHeight: 1.6}}>
@@ -92,7 +136,7 @@ Swansea is used for body copy, editorial prose, and reference documentation.
   <p style={{fontFamily: 'var(--sk-font-reference)', fontWeight: 700, fontStyle: 'italic', fontSize: '1rem', color: 'var(--sk-fg-body)', margin: '0 0 12px', lineHeight: 1.6}}>
     Bold italic — A well-crafted design system gives every team member the same vocabulary. Shared tokens mean fewer decisions at the implementation layer.
   </p>
-  <code style={{fontSize: '0.75rem', color: 'var(--sk-fg-subtle)'}}>--sk-font-reference — four variants: regular, italic, bold, bold italic</code>
+  <code style={{fontSize: '0.75rem', color: 'var(--sk-fg-subtle)'}}>--sk-font-reference — four variants: regular, italic, bold, bold italic — unused</code>
 </div>
 
 ---

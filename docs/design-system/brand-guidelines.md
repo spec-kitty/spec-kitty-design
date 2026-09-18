@@ -85,19 +85,47 @@ Always pair a surface token with its designated foreground token. See [Using tok
 
 ## Typography
 
-The Spec Kitty type system uses three typefaces, each with a defined role.
+The Spec Kitty type system uses two brand typefaces plus a monospace utility face, each with a
+defined role.
 
 | Typeface | Role | Token |
 |---|---|---|
 | Falling Sky | Headlines, display text, marketing copy | `--sk-font-display` |
-| Swansea | Editorial prose, body text, UI labels | `--sk-font-body` |
+| Inter | Body copy, UI labels, form fields, navigation | `--sk-font-sans` |
 | JetBrains Mono | Code blocks, terminal output, token names | `--sk-font-mono` |
 
 ### Usage guidance
 
 - **Falling Sky** is for high-impact headings only. Do not use it for body copy or UI labels.
-- **Swansea** is the default reading typeface. Use it for all paragraph text, form labels, and navigation.
+- **Inter** is the default reading/UI typeface — self-hosted (OFL 1.1), weights 400/500/600/700/800.
+  Use it for all paragraph text, form labels, and navigation, via `--sk-font-sans`.
 - **JetBrains Mono** is for inline code spans and fenced code blocks. It is the only acceptable typeface for displaying `--sk-*` token names in documentation.
+
+### Why Inter, and what changed (2026-09)
+
+`--sk-font-sans` previously carried no self-hosted webfont at all — only the bare system stack
+(`ui-sans-serif, system-ui, ...`) — which made every consumer's body text reflow by host OS.
+spec-kitty-saas's Playwright visual-regression suite (PR #2203) surfaced this directly: cross-machine
+font-metric noise (page-height deltas of ~100px on some screens) was larger than the real
+regressions the gate exists to catch, so the gate could not be trusted.
+
+This table previously named **Swansea** as the body face (via a `--sk-font-body` token), but that
+was never true of the actual token the styles package consumes (`--sk-font-sans`), and Swansea's
+own embedded font metadata carries an unresolved "All Rights Reserved" copyright notice with no
+accompanying terms file anywhere in this repo — flagged HIGH-risk and blocking in this repo's own
+mission review and never recorded as cleared. Swansea's font files are untouched by this change;
+only the documented body face changed.
+
+Inter was chosen because it is OFL 1.1 (unambiguous redistribution and bundling rights) and is
+already self-hosted successfully by spec-kitty-saas's own application, whose visual-regression
+lane is green in the same CI run where the design-system-fed lane was failing. `--sk-font-display`
+(Falling Sky) is unchanged and remains display-only.
+
+There is a known, pre-existing drift in the token schema that this change discloses rather than
+fixes: no `--sk-font-body` token exists in `packages/tokens/src/tokens.css` — the actual token is
+`--sk-font-sans`, named above this table for that reason — and `--sk-font-reference` (Swansea) is
+referenced by 0 of the `@spec-kitty/styles` package's 57 style sheets. Both are tracked as
+follow-up work, not resolved here.
 
 ### Type scale
 

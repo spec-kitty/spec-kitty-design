@@ -1,3 +1,33 @@
+// Still the SOURCE stylesheet, deliberately — importing packages/tokens/dist/tokens.css instead
+// was tried and reverted (mission #1673's Storybook font-path fix). tokens.css declares every
+// @font-face as a relative `url('./fonts/...')`, resolved by the browser against wherever the
+// stylesheet itself ends up served from. That URL 404'd from here because the fonts lived at
+// packages/tokens/fonts/ — a sibling of dist/, never of src/ — verified directly: a real
+// headless-Chromium load of a Falling-Sky-dependent story showed `document.fonts` entries at
+// `status: "error"` for exactly the weights that story used, silent because nothing here asserts
+// on the rendered TYPEFACE, only on layout/contrast/semantics, which font-display: swap's
+// system-font fallback still satisfies.
+//
+// Switching THIS IMPORT to dist/tokens.css did fix that 404, but it fixed the wrong layer and
+// broke something bigger: build-tokens-css.mjs's dist output adds a `:root:not([data-theme])`
+// block under `@media (prefers-color-scheme: light)` — the no-JS "follow the OS" fallback for
+// unenhanced HTML consumers. src/tokens.css, the hand-authored source, has no such block. Every
+// story here that does not explicitly set `data-theme`/`.sk-light` (most of them — this is the
+// DEFAULT/dark path) was relying on that absence to render dark unconditionally. Headless
+// Chromium's default `prefers-color-scheme` is `light` (verified: `matchMedia('(prefers-color-
+// scheme: light)').matches` is true with no explicit emulation), so importing dist/ silently
+// flipped every theme-unmarked story from dark to light — measured on
+// `card--blog-card-example`: `.sk-card`'s background went from `rgb(24,26,31)` (dark) to
+// `rgb(255,255,255)` (white), which is what turned a fine dark-mode `--sk-color-yellow` link into
+// a 1.63:1 axe color-contrast violation against a white card it was never designed to sit on.
+// Three stories failed for exactly this reason before the revert.
+//
+// The fonts moved instead: packages/tokens/fonts/ -> packages/tokens/src/fonts/ (this repo's own
+// tokens:build now cp -r's from there). tokens.css's `./fonts/...` URLs need no edit — they were
+// always relative to wherever tokens.css itself lives, and now that IS a sibling. This keeps
+// Storybook consuming the same source stylesheet it always has, with none of the built
+// artifact's no-JS theme-fallback behaviour, and fixes only the one thing that was actually
+// broken.
 import "../../../packages/tokens/src/tokens.css";
 // #176's content primitives, loaded globally for the same reason tokens.css is: they style
 // LIGHT-DOM markup. #177 composes facts and disclosure inside an <sk-card>'s default slot, and

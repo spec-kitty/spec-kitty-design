@@ -9,6 +9,48 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 
 ### Changed
 
+- **`--sk-font-sans` (the body/UI face) now self-hosts Inter; the previously-documented body face,
+  Swansea, is no longer claimed as one** (OPERATOR DECISION — spec-kitty-saas mission #1673). Before: `--sk-font-sans:
+  ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;` — no
+  self-hosted webfont at all. After: `--sk-font-sans: 'Inter', ui-sans-serif, system-ui,
+  -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;` (system stack kept as the fallback
+  tail). Ten `inter-*.woff2` files (weights 400/500/600/700/800 × latin/latin-ext) plus
+  `Inter-OFL.txt` are added to `packages/tokens/fonts/`, flat alongside the existing Falling
+  Sky/Swansea files — a subdirectory would have silently dropped out of both
+  `scripts/assemble-demo-dist.sh`'s non-recursive font copy and `scripts/check-offline-load.mjs`'s
+  flat `dist/fonts` file count. Files are byte-identical to the npm-published
+  `@fontsource/inter@5.3.0` tarball, verified independently against that tarball's own checksums,
+  not merely trusted from spec-kitty-saas's copy of the same files.
+
+  **Why**: spec-kitty-saas PR #2203 added Playwright visual-regression coverage for 17 screens;
+  all 29 assertions failed in CI while passing on a workstation. With no self-hosted body
+  webfont, every screen's line/page height reflowed by host OS — measured at ~100px on two of
+  three sampled screens, a bigger signal than the 8,174px/0.63% real regression the gate exists
+  to catch (cross-machine noise measured at 8,936px/0.69% — larger than the signal, so a pixel
+  tolerance could not simply be widened). Swansea was the *documented* body face but was never
+  wired to the token consumers actually use, and its embedded metadata carries an unresolved
+  "All Rights Reserved" notice with no terms file anywhere in this repo — flagged RISK-1 HIGH and
+  blocking publication in this repo's own mission review
+  (`docs/architecture/validation/mission-review-01KQJNTP49SPQNNXQ1TG3BKKKW.md:148-157,215-219`)
+  and never recorded as cleared. Inter is OFL 1.1 (unambiguous redistribution rights) and is
+  already self-hosted successfully by spec-kitty-saas's own app, whose Playwright lane is green
+  in the same CI run where the design-system-fed lane fails.
+
+  **Blast radius**: 49 of 57 `@spec-kitty/styles` sheets consume `--sk-font-sans` and are
+  therefore affected; `--sk-font-display` (Falling Sky) is unchanged, remaining the heading/
+  display face, and Swansea's font files are untouched — only the documentation naming it as the
+  body face was corrected. `docs/design-system/brand-guidelines.md` (Typography) and
+  `apps/storybook/src/stories/tokens/typography.mdx` are updated to match.
+
+  **Disclosed, not fixed here**: the docs previously named a `--sk-font-body` token that does not
+  exist anywhere in `packages/tokens/src/tokens.css` (the real token is `--sk-font-sans`), and
+  `--sk-font-reference` (Swansea) is referenced by 0 of 57 style sheets. Both are pre-existing
+  token-schema drift, tracked as follow-up work rather than reshaped in this change.
+
+  This repo's own Storybook visual baselines were re-harvested from CI per the documented
+  convention (never `--update-snapshots` locally) — see the mission PR for the CI run cited as
+  the source.
+
 - **`.sk-input` / `<sk-form-input>`'s resting-state control boundary now clears WCAG 1.4.11**
   (#321). A new token, `--sk-border-control` (dark `#81818B`, light `#7A7A6E` — independently
   declared literals, not aliases of `--sk-fg-subtle`), replaces `--sk-border-default` as the
