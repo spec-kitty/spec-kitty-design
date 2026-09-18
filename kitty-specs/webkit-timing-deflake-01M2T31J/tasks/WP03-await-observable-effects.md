@@ -9,6 +9,8 @@ requirement_refs:
 - NFR-001
 - NFR-003
 - C-003
+- C-010
+- C-012
 planning_base_branch: mission/webkit-deflake
 merge_target_branch: mission/webkit-deflake
 branch_strategy: Planning artifacts for this mission were generated on mission/webkit-deflake. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/webkit-deflake unless the human explicitly redirects the landing branch.
@@ -39,7 +41,7 @@ tracker_refs: []
 
 
 - **Goal**: Items 10 and 12 await the effect they assert.
-- **Priority**: P1 — item 12 lands in unrelated missions' output, costing other people a wrong first hypothesis; item 10 failed on the train.
+- **Priority**: P1 — item 12 lands in unrelated missions' output, costing other people a wrong first hypothesis; item 10 flaked on the train (failed, then passed on retry).
 - **Owns**: `apps/storybook/src/tests/sk-action-row.spec.ts`, `apps/storybook/src/tests/sk-workflow-board.spec.ts`.
 - **Included subtasks**:
   - T020 Action-row: await the location change (or the event the handler fires) instead of asserting after the keypress. This is the adopted issue's own suggested direction. It is a parameterized family with no single line number — enumerate the sub-tests and report per sub-test.
