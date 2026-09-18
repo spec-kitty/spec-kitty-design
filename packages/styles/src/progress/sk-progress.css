@@ -157,7 +157,7 @@
   background-image: linear-gradient(90deg, transparent 0%, var(--sk-color-yellow) 50%, transparent 100%);
   background-size: 200% 100%;
   background-repeat: no-repeat;
-  animation-name: none; /* RED-FIRST MUTATION T015 item3 — revert before merge (T015a) */
+  animation-name: sk-progress-indeterminate-sweep;
   animation-duration: var(--sk-motion-duration-slow);
   animation-timing-function: var(--sk-motion-ease-in-out);
   animation-iteration-count: infinite;
@@ -175,7 +175,7 @@
   background-size: 200% 100%;
   background-repeat: no-repeat;
   border-radius: var(--sk-radius-pill);
-  animation-name: none; /* RED-FIRST MUTATION T015 item3 — revert before merge (T015a) */
+  animation-name: sk-progress-indeterminate-sweep;
   animation-duration: var(--sk-motion-duration-slow);
   animation-timing-function: var(--sk-motion-ease-in-out);
   animation-iteration-count: infinite;
@@ -189,7 +189,7 @@
   background-size: 200% 100%;
   background-repeat: no-repeat;
   border-radius: var(--sk-radius-pill);
-  animation-name: none; /* RED-FIRST MUTATION T015 item3 — revert before merge (T015a) */
+  animation-name: sk-progress-indeterminate-sweep;
   animation-duration: var(--sk-motion-duration-slow);
   animation-timing-function: var(--sk-motion-ease-in-out);
   animation-iteration-count: infinite;
@@ -221,17 +221,17 @@
  */
 @media (prefers-reduced-motion: reduce) {
   .sk-progress--indeterminate .sk-progress__bar {
-    animation-name: sk-progress-indeterminate-sweep; /* RED-FIRST MUTATION T015 item4 — revert before merge (T015a) */
+    animation-name: none;
     background-position: 50% 0;
   }
 
   .sk-progress--indeterminate .sk-progress__bar::-webkit-progress-value {
-    animation-name: sk-progress-indeterminate-sweep; /* RED-FIRST MUTATION T015 item4 — revert before merge (T015a) */
+    animation-name: none;
     background-position: 50% 0;
   }
 
   .sk-progress--indeterminate .sk-progress__bar::-moz-progress-bar {
-    animation-name: sk-progress-indeterminate-sweep; /* RED-FIRST MUTATION T015 item4 — revert before merge (T015a) */
+    animation-name: none;
     background-position: 50% 0;
   }
 }
@@ -326,20 +326,20 @@
     background-color: Highlight;
     background-image: none;
     animation-name: none;
-    clip-path: inset(0 0 0 0); /* RED-FIRST MUTATION T015 item1 — revert before merge (T015a) */
+    clip-path: inset(0 55% 0 0);
   }
 
   .sk-progress--indeterminate .sk-progress__bar::-webkit-progress-value {
     background-color: Highlight;
     background-image: none;
     animation-name: none;
-    clip-path: inset(0 0 0 0); /* RED-FIRST MUTATION T015 item1 — revert before merge (T015a) */
+    clip-path: inset(0 55% 0 0);
   }
 
   .sk-progress--indeterminate .sk-progress__bar::-moz-progress-bar {
     background-color: Highlight;
     background-image: none;
     animation-name: none;
-    clip-path: inset(0 0 0 0); /* RED-FIRST MUTATION T015 item1 — revert before merge (T015a) */
+    clip-path: inset(0 55% 0 0);
   }
 }
