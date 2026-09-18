@@ -64,7 +64,7 @@ const LINE_ITEMS = [
   { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 160, label: 'narrow shell region order' },
   { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 303, label: 'landmarks/labels/grouping' },
   { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 445, label: 'axe-clean in dark mode' },
-  { item: 10, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', line: 557, label: 'focused overflow keyboard scroll' },
+  { item: 10, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', line: 620, label: 'focused overflow keyboard scroll' }, // WP03: was 557; T021's waitForScrollSettled helper (added ahead of this test) shifted it. See tmp/finding/wp03-lane-c-rig-line-number-drift.md.
   { item: 11, file: 'apps/storybook/src/tests/sk-radio-choice-group.spec.ts', line: 1113, label: 'legend cue across two stories' },
 ];
 
