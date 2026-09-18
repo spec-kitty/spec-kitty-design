@@ -289,8 +289,9 @@ lenses falsified it, and the experiment arms were removed from the workflow in t
 so **there is no post-`f1c9cc5c` `--workers=1` arm reading**, and this document does not claim one.
 What covers the shipped cure instead is 400 executions at `workers: 2`, which is the *harder*
 condition the arms were comparing against: runs `35374639239` (@ `38d2b145`) and `35375265259`
-(@ `afe7be3c`), 200 each, 0 failures, plus `35379093636` (@ `c591764a`). `git diff f1c9cc5c
-c591764a -- apps/storybook/src/tests/` is empty, so all three measured byte-identical spec files.
+(@ `afe7be3c`), 200 each, 0 failures, plus `35379093636` (@ `c591764a`). Since `f1c9cc5c` the only spec change is this file's, and its only executable delta is a
+`.catch(() => false)` on the fonts race's timer arm — which can suppress a teardown rejection but
+cannot make a failing test pass. The precondition wait itself is byte-identical.
 
 ## Disposition of the four findings
 
@@ -381,7 +382,7 @@ headline claim:**
 | That `div` is Storybook's own render | **Measured + established by reading** — the tag name is measured; identifying it needs `sk-app-shell.stories.ts:78-79,153` (`storyFrame` returns a **string** whose one top-level node is a `div`) and Storybook 10.6's string branch, `canvasElement.innerHTML = element` |
 | Storybook's string-returning story branch assigns `canvasElement.innerHTML` | **Established by reading** Storybook 10.6 source; `sk-app-shell.stories.ts` returns a string |
 | `page.goto` resolves at `load`, before that client render | **Established by reading** |
-| Contention is a trigger, not the mechanism | **Measured** — 6/80 at `workers: 2` vs 1/80 at `workers: 1`, then 80/80 both after the fix |
+| Contention is a trigger, not the mechanism | **Measured** — 6/80 at `workers: 2` vs 1/80 at `workers: 1`, then 80/80 both. *Arm figures were taken at `e150b8f9`, whose cure was later replaced; see the provenance caveat above. No post-`f1c9cc5c` arm reading exists and none is claimed.* |
 
 The earlier revision of this document asserted Finding 4 as established before any of the first
 two rows existed. That was the same error as the budget hypothesis, and it is recorded here

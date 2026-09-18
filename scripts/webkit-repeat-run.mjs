@@ -90,17 +90,17 @@ const LINE_ITEMS = [
   // (item 3's own body grew by 5 more lines ahead of them). Re-verified by grepping each test's
   // title against these exact line numbers after the edit — see the mission record for the
   // one-time correction commit.
-  { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 425, label: 'forced-colors, two points in cycle', titleAnchor: 'legible' },
-  { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 496, label: 'forced-colors + reduced-motion', titleAnchor: 'together' },
-  { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 512, label: 'the sweep actually runs', titleAnchor: 'sweep' },
-  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 537, label: 'reduced-motion freeze', titleAnchor: 'stops' }, // corrected from 523 — see note above the item-1 entry.
-  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 582, label: 'no animation leak onto determinate', titleAnchor: 'teeth' }, // corrected from 568 — see note above the item-1 entry.
-  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 136, label: 'exact 56/240px columns', titleAnchor: 'preserves exact' },
-  { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 192, label: 'narrow shell region order', titleAnchor: 'reachable' },
-  { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 335, label: 'landmarks/labels/grouping', titleAnchor: 'landmarks' },
-  { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 477, label: 'axe-clean in dark mode', titleAnchor: 'axe-clean' },
-  { item: 10, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', line: 654, label: 'focused overflow keyboard scroll', titleAnchor: 'outline' }, // WP03: was 557; T021's waitForScrollSettled helper (added ahead of this test) shifted it. See tmp/finding/wp03-lane-c-rig-line-number-drift.md.
-  { item: 11, file: 'apps/storybook/src/tests/sk-radio-choice-group.spec.ts', line: 1113, label: 'legend cue across two stories', titleAnchor: 'non-required legend' },
+  { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'forced-colors, two points in cycle', titleAnchor: 'legible' },
+  { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'forced-colors + reduced-motion', titleAnchor: 'together' },
+  { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'the sweep actually runs', titleAnchor: 'sweep' },
+  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'reduced-motion freeze', titleAnchor: 'stops' }, // corrected from 523 — see note above the item-1 entry.
+  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'no animation leak onto determinate', titleAnchor: 'teeth' }, // corrected from 568 — see note above the item-1 entry.
+  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'exact 56/240px columns', titleAnchor: 'preserves exact' },
+  { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'narrow shell region order', titleAnchor: 'reachable' },
+  { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'landmarks/labels/grouping', titleAnchor: 'landmarks' },
+  { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'axe-clean in dark mode', titleAnchor: 'axe-clean' },
+  { item: 10, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', label: 'focused overflow keyboard scroll', titleAnchor: 'outline' }, // WP03: was 557; T021's waitForScrollSettled helper (added ahead of this test) shifted it. See tmp/finding/wp03-lane-c-rig-line-number-drift.md.
+  { item: 11, file: 'apps/storybook/src/tests/sk-radio-choice-group.spec.ts', label: 'legend cue across two stories', titleAnchor: 'non-required legend' },
 ];
 
 /** Item 12: parameterized across six modes, no single line — selected by title grep instead. */
@@ -125,73 +125,48 @@ const GREP_ITEM = {
  * actually begin a `test(` declaration. A count over the wrong set of tests is worse than no
  * count, because it is indistinguishable from a good one.
  */
-function assertSelectorsResolve(lineItems) {
-  const broken = [];
+function resolveLineItems(lineItems) {
+  const problems = [];
+  const resolved = [];
   for (const it of lineItems) {
     const lines = readFileSync(it.file, 'utf8').split('\n');
-    const line = lines[it.line - 1] ?? '';
-    if (!/^\s*test\(/.test(line)) {
-      broken.push(
-        `  item ${it.item}: ${it.file}:${it.line} is not a test( declaration — found: ${
-          line.trim().slice(0, 72) || '(end of file)'
-        }`,
-      );
-      continue;
-    }
-    // Resolvability is not identity. A drift that lands one item's line on a DIFFERENT test(
-    // passes the check above and then prints a count under the wrong label -- precisely the
-    // harm this guard's docstring names, and this file records six drifts. So each item's
-    // `label` must also be recognisable in the declaration it points at. Matching on the
-    // longest word of four-plus characters keeps the labels free to stay short without
-    // pinning them to the test titles byte-for-byte.
-    // IDENTITY, pinned -- not "a label word appears somewhere".
-    //
-    // The first version of this check accepted ANY 4+ character word from the item's label. The
-    // squad's correctness lens proved it false for SAME-FILE drift, which is the only drift this
-    // mission ever had: a cross-matrix over the real items found **12 false-pass pairs**, e.g.
-    // item 5's label would have accepted items 1, 2, 3 and 4's declarations, and item 7's would
-    // have accepted item 6's. A guard that cannot distinguish neighbours in one file cannot
-    // catch the six drifts this file records.
-    //
-    // Each item now pins an explicit `titleAnchor` that must appear in its declaration, and the
-    // anchor is additionally required to be UNIQUE among that file's test( declarations -- so a
-    // future edit that makes two titles share an anchor fails here loudly instead of quietly
-    // weakening the guard back to where it started.
     const anchor = (it.titleAnchor ?? '').toLowerCase();
     if (!anchor) {
-      broken.push(
-        `  item ${it.item}: no titleAnchor declared — every line-item must pin one, or the ` +
-          'identity check silently degrades into a resolvability check.',
+      problems.push(`  item ${it.item}: no titleAnchor declared — one is required to resolve a line.`);
+      continue;
+    }
+    // Every `test(` declaration containing this item's anchor. Exactly one must match: zero means
+    // the test was renamed or removed, more than one means the anchor cannot identify a single
+    // test and would silently select a neighbour.
+    const hits = [];
+    for (let i = 0; i < lines.length; i += 1) {
+      if (/^\s*test\(/.test(lines[i]) && lines[i].toLowerCase().includes(anchor)) {
+        hits.push({ line: i + 1, text: lines[i].trim() });
+      }
+    }
+    if (hits.length !== 1) {
+      problems.push(
+        `  item ${it.item}: titleAnchor "${it.titleAnchor}" matches ${hits.length} test( ` +
+          `declarations in ${it.file} — it must identify exactly one` +
+          (hits.length > 1 ? `: lines ${hits.map((h) => h.line).join(', ')}` : ''),
       );
       continue;
     }
-    if (!line.toLowerCase().includes(anchor)) {
-      broken.push(
-        `  item ${it.item}: ${it.file}:${it.line} IS a test( declaration, but not the pinned one ` +
-          `— titleAnchor "${it.titleAnchor}" is absent from: ${line.trim().slice(0, 72)}`,
-      );
-      continue;
-    }
-    const declarations = lines.filter((l) => /^\s*test\(/.test(l));
-    const matches = declarations.filter((l) => l.toLowerCase().includes(anchor)).length;
-    if (matches !== 1) {
-      broken.push(
-        `  item ${it.item}: titleAnchor "${it.titleAnchor}" matches ${matches} test( declarations ` +
-          `in ${it.file} — an anchor must identify exactly one test or it cannot detect drift ` +
-          'between neighbours.',
-      );
-    }
+    resolved.push({ ...it, line: hits[0].line });
   }
-  if (broken.length > 0) {
+  if (problems.length > 0) {
     throw new Error(
-      `${broken.length} of ${lineItems.length} line-item selectors no longer resolve:\n` +
-        `${broken.join('\n')}\n\n` +
-        'Playwright would silently drop these and still exit 0, producing a per-item table ' +
-        'that looks complete. Re-point the LINE_ITEMS entries above at the current line ' +
-        'numbers (grep each test title) before measuring again.',
+      `${problems.length} of ${lineItems.length} line-items could not be resolved:\n` +
+        `${problems.join('\n')}\n\n` +
+        'Playwright silently drops a file:line that matches no test and still exits 0, so this ' +
+        'refuses rather than measuring a smaller set than you asked for.',
     );
   }
-  console.log(`Selectors: all ${lineItems.length} line-items resolve to a test( declaration.`);
+  console.log(
+    `Selectors: all ${resolved.length} line-items resolved from their titleAnchors — ` +
+      `${resolved.map((r) => `${r.item}:${r.line}`).join(' ')}`,
+  );
+  return resolved;
 }
 
 function parseArgs(argv) {
@@ -343,7 +318,7 @@ async function main() {
   const jsonDir = opts.jsonDir ?? mkdtempSync(join(tmpdir(), 'webkit-repeat-run-'));
 
   printRetrySetting();
-  assertSelectorsResolve(selectedLineItems);
+  const resolvedLineItems = resolveLineItems(selectedLineItems);
   console.log(`Repeat-each: ${opts.repeatEach}`);
   console.log(`JSON reports: ${jsonDir}`);
 
@@ -351,7 +326,7 @@ async function main() {
   const allResults = [];
 
   if (selectedLineItems.length > 0) {
-    const fileLineArgs = selectedLineItems.map((it) => `${it.file}:${it.line}`);
+    const fileLineArgs = resolvedLineItems.map((it) => `${it.file}:${it.line}`);
     const jsonPath = join(jsonDir, 'line-items.json');
     const { failed } = runPlaywright([...fileLineArgs, `--repeat-each=${opts.repeatEach}`], jsonPath);
     overallFailed = overallFailed || failed;
@@ -384,7 +359,7 @@ async function main() {
   // share.
   const lineJsonPath = allResults.find((r) => r.kind === 'line')?.jsonPath;
   const lineResults = lineJsonPath ? loadResults(lineJsonPath) : [];
-  for (const it of selectedLineItems) {
+  for (const it of resolvedLineItems) {
     const wantBase = basename(it.file);
     const subTests = summarize(lineResults, (r) => basename(r.file) === wantBase && r.line === it.line);
     const hadFailure = printReport(`${it.item} (${it.label})`, subTests);
