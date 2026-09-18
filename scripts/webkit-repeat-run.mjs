@@ -21,8 +21,9 @@
  *
  * WHY TWO PLAYWRIGHT INVOCATIONS, NOT ONE
  *
- * Eleven of the twelve items are addressable as an exact `file:line` (Playwright's own
- * test-selection syntax) — RESOLVED from each item's titleAnchor at run time, never stored; the twelfth (item 12, the `sk-action-row.spec.ts` "external
+ * Eleven of the twelve items are selected by an exact `file:line` — Playwright's own
+ * test-selection syntax — whose line is RESOLVED from each item's titleAnchor at run time
+ * and never stored. The twelfth (item 12, the `sk-action-row.spec.ts` "external
  * controls" family) is parameterized across six modes with no single line, and is selected by
  * a `--grep` title match instead. Mixing a `--grep` filter into the same invocation as the
  * `file:line` selections would apply that filter GLOBALLY, silently dropping the other eleven
@@ -72,16 +73,38 @@ let workersSetting = null;
 
 /** spec.md's "Canonical scope" table, items 1–11: each addressable by a unique titleAnchor. */
 const LINE_ITEMS = [
-  //
   { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'forced-colors, two points in cycle', titleAnchor: 'legible' },
   { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'forced-colors + reduced-motion', titleAnchor: 'together' },
   { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'the sweep actually runs', titleAnchor: 'sweep' },
-  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'reduced-motion freeze', titleAnchor: 'stops' },  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'no animation leak onto determinate', titleAnchor: 'teeth' },  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'exact 56/240px columns', titleAnchor: 'preserves exact' },
+  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'reduced-motion freeze', titleAnchor: 'stops' },
+  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'no animation leak onto determinate', titleAnchor: 'teeth' },
+  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'exact 56/240px columns', titleAnchor: 'preserves exact' },
   { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'narrow shell region order', titleAnchor: 'reachable' },
   { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'landmarks/labels/grouping', titleAnchor: 'landmarks' },
   { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'axe-clean in dark mode', titleAnchor: 'axe-clean' },
   { item: 10, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', label: 'focused overflow keyboard scroll', titleAnchor: 'outline' }, // WP03: was 557; T021's waitForScrollSettled helper (added ahead of this test) shifted it. See tmp/finding/wp03-lane-c-rig-line-number-drift.md.
   { item: 11, file: 'apps/storybook/src/tests/sk-radio-choice-group.spec.ts', label: 'legend cue across two stories', titleAnchor: 'non-required legend' },
+  // ---------------------------------------------------------------------------------------
+  // Items 13-16 (#456). The webkit lane flakes BEYOND mission #453's twelve items. These four
+  // were observed flaky in pre-mission CI runs on the train, with run ids recorded in #456:
+  // 35375268744 (sk-notice), 34637284298 (sk-page-header-sticky), 34673156155
+  // (sk-work-explorer-pattern and sk-workflow-board:650 -- a DIFFERENT test from item 10).
+  //
+  // They are added here rather than investigated by reading, deliberately. None of them carries
+  // the shapes this programme has been fixing -- no waitForTimeout, no innerHTML injection over
+  // the story root, no elapsed-time wait -- so they are not variants of the render race, and
+  // reading them produced plausible mechanisms that did not survive checking. #456's own stated
+  // method is to measure first at --retries=0 and find the mechanism from the failure, which is
+  // what items 1-12 established works and what guessing did not.
+  //
+  // The fifth spec named in #456, sk-action-row.spec.ts:110, is NOT added: it is the same
+  // parameterized family already measured as item 12, which has been 10/10 under webkit in every
+  // sample. Its only sighting was chromium (run 34673156155), so if it is real it is an
+  // engine-specific issue this webkit rig cannot see, and it needs its own measurement.
+  { item: 13, file: 'apps/storybook/src/tests/sk-notice-forced-colors.spec.ts', label: 'reduced-motion entrance suppressed, message survives', titleAnchor: 'entrance animation is suppressed' },
+  { item: 14, file: 'apps/storybook/src/tests/sk-page-header-sticky.spec.ts', label: 'focused row lifted clear of sticky header', titleAnchor: 'lifted clear' },
+  { item: 15, file: 'apps/storybook/src/tests/sk-work-explorer-pattern.spec.ts', label: 'W4 rail/context/overflow at shell edges', titleAnchor: 'W4 retains' },
+  { item: 16, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', label: '220px smallest qualifying candidate in sweep', titleAnchor: '220px is the smallest' },
 ];
 
 /** Item 12: parameterized across six modes, no single line — selected by title grep instead. */
