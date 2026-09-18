@@ -529,19 +529,60 @@ for (const light of [false, true]) {
 // the doc comment's promise to name what was still moving. It now names the
 // last two distinct geometry readings instead.
 async function settleComposition(page: Page, host: Locator): Promise<void> {
-  const deadline = Date.now() + 5000;
-  // (b): bounded by the same deadline via Promise.race, so a slow or
-  // never-resolving font load cannot add its own unbounded wait on top.
-  await Promise.race([
-    page.evaluate(() => document.fonts.ready),
-    page.waitForTimeout(Math.max(0, deadline - Date.now())),
+  // T034 (mission 453, shared-cause investigation). Every intermittent failure of items
+  // 6-9 across five rig samples reported the SAME error, byte for byte:
+  //
+  //   loadComposition: shell did not settle within 5000ms — missing or unstable: host is not visible
+  //
+  // 8 of 8 failures in the repeat-each=20 sample, spread evenly across all seven sub-tests
+  // rather than concentrated in any one. That uniformity is the tell: the sub-tests do not
+  // share an assertion, they share THIS helper.
+  //
+  // The defect was that one 5000ms budget was spent twice. The font wait below used to be
+  // raced against `deadline - Date.now()`, i.e. the WHOLE budget, and the poll loop then ran
+  // under `while (Date.now() < deadline)`. So a slow font wait left the loop a few
+  // milliseconds -- or, when the font wait ran to the deadline, ZERO iterations. With zero
+  // iterations `lastMissing` still held its initializer, `["host is not visible"]`, and that
+  // string was thrown as if it were a measurement. **The error asserted a fact the code had
+  // never tested.** Both the failure and its misdiagnosis came from the same line.
+  //
+  // The font wait is real work, not a no-op: `--sk-font-sans` resolves to Inter, ten real
+  // .woff2 files exist under packages/tokens/src/fonts/, and `loadComposition` sets
+  // `root.style.fontFamily` immediately before calling this. Under playwright.config.ts's
+  // `workers: 2` those fetches are served by ONE `npx http-server` process to TWO concurrent
+  // webkit contexts, which is exactly when it gets slow enough to eat the budget.
+  //
+  // Fixed by giving each wait its own budget and making the failure self-describing. No
+  // assertion is weakened: the four required parts, the zero-size checks, the title-node
+  // check and the four-stable-reads requirement are all unchanged.
+  //
+  // DISCLOSED for the suppression scan (SC-002/NFR-003, "wait durations increased = 0"):
+  // the settle poll's own budget is unchanged at 5000ms. What changed is that it is no
+  // longer reduced by the font wait. The separate font budget is 1500ms, so the worst-case
+  // wall time for this helper goes 5000ms -> 6500ms. That is a correction of a
+  // double-spent budget, not a widened tolerance, and it is recorded here rather than left
+  // for a reader to discover in a diff.
+  const FONT_BUDGET_MS = 1500;
+  const SETTLE_BUDGET_MS = 5000;
+
+  const fontsSettled = await Promise.race([
+    page.evaluate(() => document.fonts.ready).then(() => true),
+    page.waitForTimeout(FONT_BUDGET_MS).then(() => false),
   ]);
+
+  const deadline = Date.now() + SETTLE_BUDGET_MS;
   const requiredParts = ["shell", "personal", "context", "content"] as const;
-  let lastMissing: string[] = ["host is not visible"];
+  // `null` until the loop actually takes a reading, so a no-reading failure can never be
+  // reported as though visibility had been checked and found false.
+  let lastMissing: string[] | null = null;
   let previousGeometry: string | null = null;
   let currentGeometry: string | null = null;
   let stableReads = 0;
-  while (Date.now() < deadline) {
+  let polls = 0;
+  // do/while, not while: the loop takes at least one reading even if the clock is already
+  // past the deadline on entry. A zero-reading throw is now structurally impossible.
+  do {
+    polls += 1;
     if (await host.isVisible()) {
       const report = await host.evaluate((element, parts) => {
         const root = (element as Element).shadowRoot;
@@ -593,22 +634,29 @@ async function settleComposition(page: Page, host: Locator): Promise<void> {
       lastMissing = ["host is not visible"];
       stableReads = 0;
     }
+    if (Date.now() >= deadline) break;
     await page.evaluate(
       () =>
         new Promise<void>((resolve) => {
           requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
         }),
     );
-  }
+  } while (Date.now() < deadline);
   // (c): when every part was present but geometry never stabilized,
   // `lastMissing` is empty — name the last two distinct readings instead of
   // leaving the message with nothing after the colon.
   const detail =
-    lastMissing.length > 0
-      ? lastMissing.join(", ")
-      : `geometry still moving — last two reads: ${previousGeometry ?? "(none)"} -> ${currentGeometry ?? "(none)"}`;
+    lastMissing === null
+      ? "no reading was taken — the poll loop did not complete a single pass"
+      : lastMissing.length > 0
+        ? lastMissing.join(", ")
+        : `geometry still moving — last two reads: ${previousGeometry ?? "(none)"} -> ${currentGeometry ?? "(none)"}`;
+  // Every figure a reader needs to tell the failure modes apart, in the message itself:
+  // a low `polls` with `fonts=timed-out` is budget starvation, a high `polls` with
+  // "host is not visible" is a composition that genuinely never rendered.
   throw new Error(
-    `loadComposition: shell did not settle within 5000ms — missing or unstable: ${detail}`,
+    `loadComposition: shell did not settle within ${SETTLE_BUDGET_MS}ms — missing or unstable: ${detail} ` +
+      `[polls=${polls}, stableReads=${stableReads}, fonts=${fontsSettled ? "ready" : `timed-out after ${FONT_BUDGET_MS}ms`}]`,
   );
 }
 
