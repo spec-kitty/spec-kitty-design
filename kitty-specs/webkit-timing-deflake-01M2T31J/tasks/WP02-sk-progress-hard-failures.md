@@ -1,14 +1,15 @@
 ---
 work_package_id: WP02
-title: 'sk-progress: find why the two hard failures fail, then fix that'
+title: "sk-progress — find why the two hard failures fail, then fix that"
 dependencies:
 - WP01
 requirement_refs:
 - FR-001
 - FR-002
 - FR-003
-- NFR-002
-- NFR-004
+- FR-004
+- NFR-003
+- NFR-005
 - C-001
 - C-002
 - C-003
@@ -26,6 +27,7 @@ subtasks:
 - T013
 - T014
 - T015
+- T016
 phase: Phase 2 - Fix
 history:
 - timestamp: '2026-09-18T11:13:32Z'
@@ -36,29 +38,52 @@ create_intent: []
 execution_mode: code_change
 owned_files:
 - apps/storybook/src/tests/sk-progress.spec.ts
+- packages/styles/src/progress/**
 tags: []
 tracker_refs: []
 ---
 
-# Work Package Prompt: WP02 – sk-progress: find why the two hard failures fail, then fix that
+# Work Package Prompt: WP02 – sk-progress — find why the two hard failures fail, then fix that
 
-`sk-progress.spec.ts:369` and `:465` are the two hard failures turning the aggregate gate red.
-`:456` and `:510` are flaky in the same file.
 
-**Do not start from the tracking issue's "pin the animation phase" thesis for the two failures.** The
-plan corrects it: under `prefers-reduced-motion` the CSS sets `animation-name: none` **and**
-`background-position: 50% 0`, so `:465`'s frame is deterministic by construction and has no phase to
-pin. The plan's hypothesis is that the **comparison fixture** (`complete`, `zero`) is sampled before
-it has painted, so its edge samples read as track colour — which the indeterminate frame's edges also
-are, making a correct assertion fail on a mis-measured baseline.
+- **Goal**: Items 1–5 pass repeatedly for a demonstrated reason, assertions no weaker than before.
+- **Priority**: P0 — items 1 and 4 are the hard failures reddening the train's gate.
+- **Owns**: `apps/storybook/src/tests/sk-progress.spec.ts`, `packages/styles/src/progress/**`.
+- **Included subtasks**:
+  - T010 **Experiment before fixing.** Instrument items 1 and 4 to record, at the moment of sampling, whether **both** the fixture under test **and** each comparison fixture had painted. Run under the WP01 rig until a failure is captured with that data attached.
+  - T011 Judge **per test, not once for both** (plan.md Correction 2). Item 1's suspect is the *fixture under test* — `zero`'s fill is 0%-wide by definition, so it cannot be the variable, and item 1's own comment places its `left` sample inside the clipped fill. Item 4's suspect is the *comparison fixture* `complete`. Record confirmed or refuted **for each**. If refuted for a test, stop and re-diagnose **that** test; do not transplant the other's fix.
+  - T012 Fix each demonstrated cause: await the painted state of whichever subject the data implicates, for every fixture the test reads.
+  - T013 Items 3 and 5 need *phases* (they compare two captures over time). Try `getAnimations({subtree:true})` and **prove on CI under webkit** that it returns the pseudo-element animation — the sweep is declared on `::-webkit-progress-value` and `::-moz-progress-bar`. Fallback: inject `animation-play-state: paused` with an explicit `animation-delay`. Record which was used. Items 1 and 2 assert their two samples are **identical** and need settling, not phases.
+  - T014 Item 2 (`:440`) has the identical capture-wait-capture shape and sits between its failing siblings; apply the same treatment rather than leaving it behind.
+  - T015 Red-first, one per rewritten assertion: full-width fill under forced colors fails item 1; removing the reduced-motion rule fails item 4; removing the sweep fails item 3; item 5's existing modifier-injection proof preserved and still failing. These mutations need the CSS — hence this WP's ownership of `packages/styles/src/progress/**`.
+  - T016 Report the `samplePixels` edge-offset fragility (`x=2`, `x=w-3` on an antialiased pill radius) as a finding either way.
+- **Independent test**: 10/10 repeats green for items 1–5 under the rig with `retries: 0`; red-first proofs recorded, one per rewritten assertion.
+- **Dependencies**: WP01.
+- **Risks**: any CSS edit beyond a red-first mutation is a C-007 component finding and must be reported as one, never a silent green-making change.
 
-- T010 **Experiment before fixing.** Instrument both tests to record the comparison fixtures' full sample set at the moment they are sampled. Run under the WP01 rig until a failure is captured with that data attached.
-- T011 Judge the hypothesis: was the comparison fixture unpainted? Record **confirmed or refuted**. If refuted, STOP and re-diagnose — do not build a fix on a dead hypothesis.
-- T012 Fix the demonstrated cause. If it is the unsettled comparison, await the painted state of EVERY fixture a test compares against, not only the one under test.
-- T013 For `:456`/`:510`, select phases explicitly. Try `getAnimations({subtree:true})` and **prove on CI under webkit** that it returns the pseudo-element animation — the sweep is declared on `::-webkit-progress-value` and `::-moz-progress-bar`, which the API may not reach. Fallback: inject `animation-play-state: paused` with an explicit `animation-delay`. Record which was used.
-- T014 Red-first, one per rewritten assertion: full-width fill under forced colors fails `:369`; removing the reduced-motion rule fails `:465`; removing the sweep fails `:456`; `:510`'s existing modifier-injection proof preserved and still failing.
-- T015 Report the `samplePixels` edge-offset fragility (`x=2`, `x=w-3` on an antialiased pill radius) as a finding either way.
+---
 
-These assertions close two recorded defects (an indeterminate fill indistinguishable from Complete
-under forced colors). **They must not be weakened** — no widened tolerance, no fewer samples, no
-longer waits.
+## Verification reality (read before planning any task)
+
+Every test in scope is `[webkit]`-only, and **webkit cannot launch on the development workstation**.
+Measured here, with a positive control:
+
+```
+webkit:   FAILED — Host system is missing dependencies to run browsers
+chromium: LAUNCHED — Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 …
+```
+
+The named packages (`libgtk-4-1`, `libicu74`, …) are Debian/Ubuntu soname-pinned; this host is
+Fedora. The repository's existing claim in `vitest.config.mts` is **confirmed**, not inherited.
+
+1. **CI is the only webkit authority.** A local chromium pass is evidence about chromium and nothing else.
+2. **A full `playwright` job is ~27 minutes**, so ten sequential CI runs per item is not viable. NFR-001 means ten **repeats inside one job**.
+3. **`playwright.config.ts:19` sets `retries: 2` under CI.** A rig inheriting that reports a failing test as `flaky` at exit 0 — a retry-wrapped green by inheritance. Every measurement in this mission runs with `retries: 0`, and a `flaky` line counts as a **failure** (NFR-002, C-001).
+4. A repeat loop over a test that performs a one-way mutation to a shared fixture measures the mutation, not the flake. Check for that shape before reporting a count.
+
+## Why this is on a critical path
+
+The train's own push run is red (`playwright` 3 failed / 2 flaky → `gate` failed), which **skips the
+`promote-develop` job** (`needs: [gate]`, no `always()`). `develop` is synced only by that job opening
+and merging a `promote/<40-hex>` PR. Until the train's gate is green, release promotion cannot run
+(SC-007).
