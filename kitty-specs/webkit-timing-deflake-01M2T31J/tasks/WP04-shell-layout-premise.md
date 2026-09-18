@@ -10,7 +10,6 @@ requirement_refs:
 - NFR-001
 - NFR-003
 - C-001
-- C-007
 - C-010
 - C-012
 planning_base_branch: mission/webkit-deflake
