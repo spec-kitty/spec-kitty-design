@@ -509,6 +509,9 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     // to retry away). `pinAnimationPhase`'s returned array proves what layer(s) webkit actually
     // returned from `getAnimations({ subtree: true })` for this CI run.
     const atStart = await pinAnimationPhase(bar, 0);
+    // T013: prove on CI under webkit which layer(s) getAnimations({ subtree: true }) actually
+    // reached, rather than assume — plan.md Correction 3 explicitly withholds that guarantee.
+    test.info().annotations.push({ type: 'T013-animations-item3', description: JSON.stringify(atStart) });
     expect(atStart.length).toBeGreaterThan(0); // the sweep must exist to have a phase at all
     const sample1 = await samplePixels(page, await bar.screenshot());
     const halfPeriod = Math.max(...atStart.map((a) => a.durationMs)) / 2;
