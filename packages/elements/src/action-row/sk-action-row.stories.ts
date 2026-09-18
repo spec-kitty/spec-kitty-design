@@ -126,7 +126,8 @@ export const WithControls: Story = {
           extra: 'data-with-controls="true"',
           supporting: '<span slot="supporting">Consumer-supplied supporting context</span>',
           controls: `
-            <a slot="controls" href="#details" data-native-link style="color:var(--sk-fg-default);">Details</a>
+            <!-- T022 RED-FIRST MUTATION (WP03, item 12) — revert before finishing -->
+            <a slot="controls" href="#not-details" data-native-link style="color:var(--sk-fg-default);">Details</a>
             <button slot="controls" type="button" data-native-button>Pin</button>
             <sk-button slot="controls" size="sm" data-sk-button>Inspect</sk-button>
           `,
