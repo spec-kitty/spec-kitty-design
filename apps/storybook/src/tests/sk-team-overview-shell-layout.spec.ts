@@ -497,11 +497,15 @@ for (const light of [false, true]) {
 // T031: the settledness postcondition FR-007 asks for. `loadComposition`
 // now returns only once (a) the fonts actually used have finished loading,
 // (b) the host is visible, (c) its four structural shadow parts are present
-// with non-zero size, and (d) two consecutive reads of that geometry, 50ms
-// apart, agree — or it throws, naming exactly which of those was missing or
+// with non-zero size, and (d) four consecutive reads of that geometry, each
+// a rendered frame apart (double `requestAnimationFrame`, not a wall-clock
+// guess), agree — or it throws, naming exactly which of those was missing or
 // still moving, in place of Playwright's generic "not visible" timeout.
 // The 5000ms ceiling is the SAME ceiling `expect(host).toBeVisible()`
-// already ran under by default (C-003: this does not lengthen any wait).
+// already ran under by default (C-003: this does not lengthen any wait;
+// raising the stable-read count from an earlier 2 to 4, measured against
+// items 6-9 on this branch's own CI runs, is a stricter settledness BAR
+// within that unchanged ceiling, not a longer one).
 async function settleComposition(page: Page, host: Locator): Promise<void> {
   await page.evaluate(() => document.fonts.ready);
   const requiredParts = ["shell", "personal", "context", "content"] as const;
@@ -536,7 +540,7 @@ async function settleComposition(page: Page, host: Locator): Promise<void> {
       if (report.missing.length === 0) {
         if (report.geometry === stableGeometry) {
           stableReads += 1;
-          if (stableReads >= 2) return;
+          if (stableReads >= 4) return;
         } else {
           stableGeometry = report.geometry;
           stableReads = 0;
@@ -548,7 +552,12 @@ async function settleComposition(page: Page, host: Locator): Promise<void> {
       lastMissing = ["host is not visible"];
       stableReads = 0;
     }
-    await page.waitForTimeout(50);
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        }),
+    );
   }
   throw new Error(
     `loadComposition: shell did not settle within 5000ms — missing or unstable: ${lastMissing.join(", ")}`,
