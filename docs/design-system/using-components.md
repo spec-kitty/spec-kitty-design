@@ -633,8 +633,43 @@ scrolls it clear.
 
 This repository measured the same defect on the inline axis first and reached the same conclusion —
 see `sk-section-nav.css`, where `scroll-margin-inline` on the link "had zero effect on that
-specific defect" and one `scroll-padding-inline` on the container replaced it. **It does not
-reproduce on chromium**, which is why this contract read as complete for as long as it did.
+specific defect" and one `scroll-padding-inline` on the container replaced it.
+
+### Under WebKit, CSS alone is not enough — you need the handler
+
+**`scroll-padding-block-start` is necessary and not sufficient.** Measured at `--repeat-each=60`
+(#456): under WebKit, focusing an occluded row does **not** scroll it clear, and
+`scroll-margin-block-start` on the row and `scroll-padding-block-start` on the container **both
+had zero effect** — 34 failures, every one reporting the scroll position after focus identical to
+the position before it, with both properties confirmed applied at 80px and 288px. WebKit treats an
+occluded-but-in-scrollport row as *visible* and declines to scroll at all, so neither property is
+ever consulted. Chromium scrolls on focus by itself, which is why this is invisible there.
+
+An explicit scroll does work — measured under WebKit: compact `834 → 686`, default `974 → 410`,
+the row clearing the header in both. So the scroll container needs this:
+
+```js
+scroller.addEventListener('focusin', (event) => {
+  const target = event.target;
+  if (!target?.getBoundingClientRect) return;
+  const inset = parseFloat(getComputedStyle(scroller).scrollPaddingBlockStart) || 0;
+  const portTop = scroller.getBoundingClientRect().top + inset;
+  if (target.getBoundingClientRect().top < portTop) {
+    target.scrollIntoView({ block: 'start' });
+  }
+});
+```
+
+It fires only when the focused element is actually above the scrollport's declared inset, so it is
+inert on every focus that is already clear — including in Chromium, where the browser has already
+done the work by the time it runs.
+
+**Why this is yours and not the element's**, for now: #145 ruled that `sk-page-header` observes no
+scrolling and owns no layout measurement, and that boundary is load-bearing elsewhere in this
+component's contract. That ruling predates the measurement above, and whether it should still hold
+given that WCAG 2.4.11 demonstrably cannot be met without layout-observing JS is **escalated as its
+own decision**. If it is relaxed, this snippet becomes the element's job and this section goes
+away.
 
 The element does not measure its own live box to close this gap, because observing layout is the
 class of behaviour it is deliberately barred from owning — the same boundary that keeps the timer

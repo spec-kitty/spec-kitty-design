@@ -126,8 +126,38 @@ const longBody = (rows = 40) => `
 // on that specific defect" and a single `scroll-padding-inline` on the container replaced it. The
 // page-header contract had asked consumers for the row-margin form that section-nav had already
 // found insufficient. It does not reproduce on chromium (20/20 locally), which is why it survived.
+// WCAG 2.4.11 UNDER WEBKIT NEEDS THIS, AND CSS CANNOT DO IT (#456).
+//
+// Measured, --retries=0, repeat-each=60: focusing a row occluded by the sticky header does NOT
+// scroll it clear under webkit. `scroll-margin-block-start` on the row and
+// `scroll-padding-block-start` on the container BOTH had zero effect -- 34 failures, every one
+// reporting that the scroll position after focus was identical to the position before it, with
+// both properties confirmed applied (80px and 288px). Webkit treats an occluded-but-in-scrollport
+// row as visible and declines to scroll at all, so neither property is ever consulted.
+//
+// An EXPLICIT scroll does work, and that is measured too -- under webkit, compact: 834 -> 686 and
+// the row cleared the header; default: 974 -> 410, cleared. Chromium scrolls on focus by itself
+// (834 -> 416), which is why this defect is invisible there and why the CSS-only contract read as
+// complete for as long as it did.
+//
+// Attached as an inline handler rather than a Storybook `play` function on purpose: `play` runs
+// asynchronously after render, and the contract test focuses without waiting for it, so a `play`
+// would introduce a fresh race into the very test this fixes.
+//
+// See docs/design-system/using-components.md for the consumer contract. Whether the ELEMENT
+// should own this instead -- #145 ruled it "observes no scrolling" -- is escalated separately;
+// that ruling predates this measurement.
+const liftFocusClear = [
+  "const s=this;",
+  "const t=event.target;",
+  "if(!t||!t.getBoundingClientRect)return;",
+  "const i=parseFloat(getComputedStyle(s).scrollPaddingBlockStart)||0;",
+  "const portTop=s.getBoundingClientRect().top+i;",
+  "if(t.getBoundingClientRect().top<portTop)t.scrollIntoView({block:'start'});",
+].join('');
+
 const scroller = (content: string, height = '100vh', className = '', extraStyle = '') => `
-  <div data-scroller${className ? ` class="${className}"` : ''} style="${storyFrameStyle}; min-height: 0; height: ${height}; overflow: auto; scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin)${extraStyle ? `; ${extraStyle}` : ''}">
+  <div data-scroller onfocusin="${liftFocusClear}"${className ? ` class="${className}"` : ''} style="${storyFrameStyle}; min-height: 0; height: ${height}; overflow: auto; scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin)${extraStyle ? `; ${extraStyle}` : ''}">
     ${content}
   </div>`;
 
