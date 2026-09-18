@@ -515,6 +515,7 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     expect(halfPeriod).toBeGreaterThan(0); // sanity: a real, finite duration was found
     const atHalf = await pinAnimationPhase(bar, halfPeriod);
     expect(atHalf.length).toBe(atStart.length);
+    test.info().annotations.push({ type: 'sk-progress-pseudo-elements', description: JSON.stringify({ atStart, atHalf }) });
     const sample2 = await samplePixels(page, await bar.screenshot());
     expect(samplesEqual(sample1, sample2)).toBe(false);
   });
@@ -585,7 +586,8 @@ test.describe('sk-progress absent-state regression: the indeterminate modifier d
     const after1 = await samplePixels(page, await bar.screenshot());
     const halfPeriod = Math.max(...atStart.map((a) => a.durationMs)) / 2;
     expect(halfPeriod).toBeGreaterThan(0);
-    await pinAnimationPhase(bar, halfPeriod);
+    const atHalf = await pinAnimationPhase(bar, halfPeriod);
+    test.info().annotations.push({ type: 'sk-progress-pseudo-elements', description: JSON.stringify({ atStart, atHalf }) });
     const after2 = await samplePixels(page, await bar.screenshot());
     // WATCH: with the leak injected, the identical check now correctly detects
     // motion — proving the "no leak" assertion above is not vacuous.
