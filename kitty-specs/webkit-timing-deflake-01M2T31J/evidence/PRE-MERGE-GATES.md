@@ -160,3 +160,59 @@ sed -n '620p' apps/storybook/src/tests/sk-workflow-board.spec.ts
 Every line must be a `test(` declaration for the intended item. If any is not, the merged rig is
 wrong even though every lane was individually right — and the failure mode is a silently missing
 measurement, not a red run.
+
+## 13. SC-002's mechanical count was tuned to pass, not measured to pass (pre-merge squad F1)
+
+`scripts/scan-mission-suppressions.mjs` counts "rewritten-assertion sites" and `RED-FIRST-PROOF`
+markers separately and reports SC-002 as met when the two totals are equal and non-zero. At
+`eb50aa55` those totals were **9 sites / 11 markers**. Commit `c8191843`'s entire content is two
+marker-header rewordings that reduced the marker count from 11 to 9 to match the site count — the
+numerator was edited to fit the denominator, not the other way round, and no proof was added or
+removed by that commit. **Do not read the resulting 9=9 as evidence of anything.**
+
+Separately, and worse: the two counts were never measuring the same population. The "rewritten
+assertion" count landed almost entirely on WP06's `console.warn`-wrap hunks in
+`fixtures/elements-behaviour/src/*.test.ts` (re-indentation only, per FR-011 — every `expect()`
+byte-identical). The 9 `RED-FIRST-PROOF` markers live in `apps/storybook/src/tests/*.spec.ts` and
+contribute ~0 to the site count. The mechanical proxy is therefore not a per-assertion guarantee
+and was never able to be one; see the added limitation note at the top of
+`scripts/scan-mission-suppressions.mjs` for the mechanism.
+
+The REAL, marker-by-marker correspondence, checked by hand against CI:
+
+| file | marker(s) | run id | mutation commit | revert commit |
+|---|---|---|---|---|
+| `sk-progress.spec.ts` items 1–5 | 5 | `35358002926` | `3fbb49a2` | `f53c7f3d` |
+| `sk-workflow-board.spec.ts` item 10 | 1 | `35354582083` | `f11a33c2` | `ee093dbe` |
+| `sk-action-row.spec.ts` item 12 | 1 | `35354582083` | `f11a33c2` | `ee093dbe` |
+| `sk-team-overview-shell-layout.spec.ts` (`settleComposition`) | 2 | none cited | none identified on the branch | none identified on the branch |
+
+Seven of nine markers carry a real, independently-checkable run/mutation/revert triple. Two do
+not — see §14. `acceptance-matrix.json`'s SC-002 and NFR-003 rows are corrected to `partial` to
+reflect this 7-of-9 reality rather than the mechanical 9-of-9.
+
+## 14. Two `settleComposition` markers, and two comment claims, do not survive a check (pre-merge squad F2, F4)
+
+`sk-team-overview-shell-layout.spec.ts`'s two `RED-FIRST-PROOF` markers for `settleComposition`
+name no run id, no mutation commit, no revert commit, no output and no engine — unlike all seven
+other markers in §13's table. There is no mutation/revert commit pair for this helper anywhere on
+the branch, and WP04's own `status.events.jsonl` entries carry zero CI run ids for it. WP04's
+reviewer independently confirmed the underlying claim differently: "verified by code trace, not by
+executing webkit/chromium locally... Could not independently verify the exact CI run IDs... for the
+post-fix samples." That is a legitimate form of verification, but it is not a red-first CI proof,
+and the marker comments should not read as though it were.
+
+Two further claims in the same comment block do not hold up against this mission's own baseline
+data: "Item 9-dark improved (7/10 → 9-10/10)" and an equivalent claim for item 8 (8/10 pre-fix).
+`evidence/T003-baseline.md`'s **second sample**, taken on **unmodified code**, already reads
+**9/10 dark** for item 9 and **10/10** for item 8 — both inside the claimed post-fix range, from
+noise alone. Neither claim is a demonstrated delta as written.
+
+**Disposition**: `acceptance-matrix.json`'s FR-007 row is corrected to `partial` and its notes
+record what the two markers actually rest on. The comment block in
+`sk-team-overview-shell-layout.spec.ts` itself was under active, concurrent edit by another seat
+at the time this finding was closed out (that seat is adding real chromium-local red-first proofs
+`(c)`/`(d)` to the same helper for an unrelated code finding) — the marker text was not hand-edited
+here to avoid colliding with in-flight work, but it still needs the same correction once that WP
+lands: state plainly that reachability was established by code trace and reviewer inspection, name
+no run that does not exist, and drop or requalify the item 8/9-dark "improved" language.

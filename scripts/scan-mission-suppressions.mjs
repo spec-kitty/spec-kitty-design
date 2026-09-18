@@ -49,6 +49,22 @@
  * synthesized, precisely so SC-002's "equal and non-zero" check has real teeth instead of a
  * fabricated pass.
  *
+ * LIMITATION, CONFIRMED AT MISSION CLOSEOUT (pre-merge squad F1, PR #454): these two counts are
+ * NOT counting the same population, and their equality is not evidence that every rewritten
+ * assertion has a red-first proof. "Rewritten assertion" (above) is a per-HUNK count over the
+ * whole mission diff; at closeout it landed almost entirely on WP06's `console.warn`-wrap
+ * hunks in `fixtures/elements-behaviour/src/*.test.ts`, where every `expect()` is byte-identical
+ * and only re-indented (FR-011) — a rewritten SITE by this script's hunk-shape heuristic, but not
+ * an assertion whose behaviour changed. "Red-first proof" (above) landed almost entirely in
+ * `apps/storybook/src/tests/*.spec.ts`'s `RED-FIRST-PROOF` marker comments, which is a near-
+ * disjoint file set from the WP06 hunks. Nothing in this script binds a specific marker to a
+ * specific rewritten assertion; it can only report that both totals are non-zero and equal,
+ * which is a much weaker claim than "every rewrite has a proof" and MUST NOT be read as that
+ * claim. Treat SC-002's per-assertion correspondence as established only where a specific
+ * marker names a run id, mutation commit and revert commit that were independently verified —
+ * see `acceptance-matrix.json`'s SC-002/NFR-003 rows and `evidence/PRE-MERGE-GATES.md` for the
+ * mission's real, marker-by-marker accounting.
+ *
  * USAGE
  *   node scripts/scan-mission-suppressions.mjs --base=<ref> [--target=<ref>]
  *   node scripts/scan-mission-suppressions.mjs --selftest

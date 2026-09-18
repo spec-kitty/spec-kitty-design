@@ -47,6 +47,16 @@ import { execFileSync } from 'node:child_process';
 // re-typed as a rounded or averaged figure. This is the mission's own evidence that a fixed
 // percentage tolerance cannot work here: 25.6 -> 26.7 alone is already a +4.3% swing with NO
 // code change at all.
+//
+// PROVENANCE GAP, flagged by the pre-merge squad (finding F9, PR #454): no GitHub Actions run id
+// for any of these three figures is recorded anywhere in this mission's tree — not here, not in
+// spec.md/plan.md/tasks.md, not in acceptance-matrix.json before this note. One figure, 26.7,
+// coincides with run 35352049054 (WP05's full-suite-contention run, taken MID-MISSION on a lane
+// branch that already carries WP01's rig — see tasks/WP05-radio-choice-group-settle.md), which is
+// NOT a pre-mission reference run even if it is where 26.7 came from. Whichever agent set this
+// constant did not cite its sources, and none could be reconstructed from the tree at closeout.
+// Do not add run ids here that have not been independently verified pre-mission (base commit
+// before e2cc49fd) — see acceptance-matrix.json's NFR-004/SC-005 rows for the open action.
 export const BASELINE_RUNS_MINUTES = [25.6, 26.7, 22.5];
 export const BASELINE_RUNS_SECONDS = BASELINE_RUNS_MINUTES.map((m) => m * 60);
 export const BAND_MIN_SECONDS = Math.min(...BASELINE_RUNS_SECONDS);

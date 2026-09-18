@@ -2,7 +2,7 @@
   "mission_slug": "webkit-timing-deflake-01M2T31J",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "blocked-on-sc-007",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -18,21 +18,21 @@
       "criterion_id": "FR-002",
       "description": "Preserve the forced-colors distinction",
       "proof_type": "automated_test",
-      "evidence": "sk-progress:369 assertions unchanged in substance; red-first run 35358002926 shows 0/10 when the fill is made full-width under forced colors.",
+      "evidence": "sk-progress:416 (not :369, which at the reviewed SHA is inside an unrelated earlier test's comment — see FR-013's own precedent for citing by test title where lines drift) assertions unchanged in substance; red-first run 35358002926 shows 0/10 when the fill is made full-width under forced colors.",
       "pass_fail": "pass",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": ""
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "Corrected by the pre-merge squad, finding F10: the matrix previously cited :369, which resolved to a viewport call in a different test at this SHA. Test: \"Indeterminate forced-colors: the fill is legible against the page...\" (item 1)."
     },
     {
       "criterion_id": "FR-003",
       "description": "Preserve the reduced-motion assertion",
       "proof_type": "automated_test",
-      "evidence": "sk-progress:465; red-first 0/10 when the reduced-motion rule is removed (run 35358002926).",
+      "evidence": "sk-progress:523 (not :465, which at the reviewed SHA is inside an unrelated comment); red-first 0/10 when the reduced-motion rule is removed (run 35358002926).",
       "pass_fail": "pass",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": ""
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "Corrected by the pre-merge squad, finding F10: the matrix previously cited :465, a stale pre-mission line number. Test: \"Indeterminate under prefers-reduced-motion: reduce...\" (item 4)."
     },
     {
       "criterion_id": "FR-004",
@@ -68,21 +68,21 @@
       "criterion_id": "FR-007",
       "description": "Guarantee the composition is present",
       "proof_type": "automated_test",
-      "evidence": "WP04 settleComposition: awaits document.fonts.ready, host visibility, four shadow parts non-zero, four frame-tied stable geometry reads; throws naming what was missing. Two red-first proofs, reverted.",
-      "pass_fail": "pass",
+      "evidence": "WP04 settleComposition: awaits document.fonts.ready, host visibility, four shadow parts non-zero, four frame-tied stable geometry reads; throws naming what was missing. The two RED-FIRST-PROOF markers for this helper name no run id, no mutation commit, no revert commit and no engine, unlike the mission's other seven markers (see evidence/PRE-MERGE-GATES.md #14, C-005 requires webkit CI as authority and none was produced for this pair) -- reachability of both throw paths was established by code trace and reviewer inspection (WP04 review-cycle-1: 'verified by code trace, not by executing webkit/chromium locally... Could not independently verify the exact CI run IDs'), which is a real but different, weaker form of verification than the CI-captured red-first proofs the mission otherwise relies on. Separately, the comment's 'Item 9-dark improved (7/10 -> 9-10/10)' and item-8 '8/10 pre-fix' claims are not demonstrated deltas: evidence/T003-baseline.md's second sample reads 9/10 dark and 10/10 respectively on UNMODIFIED code -- both inside the claimed post-fix range, from baseline noise alone.",
+      "pass_fail": "partial",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": ""
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "Downgraded by the pre-merge squad, findings F2 and F4. The settling defect itself is real (WP04's fonts.ready + structural-presence fix is genuine and reviewed), but 'two red-first proofs, reverted' overstated what exists for settleComposition specifically, and the item 8/9-dark improvement language is not supported against baseline's own noise. A concurrent seat is adding real chromium-local red-first proofs to this same helper for an unrelated code finding (F1); the marker text and improvement claim in the .spec.ts file itself were not hand-edited here to avoid colliding with that in-flight work, and still need the same correction once it lands."
     },
     {
       "criterion_id": "FR-008",
       "description": "Establish the geometry assertion's premise",
       "proof_type": "measurement",
       "evidence": "WP04 T032: three faces (Inter, Georgia, Courier) x two viewports = nine readings, all exactly 56.00/240.00px. Corroborated by fixed grid tracks + min-width:0. CHROMIUM-ONLY probe; no webkit font-probe was run.",
-      "pass_fail": "pass",
+      "pass_fail": "partial",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": "Refutation is chromium-measured; the CSS mechanism is engine-independent and webkit behaviour corroborates it indirectly."
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "Downgraded by the pre-merge squad, finding F7, for consistency with FR-010/NFR-006/SC-004, which carry 'partial' for the identical reason (a chromium-only measurement standing in for a webkit claim). The CSS-Grid mechanism is engine-independent in principle and item 6's own webkit post-fix data is corroborating (it got the same font/structural fix that measurably helped items 8/9 and showed no improvement, consistent with a non-font-metric residual cause) -- but that is indirect corroboration of item 6's overall pass rate, not a direct webkit measurement of the 56.00/240.00px premise itself. No webkit font-probe was run, so the direct claim stays chromium-only exactly like the other three criteria."
     },
     {
       "criterion_id": "FR-009",
@@ -128,21 +128,21 @@
       "criterion_id": "FR-013",
       "description": "Report what is not fixed",
       "proof_type": "document",
-      "evidence": "Items 7, 11, 12 reported not-reproduced with evidence. Item 3 reported as three samples (10/10, 9/10, 10/10), not folded into a flat claim. Three WP02 unknowns disclosed, one since resolved. openStory's waitForTimeout(50) reported unfixed with reasoning.",
+      "evidence": "Items 11 and 12 reported not-reproduced with evidence (not item 7 -- see notes). Item 3 reported as three samples (10/10, 9/10, 10/10), not folded into a flat claim. Item 4 reported at 10/10 then 9/10, and a third sample (run 35362552560) also 9/10 -- corrected under F6, see NFR-001/SC-001. Three WP02 unknowns disclosed, one since resolved. openStory's waitForTimeout(50) reported unfixed with reasoning.",
       "pass_fail": "pass",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": ""
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "Corrected by the pre-merge squad, finding F5: item 7 reproduces and must not be listed alongside 11/12 as not-reproduced. evidence/T003-baseline.md's second sample shows item 7 failing ~20% at 414px ('Item 7 reproduces after all'); WP04's for_review note states 'Item 7 reproduces (coordinator correction) and is covered by the same fix but not separately diagnosed'; and WP05's addendum (tasks/WP05-radio-choice-group-settle.md) logs item 7 as flaky in the full-contention run 35352049054. Item 7 is correctly reported elsewhere as reproduces-but-not-separately-diagnosed (WP04) -- this row's list was simply wrong to include it among the not-reproduced items."
     },
     {
       "criterion_id": "NFR-001",
       "description": "Repeat-run stability",
       "proof_type": "automated_test",
-      "evidence": "Items 1,2,4,5 at 10/10; item 10 10/10; items 6-9 measured as deltas. ITEM 3 IS 9/10 IN ONE OF THREE SAMPLES.",
+      "evidence": "Items 1,2,5 at 10/10; item 10 10/10; items 6-9 measured as deltas. ITEM 3 IS 9/10 IN ONE OF THREE SAMPLES. ITEM 4 IS 9/10 IN TWO OF THREE SAMPLES (run 35362552560 in addition to the earlier one).",
       "pass_fail": "partial",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": "Not met for item 3. Recorded rather than rounded up."
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "Not met for items 3 and 4. Corrected by the pre-merge squad, finding F6: item 4 was previously omitted from this row despite its own results table (evidence/WP02-sk-progress.md) showing a non-10/10 sample; a third sample (35362552560) confirms it. Recorded rather than rounded up."
     },
     {
       "criterion_id": "NFR-002",
@@ -158,21 +158,21 @@
       "criterion_id": "NFR-003",
       "description": "Red-first proof per fix",
       "proof_type": "automated_test",
-      "evidence": "WP02 five items 0/10 (35358002926); WP03 items 10 and 12 0/10 at the exact rewritten lines (35354582083); WP04 two proofs; WP06 harness derivation. Proof count equals rewritten-assertion count.",
-      "pass_fail": "pass",
+      "evidence": "WP02 five items 0/10, mutation 3fbb49a2 reverted f53c7f3d (run 35358002926); WP03 items 10 and 12 0/10 at the exact rewritten lines, mutation f11a33c2 reverted ee093dbe (run 35354582083); WP06 harness derivation (272 mutations re-derived, C-008/FR-012). Seven of nine RED-FIRST-PROOF markers carry this run/mutation/revert triple. WP04's two markers (settleComposition) name none of the three -- reachability was established by code trace and reviewer inspection, not a captured CI run; see FR-007 and evidence/PRE-MERGE-GATES.md #14. 'Proof count equals rewritten-assertion count' is NOT independent supporting evidence for this criterion: the two counts are disjoint populations (see SC-002) and their equality was in part achieved by editing marker text, not by adding proofs.",
+      "pass_fail": "partial",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": ""
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "Downgraded by the pre-merge squad, finding F1/F2: 7 of 9 markers are real, checkable red-first proofs; 2 (WP04's) are a different, weaker form of verification presented using the same marker convention. Not a full per-fix guarantee as written."
     },
     {
       "criterion_id": "NFR-004",
       "description": "No added wall-clock",
       "proof_type": "measurement",
-      "evidence": "Revised mid-mission: a 5% tolerance sat inside the suite's own 18.7% run-to-run spread (25.6/26.7/22.5 min). Now reported against that band.",
+      "evidence": "Revised mid-mission: a 5% tolerance sat inside the suite's own 18.7% run-to-run spread (25.6/26.7/22.5 min). Now reported against that band. INTEGRITY GAP (pre-merge squad F9): no run id for any of the three reference figures is recorded anywhere in this mission's tree (spec.md, plan.md, tasks.md all state the three minutes with no linked run). One figure, 26.7, coincides with run 35352049054 -- but that run is a MISSION-ERA sample (WP05's full-suite-contention run on lane-e, taken mid-mission on a branch that already carries WP01's rig, per tasks/WP05-radio-choice-group-settle.md), not a pre-mission reference. Whether it is actually one of the three intended reference runs, or a coincidence, cannot be determined from this tree.",
       "pass_fail": "pending",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": "Final figure taken from the merge CI run."
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "Final figure taken from the merge CI run. Before SC-005 can close, either name the three reference run ids and confirm each is pre-mission (base commit before e2cc49fd), or state that the band's provenance is unverified and widen/withdraw it. Do not close this on the existing prose alone."
     },
     {
       "criterion_id": "NFR-005",
@@ -328,31 +328,31 @@
       "criterion_id": "SC-001",
       "description": "All twelve items green across 10 repeats",
       "proof_type": "automated_test",
-      "evidence": "Items 1,2,4,5,10,11,12 clean. ITEM 3 9/10 in one of three samples. Items 6,7,8,9 measured but within the rig's own cross-run noise.",
+      "evidence": "Items 1,2,5,10,11,12 clean. ITEM 3 9/10 in one of three samples. ITEM 4 9/10 in two of three samples (35362552560). Items 6,7,8,9 measured but within the rig's own cross-run noise.",
       "pass_fail": "partial",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": "Not a clean sweep. See NFR-001."
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "Not a clean sweep. See NFR-001. Corrected by the pre-merge squad, finding F6, to move item 4 out of the 'clean' list."
     },
     {
       "criterion_id": "SC-002",
       "description": "Red-first proofs equal rewritten assertions",
       "proof_type": "automated_test",
-      "evidence": "Equal and non-zero. WP01's scan reports both counts.",
-      "pass_fail": "pass",
+      "evidence": "THE SCAN'S 9=9 IS NOT EVIDENCE FOR THIS CRITERION -- the two counts are disjoint populations. 'Rewritten-assertion sites' (9) landed almost entirely on WP06's console.warn-wrap hunks in fixtures/elements-behaviour/src/*.test.ts, which are re-indentation only (FR-011: every expect() byte-identical). The 9 RED-FIRST-PROOF markers live in apps/storybook/src/tests/*.spec.ts and contribute ~0 to the site count. Additionally, the equality was reached in part by editing marker text: at eb50aa55 the counts were 9 sites / 11 markers, and c8191843's entire content is two marker-header rewordings that trimmed 11 to 9 -- the numerator was tuned to the denominator, not measured. The REAL per-assertion correspondence, checked by hand: 7 of 9 markers cite a completed (non-cancelled) CI run, mutation commit and revert commit (sk-progress items 1-5: run 35358002926 / 3fbb49a2 / f53c7f3d; sk-workflow-board item 10 and sk-action-row item 12: run 35354582083 / f11a33c2 / ee093dbe, both independently confirmed completed via `gh run view`). The remaining 2 markers (sk-team-overview-shell-layout.spec.ts settleComposition) cite none of the three -- see FR-007, NFR-003.",
+      "pass_fail": "partial",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": ""
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "Downgraded by the pre-merge squad, finding F1, from a caveated 'pass' to 'partial': the caveat correctly identified the marker-editing problem but still let the mechanical 9=9 stand as if it partially supported the criterion. It does not support it at all -- the two counts never measured the same thing. 7 of 9 real assertion-to-proof correspondences are confirmed; 2 are not. See scripts/scan-mission-suppressions.mjs's added header limitation and evidence/PRE-MERGE-GATES.md #13 for the full accounting."
     },
     {
       "criterion_id": "SC-003",
       "description": "Zero suppressions",
       "proof_type": "automated_test",
-      "evidence": "WP01's scan-mission-suppressions.mjs, proven to detect a planted violation by two independent parties.",
-      "pass_fail": "pending",
+      "evidence": "scan-mission-suppressions.mjs --base=origin/train/elements-first run at a4facaa2 by the orchestrator and independently re-run by squad lens R3-constraints: 0 for test.skip, test.fixme, .only, added retries, increased numeric timeout literal. --selftest 10/10, proving the scan can fail.",
+      "pass_fail": "pass",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": "Run against the final merged diff before the PR is marked ready."
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "Closed on two independent runs at the reviewed SHA."
     },
     {
       "criterion_id": "SC-004",
@@ -368,11 +368,11 @@
       "criterion_id": "SC-005",
       "description": "Duration within the measured band",
       "proof_type": "measurement",
-      "evidence": "Band is 22.5-26.7 min across three reference runs.",
+      "evidence": "Band is 22.5-26.7 min across three reference runs. See NFR-004: no run id is named for any of the three figures in scripts/report-playwright-duration.mjs or anywhere else in this mission's tree; 26.7 coincidentally matches a mission-era run (35352049054), not a confirmed pre-mission one.",
       "pass_fail": "pending",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": "Taken from the merge CI run."
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "Taken from the merge CI run. Corrected by the pre-merge squad, finding F9: the band itself, not just the final reading, has an unverified provenance and must be named or withdrawn/widened before this criterion is treated as ready to evaluate."
     },
     {
       "criterion_id": "SC-006",
@@ -388,11 +388,11 @@
       "criterion_id": "SC-007",
       "description": "Zero failures in the final pre-merge run",
       "proof_type": "automated_test",
-      "evidence": "",
-      "pass_fail": "pending",
+      "evidence": "Run 35364818013 at the reviewed SHA a4facaa2, webkit, --retries=0, --repeat-each=10: items 1-7 all 10/10 (both viewports where parameterized); ITEM 8 = 8/10 (2 failed); ITEM 9 = 9/10 dark AND 9/10 light. Items 10, 11, 12 clean.",
+      "pass_fail": "fail",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": "Evaluated on the final PR head SHA."
+      "verified_at": "2026-09-18T16:03:18.897139+00:00",
+      "notes": "FAILS as written. Recorded as fail rather than rewritten to fit the result. The criterion was MIS-SPECIFIED by the orchestrator: it demands zero failures across all twelve items, while FR-013 explicitly permits items to be reported unfixed with evidence - and WP04 did exactly that for items 6-9, stating they showed no measurable improvement above the rig's own cross-run noise. So the mission never claimed items 8 and 9 were fixed; SC-007 asserted a bar the mission had already, openly, declined to clear. Note also that items 6 and 7 are 10/10 in THIS run having been the doubtful ones earlier, while 8 and 9 moved the other way - which is the cross-run instability the mission documented, not a regression introduced by the fixes."
     },
     {
       "criterion_id": "SC-008",
