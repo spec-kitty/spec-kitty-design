@@ -84,3 +84,23 @@ Carry it as a **named future-action item**. Reporting a defect you correctly dec
 What actually resolved item 11 and item 12 was not repeat count but running the **contention condition** — full suite, 2 workers, `retries: 2` — which is the shape under which both were originally observed failing. Both passed clean there.
 
 So when a "not reproduced" verdict is written, it must state **which conditions were tried**, not only how many repeats. A verdict resting on one condition at high volume is weaker than one resting on two conditions at low volume, and the report should make that visible rather than quoting the larger number.
+
+## 9. Corrections sent by message do not reach a lane's files
+
+WP task files are **frozen at dispatch**. When the orchestrator corrects a premise mid-mission — as
+happened when a second baseline sample showed item 7 *does* reproduce, contradicting WP04's task
+file's "item 7 is 20/20, do not hunt it" — the correcting commit lands on `mission/webkit-deflake`
+and is **not an ancestor of the lane**. WP04's reviewer verified this directly with
+`git merge-base --is-ancestor` and then checked whether the implementer had been misled by the stale
+premise. It had not: it picked the correction up out-of-band and said so in its `for_review` note.
+
+**That worked because the seat was diligent, not because the system prevented it.** When a premise
+changes after dispatch, either merge the correcting commit into the affected lane, or state in the
+message that the task file is now stale and which line is wrong. A reviewer should check
+`git merge-base --is-ancestor <correcting-commit> <lane>` whenever a mission-level premise moved
+during a package's lifetime.
+
+## 10. Reporting gaps to close in the SC-008 report
+
+- **Item 7 has no disaggregated post-fix count.** WP04 reports items 6 and 7 together ("no measurable improvement above the rig's own cross-run noise"). The FR-013 conclusion is unambiguous and was not silently folded in, but the mission report needs item 7's own number, not a lumped one.
+- **Item 6's T032 refutation is chromium-only.** The CSS-Grid mechanism (fixed tracks + `min-width: 0`) is spec-level and engine-independent in principle, and it is corroborated by webkit behaviour — item 6 received the same font fix that measurably helped items 8/9 and still showed no improvement, which is what you would expect if its residual failure is not font-metric-driven. No webkit font-probe was run. Residual, non-blocking, but state it rather than implying a webkit measurement exists.
