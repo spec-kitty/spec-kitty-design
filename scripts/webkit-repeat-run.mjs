@@ -66,8 +66,8 @@ const LINE_ITEMS = [
   { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 416, label: 'forced-colors, two points in cycle' },
   { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 487, label: 'forced-colors + reduced-motion' },
   { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 503, label: 'the sweep actually runs' },
-  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 522, label: 'reduced-motion freeze' },
-  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 567, label: 'no animation leak onto determinate' },
+  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 523, label: 'reduced-motion freeze' }, // WP02: was 522; the review-fix's real-annotation edit (see doc comment above pinAnimationPhase) added one line ahead of this declaration. See tmp/finding/.
+  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', line: 568, label: 'no animation leak onto determinate' }, // WP02: was 567; same edit added one more line ahead of this declaration.
   { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 104, label: 'exact 56/240px columns' },
   { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 160, label: 'narrow shell region order' },
   { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', line: 303, label: 'landmarks/labels/grouping' },
