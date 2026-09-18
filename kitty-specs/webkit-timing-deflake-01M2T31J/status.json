@@ -1,7 +1,7 @@
 {
-  "event_count": 3,
-  "last_event_id": "01M2T3M7X3N81VD6RAGYWEFC19",
-  "materialized_at": "2026-09-18T11:15:03.203358+00:00",
+  "event_count": 4,
+  "last_event_id": "01M2T3M7Z692T1HQ2Q5DH690P8",
+  "materialized_at": "2026-09-18T11:15:03.270442+00:00",
   "mission_number": "",
   "mission_slug": "webkit-timing-deflake-01M2T31J",
   "mission_type": "software-dev",
@@ -14,7 +14,7 @@
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 3
+    "planned": 4
   },
   "work_packages": {
     "WP01": {
@@ -37,6 +37,13 @@
       "lane": "planned",
       "last_event_id": "01M2T3M7X3N81VD6RAGYWEFC19",
       "last_transition_at": "2026-09-18T11:15:03.203358+00:00"
+    },
+    "WP04": {
+      "actor": "finalize-tasks",
+      "force_count": 0,
+      "lane": "planned",
+      "last_event_id": "01M2T3M7Z692T1HQ2Q5DH690P8",
+      "last_transition_at": "2026-09-18T11:15:03.270442+00:00"
     }
   }
 }
