@@ -1,7 +1,7 @@
 {
-  "event_count": 30,
-  "last_event_id": "01M2TDSDJAH9H3SWA71C4WFB86",
-  "materialized_at": "2026-09-18T14:12:38.602130+00:00",
+  "event_count": 31,
+  "last_event_id": "01M2TDVCS0QHV53E753DJJF7P5",
+  "materialized_at": "2026-09-18T14:13:43.328424+00:00",
   "mission_number": "",
   "mission_slug": "webkit-timing-deflake-01M2T31J",
   "mission_type": "software-dev",
@@ -11,9 +11,9 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 1,
+    "for_review": 0,
     "in_progress": 2,
-    "in_review": 1,
+    "in_review": 2,
     "planned": 0
   },
   "work_packages": {
@@ -88,14 +88,17 @@
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "for_review",
-      "last_event_id": "01M2TDSDJAH9H3SWA71C4WFB86",
-      "last_transition_at": "2026-09-18T14:12:38.602130+00:00",
+      "lane": "in_review",
+      "last_event_id": "01M2TDVCS0QHV53E753DJJF7P5",
+      "last_transition_at": "2026-09-18T14:13:43.328424+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "loadComposition never awaited font loading (font-display:swap on --sk-font-sans) and only checked host visibility once, so it could return before the shell settled; fixed with an explicit postcondition (fonts ready + 4 stable frame-tied geometry reads of the 4 structural parts) that fails naming what was missing, red-first proven twice. Item 6 exact-pixel columns measured font-independent (chromium, 3 faces x 2 widths, zero movement) so no assertion changed (T033: nothing to correct). Item 7 reproduces (coordinator correction) and is covered by the same fix but not separately diagnosed. Measured against WP01's CI rig across 3 post-fix runs plus baseline/coordinator runs (5 samples total, webkit, retries=0): items 8 and 9-dark show a plausible improvement (9-10/10 in 2 of 3 post-fix runs vs 8/10 and 7/10 pre-fix) but items 6 and 7 show no measurable improvement above this rig's own documented cross-run noise (baseline itself recorded a 10/10->7/10 swing on unmodified code). Reporting per FR-013: the settling defect is real and fixed; a clean, noise-free 10/10 for items 6/7 is NOT demonstrated and is reported as such rather than forced."
+      ],
       "provider": "__resolved_provider_absent__",
-      "role": "implementer",
-      "shell_pid": 837933,
-      "shell_pid_created_at": "1789738625.32",
+      "role": "reviewer",
+      "shell_pid": 918719,
+      "shell_pid_created_at": "1789740822.33",
       "subtasks": {
         "T030": "done",
         "T031": "done",
