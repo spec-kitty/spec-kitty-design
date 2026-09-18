@@ -270,3 +270,81 @@ Finding 1's bug — the zero-iteration path throwing its initializer. The marker
 labelled WITHDRAWN rather than deleted, and **no replacement proof is claimed**, because none has
 been captured. A red-first proof confirms whatever the code currently does; it is evidence that a
 mutation changes behaviour, never that the behaviour it lands on is correct.
+
+
+---
+
+# Finding 4 is now DIRECTLY OBSERVED, not inferred
+
+The pre-merge squad's root-cause lens blocked on exactly the right thing: the DOM snapshot that
+would prove Finding 4 shipped in the **same commit as the cure**, so it had never fired. The
+mechanism was supported only by code reading plus a fix-and-green coincidence — the identical
+evidentiary shape as the budget hypothesis this mission had already been wrong about once.
+
+It also named a rival that fits every observation equally well (**H2**): `iframe.html` ships
+`.sb-show-preparing-story:not(.sb-show-main) > :not(.sb-preparing-story) { display: none }`, and
+`#storybook-root` is a direct child of `<body>` — so if the render simply never arrives, the
+injected composition is **fully present but `display: none`** for the whole budget. Same symptom,
+same contention sensitivity, same cure. The two are separated by exactly one number.
+
+## The probe
+
+Branch `kitty/mission-webkit-timing-deflake-01M2T31J-lane-probe` reverts **only** T036's render
+wait and keeps everything else, so a real failure prints the discriminating reading. It is not
+merged and must not be.
+
+- **Recorded cause** (Storybook's render replaced the root) predicts `hosts-in-dom=0`.
+- **H2** (present but hidden) predicts `hosts-in-dom=1`.
+
+**Run `35373693252`** @ `a866420e`, webkit, `retries: 0`, selectors verified (`all 4 line-items
+resolve`), items 6–9 at `--repeat-each=20` plus both experiment arms:
+
+```
+loadComposition: shell did not settle within 5000ms — missing or unstable: host is not visible
+[polls=147, stableReads=0, fonts=ready, hosts-in-dom=0, #storybook-root children=div]
+```
+
+| reading | count |
+|---|---|
+| `hosts-in-dom=0` | **18** |
+| `hosts-in-dom=1` or more | **0** |
+
+18 failures across the three sections, 18 readings, **every one `0`**. The recorded cause is
+confirmed and **H2 is refuted** — the composition was not hidden, it was absent. `#storybook-root
+children=div` names what displaced it: Storybook's own rendered story, a `div`, standing where the
+injected `sk-app-shell` had been.
+
+The probe reproduced the contention sensitivity too, which is a second independent check that it
+is measuring the same phenomenon: arm A (`workers: 2`) failed several times, arm B (`--workers=1`)
+once.
+
+**Classification, applying this document's own measured-versus-inferred discipline to its own
+headline claim:**
+
+| claim | status |
+|---|---|
+| The host is absent during the failure, not hidden or late | **Measured** — 18/18 `hosts-in-dom=0` |
+| What occupies `#storybook-root` instead is Storybook's own render | **Measured** — `children=div` |
+| Storybook's string-returning story branch assigns `canvasElement.innerHTML` | **Established by reading** Storybook 10.6 source; `sk-app-shell.stories.ts` returns a string |
+| `page.goto` resolves at `load`, before that client render | **Established by reading** |
+| Contention is a trigger, not the mechanism | **Measured** — 6/80 at `workers: 2` vs 1/80 at `workers: 1`, then 80/80 both after the fix |
+
+The earlier revision of this document asserted Finding 4 as established before any of the first
+two rows existed. That was the same error as the budget hypothesis, and it is recorded here
+rather than quietly repaired — the correction was produced by an adversarial lens demanding the
+measurement, not by the author noticing.
+
+## Finding 3's guard: now evidenced in CI, not only locally
+
+The evidence lens correctly noted that the selector guard's "red-first proof" named no CI run —
+it had only been demonstrated locally. It has since refused twice in CI, both times against
+genuine drift created by this mission's own fixes:
+
+- **Run `35373383981`** — the first probe push. The revert shifted items 6–9 by −31 lines; the
+  guard refused and the rig measured nothing, rather than letting Playwright silently drop four
+  stale `file:line` arguments and print a clean table over them.
+- Locally, a third time, when the squad fixes shifted the same four items by −4.
+
+Its **identity** check (a label word must appear in the declaration) was added by the squad's
+correctness lens and is proved both ways: it fires when item 8 is pointed at item 6's test, and
+clears when restored.

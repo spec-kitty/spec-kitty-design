@@ -161,8 +161,8 @@
       "evidence": "WP02 five items 0/10, mutation 3fbb49a2 reverted f53c7f3d (run 35358002926); WP03 items 10 and 12 0/10 at the exact rewritten lines, mutation f11a33c2 reverted ee093dbe (run 35354582083); WP06 harness derivation (272 mutations re-derived, C-008/FR-012). Seven of nine RED-FIRST-PROOF markers carry this run/mutation/revert triple. WP04's two markers (settleComposition) name none of the three -- reachability was established by code trace and reviewer inspection, not a captured CI run; see FR-007 and evidence/PRE-MERGE-GATES.md #14. 'Proof count equals rewritten-assertion count' is NOT independent supporting evidence for this criterion: the two counts are disjoint populations (see SC-002) and their equality was in part achieved by editing marker text, not by adding proofs.",
       "pass_fail": "partial",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T16:03:18.897139+00:00",
-      "notes": "Downgraded by the pre-merge squad, finding F1/F2: 7 of 9 markers are real, checkable red-first proofs; 2 (WP04's) are a different, weaker form of verification presented using the same marker convention. Not a full per-fix guarantee as written."
+      "verified_at": "2026-09-18",
+      "notes": "Downgraded by the pre-merge squad, finding F1/F2: 7 of 9 markers are real, checkable red-first proofs. UPDATED 2026-09-18 to actually receive what FR-007's upgrade handed it, which an earlier revision claimed was carried here without amending this row. WP04's RED-FIRST-PROOF (c) is no longer 'a weaker form of verification' -- it is WITHDRAWN as AFFIRMATIVELY WRONG. It stubbed document.fonts.ready to never resolve, observed a throw naming 'host is not visible', and recorded that as proof the guard worked; that throw was the zero-iteration defect throwing its own initializer, so the proof certified the bug. A proof that was wrong is a different and worse thing than a proof missing a run id, and no row said so until now. No replacement has been captured, so none is claimed. Separately, sk-workflow-board's item-10 marker is marked SUPERSEDED IN PART: its 0/3 verdict holds, but its stated mechanism ('resolved immediately, bounded not hung') was falsified by T035 and now rejects at the full timeout instead."
     },
     {
       "criterion_id": "NFR-004",
@@ -211,8 +211,8 @@
       "evidence": "Reviewers independently verified: zero skip/fixme/.only/retry-wrap/tolerance-widening; zero assertions removed; WP02's four retained waitForTimeout calls byte-identical in duration to the pre-mission file, two waits removed and replaced by event-driven pinning.",
       "pass_fail": "pass",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T15:37:02.507409+00:00",
-      "notes": ""
+      "verified_at": "2026-09-18",
+      "notes": "UPDATED 2026-09-18 after the pre-merge squad. Still pass: no assertion was weakened or removed in either spec, independently re-verified against the base file by the correctness lens, which additionally found the workflow-board rewrite ADDS a focus assertion that did not exist. The constraint's other half -- no wait duration increased -- also holds: the four wait budgets this mission adds are NEW waits guarding preconditions, not increases to existing tolerances, and each is disclosed in the source. The tool that certifies this was itself repaired this round; see SC-003."
     },
     {
       "criterion_id": "C-002",
@@ -341,18 +341,18 @@
       "evidence": "THE SCAN'S 9=9 IS NOT EVIDENCE FOR THIS CRITERION -- the two counts are disjoint populations. 'Rewritten-assertion sites' (9) landed almost entirely on WP06's console.warn-wrap hunks in fixtures/elements-behaviour/src/*.test.ts, which are re-indentation only (FR-011: every expect() byte-identical). The 9 RED-FIRST-PROOF markers live in apps/storybook/src/tests/*.spec.ts and contribute ~0 to the site count. Additionally, the equality was reached in part by editing marker text: at eb50aa55 the counts were 9 sites / 11 markers, and c8191843's entire content is two marker-header rewordings that trimmed 11 to 9 -- the numerator was tuned to the denominator, not measured. The REAL per-assertion correspondence, checked by hand: 7 of 9 markers cite a completed (non-cancelled) CI run, mutation commit and revert commit (sk-progress items 1-5: run 35358002926 / 3fbb49a2 / f53c7f3d; sk-workflow-board item 10 and sk-action-row item 12: run 35354582083 / f11a33c2 / ee093dbe, both independently confirmed completed via `gh run view`). The remaining 2 markers (sk-team-overview-shell-layout.spec.ts settleComposition) cite none of the three -- see FR-007, NFR-003.",
       "pass_fail": "partial",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T16:03:18.897139+00:00",
-      "notes": "Downgraded by the pre-merge squad, finding F1, from a caveated 'pass' to 'partial': the caveat correctly identified the marker-editing problem but still let the mechanical 9=9 stand as if it partially supported the criterion. It does not support it at all -- the two counts never measured the same thing. 7 of 9 real assertion-to-proof correspondences are confirmed; 2 are not. See scripts/scan-mission-suppressions.mjs's added header limitation and evidence/PRE-MERGE-GATES.md #13 for the full accounting."
+      "verified_at": "2026-09-18",
+      "notes": "Downgraded by the pre-merge squad, finding F1, from a caveated 'pass' to 'partial': the caveat correctly identified the marker-editing problem but still let the mechanical 9=9 stand as if it partially supported the criterion. It does not support it at all -- the two counts never measured the same thing. 7 of 9 real assertion-to-proof correspondences are confirmed; 2 are not. See scripts/scan-missi ... UPDATED 2026-09-18: the marker population itself has changed and this row records it rather than re-tuning the scan to balance. Of the markers, one (WP04's (c)) is WITHDRAWN as affirmatively wrong and one (sk-workflow-board's item 10) is SUPERSEDED IN PART. Both are retained in their files, labelled, so the count a reader sees is explainable rather than quietly trimmed -- trimming markers to make this equality balance is an error this mission already made once and had corrected."
     },
     {
       "criterion_id": "SC-003",
       "description": "Zero suppressions",
       "proof_type": "automated_test",
-      "evidence": "scan-mission-suppressions.mjs --base=origin/train/elements-first run at a4facaa2 by the orchestrator and independently re-run by squad lens R3-constraints: 0 for test.skip, test.fixme, .only, added retries, increased numeric timeout literal. --selftest 10/10, proving the scan can fail.",
+      "evidence": "RE-RUN at the current head, not inherited from a4facaa2. scan-mission-suppressions.mjs --base=origin/train/elements-first: 0 for test.skip, test.fixme, .only, added retries, and increased numeric timeout literal. --selftest 11/11 including a new case for the rule below, proving the scan can fail. The scan itself was REPAIRED in this round: its inflation rule was gated on the hunk also REMOVING a timeout literal, so every purely additive wait budget was invisible while the report printed a clean zero -- a green over an empty set. It now flags pure additions and named budget constants, and against this PR's own diff it reports the four new budgets it previously could not see (10000 story-render wait, 1500 font budget, 5000 settle budget, 5000 scroll-settle default).",
       "pass_fail": "pass",
       "verified_by": "orchestrator",
-      "verified_at": "2026-09-18T16:03:18.897139+00:00",
-      "notes": "Closed on two independent runs at the reviewed SHA."
+      "verified_at": "2026-09-18",
+      "notes": "CORRECTED by the pre-merge squad, evidence lens. The previous entry closed this at a4facaa2 and was five commits stale; two of those commits added wait durations, one of them (a 20000ms literal) entirely undisclosed. Both are now disclosed in the source and owned by this row rather than misfiled under SC-002/NFR-003. The four budgets are reported by the scan BY DESIGN: they are new waits, not widened ones -- no existing tolerance was increased, which is what this criterion and C-001 actually constrain -- and the 20000ms literal was replaced with 10000ms specifically so the helper's worst case stays well inside Playwright's default 30000ms per-test timeout, preserving the self-describing failure message."
     },
     {
       "criterion_id": "SC-004",
