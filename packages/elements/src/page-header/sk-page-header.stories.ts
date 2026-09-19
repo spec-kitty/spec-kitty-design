@@ -106,13 +106,82 @@ const longBody = (rows = 40) => `
     ${Array.from({ length: rows }, (_, i) => `
       <p style="margin: 0 0 var(--sk-space-4)">
         <a href="#row-${i + 1}"
-           style="color: var(--sk-fg-default); scroll-margin-block-start: var(--sk-layout-page-header-sticky-scroll-margin)"
+           style="color: var(--sk-fg-default)"
            >Run ${i + 1}</a>
       </p>`).join('')}
   </div>`;
 
+// WCAG 2.4.11 under webkit needs BOTH the container inset and an explicit scroll (#456).
+//
+// MECHANISM, corrected by the pre-merge squad after an earlier revision of this comment got it
+// wrong. That revision said webkit "never consults" scroll-margin or scroll-padding. It does --
+// exactly, to the sub-pixel -- the moment a scroll is actually performed. The probe's own numbers
+// prove it: `scrollIntoView({block:'start'})` aligns the scroll-MARGIN box inside the scrollport
+// inset by scroll-PADDING, so the landing position is scrollerTop + padding + margin:
+//
+//   compact  0 + 80 + 80       = 160      measured 160
+//   default  -0.19 + 288 + 288 = 575.81   measured 575.8125
+//
+// What webkit does NOT do is INITIATE a focus-driven scroll for a row it considers already in the
+// scrollport. That is the whole defect, and it is why no CSS value could fix it: the properties
+// were correct and simply never got a scroll to apply to. Chromium initiates that scroll itself,
+// which is why this never reproduces there.
+//
+// The cure therefore DEPENDS on the container's scroll-padding: `portTop` below is the scroller's
+// top plus that inset, and without it the guard compares against the bare top edge, `12 < 0` is
+// false, and nothing fires. An earlier revision of this PR labelled scroll-padding "refuted" --
+// it is load-bearing.
+//
+// The rows no longer carry `scroll-margin-block-start`. With both set they STACKED: a row landed
+// ~160px down against a 66-71px header, roughly twice the needed inset, which no assertion in the
+// contract test could see. One declaration on the container replaces per-row margins -- the same
+// conclusion the section-nav surface reached on the inline axis (packages/styles/src/section-nav/,
+// named by directory because a contract test forbids its `sk-` filename under packages/elements).
+//
+// ATTACHED VIA `play`, NOT AN INLINE `onfocusin=` ATTRIBUTE. An earlier revision used the
+// attribute form on the grounds that `play` runs after render while the contract test focuses
+// without waiting. That was true about `play` and a false dichotomy: the squad pointed out this
+// same PR's other half establishes the readiness-marker pattern (`data-render-complete`), so the
+// race closes by marking the scroller once attached and having the test wait for the mark. The
+// attribute form was also the only inline `on*=` handler in any story in this repository, invisible
+// to every gate (a string literal no linter or tsc can see), and dead under a CSP without
+// `unsafe-inline` -- which is precisely the configuration a consumer is most likely to run.
+// NOT exported: in CSF every exported binding in a story file becomes a STORY. Exporting these
+// two created `elements-skpageheader--attach-focus-lift` and
+// `--lift-focus-clear-of-sticky-header`, which the axe gate then tried to render:
+//   did not render (script error: Cannot read properties of undefined reading 'querySelector')
+// Module-local is all `play` needs, and it keeps the story index honest.
+const liftFocusClearOfStickyHeader = (event: FocusEvent): void => {
+  const scroller = event.currentTarget as HTMLElement | null;
+  const target = event.target as HTMLElement | null;
+  if (!scroller || !target || target === scroller || !target.getBoundingClientRect) return;
+  // The header lives INSIDE the scroll container and has its own focusables (the trailing action).
+  // Those sit above the inset by construction, so without this guard focusing one scrolls the
+  // container every time -- in Chromium too. Nothing in the fixture focuses it, which is exactly
+  // why the contract test would never have shown it.
+  if (target.closest('sk-page-header')) return;
+  const style = getComputedStyle(scroller);
+  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
+  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
+  const port = scroller.getBoundingClientRect();
+  const box = target.getBoundingClientRect();
+  // Both edges: the squad noted every observation had the row INSIDE the scrollport, so whether
+  // webkit also declines to scroll a target entirely below it was untested and a one-sided guard
+  // would silently do nothing there.
+  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
+  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
+};
+
+/** Attaches the handler and marks the scroller, so a test can wait for it rather than race it. */
+const attachFocusLift = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+  const scroller = canvasElement.querySelector<HTMLElement>('[data-scroller]');
+  if (!scroller || scroller.dataset['focusLift'] === 'ready') return;
+  scroller.addEventListener('focusin', liftFocusClearOfStickyHeader as EventListener);
+  scroller.dataset['focusLift'] = 'ready';
+};
+
 const scroller = (content: string, height = '100vh', className = '', extraStyle = '') => `
-  <div data-scroller${className ? ` class="${className}"` : ''} style="${storyFrameStyle}; min-height: 0; height: ${height}; overflow: auto${extraStyle ? `; ${extraStyle}` : ''}">
+  <div data-scroller${className ? ` class="${className}"` : ''} style="${storyFrameStyle}; min-height: 0; height: ${height}; overflow: auto; scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin)${extraStyle ? `; ${extraStyle}` : ''}">
     ${content}
   </div>`;
 
@@ -150,12 +219,15 @@ export const CompactSticky: Story = {
         story:
           'Compact and sticky over a long list. The header keeps the page identity, the ' +
           'consumer-supplied freshness string, the consumer-supplied live indicator and the ' +
-          'trailing action in view. Each row below carries ' +
-          '`scroll-margin-block-start: var(--sk-layout-page-header-sticky-scroll-margin)`, which ' +
-          'is what keeps a focused row out from behind the header.',
+          'trailing action in view. The SCROLL CONTAINER carries ' +
+          '`scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin)` — one ' +
+          'declaration, not a per-row `scroll-margin`, which would stack with it — and a ' +
+          '`focusin` handler that scrolls explicitly, because WebKit declines to initiate a ' +
+          'focus-driven scroll for a row it considers already in the scrollport (#456).',
       },
     },
   },
+  play: attachFocusLift,
   render: () => scroller(`${header('density="compact" sticky')}${longBody()}`),
 };
 
@@ -166,7 +238,7 @@ export const DefaultSticky: Story = {
         story:
           'A sticky header at the DEFAULT density — supported, because the two axes are ' +
           'orthogonal. Its height is entirely the consumer\'s slotted content, so the derived ' +
-          'default of `--sk-layout-page-header-sticky-scroll-margin` (64px, sized for the ' +
+          'default of `--sk-layout-page-header-sticky-scroll-margin` (80px = 0 offset + 48px compact height + 32px, sized for the ' +
           'compact single row) does not cover it. The scroll container below therefore sets the ' +
           'token to this consumer\'s own measured figure, which is the documented remedy — the ' +
           'token name stays the one place the value lives. Remove that override and a focused ' +
@@ -174,6 +246,7 @@ export const DefaultSticky: Story = {
       },
     },
   },
+  play: attachFocusLift,
   render: () =>
     scroller(
       `${header('sticky')}${longBody()}`,
@@ -215,6 +288,7 @@ export const ShortViewport: Story = {
       },
     },
   },
+  play: attachFocusLift,
   render: () => scroller(`${header('density="compact" sticky')}${longBody(12)}`, '360px'),
 };
 
@@ -240,5 +314,6 @@ export const CompactTruncation: Story = {
 
 export const CompactStickyLightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
+  play: attachFocusLift,
   render: () => scroller(`${header('density="compact" sticky')}${longBody(20)}`, '100vh', 'sk-light'),
 };

@@ -47,7 +47,7 @@ on:
         required: false
         default: '10'
       items:
-        description: 'Comma-separated item numbers to run (default: all twelve)'
+        description: 'Comma-separated item numbers to run (default: every item the rig defines)'
         required: false
         default: ''
       workers:
