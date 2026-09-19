@@ -6,12 +6,12 @@
 `spec-kitty-train` symlink was never touched.
 
 The API token was read from the instance's `.env` into a shell variable at call time. It was never
-echoed, logged, written to a file or committed. The three outputs were scanned for it before being
+echoed, logged, written to a file or committed. The four outputs were scanned for it before being
 committed here.
 
 ## The prompt
 
-The same prompt was sent in all three runs:
+The same prompt was sent in all four runs:
 
 > Design a compact settings panel for a developer tool. The user picks exactly one workspace to
 > connect from four options (Acme, Acme / Platform, Northwind, Orbital), enters a display name in a
@@ -28,10 +28,21 @@ field, and a primary button.
 | 1 `ece117c9` | before the fix | design system only | 13 | **8** | hand-written: applicable rules verbatim — radio group 0/1, form-field 1/5, button 1/6 |
 | 2 `2a35a44a` | after the fix | design system only (push) | 22 | **14** | hand-written: applicable rules verbatim — radio group 0/3, form-field 1/6, button 1/5 |
 | 3 `c1cf3581` | after the fix | design-system folder **linked** | 15 | **0** | **verbatim**: applicable rules radio group 20/20, form-field 7/7, button 8/8, card 2/2 |
+| 4 `0c5321c7` | **final** package (after gate pass 1), manifest honoured | folder **linked** | 14 | **0** | **verbatim**: applicable rules radio group 20/20, form-field 7/7, button 6/6, card 2/2 |
 
-The outputs are in `proof-outputs/`. Run 3 rendered in Chromium is `consumability-proof-linked.png`.
+The outputs are in `proof-outputs/`. Runs 3 and 4 rendered in Chromium are
+`consumability-proof-linked.png` and `consumability-proof-final.png`.
 
-**Run 3 meets the amended acceptance line.** It uses `radio-choice-group`, `form-field`, `button` and
+**Run 4 is the one that proves the merged package.** It ran against the package as it stands after
+the first review pass: the published `tokens.css`, the rewritten prose, the showcase-first preview
+pages. Its copy's `id` matched its folder, so OpenDesign honoured the manifest (see below). The
+agent read the same four component pages and copied from them. One difference from run 3: it
+declared no `@font-face` and pinned `data-theme="dark"`, letting the `--sk-font-*` stacks fall back
+to system fonts. `DESIGN.md`'s prototype rules allow that when fonts cannot travel with a single
+file; run 3 had copied the font files into its project instead. Fonts are outside the acceptance
+line, and the screenshot shows the fallback.
+
+**Runs 3 and 4 meet the amended acceptance line.** It uses `radio-choice-group`, `form-field`, `button` and
 `card` with the library's own element and modifier classes. Its radio group is the library's static
 form (`sk-radio-choice-group__choice`, `__control`, `__label`, `__secondary-value`), and it spliced
 `tokens.css` and the Inter and Falling Sky font files in from the package.
@@ -68,8 +79,9 @@ at `c5ae6292c4`, gave the cause:
 
 1. **The prompt never contains the components.** `DESIGN.md`, `USAGE.md` and `tokens.css` are
    injected verbatim. For components, only `summarizeComponentsManifestForPrompt()` of
-   `components.manifest.json` is injected (`apps/daemon/src/prompts/system.ts:1295`): nine generic
-   groups, eight selectors each. `components.html` is used only when there is no manifest
+   `components.manifest.json` is injected (`apps/daemon/src/prompts/system.ts:1295`): the generic
+   groups it detects, at most eight selectors each. For this package that is seven groups, two of
+   them empty, so about forty selectors for 34 components. `components.html` is used only when there is no manifest
    (`:1299`), and at 430 KB it would not fit.
 2. **The agent cannot open the design-system folder.** Its sandbox allowed the project directory,
    `/app/skills` and the built-in `/app/design-systems`. The user design-systems directory is not
@@ -84,7 +96,7 @@ The generator now emits:
 
 - **`components/<name>.html`**, one per component (34), each holding that component's CSS and every
   static form it has, at 1–31 KB apiece. They are declared as `preview.pages` in `manifest.json`,
-  which is the only manifest key that puts a file on OpenDesign's pull index and its
+  the manifest key that lists each page by name on OpenDesign's pull index and its
   `tools design-systems read` allowlist.
 - **A closed class vocabulary per component** in `DESIGN.md`'s generated region, which is pushed into
   every prompt.
@@ -100,6 +112,25 @@ rescues it.
 the agent as a read-only `--add-dir`). The agent read the four component pages it needed and copied
 from them.
 
+## A limit of runs 2 and 3, found at review
+
+OpenDesign ignores a package's `manifest.json` unless its `id` equals the directory name
+(`index.ts:4104`). The copy was installed as `spec-kitty-train-rel4` with the package's own
+`id: spec-kitty-train`, so for runs 2 and 3 **the manifest was discarded**. There was no pull index
+and no `usage` or preview-page wiring from it. `USAGE.md` and `components.manifest.json` were still
+read, under their default names.
+
+Run 3's result does not depend on the manifest: the linked folder is read-only file access, and the
+agent opened the pages directly. That the preview pages reach the pull index was then shown from
+source (the architect lens ran OpenDesign's own `buildDesignSystemPullIndex` over the manifest: 35
+lines under the matching name, 0 under the other), not by a run. Run 4 closes that gap: its copy has
+the `id` rewritten to `spec-kitty-train-rel4` (the only difference from the package), and the
+instance's API then reports the component pages. The same refresh also showed `metadata.json`'s
+dual ownership live: before it, OpenDesign had written `"projectId": "ds-spec-kitty-train-rel4"`
+into the copy's `metadata.json`.
+
+The docs now state that the folder or symlink must be named `spec-kitty-train`.
+
 ## Consequences for the instance
 
 - **Link the folder.** Use the package from a project with `/app/.od/design-systems/spec-kitty-train`
@@ -114,6 +145,6 @@ from them.
 
 - **The package copy.** `design-systems/spec-kitty-train-rel4`.
 - **The projects.** `rel4-proof-1789834936`, `rel4-proof-push-1789835470`,
-  `rel4-proof-linked-1789835470`, plus run `b614ebbe`, which was cancelled after it started against a project that was never created.
+  `rel4-proof-linked-1789835470`, `rel4-proof-final-1789837159`, plus run `b614ebbe`, which was cancelled after it started against a project that was never created.
 
 All of them are instance state and nothing here refers to them. The WP03 report offers their removal.

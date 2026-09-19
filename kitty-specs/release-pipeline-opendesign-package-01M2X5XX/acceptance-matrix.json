@@ -2,127 +2,127 @@
   "mission_slug": "release-pipeline-opendesign-package-01M2X5XX",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
-      "description": "Verify FR-001 is satisfied",
+      "description": "The generator builds the whole package into opendesign/spec-kitty-train/; USAGE.md and DESIGN.md's prose are authored and prose-checked (FR amended)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "scripts/build-opendesign-package.mjs buildPackage(); `node scripts/build-opendesign-package.mjs --check` \u2192 current: 34 components, 157 static forms",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL4, after gate pass 1)",
+      "verified_at": "2026-09-19T17:00:02.729471+00:00",
+      "notes": "Verified at the REL4 fix head; the four-lens gate re-runs on the pushed head."
     },
     {
       "criterion_id": "FR-002",
-      "description": "Verify FR-002 is satisfied",
+      "description": "components.html and every components/<name>.html are static-only",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "staticOnlyProblems() asserted over components.html and each page in buildPackage(); selftest probes for custom tag, <script>, declarative shadow root, each with a control",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL4, after gate pass 1)",
+      "verified_at": "2026-09-19T17:00:02.729471+00:00",
+      "notes": "Verified at the REL4 fix head; the four-lens gate re-runs on the pushed head."
     },
     {
       "criterion_id": "FR-003",
-      "description": "Verify FR-003 is satisfied",
+      "description": "Every component with a static form is covered with every static form, derived from the tree",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "derive() takes every .html per styles dir; probe 'taken + omitted = every .html on disk'; output-side probes count each page's and each components.html section's figures against the component's forms (mutant-tested after regeneration)",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL4, after gate pass 1)",
+      "verified_at": "2026-09-19T17:00:02.729471+00:00",
+      "notes": "Verified at the REL4 fix head; the four-lens gate re-runs on the pushed head."
     },
     {
       "criterion_id": "FR-004",
-      "description": "Verify FR-004 is satisfied",
+      "description": "Excluded elements and omitted forms are named in DESIGN.md, derived",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "buildDesignRegion() \u2192 16 excluded elements, 2 omitted boundary-page forms with reasons; probes 'names excluded elements', 'omitted form named with its reason'",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL4, after gate pass 1)",
+      "verified_at": "2026-09-19T17:00:02.729471+00:00",
+      "notes": "Verified at the REL4 fix head; the four-lens gate re-runs on the pushed head."
     },
     {
       "criterion_id": "FR-005",
-      "description": "Verify FR-005 is satisfied",
+      "description": "tokens.css equals the stylesheet @spec-kitty/tokens publishes",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "derive() uses buildTokensCss(src); probe 'tokens.css is the PUBLISHED stylesheet' incl. :root:not([data-theme]); drift probe on a one-byte change",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL4, after gate pass 1)",
+      "verified_at": "2026-09-19T17:00:02.729471+00:00",
+      "notes": "Verified at the REL4 fix head; the four-lens gate re-runs on the pushed head."
     },
     {
       "criterion_id": "FR-006",
-      "description": "Verify FR-006 is satisfied",
+      "description": "components.manifest.json is derived by OpenDesign's own extractor, vendored byte-for-byte and digest-verified before import",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "scripts/vendor/open-design/ at c5ae6292c4; opendesign-reference.mjs verifyVendor()+6 probes; independently confirmed equal to upstream by two review lenses (git show | sha256sum)",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL4, after gate pass 1)",
+      "verified_at": "2026-09-19T17:00:02.729471+00:00",
+      "notes": "Verified at the REL4 fix head; the four-lens gate re-runs on the pushed head."
     },
     {
       "criterion_id": "FR-007",
-      "description": "Verify FR-007 is satisfied",
+      "description": "manifest.json passes OpenDesign's own validator and declares files.components and componentsManifest",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "parseDesignSystemProjectManifest() in buildPackage(); drift probe that the validator rejects an unknown key",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL4, after gate pass 1)",
+      "verified_at": "2026-09-19T17:00:02.729471+00:00",
+      "notes": "Verified at the REL4 fix head; the four-lens gate re-runs on the pushed head."
     },
     {
       "criterion_id": "FR-008",
-      "description": "Verify FR-008 is satisfied",
+      "description": "The package records the library version and branch, no self-SHA",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "buildManifest() description carries @spec-kitty/* versions, source.branch; probe 'the manifest records no commit SHA'",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL4, after gate pass 1)",
+      "verified_at": "2026-09-19T17:00:02.729471+00:00",
+      "notes": "Verified at the REL4 fix head; the four-lens gate re-runs on the pushed head."
     },
     {
       "criterion_id": "FR-009",
-      "description": "Verify FR-009 is satisfied",
+      "description": "--check reds on drift and is wired through all three gate-wiring layers",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "ci-quality.yml lint-code steps; check-gate-wiring REQUIRED_LINT; defeat cases (42); 15 drift probes",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL4, after gate pass 1)",
+      "verified_at": "2026-09-19T17:00:02.729471+00:00",
+      "notes": "Verified at the REL4 fix head; the four-lens gate re-runs on the pushed head."
     },
     {
       "criterion_id": "FR-010",
-      "description": "Verify FR-010 is satisfied",
+      "description": "An empty or shrunken set is refused",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "derive() refuses zero components/forms; diffPackage refuses an empty file set; probes for both",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL4, after gate pass 1)",
+      "verified_at": "2026-09-19T17:00:02.729471+00:00",
+      "notes": "Verified at the REL4 fix head; the four-lens gate re-runs on the pushed head."
     },
     {
       "criterion_id": "FR-011",
-      "description": "Verify FR-011 is satisfied",
+      "description": "The release path refuses a stale package",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "publish-packages.yml and release.yml run the exact, unconditional --check before any bump; check-release-graph enforces presence, order, exact run and no if: (probes incl. || true, echo, if: false)",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL4, after gate pass 1)",
+      "verified_at": "2026-09-19T17:00:02.729471+00:00",
+      "notes": "Verified at the REL4 fix head; the four-lens gate re-runs on the pushed head."
     },
     {
       "criterion_id": "FR-012",
-      "description": "Verify FR-012 is satisfied",
+      "description": "docs/ documents install (symlink discovery, folder name = id), refresh (metadata.json dual ownership), and use (link the folder)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "docs/opendesign-package.md; consumability proof research/consumability-proof.md (runs 1-4)",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL4, after gate pass 1)",
+      "verified_at": "2026-09-19T17:00:02.729471+00:00",
+      "notes": "Verified at the REL4 fix head; the four-lens gate re-runs on the pushed head."
     }
   ],
   "negative_invariants": []

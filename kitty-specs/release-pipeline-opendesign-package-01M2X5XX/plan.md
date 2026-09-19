@@ -15,8 +15,8 @@
 | How does the instance load a prepared package? | **By discovery, not import.** Its user design-systems root holds a *symlink* `spec-kitty-train -> /workspace/team-kitty-ux/open-design-systems/spec-kitty-train`, read verbatim (`index.ts:604`) and listed as `user:spec-kitty-train`. `od design-systems import local` is the WRONG path: it scans a source codebase and generates its own DESIGN.md, generic-schema tokens.css and generic components.html (`import.ts:119-178`), discarding every file we build. *(Corrected during WP01; the first version of this row named `import local`.)* | data-volume listing; `GET /api/design-systems`; `import.ts` |
 | Why was the old package pinned to `a9f385d`? | The container mounts a design-repo clone at `/workspace/spec-kitty-design`; it sits on `train/elements-first` at **`a9f385d4`** and has not been pulled since 2026-09-11. The package was generated from it and never refreshed. | `git -C references/spec-kitty-design-train log -1` |
 | Which fonts does the library use? | **Falling Sky** (`--sk-font-display`), **Inter** (`--sk-font-sans`) and **Swansea**, via 40 `@font-face` rules over files in `packages/tokens/src/fonts/`; every referenced file is present. JetBrains Mono (`--sk-font-mono`) is not loaded — a comment in `tokens.css` records that its old `@import` was always dropped by the browser. | `tokens.css:276-283`, `@font-face` scan, reference-vs-file diff |
-| Which fonts does today's package ship? | 30 Falling Sky `.otf` files — **exactly what its own stale `tokens.css` references**, so the package is internally consistent. It lacks Inter and Swansea only because that `tokens.css` predates them. | reference-vs-file diff: 30 referenced, 30 shipped, 0 missing |
-| Does the static-only line in the spec hold as first written? | **No** — 13 of 34 components ship `:host`/`::slotted` rules in their CSS; spec amended | per-component grep, control on `action-row` (14) |
+| Which fonts does today's package ship? | 26 Falling Sky `.otf` and 4 Swansea `.ttf` files — **what its own stale `tokens.css` references**, so the package is internally consistent. It lacks Inter only because that `tokens.css` predates it. *(Corrected at the REL4 gate: first recorded as 30 Falling Sky files and no Swansea.)* | `ls fonts` by extension: 26 otf, 4 ttf; its `tokens.css` references Swansea 4 times |
+| Does the static-only line in the spec hold as first written? | **No** — 11 of 34 components ship `:host`/`::slotted` rules in their CSS; spec amended *(corrected from 13 at the REL4 gate: the first grep counted two components that mention `:host` only in comments)* | the generator's comment-stripped scan |
 
 ## Architecture
 
@@ -58,7 +58,7 @@ deterministic: sorted inputs, no timestamps, stable whitespace. Writes the whole
   a heading and one block per static form, labelled by variant.
 - `DESIGN.md`: the current prose, carried over as the authored part, plus a **generated section between
   markers** listing emittable components with their variants, the excluded elements (derived), and the
-  13-component fidelity caveat (derived by the same `:host`/`::slotted` scan).
+  11-component fidelity caveat (derived by the same `:host`/`::slotted` scan).
 - `manifest.json`: `id: spec-kitty-train`, `files` including `components`, `componentsManifest`, and
   `source: {type: github, url, branch}` — **no `commit`** (a committed file cannot know its own SHA);
   the `@spec-kitty/tokens` version goes in the description.
@@ -95,15 +95,18 @@ variable at call time and is never written, echoed or committed.
 
 ## Risks
 
-- **Verbatim CSS carries 13 components' inert `:host` rules into OpenDesign's prompt summary.**
+- **Verbatim CSS carries 11 components' inert `:host` rules into OpenDesign's prompt summary.**
   `summarizeComponentsManifestForPrompt` reports selector counts to the agent. Accepted: the
   alternative is a fixture built on a stylesheet no consumer installs. `DESIGN.md` names the caveat.
 - **Upstream can change the contract.** The vendored copy is pinned; a newer OpenDesign may derive a
   different manifest. The proof run against the live 0.21.1 instance is the check that the pin still
   matches what is deployed.
-- **The imported project in the instance is a copy.** Refreshing needs a re-import, not a file edit;
-  the docs say so and the proof exercises it.
-- **The font set grows from 30 files to the library's 40+**, adding Inter and Swansea. That is the
+- **The imported project in the instance is a copy.** A project created *from* the design system
+  (`ds-spec-kitty-train`) keeps its own copy, which a refresh does not update; the docs say so.
+  *(At WP03: there is no re-import — the instance discovers the package through a symlink, so the
+  design system itself refreshes with the clone it points into. The proof installed a copy and
+  linked it into projects instead; see research/consumability-proof.md.)*
+- **The font set grows from 30 files to the library's 40**, adding Inter. That is the
   current `tokens.css` catching up with the fonts it declares, not a change of typeface.
 
 ## Open question deliberately left to WP01

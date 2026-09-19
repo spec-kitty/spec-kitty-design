@@ -22,6 +22,15 @@
 | T012 | Re-import the package into the local OpenDesign instance; the API token is read at call time and never written, echoed or committed | FR-012 | |
 | T013 | Consumability proof: one real generation emits at least one library component; record prompt, output and component in the mission directory | acceptance | |
 
+*As delivered (recorded at the REL4 gate, rows above left as planned):* **T011** — there is no
+re-import: the instance discovers the package through a symlink, so the docs cover install by
+symlink (named `spec-kitty-train`, matching the manifest id), refresh by checking out the clone it
+points into (with `metadata.json`'s dual ownership), and use by linking the folder into a project;
+a project created *from* the system keeps its own copy. **T012** — the package was installed as a
+copy, `spec-kitty-train-rel4`, so the live symlink stayed untouched; the final run's copy has its
+manifest `id` rewritten to match its folder. **T013** — four runs against the amended bar (zero
+invented classes, CSS verbatim); see `research/consumability-proof.md`.
+
 ## Work Packages
 
 ### WP01 — Generator, vendored OpenDesign reference, committed package
@@ -30,12 +39,12 @@
 - **Depends on**: —
 - **Independent test**: OpenDesign's vendored validator accepts `manifest.json`; its extractor over the committed fixture reproduces `components.manifest.json` byte-for-byte; the fixture covers every component with a static form.
 
-- [ ] T001 Vendor OpenDesign's reference files with a digest manifest
-- [ ] T002 Derive the component set, exclusions and fidelity caveats
-- [ ] T003 Build components.html
-- [ ] T004 Build tokens.css, fonts, manifest.json, components.manifest.json
-- [ ] T005 Build DESIGN.md and USAGE.md
-- [ ] T006 Generate and commit the package; prove OpenDesign accepts it
+- [x] T001 Vendor OpenDesign's reference files with a digest manifest
+- [x] T002 Derive the component set, exclusions and fidelity caveats
+- [x] T003 Build components.html
+- [x] T004 Build tokens.css, fonts, manifest.json, components.manifest.json
+- [x] T005 Build DESIGN.md and USAGE.md
+- [x] T006 Generate and commit the package; prove OpenDesign accepts it
 
 ### WP02 — Gates and the release path
 
@@ -43,10 +52,10 @@
 - **Depends on**: WP01
 - **Independent test**: every probe reds on its mutation; every gate is wired through all three layers; the release path runs `--check`.
 
-- [ ] T007 --check mode with probe table and floor
-- [ ] T008 Static-only, tokens-digest and OpenDesign-equality gates
-- [ ] T009 Three-layer gate wiring
-- [ ] T010 Release-path wiring
+- [x] T007 --check mode with probe table and floor
+- [x] T008 Static-only, tokens-digest and OpenDesign-equality gates
+- [x] T009 Three-layer gate wiring
+- [x] T010 Release-path wiring
 
 ### WP03 — Documentation and the consumability proof
 
@@ -54,9 +63,9 @@
 - **Depends on**: WP02
 - **Independent test**: a re-import succeeds and one generation emits a library component, recorded.
 
-- [ ] T011 Documentation
-- [ ] T012 Re-import into the local instance
-- [ ] T013 Consumability proof
+- [x] T011 Documentation
+- [x] T012 Re-import into the local instance
+- [x] T013 Consumability proof
 
 ## Parallelization
 
