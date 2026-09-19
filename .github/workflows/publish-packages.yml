@@ -202,54 +202,7 @@ jobs:
       - name: "[ENFORCED] Report the published dist-tags"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          # `npm dist-tag ls`, NOT `npm view`. This PR's own bump script records the measurement:
-          # `npm view` returns EXIT 0 WITH ZERO BYTES against GitHub Packages, so the previous
-          # `npm view ... || echo` never even reached its fallback — the step printed a package name
-          # followed by nothing and succeeded. The one surface an operator has for confirming the
-          # publish landed was blind AND green, which is the failure mode this whole mission is about.
-          FAILED=""
-          # A GREEN LINE OVER ZERO PACKAGES IS THE FOUNDING DEFECT OF THIS GATE FAMILY.
-          REPORT_PKGS="${{ steps.graph.outputs.dirs }}"
-          [ -n "$REPORT_PKGS" ] || { echo "::error::empty publish set reached the dist-tag report"; exit 1; }
-          for pkg in $REPORT_PKGS; do
-            NAME="$(node -p "require('./packages/$pkg/package.json').name")"
-            echo "=== $NAME ==="
-            # STATUS CAPTURED ON ITS OWN LINE, and stderr kept OUT of the success test. The first
-            # version wrote `OUT="$(npm dist-tag ls "$NAME" 2>&1)" || true`, which folded an E404 or
-            # E401 body INTO $OUT — so an authentication failure sailed through the emptiness check
-            # as a non-empty "reading", and `|| true` threw the exit code away. That is the same
-            # blind-and-green shape this step was rewritten to fix, one layer in.
-            set +e
-            OUT="$(npm dist-tag ls "$NAME" 2>/tmp/disttag.err)"
-            RC=$?
-            set -e
-            printf '%s\n' "$OUT"
-            if [ "$RC" -ne 0 ]; then
-              echo "::error::$NAME: npm dist-tag ls exited $RC"
-              sed 's/^/    /' /tmp/disttag.err
-              FAILED="$FAILED $NAME"
-            elif [ -z "$(printf '%s' "$OUT" | tr -d '[:space:]')" ]; then
-              # An empty read is a FAILED read on this registry, not an absent tag.
-              echo "::error::$NAME returned an empty dist-tag listing — that is a failed read, not an absent tag"
-              FAILED="$FAILED $NAME"
-            fi
-          done
-          [ -z "$FAILED" ] || { echo "::error::could not confirm dist-tags for:$FAILED"; exit 1; }
-
-      # THE RELEASE STEP IS DELIBERATELY NOT HERE. Cutting a GitHub Release needs `contents: write`,
-      # and declaring that in this job is what made the rc stream unstartable (see the permissions
-      # block above). It is also prod-only, so it does not belong in a shared spine. The SBOM leaves
-      # as a run artifact instead. Prod (`release.yml`) is not a caller: it generates its own SBOM and
-      # attaches it to the GitHub Release from its own job, which holds `contents: write`.
-      #
-      # PROD IS NOT A CALLER OF THIS PAYLOAD, AND REL3 (#364) KEPT IT THAT WAY. This payload refuses
-      # `latest` unconditionally (publish-derived-set.mjs), so `release.yml` publishes through its own scripts/publish-latest.mjs
-      # for the prod channel and runs the same pack → attest → publish-files → verify sequence there,
-      # with the same shared scripts. `--provenance` must not return (the npmjs mechanism; hard-fails
-      # here), and `--access public` neither (GitHub Packages governs visibility per package). The
-      # GitHub Release needs `contents: write`, which this payload must never hold — see the ceiling.
+        run: node scripts/report-dist-tags.mjs
       - name: Upload the SBOM for the caller to attach
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         with:

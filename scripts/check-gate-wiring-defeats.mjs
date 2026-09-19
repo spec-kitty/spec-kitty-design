@@ -136,6 +136,7 @@ const CASES = [
   ['#364 the tarball pack selftest weakened with a `|| true` tail', fallbackExact('node scripts/pack-derived-set.mjs --selftest', '|| true')],
   ['#364 the published-bytes integrity selftest weakened with a `|| true` tail', fallbackExact('node scripts/verify-published-integrity.mjs --selftest', '|| true')],
   ['#364 the prod publish selftest weakened with a `|| true` tail', fallbackExact('node scripts/publish-latest.mjs --selftest', '|| true')],
+  ['#364 the dist-tag report selftest weakened with a `|| true` tail', fallbackExact('node scripts/report-dist-tags.mjs --selftest', '|| true')],
   ['#396 the vendored OpenDesign digest check weakened with a `|| true` tail', fallbackExact('node scripts/opendesign-reference.mjs', '|| true')],
   ['#396 the OpenDesign reference selftest weakened with a `|| true` tail', fallbackExact('node scripts/opendesign-reference.mjs --selftest', '|| true')],
   ['#396 the OpenDesign package drift check weakened with a `|| true` tail', fallbackExact('node scripts/build-opendesign-package.mjs --check', '|| true')],
@@ -365,7 +366,7 @@ const CASES = [
 // That was false: #436 is an ISSUE about charter.md and never touched this file. Two review
 // lenses caught it independently. Corrected rather than carried forward, because a wrong note
 // here misdirects exactly the person doing the next rebase.
-const MIN_CASES = 54;
+const MIN_CASES = 55;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });

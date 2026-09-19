@@ -278,6 +278,8 @@ jobs:
         run: node scripts/verify-published-integrity.mjs --selftest
       - name: "[ENFORCED] Prod publish (latest) effect probe table (#364)"
         run: node scripts/publish-latest.mjs --selftest
+      - name: "[ENFORCED] Published dist-tag report probe table (#364)"
+        run: node scripts/report-dist-tags.mjs --selftest
       # REL4 (#396). The OpenDesign package is generated from the library and committed, so it can
       # only go stale if nothing checks it — which is exactly how the last one ended up pinned to a
       # commit 168 lines behind. The vendored OpenDesign reference is verified against upstream's

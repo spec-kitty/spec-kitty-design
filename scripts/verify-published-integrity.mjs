@@ -186,7 +186,7 @@ const CLI_SIGNER = 'spec-kitty/spec-kitty-design/.github/workflows/publish-packa
 const CLI_DIGEST = '0123456789abcdef0123456789abcdef01234567';
 
 async function selftest() {
-  const root = await fixture();
+  const root = fixture();
   const run = (opts) => {
     try {
       return { ok: true, value: verifyPublished({ root, delayMs: 0, log: quiet, attest: () => {}, ...opts }) };
@@ -231,6 +231,8 @@ async function selftest() {
         rmSync(bin, { recursive: true, force: true });
       }
     }],
+    // KEPT as the root control for the two `alone` probes below, which run the same CLI path with
+    // one pin set: this one proves the refusal fires with neither (REL3 pass 4, reducer).
     ['in CI, a missing SIGNER_WORKFLOW/SOURCE_DIGEST is refused before any download', () => { const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], { encoding: 'utf8', env: { ...process.env, GITHUB_ACTIONS: 'true', SIGNER_WORKFLOW: '', SOURCE_DIGEST: '' } }); return r.status === 1 && /SIGNER_WORKFLOW and SOURCE_DIGEST must be set/.test(r.stderr); }],
     ['the CLI forwards SIGNER_WORKFLOW as --signer-workflow and SOURCE_DIGEST as --source-digest on every gh call', () => {
       const r = cliProbe({ SIGNER_WORKFLOW: CLI_SIGNER, SOURCE_DIGEST: CLI_DIGEST });

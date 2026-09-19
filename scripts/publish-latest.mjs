@@ -44,7 +44,9 @@ function fail(msg) {
  * fence (it refuses this script outside release.yml's `release` job, and release.yml's step is an exact,
  * unconditional run, so no prefix can forge these variables there). These are the runner's values.
  */
-export function prodRunProblem(env) {
+// Not exported: its only callers are `main()` and the probe table in this file. An export with no
+// importer invites one (REL3 pass 4, reducer).
+function prodRunProblem(env) {
   if (env.GITHUB_REF_TYPE !== 'tag') return `GITHUB_REF_TYPE is ${JSON.stringify(env.GITHUB_REF_TYPE)}, not "tag"`;
   if (!/^refs\/tags\/v\d+\.\d+\.\d+$/.test(env.GITHUB_REF ?? '')) return `GITHUB_REF ${JSON.stringify(env.GITHUB_REF)} is not a vX.Y.Z tag`;
   if (!String(env.GITHUB_WORKFLOW_REF ?? '').startsWith('spec-kitty/spec-kitty-design/.github/workflows/release.yml@refs/tags/')) {

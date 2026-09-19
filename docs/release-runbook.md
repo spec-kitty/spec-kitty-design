@@ -168,7 +168,12 @@ prerelease version bump is applied on the runner and is never committed, so that
 attestation cannot vouch that no step in it misbehaved. The workflows keep that job small, and
 `check-release-graph.mjs` enforces it on every PR:
 
-- the registry token reaches only the steps that talk to the registry;
+- `NODE_AUTH_TOKEN` reaches only steps whose `run` is exactly one of the registry scripts
+  (`bump-prerelease.mjs --from-registry`, `publish-derived-set.mjs`, `publish-latest.mjs`,
+  `verify-published-integrity.mjs`, `report-dist-tags.mjs`) — no shell step may hold it. The rule binds
+  that variable name, which is the one npm reads: a step passing some other secret under another name is
+  not refused by it;
+- no step may run a local (`./…`) action, whose steps the gate cannot read;
 - checkout keeps no credentials;
 - every `npx` and `npm exec` runs the lockfile's copy (`--no-install` / `--no`), never a package fetched at
   release time;

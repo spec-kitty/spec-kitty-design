@@ -873,6 +873,7 @@ else {
     [/node\s+scripts\/pack-derived-set\.mjs\s+--selftest(\s|$)/, "the tarball pack and re-validation probe table", 'scripts/pack-derived-set.mjs --selftest'],
     [/node\s+scripts\/verify-published-integrity\.mjs\s+--selftest(\s|$)/, "the published-bytes integrity probe table", 'scripts/verify-published-integrity.mjs --selftest'],
     [/node\s+scripts\/publish-latest\.mjs\s+--selftest(\s|$)/, "the prod publish's effect probe table", 'scripts/publish-latest.mjs --selftest'],
+    [/node\s+scripts\/report-dist-tags\.mjs\s+--selftest(\s|$)/, "the published dist-tag report's probe table", 'scripts/report-dist-tags.mjs --selftest'],
     // REL4 (#396). All four, because each is the only thing standing behind a different failure:
     // the digest check behind an edited vendored reference, --check behind a stale package, and
     // each --selftest behind a check that has quietly stopped seeing what it claims to.
