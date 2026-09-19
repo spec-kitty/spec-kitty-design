@@ -96,6 +96,11 @@ jobs:
         run: node scripts/check-vue-packed-types.mjs
       - name: "[ENFORCED] Sizes and the SRI hash match the built artifacts (FR-005, NFR-004)"
         run: node scripts/measure-elements-sizes.mjs --check
+      # REL4 (#396). BEFORE the bump, like the size check beside it: the package records the library
+      # version it was generated from, and the rc bump rewrites that version, so checking after the
+      # bump would compare the committed package against manifests the previous step just mutated.
+      - name: "[ENFORCED] OpenDesign package is current with the library (#396, FR-011)"
+        run: node scripts/build-opendesign-package.mjs --check
 
       # ADR-005. Dropped from the rc path when it was a separate file; restored here because the
       # gate set is a property of the artifact, not of which workflow happens to publish it.

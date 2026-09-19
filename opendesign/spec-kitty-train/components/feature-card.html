@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>feature-card — Spec Kitty</title>
+    <meta name="description" content="feature-card: 1 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: feature-card — packages/styles/src/feature-card/sk-feature-card.css */
+/* @spec-kitty/styles — sk-feature-card shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+/* Deviation note: rgba() tint values for icon-chip backgrounds use
+   hardcoded rgb channels (per spec C-103 accepted deviation for tint
+   calculations where CSS relative colour syntax is not yet universally
+   supported). Opacity value (0.10–0.15) is the only non-token value. */
+
+/* A custom element defaults to `display: inline`, so without this the host cannot be sized or
+   spaced by a consumer and a `max-width` on it is silently inert — the defect #77 found across
+   five sk-grid stories. `block` matches the static form, which is an <article>: the two
+   consumption paths must agree about their own box, and #77 shipped a version where they did
+   not. Inert in the static path, where the root IS the .sk-feature-card article. */
+/* COLOUR ON THE HOST, so SLOTTED content is legible — and on the HOST specifically so the
+   static path cannot move.
+
+   The title and body classes style nodes in the shadow tree; slotted content is not in the
+   shadow tree, so those classes reach nothing and the text falls back to the UA default black
+   on a dark card surface. axe reported color-contrast on EVERY element story of this
+   component. `color` is inherited, and inheritance follows the FLATTENED tree, so a slotted
+   node inherits through the slot from `:host` — which a selector could never reach it with.
+
+   An earlier fix put this on the `.sk-<name>` class instead. That works for the element and
+   also changes the STATIC path, where that class is the article and its untinted descendants
+   would have picked up a new inherited colour — moving a committed visual baseline as a side
+   effect of an a11y fix. `:host` is inert in a document, so this cannot.
+
+   --sk-fg-body, not --sk-fg-on-card, for the reason sk-card.css records: the latter is defined
+   only in the dark block, so it would fall back to light grey inside a .sk-light subtree. */
+:host {
+  display: block;
+  color: var(--sk-fg-body);
+}
+
+.sk-feature-card {
+  padding: var(--sk-space-6);
+  background: var(--sk-surface-card);
+  border: 1px solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-4);
+}
+
+.sk-feature-card__icon-chip {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--sk-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Tint colours: rgba channels derived from the token values.
+   Yellow chip now uses --sk-color-yellow-alpha-15 token (WP03, mission-review DRIFT-2 remediation).
+   Green and purple have no alpha tokens yet — accepted deviation per mission-review-01KQPDB5J5EK82K39TF1MPQA7H.
+   Token reference: --sk-color-yellow=#F5C518, --sk-color-green=#8FCB8F,
+   --sk-color-purple=#B8A9E0 */
+.sk-feature-card__icon-chip--yellow {
+  background: var(--sk-color-yellow-alpha-15);
+  color: var(--sk-color-yellow);
+}
+
+.sk-feature-card__icon-chip--green {
+  background: rgba(143, 203, 143, 0.12);
+  color: var(--sk-color-green);
+}
+
+.sk-feature-card__icon-chip--purple {
+  background: rgba(184, 169, 224, 0.15);
+  color: var(--sk-color-purple);
+}
+
+/* Colorized-border variants — accent the card edge with a brand colour
+   instead of the default neutral hairline border. Per WP01 / issue #10.
+   These modifiers compose with the existing icon-chip variants and do
+   NOT touch the rgba() tint rules above (out-of-scope debt). */
+.sk-feature-card--border-yellow {
+  border-color: var(--sk-color-yellow);
+}
+
+.sk-feature-card--border-green {
+  border-color: var(--sk-color-green);
+}
+
+.sk-feature-card--border-purple {
+  border-color: var(--sk-color-purple);
+}
+
+/* BOTH SPELLINGS, ONE RULE, because the title and body are SLOTTED in the element path.
+   A shadow-tree selector cannot match a slotted node — slotted content stays in the light DOM —
+   so these rules applied on the static path and were INERT on the element path, and the two
+   consumption paths this component's markup module exists to keep identical rendered with
+   different fonts, sizes, weights and margins. `:host { color }` fixed only the CONTRAST slice,
+   which is the one axe could see; all three pre-merge lenses found the rest independently.
+   `::slotted()` is inert in a document and the bare class is inert in a shadow tree, so one
+   selector list serves both paths with no declaration written twice. `::slotted()` is an
+   accepted owning compound in check-adopted-css-boundaries.mjs, and sk-nav-pill.css has used
+   this shape since #73. */
+.sk-feature-card__title,
+::slotted(.sk-feature-card__title) {
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-lg);
+  font-weight: var(--sk-weight-bold);
+  color: var(--sk-fg-default);
+  margin: 0;
+}
+
+.sk-feature-card__body,
+::slotted(.sk-feature-card__body) {
+  font-size: var(--sk-text-sm);
+  color: var(--sk-fg-muted);
+  margin: 0;
+  line-height: 1.55;
+}
+    </style>
+  </head>
+  <body>
+    <section id="feature-card" data-od-component="feature-card">
+      <h1>feature-card</h1>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <article class="sk-feature-card"><div class="sk-feature-card__icon-chip sk-feature-card__icon-chip--yellow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div><h4 class="sk-feature-card__title">Feature title</h4><p class="sk-feature-card__body">What this feature does for the reader.</p></article>
+      </figure>
+    </section>
+  </body>
+</html>

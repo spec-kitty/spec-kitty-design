@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
 const PROGRESS_CSS = 'packages/styles/src/progress/sk-progress.css';
@@ -20,6 +20,18 @@ const story = async (page: Page, id: string) => {
  * default/initial values regardless of the actual applied style) — pixel sampling
  * reads what actually rendered instead of guessing at an unreliable API, and works
  * identically on every engine including WebKit in CI.
+ *
+ * `left`/`right` sample 10px in from each edge, not the original 2px/3px. T010's decisive
+ * experiment (webkit-timing-deflake-01M2T31J, evidence/T010-paint-diagnostic.md) proved the
+ * original offsets sat inside a webkit-specific edge-inset band that never carries the fill
+ * colour: `completeSample.left`/`.right` at `x=2`/`x=w-3` read plain track background
+ * (`var(--sk-surface-input)`, e.g. `[43,49,59,255]`) on the DETERMINATE `Complete` fixture
+ * (value=8/max=8, a solid 100% fill with zero clip-path, under BOTH plain and forced-colors
+ * rendering) across all 10 measured webkit repeats — proof the edge itself never shows the
+ * authored fill in this webkit build, regardless of value or clip, so no CSS/component change
+ * can move it (C-007 does not apply here). Widening the offset to 10px clears that band while
+ * staying well inside item 1's own 45%-wide forced-colors clip (54px of 120px) and off-centre
+ * enough to keep testing genuinely near-edge geometry.
  */
 const samplePixels = async (page: Page, buffer: Buffer) => {
   const dataUrl = `data:image/png;base64,${buffer.toString('base64')}`;
@@ -39,9 +51,9 @@ const samplePixels = async (page: Page, buffer: Buffer) => {
     const h = canvas.height;
     const sample = (x: number, y: number) => Array.from(ctx.getImageData(x, y, 1, 1).data);
     return {
-      left: sample(2, Math.floor(h / 2)),
+      left: sample(10, Math.floor(h / 2)),
       center: sample(Math.floor(w / 2), Math.floor(h / 2)),
-      right: sample(Math.max(0, w - 3), Math.floor(h / 2)),
+      right: sample(Math.max(0, w - 11), Math.floor(h / 2)),
       // The 1px top border stroke, sampled the same pixel-reading way as the fill (FR-009/SC-006
       // boundary-vs-indicator — `getComputedStyle(...).borderColor` is ALSO unreliable here: under
       // forced-colors Chromium reports it as a semi-transparent `rgba(...)` pre-blend value, not
@@ -56,6 +68,50 @@ const pixelsEqual = (a: number[], b: number[], tolerance = 2) =>
   a.every((v, i) => Math.abs(v - b[i]) <= tolerance);
 const samplesEqual = (a: Pixels, b: Pixels, tolerance = 2) =>
   pixelsEqual(a.left, b.left, tolerance) && pixelsEqual(a.center, b.center, tolerance) && pixelsEqual(a.right, b.right, tolerance);
+
+/**
+ * FR-004/plan.md Correction 3/IC-02: items 3 and 5 compare two captures over time to prove
+ * the authored sweep animation does or does not run. The original technique separated the two
+ * captures by a fixed `waitForTimeout` and trusted wall-clock luck to land on two different
+ * points of the `320ms` (`--sk-motion-duration-slow`) looping sweep — T003-baseline.md measured
+ * that luck at 3/10 and 1/10. This selects the two phases explicitly instead: pause every
+ * Animation the sweep's keyframe touches (the host `.sk-progress__bar` element AND, per
+ * `{ subtree: true }`, its pseudo-elements — required because plan.md Correction 3 records that
+ * `getAnimations()` reaching a vendor pseudo-element's animation is not guaranteed cross-engine,
+ * and webkit is measured here, not assumed, via `pseudoElement` on each returned
+ * `KeyframeEffect`, attached as a test annotation so the CI record proves which layer webkit
+ * actually returned animations for), then seeks each one's `currentTime` to the given phase.
+ * Pausing is required — otherwise the animation keeps advancing between the seek and the
+ * screenshot. The explicit double-`requestAnimationFrame` after seeking waits for an actual
+ * paint of the new frame (not a duration) before anything samples it — the same "wait for the
+ * event, not the clock" principle FR-001 asks for elsewhere in this file, applied to animation
+ * phase instead of load/paint settling. Returns each reached animation's `pseudoElement` (so a
+ * caller can assert on/log what was actually reached), its own effect duration in ms (so a
+ * caller can derive "half a period" from the token's real, live-resolved value instead of a
+ * hardcoded literal that would drift silently if `--sk-motion-duration-slow` ever changed), and
+ * its `playState` as read BEFORE `pause()` runs. That order matters: pausing is this helper's own
+ * measurement technique, not the thing under test, so the state read AFTER pause() is always
+ * `'paused'` by construction — asserting on that would be a vacuous tautology and would false-pass
+ * an animation that is authored `animation-play-state: paused` (frozen for every real user) just
+ * as readily as a genuinely running one, since both look identical once THIS helper has paused
+ * them. Reading it first lets a caller assert the animation was actually running prior to the
+ * measurement, not merely that it exists and is pausable.
+ */
+const pinAnimationPhase = (bar: Locator, timeMs: number) =>
+  bar.evaluate(async (node, t) => {
+    const anims = (node as Element).getAnimations({ subtree: true });
+    const prePauseStates = anims.map((anim) => anim.playState);
+    for (const anim of anims) {
+      anim.pause();
+      anim.currentTime = t;
+    }
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    return anims.map((anim, i) => ({
+      pseudoElement: (anim.effect as KeyframeEffect | null)?.pseudoElement ?? null,
+      durationMs: Number((anim.effect as KeyframeEffect | null)?.getComputedTiming().duration ?? 0),
+      playState: prePauseStates[i],
+    }));
+  }, timeMs);
 
 /** `getComputedStyle(...).borderColor` / `.backgroundColor` come back as `rgb(r, g, b)` or
  * `rgba(r, g, b, a)` strings; extract the numeric components for a pixel-tolerance compare
@@ -456,8 +512,24 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
   test('Indeterminate: the authored sweep animation actually runs (two captures over time differ) with no reduced-motion preference set', async ({ page }) => {
     const host = await story(page, 'indeterminate');
     const bar = host.locator('progress');
+
+    // FR-004/IC-02: two explicitly selected phases, not two wall-clock reads separated by a
+    // timeout (T003-baseline.md measured the old technique at 3/10 — a real race, not a flake
+    // to retry away). `pinAnimationPhase`'s returned array proves what layer(s) webkit actually
+    // returned from `getAnimations({ subtree: true })` for this CI run.
+    const atStart = await pinAnimationPhase(bar, 0);
+    expect(atStart.length).toBeGreaterThan(0); // the sweep must exist to have a phase at all
+    // F1: it must have been RUNNING before this helper paused it to seek a phase — otherwise a
+    // bar frozen by e.g. `animation-play-state: paused` (every real user sees a static bar) has
+    // an animation to pause and a phase to seek, and the two captures below would still differ
+    // in APPEARANCE between phase 0 and half-period, false-passing a sweep nobody ever sees move.
+    expect(atStart.every((a) => a.playState === 'running')).toBe(true);
     const sample1 = await samplePixels(page, await bar.screenshot());
-    await page.waitForTimeout(400);
+    const halfPeriod = Math.max(...atStart.map((a) => a.durationMs)) / 2;
+    expect(halfPeriod).toBeGreaterThan(0); // sanity: a real, finite duration was found
+    const atHalf = await pinAnimationPhase(bar, halfPeriod);
+    expect(atHalf.length).toBe(atStart.length);
+    test.info().annotations.push({ type: 'sk-progress-pseudo-elements', description: JSON.stringify({ atStart, atHalf }) });
     const sample2 = await samplePixels(page, await bar.screenshot());
     expect(samplesEqual(sample1, sample2)).toBe(false);
   });
@@ -517,14 +589,35 @@ test.describe('sk-progress absent-state regression: the indeterminate modifier d
     const before2 = await samplePixels(page, await bar.screenshot());
     // No leak: no motion on the unmodified determinate fixture.
     expect(samplesEqual(before1, before2)).toBe(true);
+    // F3: the SAME check the leaked half below re-runs after mutation — both sides count
+    // `getAnimations({ subtree: true })` on this element. Before the leak there is nothing to
+    // count at all.
+    const beforeAnimCount = await bar.evaluate((node) => (node as Element).getAnimations({ subtree: true }).length);
+    expect(beforeAnimCount).toBe(0);
 
     // MUTATE: simulate the modifier leaking onto a determinate fixture.
     await host.evaluate((node) => node.classList.add('sk-progress--indeterminate'));
+    // FR-004/IC-02: same phase-pinning as the sweep test above, for the same reason — the
+    // injected leak now has a real, looping sweep animation to detect, and two wall-clock reads
+    // race the same way T003-baseline.md measured at 1/10 for this exact test.
+    const atStart = await pinAnimationPhase(bar, 0);
+    expect(atStart.length).toBeGreaterThan(0); // the leaked sweep must exist to have a phase
+    // F1: the leaked animation must have been RUNNING before this helper paused it to seek a
+    // phase — see the sibling assertion and comment on the sweep test above.
+    expect(atStart.every((a) => a.playState === 'running')).toBe(true);
     const after1 = await samplePixels(page, await bar.screenshot());
-    await page.waitForTimeout(400);
+    const halfPeriod = Math.max(...atStart.map((a) => a.durationMs)) / 2;
+    expect(halfPeriod).toBeGreaterThan(0);
+    const atHalf = await pinAnimationPhase(bar, halfPeriod);
+    expect(atHalf.length).toBe(atStart.length); // F6: parity with the sweep test's own guard above
+    test.info().annotations.push({ type: 'sk-progress-pseudo-elements', description: JSON.stringify({ atStart, atHalf }) });
     const after2 = await samplePixels(page, await bar.screenshot());
-    // WATCH: with the leak injected, the identical check now correctly detects
-    // motion — proving the "no leak" assertion above is not vacuous.
+    // WATCH: with the leak injected, the SAME check as `beforeAnimCount` above (counting
+    // `getAnimations({ subtree: true })` on this element — see `atStart.length` asserted `> 0`
+    // above) now correctly finds an animation where there was none — proving the "no leak"
+    // assertion above (that same count was 0) is not vacuous. The pixel-motion assertion below is
+    // additional, corroborating evidence that the leaked animation is not merely present but
+    // visibly running.
     expect(samplesEqual(after1, after2)).toBe(false);
   });
 });
@@ -560,3 +653,35 @@ test.describe('sk-progress theming', () => {
     expect(light.labelColor).not.toBe(dark.labelColor);
   });
 });
+
+/*
+ * Red-first proofs — items 1-5, CI run 35358002926 (webkit, --retries=0, --repeat-each=10),
+ * mutation commit `3fbb49a2` (three CSS mutations: item 1's clip flattened to full-width, item 3's
+ * sweep removed, item 4's reduced-motion override removed), reverted in `f53c7f3d` with a
+ * byte-empty `git diff packages/styles/src/progress/**` afterwards. Line numbers below are as of
+ * that proof; items 3/5 shifted to :512/:582 after the PR #454 fix below — see that proof's own
+ * line numbers instead of these for the current file.
+ *
+ *   RED-FIRST-PROOF item 1 (:416)  0/10 passed under mutation
+ *   RED-FIRST-PROOF item 2 (:487)  0/10 passed under mutation (collateral of the shared clip rule)
+ *   RED-FIRST-PROOF item 3 (:503)  0/10 passed under mutation
+ *   RED-FIRST-PROOF item 4 (:523)  0/10 passed under mutation
+ *   RED-FIRST-PROOF item 5 (:568)  0/10 passed under mutation (collateral of the shared sweep rule)
+ *
+ * Post-fix, same rig: all five at 10/10 (runs 35356189046, 35361773017). Item 3 additionally read
+ * 9/10 in one of three samples and is recorded as substantially improved, NOT fully fixed.
+ *
+ * PR #454 pre-merge squad F1 fix — CI run 35367151938 (webkit, --retries=0, --repeat-each=10),
+ * mutation commit `557eb49e` (`animation-play-state: paused` added to the indeterminate sweep
+ * rule — the squad's own demonstrated mutant, which the PRE-fix form of these two tests passed),
+ * reverted in `2eed0a4c` with `git diff a4facaa2 -- packages/` (the commit before the mutation)
+ * byte-empty afterwards. Fix: `pinAnimationPhase` now returns each animation's `playState` as
+ * read BEFORE `pause()` runs, and both call sites assert it was `'running'`.
+ *
+ *   RED-FIRST-PROOF item 3 (:512)  0/10 passed under mutation (this run's own log: every failure
+ *     is `expect(atStart.every((a) => a.playState === 'running')).toBe(true)` at :526)
+ *   RED-FIRST-PROOF item 5 (:582)  0/10 passed under mutation (same assertion, at :607)
+ *
+ * Items 1/2/4 (:425/:496/:537) were unaffected by this mutation, 10/10, in the same run —
+ * confirming the new assertion is specific to the paused-sweep case, not a blunt trip-wire.
+ */

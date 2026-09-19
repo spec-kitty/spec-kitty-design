@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>context-nav — Spec Kitty</title>
+    <meta name="description" content="context-nav: 10 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: context-nav — packages/styles/src/context-nav/sk-context-nav.css */
+/* @spec-kitty/styles — native light-DOM context navigation presentation (#256, #264) */
+/* Consumers own navigation semantics, links, order, current state, icons, and copy. */
+
+.sk-context-nav {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  overflow-wrap: anywhere;
+}
+
+.sk-context-nav__group {
+  min-inline-size: 0;
+}
+
+.sk-context-nav__group + .sk-context-nav__group {
+  margin-block-start: var(--sk-space-5);
+}
+
+.sk-context-nav__heading {
+  margin: 0;
+  padding-block: var(--sk-space-2);
+  padding-inline: var(--sk-space-3);
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-xs);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-context-nav__list,
+.sk-context-nav__children {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sk-context-nav__item {
+  min-inline-size: 0;
+}
+
+.sk-context-nav__link {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: var(--sk-space-9);
+  gap: var(--sk-space-3);
+  padding-block: var(--sk-space-2);
+  padding-inline: var(--sk-space-3);
+  color: inherit;
+  background: transparent;
+  border-inline-start-color: transparent;
+  border-inline-start-style: solid;
+  border-inline-start-width: var(--sk-border-width-1);
+  border-radius: var(--sk-radius-sm);
+  font-weight: var(--sk-weight-normal);
+  line-height: normal;
+  text-decoration: none;
+}
+
+.sk-context-nav__link:link,
+.sk-context-nav__link:visited {
+  color: inherit;
+}
+
+.sk-context-nav__link:hover {
+  color: var(--sk-fg-default);
+  background: var(--sk-surface-pill);
+  text-decoration-line: underline;
+  text-decoration-thickness: var(--sk-border-width-1);
+  text-underline-offset: var(--sk-space-1);
+}
+
+.sk-context-nav__link:active {
+  background: var(--sk-surface-muted);
+  border-inline-start-color: var(--sk-border-strong);
+  border-inline-start-style: double;
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+.sk-context-nav__link:focus-visible,
+.sk-context-nav__overflow-link:focus-visible {
+  outline-color: var(--sk-color-accent);
+  outline-style: solid;
+  outline-width: var(--sk-border-width-2);
+  outline-offset: var(--sk-border-width-1);
+}
+
+.sk-context-nav__link[aria-current]:not([aria-current="false"]) {
+  color: var(--sk-fg-default);
+  background: var(--sk-surface-pill);
+  border-inline-start-color: var(--sk-color-accent);
+  border-inline-start-style: solid;
+  border-inline-start-width: var(--sk-border-width-4);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-context-nav__link[aria-current]:not([aria-current="false"]):active {
+  background: var(--sk-surface-muted);
+  border-inline-start-style: double;
+}
+
+.sk-context-nav__icon {
+  flex: 0 0 auto;
+  inline-size: var(--sk-space-4);
+  block-size: var(--sk-space-4);
+}
+
+.sk-context-nav__label {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.sk-context-nav__unavailable {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: var(--sk-space-9);
+  gap: var(--sk-space-2) var(--sk-space-3);
+  padding-block: var(--sk-space-2);
+  padding-inline: var(--sk-space-3);
+  color: var(--sk-fg-muted);
+  background: transparent;
+  border-inline-start-color: var(--sk-border-strong);
+  border-inline-start-style: dashed;
+  border-inline-start-width: var(--sk-border-width-1);
+  border-radius: var(--sk-radius-sm);
+  font-weight: var(--sk-weight-normal);
+  line-height: normal;
+}
+
+.sk-context-nav__unavailable .sk-context-nav__label {
+  flex-basis: var(--sk-space-9);
+}
+
+.sk-context-nav__annotation {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin-inline-start: auto;
+  font-size: var(--sk-text-xs);
+  font-weight: var(--sk-weight-medium);
+}
+
+.sk-context-nav__children {
+  margin-inline-start: var(--sk-space-3);
+  padding-inline-start: var(--sk-space-4);
+  border-inline-start-color: var(--sk-border-strong);
+  border-inline-start-style: solid;
+  border-inline-start-width: var(--sk-border-width-1);
+}
+
+.sk-context-nav__children .sk-context-nav__link {
+  font-size: var(--sk-text-xs);
+}
+
+.sk-context-nav__empty-copy {
+  margin: 0;
+  padding-block: var(--sk-space-2);
+  padding-inline: var(--sk-space-3);
+  color: var(--sk-fg-muted);
+}
+
+.sk-context-nav__overflow-link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--sk-space-9);
+  margin-inline: var(--sk-space-3);
+  color: inherit;
+  font-weight: var(--sk-weight-medium);
+  text-decoration-line: underline;
+  text-decoration-thickness: var(--sk-border-width-1);
+  text-underline-offset: var(--sk-space-1);
+}
+
+.sk-context-nav__overflow-link:link,
+.sk-context-nav__overflow-link:visited {
+  color: inherit;
+}
+
+.sk-context-nav__overflow-link:hover {
+  color: var(--sk-fg-default);
+  text-decoration-thickness: var(--sk-border-width-2);
+}
+
+@media (forced-colors: active) {
+  .sk-context-nav__unavailable {
+    color: GrayText;
+    border-inline-start-color: GrayText;
+  }
+
+  .sk-context-nav__children {
+    border-inline-start-color: ButtonText;
+  }
+
+  .sk-context-nav__link[aria-current]:not([aria-current="false"]) {
+    border-inline-start-color: Highlight;
+  }
+
+  .sk-context-nav__link:focus-visible,
+  .sk-context-nav__overflow-link:focus-visible {
+    outline-color: Highlight;
+  }
+}
+    </style>
+  </head>
+  <body>
+    <section id="context-nav" data-od-component="context-nav">
+      <h1>context-nav</h1>
+      <figure data-od-variant="current-nested">
+        <figcaption>current-nested</figcaption>
+        <nav class="sk-context-nav" aria-label="Collection context">
+          <section class="sk-context-nav__group" aria-labelledby="context-nav-collection-heading">
+            <h2 class="sk-context-nav__heading" id="context-nav-collection-heading">Collection</h2>
+            <ul class="sk-context-nav__list">
+              <li class="sk-context-nav__item">
+                <a class="sk-context-nav__link" href="#collection">
+                  <span class="sk-context-nav__label">Collection overview</span>
+                </a>
+                <ul class="sk-context-nav__children">
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#item-1"><span class="sk-context-nav__label">Item 1</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#item-2" aria-current="page"><span class="sk-context-nav__label">Item 2</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#item-3"><span class="sk-context-nav__label">Item 3</span></a></li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+        </nav>
+      </figure>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <nav class="sk-context-nav" aria-label="Project context">
+          <section class="sk-context-nav__group" aria-labelledby="context-nav-primary-heading">
+            <h2 class="sk-context-nav__heading" id="context-nav-primary-heading">Destinations</h2>
+            <ul class="sk-context-nav__list">
+              <li class="sk-context-nav__item">
+                <a class="sk-context-nav__link" href="#overview" aria-current="page">
+                  <svg class="sk-context-nav__icon" aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M2 8 8 2l6 6v6H9v-4H7v4H2Z" /></svg>
+                  <span class="sk-context-nav__label">Overview</span>
+                </a>
+              </li>
+              <li class="sk-context-nav__item">
+                <a class="sk-context-nav__link" href="#context-nav-visited">
+                  <span class="sk-context-nav__label">Activity</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+          <section class="sk-context-nav__group" aria-labelledby="context-nav-settings-heading">
+            <h2 class="sk-context-nav__heading" id="context-nav-settings-heading">Configuration</h2>
+            <ul class="sk-context-nav__list">
+              <li class="sk-context-nav__item">
+                <a class="sk-context-nav__link" href="#preferences">
+                  <span class="sk-context-nav__label">Preferences</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+        </nav>
+      </figure>
+      <figure data-od-variant="empty-overflow">
+        <figcaption>empty-overflow</figcaption>
+        <nav class="sk-context-nav" aria-label="Saved views">
+          <section class="sk-context-nav__group" aria-labelledby="context-nav-empty-overflow-heading">
+            <h2 class="sk-context-nav__heading" id="context-nav-empty-overflow-heading">Saved views</h2>
+            <p class="sk-context-nav__empty-copy">No saved views are available.</p>
+            <a class="sk-context-nav__overflow-link" href="#manage-views">Manage saved views</a>
+          </section>
+        </nav>
+      </figure>
+      <figure data-od-variant="empty">
+        <figcaption>empty</figcaption>
+        <nav class="sk-context-nav" aria-label="Saved views">
+          <section class="sk-context-nav__group" aria-labelledby="context-nav-empty-heading">
+            <h2 class="sk-context-nav__heading" id="context-nav-empty-heading">Saved views</h2>
+            <p class="sk-context-nav__empty-copy">No saved views are available.</p>
+          </section>
+        </nav>
+      </figure>
+      <figure data-od-variant="long-labels">
+        <figcaption>long-labels</figcaption>
+        <nav class="sk-context-nav" aria-label="Document context">
+          <section class="sk-context-nav__group" aria-labelledby="context-nav-long-heading">
+            <h2 class="sk-context-nav__heading" id="context-nav-long-heading">Documents</h2>
+            <ul class="sk-context-nav__list">
+              <li class="sk-context-nav__item">
+                <a class="sk-context-nav__link" href="#long-unbroken" aria-current="false"><span class="sk-context-nav__label">averylongunbrokendocumentidentifierthatmustremainfullyavailable</span></a>
+              </li>
+              <li class="sk-context-nav__item">
+                <a class="sk-context-nav__link" href="#long-natural"><span class="sk-context-nav__label">A naturally worded destination label that wraps across several lines without losing content</span></a>
+              </li>
+            </ul>
+          </section>
+        </nav>
+      </figure>
+      <figure data-od-variant="scale">
+        <figcaption>scale</figcaption>
+        <nav class="sk-context-nav" aria-label="Archive context">
+          <section class="sk-context-nav__group" aria-labelledby="context-nav-scale-heading">
+            <h2 class="sk-context-nav__heading" id="context-nav-scale-heading">Archive</h2>
+            <ul class="sk-context-nav__list">
+              <li class="sk-context-nav__item">
+                <a class="sk-context-nav__link" href="#archive"><span class="sk-context-nav__label">Archive overview</span></a>
+                <ul class="sk-context-nav__children">
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-01"><span class="sk-context-nav__label">Item 01</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-02"><span class="sk-context-nav__label">Item 02</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-03"><span class="sk-context-nav__label">Item 03</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-04"><span class="sk-context-nav__label">Item 04</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-05"><span class="sk-context-nav__label">Item 05</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-06"><span class="sk-context-nav__label">Item 06</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-07"><span class="sk-context-nav__label">Item 07</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-08"><span class="sk-context-nav__label">Item 08</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-09"><span class="sk-context-nav__label">Item 09</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-10"><span class="sk-context-nav__label">Item 10</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-11"><span class="sk-context-nav__label">Item 11</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-12"><span class="sk-context-nav__label">Item 12</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-13"><span class="sk-context-nav__label">Item 13</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-14"><span class="sk-context-nav__label">Item 14</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-15"><span class="sk-context-nav__label">Item 15</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-16"><span class="sk-context-nav__label">Item 16</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-17"><span class="sk-context-nav__label">Item 17</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-18"><span class="sk-context-nav__label">Item 18</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-19"><span class="sk-context-nav__label">Item 19</span></a></li>
+                  <li class="sk-context-nav__item"><a class="sk-context-nav__link" href="#entry-20"><span class="sk-context-nav__label">Item 20</span></a></li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+        </nav>
+      </figure>
+      <figure data-od-variant="unavailable-all">
+        <figcaption>unavailable-all</figcaption>
+        <nav class="sk-context-nav" aria-label="Resource context">
+          <section
+            class="sk-context-nav__group"
+            aria-labelledby="context-nav-unavailable-all-heading"
+          >
+            <h2
+              class="sk-context-nav__heading"
+              id="context-nav-unavailable-all-heading"
+            >
+              Resources
+            </h2>
+            <ul class="sk-context-nav__list">
+              <li class="sk-context-nav__item">
+                <span class="sk-context-nav__unavailable" aria-disabled="true">
+                  <span class="sk-context-nav__label">Guides</span>
+                  <span class="sk-context-nav__annotation">Unavailable</span>
+                </span>
+              </li>
+              <li class="sk-context-nav__item">
+                <span class="sk-context-nav__unavailable" aria-disabled="true">
+                  <span class="sk-context-nav__label">Examples</span>
+                  <span class="sk-context-nav__annotation">Unavailable</span>
+                </span>
+              </li>
+              <li class="sk-context-nav__item">
+                <span class="sk-context-nav__unavailable" aria-disabled="true">
+                  <span class="sk-context-nav__label">Reference</span>
+                </span>
+              </li>
+            </ul>
+          </section>
+        </nav>
+      </figure>
+      <figure data-od-variant="unavailable-long">
+        <figcaption>unavailable-long</figcaption>
+        <nav class="sk-context-nav" aria-label="Publication context">
+          <section
+            class="sk-context-nav__group"
+            aria-labelledby="context-nav-unavailable-long-heading"
+          >
+            <h2
+              class="sk-context-nav__heading"
+              id="context-nav-unavailable-long-heading"
+            >
+              Publications
+            </h2>
+            <ul class="sk-context-nav__list">
+              <li class="sk-context-nav__item">
+                <span class="sk-context-nav__unavailable" aria-disabled="true">
+                  <span class="sk-context-nav__label"
+                    >averylongunbrokenpublicationidentifierthatmustremainfullyavailable</span
+                  >
+                  <span class="sk-context-nav__annotation"
+                    >temporarilyunavailablewithoutbreakopportunities</span
+                  >
+                </span>
+              </li>
+              <li class="sk-context-nav__item">
+                <span class="sk-context-nav__unavailable" aria-disabled="true">
+                  <span class="sk-context-nav__label"
+                    >A naturally worded publication destination that wraps without
+                    losing content</span
+                  >
+                  <span class="sk-context-nav__annotation"
+                    >Unavailable in this catalogue</span
+                  >
+                </span>
+              </li>
+            </ul>
+          </section>
+        </nav>
+      </figure>
+      <figure data-od-variant="unavailable-mixed">
+        <figcaption>unavailable-mixed</figcaption>
+        <nav class="sk-context-nav" aria-label="Library context">
+          <section
+            class="sk-context-nav__group"
+            aria-labelledby="context-nav-unavailable-mixed-heading"
+          >
+            <h2
+              class="sk-context-nav__heading"
+              id="context-nav-unavailable-mixed-heading"
+            >
+              Catalogue
+            </h2>
+            <ul class="sk-context-nav__list">
+              <li class="sk-context-nav__item">
+                <a class="sk-context-nav__link" href="#overview" aria-current="page">
+                  <span class="sk-context-nav__label">Overview</span>
+                </a>
+              </li>
+              <li class="sk-context-nav__item">
+                <a class="sk-context-nav__link" href="#collections">
+                  <span class="sk-context-nav__label">Collections</span>
+                </a>
+                <ul class="sk-context-nav__children">
+                  <li class="sk-context-nav__item">
+                    <a class="sk-context-nav__link" href="#collection-one"
+                      ><span class="sk-context-nav__label">Collection one</span></a
+                    >
+                  </li>
+                  <li class="sk-context-nav__item">
+                    <a class="sk-context-nav__link" href="#collection-two"
+                      ><span class="sk-context-nav__label">Collection two</span></a
+                    >
+                  </li>
+                </ul>
+              </li>
+              <li class="sk-context-nav__item">
+                <span class="sk-context-nav__unavailable" aria-disabled="true">
+                  <span class="sk-context-nav__label">Reports</span>
+                  <span class="sk-context-nav__annotation">Unavailable</span>
+                </span>
+              </li>
+              <li class="sk-context-nav__item">
+                <span class="sk-context-nav__unavailable" aria-disabled="true">
+                  <span class="sk-context-nav__label">Archive</span>
+                </span>
+              </li>
+            </ul>
+          </section>
+        </nav>
+      </figure>
+      <figure data-od-variant="unavailable-parent">
+        <figcaption>unavailable-parent</figcaption>
+        <nav class="sk-context-nav" aria-label="Directory context">
+          <section
+            class="sk-context-nav__group"
+            aria-labelledby="context-nav-unavailable-parent-heading"
+          >
+            <h2
+              class="sk-context-nav__heading"
+              id="context-nav-unavailable-parent-heading"
+            >
+              Directory
+            </h2>
+            <ul class="sk-context-nav__list">
+              <li class="sk-context-nav__item">
+                <span class="sk-context-nav__unavailable" aria-disabled="true">
+                  <span class="sk-context-nav__label">Reference library</span>
+                  <span class="sk-context-nav__annotation">Unavailable</span>
+                </span>
+              </li>
+              <li class="sk-context-nav__item">
+                <a class="sk-context-nav__link" href="#collections">
+                  <span class="sk-context-nav__label">Collections</span>
+                </a>
+                <ul class="sk-context-nav__children">
+                  <li class="sk-context-nav__item">
+                    <a class="sk-context-nav__link" href="#collection-alpha"
+                      ><span class="sk-context-nav__label">Collection alpha</span></a
+                    >
+                  </li>
+                  <li class="sk-context-nav__item">
+                    <a class="sk-context-nav__link" href="#collection-beta"
+                      ><span class="sk-context-nav__label">Collection beta</span></a
+                    >
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+        </nav>
+      </figure>
+    </section>
+  </body>
+</html>

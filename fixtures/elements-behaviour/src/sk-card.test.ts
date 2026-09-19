@@ -201,9 +201,22 @@ test('an unknown variant THROWS on the authoring path — a bad variant never re
   expect(() => cardStaticHtml({ variant: 'definitely-not-a-variant' })).toThrow(/unknown card variant/);
   // Prototype-chain keys are not variants. `in` reached them and emitted
   // `sk-card function Object() { [native code] }` into real markup.
-  for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
-    expect(() => cardStaticHtml({ variant: key }), `${key} must not be accepted`).toThrow(/unknown card variant/);
-    expect(cardClasses(key).trim(), `${key} must degrade to the base card`).toBe('sk-card');
+  //
+  // `cardClasses(key)` degrades by warning (see sk-card.markup.ts) for every one of the four
+  // keys below; the job log's console.warn replay volume was a large share of what pushed the
+  // behaviour-suite job log over its truncation cap (WP06, FR-010/NFR-006). The warn call itself
+  // is not what this loop asserts — only the RETURN VALUE is — so intercepting it here changes
+  // no coverage: the mutation harness's SC-013 arm for this file mutates the warn call into a
+  // `throw`, which still propagates through `cardClasses` and reds this same assertion (C-008).
+  const loopWarn = console.warn;
+  console.warn = () => {};
+  try {
+    for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+      expect(() => cardStaticHtml({ variant: key }), `${key} must not be accepted`).toThrow(/unknown card variant/);
+      expect(cardClasses(key).trim(), `${key} must degrade to the base card`).toBe('sk-card');
+    }
+  } finally {
+    console.warn = loopWarn;
   }
   // The known variants still work on both paths.
   expect(cardStaticHtml({ variant: 'blue' })).toContain('sk-card--blue');
@@ -312,14 +325,24 @@ test('an unknown status THROWS on the authoring path — it never reaches genera
   expect(() => cardStaticHtml({ status: 'failed' })).toThrow(/unknown card status/);
   // Prototype-chain keys are not statuses. `in` would reach them and this module generates
   // server-rendered HTML.
-  for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
-    expect(() => cardStaticHtml({ status: key }), `${key} must not be accepted`).toThrow(
-      /unknown card status/,
-    );
-    expect(
-      cardClasses(undefined, false, key).trim(),
-      `${key} must degrade to the base card`,
-    ).toBe('sk-card');
+  //
+  // See the sibling loop above: `console.warn` is intercepted for the duration of the loop to
+  // cut the job log's warn-replay volume (WP06, FR-010/NFR-006) without touching what is
+  // asserted — the return-value checks below are unaffected by the interception.
+  const loopWarn = console.warn;
+  console.warn = () => {};
+  try {
+    for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+      expect(() => cardStaticHtml({ status: key }), `${key} must not be accepted`).toThrow(
+        /unknown card status/,
+      );
+      expect(
+        cardClasses(undefined, false, key).trim(),
+        `${key} must degrade to the base card`,
+      ).toBe('sk-card');
+    }
+  } finally {
+    console.warn = loopWarn;
   }
   // Every real tone works on both paths, derived from the map rather than hardcoded.
   for (const [tone, cls] of Object.entries(CARD_STATUSES)) {

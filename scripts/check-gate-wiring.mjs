@@ -870,6 +870,13 @@ else {
     // that the `latest` refusal fires, now that the guard is executed code rather than a regex a
     // reviewer can read.
     [/node\s+scripts\/publish-derived-set\.mjs\s+--selftest(\s|$)/, "the publish refusal's own probe table", 'scripts/publish-derived-set.mjs --selftest'],
+    // REL4 (#396). All four, because each is the only thing standing behind a different failure:
+    // the digest check behind an edited vendored reference, --check behind a stale package, and
+    // each --selftest behind a check that has quietly stopped seeing what it claims to.
+    [/node\s+scripts\/opendesign-reference\.mjs(?!\s*--selftest)(\s|$)/, 'the vendored OpenDesign reference digest check', 'scripts/opendesign-reference.mjs'],
+    [/node\s+scripts\/opendesign-reference\.mjs\s+--selftest(\s|$)/, "the OpenDesign reference loader's own probe table", 'scripts/opendesign-reference.mjs --selftest'],
+    [/node\s+scripts\/build-opendesign-package\.mjs\s+--check(\s|$)/, 'the OpenDesign package drift check', 'scripts/build-opendesign-package.mjs --check'],
+    [/node\s+scripts\/build-opendesign-package\.mjs\s+--selftest(\s|$)/, "the OpenDesign package generator's own probe table", 'scripts/build-opendesign-package.mjs --selftest'],
     [/node\s+scripts\/check-adopted-css-boundaries\.mjs(?!\s*--selftest)(\s|$)/, 'the cross-root selector gate', 'scripts/check-adopted-css-boundaries.mjs'],
     [/node\s+scripts\/check-adopted-css-boundaries\.mjs\s+--selftest(\s|$)/, "the cross-root gate's own probe table", 'scripts/check-adopted-css-boundaries.mjs --selftest'],
     [/node\s+scripts\/check-elements-entries\.mjs(?!\s*--selftest)(\s|$)/, 'the distribution-entry gate', 'scripts/check-elements-entries.mjs'],
@@ -882,6 +889,28 @@ else {
     // entry here, and a lens demonstrated the consequence: delete both its CI lines and this
     // checker still printed green. That is the defect this list was created for, one gate later.
     [/node\s+scripts\/check-element-css-hygiene\.mjs(\s|$)/, 'the adopted-CSS hygiene gate', 'scripts/check-element-css-hygiene.mjs'],
+    // Design issue 453, registered WITH the change that made the table load-bearing rather than
+    // after it — the mistake #74 and #129 both shipped. `lint-code`'s commitlint step is TWO
+    // commands under one [ENFORCED] name: delete the first and the step still runs `npx
+    // commitlint`, still passes, and the probe table bounding ~20 ignore regexes is gone
+    // silently. The whole-job payload audit cannot catch it either, because `lint-code` is
+    // outside `JOBS` by design (its steps use continue-on-error), so REQUIRED_LINT is the only
+    // mechanism holding either command in place. Both are required, separately: a gate whose
+    // probe table stops running is a gate whose defeated forms quietly reopen.
+    [/node\s+scripts\/check-commitlint-config\.mjs(\s|$)/, "the commitlint ignore-list's own probe table", 'scripts/check-commitlint-config.mjs'],
+    // #456, registered WITH the gate (R3, PR #457). The probe table is required separately from
+    // the gate: its per-rule mutation proof is the only evidence the swallowed-opener rule fires —
+    // the first version's table stayed 5/5 green with that rule deleted.
+    // No flag at all: the gate itself. `(?!\s*--selftest)` also matched `--drift-sentinel`, so the
+    // gate step could have been deleted with this entry still satisfied by the sentinel's line.
+    [/node\s+scripts\/check-markdown-fences\.mjs(?!\s*--)(\s|$)/, 'the Markdown fence-integrity gate', 'scripts/check-markdown-fences.mjs'],
+    [/node\s+scripts\/check-markdown-fences\.mjs\s+--drift-sentinel(\s|$)/, "the fence gate's MDX drift sentinel", 'scripts/check-markdown-fences.mjs --drift-sentinel'],
+    [/node\s+scripts\/check-markdown-fences\.mjs\s+--selftest(\s|$)/, "the Markdown fence gate's own probe table", 'scripts/check-markdown-fences.mjs --selftest'],
+    // NOT registered: `npx commitlint --from=<pr base>` needs pull-request refs, so its step
+    // legitimately carries an `if:`, and REQUIRED_LINT refuses `if:`-carrying steps (they cannot
+    // fail the job). Registering it makes this checker red — verified. The residual risk is
+    // narrower than what was closed: the comparison line could still be dropped, but the probe
+    // table above, which is what bounds every ignore regex, can no longer be.
     // #75, both entries with the gate itself. The gate's probe table is required separately
     // from the gate: a table that stops running is a gate whose defeated forms quietly reopen.
     [/node\s+scripts\/build-react-wrappers\.mjs\s+--check(?!\s*--selftest)(\s|$)/, 'the React wrapper drift gate', 'scripts/build-react-wrappers.mjs --check'],
@@ -1026,6 +1055,17 @@ else {
       }
     }
   }
+  // #456, R3 V3 (PR #457): the MDX drift sentinel runs AFTER the fence gate, so a Storybook loader
+  // breakage cannot stop lint-code before the PR has its fence verdict. Order, not just presence.
+  {
+    const at = (re) => lintSteps.findIndex((st) => re.test(commandLines(st)));
+    const gate = at(/node\s+scripts\/check-markdown-fences\.mjs(?!\s*--)(\s|$)/);
+    const sentinel = at(/node\s+scripts\/check-markdown-fences\.mjs\s+--drift-sentinel(\s|$)/);
+    if (gate >= 0 && sentinel >= 0 && sentinel < gate) {
+      problems.push('the fence gate\'s MDX drift sentinel runs BEFORE the fence gate in `lint-code` — a Storybook ' +
+        'loader breakage would then stop the job before the PR has a fence verdict');
+    }
+  }
 
   // REQUIRED describes the `test` job's payload specifically, so it is named rather than looped.
   const steps = wf.jobs?.test?.steps ?? [];
@@ -1123,6 +1163,44 @@ else {
   // this chain makes a failure unreachable. lint-code uses continue-on-error deliberately,
   // rescued by an explicit "Fail if lint errors" step; nothing here is.
   const guarded = Object.fromEntries(JOBS.map((j) => [j, wf.jobs?.[j]]));
+  // NODE_OPTIONS IS A PRELOAD. `--import=data:text/javascript,process.exit(0)` makes every `node`
+  // gate exit 0 before its script runs, with every `run:` line intact — measured live against the
+  // OpenDesign check at REL4 gate pass 2, and it held for every node gate here. No gated job needs
+  // it, so it is refused at workflow, job and step level alike.
+  const hasNodeOptions = (env) => !!env && typeof env === 'object' && Object.keys(env).some((k) => k.toUpperCase() === 'NODE_OPTIONS');
+  if (hasNodeOptions(wf.env)) problems.push('the workflow sets NODE_OPTIONS in `env:` — a preload can make every node gate exit 0 without running');
+  // A DEFAULT SHELL IS A `shell:` ON EVERY STEP. The per-step `shell:` refusal below never saw
+  // `defaults.run.shell` at job or workflow level, so `sh -c true {0}` there ran no gate at all
+  // (REL4 gate pass 3). No job in this workflow sets one.
+  if (wf.defaults?.run?.shell !== undefined) problems.push(`the workflow sets \`defaults.run.shell: ${wf.defaults.run.shell}\` — a shell template decides what every step runs`);
+  for (const [jobName, job] of Object.entries(wf.jobs ?? {})) {
+    if (job?.defaults?.run?.shell !== undefined) problems.push(`job \`${jobName}\` sets \`defaults.run.shell: ${job.defaults.run.shell}\` — a shell template decides what its steps run`);
+  }
+  // EVERY job, not the `guarded` set: lint-code is outside it by design (see its edge assertions),
+  // and it is where the registered node gates run. No job in this workflow uses NODE_OPTIONS.
+  for (const [jobName, job] of Object.entries(wf.jobs ?? {})) {
+    if (hasNodeOptions(job?.env)) problems.push(`job \`${jobName}\` sets NODE_OPTIONS in \`env:\` — a preload can make its node gates exit 0 without running`);
+    for (const st of job?.steps ?? []) {
+      if (hasNodeOptions(st.env)) problems.push(`step "${st.name ?? st.run}" in \`${jobName}\` sets NODE_OPTIONS — a preload can make it exit 0 without running`);
+      // `echo "NODE_OPTIONS=…" >> "$GITHUB_ENV"` would set it for every later step with no `env:`
+      // block in sight. GitHub's runner currently refuses that key from the file (actions/runner
+      // FileCommandManager), so this is defence in depth. A job that genuinely needs, say,
+      // --max-old-space-size is a deliberate edit to this rule, not a silent exemption.
+      // A DRIFT CHECK CANNOT FAIL IF THE TREE IS REGENERATED FIRST. A step running the generator (or
+      // the size recorder) in write mode rewrites what the next step's --check compares (REL4
+      // pass 3, the PR-path twin of the publish-path rule in check-release-graph.mjs).
+      for (const inv of String(st.run ?? '').split('\n').filter((l) => !/^\s*#/.test(l)).join('\n').split(/&&|\|\||;|\||\n/)) {
+        for (const script of ['build-opendesign-package.mjs', 'measure-elements-sizes.mjs']) {
+          if (inv.includes(script) && !/--check\b|--selftest\b/.test(inv)) {
+            problems.push(`step "${st.name ?? st.run}" in \`${jobName}\` runs \`${script}\` in write mode — it regenerates what the drift check then compares`);
+          }
+        }
+      }
+      if (/NODE_OPTIONS/i.test(String(st.run ?? '').split('\n').filter((l) => !/^\s*#/.test(l)).join('\n'))) {
+        problems.push(`step "${st.name ?? st.run}" in \`${jobName}\` names NODE_OPTIONS in its run — writing it to $GITHUB_ENV preloads every later node step`);
+      }
+    }
+  }
   for (const [jobName, job] of Object.entries({ ...guarded, gate })) {
     if (!job) continue;
     if (job['continue-on-error']) problems.push(`job \`${jobName}\` carries continue-on-error — its failure cannot reach the gate`);

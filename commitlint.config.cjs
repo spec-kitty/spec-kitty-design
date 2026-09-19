@@ -139,6 +139,22 @@ const SPEC_KITTY_AUTO_COMMIT_PATTERNS = [
   // empty tail -- and the exact plural noun phrase is fixed, matching how every sibling pattern
   // in this file closes over the CLI's literal wording rather than a loose approximation of it.
   (msg) => /^chore\(retrospective\): backfill \d+ retrospective records\s*(\n|$)/.test(msg),
+  // `spec-kitty agent mission record-analysis` (CLI 3.2.6rc4) commits the analysis report under
+  // this subject. Its scope `record-analysis` is not in `scope-enum` below and this project does
+  // not control the message — the same class as the `chore(spec-kitty)` / `chore(tracer)` entries
+  // above. Exempted rather than reworded for the reason this file's header gives: the commit lands
+  // mid-branch, and rewording it renumbers the `base_commit` each work-package file records and
+  // the tooling reads back, orphaning it. Operator decision, 2026-09-18 (design issue 453).
+  //
+  // Anchored to the EXACT subject plus the mission-slug shape every neighbouring pattern binds to
+  // (`-01` + >=6 uppercase-alphanumerics). An unanchored /^docs\(record-analysis\):/ would exempt
+  // any commit with that scope from EVERY rule — the trap the `chore(spec-kitty)` comment records.
+  // Anchored to end-of-LINE, not end-of-string, like its siblings. Probed in
+  // scripts/check-commitlint-config.mjs, both the exemption and three near misses.
+  (msg) =>
+    /^docs\(record-analysis\): record analysis report for mission [a-z0-9]+(?:-[a-z0-9]+)*-01[A-Z0-9]{6,}\s*(\n|$)/.test(
+      msg,
+    ),
 ];
 
 module.exports = {

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>prose — Spec Kitty</title>
+    <meta name="description" content="prose: 5 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: prose — packages/styles/src/prose/sk-prose.css */
+/* @spec-kitty/styles — consumer-authored prose and prompt content */
+/* The primitive styles native nodes; it never parses or rewrites content. */
+
+.sk-prose {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: calc(
+    var(--sk-space-12) + var(--sk-space-12) + var(--sk-space-12) +
+      var(--sk-space-12) + var(--sk-space-12)
+  );
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+}
+
+.sk-prose > :first-child {
+  margin-block-start: 0;
+}
+
+.sk-prose > :last-child {
+  margin-block-end: 0;
+}
+
+.sk-prose h1,
+.sk-prose h2,
+.sk-prose h3,
+.sk-prose h4,
+.sk-prose h5,
+.sk-prose h6 {
+  margin-block: var(--sk-space-7) var(--sk-space-3);
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-display);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-prose h2 {
+  font-size: var(--sk-text-2xl);
+}
+
+.sk-prose h3 {
+  font-size: var(--sk-text-xl);
+}
+
+.sk-prose p,
+.sk-prose ul,
+.sk-prose ol {
+  margin-block: 0 var(--sk-space-4);
+}
+
+.sk-prose ul,
+.sk-prose ol {
+  padding-inline-start: var(--sk-space-7);
+}
+
+.sk-prose li + li {
+  margin-block-start: var(--sk-space-1);
+}
+
+.sk-prose a {
+  color: var(--sk-color-accent);
+  text-decoration-thickness: var(--sk-border-width-1);
+  text-underline-offset: var(--sk-space-1);
+}
+
+.sk-prose a:focus-visible,
+.sk-prose pre:focus-visible {
+  border-radius: var(--sk-radius-sm);
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-2);
+}
+
+.sk-prose code {
+  border-radius: var(--sk-radius-sm);
+  background: var(--sk-surface-muted);
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-sm);
+}
+
+.sk-prose :not(pre) > code {
+  padding: var(--sk-space-1) var(--sk-space-2);
+}
+
+.sk-prose pre {
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  margin-block: var(--sk-space-5);
+  padding: var(--sk-space-4);
+  overflow-x: auto;
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  background: var(--sk-surface-muted);
+}
+
+.sk-prose pre code {
+  padding: 0;
+  background: transparent;
+  white-space: pre;
+}
+
+.sk-prose .sk-data-table__scroller {
+  max-inline-size: 100%;
+}
+
+@media (forced-colors: active) {
+  .sk-prose pre {
+    border-color: CanvasText;
+  }
+
+  .sk-prose a:focus-visible,
+  .sk-prose pre:focus-visible {
+    outline-color: Highlight;
+  }
+}
+    </style>
+  </head>
+  <body>
+    <section id="prose" data-od-component="prose">
+      <h1>prose</h1>
+      <figure data-od-variant="absent-prompt">
+        <figcaption>absent-prompt</figcaption>
+        <section class="sk-empty-state" aria-labelledby="prompt-empty-heading">
+          <h2 class="sk-empty-state__heading" id="prompt-empty-heading">
+            No prompt available
+          </h2>
+          <p class="sk-empty-state__body">
+            The consumer supplies absence copy and state.
+          </p>
+        </section>
+      </figure>
+      <figure data-od-variant="long-code">
+        <figcaption>long-code</figcaption>
+        <article class="sk-prose">
+          <h2>Long command</h2>
+          <p>The code region owns its overflow and leaves the page width unchanged.</p>
+          <pre
+            role="region"
+            aria-label="Long command example"
+            tabindex="0"
+          ><code>spec-kitty-example --repository=repository-with-an-intentionally-unbroken-name --mission=mission-with-an-intentionally-unbroken-name --work-package=work-package-with-an-intentionally-unbroken-name --evidence=exact-current-head</code></pre>
+        </article>
+      </figure>
+      <figure data-od-variant="narrow">
+        <figcaption>narrow</figcaption>
+        <article class="sk-prose">
+          <h2>Narrow prompt</h2>
+          <p>
+            A deliberately long consumer-authored sentence wraps inside the available
+            content width while retaining its complete text and native paragraph
+            semantics.
+          </p>
+          <pre
+            role="region"
+            aria-label="Narrow code example"
+            tabindex="0"
+          ><code>consumer-authored-command --with=a-long-unbroken-argument-that-scrolls-inside-this-region</code></pre>
+        </article>
+      </figure>
+      <figure data-od-variant="prompt">
+        <figcaption>prompt</figcaption>
+        <article class="sk-prose">
+          <h2>Implementation prompt</h2>
+          <p>
+            Keep consumer-authored structure intact and use <code>--sk-*</code> tokens
+            for presentation.
+          </p>
+          <h3>Requirements</h3>
+          <ul>
+            <li>Preserve native semantics.</li>
+            <li>Contain local overflow.</li>
+          </ul>
+          <p>
+            Follow the <a href="#authoring-guide">component authoring guide</a> before
+            implementation.
+          </p>
+          <ol>
+            <li>Write a failing acceptance check.</li>
+            <li>Implement the smallest public surface.</li>
+          </ol>
+          <pre><code>const state = { phase: 'planned', evidence: true };</code></pre>
+        </article>
+      </figure>
+      <figure data-od-variant="wide-table">
+        <figcaption>wide-table</figcaption>
+        <article class="sk-prose">
+          <h2>Structured evidence</h2>
+          <p>
+            Dense multi-column data remains a native table rather than becoming event
+            history.
+          </p>
+          <div
+            class="sk-data-table__scroller"
+            role="region"
+            aria-label="Structured evidence table"
+            tabindex="0"
+          >
+            <table class="sk-data-table">
+              <caption>
+                Verification evidence
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Identifier</th>
+                  <th scope="col">Source</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Recorded result</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>check-001</td>
+                  <td>consumer-supplied-source-with-a-long-name</td>
+                  <td>Passed</td>
+                  <td>exact-current-head-evidence-without-truncation</td>
+                </tr>
+                <tr>
+                  <td>check-002</td>
+                  <td>another-consumer-supplied-source</td>
+                  <td>Pending</td>
+                  <td>awaiting-independent-verification</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </figure>
+    </section>
+  </body>
+</html>
