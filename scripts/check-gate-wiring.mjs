@@ -1159,6 +1159,16 @@ else {
       // `echo "NODE_OPTIONS=…" >> "$GITHUB_ENV"` sets it for every later step with no `env:` block
       // in sight (REL4 pass 3). A job that genuinely needs, say, --max-old-space-size is a
       // deliberate edit to this rule, not a silent exemption.
+      // A DRIFT CHECK CANNOT FAIL IF THE TREE IS REGENERATED FIRST. A step running the generator (or
+      // the size recorder) in write mode rewrites what the next step's --check compares (REL4
+      // pass 3, the PR-path twin of the publish-path rule in check-release-graph.mjs).
+      for (const inv of String(st.run ?? '').split('\n').filter((l) => !/^\s*#/.test(l)).join('\n').split(/&&|\|\||;|\||\n/)) {
+        for (const script of ['build-opendesign-package.mjs', 'measure-elements-sizes.mjs']) {
+          if (inv.includes(script) && !/--check\b|--selftest\b/.test(inv)) {
+            problems.push(`step "${st.name ?? st.run}" in \`${jobName}\` runs \`${script}\` in write mode — it regenerates what the drift check then compares`);
+          }
+        }
+      }
       if (/NODE_OPTIONS/i.test(String(st.run ?? '').split('\n').filter((l) => !/^\s*#/.test(l)).join('\n'))) {
         problems.push(`step "${st.name ?? st.run}" in \`${jobName}\` names NODE_OPTIONS in its run — writing it to $GITHUB_ENV preloads every later node step`);
       }
