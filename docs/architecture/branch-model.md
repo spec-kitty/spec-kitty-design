@@ -193,3 +193,4 @@ CodeQL-baseline bootstrap gap — quickstart.md's Plan B if no analysis appears)
 analysis of its own head; PATCH the ruleset back to the committed artifact (`enforcement:
 "active"`); record the ruleset's numeric id above; and, after several real promotion cycles,
 recalibrate the mechanism's 10-minute poll budget against observed CodeQL timing.
+
