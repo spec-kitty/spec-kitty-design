@@ -185,10 +185,14 @@ function publishAll(decision, { dryRun }) {
   // Nothing in the repo read that key, so it was one JSON line from here to `latest`, unobservable
   // in the run log. This is the same lesson as the workflow guards, one layer down: the refusal has
   // to cover every input npm actually consults, not just the one this file passes.
-  const overriding = pkgs.filter((p) => typeof p.tag === 'string' && p.tag.trim() !== '');
+  // …AND `publishConfig.tag`, which npm honours ahead of both (REL3 review reproduced it against a
+  // mock registry: `--tag rc` lost to it).
+  const overriding = pkgs.filter(
+    (p) => (typeof p.tag === 'string' && p.tag.trim() !== '') || (typeof p.publishConfig?.tag === 'string' && p.publishConfig.tag.trim() !== ''),
+  );
   if (overriding.length > 0) {
     console.error(
-      `::error::${overriding.map((p) => `${p.name} declares "tag": ${JSON.stringify(p.tag)}`).join('; ')}. ` +
+      `::error::${overriding.map((p) => `${p.name} declares ${p.tag ? `"tag": ${JSON.stringify(p.tag)}` : `"publishConfig.tag": ${JSON.stringify(p.publishConfig.tag)}`}`).join('; ')}. ` +
         'npm resolves `manifest.tag || --tag`, so a manifest tag silently overrides the dist-tag this ' +
         'script passes — including to `latest`. Remove the key; the dist-tag is the workflow\'s to set.',
     );
@@ -470,6 +474,22 @@ function effectProbes() {
       },
     ],
     [
+      'EFFECT (REL3): a manifest `publishConfig.tag` override is refused before any npm call',
+      () => {
+        const f = join(ROOT, 'packages/tokens/package.json');
+        const original = readFileSync(f, 'utf8');
+        const j = JSON.parse(original);
+        if (j.publishConfig?.tag !== undefined) return false; // anchor gone; probe would be vacuous
+        try {
+          writeFileSync(f, `${JSON.stringify({ ...j, publishConfig: { ...(j.publishConfig ?? {}), tag: 'latest' } }, null, 2)}\n`);
+          const r = run({ DIST_TAG: 'rc' });
+          return r.status !== 0 && r.calls.length === 0;
+        } finally {
+          writeFileSync(f, original);
+        }
+      },
+    ],
+    [
       'EFFECT: refuses to publish outside GitHub Actions',
       () => {
         writeFileSync(log, '');
@@ -559,7 +579,7 @@ function effectProbes() {
 // defect this floor exists to catch.
 const PROBE_FLOOR = 22;
 // Effect probes have their own floor: they are the only ones a bypassed `main()` cannot satisfy.
-const EFFECT_FLOOR = 13;
+const EFFECT_FLOOR = 14;
 
 function selftest() {
   let bad = 0;

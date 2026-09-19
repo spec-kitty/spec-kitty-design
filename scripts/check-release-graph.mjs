@@ -389,6 +389,26 @@ const FORBIDDEN = [
 /* ─────────────────────────── the checks, as pure functions ─────────────────────────── */
 
 /** SC-001 — nothing is silently excluded from the release. */
+/**
+ * REL3 review: NO MANIFEST MAY CHOOSE ITS OWN DIST-TAG. npm resolves the published tag as
+ * `publishConfig.tag || manifest.tag || --tag`, so either key silently moves a publish to another
+ * channel while the run log shows the flag's value. The rc payload's script already refused
+ * `manifest.tag`; `publishConfig.tag` reached neither stream's guard, and prod passed no `--tag` at all.
+ */
+export function checkNoManifestDistTag(packages) {
+  const problems = [];
+  for (const p of packages) {
+    if (typeof p.tag === 'string' && p.tag.trim() !== '') {
+      problems.push(`${p.name} declares "tag": ${JSON.stringify(p.tag)} — it overrides \`npm publish --tag\`; the dist-tag is the workflow's to set`);
+    }
+    const pc = p.publishConfig?.tag;
+    if (typeof pc === 'string' && pc.trim() !== '') {
+      problems.push(`${p.name} declares "publishConfig.tag": ${JSON.stringify(pc)} — npm honours it over the workflow's channel; remove it`);
+    }
+  }
+  return problems;
+}
+
 export function checkNothingSilentlyPrivate(packages, expectedPrivate) {
   const problems = [];
   const unexpected = packages.filter((p) => p.private && !expectedPrivate.includes(p.name));
@@ -574,6 +594,10 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
     for (const k of ['subject-digest', 'subject-checksums', 'subject-name']) {
       if (w[k] !== undefined) problems.push(`${label}: the attest step sets \`${k}\` — a second subject source can certify something other than dist-tarballs/`);
     }
+    // A CUSTOM PREDICATE replaces the SLSA build-provenance statement consumers verify by default.
+    for (const k of ['predicate-type', 'predicate', 'predicate-path']) {
+      if (w[k] !== undefined) problems.push(`${label}: the attest step sets \`${k}\` — a custom predicate breaks the SLSA provenance consumers verify with \`gh attestation verify\``);
+    }
   }
   const packAt = idx((st) => runOf(st).trim() === 'node scripts/pack-derived-set.mjs');
   const attestAt = idx(isAttest);
@@ -583,18 +607,27 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
   if (packAt !== -1 && attestAt !== -1 && publishAt !== -1 && verifyAt !== -1) {
     if (!(packAt < attestAt)) problems.push(`${label} attests before it packs — the attestation cannot cover the tarballs`);
     if (!(attestAt < publishAt)) problems.push(`${label} publishes before it attests — an attest failure would come after the bytes shipped`);
+    // NOTHING BETWEEN ATTEST AND PUBLISH. A step there could delete and repack dist-tarballs/ (review
+    // reproduced it green): readPacked would then validate the NEW bytes against a NEW manifest.
+    else if (publishAt !== attestAt + 1) problems.push(`${label} runs a step between the attest and the publish — it could replace the attested tarballs`);
     if (!(publishAt < verifyAt)) problems.push(`${label} runs the integrity check before the publish — it would compare against nothing published yet`);
   }
   if (bumpAt !== -1 && packAt !== -1 && !(bumpAt < packAt)) {
     problems.push(`${label} packs before the prerelease bump — the attested tarballs would carry the unbumped version`);
   }
   if (jobName === 'release') {
+    // THE LOOP'S INPUT IS THE RE-VALIDATED LIST, and nothing else. `npm publish "$file"` alone was
+    // satisfied by `FILES="$(ls -d packages/*/)"` (review reproduced it green against release.yml).
+    const pubRun = publishAt === -1 ? '' : runOf(steps[publishAt]);
+    if (!/FILES="\$\(node scripts\/pack-derived-set\.mjs --list\)"/.test(pubRun) || !/for file in \$FILES; do/.test(pubRun) || (pubRun.match(/\bFILES=/g) ?? []).length !== 1 || /\bfile=/.test(pubRun)) {
+      problems.push(`${label}'s publish loop must take its files only from \`FILES="$(node scripts/pack-derived-set.mjs --list)"\` and iterate \`for file in $FILES; do\`, reassigning neither`);
+    }
     const publishes = steps
       .flatMap((st) => runOf(st).split(/&&|\|\||;|\n/))
       .filter((c) => /npm\s+publish\b/.test(c));
     for (const c of publishes) {
-      if (!/npm\s+publish\s+"\$file"(\s|$|\))/.test(c.trim()) || /packages\//.test(c)) {
-        problems.push(`${label} runs \`${c.trim()}\` — prod must publish only \`"$file"\` from the attested dist-tarballs/ list, never a package directory`);
+      if (!/npm\s+publish\s+"\$file"\s+--tag\s+latest(\s|$|\))/.test(c.trim()) || /packages\//.test(c)) {
+        problems.push(`${label} runs \`${c.trim()}\` — prod must publish only \`"$file"\` from the attested dist-tarballs/ list, with an explicit \`--tag latest\` (a manifest key would otherwise choose the channel)`);
       }
     }
   }
@@ -1252,7 +1285,7 @@ jobs:
       - name: Publish
         run: |
           FILES="$(node scripts/pack-derived-set.mjs --list)"
-          for file in $FILES; do npm publish "$file"; done
+          for file in $FILES; do npm publish "$file" --tag latest; done
       - name: Verify
         run: node scripts/verify-published-integrity.mjs
 `;
@@ -1375,9 +1408,17 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 98;
+const PROBE_FLOOR = 106;
 
 const PROBES = [
+  {
+    what: 'REL3: a manifest `publishConfig.tag` (npm honours it over the workflow\'s channel)',
+    run: () => checkNoManifestDistTag([{ name: '@x/a', publishConfig: { registry: 'r', tag: 'next' } }]),
+  },
+  {
+    what: 'REL3: a manifest top-level `tag`',
+    run: () => checkNoManifestDistTag([{ name: '@x/a', tag: 'latest' }]),
+  },
   {
     what: 'a package marked private with no EXPECTED_PRIVATE entry',
     run: () => checkNothingSilentlyPrivate([{ name: '@x/a', private: true }], []),
@@ -1734,9 +1775,15 @@ const PROBES = [
       payload('the integrity check moved before the publish', PUB + VERIFY, VERIFY + PUB),
       payload('the payload job without `id-token: write`', '      id-token: write\n', ''),
       release('the attest step deleted', ATTEST, ''),
-      release('a publish from a package directory', '          for file in $FILES; do npm publish "$file"; done\n', '          for pkg in tokens; do ( cd "packages/$pkg" && npm publish ); done\n'),
-      release('a bare `npm publish` (repacks in memory)', 'do npm publish "$file"; done', 'do npm publish; done'),
+      release('a publish from a package directory', '          for file in $FILES; do npm publish "$file" --tag latest; done\n', '          for pkg in tokens; do ( cd "packages/$pkg" && npm publish ); done\n'),
+      release('a bare `npm publish` (repacks in memory)', 'do npm publish "$file" --tag latest; done', 'do npm publish; done'),
+      release('prod publishing without an explicit `--tag latest`', 'do npm publish "$file" --tag latest; done', 'do npm publish "$file"; done'),
       release('the workflow without `attestations: write`', '  attestations: write\n', ''),
+      payload('a step between the attest and the publish (could repack dist-tarballs/)', PUB, '      - name: Repack\n        run: rm -rf dist-tarballs && node scripts/pack-derived-set.mjs\n' + PUB),
+      release('a step between the attest and the publish', '      - name: Publish\n        run: |\n          FILES=', '      - name: Tidy\n        run: echo tidy\n      - name: Publish\n        run: |\n          FILES='),
+      release('the publish loop fed from somewhere other than the re-validated list', 'FILES="$(node scripts/pack-derived-set.mjs --list)"', 'FILES="$(ls -d packages/*/)"'),
+      release('the loop variable reassigned inside the loop', 'do npm publish "$file" --tag latest; done', 'do file=packages/tokens; npm publish "$file" --tag latest; done'),
+      payload('a custom predicate on the attest step', "          subject-path: 'dist-tarballs/*.tgz'\n", "          subject-path: 'dist-tarballs/*.tgz'\n          predicate-type: https://example.com/custom\n"),
       {
         what: 'REL3 caller: the rc caller without `attestations: write` (the payload needs it; the caller is its ceiling)',
         run: () => checkPublishingCallersDelegate([{ file: 'release-rc.yml', text: withCallerDefect('      attestations: write\n', '') }], REUSABLE_PAYLOAD_FIXTURE),
@@ -2223,6 +2270,7 @@ function main() {
 
   const problems = [
     ...checkNothingSilentlyPrivate(pkgs, EXPECTED_PRIVATE),
+    ...checkNoManifestDistTag(pkgs),
     ...checkTarballsNonEmpty(tarballs),
     ...checkExportsResolve(tarballs),
     ...checkLegacyEntriesResolve(tarballs),

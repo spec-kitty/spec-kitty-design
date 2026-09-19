@@ -8,9 +8,14 @@
  * The attestation certifies the tarball FILES in dist-tarballs/. Publishing those files should put the
  * same bytes on the registry, but "should" is not evidence: a publish that repacked, a registry that
  * rewrote, or a step that published something else would leave a valid attestation over bytes nobody
- * can install. So after publishing, each name@version is DOWNLOADED again — `npm pack <spec> --json`,
- * the path REL4 measured to work against GitHub Packages (`npm view` returns exit 0 with zero bytes
- * there) — and its SHA-512 is recomputed and compared with the attested one.
+ * can install. So after publishing, each name@version is DOWNLOADED again — `npm pack <spec> --json`
+ * (`npm view` returns exit 0 with zero bytes against GitHub Packages, measured in REL2,
+ * bump-prerelease.mjs) — and its SHA-512 is recomputed and compared with the attested one.
+ *
+ * WITH A THROWAWAY `--cache`. The pack step already put each tarball into npm's shared cache, keyed by
+ * its integrity, so a plain `npm pack <spec>` answers from the cache: it checks only the integrity the
+ * registry ADVERTISES and never re-reads a byte (REL3 review, reproduced: `(cache hit)`, no blob GET).
+ * A fresh cache per fetch forces the real blob download (`cache miss`, a GET to the blob store).
  *
  * A just-published version can take a moment to become readable, so a download is retried a bounded
  * number of times. A mismatch is never retried: bytes that differ do not converge.
@@ -26,8 +31,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const KNOWN_ARGV = new Set(['--selftest']);
 
 /** Download name@version with `npm pack` into `dest`; return the file path. Throws on any failure. */
-function npmFetch(spec, dest) {
-  const r = spawnSync('npm', ['pack', spec, '--json', '--pack-destination', dest], {
+export function npmFetch(spec, dest) {
+  const r = spawnSync('npm', ['pack', spec, '--json', '--pack-destination', dest, '--cache', join(dest, '.npm-cache')], {
     cwd: ROOT, // the root .npmrc maps @spec-kitty to GitHub Packages
     encoding: 'utf8',
     maxBuffer: 32 * 1024 * 1024,
@@ -134,11 +139,28 @@ async function selftest() {
     ['a version never readable fails after the bounded attempts', () => { const calls = []; const r = run({ fetch: registry({ failFirst: 99, calls }), attempts: 3 }); return !r.ok && calls.length === 3 && /after 3 attempts/.test(r.error); }],
     ['a missing packed.json is refused before any download', () => { const calls = []; const empty = mkdtempSync(join(tmpdir(), 'verify-empty-')); try { verifyPublished({ root: empty, fetch: registry({ calls }), log: quiet }); return false; } catch (e) { return calls.length === 0 && /missing|no packages/.test(e.message); } finally { rmSync(empty, { recursive: true, force: true }); } }],
     ['every attested entry is checked, not just the first', () => { const calls = []; run({ fetch: registry({ calls }) }); return calls.length === 2; }],
+    ['the real fetch uses a throwaway --cache, so it re-reads bytes instead of hitting the pack step\'s cache', () => {
+      const bin = mkdtempSync(join(tmpdir(), 'verify-npm-'));
+      const dest = mkdtempSync(join(tmpdir(), 'verify-dest-'));
+      const saved = process.env.PATH;
+      try {
+        writeFileSync(join(bin, 'npm'), `#!/bin/sh\necho "$*" > "${join(bin, 'args')}"\nprintf x > "${join(dest, 'f.tgz')}"\necho '[{"filename":"f.tgz"}]'\n`, { mode: 0o755 });
+        process.env.PATH = `${bin}:${saved}`;
+        npmFetch('@x/y@1.0.0', dest);
+        const args = readFileSync(join(bin, 'args'), 'utf8');
+        const m = args.match(/--cache (\S+)/);
+        return Boolean(m) && m[1].startsWith(dest);
+      } finally {
+        process.env.PATH = saved;
+        rmSync(bin, { recursive: true, force: true });
+        rmSync(dest, { recursive: true, force: true });
+      }
+    }],
     // SPAWNED, not a Set lookup: these fail if the real argv refusal or the import guard goes.
     ['an unknown argument exits 2', () => spawnSync(process.execPath, [fileURLToPath(import.meta.url), '--nope'], { encoding: 'utf8' }).status === 2],
     ['importing the module verifies nothing', () => { const r = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(import.meta.url)})`], { encoding: 'utf8' }); return r.status === 0 && `${r.stdout}${r.stderr}`.trim() === ''; }],
   ];
-  const PROBE_FLOOR = 9;
+  const PROBE_FLOOR = 10;
   let bad = 0;
   for (const [what, fn] of PROBES) {
     let ok = false;

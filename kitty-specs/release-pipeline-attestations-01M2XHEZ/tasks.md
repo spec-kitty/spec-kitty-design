@@ -26,9 +26,9 @@
 - **Depends on**: —
 - **Independent test**: each script's selftest passes, with probes that go red on each defect; the effect probes show `npm publish <tgz>` and never a directory publish.
 
-- [ ] T001 pack-derived-set.mjs
-- [ ] T002 verify-published-integrity.mjs
-- [ ] T003 publish-derived-set.mjs publishes tarballs
+- [x] T001 pack-derived-set.mjs
+- [x] T002 verify-published-integrity.mjs
+- [x] T003 publish-derived-set.mjs publishes tarballs
 
 ### WP02 — Attestation in both publish paths, and the gates
 
@@ -36,10 +36,10 @@
 - **Depends on**: WP01
 - **Independent test**: the release-graph rules are green on the real workflows and red on every probe's defect; gate wiring and action pins are green.
 
-- [ ] T004 rc payload and caller
-- [ ] T005 prod release.yml
-- [ ] T006 release-graph rules and probes
-- [ ] T007 Gate wiring and pins
+- [x] T004 rc payload and caller
+- [x] T005 prod release.yml
+- [x] T006 release-graph rules and probes
+- [x] T007 Gate wiring and pins
 
 ### WP03 — Runbook and live proof
 
@@ -47,5 +47,5 @@
 - **Depends on**: WP02
 - **Independent test**: `gh attestation verify` passes for every package of the next rc, fetched from the registry.
 
-- [ ] T008 Runbook
+- [x] T008 Runbook
 - [ ] T009 Post-merge live proof

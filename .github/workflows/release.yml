@@ -32,11 +32,16 @@ jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # THE REGISTRY TOKEN IS STEP-SCOPED, NOT JOB-WIDE (REL3 review). `id-token: write` makes every step
+    # in this job able to mint an OIDC token and so sign an attestation; a job-wide NODE_AUTH_TOKEN and
+    # checkout's persisted credentials widened what any one step could do on top. So: the token goes
+    # only to the steps that talk to the registry, checkout does not persist credentials, and the SBOM
+    # tool runs from the lockfile (`npx --no-install`) instead of being fetched unpinned at release time.
+    # What remains is inherent to attesting in the building job (SLSA Build L2): the attestation proves
+    # these bytes came from this workflow on a GitHub-hosted runner, not that no step in it misbehaved.
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 0, persist-credentials: false }
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
         with:
           node-version: '22'
@@ -134,7 +139,7 @@ jobs:
 
       - name: Generate CycloneDX SBOM (FR-045)
         run: |
-          npx @cyclonedx/cyclonedx-npm \
+          npx --no-install @cyclonedx/cyclonedx-npm \
             --output-format json \
             --output-file spec-kitty-design-sbom.cdx.json
           echo "SBOM components: $(node -e "const d=require('./spec-kitty-design-sbom.cdx.json'); console.log(d.components.length)")"
@@ -174,6 +179,8 @@ jobs:
       # Dropping `-e` therefore bought nothing and silently removed protection from every
       # *unhandled* command in the block.
       - name: Publish every package in the derived set
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           # THE ATTESTED FILES, NEVER A PACKAGE DIRECTORY. `--list` re-validates dist-tarballs/ against
@@ -190,7 +197,9 @@ jobs:
             # per package outside the publish call. This loop is not routed through
             # scripts/publish-derived-set.mjs: that script refuses `latest` unconditionally (REL2), and
             # this is the prod stream, which owns `latest`.
-            if out="$( npm publish "$file" 2>&1 )"; then
+            # `--tag latest` EXPLICITLY: without it npm resolves `publishConfig.tag || manifest.tag ||
+            # latest`, so one manifest key would silently move prod to another channel (REL3 review).
+            if out="$( npm publish "$file" --tag latest 2>&1 )"; then
               echo "$out"
             else
               echo "$out"
@@ -240,11 +249,15 @@ jobs:
 
       - name: "[ENFORCED] The registry holds exactly the attested bytes (#364)"
         run: node scripts/verify-published-integrity.mjs
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # SAME REASONING AS THE RC PAYLOAD, and it applies here now that prod publishes to GitHub
       # Packages too: `npm view` returns exit 0 with zero bytes against this registry, so a report
       # built on it is blind and green. `npm dist-tag ls` works, and an empty read is a FAILED read.
       - name: "[ENFORCED] Report the published dist-tags"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           FAILED=""

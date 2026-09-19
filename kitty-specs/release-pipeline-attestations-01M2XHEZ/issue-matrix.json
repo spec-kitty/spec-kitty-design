@@ -1,28 +1,28 @@
 {
   "rows": {
     "#361": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Epic stays open: this mission delivers REL3 item 3; REL1 CodeQL follow-up (#362) and the rest of #364 remain",
       "fr": null,
       "nfr": null,
       "repo": null,
       "sc": null,
-      "scope": null,
+      "scope": "parent epic",
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "title": "Epic: Release pipeline \u2014 dual-stream rc/prod publishing",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#364": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "PR #469; items 4 (republish error code) and 5 (routing docs) and making packages public are outside this mission and stay on #364",
       "fr": null,
       "nfr": null,
       "repo": null,
       "sc": null,
-      "scope": null,
+      "scope": "scope item 3 only (attestations), per the operator",
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "title": "[REL3] prod stream on GitHub Packages and registry routing",
+      "verdict": "in-mission",
+      "wp": "WP01,WP02,WP03"
     }
   },
   "schema_version": 1

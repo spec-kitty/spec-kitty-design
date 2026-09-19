@@ -6,94 +6,95 @@
   "criteria": [
     {
       "criterion_id": "FR-001",
-      "description": "Verify FR-001 is satisfied",
+      "description": "Each publish path packs the derived set into dist-tarballs/ after any bump, recording SHA-512s",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "scripts/pack-derived-set.mjs (18 probes); pack step in publish-packages.yml and release.yml; release-graph order rule bump < pack < attest",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 1)",
+      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
       "criterion_id": "FR-002",
-      "description": "Verify FR-002 is satisfied",
+      "description": "A SHA-pinned attest-build-provenance step attests exactly dist-tarballs/*.tgz before any publish",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "attest step v4.2.2 = 4d101475\u2026 in both workflows; checkAttestation: pin, unconditional, sole subject, no predicate override, publish directly after attest (probes, revert-tested)",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 1)",
+      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
       "criterion_id": "FR-003",
-      "description": "Verify FR-003 is satisfied",
+      "description": "Both paths publish the attested tarball files, never a directory",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "publish-derived-set.mjs publishes readPacked() tarballs (effect probes); release.yml loop publishes \"$file\" from pack-derived-set.mjs --list with --tag latest (release-graph rules + probes)",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 1)",
+      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
       "criterion_id": "FR-004",
-      "description": "Verify FR-004 is satisfied",
+      "description": "After publishing, the registry bytes are re-downloaded and compared with the attested SHA-512",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "scripts/verify-published-integrity.mjs with a throwaway npm cache per fetch (a real blob GET, not a cache hit; 10 probes); checked live against 1.1.0-rc.2 with a registry-mismatch control",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 1)",
+      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
       "criterion_id": "FR-005",
-      "description": "Verify FR-005 is satisfied",
+      "description": "id-token and attestations write on the payload job, rc caller and release.yml; no contents: write in the payload; ceiling holds",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "PAYLOAD_PERMISSIONS + checkPublishingCallersDelegate (ceiling) + checkAttestation (floor); probes for payload, caller and prod",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 1)",
+      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
       "criterion_id": "FR-006",
-      "description": "Verify FR-006 is satisfied",
+      "description": "publish-derived-set.mjs keeps its latest refusal and branded decision and publishes tarballs",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "22 decision + 14 effect probes, including tarball argument, no package-dir cwd, swapped/smuggled tarball, manifest tag and publishConfig.tag",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 1)",
+      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
       "criterion_id": "FR-007",
-      "description": "Verify FR-007 is satisfied",
+      "description": "check-release-graph.mjs asserts the attestation contract for both paths",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "checkAttestation + exact-step rule; 106 probes, each new rule revert-tested red",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 1)",
+      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
       "criterion_id": "FR-008",
-      "description": "Verify FR-008 is satisfied",
+      "description": "The CycloneDX SBOM is unchanged and still produced on both paths",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "SBOM step kept; the tool now runs from the lockfile (npx --no-install, exact 6.0.1)",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 1)",
+      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
       "criterion_id": "FR-009",
-      "description": "Verify FR-009 is satisfied",
+      "description": "The runbook documents verification and FR-044 met by attestations",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "docs/release-runbook.md: steps, Verifying a published package (incl. rc.0\u2013rc.2 unattested, SLSA L2 scope), failure modes",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 1)",
+      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     }
   ],
-  "negative_invariants": []
+  "negative_invariants": [],
+  "notes": ""
 }

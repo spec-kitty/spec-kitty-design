@@ -146,8 +146,19 @@ gh attestation verify spec-kitty-elements-1.1.0-rc.3.tgz --repo spec-kitty/spec-
 ```
 
 A pass means the tarball's digest was attested by a workflow run in this repository. The output names
-the workflow, ref and commit that built it. A failure means the bytes you hold are not the bytes this
-repository's release workflows published.
+the workflow, ref and commit that built it. For any version published after attestations were added
+(REL3, #364), a failure means the bytes you hold are not the bytes this repository's release workflows
+published. **Versions published before that, `1.1.0-rc.0` to `1.1.0-rc.2`, carry no attestation**, so
+`gh attestation verify` finds nothing for them.
+
+**What an attestation does and does not prove.** It is SLSA Build Level 2 provenance: a signed
+statement, from this repository's release workflow on a GitHub-hosted runner, that it produced these
+exact bytes from the named commit. The attest step runs in the same job as the build. So it cannot
+vouch that no step in that job misbehaved. The workflows reduce that surface: the registry token is
+given only to the steps that talk to the registry, checkout keeps no credentials, and the SBOM tool
+runs from the lockfile rather than being fetched at release time. It is still provenance, not a
+guarantee of a clean build. Attestations on this plan also need the repository to stay **public**;
+making it private would stop new releases from being attestable.
 
 There is one package list, and it is computed. Until #80 there were three hand-written ones and they
 disagreed: `elements` was built on every release and never published, and `react` appeared in none of
@@ -225,20 +236,29 @@ it is the brand assets and 30 OTF font files that `FR-105` records as intended p
 ## If the release fails
 
 - **`404 Not Found - PUT`** — the scope does not exist, or the token cannot write to it. Steps 2–4.
-- **The attest step fails** (`Unable to get ACTIONS_ID_TOKEN_REQUEST_URL`, or a 403 on the attestations
-  API) — the workflow lost `id-token: write` or `attestations: write`. For the rc stream the CALLER
-  (`release-rc.yml`) must grant both too, because a reusable workflow cannot exceed its caller.
-  `check-release-graph.mjs` refuses either loss on the PR. Nothing was published: the attest step runs
-  first.
+- **The attest step fails with `missing "id-token" permission`, or a 403 on the attestations API** —
+  the workflow lost `id-token: write` or `attestations: write`. For the rc stream, a CALLER
+  (`release-rc.yml`) missing either fails workflow validation before any step runs, because a reusable
+  workflow cannot exceed its caller. `check-release-graph.mjs` refuses either loss on the PR. Nothing
+  was published: the attest step runs first.
+- **The attest step fails for no reason in this repository** (Sigstore, Rekor or the attestations API
+  unavailable) — nothing was published, because attesting comes first. Re-run once the service is
+  back.
 - **`… changed after packing` or `… does not list`** — something touched `dist-tarballs/` between the
   pack and the publish. The publish refuses rather than ship unattested bytes.
 - **`the registry serves … but the attested tarball is …`** — the verify step found different bytes on
-  the registry. Treat that published version as suspect, and do not re-run over it.
+  the registry. Treat that published version as suspect and investigate before anything else.
+  Re-running cannot fix a published version.
 - **A package published and another did not** — this is **expected** on any mid-loop failure, not
   impossible. npm has no atomic multi-package publish, so whatever went out stays out. The publish
-  step is built for it: an already-published version is skipped rather than treated as an error,
-  and real failures are collected and reported together. Fix the cause and re-run the same tag —
-  the retry skips what is already on the registry and completes the set.
+  step halts at the first real failure, and on a re-run an already-published version is skipped
+  rather than treated as an error. Fix the cause and re-run the same tag. The retry re-packs,
+  re-attests and verifies the whole set, and completes it.
+  **The retry is sound only if the rebuild reproduces the same bytes.** The same commit on a
+  GitHub-hosted runner does, because the checkout path is fixed and `npm pack` is deterministic.
+  A changed toolchain between attempts could change a bundle. The Node version floats within `22`.
+  If the bytes differ, the verify step fails for the packages already published, and that version
+  cannot be completed: cut the next version instead.
 
 ## What this repo does not do
 

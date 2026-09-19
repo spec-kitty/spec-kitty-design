@@ -5,6 +5,8 @@
  *   node scripts/pack-derived-set.mjs            pack every publishable package into dist-tarballs/
  *   node scripts/pack-derived-set.mjs --list     validate dist-tarballs/ and print one tarball path per
  *                                                line, in topological order (the prod loop's input)
+ *                                                — ABSOLUTE paths: npm reads a relative `dist-tarballs/x.tgz`
+ *                                                as a GitHub `owner/repo` shorthand and fails with a git error
  *   node scripts/pack-derived-set.mjs --selftest run the probe table
  *
  * WHY FILES. Both publish paths used to run `npm publish` inside the package directory, so npm packed
@@ -111,6 +113,10 @@ export function readPacked({ root = ROOT } = {}) {
   const got = entries.map((e) => `${e.name}@${e.version}`).join(' ');
   if (want !== got) throw new Error(`${MANIFEST} does not match the derived set:\n  packed:  ${got}\n  derived: ${want}`);
   for (const e of entries) {
+    // A BARE FILE NAME, never a path: `../outside.tgz` would publish a file the attest glob never saw.
+    if (typeof e.file !== 'string' || !/^[A-Za-z0-9._-]+\.tgz$/.test(e.file) || e.file.startsWith('.')) {
+      throw new Error(`${MANIFEST} lists ${JSON.stringify(e.file)}, which is not a plain tarball name inside ${PACK_DIR_NAME}/`);
+    }
     const file = join(outDir, e.file);
     if (!existsSync(file)) throw new Error(`${e.file} is listed in ${MANIFEST} but missing`);
     const now = sha512Integrity(file);
@@ -193,6 +199,7 @@ const PROBES = [
   ['readPacked refuses a tarball the manifest does not list (the attest glob would cover it)', () => withRoot(TWO, (root) => { const { outDir } = packSet({ root, pack: fakePack() }); writeFileSync(join(outDir, 'extra.tgz'), 'x'); return throws(() => readPacked({ root }), /does not list/); })],
   ['readPacked refuses a pack from before the version bump', () => withRoot(TWO, (root) => { packSet({ root, pack: fakePack() }); const f = join(root, 'packages/tokens/package.json'); writeFileSync(f, JSON.stringify({ ...JSON.parse(readFileSync(f, 'utf8')), version: '1.1.0-rc.3' })); return throws(() => readPacked({ root }), /does not match the derived set/); })],
   ['readPacked refuses a manifest whose order differs from the topological set', () => withRoot(TWO, (root) => { const { outDir } = packSet({ root, pack: fakePack() }); const p = join(outDir, MANIFEST); const m = JSON.parse(readFileSync(p, 'utf8')); m.entries.reverse(); writeFileSync(p, JSON.stringify(m)); return throws(() => readPacked({ root }), /does not match/); })],
+  ['readPacked refuses a manifest entry that points outside dist-tarballs/', () => withRoot(TWO, (root) => { const { outDir } = packSet({ root, pack: fakePack() }); writeFileSync(join(root, 'outside.tgz'), 'x'); const p = join(outDir, MANIFEST); const m = JSON.parse(readFileSync(p, 'utf8')); m.entries[0].file = '../outside.tgz'; m.entries[0].integrity = sha512Integrity(join(root, 'outside.tgz')); writeFileSync(p, JSON.stringify(m)); return throws(() => readPacked({ root }), /not a plain tarball name/); })],
   ['readPacked refuses an empty entry list', () => withRoot(TWO, (root) => { mkdirSync(join(root, PACK_DIR_NAME)); writeFileSync(join(root, PACK_DIR_NAME, MANIFEST), JSON.stringify({ entries: [] })); return throws(() => readPacked({ root }), /no tarballs/); })],
   // SPAWNED, not a Set lookup: the probe must fail if the real argv refusal or the import guard goes.
   ['an unknown argument exits 2 before anything is packed', () => childLeavesNoPack([fileURLToPath(import.meta.url), '--nope'], (r) => r.status === 2)],
@@ -210,7 +217,7 @@ function childLeavesNoPack(args, ok) {
     rmSync(out, { recursive: true, force: true });
   }
 }
-const PROBE_FLOOR = 17;
+const PROBE_FLOOR = 18;
 
 function selftest() {
   let bad = 0;
