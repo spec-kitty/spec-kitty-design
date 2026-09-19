@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>workflow-board — Spec Kitty</title>
+    <meta name="description" content="workflow-board: 7 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: workflow-board — packages/styles/src/workflow-board/sk-workflow-board.css */
+/* @spec-kitty/styles — native workflow-board presentation (#209) */
+/*
+ * This styles-only family preserves consumer-authored light-DOM semantics.
+ * The consumer adds role="region", exactly one accessible name, and
+ * tabindex="0" to the scroller only after measuring real horizontal overflow.
+ * CSS owns presentation and containment; it does not measure or mutate state.
+ */
+
+.sk-workflow-board {
+  display: grid;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  gap: var(--sk-space-3);
+  font-family: var(--sk-font-sans);
+  color: var(--sk-fg-body);
+}
+
+.sk-workflow-board__scroller {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(
+    var(--sk-layout-workflow-lane-min-inline-size),
+    1fr
+  );
+  align-items: start;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  gap: var(--sk-space-4);
+  padding: var(--sk-space-1);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  border-radius: var(--sk-radius-md);
+}
+
+.sk-workflow-board__scroller:focus-visible {
+  outline-width: var(--sk-border-width-2);
+  outline-style: solid;
+  outline-color: var(--sk-border-focus);
+  outline-offset: calc(
+    var(--sk-border-width-2) - var(--sk-border-width-4)
+  );
+}
+    </style>
+  </head>
+  <body>
+    <section id="workflow-board" data-od-component="workflow-board">
+      <h1>workflow-board</h1>
+      <figure data-od-variant="all-empty">
+        <figcaption>all-empty</figcaption>
+        <div class="sk-workflow-board">
+          <h2 id="workflow-board-all-empty-title">Work Packages — all lanes empty</h2>
+          <div
+            class="sk-workflow-board__scroller"
+            role="region"
+            aria-labelledby="workflow-board-all-empty-title"
+            tabindex="0"
+          >
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-all-empty-planned-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-all-empty-planned-title"
+                >
+                  Planned
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="0 work packages"
+                  >0</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list"></ol>
+              <div class="sk-empty-state">
+                <h4 class="sk-empty-state__heading">Nothing planned</h4>
+                <p class="sk-empty-state__body">New work will appear here.</p>
+              </div>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-all-empty-doing-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-all-empty-doing-title"
+                >
+                  Doing
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="0 work packages"
+                  >0</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list"></ol>
+              <div class="sk-empty-state">
+                <h4 class="sk-empty-state__heading">Nothing in progress</h4>
+                <p class="sk-empty-state__body">Started work will appear here.</p>
+              </div>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-all-empty-review-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-all-empty-review-title"
+                >
+                  In review
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="0 work packages"
+                  >0</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list"></ol>
+              <div class="sk-empty-state">
+                <h4 class="sk-empty-state__heading">Nothing to review</h4>
+                <p class="sk-empty-state__body">Review-ready work will appear here.</p>
+              </div>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-all-empty-approved-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-all-empty-approved-title"
+                >
+                  Approved
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="0 work packages"
+                  >0</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list"></ol>
+              <div class="sk-empty-state">
+                <h4 class="sk-empty-state__heading">Nothing approved</h4>
+                <p class="sk-empty-state__body">Approved work will appear here.</p>
+              </div>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-all-empty-done-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-all-empty-done-title"
+                >
+                  Done
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="0 work packages"
+                  >0</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list"></ol>
+              <div class="sk-empty-state">
+                <h4 class="sk-empty-state__heading">Nothing completed</h4>
+                <p class="sk-empty-state__body">Completed work will appear here.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </figure>
+      <figure data-od-variant="fifty-items">
+        <figcaption>fifty-items</figcaption>
+        <div class="sk-workflow-board">
+          <h2>Work Packages — 50-item scale</h2>
+          <div class="sk-workflow-board__scroller">
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-fifty-items-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-fifty-items-title"
+                >
+                  Large queue
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="50 work packages"
+                  >50</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Work package 01</li>
+                <li>Work package 02</li>
+                <li>Work package 03</li>
+                <li>Work package 04</li>
+                <li>Work package 05</li>
+                <li>Work package 06</li>
+                <li>Work package 07</li>
+                <li>Work package 08</li>
+                <li>Work package 09</li>
+                <li>Work package 10</li>
+                <li>Work package 11</li>
+                <li>Work package 12</li>
+                <li>Work package 13</li>
+                <li>Work package 14</li>
+                <li>Work package 15</li>
+                <li>Work package 16</li>
+                <li>Work package 17</li>
+                <li>Work package 18</li>
+                <li>Work package 19</li>
+                <li>Work package 20</li>
+                <li>Work package 21</li>
+                <li>Work package 22</li>
+                <li>Work package 23</li>
+                <li>Work package 24</li>
+                <li>Work package 25</li>
+                <li>Work package 26</li>
+                <li>Work package 27</li>
+                <li>Work package 28</li>
+                <li>Work package 29</li>
+                <li>Work package 30</li>
+                <li>Work package 31</li>
+                <li>Work package 32</li>
+                <li>Work package 33</li>
+                <li>Work package 34</li>
+                <li>Work package 35</li>
+                <li>Work package 36</li>
+                <li>Work package 37</li>
+                <li>Work package 38</li>
+                <li>Work package 39</li>
+                <li>Work package 40</li>
+                <li>Work package 41</li>
+                <li>Work package 42</li>
+                <li>Work package 43</li>
+                <li>Work package 44</li>
+                <li>Work package 45</li>
+                <li>Work package 46</li>
+                <li>Work package 47</li>
+                <li>Work package 48</li>
+                <li>Work package 49</li>
+                <li>Work package 50</li>
+              </ol>
+            </section>
+          </div>
+        </div>
+      </figure>
+      <figure data-od-variant="fitting">
+        <figcaption>fitting</figcaption>
+        <div class="sk-workflow-board">
+          <h2>Work Packages — wide fitting control</h2>
+          <div class="sk-workflow-board__scroller">
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-fitting-planned-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-fitting-planned-title"
+                >
+                  Planned
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="1 work package"
+                  >1</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Define acceptance evidence</li>
+              </ol>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-fitting-doing-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-fitting-doing-title"
+                >
+                  Doing
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="1 work package"
+                  >1</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Author native fixtures</li>
+              </ol>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-fitting-review-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-fitting-review-title"
+                >
+                  In review
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="1 work package"
+                  >1</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Inspect accessibility output</li>
+              </ol>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-fitting-approved-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-fitting-approved-title"
+                >
+                  Approved
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="1 work package"
+                  >1</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Confirm generated exports</li>
+              </ol>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-fitting-done-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-fitting-done-title"
+                >
+                  Done
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="1 work package"
+                  >1</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Record implementation research</li>
+              </ol>
+            </section>
+          </div>
+        </div>
+      </figure>
+      <figure data-od-variant="long-labels-and-items">
+        <figcaption>long-labels-and-items</figcaption>
+        <div class="sk-workflow-board">
+          <h2 id="workflow-board-long-title">
+            Work Packages with unusually long supplied labels
+          </h2>
+          <div
+            class="sk-workflow-board__scroller"
+            role="region"
+            aria-labelledby="workflow-board-long-title"
+            tabindex="0"
+          >
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-long-planned-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-long-planned-title"
+                >
+                  Planned work awaiting dependency reconciliation across several
+                  independently versioned packages
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="2 work packages"
+                  >2</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>
+                  Document the complete consumer-authored overflow synchronization
+                  responsibility without abbreviating its meaning
+                </li>
+                <li>
+                  Verify the unbroken native ordered-list relationship while opaque
+                  content wraps inside the lane
+                </li>
+              </ol>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-long-review-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-long-review-title"
+                >
+                  Independent accessibility and browser interoperability review
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="2 work packages"
+                  >2</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>
+                  Inspect the
+                  exceptionallylongunbrokentestidentifierthatmustwrapwithoutwideningthepageoroverlappingthecount
+                </li>
+                <li>
+                  <a
+                    href="#workflow-board-long-focus-target"
+                    style="color: var(--sk-color-yellow)"
+                    >Focus this long consumer-owned work package link and keep all of it
+                    visible inside the local scroller</a
+                  >
+                </li>
+              </ol>
+            </section>
+          </div>
+        </div>
+      </figure>
+      <figure data-od-variant="one-empty-lane">
+        <figcaption>one-empty-lane</figcaption>
+        <div class="sk-workflow-board">
+          <h2 id="workflow-board-one-empty-title">Work Packages — one empty lane</h2>
+          <div
+            class="sk-workflow-board__scroller"
+            role="region"
+            aria-labelledby="workflow-board-one-empty-title"
+            tabindex="0"
+          >
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-one-empty-planned-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-one-empty-planned-title"
+                >
+                  Planned
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="2 work packages"
+                  >2</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Define acceptance evidence</li>
+                <li>Map token dependencies</li>
+              </ol>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-one-empty-doing-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-one-empty-doing-title"
+                >
+                  Doing
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="1 work package"
+                  >1</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Author native fixtures</li>
+              </ol>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-one-empty-review-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-one-empty-review-title"
+                >
+                  In review
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="0 work packages"
+                  >0</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list"></ol>
+              <div class="sk-empty-state">
+                <h4 class="sk-empty-state__heading">Nothing to review</h4>
+                <p class="sk-empty-state__body">Review-ready work will appear here.</p>
+              </div>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-one-empty-approved-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-one-empty-approved-title"
+                >
+                  Approved
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="1 work package"
+                  >1</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Confirm generated exports</li>
+              </ol>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-one-empty-done-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-one-empty-done-title"
+                >
+                  Done
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="1 work package"
+                  >1</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Record implementation research</li>
+              </ol>
+            </section>
+          </div>
+        </div>
+      </figure>
+      <figure data-od-variant="populated">
+        <figcaption>populated</figcaption>
+        <div class="sk-workflow-board">
+          <h2 id="workflow-board-populated-title">Work Packages</h2>
+          <div
+            class="sk-workflow-board__scroller"
+            role="region"
+            aria-labelledby="workflow-board-populated-title"
+            tabindex="0"
+          >
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-populated-planned-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-populated-planned-title"
+                >
+                  Planned
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="2 work packages"
+                  >2</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Define acceptance evidence</li>
+                <li>Map token dependencies</li>
+              </ol>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-populated-doing-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-populated-doing-title"
+                >
+                  Doing
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="1 work package"
+                  >1</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Author native fixtures</li>
+              </ol>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-populated-review-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-populated-review-title"
+                >
+                  In review
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="2 work packages"
+                  >2</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Check native list order</li>
+                <li>Inspect accessibility output</li>
+              </ol>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-populated-approved-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-populated-approved-title"
+                >
+                  Approved
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="1 work package"
+                  >1</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Confirm generated exports</li>
+              </ol>
+            </section>
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-populated-done-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-populated-done-title"
+                >
+                  Done
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="1 work package"
+                  >1</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Record implementation research</li>
+              </ol>
+            </section>
+          </div>
+        </div>
+      </figure>
+      <figure data-od-variant="single-lane-narrow">
+        <figcaption>single-lane-narrow</figcaption>
+        <div class="sk-workflow-board">
+          <h2>Work Packages — selected lane</h2>
+          <div class="sk-workflow-board__scroller">
+            <section
+              class="sk-workflow-lane"
+              aria-labelledby="workflow-board-single-lane-title"
+            >
+              <header class="sk-workflow-lane__header">
+                <h3
+                  class="sk-workflow-lane__title"
+                  id="workflow-board-single-lane-title"
+                >
+                  In review
+                </h3>
+                <span class="sk-workflow-lane__count" aria-label="2 work packages"
+                  >2</span
+                >
+              </header>
+              <ol class="sk-workflow-lane__list">
+                <li>Review public component contract</li>
+                <li>Verify browser evidence</li>
+              </ol>
+            </section>
+          </div>
+        </div>
+      </figure>
+    </section>
+  </body>
+</html>

@@ -13,9 +13,8 @@
  * so it cannot fall behind the library it describes without a red gate.
  *
  * WHAT IS GENERATED, AND WHAT IS AUTHORED.
- *   generated  tokens.css, fonts/, components.html, components.manifest.json, manifest.json,
- *              metadata.json, and the
- *              region of DESIGN.md between the GENERATED markers
+ *   generated  tokens.css, fonts/, components.html, components/<name>.html, components.manifest.json,
+ *              manifest.json, metadata.json, and the region of DESIGN.md between the GENERATED markers
  *   authored   USAGE.md, and DESIGN.md outside the markers — prose written for OpenDesign's agent,
  *              which this script preserves verbatim and never rewrites
  *
@@ -30,6 +29,19 @@
  *   3. components.manifest.json is produced by OPENDESIGN'S OWN extractComponentsManifest(), vendored
  *      byte-for-byte — because OpenDesign regenerates that file on import and discards anything it
  *      did not produce. A manifest computed any other way would be silently replaced.
+ *
+ * WHAT OPENDESIGN'S AGENT ACTUALLY SEES — measured by the WP03 consumability run, not assumed. The
+ * prompt carries DESIGN.md, USAGE.md and tokens.css verbatim, but for components only a SUMMARY of
+ * components.manifest.json: nine generic groups, at most eight selectors each (system.ts:1295,
+ * summarizeComponentsManifestForPrompt). components.html itself is never injected when a manifest
+ * exists, and at 430 KB it could not be. The agent's sandbox could not open the design-system
+ * folder either. Given only component names, it emitted the right blocks with invented elements:
+ * `sk-radio-choice__input` for the library's `sk-radio-choice-group__control`, 8 of 13 classes. So:
+ *   - DESIGN.md's generated region carries each component's exact class vocabulary. It is pushed
+ *     into every prompt, so the names are right even when no file can be read.
+ *   - components/<name>.html holds one component's CSS and forms — a size an agent can read — and
+ *     manifest.json declares them as preview pages, which is what puts them on OpenDesign's pull
+ *     index and its `tools design-systems read` allowlist.
  */
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, rmSync, statSync, realpathSync, mkdtempSync, cpSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -180,6 +192,22 @@ export function staticOnlyProblems(html) {
   return problems;
 }
 
+/**
+ * A component's CLASS VOCABULARY: every class its own CSS selects on, plus every class its static
+ * forms use. Selectors only — a declaration value such as `url(./fonts/inter.woff2)` is not a class.
+ */
+export function classVocabulary(css, forms) {
+  const out = new Set();
+  const flat = stripCssComments(css);
+  for (const m of flat.matchAll(/([^{}]+)\{/g)) {
+    const sel = m[1].trim();
+    if (sel.startsWith('@')) continue;
+    for (const c of sel.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) out.add(c[1]);
+  }
+  for (const f of forms) for (const a of f.markup.matchAll(/\bclass\s*=\s*"([^"]*)"/g)) for (const t of a[1].split(/\s+/)) if (t) out.add(t);
+  return [...out].sort();
+}
+
 /* ───────────────────────────── builders (pure) ───────────────────────────── */
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -228,6 +256,42 @@ export function buildComponentsHtml(d) {
   ].join('\n');
 }
 
+export const componentPagePath = (c) => `components/${c.name}.html`;
+
+/**
+ * One component on its own page: its CSS and every static form, at a size an agent can read. It
+ * links ../tokens.css so it renders standalone for a person; an agent already has the tokens in its
+ * prompt and copies only this page's <style> block and markup.
+ */
+export function buildComponentPage(d, c) {
+  const figs = c.forms
+    .map((f) => `<figure data-od-variant="${esc(f.variant)}">\n  <figcaption>${esc(f.variant)}</figcaption>\n${indent(f.markup, 2)}\n</figure>`)
+    .join('\n');
+  return [
+    '<!doctype html>',
+    '<html lang="en">',
+    '  <head>',
+    '    <meta charset="utf-8" />',
+    '    <meta name="viewport" content="width=device-width, initial-scale=1" />',
+    `    <title>${esc(c.name)} — Spec Kitty</title>`,
+    `    <meta name="description" content="${esc(`${c.name}: ${c.forms.length} static form(s) and its CSS, from @spec-kitty/styles ${d.versions.styles}. Copy the <style> block and the markup verbatim; tokens.css is required and not repeated here.`)}" />`,
+    '    <link rel="stylesheet" href="../tokens.css" />',
+    '    <style>',
+    `/* component: ${c.name} — ${c.cssRel} */`,
+    c.css.trimEnd(),
+    '    </style>',
+    '  </head>',
+    '  <body>',
+    `    <section id="${esc(c.name)}" data-od-component="${esc(c.name)}">`,
+    `      <h1>${esc(c.name)}</h1>`,
+    indent(figs, 6),
+    '    </section>',
+    '  </body>',
+    '</html>',
+    '',
+  ].join('\n');
+}
+
 export function buildManifest(d) {
   return {
     schemaVersion: 'od-design-system-project/v1',
@@ -245,6 +309,10 @@ export function buildManifest(d) {
     componentsManifest: 'components.manifest.json',
     usage: 'USAGE.md',
     importMode: 'verbatim',
+    // THE PER-COMPONENT PAGES ARE DECLARED AS PREVIEW PAGES because that is the only manifest key
+    // that puts a file on OpenDesign's pull index (buildDesignSystemPullIndex) and its read
+    // allowlist (buildDesignSystemPullFileAllowlist). components.html is on neither.
+    preview: { dir: 'components', pages: d.components.map((c) => ({ path: componentPagePath(c), title: c.name, role: 'component' })) },
     craft: { applies: [], suggested: ['accessibility-baseline'], exemptions: [] },
   };
 }
@@ -267,11 +335,24 @@ export function buildDesignRegion(d) {
     '## Components in this package',
     '',
     `Derived from the source tree by \`scripts/build-opendesign-package.mjs\`. **${d.components.length}** components`,
-    `have a static form and appear in \`components.html\`; use their markup and class names exactly.`,
+    'have a static form. Each has its own page, `components/<name>.html`, holding its CSS and every static',
+    'form. Read the page for the component you need, then copy its `<style>` block and its markup',
+    'verbatim — after `tokens.css`, which the page links but does not repeat. Read it from the linked',
+    'design-system folder when the project has one, or with',
+    '`"$OD_NODE_BIN" "$OD_BIN" tools design-systems read --path components/<name>.html`.',
     '',
-    '| Component | Static forms |',
-    '|---|---|',
-    ...d.components.map((c) => `| \`${c.name}\` | ${c.forms.map((f) => `\`${f.variant}\``).join(', ')} |`),
+    '**The class vocabulary is closed.** The classes listed for a component are every class its CSS',
+    'styles and its forms use. A class that is not listed does not exist in the library: never',
+    'invent a BEM element or modifier — `sk-radio-choice__input` is not a class; the library\'s is',
+    '`sk-radio-choice-group__control`. When no page can be read, build from these names only.',
+    '',
+    '| Component | Page | Static forms | Classes |',
+    '|---|---|---|---|',
+    ...d.components.map(
+      (c) =>
+        `| \`${c.name}\` | \`${componentPagePath(c)}\` | ${c.forms.map((f) => `\`${f.variant}\``).join(', ')} | ` +
+        `${classVocabulary(c.css, c.forms).map((x) => `\`${x}\``).join(' ')} |`,
+    ),
     '',
     ...(d.coveredElsewhere.length
       ? [
@@ -342,6 +423,12 @@ export async function buildPackage(d, designMd, ref) {
   // this file with identical bytes rather than a silently different one.
   const cm = ref.extractComponentsManifest({ brandId: BRAND_ID, fixtureHtml: html, tokensCss: d.tokensCss });
   files.set('components.html', Buffer.from(html));
+  for (const c of d.components) {
+    const page = buildComponentPage(d, c);
+    const why = staticOnlyProblems(page);
+    if (why.length) throw new Error(`${componentPagePath(c)} is not static-only:\n  - ${why.join('\n  - ')}`);
+    files.set(componentPagePath(c), Buffer.from(page));
+  }
   files.set('components.manifest.json', Buffer.from(`${JSON.stringify(cm, null, 2)}\n`));
   files.set('manifest.json', Buffer.from(manifestJson));
   // metadata.json IS REQUIRED FOR USE, despite not being in the project schema. Without
@@ -432,6 +519,7 @@ async function main({ check }) {
   }
 
   mkdirSync(join(outDir, 'fonts'), { recursive: true });
+  mkdirSync(join(outDir, 'components'), { recursive: true });
   for (const f of onDisk) if (!expected.has(f)) rmSync(join(outDir, f));
   for (const [f, bytes] of files) writeFileSync(join(outDir, f), bytes);
   console.log(`wrote ${OUT_REL}: ${generated.length} generated files (${d.components.length} components).`);
@@ -479,8 +567,16 @@ const PROBES = [
   ['the real tree drops NO form: taken + omitted = every .html on disk', () => { const d = derive(); const taken = d.components.reduce((n, c) => n + c.forms.length, 0); const onDisk = readdirSync(join(ROOT, 'packages/styles/src'), { withFileTypes: true }).filter((x) => x.isDirectory()).reduce((n, x) => n + readdirSync(join(ROOT, 'packages/styles/src', x.name)).filter((f) => f.endsWith('.html')).length, 0); return taken + d.omitted.length === onDisk && onDisk > 0; }],
   ['sk-form-input and sk-form-textarea are NOT excluded (their forms live under form-field)', () => { const d = derive(); return !d.excluded.includes('form-input') && !d.excluded.includes('form-textarea'); }],
   ['every real excluded element is a real element without a form', () => { const d = derive(); return d.excluded.every((e) => d.elements.includes(e) && !d.components.some((c) => c.name === e)); }],
+  ['the class vocabulary takes selector classes (control)', () => classVocabulary('.sk-a, .sk-a__b:hover{color:red}', []).join() === 'sk-a,sk-a__b'],
+  ['the class vocabulary does not mistake a declaration value for a class', () => !classVocabulary('.sk-a{src:url(./fonts/x.woff2)}', []).includes('woff2')],
+  ['the class vocabulary skips an at-rule header but keeps the rules inside it', () => classVocabulary('@layer base.components{ .sk-a{} }', []).join() === 'sk-a'],
+  ['the class vocabulary includes classes the forms use', () => classVocabulary('', [{ markup: '<p class="sk-a  is-open"></p>' }]).join() === 'is-open,sk-a'],
+  ['every component gets its own static-only page carrying its CSS verbatim', () => FIXTURE.components.every((c) => { const p = buildComponentPage(FIXTURE, c); return p.includes(c.css) && staticOnlyProblems(p).length === 0 && p.includes('href="../tokens.css"'); })],
+  ['the manifest declares exactly one preview page per component (the pull-index entry)', () => { const m = buildManifest(FIXTURE); return m.preview.pages.length === FIXTURE.components.length && m.preview.pages.every((pg, i) => pg.path === componentPagePath(FIXTURE.components[i])); }],
+  ['the design region lists each component with its page and vocabulary', () => { const r = buildDesignRegion(FIXTURE); return r.includes('| `button` | `components/button.html` | `default` | `sk-button` |') && r.includes('`sk-grid`'); }],
+  ['the real vocabulary names the class the first proof run invented a substitute for', () => { const c = derive().components.find((x) => x.name === 'radio-choice-group'); const v = classVocabulary(c.css, c.forms); return v.includes('sk-radio-choice-group__control') && !v.includes('sk-radio-choice__input'); }],
 ];
-const PROBE_FLOOR = 23;
+const PROBE_FLOOR = 31;
 
 /**
  * DRIFT PROBES — each mutates a TEMPORARY COPY of the committed package and asserts `diffPackage`
@@ -508,7 +604,7 @@ async function checkProbes() {
   const font = d.fonts[0];
   const cases = [
     ['the committed package matches a fresh build (control)', () => onCopy(() => {}, (ps) => ps.length === 0)],
-    ...['components.html', 'components.manifest.json', 'manifest.json', 'metadata.json', 'tokens.css', 'DESIGN.md', `fonts/${font}`].map((f) => [
+    ...['components.html', `components/${d.components[0].name}.html`, 'components.manifest.json', 'manifest.json', 'metadata.json', 'tokens.css', 'DESIGN.md', `fonts/${font}`].map((f) => [
       `a ONE-BYTE change to ${f} is reported`,
       () => onCopy((dir) => flip(join(dir, f)), names(f)),
     ]),
@@ -531,7 +627,7 @@ async function checkProbes() {
   ];
   return cases;
 }
-const CHECK_PROBE_FLOOR = 14;
+const CHECK_PROBE_FLOOR = 15;
 
 
 async function selftest() {

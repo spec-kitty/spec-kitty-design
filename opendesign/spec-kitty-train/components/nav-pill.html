@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>nav-pill — Spec Kitty</title>
+    <meta name="description" content="nav-pill: 1 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: nav-pill — packages/styles/src/nav-pill/sk-nav-pill.css */
+/* @spec-kitty/styles — sk-nav-pill styles — tokens only, no hardcoded values */
+
+.sk-nav-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sk-space-2);
+  padding: var(--sk-space-2);
+  background: var(--sk-surface-card);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-pill);
+  width: fit-content;
+}
+
+.sk-nav-pill__items {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-space-1);
+}
+
+.sk-nav-pill__item {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--sk-space-2) var(--sk-space-3);
+  border-radius: var(--sk-radius-pill);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-normal);
+  color: var(--sk-fg-muted);
+  text-decoration: none;
+  transition:
+    color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    box-shadow var(--sk-motion-duration-base) var(--sk-motion-ease-out);
+}
+
+.sk-nav-pill__item:hover {
+  color: var(--sk-fg-default);
+  background: var(--sk-bg-pill);
+}
+
+.sk-nav-pill__item--active {
+  color: var(--sk-fg-default);
+  background: var(--sk-bg-pill);
+  border: var(--sk-border-width-1) solid var(--sk-border-strong);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-nav-pill__item--active:hover {
+  background: var(--sk-bg-pill);
+}
+
+.sk-nav-pill__item:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: 2px;
+}
+
+.sk-nav-pill__cta {
+  padding-left: var(--sk-space-2);
+}
+
+.sk-nav-pill__cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sk-space-2) var(--sk-space-4);
+  background: var(--sk-color-accent);
+  /* `--sk-color-accent-fg`, not `--sk-fg-on-primary` — the accent background's OWN designed
+     foreground. In dark mode the two tokens hold the identical value (#1A1408), so this is a
+     no-op there and no dark baseline moves. In light mode they diverge, and the old pairing
+     was dark ink (a token whose comment reads "dark ink on yellow buttons") on a sage button:
+     4.68:1 before the accent ramp fix and 3.53:1 after it. White on #3D7A3D is 5.19:1. */
+  color: var(--sk-color-accent-fg);
+  border: none;
+  border-radius: var(--sk-radius-pill);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-semibold);
+  cursor: pointer;
+  transition:
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    box-shadow var(--sk-motion-duration-base) var(--sk-motion-ease-out);
+}
+
+.sk-nav-pill__cta-btn:hover {
+  box-shadow: var(--sk-shadow-glow-primary);
+}
+
+.sk-nav-pill__cta-btn:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Slotted items, for the element arrangement ─────────────────────────── */
+/*
+   ADDED for <sk-nav-pill> (#73), and inert in a document — `::slotted()` matches only when
+   this sheet is ADOPTED into a shadow root, so a plain <link> to this file cannot activate it.
+
+   WHY IT IS NEEDED. A consumer writes their links in the LIGHT DOM. An adopted stylesheet
+   cannot style them with an ordinary `.sk-nav-pill__item` selector: light-DOM nodes are styled
+   by the document, and the shadow sheet only reaches them through `::slotted()`. Measured, not
+   assumed — the element's first a11y run reported colour-contrast violations on both stories
+   for exactly this, on links the static stylesheet above styles perfectly well in a document.
+
+   `::slotted()` matches only DIRECTLY assigned children, which is the documented contract:
+   nav items are children of <sk-nav-pill>, not grandchildren.
+*/
+/* The `transition` below is NOT an oversight and NOT a copy of the static rule's — two lenses
+   independently caught its absence from the first draft of this block. It is here because a
+   slotted item and a static item should behave identically on hover; the seam only exists
+   because `::slotted()` cannot be merged into the static rule's selector list without risking
+   the whole rule being dropped by an engine that does not parse it. */
+::slotted(.sk-nav-pill__item) {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--sk-space-2) var(--sk-space-3);
+  border-radius: var(--sk-radius-pill);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-normal);
+  color: var(--sk-fg-muted);
+  text-decoration: none;
+  transition:
+    color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+::slotted(.sk-nav-pill__item--active:hover) {
+  background: var(--sk-bg-pill);
+}
+
+::slotted(.sk-nav-pill__item--active) {
+  color: var(--sk-fg-default);
+  background: var(--sk-bg-pill);
+  border: var(--sk-border-width-1) solid var(--sk-border-strong);
+  font-weight: var(--sk-weight-semibold);
+}
+
+/* Hover and focus cannot be expressed as `::slotted(a:hover)` — the pseudo-class must sit
+   inside the argument, and it does. `:focus-visible` there is likewise legal. */
+::slotted(.sk-nav-pill__item:hover) {
+  color: var(--sk-fg-default);
+  background: var(--sk-bg-pill);
+}
+
+::slotted(.sk-nav-pill__item:focus-visible) {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: 2px;
+}
+    </style>
+  </head>
+  <body>
+    <section id="nav-pill" data-od-component="nav-pill">
+      <h1>nav-pill</h1>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <nav class="sk-nav-pill" aria-label="Primary navigation">
+          <div class="sk-nav-pill__items">
+            <a href="#" class="sk-nav-pill__item">Platform</a>
+            <a href="#" class="sk-nav-pill__item sk-nav-pill__item--active" aria-current="page">Getting Started</a>
+            <a href="#" class="sk-nav-pill__item">About</a>
+            <a href="#" class="sk-nav-pill__item">Blog</a>
+          </div>
+          <div class="sk-nav-pill__cta">
+            <button class="sk-nav-pill__cta-btn" type="button">Book Demo</button>
+          </div>
+        </nav>
+      </figure>
+    </section>
+  </body>
+</html>

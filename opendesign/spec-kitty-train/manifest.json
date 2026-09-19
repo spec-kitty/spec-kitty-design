@@ -17,6 +17,181 @@
   "componentsManifest": "components.manifest.json",
   "usage": "USAGE.md",
   "importMode": "verbatim",
+  "preview": {
+    "dir": "components",
+    "pages": [
+      {
+        "path": "components/action-row.html",
+        "title": "action-row",
+        "role": "component"
+      },
+      {
+        "path": "components/blog-card.html",
+        "title": "blog-card",
+        "role": "component"
+      },
+      {
+        "path": "components/boundary-page.html",
+        "title": "boundary-page",
+        "role": "component"
+      },
+      {
+        "path": "components/breadcrumbs.html",
+        "title": "breadcrumbs",
+        "role": "component"
+      },
+      {
+        "path": "components/button.html",
+        "title": "button",
+        "role": "component"
+      },
+      {
+        "path": "components/card.html",
+        "title": "card",
+        "role": "component"
+      },
+      {
+        "path": "components/check-bullet.html",
+        "title": "check-bullet",
+        "role": "component"
+      },
+      {
+        "path": "components/checkbox-choice-group.html",
+        "title": "checkbox-choice-group",
+        "role": "component"
+      },
+      {
+        "path": "components/collection.html",
+        "title": "collection",
+        "role": "component"
+      },
+      {
+        "path": "components/context-nav.html",
+        "title": "context-nav",
+        "role": "component"
+      },
+      {
+        "path": "components/data-table.html",
+        "title": "data-table",
+        "role": "component"
+      },
+      {
+        "path": "components/disclosure.html",
+        "title": "disclosure",
+        "role": "component"
+      },
+      {
+        "path": "components/empty-state.html",
+        "title": "empty-state",
+        "role": "component"
+      },
+      {
+        "path": "components/event-timeline.html",
+        "title": "event-timeline",
+        "role": "component"
+      },
+      {
+        "path": "components/facts.html",
+        "title": "facts",
+        "role": "component"
+      },
+      {
+        "path": "components/feature-card.html",
+        "title": "feature-card",
+        "role": "component"
+      },
+      {
+        "path": "components/form-field.html",
+        "title": "form-field",
+        "role": "component"
+      },
+      {
+        "path": "components/form-select.html",
+        "title": "form-select",
+        "role": "component"
+      },
+      {
+        "path": "components/grid.html",
+        "title": "grid",
+        "role": "component"
+      },
+      {
+        "path": "components/nav-pill.html",
+        "title": "nav-pill",
+        "role": "component"
+      },
+      {
+        "path": "components/pill-tag.html",
+        "title": "pill-tag",
+        "role": "component"
+      },
+      {
+        "path": "components/progress.html",
+        "title": "progress",
+        "role": "component"
+      },
+      {
+        "path": "components/prose.html",
+        "title": "prose",
+        "role": "component"
+      },
+      {
+        "path": "components/public-header.html",
+        "title": "public-header",
+        "role": "component"
+      },
+      {
+        "path": "components/radio-choice-group.html",
+        "title": "radio-choice-group",
+        "role": "component"
+      },
+      {
+        "path": "components/ribbon-card.html",
+        "title": "ribbon-card",
+        "role": "component"
+      },
+      {
+        "path": "components/section-banner.html",
+        "title": "section-banner",
+        "role": "component"
+      },
+      {
+        "path": "components/section-nav.html",
+        "title": "section-nav",
+        "role": "component"
+      },
+      {
+        "path": "components/segmented-choice.html",
+        "title": "segmented-choice",
+        "role": "component"
+      },
+      {
+        "path": "components/site-footer.html",
+        "title": "site-footer",
+        "role": "component"
+      },
+      {
+        "path": "components/skip-link.html",
+        "title": "skip-link",
+        "role": "component"
+      },
+      {
+        "path": "components/stub.html",
+        "title": "stub",
+        "role": "component"
+      },
+      {
+        "path": "components/workflow-board.html",
+        "title": "workflow-board",
+        "role": "component"
+      },
+      {
+        "path": "components/workflow-lane.html",
+        "title": "workflow-lane",
+        "role": "component"
+      }
+    ]
+  },
   "craft": {
     "applies": [],
     "suggested": [

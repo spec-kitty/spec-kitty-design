@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>collection — Spec Kitty</title>
+    <meta name="description" content="collection: 8 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: collection — packages/styles/src/collection/sk-collection.css */
+/* @spec-kitty/styles — controlled native collection */
+/* Structure, state, labels, counts, content, and actions remain consumer-owned. */
+
+.sk-collection {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  background: var(--sk-surface-card);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  overflow-wrap: anywhere;
+}
+
+.sk-collection__header {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sk-space-2) var(--sk-space-3);
+  align-items: center;
+  min-inline-size: 0;
+  padding: var(--sk-space-3) var(--sk-space-4);
+  border-block-end: var(--sk-border-width-1) solid var(--sk-border-default);
+}
+
+.sk-collection__heading {
+  min-inline-size: 0;
+  margin: 0;
+  color: var(--sk-fg-default);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.sk-collection__count {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-sm);
+  overflow-wrap: anywhere;
+}
+
+.sk-collection__toggle {
+  grid-column: 1 / -1;
+  justify-self: end;
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: var(--sk-space-2);
+  align-items: center;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  padding: var(--sk-space-2) var(--sk-space-3);
+  border: 0;
+  border-radius: var(--sk-radius-md);
+  background: none;
+  color: var(--sk-fg-default);
+  font: inherit;
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.sk-collection__toggle:focus-visible,
+.sk-collection__action:focus-visible {
+  outline: var(--sk-border-width-1) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-1);
+}
+
+.sk-collection__marker {
+  flex: none;
+  color: var(--sk-fg-muted);
+  transition: transform var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-collection__toggle[aria-expanded='true'] .sk-collection__marker {
+  transform: rotate(90deg);
+}
+
+.sk-collection__state-label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Never override the native hidden state: display is limited to the visible state. */
+.sk-collection__body:not([hidden]) {
+  display: flow-root;
+}
+
+.sk-collection__body {
+  min-inline-size: 0;
+  padding: var(--sk-space-3) var(--sk-space-4);
+}
+
+.sk-collection__list {
+  min-inline-size: 0;
+  margin: 0;
+  padding-inline-start: var(--sk-space-4);
+}
+
+.sk-collection__item {
+  min-inline-size: 0;
+  padding-block: var(--sk-space-2);
+  color: var(--sk-fg-body);
+  overflow-wrap: anywhere;
+}
+
+.sk-collection__item + .sk-collection__item {
+  border-block-start: var(--sk-border-width-1) solid var(--sk-border-default);
+}
+
+.sk-collection__footer {
+  min-inline-size: 0;
+  margin-block-start: var(--sk-space-3);
+  padding-block-start: var(--sk-space-3);
+  border-block-start: var(--sk-border-width-1) solid var(--sk-border-default);
+}
+
+.sk-collection__action {
+  display: inline-block;
+  max-inline-size: 100%;
+  color: var(--sk-fg-default);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+  overflow-wrap: anywhere;
+}
+
+@media (forced-colors: active) {
+  .sk-collection {
+    border-color: var(--sk-border-default);
+  }
+
+  .sk-collection__header,
+  .sk-collection__item + .sk-collection__item,
+  .sk-collection__footer {
+    border-color: var(--sk-border-default);
+  }
+
+  .sk-collection__toggle:focus-visible,
+  .sk-collection__action:focus-visible {
+    outline-color: var(--sk-border-focus);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-collection__marker {
+    transition: none;
+  }
+}
+    </style>
+  </head>
+  <body>
+    <section id="collection" data-od-component="collection">
+      <h1>collection</h1>
+      <figure data-od-variant="closed">
+        <figcaption>closed</figcaption>
+        <section class="sk-collection" aria-labelledby="collection-closed-heading">
+          <div class="sk-collection__header">
+            <h3 class="sk-collection__heading" id="collection-closed-heading">Closed collection</h3>
+            <span class="sk-collection__count">3 items</span>
+            <button class="sk-collection__toggle" type="button" aria-expanded="false" aria-controls="collection-closed-body">
+              <span class="sk-collection__marker" aria-hidden="true">▸</span>
+              <span class="sk-collection__state-label">Expand collection</span>
+            </button>
+          </div>
+          <div class="sk-collection__body" id="collection-closed-body" hidden>
+            <ul class="sk-collection__list">
+              <li class="sk-collection__item">Collection item 01</li>
+              <li class="sk-collection__item">Collection item 02</li>
+              <li class="sk-collection__item">Collection item 03</li>
+            </ul>
+            <footer class="sk-collection__footer">
+              <a class="sk-collection__action" href="#more-items">View more</a>
+            </footer>
+          </div>
+        </section>
+      </figure>
+      <figure data-od-variant="empty">
+        <figcaption>empty</figcaption>
+        <section class="sk-collection" aria-labelledby="collection-empty-heading">
+          <div class="sk-collection__header">
+            <h3 class="sk-collection__heading" id="collection-empty-heading">Empty collection</h3>
+            <span class="sk-collection__count">0 items</span>
+            <button class="sk-collection__toggle" type="button" aria-expanded="true" aria-controls="collection-empty-body">
+              <span class="sk-collection__marker" aria-hidden="true">▸</span>
+              <span class="sk-collection__state-label">Collapse collection</span>
+            </button>
+          </div>
+          <div class="sk-collection__body" id="collection-empty-body">
+            <ul class="sk-collection__list"></ul>
+            <footer class="sk-collection__footer">
+              <a class="sk-collection__action" href="#more-items">View more</a>
+            </footer>
+          </div>
+        </section>
+      </figure>
+      <figure data-od-variant="fifty-items">
+        <figcaption>fifty-items</figcaption>
+        <section class="sk-collection" aria-labelledby="collection-fifty-items-heading">
+          <div class="sk-collection__header">
+            <h3 class="sk-collection__heading" id="collection-fifty-items-heading">Large collection</h3>
+            <span class="sk-collection__count">50 items</span>
+            <button class="sk-collection__toggle" type="button" aria-expanded="true" aria-controls="collection-fifty-items-body">
+              <span class="sk-collection__marker" aria-hidden="true">▸</span>
+              <span class="sk-collection__state-label">Collapse collection</span>
+            </button>
+          </div>
+          <div class="sk-collection__body" id="collection-fifty-items-body">
+            <ol class="sk-collection__list">
+              <li class="sk-collection__item">Collection item 01</li>
+              <li class="sk-collection__item">Collection item 02</li>
+              <li class="sk-collection__item">Collection item 03</li>
+              <li class="sk-collection__item">Collection item 04</li>
+              <li class="sk-collection__item">Collection item 05</li>
+              <li class="sk-collection__item">Collection item 06</li>
+              <li class="sk-collection__item">Collection item 07</li>
+              <li class="sk-collection__item">Collection item 08</li>
+              <li class="sk-collection__item">Collection item 09</li>
+              <li class="sk-collection__item">Collection item 10</li>
+              <li class="sk-collection__item">Collection item 11</li>
+              <li class="sk-collection__item">Collection item 12</li>
+              <li class="sk-collection__item">Collection item 13</li>
+              <li class="sk-collection__item">Collection item 14</li>
+              <li class="sk-collection__item">Collection item 15</li>
+              <li class="sk-collection__item">Collection item 16</li>
+              <li class="sk-collection__item">Collection item 17</li>
+              <li class="sk-collection__item">Collection item 18</li>
+              <li class="sk-collection__item">Collection item 19</li>
+              <li class="sk-collection__item">Collection item 20</li>
+              <li class="sk-collection__item">Collection item 21</li>
+              <li class="sk-collection__item">Collection item 22</li>
+              <li class="sk-collection__item">Collection item 23</li>
+              <li class="sk-collection__item">Collection item 24</li>
+              <li class="sk-collection__item">Collection item 25</li>
+              <li class="sk-collection__item">Collection item 26</li>
+              <li class="sk-collection__item">Collection item 27</li>
+              <li class="sk-collection__item">Collection item 28</li>
+              <li class="sk-collection__item">Collection item 29</li>
+              <li class="sk-collection__item">Collection item 30</li>
+              <li class="sk-collection__item">Collection item 31</li>
+              <li class="sk-collection__item">Collection item 32</li>
+              <li class="sk-collection__item">Collection item 33</li>
+              <li class="sk-collection__item">Collection item 34</li>
+              <li class="sk-collection__item">Collection item 35</li>
+              <li class="sk-collection__item">Collection item 36</li>
+              <li class="sk-collection__item">Collection item 37</li>
+              <li class="sk-collection__item">Collection item 38</li>
+              <li class="sk-collection__item">Collection item 39</li>
+              <li class="sk-collection__item">Collection item 40</li>
+              <li class="sk-collection__item">Collection item 41</li>
+              <li class="sk-collection__item">Collection item 42</li>
+              <li class="sk-collection__item">Collection item 43</li>
+              <li class="sk-collection__item">Collection item 44</li>
+              <li class="sk-collection__item">Collection item 45</li>
+              <li class="sk-collection__item">Collection item 46</li>
+              <li class="sk-collection__item">Collection item 47</li>
+              <li class="sk-collection__item">Collection item 48</li>
+              <li class="sk-collection__item">Collection item 49</li>
+              <li class="sk-collection__item">Collection item 50</li>
+            </ol>
+            <footer class="sk-collection__footer">
+              <a class="sk-collection__action" href="#more-items">View more</a>
+            </footer>
+          </div>
+        </section>
+      </figure>
+      <figure data-od-variant="long-text">
+        <figcaption>long-text</figcaption>
+        <section class="sk-collection" aria-labelledby="collection-long-text-heading">
+          <div class="sk-collection__header">
+            <h3 class="sk-collection__heading" id="collection-long-text-heading">An extraordinarily long consumer-authored collection heading that remains readable without introducing page-level horizontal overflow</h3>
+            <span class="sk-collection__count">A deliberately long consumer-supplied count label that the library neither derives nor abbreviates</span>
+            <button class="sk-collection__toggle" type="button" aria-expanded="true" aria-controls="collection-long-text-body">
+              <span class="sk-collection__marker" aria-hidden="true">▸</span>
+              <span class="sk-collection__state-label">Collapse collection</span>
+            </button>
+          </div>
+          <div class="sk-collection__body" id="collection-long-text-body">
+            <ul class="sk-collection__list">
+              <li class="sk-collection__item">An exceptionally long consumer-authored collection item that wraps naturally inside the native list while preserving its complete supplied content</li>
+              <li class="sk-collection__item">unbroken-consumer-authored-collection-item-identifier-that-must-wrap-without-expanding-the-page</li>
+            </ul>
+            <footer class="sk-collection__footer">
+              <a class="sk-collection__action" href="#all-consumer-authored-collection-items">Open the complete consumer-authored collection with a deliberately long action label</a>
+            </footer>
+          </div>
+        </section>
+      </figure>
+      <figure data-od-variant="no-count">
+        <figcaption>no-count</figcaption>
+        <section class="sk-collection" aria-labelledby="collection-no-count-heading">
+          <div class="sk-collection__header">
+            <h3 class="sk-collection__heading" id="collection-no-count-heading">Collection without a count</h3>
+            <button class="sk-collection__toggle" type="button" aria-expanded="true" aria-controls="collection-no-count-body">
+              <span class="sk-collection__marker" aria-hidden="true">▸</span>
+              <span class="sk-collection__state-label">Collapse collection</span>
+            </button>
+          </div>
+          <div class="sk-collection__body" id="collection-no-count-body">
+            <ul class="sk-collection__list">
+              <li class="sk-collection__item">Collection item 01</li>
+              <li class="sk-collection__item">Collection item 02</li>
+              <li class="sk-collection__item">Collection item 03</li>
+            </ul>
+            <footer class="sk-collection__footer">
+              <a class="sk-collection__action" href="#more-items">View more</a>
+            </footer>
+          </div>
+        </section>
+      </figure>
+      <figure data-od-variant="no-footer">
+        <figcaption>no-footer</figcaption>
+        <section class="sk-collection" aria-labelledby="collection-no-footer-heading">
+          <div class="sk-collection__header">
+            <h3 class="sk-collection__heading" id="collection-no-footer-heading">Collection without a footer</h3>
+            <span class="sk-collection__count">3 items</span>
+            <button class="sk-collection__toggle" type="button" aria-expanded="true" aria-controls="collection-no-footer-body">
+              <span class="sk-collection__marker" aria-hidden="true">▸</span>
+              <span class="sk-collection__state-label">Collapse collection</span>
+            </button>
+          </div>
+          <div class="sk-collection__body" id="collection-no-footer-body">
+            <ul class="sk-collection__list">
+              <li class="sk-collection__item">Collection item 01</li>
+              <li class="sk-collection__item">Collection item 02</li>
+              <li class="sk-collection__item">Collection item 03</li>
+            </ul>
+          </div>
+        </section>
+      </figure>
+      <figure data-od-variant="one-item">
+        <figcaption>one-item</figcaption>
+        <section class="sk-collection" aria-labelledby="collection-one-item-heading">
+          <div class="sk-collection__header">
+            <h3 class="sk-collection__heading" id="collection-one-item-heading">Single-item collection</h3>
+            <span class="sk-collection__count">1 item</span>
+            <button class="sk-collection__toggle" type="button" aria-expanded="true" aria-controls="collection-one-item-body">
+              <span class="sk-collection__marker" aria-hidden="true">▸</span>
+              <span class="sk-collection__state-label">Collapse collection</span>
+            </button>
+          </div>
+          <div class="sk-collection__body" id="collection-one-item-body">
+            <ul class="sk-collection__list">
+              <li class="sk-collection__item">Only collection item</li>
+            </ul>
+            <footer class="sk-collection__footer">
+              <a class="sk-collection__action" href="#more-items">View more</a>
+            </footer>
+          </div>
+        </section>
+      </figure>
+      <figure data-od-variant="open">
+        <figcaption>open</figcaption>
+        <section class="sk-collection" aria-labelledby="collection-open-heading">
+          <div class="sk-collection__header">
+            <h3 class="sk-collection__heading" id="collection-open-heading">Sample collection</h3>
+            <span class="sk-collection__count">3 items</span>
+            <button class="sk-collection__toggle" type="button" aria-expanded="true" aria-controls="collection-open-body">
+              <span class="sk-collection__marker" aria-hidden="true">▸</span>
+              <span class="sk-collection__state-label">Collapse collection</span>
+            </button>
+          </div>
+          <div class="sk-collection__body" id="collection-open-body">
+            <ul class="sk-collection__list">
+              <li class="sk-collection__item">Collection item 01</li>
+              <li class="sk-collection__item">Collection item 02</li>
+              <li class="sk-collection__item">Collection item 03</li>
+            </ul>
+            <footer class="sk-collection__footer">
+              <a class="sk-collection__action" href="#more-items">View more</a>
+            </footer>
+          </div>
+        </section>
+      </figure>
+    </section>
+  </body>
+</html>

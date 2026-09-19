@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>section-banner — Spec Kitty</title>
+    <meta name="description" content="section-banner: 1 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: section-banner — packages/styles/src/section-banner/sk-section-banner.css */
+/* A custom element's UA default is `display: inline`, so without this the host cannot be sized
+   or spaced by a consumer and the inner flex row governs nothing outside itself. `inline-flex`
+   rather than `block` because a section banner is a badge that sits inline with surrounding
+   content — apps/demo/blog-demo.html already overrides the static form to `inline-flex` by
+   hand, which is the consumer telling us what the default should have been.
+   Inert in the static consumption path, where the root IS the .sk-section-banner div. */
+:host {
+  display: inline-flex;
+}
+
+/* `inline-flex`, matching :host above. These MUST agree: the element shrink-wraps and the
+   static form did not, so the two consumption paths this component's markup module exists to
+   keep identical rendered differently — a divergence introduced by the :host fix itself and
+   caught at the second gate pass. blog-demo.html's hand-override to inline-flex was the
+   consumer already working around the static default; that override is removed in the same
+   commit. */
+.sk-section-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sk-space-3);
+  padding: var(--sk-space-2) var(--sk-space-4);
+  border-radius: var(--sk-radius-sm);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sk-section-banner--neutral {
+  background: var(--sk-surface-card);
+  color: var(--sk-fg-default);
+}
+
+/* --sk-surface-tint-lilac / --sk-on-tint-lilac, NOT --sk-surface-purple-tint.
+   The names this file used were defined nowhere in @spec-kitty/tokens, so `background:
+   var(--sk-surface-purple-tint)` was invalid at computed-value time and these two banners have
+   been rendering with NO background at all since they were written. Nothing caught it: the
+   hygiene gate that names undefined tokens runs on ADOPTED sheets, and section-banner had no
+   element until #77.
+   The tint family is the one this component was described in terms of — tokens.css:46 says
+   "dark: v2.x banner / purple" and :44 says "numbers banner / green", so the intended tokens
+   existed the whole time under the family's naming.
+   The foreground moves to the on-tint ink rather than --sk-color-purple: the colour tokens are
+   tuned for the dark page surface, and the light-mode tint surfaces are pastel, so the raw
+   colour on them is the low-contrast pairing --sk-on-tint-* exists to prevent. */
+.sk-section-banner--purple {
+  background: var(--sk-surface-tint-lilac);
+  color: var(--sk-on-tint-lilac);
+}
+
+.sk-section-banner--green {
+  background: var(--sk-surface-tint-mint);
+  color: var(--sk-on-tint-mint);
+}
+
+.sk-section-banner__dot {
+  font-size: var(--sk-text-base);
+}
+    </style>
+  </head>
+  <body>
+    <section id="section-banner" data-od-component="section-banner">
+      <h1>section-banner</h1>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <div class="sk-section-banner sk-section-banner--neutral"><span class="sk-section-banner__dot" aria-hidden="true">●</span><span class="sk-section-banner__label">Section label</span></div>
+      </figure>
+    </section>
+  </body>
+</html>

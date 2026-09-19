@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>action-row — Spec Kitty</title>
+    <meta name="description" content="action-row: 1 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: action-row — packages/styles/src/action-row/sk-action-row.css */
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   `:host { container-type: inline-size }` below is the sole container establishing the
+   `@container (max-width: 400px)` reflow — the only reflow rule this file has. There is no
+   light-DOM form of it in this package yet (#309 generator, #310 equivalence gate), so a
+   server-rendered consumer authors the wrapper themselves:
+
+       <div class="sk-action-row-host">
+         <div class="sk-action-row"> ... </div>
+       </div>
+
+   THE WRAPPER CARRIES THIS SHEET'S WHOLE `:host` DECLARATION SET, not `container-type` alone —
+   today `display: block; min-width: 0; container-type: inline-size`, and "whatever `:host`
+   declares" if that changes. This sheet's `:host` happens to declare no `width`, so here an
+   abbreviated wrapper measures identically (all 20 declared outcomes, both engines, including
+   the flex-item case). That is a coincidence of THIS component, not a general licence:
+   `sk-app-shell.css` declares `width: 100%` on `:host`, and dropping it makes the component
+   compute `0px` in a flex row. Read each sheet's own `:host`; never copy another's list.
+
+   AND THIS SHEET STILL DOES NOT DEFINE `.sk-action-row-host` — THE GENERATED STATIC FORM DOES.
+   The container above lives on `:host`, which is inert in a document, so a static consumer who
+   writes the two-element markup and links THIS file gets no container at all and
+   `@container (max-width: 400px)` below never fires — the exact failure #301 reported. #309
+   landed the generator; what a static consumer links is
+
+       @spec-kitty/styles/action-row/static/sk-action-row.static.css
+
+   INSTEAD OF this file, never in addition to it. It carries every rule below in the same order
+   with `:host` rewritten onto `.sk-action-row-host`, and #310 holds it rendered-equal to the
+   shadow form on every declared outcome in both engines.
+
+   OVERRIDING A WRAPPER DECLARATION IS NOT THE SAME AS OVERRIDING `:host` — A RULED LIMIT (#375).
+   `:host` declarations sit in the element's INNER tree, and under CSS Cascade's tree-order sort a
+   normal outer-tree declaration wins BEFORE specificity or source order is consulted. So any
+   document rule matching `<sk-action-row>` beats `:host` at any weight, in any order. On
+   `.sk-action-row-host` the same declarations are ordinary document declarations. Measured,
+   chromium and firefox identical: `sk-action-row { display: flex }` at (0,0,1) beats `:host`,
+   while `div { display: flex }` at the SAME (0,0,1) loses to `.sk-action-row-host`; and
+   `sk-action-row { container-type: normal }` destroys the element's container while the same
+   declaration on the wrapper, at equal weight authored first, does not. The static form therefore
+   reproduces `:host`'s LAYOUT and HARDENS its cascade position. To change a wrapper declaration a
+   consumer needs specificity STRICTLY HIGHER than the generated rule that declares it — or the
+   same specificity in a LATER stylesheet — computed from that rule rather than from a number
+   quoted here: `.sk-action-row-host` is (0,1,0), and a modifier rule
+   `.sk-action-row-host.sk-action-row-host--<axis>` is (0,2,0). `:where()` on the wrapper
+   was measured as a candidate and is deliberately not emitted; the generated sheet's own header
+   records why.
+
+   DO NOT MOVE `container-type` ONTO `.sk-action-row`. An element is never its own query
+   container. Measured, chromium and firefox, at a 360px row: the real element computes
+   `flex-wrap: wrap` and the collapsed static form computes `nowrap`; nested inside a 320px
+   ancestor container, a 700px row the element correctly leaves unwrapped wraps anyway. The
+   trigger's `grid-template-areas` agrees in both forms at every width, because the trigger is
+   a DESCENDANT of the container — which is what makes the divergence easy to miss.
+
+   ADR-15 and kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/
+   host-container-type/ hold the full outcome table. This comment adds no rule and changes
+   none. */
+
+:host {
+  display: block;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.sk-action-row {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--sk-fg-body);
+  background: var(--sk-surface-card);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  font-family: var(--sk-font-sans);
+  transition:
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+/* #349: route mode never sets `aria-current="true"` on the row — it sets `aria-current="page"`
+   on the trigger anchor instead (FR-011, ratified: attribute parity only, one value per mode).
+   Without the `:has()` arm below, a route-mode current row painted identically to a non-current
+   one — assistive tech was told which row is current, a sighted user was not. The `:has()` arm
+   reaches the row from the anchor's attribute so the SAME declarations paint both cases; this is
+   not a second visual language, it is the one rule this component already had, applied to both
+   places `aria-current` can land. `> .sk-action-row__trigger` matches only the DIRECT trigger
+   child, never a nested consumer-supplied anchor (e.g. inside `supporting`). */
+.sk-action-row[aria-current="true"],
+.sk-action-row:has(> .sk-action-row__trigger[aria-current="page"]) {
+  background: var(--sk-surface-pill);
+  border-color: var(--sk-border-strong);
+}
+
+.sk-action-row--flush {
+  background: none;
+  border-color: transparent;
+  border-width: 0;
+  border-radius: 0;
+}
+
+.sk-action-row--flush[aria-current="true"],
+.sk-action-row--flush:has(> .sk-action-row__trigger[aria-current="page"]) {
+  background: var(--sk-surface-pill);
+  border-color: transparent;
+  border-width: 0;
+}
+
+.sk-action-row__trigger {
+  box-sizing: border-box;
+  display: grid;
+  flex: 1;
+  grid-template-areas:
+    "marker title metadata"
+    "marker reference metadata"
+    "marker tags metadata"
+    "supporting supporting supporting";
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  min-width: 0;
+  /* NFR-003 (action-row-static-form-01M25JSV, #331): a title-only row (no marker, reference,
+     tags or metadata) has nothing in this grid's other rows, so the trigger's block size was
+     riding on the browser's default `line-height: normal` for one line of text plus this
+     rule's own padding — a real 44px floor was not being asserted here at all, it just
+     happened to clear 44px on some engine/font-fallback combinations and not others.
+     `--sk-space-9` is 3rem/48px — the closest token at or above the 44px floor — pinned the
+     same way sk-confirm-dialog.css pins its own two NFR-001 controls. */
+  min-block-size: var(--sk-space-9);
+  margin: 0;
+  padding: var(--sk-space-3) var(--sk-space-4);
+  color: inherit;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  transition: background-color var(--sk-motion-duration-fast)
+    var(--sk-motion-ease-out);
+}
+
+button.sk-action-row__trigger,
+a.sk-action-row__trigger {
+  appearance: none;
+  cursor: pointer;
+}
+
+a.sk-action-row__trigger {
+  color: inherit;
+  text-decoration: none;
+}
+
+button.sk-action-row__trigger:hover,
+a.sk-action-row__trigger:hover {
+  background: var(--sk-surface-pill);
+}
+
+button.sk-action-row__trigger:focus-visible,
+a.sk-action-row__trigger:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-color-accent);
+  outline-offset: calc(var(--sk-border-width-2) * -1);
+}
+
+button.sk-action-row__trigger:active,
+a.sk-action-row__trigger:active {
+  background: var(--sk-surface-muted);
+}
+
+.sk-action-row__marker {
+  grid-area: marker;
+  align-self: start;
+  margin-inline-end: var(--sk-space-3);
+}
+
+.sk-action-row__title {
+  grid-area: title;
+  min-width: 0;
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-display);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.sk-action-row__reference {
+  grid-area: reference;
+  min-width: 0;
+  color: var(--sk-fg-muted);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  overflow-wrap: anywhere;
+}
+
+.sk-action-row__tags {
+  display: flex;
+  grid-area: tags;
+  flex-wrap: wrap;
+  gap: var(--sk-space-1);
+  min-width: 0;
+  margin-block-start: var(--sk-space-2);
+}
+
+.sk-action-row__metadata {
+  grid-area: metadata;
+  align-self: center;
+  justify-self: end;
+  margin-inline-start: var(--sk-space-5);
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-xs);
+  white-space: nowrap;
+}
+
+.sk-action-row__supporting {
+  grid-area: supporting;
+  min-width: 0;
+  margin-block-start: var(--sk-space-2);
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-xs);
+  overflow-wrap: anywhere;
+}
+
+.sk-action-row__controls {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: none;
+  flex-wrap: wrap;
+  gap: var(--sk-space-2);
+  padding: var(--sk-space-3) var(--sk-space-4) var(--sk-space-3) 0;
+}
+
+.sk-action-row--card {
+  flex-direction: column;
+}
+
+.sk-action-row--card .sk-action-row__trigger {
+  grid-template-areas:
+    "marker"
+    "title"
+    "reference"
+    "tags"
+    "metadata"
+    "supporting";
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+}
+
+.sk-action-row--card .sk-action-row__marker {
+  margin-inline-end: 0;
+}
+
+.sk-action-row--card .sk-action-row__metadata {
+  justify-self: start;
+  margin-block-start: var(--sk-space-2);
+  margin-inline-start: 0;
+  white-space: normal;
+}
+
+.sk-action-row--card .sk-action-row__controls {
+  width: 100%;
+  padding: 0 var(--sk-space-4) var(--sk-space-3);
+}
+
+@container (max-width: 400px) {
+  .sk-action-row {
+    flex-wrap: wrap;
+  }
+
+  .sk-action-row__trigger {
+    grid-template-areas:
+      "marker title"
+      "marker reference"
+      "marker tags"
+      "metadata metadata"
+      "supporting supporting";
+    grid-template-columns: auto minmax(0, 1fr);
+    width: 100%;
+  }
+
+  .sk-action-row__metadata {
+    justify-self: start;
+    margin-block-start: var(--sk-space-2);
+    margin-inline-start: 0;
+  }
+
+  .sk-action-row__controls {
+    width: 100%;
+    padding: 0 var(--sk-space-4) var(--sk-space-3);
+  }
+}
+
+/* Disable exactly the two transitions this component owns. Keeping the
+   selectors scoped avoids changing motion in consumer-provided slots. */
+@media (prefers-reduced-motion: reduce) {
+  .sk-action-row {
+    transition: none;
+  }
+
+  .sk-action-row__trigger {
+    transition: none;
+  }
+}
+
+/* Background state changes flatten to Canvas in forced-colors mode. Preserve
+   the selected edge and give hover/pressed states an inset outline without
+   opting out of the user's palette. System colours live on policed longhands;
+   focus keeps the base rule's width/style and overrides its colour only. */
+@media (forced-colors: active) {
+  /* #349: the colour-only case above — this is where a route-mode current row's treatment
+     would vanish entirely if it were left keyed to `[aria-current="true"]` alone: forced-colors
+     already flattens `background`/`border-color` to Canvas, so this block's own edge is the
+     ONLY surviving carrier of "current" here, for either mode. */
+  .sk-action-row[aria-current="true"],
+  .sk-action-row:has(> .sk-action-row__trigger[aria-current="page"]) {
+    border-inline-start-color: Highlight;
+    border-inline-start-width: var(--sk-border-width-2);
+  }
+
+  .sk-action-row--flush[aria-current="true"],
+  .sk-action-row--flush:has(> .sk-action-row__trigger[aria-current="page"]) {
+    border-inline-start-width: 0;
+  }
+
+  button.sk-action-row__trigger:hover,
+  a.sk-action-row__trigger:hover {
+    outline-style: solid;
+    outline-width: var(--sk-border-width-1);
+    outline-offset: calc(var(--sk-border-width-1) * -1);
+    outline-color: CanvasText;
+  }
+
+  button.sk-action-row__trigger:active,
+  a.sk-action-row__trigger:active {
+    outline-style: dashed;
+    outline-width: var(--sk-border-width-2);
+    outline-offset: calc(var(--sk-border-width-2) * -1);
+    outline-color: ButtonText;
+  }
+
+  button.sk-action-row__trigger:focus-visible,
+  a.sk-action-row__trigger:focus-visible {
+    outline-style: solid;
+    outline-width: var(--sk-border-width-2);
+    outline-offset: calc(var(--sk-border-width-2) * -1);
+    outline-color: Highlight;
+  }
+}
+    </style>
+  </head>
+  <body>
+    <section id="action-row" data-od-component="action-row">
+      <h1>action-row</h1>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <div class="sk-action-row-host"><div class="sk-action-row"><div class="sk-action-row__trigger sk-action-row__trigger--static"><span class="sk-action-row__marker"><span aria-hidden="true">●</span></span><span id="sk-action-row-title" class="sk-action-row__title">Row title</span><span class="sk-action-row__reference">/path/to/resource</span><span class="sk-action-row__tags"><span class="sk-pill-tag">Tag</span></span><span class="sk-action-row__metadata">2 hours ago</span><span class="sk-action-row__supporting">Supporting detail about this row.</span></div><div class="sk-action-row__controls"><button type="button" style="color:inherit;font:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;">Action</button></div></div></div>
+      </figure>
+    </section>
+  </body>
+</html>

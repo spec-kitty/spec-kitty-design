@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>progress — Spec Kitty</title>
+    <meta name="description" content="progress: 14 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: progress — packages/styles/src/progress/sk-progress.css */
+/* @spec-kitty/styles — sk-progress shared styles */
+/* All values use --sk-* tokens only — no hardcoded values, except the system-color
+   keyword under forced-colors — see docs/contributing/adding-a-component.md's
+   "Forced-colors and reduced-motion baselines" section, the canonical owner of that
+   convention; it is not restated here. */
+/*
+ * No shadow root: this component has no custom element (styles-only, ADR-10's
+ * "Styles-only components are a class, not a fixed exception count" section), so
+ * no `:host` rule applies here.
+ *
+ * Markup contract (data-model.md is authoritative; not restated in full here):
+ *   <div class="sk-progress[ sk-progress--<modifier>]">
+ *     <label class="sk-progress__label" for="<id>">...</label>
+ *     <progress class="sk-progress__bar" id="<id>" value="<n>" max="<n>">...</progress>
+ *     <span class="sk-progress__meta">...</span>
+ *   </div>
+ * Three flat children, always in this order — no wrapper div between them, so every
+ * layout arrangement below is expressed as a flex direction/sizing rule on the root
+ * and its direct children, never a restructure.
+ *
+ * Indeterminate (#306, mission progress-indeterminate-01M25C78): a root modifier,
+ * `.sk-progress--indeterminate`, expresses unknown-duration activity with the
+ * SAME three-flat-children markup, one change only — `<progress class="sk-
+ * progress__bar">` carries no `value` attribute at all (not an empty string, not
+ * an out-of-range value):
+ *   <div class="sk-progress sk-progress--indeterminate">
+ *     <label class="sk-progress__label" for="<id>">...</label>
+ *     <progress class="sk-progress__bar" id="<id>"></progress>
+ *     <span class="sk-progress__meta">...</span>  <!-- OPTIONAL for this state -->
+ *   </div>
+ * `sk-progress__meta` becomes optional for this state (its absence is a
+ * supported, tested state) and, when present, must never read as a percentage
+ * — there is no percentage to state. No ARIA is added anywhere; the native,
+ * valueless `<progress>` plus the existing `for`/`id` label pair is the sole
+ * accessibility mechanism, unchanged in mechanism from the determinate case.
+ * This family does NOT share its activity cue with `sk-button`/#305 — see
+ * spec.md's "Cross-Mission Decision: TKT5/TKT6 Activity Cue" section
+ * (kitty-specs/progress-indeterminate-01M25C78/spec.md) for the ruling and its
+ * reasoning; nothing below is designed, named, or structured for reuse there.
+ */
+
+.sk-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-1);
+}
+
+.sk-progress__label {
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  color: var(--sk-fg-default);
+}
+
+/*
+ * `appearance: none` is required before any of the three vendor pseudo-elements
+ * below can paint a custom fill — the only standardised styling surface
+ * `<progress>` exposes. The track is drawn with a plain `border`, which survives
+ * `forced-colors: active` automatically (zero override needed, see the
+ * `@media (forced-colors: active)` block below for the fill, which does need one).
+ */
+.sk-progress__bar {
+  appearance: none;
+  display: block;
+  width: 120px;
+  height: 4px;
+  background: var(--sk-surface-input);
+  border: 1px solid var(--sk-border-default);
+  border-radius: var(--sk-radius-pill);
+}
+
+/* Blink/WebKit paints its own track pseudo-element over the reset host by
+   default; reset it to transparent so the host's own background/border (above)
+   show through instead of a second, competing track. */
+.sk-progress__bar::-webkit-progress-bar {
+  background: transparent;
+  border-radius: var(--sk-radius-pill);
+}
+
+.sk-progress__bar::-webkit-progress-value {
+  background-color: var(--sk-color-yellow);
+  border-radius: var(--sk-radius-pill);
+}
+
+.sk-progress__bar::-moz-progress-bar {
+  background-color: var(--sk-color-yellow);
+  border-radius: var(--sk-radius-pill);
+}
+
+.sk-progress__meta {
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  color: var(--sk-fg-muted);
+}
+
+/*
+ * Layout modifiers (FR-007): same three children, same order, in every case —
+ * only the root's flex direction and the bar's own width change.
+ */
+.sk-progress--compact {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--sk-space-2);
+}
+
+/* Narrow keeps the default's stacked direction but lets the bar fill the
+   available width instead of sitting at the fixed 120px default — the fixed
+   width is sized for an inline/stacked context with room to spare, not for a
+   genuinely narrow column. */
+.sk-progress--narrow .sk-progress__bar {
+  width: 100%;
+}
+
+/*
+ * Indeterminate (FR-001, FR-007): an AUTHORED, token-driven animation — never
+ * a reliance on each engine's own default indeterminate paint. research.md
+ * R-05 records why: native indeterminate rendering (a) is not an author
+ * `animation`/`transition`, so `prefers-reduced-motion` cannot switch it off
+ * on its own, which would make FR-008 unsatisfiable, and (b) is itself the
+ * named cross-engine divergence risk this mission exists to avoid.
+ *
+ * MEASURED, NOT ASSUMED (T001/T002), TWO separate findings:
+ *
+ * 1. Chromium generates no paintable `::-webkit-progress-value` box at all
+ *    for an indeterminate `<progress>` — confirmed by an isolated probe
+ *    outside this component's own CSS entirely: a bare
+ *    `progress:indeterminate::-webkit-progress-value { background: red }`
+ *    paints nothing, while the identical selector without `:indeterminate`
+ *    paints normally for a determinate value. Firefox's `::-moz-progress-bar`,
+ *    by contrast, DOES paint for the indeterminate case. WebKit cannot be
+ *    measured on this host (R-04) and may match either behaviour. To avoid
+ *    gambling on which mechanism a given engine uses, the SAME sweep is
+ *    authored on TWO surfaces below: the host `.sk-progress__bar` element's
+ *    own background (which always paints — the track border/background
+ *    already prove this for every state) as the resilient base layer, and
+ *    the vendor pseudo-elements as an enhancement for engines that also
+ *    paint those.
+ * 2. A comma-separated selector list that MIXES a plain selector (or a
+ *    `::-webkit-*` pseudo) with an unrecognised `::-moz-*` pseudo (or vice
+ *    versa) is dropped WHOLESALE by Chromium — not just the unrecognised
+ *    branch. Confirmed by isolated probe: `.a, .a::-moz-progress-bar { … }`
+ *    applies NEITHER declaration to `.a` in Chromium, where `.a { … }` alone
+ *    applies normally; a plain grouped selector list is not "forgiving" the
+ *    way `:is()`/`:where()` are. This is exactly why the determinate rules
+ *    above (`::-webkit-progress-value` / `::-moz-progress-bar`) already live
+ *    in two SEPARATE rule blocks rather than one combined list — that
+ *    existing convention is followed deliberately below, never combined,
+ *    even though it duplicates declarations three ways (host / webkit /
+ *    moz).
+ *
+ * Technique: a soft gradient band, twice the track's own width, swept by
+ * animating `background-position` from fully off the left edge to fully off
+ * the right edge, looping — a standard "search-light" sweep. This is the
+ * `--sk-motion-*`-token-driven activity cue itself.
+ */
+.sk-progress--indeterminate .sk-progress__bar {
+  background-color: var(--sk-surface-input);
+  background-image: linear-gradient(90deg, transparent 0%, var(--sk-color-yellow) 50%, transparent 100%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation-name: sk-progress-indeterminate-sweep;
+  animation-duration: var(--sk-motion-duration-slow);
+  animation-timing-function: var(--sk-motion-ease-in-out);
+  animation-iteration-count: infinite;
+}
+
+/* The pseudo-element layer (Firefox; a harmless no-op where Chromium/WebKit
+   never paint it — see finding 1 above): span the full track, since there is
+   no value/max pair for the browser to size it from, and clear the solid
+   fill colour so the gradient (not a block) is what reads as the fill. */
+.sk-progress--indeterminate .sk-progress__bar::-webkit-progress-value {
+  appearance: none;
+  width: 100%;
+  background-color: transparent;
+  background-image: linear-gradient(90deg, transparent 0%, var(--sk-color-yellow) 50%, transparent 100%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  border-radius: var(--sk-radius-pill);
+  animation-name: sk-progress-indeterminate-sweep;
+  animation-duration: var(--sk-motion-duration-slow);
+  animation-timing-function: var(--sk-motion-ease-in-out);
+  animation-iteration-count: infinite;
+}
+
+.sk-progress--indeterminate .sk-progress__bar::-moz-progress-bar {
+  appearance: none;
+  width: 100%;
+  background-color: transparent;
+  background-image: linear-gradient(90deg, transparent 0%, var(--sk-color-yellow) 50%, transparent 100%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  border-radius: var(--sk-radius-pill);
+  animation-name: sk-progress-indeterminate-sweep;
+  animation-duration: var(--sk-motion-duration-slow);
+  animation-timing-function: var(--sk-motion-ease-in-out);
+  animation-iteration-count: infinite;
+}
+
+@keyframes sk-progress-indeterminate-sweep {
+  from {
+    background-position: -100% 0;
+  }
+
+  to {
+    background-position: 200% 0;
+  }
+}
+
+/*
+ * Reduced motion (FR-008, NFR-005): the animation stops, but the frozen frame
+ * is fixed at `background-position: 50% 0` — the gradient band's own
+ * midpoint, which paints a soft, visibly-present band roughly centred in the
+ * track. This is deliberately neither the Complete determinate fixture's
+ * fully-full fill nor the Zero determinate fixture's fully-empty one (both of
+ * which are solid `background-color` fills at 100%/0% width, a different
+ * rendering mechanism entirely from this gradient-band technique) — the
+ * inverse of the usual reflex, where stopping motion means hiding the
+ * indicator: here the track must stay visibly present. User Story 3's
+ * acceptance scenarios measure this frame directly; it is not assumed from
+ * "the animation stops" alone. Three separate rules, per the measured
+ * grouped-selector-list hazard documented above.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .sk-progress--indeterminate .sk-progress__bar {
+    animation-name: none;
+    background-position: 50% 0;
+  }
+
+  .sk-progress--indeterminate .sk-progress__bar::-webkit-progress-value {
+    animation-name: none;
+    background-position: 50% 0;
+  }
+
+  .sk-progress--indeterminate .sk-progress__bar::-moz-progress-bar {
+    animation-name: none;
+    background-position: 50% 0;
+  }
+}
+
+/*
+ * Forced-colors: the track's plain `border` above survives automatically — no
+ * override needed (adding-a-component.md's forced-colors section, and this
+ * repo's own sk-skip-link/sk-data-table measurements). The fill is
+ * background-drawn and does NOT survive (it flattens to `Canvas`), so it gets
+ * an explicit override to the `Highlight` system color here, matching
+ * sk-skip-link.css / sk-data-table.css's established pattern. `Highlight` is
+ * already in stylelint.config.mjs's `ignoreValues` — no config change needed.
+ *
+ * No reduced-motion block for the determinate rules above: no transition is
+ * authored on the determinate fill. Those fixtures are static snapshots (no
+ * live `value` mutation), and FR-010/AC-2 explicitly allows the
+ * reduced-motion requirement to be "satisfied vacuously" when no transition
+ * exists — adding one here with nothing to guard would be exactly the
+ * dead-guard shape adding-a-component.md warns against
+ * (sk-transition-matrix.css:237). The indeterminate rule above is the real,
+ * non-vacuous guard this mission adds.
+ */
+@media (forced-colors: active) {
+  /*
+   * #328 — measured, not assumed: a comma-separated selector list mixing a
+   * `::-webkit-*` pseudo with an unrecognised (to Chromium) `::-moz-*` pseudo
+   * is dropped WHOLESALE by Chromium, per the T002 finding documented at the
+   * indeterminate rule below — so the combined list this rule used to be
+   * silently applied NEITHER declaration in Chromium, leaving the determinate
+   * fill's `::-webkit-progress-value` pseudo with no forced-colors override at
+   * all. Split into two separate rules, matching the convention the
+   * indeterminate rules below already follow for the same reason.
+   */
+  .sk-progress__bar::-webkit-progress-value {
+    background-color: Highlight;
+  }
+
+  .sk-progress__bar::-moz-progress-bar {
+    background-color: Highlight;
+  }
+
+  /*
+   * #345 — MEASURED, NOT ASSUMED: flattening the indeterminate fill to a
+   * solid, full-width `Highlight` block (the original shape of this rule)
+   * made it pixel-identical to the determinate `Complete` fixture once #328's
+   * selector-list fix above lets the determinate `::-webkit-progress-value`
+   * pseudo actually receive its own `Highlight` override — both fixtures then
+   * render as a single, full-width, uniformly-`Highlight`-coloured bar with
+   * no motion, a false completion claim (spec.md User Story 3 calls this "a
+   * correctness defect, not a cosmetic one"). Confirmed by rendering both
+   * under `forced-colors: active` and sampling: identical centre/left pixels.
+   *
+   * The obvious fix — a two-stop `linear-gradient(Highlight, Canvas)` doing
+   * the width-split via `background-image` — was tried and MEASURED to fail:
+   * the CSS Color Adjustment spec requires UAs to ignore any author
+   * `background-image` under forced-colors unless `forced-color-adjust: none`
+   * is set (which would also let the non-system sweep gradient's colours
+   * back in, defeating the point), and an isolated probe confirmed Chromium
+   * does exactly this — the gradient never painted, leaving only the
+   * `background-color: Canvas` fallback, making the fixture pixel-identical
+   * to `Zero` instead. `background-image` is therefore off the table for
+   * this fix, forced-colors-wide, not just here.
+   *
+   * The fix that DOES survive (confirmed by the same probe): `clip-path` is
+   * pure geometry, not colour, so forced-colors never touches it. Clipping
+   * the fill to its own left half — solid `Highlight`, no image — is
+   * non-full-width (so it can never read as "done") and, combined with
+   * `animation-name: none`, non-motion (rather than "left running,
+   * harmlessly" as the original comment claimed a gradient would be — with
+   * no gradient at all now, there is nothing left to leave running). The
+   * clip stops at 45% rather than exactly 50% so the sampling test's centre
+   * point (~50%) lands unambiguously on the Canvas side rather than on the
+   * clip edge itself. This mirrors the existing `prefers-reduced-motion`
+   * frame below — a partial, static cue that is deliberately neither the
+   * `Complete` fixture's fully-full fill nor the `Zero` fixture's fully-empty
+   * track — and, like that frame, is exercised by an assertion (see
+   * apps/storybook/src/tests/sk-progress.spec.ts) rather than assumed
+   * correct from the CSS alone. `.sk-progress--indeterminate`'s own rules
+   * retain the cascade priority explained below (two classes beat the
+   * one-class #328 override above), so this still needs restating on BOTH
+   * surfaces — the host (the layer Chromium actually renders for
+   * indeterminate, per the measured note above) and the pseudo-elements
+   * (Firefox) — and the `forced-colors` + `prefers-reduced-motion`
+   * combination is covered for free: this block runs regardless of the
+   * reduced-motion preference, so it already produces the same static,
+   * partial frame under both. Three separate rules, per the measured
+   * grouped-selector-list hazard documented at the indeterminate rule above
+   * (NOT combined the way the unscoped determinate override two rules up is
+   * — that one is #210's and out of this WP's authorised scope to alter).
+   */
+  .sk-progress--indeterminate .sk-progress__bar {
+    background-color: Highlight;
+    background-image: none;
+    animation-name: none;
+    clip-path: inset(0 55% 0 0);
+  }
+
+  .sk-progress--indeterminate .sk-progress__bar::-webkit-progress-value {
+    background-color: Highlight;
+    background-image: none;
+    animation-name: none;
+    clip-path: inset(0 55% 0 0);
+  }
+
+  .sk-progress--indeterminate .sk-progress__bar::-moz-progress-bar {
+    background-color: Highlight;
+    background-image: none;
+    animation-name: none;
+    clip-path: inset(0 55% 0 0);
+  }
+}
+    </style>
+  </head>
+  <body>
+    <section id="progress" data-od-component="progress">
+      <h1>progress</h1>
+      <figure data-od-variant="compact">
+        <figcaption>compact</figcaption>
+        <div class="sk-progress sk-progress--compact">
+          <label class="sk-progress__label" for="progress-compact">5 of 8 Work Packages done</label>
+          <progress class="sk-progress__bar" id="progress-compact" value="5" max="8">63%</progress>
+          <span class="sk-progress__meta">63%</span>
+        </div>
+      </figure>
+      <figure data-od-variant="complete">
+        <figcaption>complete</figcaption>
+        <div class="sk-progress">
+          <label class="sk-progress__label" for="progress-complete">8 of 8 Work Packages done</label>
+          <progress class="sk-progress__bar" id="progress-complete" value="8" max="8">100%</progress>
+          <span class="sk-progress__meta">100%</span>
+        </div>
+      </figure>
+      <figure data-od-variant="forced-colors">
+        <figcaption>forced-colors</figcaption>
+        <div class="sk-progress">
+          <label class="sk-progress__label" for="progress-forced-colors">5 of 8 Work Packages done</label>
+          <progress class="sk-progress__bar" id="progress-forced-colors" value="5" max="8">63%</progress>
+          <span class="sk-progress__meta">63%</span>
+        </div>
+      </figure>
+      <figure data-od-variant="indeterminate-compact">
+        <figcaption>indeterminate-compact</figcaption>
+        <div class="sk-progress sk-progress--indeterminate sk-progress--compact">
+          <label class="sk-progress__label" for="progress-indeterminate-compact">Syncing your changes</label>
+          <progress class="sk-progress__bar" id="progress-indeterminate-compact"></progress>
+        </div>
+      </figure>
+      <figure data-od-variant="indeterminate-forced-colors">
+        <figcaption>indeterminate-forced-colors</figcaption>
+        <div class="sk-progress sk-progress--indeterminate">
+          <label class="sk-progress__label" for="progress-indeterminate-forced-colors">Syncing your changes</label>
+          <progress class="sk-progress__bar" id="progress-indeterminate-forced-colors"></progress>
+        </div>
+      </figure>
+      <figure data-od-variant="indeterminate-long-label">
+        <figcaption>indeterminate-long-label</figcaption>
+        <div class="sk-progress sk-progress--indeterminate">
+          <label class="sk-progress__label" for="progress-indeterminate-long-label">Resolving pending join-link invitations across every regional workspace tracked this quarter</label>
+          <progress class="sk-progress__bar" id="progress-indeterminate-long-label"></progress>
+        </div>
+      </figure>
+      <figure data-od-variant="indeterminate-narrow">
+        <figcaption>indeterminate-narrow</figcaption>
+        <div class="sk-progress sk-progress--indeterminate sk-progress--narrow">
+          <label class="sk-progress__label" for="progress-indeterminate-narrow">Syncing your changes</label>
+          <progress class="sk-progress__bar" id="progress-indeterminate-narrow"></progress>
+        </div>
+      </figure>
+      <figure data-od-variant="indeterminate-with-meta">
+        <figcaption>indeterminate-with-meta</figcaption>
+        <div class="sk-progress sk-progress--indeterminate">
+          <label class="sk-progress__label" for="progress-indeterminate-with-meta">Resolving join link</label>
+          <progress class="sk-progress__bar" id="progress-indeterminate-with-meta"></progress>
+          <span class="sk-progress__meta">Working…</span>
+        </div>
+      </figure>
+      <figure data-od-variant="indeterminate">
+        <figcaption>indeterminate</figcaption>
+        <div class="sk-progress sk-progress--indeterminate">
+          <label class="sk-progress__label" for="progress-indeterminate">Syncing your changes</label>
+          <progress class="sk-progress__bar" id="progress-indeterminate"></progress>
+        </div>
+      </figure>
+      <figure data-od-variant="large-total">
+        <figcaption>large-total</figcaption>
+        <div class="sk-progress">
+          <label class="sk-progress__label" for="progress-large-total">2,500 of 10,000 Work Packages done</label>
+          <progress class="sk-progress__bar" id="progress-large-total" value="2500" max="10000">25%</progress>
+          <span class="sk-progress__meta">25%</span>
+        </div>
+      </figure>
+      <figure data-od-variant="long-label">
+        <figcaption>long-label</figcaption>
+        <div class="sk-progress">
+          <label class="sk-progress__label" for="progress-long-label">3 of 5 quarterly compliance audits completed across every regional data center deployment tracked this quarter</label>
+          <progress class="sk-progress__bar" id="progress-long-label" value="3" max="5">60%</progress>
+          <span class="sk-progress__meta">60%</span>
+        </div>
+      </figure>
+      <figure data-od-variant="narrow">
+        <figcaption>narrow</figcaption>
+        <div class="sk-progress sk-progress--narrow">
+          <label class="sk-progress__label" for="progress-narrow">5 of 8 Work Packages done</label>
+          <progress class="sk-progress__bar" id="progress-narrow" value="5" max="8">63%</progress>
+          <span class="sk-progress__meta">63%</span>
+        </div>
+      </figure>
+      <figure data-od-variant="t10">
+        <figcaption>t10</figcaption>
+        <div class="sk-progress">
+          <label class="sk-progress__label" for="mission-progress">5 of 8 Work Packages done</label>
+          <progress class="sk-progress__bar" id="mission-progress" value="5" max="8">63%</progress>
+          <span class="sk-progress__meta">63%</span>
+        </div>
+      </figure>
+      <figure data-od-variant="zero">
+        <figcaption>zero</figcaption>
+        <div class="sk-progress">
+          <label class="sk-progress__label" for="progress-zero">0 of 8 Work Packages done</label>
+          <progress class="sk-progress__bar" id="progress-zero" value="0" max="8">0%</progress>
+          <span class="sk-progress__meta">0%</span>
+        </div>
+      </figure>
+    </section>
+  </body>
+</html>

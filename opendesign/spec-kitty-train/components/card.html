@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>card — Spec Kitty</title>
+    <meta name="description" content="card: 1 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: card — packages/styles/src/card/sk-card.css */
+/* @spec-kitty/styles — sk-card generic card component */
+/* All values use --sk-* tokens only */
+/* Token mapping note: reference kit.css used --sk-blue-bg and --sk-purple-bg
+   (old flat names). ADR-003 equivalents are --sk-surface-tint-sky (blue)
+   and --sk-surface-tint-lilac (purple), which are semantically identical
+   in both light and dark themes. --sk-color-blue-bg and --sk-color-purple-bg
+   are also available as aliases. */
+
+.sk-card {
+  background: var(--sk-surface-card);
+  border: 2px solid var(--sk-border-default);
+  border-radius: var(--sk-radius-lg);
+  /* Cards set no colour of their own until #69. Without this, text inside a card
+     inherits the UA default (black) and renders black-on-dark: measured 1.2:1 on
+     --sk-surface-card. Present in EVERY card story, but axe can only report it where
+     an ancestor sets a background it can resolve, which is why only the LightMode
+     variants were ever flagged.
+     --sk-fg-body, not --sk-fg-on-card: the latter is defined only in the dark block,
+     so it would fall back to light grey inside a .sk-light subtree (a documented
+     wrapper, see the tokens README). --sk-fg-body is defined in both. #101 */
+  color: var(--sk-fg-body);
+  padding: var(--sk-space-7);
+  /* The base border is 2px on all four sides, and every INTERACTIVE state changes
+     only its colour — which is what prevents layout shift on hover.
+     #177 widened the inline-start edge to 4px for a status tone, so "always 2px"
+     is no longer true of the box; the property that matters still is. A status is
+     a STATIC axis: it is set once in markup, not entered and left under the
+     pointer, so the widened edge cannot produce the reflow this note exists to
+     prevent. Do not reintroduce a width change on :hover, :focus or :active. */
+  transition: border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-card--inset {
+  background: var(--sk-surface-input);
+  border-color: var(--sk-border-default);
+}
+
+/* Blue tint variant — information/context cards.
+   The rgba() channel values that DRIFT-2 recorded as a deviation here have moved into
+   --sk-border-tint-sky in @spec-kitty/tokens (#72). They are still channel extractions
+   rather than relative colour syntax — `rgb(from var(--sk-color-blue) r g b / 0.20)` still
+   has limited support — but they are now a token, so this file has no hardcoded colour and
+   light-mode variance crosses the shadow boundary as a value rather than a selector. */
+.sk-card--blue {
+  background: var(--sk-surface-tint-sky);
+  border-color: var(--sk-border-tint-sky);
+}
+.sk-card--blue:hover {
+  border-color: var(--sk-color-blue); /* full accent on hover — no size jump (still 2px) */
+}
+
+/* Purple tint variant — feature/architecture cards */
+.sk-card--purple {
+  background: var(--sk-surface-tint-lilac);
+  border-color: var(--sk-border-tint-lilac);
+}
+.sk-card--purple:hover {
+  border-color: var(--sk-color-purple); /* no size jump */
+}
+
+/* NO light-mode overrides here, deliberately.
+   Light-mode variance lives in --sk-border-tint-{sky,lilac} in @spec-kitty/tokens.
+   The rules that used to sit here were `:root[data-theme="light"] .sk-card--blue` and
+   `.sk-light .sk-card--blue` — BOTH cross a shadow boundary, and both are therefore inert
+   once this CSS is adopted by <sk-card>: the themed ancestor is outside the shadow root
+   and a descendant combinator cannot reach in. Silently: no error, no warning, and a
+   LightMode story rendering dark styling.
+   A custom property inherits through the boundary; a selector does not. That is the whole
+   reason for the token pair. See #72 and SK-D01. */
+
+/* ── Operational status tones (#177) ──────────────────────────────────────────
+   ONE axis. `variant` stays the brand/decorative axis; `status` is the
+   operational one, and a card may carry both.
+
+   THE TWO AXES ARE ORTHOGONAL AS INPUTS AND PRECEDENCE IN RENDERING. Both may be
+   set, both reflect, neither errors, and both modifiers stay on the node — but
+   while a status is present the operational tone SUPERSEDES the brand variant's
+   surface and edge ENTIRELY. `.sk-card--blue` sets exactly `background` and
+   `border-color`; the status rules below set both, at equal specificity, authored
+   after. So the variant loses every property it declares, and nothing about it
+   reaches the pixel.
+
+   MEASURED, because an earlier revision of this comment claimed the opposite —
+   that "the brand variant keeps its own hover accent" and "nothing is silently
+   dropped". Computed styles for `variant="blue" status="attention"`,
+   `variant="purple" status="attention"` and `status="attention"` alone are
+   IDENTICAL in background, all four border colours and border width. The two
+   variants render pixel-identical under any status.
+
+   That is deliberate and it is the right default — an operational tone that a
+   decorative one could tint is not an operational tone — but it is PRECEDENCE,
+   not co-existence, and the difference is what the comment above got wrong.
+   Giving `variant` a surviving visual contribution under a status is a DESIGN
+   decision and belongs to whoever owns the palette, not to a stylesheet comment.
+   Pinned by the precedence test in fixtures/elements-behaviour/src/sk-card.test.ts.
+
+   TONE IS NEVER THE ONLY CARRIER OF MEANING. These rules paint a surface and an
+   edge. The meaning is carried by the slotted <sk-status-indicator>'s TEXT — see
+   the Greyscale story, which renders the whole set desaturated and stays
+   readable. A card whose only signal is its hue is the defect this axis exists
+   to remove, not a use of it.
+
+   NO THEME SELECTOR here, deliberately, for the reason the block above already
+   records at length: `:root[data-theme="light"] .sk-x` and `.sk-light .sk-x`
+   both cross a shadow boundary and are inert once this sheet is adopted. Light
+   variance lives entirely in --sk-status-* / --sk-on-status-*, which inherit
+   through the boundary as values. */
+.sk-card--status-neutral {
+  background: var(--sk-status-neutral);
+  border-color: var(--sk-on-status-neutral);
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+.sk-card--status-info {
+  background: var(--sk-status-info);
+  border-color: var(--sk-on-status-info);
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+.sk-card--status-success {
+  background: var(--sk-status-success);
+  border-color: var(--sk-on-status-success);
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+.sk-card--status-attention {
+  background: var(--sk-status-attention);
+  border-color: var(--sk-on-status-attention);
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+.sk-card--status-danger {
+  background: var(--sk-status-danger);
+  border-color: var(--sk-on-status-danger);
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+.sk-card--status-recovery {
+  background: var(--sk-status-recovery);
+  border-color: var(--sk-on-status-recovery);
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+/* THE OPERATIONAL EDGE DOES NOT YIELD TO THE BRAND VARIANT'S HOVER ACCENT.
+   `.sk-card--blue:hover` and `.sk-card--purple:hover` set `border-color` at
+   (0,2,0), which outranks the (0,1,0) status rules above — so without these six,
+   hovering a card carrying BOTH axes swapped the operational tone for the brand
+   one and the status hue disappeared under the pointer.
+
+   These six complete the precedence stated above rather than being an exception
+   to it: without them the variant's ONE surviving declaration was its hover
+   colour, which made the rendering inconsistent — variant inert at rest, variant
+   winning on hover. It is now inert in both.
+
+   Equal specificity to the variant hover rules, authored after them, so source
+   order decides — the same mechanism the block above relies on. Six rules rather
+   than one grouped selector with a custom property, because the indirection buys
+   nothing here and a per-tone rule is what a reader greps for. */
+.sk-card--status-neutral:hover {
+  border-color: var(--sk-on-status-neutral);
+}
+
+.sk-card--status-info:hover {
+  border-color: var(--sk-on-status-info);
+}
+
+.sk-card--status-success:hover {
+  border-color: var(--sk-on-status-success);
+}
+
+.sk-card--status-attention:hover {
+  border-color: var(--sk-on-status-attention);
+}
+
+.sk-card--status-danger:hover {
+  border-color: var(--sk-on-status-danger);
+}
+
+.sk-card--status-recovery:hover {
+  border-color: var(--sk-on-status-recovery);
+}
+
+/* FORCED COLORS: the WIDTH is the mechanism, and it is set above, unconditionally.
+
+   Under `forced-colors: active` every tone collapses to the system surface —
+   `background` flattens to Canvas and the six tints become one ground, so the
+   tone is gone. What still says "this card carries an operational status" is the
+   4px `border-inline-start-width` in each `.sk-card--status-*` rule above: forced
+   colors remaps COLOR and leaves width alone, so that step survives untouched
+   while the tint does not.
+
+   SAY THE CONSEQUENCE OUT LOUD: in forced colors the six tones are MUTUALLY
+   INDISTINGUISHABLE. All six grounds flatten to Canvas and all six borders remap
+   to CanvasText, so `success` and `danger` render identically; the only surviving
+   distinction is between a status card and a plain one, and it is carried
+   entirely by the 4px inline-start width. That is acceptable only because the
+   tone was never the carrier of meaning here — the slotted
+   <sk-status-indicator>'s TEXT is (see the Greyscale story, and #177). A future
+   author who wants the tones to differ in this mode is choosing a system color
+   per tone, which is a design decision and a different change from this one.
+
+   There is deliberately NO `@media (forced-colors: active)` block here. One used
+   to sit at this line, setting `border-inline-start-color: CanvasText` and
+   restating `border-inline-start-width`, described as making the edge
+   "deliberate". Both declarations were no-ops (#218): the forced-colors
+   algorithm already remaps border colors to `CanvasText` with zero author CSS,
+   and the width was already set outside the query for a property the algorithm
+   never touches. A block that restates what the UA computes anyway reads as the
+   mechanism while doing none of the work, which is worse than no block — the
+   next author to widen the axis would have maintained it believing the edge
+   depended on it.
+
+   Contrast the blocks in this repo that ARE load-bearing, and note what they have
+   in common: each swaps to a system color DIFFERENT from the automatic remap.
+   `sk-action-row.css` uses `Highlight` for selection; `sk-data-table.css` swaps
+   `transparent` → `Canvas`/`CanvasText` to restore a zebra alternation the remap
+   destroys; `sk-skip-link.css` uses `Highlight`. Giving the status edge a
+   distinct system color would be that kind of change — and a design decision
+   about what a status card claims in this mode, not a correction — so it is not
+   made here.
+
+   The claim is asserted rather than documented: see the forced-colors case in
+   `apps/storybook/src/tests/elements-load.spec.ts`, which emulates the media
+   feature in both color schemes and requires the status card's inline-start edge
+   to stay strictly wider than the base card's. `forced-color-adjust: none` is NOT
+   used anywhere here: it freezes a value at its authored color, which is
+   frequently invisible against the forced-colors background. */
+
+/* Reduced motion. The card already transitions `border-color` (the rule at the
+   top of this file), and the status axis is now one of the things that
+   transition can express — a status changing under the reader is exactly the
+   motion `prefers-reduced-motion` exists to suppress.
+
+   Scoped to the exact selector and the exact property this component owns, per
+   the recipe: never a wildcard over the component's subtree. The card sets one
+   transition and this cancels that one. */
+@media (prefers-reduced-motion: reduce) {
+  .sk-card {
+    transition: none;
+  }
+}
+    </style>
+  </head>
+  <body>
+    <section id="card" data-od-component="card">
+      <h1>card</h1>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <article class="sk-card">Card content</article>
+      </figure>
+    </section>
+  </body>
+</html>

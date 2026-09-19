@@ -5,8 +5,10 @@
 1. Read `DESIGN.md` for visual and behavioral rules.
 2. Paste `tokens.css` verbatim into the artifact's first style block.
 3. Ground available data and actions in the current product backend.
-4. Use `components.html` for component anatomy: it holds every component's static form, and
-   `DESIGN.md`'s generated section lists which components exist and which cannot be emitted.
+4. For every component you emit, find it in `DESIGN.md`'s generated section, read its page
+   `components/<name>.html`, and copy that page's `<style>` block and markup verbatim. Use only the
+   classes listed for it there: the vocabulary is closed, and a class not listed does not exist.
+   `components.html` holds all 34 pages at once (430 KB); do not load it into context.
 5. For current Team Kitty work, prefer the native `checkbox-choice-group`, compact
    `event-timeline`, route/flush `action-row`, and truthful `sk-copy-field` contracts added
    through train issues #289, #273, #288, and #257.

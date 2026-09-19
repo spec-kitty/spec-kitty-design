@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>form-select — Spec Kitty</title>
+    <meta name="description" content="form-select: 7 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: form-select — packages/styles/src/form-select/sk-form-select.css */
+/* @spec-kitty/styles — native light-DOM form-select presentation (#211) */
+/* The browser keeps the indicator, option UI, validity, focus, and form behaviour. */
+
+.sk-form-select {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  contain: paint;
+  padding-block: var(--sk-space-3);
+  padding-inline: var(--sk-space-4);
+  color: var(--sk-fg-default);
+  background: var(--sk-surface-input);
+  border-color: var(--sk-border-default);
+  border-style: solid;
+  border-width: var(--sk-border-width-1);
+  border-radius: var(--sk-radius-sm);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-normal);
+}
+
+.sk-form-select:focus-visible {
+  border-color: var(--sk-border-focus);
+  outline-color: var(--sk-border-focus);
+  outline-style: solid;
+  outline-width: var(--sk-border-width-2);
+  outline-offset: var(--sk-border-width-1);
+}
+
+.sk-form-select:invalid {
+  border-color: var(--sk-border-control-invalid);
+  border-style: double;
+  border-width: var(--sk-border-width-2);
+}
+
+.sk-form-select:disabled {
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+.sk-form-select--compact {
+  padding-block: var(--sk-space-2);
+  padding-inline: var(--sk-space-3);
+  font-size: var(--sk-text-sm);
+}
+    </style>
+  </head>
+  <body>
+    <section id="form-select" data-od-component="form-select">
+      <h1>form-select</h1>
+      <figure data-od-variant="compact">
+        <figcaption>compact</figcaption>
+        <form class="sk-form-field">
+          <label class="sk-form-field__label" for="compact-outcome">Outcome</label>
+          <select class="sk-form-select sk-form-select--compact" id="compact-outcome" name="outcome">
+            <option value="all" selected>All outcomes</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </form>
+      </figure>
+      <figure data-od-variant="disabled">
+        <figcaption>disabled</figcaption>
+        <form class="sk-form-field">
+          <label class="sk-form-field__label" for="disabled-lane">Lane</label>
+          <select class="sk-form-select" id="disabled-lane" name="lane" disabled aria-describedby="disabled-lane-help">
+            <option value="planned" selected>Planned</option>
+            <option value="done">Done</option>
+          </select>
+          <span class="sk-form-field__description" id="disabled-lane-help">Lane changes are unavailable.</span>
+        </form>
+      </figure>
+      <figure data-od-variant="long-options">
+        <figcaption>long-options</figcaption>
+        <form class="sk-form-field">
+          <label class="sk-form-field__label" for="long-lane">Lane with a long name</label>
+          <select class="sk-form-select" id="long-lane" name="lane">
+            <option value="planned" selected>Planned — awaiting dependency verification and independent adversarial review</option>
+            <option value="done">Done</option>
+          </select>
+        </form>
+      </figure>
+      <figure data-od-variant="optgroups">
+        <figcaption>optgroups</figcaption>
+        <form class="sk-form-field">
+          <label class="sk-form-field__label" for="grouped-lane">Lane</label>
+          <select class="sk-form-select" id="grouped-lane" name="lane">
+            <option value="" selected>Choose a lane</option>
+            <optgroup label="Open">
+              <option value="planned">Planned</option>
+              <option value="in-progress">In progress</option>
+            </optgroup>
+            <optgroup label="Closed">
+              <option value="approved">Approved</option>
+              <option value="done">Done</option>
+            </optgroup>
+          </select>
+        </form>
+      </figure>
+      <figure data-od-variant="required-invalid">
+        <figcaption>required-invalid</figcaption>
+        <form class="sk-form-field sk-form-field--error">
+          <label class="sk-form-field__label" for="required-lane">Lane</label>
+          <select class="sk-form-select" id="required-lane" name="lane" required aria-describedby="required-lane-error">
+            <option value="" selected>Choose a lane</option>
+            <option value="planned">Planned</option>
+            <option value="in-progress">In progress</option>
+            <option value="done">Done</option>
+          </select>
+          <span class="sk-form-field__description" id="required-lane-error">Choose a lane before continuing.</span>
+        </form>
+      </figure>
+      <figure data-od-variant="t10-lane">
+        <figcaption>t10-lane</figcaption>
+        <form class="sk-form-field">
+          <label class="sk-form-field__label" for="t10-lane">Lane</label>
+          <select class="sk-form-select" id="t10-lane" name="lane" aria-describedby="t10-lane-help">
+            <option value="planned" selected>Planned</option>
+            <option value="in-progress">In progress</option>
+            <option value="review">For review</option>
+            <option value="approved">Approved</option>
+            <option value="done">Done</option>
+          </select>
+          <span class="sk-form-field__description" id="t10-lane-help">Choose the Work Package lane.</span>
+        </form>
+      </figure>
+      <figure data-od-variant="t12-filters">
+        <figcaption>t12-filters</figcaption>
+        <form style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--sk-space-12)), 1fr)); gap: var(--sk-space-4);">
+          <div class="sk-form-field">
+            <label class="sk-form-field__label" for="t12-kind">Kind</label>
+            <select class="sk-form-select sk-form-select--compact" id="t12-kind" name="kind">
+              <option value="all" selected>All kinds</option>
+              <option value="feature">Feature</option>
+              <option value="fix">Fix</option>
+            </select>
+          </div>
+          <div class="sk-form-field">
+            <label class="sk-form-field__label" for="t12-outcome">Outcome</label>
+            <select class="sk-form-select sk-form-select--compact" id="t12-outcome" name="outcome">
+              <option value="all" selected>All outcomes</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </form>
+      </figure>
+    </section>
+  </body>
+</html>

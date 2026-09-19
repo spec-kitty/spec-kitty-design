@@ -171,44 +171,53 @@ fictional placeholder.
 ## Components in this package
 
 Derived from the source tree by `scripts/build-opendesign-package.mjs`. **34** components
-have a static form and appear in `components.html`; use their markup and class names exactly.
+have a static form. Each has its own page, `components/<name>.html`, holding its CSS and every static
+form. Read the page for the component you need, then copy its `<style>` block and its markup
+verbatim — after `tokens.css`, which the page links but does not repeat. Read it from the linked
+design-system folder when the project has one, or with
+`"$OD_NODE_BIN" "$OD_BIN" tools design-systems read --path components/<name>.html`.
 
-| Component | Static forms |
-|---|---|
-| `action-row` | `default` |
-| `blog-card` | `default` |
-| `boundary-page` | `long-email`, `long-identifier`, `no-action`, `several-actions`, `terminal-card`, `with-footnote`, `without-footnote`, `without-mark` |
-| `breadcrumbs` | `forced-colors`, `long-labels`, `narrow`, `one-level`, `six-level`, `three-level` |
-| `button` | `default` |
-| `card` | `default` |
-| `check-bullet` | `default` |
-| `checkbox-choice-group` | `default`, `disabled`, `long`, `none`, `zero-counts` |
-| `collection` | `closed`, `empty`, `fifty-items`, `long-text`, `no-count`, `no-footer`, `one-item`, `open` |
-| `context-nav` | `current-nested`, `default`, `empty-overflow`, `empty`, `long-labels`, `scale`, `unavailable-all`, `unavailable-long`, `unavailable-mixed`, `unavailable-parent` |
-| `data-table` | `default`, `narrow-scrollable`, `sticky-header` |
-| `disclosure` | `closed`, `long-body`, `nested`, `open` |
-| `empty-state` | `inline`, `with-action`, `without-action` |
-| `event-timeline` | `compact-default`, `compact-degraded`, `compact-forced-colors`, `compact-leading-marker`, `compact-linked`, `compact-long-content`, `compact-narrow`, `compact-one-event`, `compact-twenty-events`, `forced-colors`, `long-transition`, `narrow`, `one-event`, `twenty-events`, `two-events`, `unavailable-retention`, `verified-marker` |
-| `facts` | `compact`, `empty-value`, `long-value`, `two-col`, `default` |
-| `feature-card` | `default` |
-| `form-field` | `default`, `form-input-default`, `form-input-disabled`, `form-input-error`, `form-input-filled`, `form-input-focus`, `form-textarea-default`, `form-textarea-error` |
-| `form-select` | `compact`, `disabled`, `long-options`, `optgroups`, `required-invalid`, `t10-lane`, `t12-filters` |
-| `grid` | `default` |
-| `nav-pill` | `default` |
-| `pill-tag` | `default` |
-| `progress` | `compact`, `complete`, `forced-colors`, `indeterminate-compact`, `indeterminate-forced-colors`, `indeterminate-long-label`, `indeterminate-narrow`, `indeterminate-with-meta`, `indeterminate`, `large-total`, `long-label`, `narrow`, `t10`, `zero` |
-| `prose` | `absent-prompt`, `long-code`, `narrow`, `prompt`, `wide-table` |
-| `public-header` | `brand-only`, `current-action`, `long-labels`, `many-actions`, `mixed-controls`, `one-action`, `theme-slot`, `two-actions` |
-| `radio-choice-group` | `default`, `disabled-group`, `disabled`, `long`, `none`, `one`, `required-invalid`, `two` |
-| `ribbon-card` | `default` |
-| `section-banner` | `default` |
-| `section-nav` | `default`, `long-labels`, `many-routes`, `no-current`, `one-route`, `two-route` |
-| `segmented-choice` | `all-disabled`, `default`, `five-items`, `long-labels`, `no-selection`, `one-disabled`, `second-selected`, `third-selected`, `two-items` |
-| `site-footer` | `default` |
-| `skip-link` | `unfocused` |
-| `stub` | `default` |
-| `workflow-board` | `all-empty`, `fifty-items`, `fitting`, `long-labels-and-items`, `one-empty-lane`, `populated`, `single-lane-narrow` |
-| `workflow-lane` | `default`, `empty` |
+**The class vocabulary is closed.** The classes listed for a component are every class its CSS
+styles and its forms use. A class that is not listed does not exist in the library: never
+invent a BEM element or modifier — `sk-radio-choice__input` is not a class; the library's is
+`sk-radio-choice-group__control`. When no page can be read, build from these names only.
+
+| Component | Page | Static forms | Classes |
+|---|---|---|---|
+| `action-row` | `components/action-row.html` | `default` | `sk-action-row` `sk-action-row--card` `sk-action-row--flush` `sk-action-row-host` `sk-action-row__controls` `sk-action-row__marker` `sk-action-row__metadata` `sk-action-row__reference` `sk-action-row__supporting` `sk-action-row__tags` `sk-action-row__title` `sk-action-row__trigger` `sk-action-row__trigger--static` `sk-pill-tag` |
+| `blog-card` | `components/blog-card.html` | `default` | `sk-blog-card` `sk-blog-card__content` `sk-blog-card__excerpt` `sk-blog-card__eyebrow` `sk-blog-card__meta` `sk-blog-card__read-more` `sk-blog-card__thumbnail` `sk-blog-card__title` `sk-card` |
+| `boundary-page` | `components/boundary-page.html` | `long-email`, `long-identifier`, `no-action`, `several-actions`, `terminal-card`, `with-footnote`, `without-footnote`, `without-mark` | `sk-boundary-page` `sk-boundary-page__action-group` `sk-boundary-page__body` `sk-boundary-page__card` `sk-boundary-page__footnote` `sk-boundary-page__mark` `sk-boundary-page__stage` `sk-boundary-page__title` `sk-pill-tag` `sk-pill-tag--status-success` |
+| `breadcrumbs` | `components/breadcrumbs.html` | `forced-colors`, `long-labels`, `narrow`, `one-level`, `six-level`, `three-level` | `sk-breadcrumbs` `sk-breadcrumbs--narrow` `sk-breadcrumbs__item` `sk-breadcrumbs__link` `sk-breadcrumbs__list` |
+| `button` | `components/button.html` | `default` | `sk-button` `sk-button--busy` `sk-button--danger-secondary` `sk-button--ghost` `sk-button--icon` `sk-button--primary` `sk-button--secondary` `sk-button--sm` `sk-button__busy-cue` |
+| `card` | `components/card.html` | `default` | `sk-card` `sk-card--blue` `sk-card--inset` `sk-card--purple` `sk-card--status-attention` `sk-card--status-danger` `sk-card--status-info` `sk-card--status-neutral` `sk-card--status-recovery` `sk-card--status-success` |
+| `check-bullet` | `components/check-bullet.html` | `default` | `sk-check-bullet` `sk-check-bullet--pending` `sk-check-bullet__icon` `sk-check-bullet__state` |
+| `checkbox-choice-group` | `components/checkbox-choice-group.html` | `default`, `disabled`, `long`, `none`, `zero-counts` | `sk-checkbox-choice-group` `sk-checkbox-choice-group__choice` `sk-checkbox-choice-group__control` `sk-checkbox-choice-group__label` `sk-checkbox-choice-group__legend` `sk-checkbox-choice-group__metadata` `sk-checkbox-choice-group__options` |
+| `collection` | `components/collection.html` | `closed`, `empty`, `fifty-items`, `long-text`, `no-count`, `no-footer`, `one-item`, `open` | `sk-collection` `sk-collection__action` `sk-collection__body` `sk-collection__count` `sk-collection__footer` `sk-collection__header` `sk-collection__heading` `sk-collection__item` `sk-collection__list` `sk-collection__marker` `sk-collection__state-label` `sk-collection__toggle` |
+| `context-nav` | `components/context-nav.html` | `current-nested`, `default`, `empty-overflow`, `empty`, `long-labels`, `scale`, `unavailable-all`, `unavailable-long`, `unavailable-mixed`, `unavailable-parent` | `sk-context-nav` `sk-context-nav__annotation` `sk-context-nav__children` `sk-context-nav__empty-copy` `sk-context-nav__group` `sk-context-nav__heading` `sk-context-nav__icon` `sk-context-nav__item` `sk-context-nav__label` `sk-context-nav__link` `sk-context-nav__list` `sk-context-nav__overflow-link` `sk-context-nav__unavailable` |
+| `data-table` | `components/data-table.html` | `default`, `narrow-scrollable`, `sticky-header` | `sk-data-table` `sk-data-table--sticky-header` `sk-data-table__cell--numeric` `sk-data-table__scroller` |
+| `disclosure` | `components/disclosure.html` | `closed`, `long-body`, `nested`, `open` | `sk-disclosure` `sk-disclosure__body` `sk-disclosure__summary` |
+| `empty-state` | `components/empty-state.html` | `inline`, `with-action`, `without-action` | `sk-empty-state` `sk-empty-state--inline` `sk-empty-state__action` `sk-empty-state__body` `sk-empty-state__heading` |
+| `event-timeline` | `components/event-timeline.html` | `compact-default`, `compact-degraded`, `compact-forced-colors`, `compact-leading-marker`, `compact-linked`, `compact-long-content`, `compact-narrow`, `compact-one-event`, `compact-twenty-events`, `forced-colors`, `long-transition`, `narrow`, `one-event`, `twenty-events`, `two-events`, `unavailable-retention`, `verified-marker` | `sk-empty-state` `sk-empty-state__body` `sk-empty-state__heading` `sk-event-timeline` `sk-event-timeline--compact` `sk-event-timeline--narrow` `sk-event-timeline__content` `sk-event-timeline__item` `sk-event-timeline__leading-marker` `sk-event-timeline__marker` `sk-event-timeline__metadata` `sk-event-timeline__summary` |
+| `facts` | `components/facts.html` | `compact`, `empty-value`, `long-value`, `two-col`, `default` | `sk-facts` `sk-facts--compact` `sk-facts--two-col` `sk-facts__term` `sk-facts__value` |
+| `feature-card` | `components/feature-card.html` | `default` | `sk-feature-card` `sk-feature-card--border-green` `sk-feature-card--border-purple` `sk-feature-card--border-yellow` `sk-feature-card__body` `sk-feature-card__icon-chip` `sk-feature-card__icon-chip--green` `sk-feature-card__icon-chip--purple` `sk-feature-card__icon-chip--yellow` `sk-feature-card__title` |
+| `form-field` | `components/form-field.html` | `default`, `form-input-default`, `form-input-disabled`, `form-input-error`, `form-input-filled`, `form-input-focus`, `form-textarea-default`, `form-textarea-error` | `is-focused` `sk-form-field` `sk-form-field--error` `sk-form-field__description` `sk-form-field__label` `sk-input` `sk-textarea` |
+| `form-select` | `components/form-select.html` | `compact`, `disabled`, `long-options`, `optgroups`, `required-invalid`, `t10-lane`, `t12-filters` | `sk-form-field` `sk-form-field--error` `sk-form-field__description` `sk-form-field__label` `sk-form-select` `sk-form-select--compact` |
+| `grid` | `components/grid.html` | `default` | `sk-grid` `sk-grid--cols-2` `sk-grid--cols-3` `sk-grid--cols-4` `sk-grid--gap-3` `sk-grid--gap-4` `sk-grid--gap-6` |
+| `nav-pill` | `components/nav-pill.html` | `default` | `sk-nav-pill` `sk-nav-pill__cta` `sk-nav-pill__cta-btn` `sk-nav-pill__item` `sk-nav-pill__item--active` `sk-nav-pill__items` |
+| `pill-tag` | `components/pill-tag.html` | `default` | `sk-pill-tag` `sk-pill-tag--breaking` `sk-pill-tag--eyebrow` `sk-pill-tag--green` `sk-pill-tag--purple` `sk-pill-tag--status-attention` `sk-pill-tag--status-danger` `sk-pill-tag--status-info` `sk-pill-tag--status-neutral` `sk-pill-tag--status-recovery` `sk-pill-tag--status-success` `sk-pill-tag--yellow` |
+| `progress` | `components/progress.html` | `compact`, `complete`, `forced-colors`, `indeterminate-compact`, `indeterminate-forced-colors`, `indeterminate-long-label`, `indeterminate-narrow`, `indeterminate-with-meta`, `indeterminate`, `large-total`, `long-label`, `narrow`, `t10`, `zero` | `sk-progress` `sk-progress--compact` `sk-progress--indeterminate` `sk-progress--narrow` `sk-progress__bar` `sk-progress__label` `sk-progress__meta` |
+| `prose` | `components/prose.html` | `absent-prompt`, `long-code`, `narrow`, `prompt`, `wide-table` | `sk-data-table` `sk-data-table__scroller` `sk-empty-state` `sk-empty-state__body` `sk-empty-state__heading` `sk-prose` |
+| `public-header` | `components/public-header.html` | `brand-only`, `current-action`, `long-labels`, `many-actions`, `mixed-controls`, `one-action`, `theme-slot`, `two-actions` | `sk-button` `sk-button--ghost` `sk-button--secondary` `sk-button--sm` `sk-public-header` `sk-public-header__action` `sk-public-header__actions` `sk-public-header__brand` `sk-public-header__brand-context` `sk-public-header__inner` |
+| `radio-choice-group` | `components/radio-choice-group.html` | `default`, `disabled-group`, `disabled`, `long`, `none`, `one`, `required-invalid`, `two` | `sk-radio-choice-group` `sk-radio-choice-group__choice` `sk-radio-choice-group__control` `sk-radio-choice-group__label` `sk-radio-choice-group__legend` `sk-radio-choice-group__options` `sk-radio-choice-group__secondary-value` |
+| `ribbon-card` | `components/ribbon-card.html` | `default` | `sk-ribbon-card` `sk-ribbon-card--border-blue` `sk-ribbon-card--border-green` `sk-ribbon-card--border-purple` `sk-ribbon-card--border-red` `sk-ribbon-card--border-yellow` `sk-ribbon-card--has-ribbon` `sk-ribbon-card__content` `sk-ribbon-card__ribbon` `sk-ribbon-card__ribbon--blue` `sk-ribbon-card__ribbon--green` `sk-ribbon-card__ribbon--purple` `sk-ribbon-card__ribbon--red` `sk-ribbon-card__ribbon--yellow` |
+| `section-banner` | `components/section-banner.html` | `default` | `sk-section-banner` `sk-section-banner--green` `sk-section-banner--neutral` `sk-section-banner--purple` `sk-section-banner__dot` `sk-section-banner__label` |
+| `section-nav` | `components/section-nav.html` | `default`, `long-labels`, `many-routes`, `no-current`, `one-route`, `two-route` | `sk-section-nav` `sk-section-nav__link` |
+| `segmented-choice` | `components/segmented-choice.html` | `all-disabled`, `default`, `five-items`, `long-labels`, `no-selection`, `one-disabled`, `second-selected`, `third-selected`, `two-items` | `sk-segmented-choice` `sk-segmented-choice__item` |
+| `site-footer` | `components/site-footer.html` | `default` | `sk-site-footer` `sk-site-footer__brand` `sk-site-footer__column` `sk-site-footer__divider` `sk-site-footer__grid` `sk-site-footer__heading` `sk-site-footer__legal` `sk-site-footer__link` `sk-site-footer__link--compact` `sk-site-footer__links` `sk-site-footer__meta` `sk-site-footer__row` `sk-site-footer__tagline` `sk-site-footer__wordmark` |
+| `skip-link` | `components/skip-link.html` | `unfocused` | `sk-skip-link` |
+| `stub` | `components/stub.html` | `default` | `sk-stub` `sk-stub__label` |
+| `workflow-board` | `components/workflow-board.html` | `all-empty`, `fifty-items`, `fitting`, `long-labels-and-items`, `one-empty-lane`, `populated`, `single-lane-narrow` | `sk-empty-state` `sk-empty-state__body` `sk-empty-state__heading` `sk-workflow-board` `sk-workflow-board__scroller` `sk-workflow-lane` `sk-workflow-lane__count` `sk-workflow-lane__header` `sk-workflow-lane__list` `sk-workflow-lane__title` |
+| `workflow-lane` | `components/workflow-lane.html` | `default`, `empty` | `sk-empty-state` `sk-empty-state__body` `sk-empty-state__heading` `sk-workflow-lane` `sk-workflow-lane__count` `sk-workflow-lane__header` `sk-workflow-lane__list` `sk-workflow-lane__title` |
 
 ## Elements whose static form lives in another component
 

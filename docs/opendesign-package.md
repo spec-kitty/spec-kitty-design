@@ -18,13 +18,22 @@ It replaces the hand-maintained package that used to live in `spec-kitty/team-ki
 | `tokens.css` | yes | byte-identical copy of `packages/tokens/src/tokens.css` |
 | `fonts/` | yes | the font files `tokens.css` references |
 | `components.html` | yes | every static form the library ships, one section per component, CSS inlined |
+| `components/<name>.html` | yes | one component's CSS and static forms — the page OpenDesign's agent actually reads; declared as a preview page so it is on OpenDesign's pull index |
 | `components.manifest.json` | yes | derived by OpenDesign's own `extractComponentsManifest()`, so an OpenDesign import rewrites it with identical bytes |
-| `DESIGN.md` | partly | authored prose for OpenDesign's agent; the section between the `GENERATED` markers lists what can and cannot be emitted |
+| `DESIGN.md` | partly | authored prose for OpenDesign's agent; the section between the `GENERATED` markers lists every component with its page and its **closed class vocabulary**, and what cannot be emitted |
 | `USAGE.md` | no | authored read-order for OpenDesign's agent |
 
 **What it cannot emit.** Components with no static form — the shadow-DOM-only custom elements, and two
 `boundary-page` forms that compose `<sk-entity-marker>` — are named in `DESIGN.md`'s generated section
 with the reason, so OpenDesign's agent knows they exist and does not invent markup for them.
+
+**What OpenDesign's agent actually sees.** Its prompt carries `DESIGN.md`, `USAGE.md` and
+`tokens.css` verbatim, but for components only a short summary of `components.manifest.json` — nine
+generic groups, eight selectors each. `components.html` is never put in the prompt, and at 430 KB
+it could not be. That is why the class vocabulary lives in `DESIGN.md` and each component has its
+own page: without them, the first proof run emitted the right component blocks with invented
+elements (`sk-radio-choice__input` for the library's `sk-radio-choice-group__control`) and
+hand-written CSS.
 
 ## Regenerating
 
@@ -68,6 +77,26 @@ git -C <the mounted clone> checkout --detach origin/train/elements-first
 A detached checkout rather than `git pull`, because OpenDesign may annotate `metadata.json` inside the
 design-system folder when a project claims it, which would make a pull refuse to fast-forward. The
 annotation is instance state, not a change to keep.
+
+## Using it in a project: link the folder
+
+An agent can only copy a component's CSS and markup if it can **read** `components/<name>.html`.
+OpenDesign offers two ways, and a self-hosted instance may block one of them:
+
+- **Link the design-system folder into the project** (recommended). In the project's working
+  directories, add `/app/.od/design-systems/spec-kitty-train` — the Home composer's folder picker,
+  or `metadata.linkedDirs` when creating a project through the API. OpenDesign gives the agent
+  read-only access to it (`--add-dir`); nothing is imported or copied.
+- **The pull tool**, `"$OD_NODE_BIN" "$OD_BIN" tools design-systems read --path components/<name>.html`.
+  It needs the agent to be allowed to run that command. The local instance runs Claude Code with
+  `--permission-mode acceptEdits`, which refuses it non-interactively — so there, only the linked
+  folder works.
+
+**Without either, the package does not work as a design library.** The class vocabulary in
+`DESIGN.md` is in the prompt, and it is not enough: in the proof's push-only run the agent saw it,
+looked for the component pages, could not open them, and invented 14 of its 22 library-namespace
+classes and all of its component CSS. With the folder linked, the same prompt produced 0 invented
+classes and copied the radio group's CSS verbatim.
 
 **Projects keep their own copy.** An OpenDesign project created from the design system (for example
 `ds-spec-kitty-train`) holds a copy of its files; refreshing the design system does not update it.

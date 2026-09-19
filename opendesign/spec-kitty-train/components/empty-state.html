@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>empty-state — Spec Kitty</title>
+    <meta name="description" content="empty-state: 3 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: empty-state — packages/styles/src/empty-state/sk-empty-state.css */
+/* @spec-kitty/styles — sk-empty-state shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+
+.sk-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sk-space-3);
+  padding: var(--sk-space-9) var(--sk-space-6);
+  text-align: center;
+}
+
+.sk-empty-state__heading {
+  margin: 0;
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-lg);
+  font-weight: var(--sk-weight-semibold);
+  color: var(--sk-fg-default);
+}
+
+.sk-empty-state__body {
+  margin: 0;
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  color: var(--sk-fg-muted);
+}
+
+.sk-empty-state__action {
+  margin-block-start: var(--sk-space-2);
+}
+
+.sk-empty-state--inline {
+  display: block;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin: 0;
+  padding: var(--sk-space-3) var(--sk-space-4);
+  color: var(--sk-fg-muted);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+    </style>
+  </head>
+  <body>
+    <section id="empty-state" data-od-component="empty-state">
+      <h1>empty-state</h1>
+      <figure data-od-variant="inline">
+        <figcaption>inline</figcaption>
+        <p class="sk-empty-state sk-empty-state--inline">Nothing here</p>
+      </figure>
+      <figure data-od-variant="with-action">
+        <figcaption>with-action</figcaption>
+        <div class="sk-empty-state">
+          <h3 class="sk-empty-state__heading">No runs yet</h3>
+          <p class="sk-empty-state__body">Trigger a run to see its status and logs here.</p>
+          <div class="sk-empty-state__action">
+            <button type="button">Start a run</button>
+          </div>
+        </div>
+      </figure>
+      <figure data-od-variant="without-action">
+        <figcaption>without-action</figcaption>
+        <div class="sk-empty-state">
+          <h3 class="sk-empty-state__heading">No runs yet</h3>
+          <p class="sk-empty-state__body">Trigger a run to see its status and logs here.</p>
+        </div>
+      </figure>
+    </section>
+  </body>
+</html>
