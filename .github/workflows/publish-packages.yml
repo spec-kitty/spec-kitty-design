@@ -96,7 +96,7 @@ jobs:
           echo "Publishing: $DIRS"
 
       - name: Build the buildable set
-        run: npx nx run-many --target=build --projects=${{ steps.graph.outputs.projects }}
+        run: npx --no-install nx run-many --target=build --projects=${{ steps.graph.outputs.projects }}
 
       - name: "[ENFORCED] The release gate can see its own failures (SC-003)"
         run: node scripts/check-release-graph.mjs --selftest
@@ -193,6 +193,9 @@ jobs:
           # `gh attestation verify` reads the attestations API; each downloaded tarball must carry
           # an attestation from this repo, not merely match packed.json (which is not attested).
           GH_TOKEN: ${{ github.token }}
+          # Pin WHICH workflow, on WHICH commit, signed: `--repo` alone accepts any workflow on any ref.
+          SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/publish-packages.yml
+          SOURCE_DIGEST: ${{ github.sha }}
 
       # Non-`latest` dist-tags never appear in the GitHub web UI version list, so this is the only
       # place an operator can see that the publish actually landed.
@@ -238,8 +241,8 @@ jobs:
       # THE RELEASE STEP IS DELIBERATELY NOT HERE. Cutting a GitHub Release needs `contents: write`,
       # and declaring that in this job is what made the rc stream unstartable (see the permissions
       # block above). It is also prod-only, so it does not belong in a shared spine. The SBOM leaves
-      # as an artifact instead, and REL3's prod caller attaches it from a job of its own that grants
-      # itself `contents: write` — the caller can hold a permission this payload must not.
+      # as a run artifact instead. Prod (`release.yml`) is not a caller: it generates its own SBOM and
+      # attaches it to the GitHub Release from its own job, which holds `contents: write`.
       #
       # PROD IS NOT A CALLER OF THIS PAYLOAD, AND REL3 (#364) KEPT IT THAT WAY. This payload refuses
       # `latest` unconditionally (publish-derived-set.mjs), so `release.yml` keeps its own publish loop

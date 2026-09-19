@@ -391,10 +391,10 @@ const FORBIDDEN = [
 
 /** SC-001 — nothing is silently excluded from the release. */
 /**
- * REL3 review: NO MANIFEST MAY CHOOSE ITS OWN DIST-TAG. npm resolves the published tag as
- * `publishConfig.tag || manifest.tag || --tag`, so either key silently moves a publish to another
- * channel while the run log shows the flag's value. The rc payload's script already refused
- * `manifest.tag`; `publishConfig.tag` reached neither stream's guard, and prod passed no `--tag` at all.
+ * REL3 review: NO MANIFEST MAY CHOOSE ITS OWN DIST-TAG. Measured on npm 10.9.7: a top-level `tag`
+ * beats `npm publish --tag` (libnpmpublish: `manifest.tag || defaultTag`), and `publishConfig.tag` is
+ * the channel whenever no `--tag` is given (an explicit flag wins over it). Both streams now pass an
+ * explicit tag, so `publishConfig.tag` is refused as insurance; a top-level `tag` would still override.
  */
 export function checkNoManifestDistTag(packages) {
   const problems = [];
@@ -404,7 +404,7 @@ export function checkNoManifestDistTag(packages) {
     }
     const pc = p.publishConfig?.tag;
     if (typeof pc === 'string' && pc.trim() !== '') {
-      problems.push(`${p.name} declares "publishConfig.tag": ${JSON.stringify(pc)} — npm honours it over the workflow's channel; remove it`);
+      problems.push(`${p.name} declares "publishConfig.tag": ${JSON.stringify(pc)} — it picks the channel whenever a publish omits \`--tag\`; remove it`);
     }
   }
   return problems;
@@ -620,7 +620,7 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
     // THE LOOP'S INPUT IS THE RE-VALIDATED LIST, and nothing else. `npm publish "$file"` alone was
     // satisfied by `FILES="$(ls -d packages/*/)"` (review reproduced it green against release.yml).
     const pubRun = publishAt === -1 ? '' : runOf(steps[publishAt]);
-    if (!/FILES="\$\(node scripts\/pack-derived-set\.mjs --list\)"/.test(pubRun) || !/for file in \$FILES; do/.test(pubRun) || (pubRun.match(/\bFILES=/g) ?? []).length !== 1 || /\bfile=/.test(pubRun)) {
+    if (!/FILES="\$\(node scripts\/pack-derived-set\.mjs --list\)"/.test(pubRun) || !/for file in \$FILES; do/.test(pubRun) || (pubRun.match(/\bFILES=/g) ?? []).length !== 1 || /\bfile=/.test(pubRun) || /\b(read|mapfile|readarray)\b[^\n]*\b(FILES|file)\b/.test(pubRun) || (pubRun.match(/\bfor file in\b/g) ?? []).length !== 1) {
       problems.push(`${label}'s publish loop must take its files only from \`FILES="$(node scripts/pack-derived-set.mjs --list)"\` and iterate \`for file in $FILES; do\`, reassigning neither`);
     }
     const publishes = steps
@@ -632,9 +632,45 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
       }
     }
   }
+  // THE JOB IS THE TRUST BOUNDARY (`id-token: write` reaches every step), so what else each step holds
+  // is gated, not just stated (REL3 review: six reverts of this hardening were green):
+  //   - the registry token only on the steps that talk to the registry, never job- or workflow-wide;
+  //   - checkout keeps no credentials;
+  //   - every `npx` runs the lockfile's copy (`--no-install`), never something fetched at release time;
+  //   - the verify step pins which workflow, on which commit, signed the attestation.
+  const TOKEN_STEP = /bump-prerelease\.mjs|publish-derived-set\.mjs|npm\s+publish\b|verify-published-integrity\.mjs|npm\s+dist-tag\b/;
+  for (const [where, env] of [['job', wf?.jobs?.[jobName]?.env], ['workflow', wf?.env]]) {
+    if (env && typeof env === 'object' && 'NODE_AUTH_TOKEN' in env) {
+      problems.push(`${label} sets NODE_AUTH_TOKEN at ${where} level — it must reach only the steps that talk to the registry`);
+    }
+  }
+  for (const st of steps) {
+    if (st.env && typeof st.env === 'object' && 'NODE_AUTH_TOKEN' in st.env && !TOKEN_STEP.test(runOf(st))) {
+      problems.push(`${label} step "${st.name ?? runOf(st).trim().slice(0, 40)}" holds NODE_AUTH_TOKEN but does not talk to the registry`);
+    }
+    for (const inv of runOf(st).split(/&&|\|\||;|\n/)) {
+      if (/(^|\s)npx\s/.test(inv) && !/(^|\s)npx\s+--no-install\s/.test(inv)) {
+        problems.push(`${label} runs \`${inv.trim().slice(0, 60)}\` — every npx in a publish job must be \`npx --no-install\` (the lockfile's copy, never a release-time fetch)`);
+      }
+    }
+  }
+  const checkouts = steps.filter((st) => typeof st.uses === 'string' && /^actions\/checkout@/.test(st.uses.trim()));
+  if (checkouts.length === 0) problems.push(`${label} has no actions/checkout step to hold to persist-credentials: false`);
+  for (const st of checkouts) {
+    if (st.with?.['persist-credentials'] !== false) problems.push(`${label}'s checkout does not set \`persist-credentials: false\` — the token would sit in .git/config for every later step`);
+  }
+  const verifyStep = verifyAt === -1 ? null : steps[verifyAt];
+  if (verifyStep) {
+    const want = `spec-kitty/spec-kitty-design/.github/workflows/${jobName === 'release' ? 'release.yml' : 'publish-packages.yml'}`;
+    const env = verifyStep.env ?? {};
+    if (env.SIGNER_WORKFLOW !== want) problems.push(`${label}'s verify step must pin SIGNER_WORKFLOW to \`${want}\` (got ${JSON.stringify(env.SIGNER_WORKFLOW)})`);
+    if (env.SOURCE_DIGEST !== '${{ github.sha }}') problems.push(`${label}'s verify step must pin SOURCE_DIGEST to \`\${{ github.sha }}\``);
+    if (!env.GH_TOKEN) problems.push(`${label}'s verify step has no GH_TOKEN for \`gh attestation verify\``);
+  }
   const perms = wf?.jobs?.[jobName]?.permissions ?? wf?.permissions;
   for (const scope of ['id-token', 'attestations']) {
-    const level = perms && typeof perms === 'object' ? perms[scope] : perms === 'write-all' ? 'write' : undefined;
+    // An explicit object only: `write-all` is a blanket grant and does not count as holding these.
+    const level = perms && typeof perms === 'object' ? perms[scope] : undefined;
     if (level !== 'write') problems.push(`${label} does not hold \`${scope}: write\` — the attest step cannot sign or store its attestation`);
   }
   return problems;
@@ -1249,6 +1285,8 @@ const VALID_RELEASE_WORKFLOW = `permissions:
 jobs:
   release:
     steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with: { fetch-depth: 0, persist-credentials: false }
       - name: Security
         run: bash scripts/npm-audit-gate.sh
       - name: Report
@@ -1261,7 +1299,7 @@ jobs:
           echo "projects=$PROJECTS" >> "$GITHUB_OUTPUT"
           echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
       - name: Build
-        run: npx nx run-many --target=build --projects=\${{ steps.graph.outputs.projects }}
+        run: npx --no-install nx run-many --target=build --projects=\${{ steps.graph.outputs.projects }}
       - name: Assert
         run: node scripts/check-release-graph.mjs
       - name: Selftest
@@ -1276,7 +1314,7 @@ jobs:
         run: |
           for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm pack --dry-run ); done
       - name: SBOM
-        run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json
+        run: npx --no-install @cyclonedx/cyclonedx-npm --output-file sbom.json
       - name: Pack
         run: node scripts/pack-derived-set.mjs
       - name: Attest
@@ -1288,6 +1326,10 @@ jobs:
           FILES="$(node scripts/pack-derived-set.mjs --list)"
           for file in $FILES; do npm publish "$file" --tag latest; done
       - name: Verify
+        env:
+          GH_TOKEN: \${{ github.token }}
+          SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/release.yml
+          SOURCE_DIGEST: \${{ github.sha }}
         run: node scripts/verify-published-integrity.mjs
 `;
 
@@ -1316,6 +1358,8 @@ const REUSABLE_PAYLOAD_FIXTURE = `jobs:
       id-token: write
       attestations: write
     steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with: { fetch-depth: 0, persist-credentials: false }
       - name: Resolve
         id: graph
         run: |
@@ -1324,7 +1368,7 @@ const REUSABLE_PAYLOAD_FIXTURE = `jobs:
           echo "projects=\${PROJECTS}" >> "$GITHUB_OUTPUT"
           echo "dirs=\${DIRS}" >> "$GITHUB_OUTPUT"
       - name: Build
-        run: npx nx run-many --target=build --projects=\${{ steps.graph.outputs.projects }}
+        run: npx --no-install nx run-many --target=build --projects=\${{ steps.graph.outputs.projects }}
       - name: Selftest
         run: node scripts/check-release-graph.mjs --selftest
       - name: Assert
@@ -1355,6 +1399,10 @@ const REUSABLE_PAYLOAD_FIXTURE = `jobs:
           DIST_TAG: \${{ inputs.dist-tag }}
         run: node scripts/publish-derived-set.mjs
       - name: Verify
+        env:
+          GH_TOKEN: \${{ github.token }}
+          SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/publish-packages.yml
+          SOURCE_DIGEST: \${{ github.sha }}
         run: node scripts/verify-published-integrity.mjs
 `;
 
@@ -1409,11 +1457,11 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 107;
+const PROBE_FLOOR = 123;
 
 const PROBES = [
   {
-    what: 'REL3: a manifest `publishConfig.tag` (npm honours it over the workflow\'s channel)',
+    what: 'REL3: a manifest `publishConfig.tag` (the channel whenever a publish omits --tag)',
     run: () => checkNoManifestDistTag([{ name: '@x/a', publishConfig: { registry: 'r', tag: 'next' } }]),
   },
   {
@@ -1751,7 +1799,7 @@ const PROBES = [
   ...(() => {
     const ATTEST = `      - name: Attest\n        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8\n        with:\n          subject-path: 'dist-tarballs/*.tgz'\n`;
     const PACK = '      - name: Pack\n        run: node scripts/pack-derived-set.mjs\n';
-    const VERIFY = '      - name: Verify\n        run: node scripts/verify-published-integrity.mjs\n';
+    const VERIFY = '      - name: Verify\n        env:\n          GH_TOKEN: ${{ github.token }}\n          SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/publish-packages.yml\n          SOURCE_DIGEST: ${{ github.sha }}\n        run: node scripts/verify-published-integrity.mjs\n';
     const PUB = '      - name: Publish\n        env:\n          DIST_TAG: ${{ inputs.dist-tag }}\n        run: node scripts/publish-derived-set.mjs\n';
     const BUMP = '      - name: Bump\n        run: node scripts/bump-prerelease.mjs --from-registry\n';
     const payload = (what, anchor, text) => ({
@@ -1785,6 +1833,22 @@ const PROBES = [
       release('a step between the attest and the publish', '      - name: Publish\n        run: |\n          FILES=', '      - name: Tidy\n        run: echo tidy\n      - name: Publish\n        run: |\n          FILES='),
       release('the publish loop fed from somewhere other than the re-validated list', 'FILES="$(node scripts/pack-derived-set.mjs --list)"', 'FILES="$(ls -d packages/*/)"'),
       release('the loop variable reassigned inside the loop', 'do npm publish "$file" --tag latest; done', 'do file=packages/tokens; npm publish "$file" --tag latest; done'),
+      payload('NODE_AUTH_TOKEN back at job level', '    steps:\n      - uses: actions/checkout@', '    env:\n      NODE_AUTH_TOKEN: x\n    steps:\n      - uses: actions/checkout@'),
+      release('NODE_AUTH_TOKEN handed to the SBOM step', '      - name: SBOM\n', '      - name: SBOM\n        env:\n          NODE_AUTH_TOKEN: x\n'),
+      payload('checkout persisting its credentials', '{ fetch-depth: 0, persist-credentials: false }', '{ fetch-depth: 0 }'),
+      release('checkout persisting its credentials', '{ fetch-depth: 0, persist-credentials: false }', '{ fetch-depth: 0, persist-credentials: true }'),
+      payload('an npx that may fetch at release time', 'npx --no-install nx run-many', 'npx nx run-many'),
+      release('the SBOM tool fetched instead of run from the lockfile', 'npx --no-install @cyclonedx/cyclonedx-npm', 'npx @cyclonedx/cyclonedx-npm@latest'),
+      payload('the verify step pinned to the wrong signer workflow', 'SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/publish-packages.yml', 'SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/ci-quality.yml'),
+      payload('the verify step without a source-digest pin', '          SOURCE_DIGEST: ${{ github.sha }}\n        run: node scripts/verify-published-integrity.mjs', '        run: node scripts/verify-published-integrity.mjs'),
+      release('FILES reassigned after the validated list', 'FILES="$(node scripts/pack-derived-set.mjs --list)"\n', 'FILES="$(node scripts/pack-derived-set.mjs --list)"\n          FILES="$(ls /tmp/*.tgz)"\n'),
+      release('FILES re-read with `read`', 'FILES="$(node scripts/pack-derived-set.mjs --list)"\n', 'FILES="$(node scripts/pack-derived-set.mjs --list)"\n          read -r FILES <<< "/tmp/x.tgz"\n'),
+      release('the loop iterating something other than FILES', 'for file in $FILES; do', 'for file in /tmp/*.tgz; do'),
+      release('a second publish loop over another list', '          for file in $FILES; do npm publish "$file" --tag latest; done\n', '          for file in $FILES; do npm publish "$file" --tag latest; done\n          for file in /tmp/*.tgz; do npm publish "$file" --tag latest; done\n'),
+      release('a package path appended to the publish', 'npm publish "$file" --tag latest;', 'npm publish "$file" --tag latest packages/tokens;'),
+      payload('a `subject-checksums` source alongside the tarballs', "          subject-path: 'dist-tarballs/*.tgz'\n", "          subject-path: 'dist-tarballs/*.tgz'\n          subject-checksums: sums.txt\n"),
+      payload('a `subject-name` override', "          subject-path: 'dist-tarballs/*.tgz'\n", "          subject-path: 'dist-tarballs/*.tgz'\n          subject-name: other\n"),
+      payload('`permissions: write-all` instead of the explicit scopes', '    permissions:\n      contents: read\n      packages: write\n      id-token: write\n      attestations: write\n', '    permissions: write-all\n'),
       payload('a custom predicate on the attest step', "          subject-path: 'dist-tarballs/*.tgz'\n", "          subject-path: 'dist-tarballs/*.tgz'\n          predicate-type: https://example.com/custom\n"),
       {
         what: 'REL3 caller: the rc caller without `attestations: write` (the payload needs it; the caller is its ceiling)',

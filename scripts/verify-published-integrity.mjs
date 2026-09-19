@@ -58,9 +58,17 @@ export function npmFetch(spec, dest) {
   return file;
 }
 
-/** `gh attestation verify` over a downloaded file; throws unless an attestation from this repo covers it. */
-export function ghAttestationVerify(file) {
-  const r = spawnSync('gh', ['attestation', 'verify', file, '--repo', 'spec-kitty/spec-kitty-design', '--deny-self-hosted-runners'], {
+/**
+ * `gh attestation verify` over a downloaded file; throws unless an attestation covers it. `--repo` alone
+ * accepts an attestation from ANY workflow in the repo, on any ref (REL3 review), so in CI the stream's
+ * own signer workflow (the reusable publish-packages.yml for rc, release.yml for prod) and the commit
+ * being released are pinned too.
+ */
+export function ghAttestationVerify(file, { signerWorkflow, sourceDigest } = {}) {
+  const args = ['attestation', 'verify', file, '--repo', 'spec-kitty/spec-kitty-design', '--deny-self-hosted-runners'];
+  if (signerWorkflow) args.push('--signer-workflow', signerWorkflow);
+  if (sourceDigest) args.push('--source-digest', sourceDigest);
+  const r = spawnSync('gh', args, {
     encoding: 'utf8',
     maxBuffer: 8 * 1024 * 1024,
   });
@@ -170,14 +178,16 @@ async function selftest() {
       try {
         writeFileSync(join(bin, 'gh'), `#!/bin/sh\necho "$*" > "${join(bin, 'args')}"\nexit 0\n`, { mode: 0o755 });
         process.env.PATH = `${bin}:${saved}`;
-        ghAttestationVerify('/tmp/x.tgz');
+        ghAttestationVerify('/tmp/x.tgz', { signerWorkflow: 'spec-kitty/spec-kitty-design/.github/workflows/release.yml', sourceDigest: 'abc123' });
         const a = readFileSync(join(bin, 'args'), 'utf8');
-        return /attestation verify \/tmp\/x\.tgz/.test(a) && /--repo spec-kitty\/spec-kitty-design/.test(a) && /--deny-self-hosted-runners/.test(a);
+        return /attestation verify \/tmp\/x\.tgz/.test(a) && /--repo spec-kitty\/spec-kitty-design/.test(a) && /--deny-self-hosted-runners/.test(a)
+          && /--signer-workflow spec-kitty\/spec-kitty-design\/\.github\/workflows\/release\.yml/.test(a) && /--source-digest abc123/.test(a);
       } finally {
         process.env.PATH = saved;
         rmSync(bin, { recursive: true, force: true });
       }
     }],
+    ['in CI, a missing SIGNER_WORKFLOW/SOURCE_DIGEST is refused before any download', () => { const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], { encoding: 'utf8', env: { ...process.env, GITHUB_ACTIONS: 'true', SIGNER_WORKFLOW: '', SOURCE_DIGEST: '' } }); return r.status === 1 && /SIGNER_WORKFLOW and SOURCE_DIGEST must be set/.test(r.stderr); }],
     ['every attested entry is checked, not just the first', () => { const calls = []; run({ fetch: registry({ calls }) }); return calls.length === 2; }],
     ['the real fetch uses a throwaway --cache, so it re-reads bytes instead of hitting the pack step\'s cache', () => {
       const bin = mkdtempSync(join(tmpdir(), 'verify-npm-'));
@@ -200,7 +210,7 @@ async function selftest() {
     ['an unknown argument exits 2', () => spawnSync(process.execPath, [fileURLToPath(import.meta.url), '--nope'], { encoding: 'utf8' }).status === 2],
     ['importing the module verifies nothing', () => { const r = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(import.meta.url)})`], { encoding: 'utf8' }); return r.status === 0 && `${r.stdout}${r.stderr}`.trim() === ''; }],
   ];
-  const PROBE_FLOOR = 14;
+  const PROBE_FLOOR = 15;
   let bad = 0;
   for (const [what, fn] of PROBES) {
     let ok = false;
@@ -234,7 +244,13 @@ if (isDirectInvocation(process.argv[1], import.meta.url)) {
     await selftest();
   } else {
     try {
-      const results = verifyPublished();
+      const signerWorkflow = process.env.SIGNER_WORKFLOW;
+      const sourceDigest = process.env.SOURCE_DIGEST;
+      // IN CI BOTH PINS ARE REQUIRED: without them any workflow in the repo could have signed.
+      if (process.env.GITHUB_ACTIONS === 'true' && (!signerWorkflow || !sourceDigest)) {
+        throw new Error('SIGNER_WORKFLOW and SOURCE_DIGEST must be set in CI — they pin which workflow, on which commit, signed the attestation');
+      }
+      const results = verifyPublished({ attest: (f) => ghAttestationVerify(f, { signerWorkflow, sourceDigest }) });
       console.log(`✅ ${results.length} published tarball(s) match the attested bytes.`);
     } catch (e) {
       console.error(`::error::${e.message}`);

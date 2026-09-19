@@ -91,7 +91,7 @@ jobs:
 
 
       - name: Build all packages
-        run: npx nx run-many --target=build --projects=${{ steps.graph.outputs.projects }}
+        run: npx --no-install nx run-many --target=build --projects=${{ steps.graph.outputs.projects }}
 
       # The `cp sk-nav-pill.js` step that stood here is gone with the helper (#73). It existed
       # only because @nx/js:tsc copies **/*.{html,css} assets and not .js, and @spec-kitty/styles
@@ -169,9 +169,10 @@ jobs:
       # failed were never retried and the release stayed wedged at that version. A lens walked
       # through it.
       #
-      # So an already-published version is a SKIP, not a failure. A re-run re-packs the same tree,
-      # which yields byte-identical tarballs (npm pack is deterministic), so the retry attests and
-      # verifies the same bytes that are already on the registry.
+      # So an already-published version is a SKIP, not a failure. A re-run re-packs the same commit;
+      # on a GitHub-hosted runner (fixed checkout path, deterministic npm pack) that reproduces the
+      # same bytes, so the retry verifies what is already on the registry. If a toolchain change made
+      # the bytes differ, verify fails and that version cannot be completed — see the runbook.
       #
       # `set -euo pipefail` is RESTORED here. An earlier revision dropped `-e` on the stated
       # grounds that it "would defeat the handling" — that is false, and a lens measured it: POSIX
@@ -197,8 +198,10 @@ jobs:
             # per package outside the publish call. This loop is not routed through
             # scripts/publish-derived-set.mjs: that script refuses `latest` unconditionally (REL2), and
             # this is the prod stream, which owns `latest`.
-            # `--tag latest` EXPLICITLY: without it npm resolves `publishConfig.tag || manifest.tag ||
-            # latest`, so one manifest key would silently move prod to another channel (REL3 review).
+            # `--tag latest` EXPLICITLY. Without it a `publishConfig.tag` would choose the channel; with it
+            # the flag wins over `publishConfig.tag` (npm drops publishConfig keys given on the CLI), but
+            # a top-level manifest `tag` still wins over the flag (libnpmpublish: `manifest.tag ||
+            # defaultTag`) — which is why check-release-graph.mjs refuses both keys outright.
             if out="$( npm publish "$file" --tag latest 2>&1 )"; then
               echo "$out"
             else
@@ -254,6 +257,9 @@ jobs:
           # `gh attestation verify` reads the attestations API; each downloaded tarball must carry
           # an attestation from this repo, not merely match packed.json (which is not attested).
           GH_TOKEN: ${{ github.token }}
+          # Pin WHICH workflow, on WHICH commit, signed: `--repo` alone accepts any workflow on any ref.
+          SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/release.yml
+          SOURCE_DIGEST: ${{ github.sha }}
 
       # SAME REASONING AS THE RC PAYLOAD, and it applies here now that prod publishes to GitHub
       # Packages too: `npm view` returns exit 0 with zero bytes against this registry, so a report

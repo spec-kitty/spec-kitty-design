@@ -185,8 +185,9 @@ function publishAll(decision, { dryRun }) {
   // Nothing in the repo read that key, so it was one JSON line from here to `latest`, unobservable
   // in the run log. This is the same lesson as the workflow guards, one layer down: the refusal has
   // to cover every input npm actually consults, not just the one this file passes.
-  // …AND `publishConfig.tag`, which npm honours ahead of both (REL3 review reproduced it against a
-  // mock registry: `--tag rc` lost to it).
+  // …AND `publishConfig.tag`. Measured on npm 10.9.7: the explicit `--tag` this script passes WINS
+  // over `publishConfig.tag` (npm drops publishConfig keys also given on the CLI), while a top-level
+  // `tag` wins over `--tag`. The publishConfig refusal is insurance against that precedence changing.
   const overriding = pkgs.filter(
     (p) => (typeof p.tag === 'string' && p.tag.trim() !== '') || (typeof p.publishConfig?.tag === 'string' && p.publishConfig.tag.trim() !== ''),
   );

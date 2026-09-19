@@ -142,8 +142,15 @@ must map `@spec-kitty` to `https://npm.pkg.github.com`) and verify it:
 
 ```sh
 npm pack @spec-kitty/elements@1.1.0-rc.3          # writes spec-kitty-elements-1.1.0-rc.3.tgz
-gh attestation verify spec-kitty-elements-1.1.0-rc.3.tgz --repo spec-kitty/spec-kitty-design
+gh attestation verify spec-kitty-elements-1.1.0-rc.3.tgz --repo spec-kitty/spec-kitty-design \
+  --signer-workflow spec-kitty/spec-kitty-design/.github/workflows/publish-packages.yml
 ```
+
+`--repo` alone accepts an attestation from any workflow in the repository, on any ref, so pin the
+signer. rc versions are signed by the reusable `publish-packages.yml`, and `latest` versions by
+`release.yml`. Add `--source-ref refs/heads/develop` for rc, or `--source-ref refs/tags/vX.Y.Z` for
+prod, to pin the ref as well. The release workflows' own verify step pins the signer workflow and the
+exact commit (`--source-digest`).
 
 A pass means the tarball's digest was attested by a workflow run in this repository. The output names
 the workflow, ref and commit that built it. For any version published after attestations were added
@@ -153,11 +160,16 @@ published. **Versions published before that, `1.1.0-rc.0` to `1.1.0-rc.2`, carry
 
 **What an attestation does and does not prove.** It is SLSA Build Level 2 provenance: a signed
 statement, from this repository's release workflow on a GitHub-hosted runner, that it produced these
-exact bytes from the named commit. The attest step runs in the same job as the build. So it cannot
-vouch that no step in that job misbehaved. The workflows reduce that surface: the registry token is
-given only to the steps that talk to the registry, checkout keeps no credentials, and the SBOM tool
-runs from the lockfile rather than being fetched at release time. It is still provenance, not a
-guarantee of a clean build. Attestations on this plan also need the repository to stay **public**;
+exact bytes from the named commit. The attest step runs in the same job as the build, and
+`id-token: write` reaches every step of that job. **The job, not the step, is the trust boundary**: the
+attestation cannot vouch that no step in it misbehaved. The workflows keep that job small, and
+`check-release-graph.mjs` enforces it on every PR:
+
+- the registry token reaches only the steps that talk to the registry;
+- checkout keeps no credentials;
+- every `npx` runs the lockfile's copy (`--no-install`), so nothing is fetched at release time.
+
+It is still provenance, not a guarantee of a clean build. Attestations on this plan also need the repository to stay **public**;
 making it private would stop new releases from being attestable.
 
 There is one package list, and it is computed. Until #80 there were three hand-written ones and they
@@ -246,6 +258,11 @@ it is the brand assets and 30 OTF font files that `FR-105` records as intended p
   back.
 - **`… changed after packing` or `… does not list`** — something touched `dist-tarballs/` between the
   pack and the publish. The publish refuses rather than ship unattested bytes.
+- **The verify step cannot confirm an attestation** (`could not confirm the published tarball and its
+  attestation`), for example during an attestations-API outage. This happens AFTER the publish, so the
+  bytes are already out. For prod, re-run the tag once the service is back: the retry skips the published
+  packages and verifies them. For rc, a re-run bumps to the next rc, so a transient outage costs a
+  version number. Check the published one by hand with `gh attestation verify` instead.
 - **`the registry serves … but the attested tarball is …`** — the verify step found different bytes on
   the registry. Treat that published version as suspect and investigate before anything else.
   Re-running cannot fix a published version.
