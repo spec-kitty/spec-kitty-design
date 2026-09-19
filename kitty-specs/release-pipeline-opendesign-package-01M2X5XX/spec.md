@@ -33,7 +33,7 @@ components fixture — and keeps it current from the same derived package set th
 | FR-001 | A generator in `scripts/` builds the complete OpenDesign package — `manifest.json`, `DESIGN.md`, `tokens.css`, `components.html`, `components.manifest.json`, `USAGE.md` and fonts — into a committed directory in this repository. | High |
 | FR-002 | `components.html` is assembled from the library's **generated static forms only** (ADR-10 §3). No custom element, shadow root, `<script>` or runtime dependency may appear in it. | High |
 | FR-003 | The fixture covers **every** component that has a generated static form, with every variant form, derived from the source tree rather than listed by hand. At the base that is 34 components and 159 forms. | High |
-| FR-004 | Components without a static form are **named as excluded** in the package — in `DESIGN.md` and in the components manifest — derived rather than listed, so OpenDesign's agent knows they exist and why it cannot emit them. | High |
+| FR-004 | Components without a static form are **named as excluded** in `DESIGN.md` — derived rather than listed, so OpenDesign's agent knows they exist and why it cannot emit them. *(Amended at plan: not in the components manifest, because OpenDesign regenerates that file on import — `import.ts:156` — and discards any key it did not produce.)* | High |
 | FR-005 | `tokens.css` in the package is **byte-identical** to the token stylesheet the library ships, verified by digest. | High |
 | FR-006 | `components.manifest.json` is **derived by OpenDesign's own code** from `components.html` + `tokens.css` where OpenDesign exposes that derivation, and validated by OpenDesign's own validator — never by a re-implementation of the schema in this repository. | High |
 | FR-007 | The project `manifest.json` validates against `od-design-system-project/v1` using OpenDesign's exported validator, and declares `files.components` and `componentsManifest`. | High |
@@ -45,8 +45,8 @@ components fixture — and keeps it current from the same derived package set th
 
 ## Acceptance essentials
 
-- **Contract**: `manifest.json` and `components.manifest.json` pass OpenDesign's own validation, run from `~/dev/open-design` at the version the local instance runs (0.21.1).
-- **Static-only**: `components.html` contains zero custom-element tags, `<script>` elements or `:host`/`::slotted` selectors, asserted by a check with a control that proves the assertion can fail.
+- **Contract**: `manifest.json` passes OpenDesign's own validator, and `components.manifest.json` equals OpenDesign's own `extractComponentsManifest()` over the committed fixture — both run from upstream's files **vendored byte-for-byte** at the commit the local 0.21.1 instance is built from, digest-verified. *(Amended at plan: CI runners have no `~/dev/open-design`.)*
+- **Static-only markup**: `components.html` contains zero custom-element tags, `<script>` elements or declarative shadow roots, asserted by a check with a control that proves the assertion can fail. *(Amended at plan: the original line also forbade `:host`/`::slotted` selectors. 13 of the 34 components ship such rules in the CSS consumers install; they are inert in light DOM. Removing them would teach OpenDesign against a stylesheet nobody ships, so the CSS is inlined verbatim and the constraint applies to markup, where the runtime hazard actually is. Those 13 are named in `DESIGN.md` as a fidelity caveat pending ADR-15.)*
 - **Coverage**: the fixture's component count equals the number of components with a static form, and every excluded element is named.
 - **Tokens**: `tokens.css` digest equals the library's.
 - **Drift**: `--check` reds on a one-byte change to any generated file and on a new static form that was not regenerated.
