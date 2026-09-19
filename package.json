@@ -49,6 +49,7 @@
     "@vue/compiler-dom": "3.5.42",
     "@wc-toolkit/react-wrappers": "1.2.7",
     "axe-playwright": "^2.2.2",
+    "commonmark": "0.31.2",
     "esbuild": "0.28.1",
     "eslint": "^9.39.4",
     "eslint-plugin-security": "^4.0.0",
