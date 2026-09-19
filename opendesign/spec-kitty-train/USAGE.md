@@ -13,7 +13,7 @@
    elements (the app shell, headers, metrics, notices, the copy field, charts, the confirm dialog):
    they cannot be emitted here, so leave them out or mark where one belongs, never approximate them.
 6. For current Team Kitty work, prefer `checkbox-choice-group`, the compact `event-timeline`, and
-   the route/flush `action-row`.
+   `action-row` (see `DESIGN.md` for its link and flush forms, which its page does not show).
 
 ## Design Highlights
 

@@ -58,7 +58,7 @@ deterministic: sorted inputs, no timestamps, stable whitespace. Writes the whole
   a heading and one block per static form, labelled by variant.
 - `DESIGN.md`: the current prose, carried over as the authored part, plus a **generated section between
   markers** listing emittable components with their variants, the excluded elements (derived), and the
-  11-component fidelity caveat (derived by the same `:host`/`::slotted` scan).
+  fidelity caveat (10 components at merge: action-row ships its static sheet instead) (derived by the same `:host`/`::slotted` scan).
 - `manifest.json`: `id: spec-kitty-train`, `files` including `components`, `componentsManifest`, and
   `source: {type: github, url, branch}` — **no `commit`** (a committed file cannot know its own SHA);
   the `@spec-kitty/tokens` version goes in the description.
@@ -95,7 +95,7 @@ variable at call time and is never written, echoed or committed.
 
 ## Risks
 
-- **Verbatim CSS carries 11 components' inert `:host` rules into OpenDesign's prompt summary.**
+- **Verbatim CSS carries 10 components' inert `:host` rules (11 in the source sheets; action-row's static sheet has none) into OpenDesign's prompt summary.**
   `summarizeComponentsManifestForPrompt` reports selector counts to the agent. Accepted: the
   alternative is a fixture built on a stylesheet no consumer installs. `DESIGN.md` names the caveat.
 - **Upstream can change the contract.** The vendored copy is pinned; a newer OpenDesign may derive a

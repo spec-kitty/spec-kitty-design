@@ -21,7 +21,7 @@ It replaces the hand-maintained package that used to live in `spec-kitty/team-ki
 | `components/<name>.html` | yes | one component's CSS and static forms — the page OpenDesign's agent actually reads; declared as a preview page, which lists it by name on OpenDesign's pull index |
 | `components.manifest.json` | yes | derived by OpenDesign's own `extractComponentsManifest()`. At discovery OpenDesign reads this file verbatim and summarises it into every prompt, so it must be exactly what its extractor produces |
 | `DESIGN.md` | partly | authored prose for OpenDesign's agent; the section between the `GENERATED` markers lists every component with its page and its **closed class vocabulary**, and what cannot be emitted |
-| `USAGE.md` | no | authored read-order for OpenDesign's agent. The build refuses authored prose that recommends a non-emittable element, points at a repository path, or hard-codes a derived count |
+| `USAGE.md` | no | authored read-order for OpenDesign's agent. The build refuses authored prose that recommends a non-emittable element, points at a repository path, or hard-codes a derived count. The check is lexical, per paragraph or list item: a "cannot be emitted" anywhere in the same item exempts it, and bare paths, upper-case names or spelled-out counts pass, so review still reads the prose |
 
 **What it cannot emit.** Components with no static form — the shadow-DOM-only custom elements, and two
 `boundary-page` forms that compose `<sk-entity-marker>` — are named in `DESIGN.md`'s generated section

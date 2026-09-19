@@ -86,9 +86,11 @@ invent wrapper elements.
 
 Three composition contracts matter most for current Team Kitty screens, and all three have
 component pages here: `checkbox-choice-group` for multi-select filters such as the detailed Kanban
-lane filter, the compact `event-timeline` for dense operational chronology, and `action-row` in its
-native-route and flush presentations for real link destinations without card-within-card chrome.
-Copy their anatomy from their pages rather than recreating approximations.
+lane filter, the compact `event-timeline` for dense operational chronology, and `action-row` for
+rows that lead somewhere. Copy their anatomy from their pages rather than recreating approximations.
+`action-row`'s page has one static form, whose trigger is a static element; its CSS also styles the
+trigger as a real link (`a.sk-action-row__trigger`) and a flush presentation (`sk-action-row--flush`)
+without card-within-card chrome, so for a real destination make the trigger an `<a>` with that class.
 
 **Shell, status and dialog elements are shadow-DOM only and cannot be emitted from this package.**
 The generated section names every one of them. The application shell with its personal rail and

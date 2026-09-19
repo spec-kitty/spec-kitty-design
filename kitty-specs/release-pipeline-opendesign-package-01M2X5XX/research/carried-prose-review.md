@@ -22,11 +22,14 @@ authored prose contradicts that section, the agent gets two opposite instruction
 
 ## Keeping it fixed
 
-`authoredProseProblems()` in `scripts/build-opendesign-package.mjs` now refuses, per paragraph:
+`authoredProseProblems()` in `scripts/build-opendesign-package.mjs` now refuses, per paragraph or list item:
 
 - authored prose that names an excluded `sk-<element>` without saying it cannot be emitted;
 - prose that points at a repository path;
 - prose that hard-codes a derived count.
 
-Each rule was revert-tested red, and the committed prose passes. The check cannot read meaning: a
-wrong font name or a wrong claim about a token still gets through. That part remains review's job.
+Each rule was revert-tested red, and the committed prose passes. The check is lexical and has known
+gaps. A qualifier anywhere in the same paragraph or list item exempts every element named there.
+Upper-case names, bare repository paths (without backticks or a Markdown link), hyphenated or
+spelled-out counts all pass. It also cannot read meaning: a wrong font name or a wrong claim about a
+token still gets through. Those parts remain review's job.

@@ -35,9 +35,11 @@ The outputs are in `proof-outputs/`. Runs 3 and 4 rendered in Chromium are
 
 **Run 4 is the one that proves the package as reviewed.** It ran against the package at `3d015d97`
 (after the first review pass): the published `tokens.css`, the rewritten prose, the showcase-first
-preview pages. The second review pass then changed only the `action-row` page (its static sheet,
-see the design region) and two prose paragraphs (theme selection, a sticky-header sentence); none
-touches the four components this prompt exercises. Its copy's `id` matched its folder, so OpenDesign honoured the manifest (see below). The
+preview pages. Later review passes changed only action-row's CSS (its page, its section of
+`components.html`, and so the derived `components.manifest.json` by one selector) and prose in
+`DESIGN.md`/`USAGE.md` (theme selection, a sticky-header sentence, action-row's link and flush forms,
+the static-sheet line of the generated region). None of it touches the four components this prompt
+exercises. Its copy's `id` matched its folder, so OpenDesign honoured the manifest (see below). The
 agent read the same four component pages and copied from them. One difference from run 3: it
 declared no `@font-face` and pinned `data-theme="dark"`, letting the `--sk-font-*` stacks fall back
 to system fonts. `DESIGN.md`'s prototype rules allow that when fonts cannot travel with a single
@@ -49,7 +51,8 @@ line, and the screenshot shows the fallback.
 the library's static form (`sk-radio-choice-group__choice`, `__control`, `__label`,
 `__secondary-value`). They differ on tokens and fonts, which the line does not measure: run 3
 spliced `tokens.css` and the Inter and Falling Sky font files in from the package; run 4 carried
-211 of the package's 285 `--sk-*` declarations verbatim (whitespace-normalised), pinned the dark theme and declared no fonts, so it did not
+the whole dark `:root` palette and half of each light block — not the whole file, and not the
+no-`data-theme` fallback — pinned the dark theme and declared no fonts, so it did not
 exercise the published stylesheet's no-`data-theme` fallback.
 
 ## How it was measured
@@ -67,7 +70,8 @@ exercise the published stylesheet's no-`data-theme` fallback.
   never uses. A missing inapplicable rule is a correct trim, not a loss. For runs 1 and 2 the
   applicable counts are small because a rule selecting an invented class's library counterpart is
   not applicable to an output that never uses it; the invented-class count is the measure there.
-  Every figure in this document is the analyser's own output, reproducible with the command above.
+  Every class and CSS-rule figure in this document is the analyser's own output, reproducible with
+  the command above. The token description of run 4 below is a structural reading, not a count.
 
 It was checked against controls before any conclusion was drawn from it:
 
@@ -137,7 +141,7 @@ dual ownership live: before it, OpenDesign had written `"projectId": "ds-spec-ki
 into the copy's `metadata.json`.
 
 Run 4 also departed from `DESIGN.md` in one way worth recording: the prototype rules say to paste
-`tokens.css` unchanged, and it carried a subset (211 of 285 declarations, no light blocks' fallback)
+`tokens.css` unchanged, and it carried a subset (the dark palette, half of each light block, no fallback)
 while pinning `data-theme="dark"`. That is the agent's judgment for a single-theme artifact, not a
 package defect, and the acceptance line does not measure tokens.
 
