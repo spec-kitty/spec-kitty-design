@@ -214,9 +214,11 @@ export const CompactSticky: Story = {
         story:
           'Compact and sticky over a long list. The header keeps the page identity, the ' +
           'consumer-supplied freshness string, the consumer-supplied live indicator and the ' +
-          'trailing action in view. Each row below carries ' +
-          '`scroll-margin-block-start: var(--sk-layout-page-header-sticky-scroll-margin)`, which ' +
-          'is what keeps a focused row out from behind the header.',
+          'trailing action in view. The SCROLL CONTAINER carries ' +
+          '`scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin)` — one ' +
+          'declaration, not a per-row `scroll-margin`, which would stack with it — and a ' +
+          '`focusin` handler that scrolls explicitly, because WebKit declines to initiate a ' +
+          'focus-driven scroll for a row it considers already in the scrollport (#456).',
       },
     },
   },
@@ -231,7 +233,7 @@ export const DefaultSticky: Story = {
         story:
           'A sticky header at the DEFAULT density — supported, because the two axes are ' +
           'orthogonal. Its height is entirely the consumer\'s slotted content, so the derived ' +
-          'default of `--sk-layout-page-header-sticky-scroll-margin` (64px, sized for the ' +
+          'default of `--sk-layout-page-header-sticky-scroll-margin` (80px = 0 offset + 48px compact height + 32px, sized for the ' +
           'compact single row) does not cover it. The scroll container below therefore sets the ' +
           'token to this consumer\'s own measured figure, which is the documented remedy — the ' +
           'token name stays the one place the value lives. Remove that override and a focused ' +

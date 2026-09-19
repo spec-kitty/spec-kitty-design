@@ -647,10 +647,16 @@ specific defect" and one `scroll-padding-inline` on the container replaced it.
 
 ### Under WebKit, CSS alone is not enough — you need the handler
 
-**`scroll-padding-block-start` is necessary and not sufficient.** Measured at `--repeat-each=60`
-(#456): under WebKit, focusing an occluded row does **not** scroll it clear — 34 failures, every
-one reporting the scroll position after focus identical to the position before it, with the inset
-confirmed applied at 80px and 288px.
+**`scroll-padding-block-start` is necessary and not sufficient.** Measured under WebKit (#456): focusing an occluded row does **not** scroll it clear. The
+discriminating evidence is run `35398759713` at `--repeat-each=30`, where **every** failure
+reported the scroll position after focus identical to the position before it
+(`focusMovedScroller=false`), and run `35399537534` at `--repeat-each=60`, where the container
+inset was **confirmed applied** at 80px and 288px and the failures continued.
+
+*(An earlier revision of this paragraph said "34 failures at `--repeat-each=60`". Both halves were
+wrong: those 34 come from two runs at `--repeat-each=30`, and neither carried the
+`focusMovedScroller` or `scrollPadding` fields, which did not exist yet. The claim was true of
+later runs and cited against earlier ones.)*
 
 **The properties are not the problem, and an earlier revision of this section said they were.**
 WebKit honours them exactly — to the sub-pixel — the moment a scroll is actually performed:

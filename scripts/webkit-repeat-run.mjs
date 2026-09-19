@@ -52,15 +52,21 @@
  *   #456  run 35396510928            sk-notice item 13         29/30,  60/60 and 40/40 after
  *   #456  PR #457 CI 35401059899     sk-public-header item 17  1 failure, 40/40 after
  *
- * Failure accounting across this mission's measured executions, THREE kinds not two:
- *   1. the sk-page-header sticky / WCAG-2.4.11 defect (38 + 3 + 17) -- real, fixed
- *   2. this environmental fault (3 sightings, listed above, on 3 different tests)
- *   3. item 18's `TimeoutError: locator.waitFor ... .sk-empty-state--inline` (run 35403525734)
- *      -- one sighting, did not reproduce at 40 repeats, cause NOT established
+ * FAILURE KINDS SEEN IN THIS MISSION -- kinds, deliberately, not a total. An earlier revision of
+ * this note gave a single arithmetic ("38 + 3 + 17 ... ~1,270 executions ... Nothing else") that
+ * the evidence lens showed was wrong in three ways at once: the per-run counts do not sum to it,
+ * the execution total was short, and it omitted kinds it documents elsewhere in this same file.
+ * Counts change every time a run is added, so they are not restated here; read them from the runs.
  *
- * An earlier revision of this note said "every failure was either (1) or this fault (1). Nothing
- * else", which both undercounted the fault's own sightings and omitted kind 3 entirely. Corrected
- * by the pre-merge squad.
+ *   1. sk-page-header sticky / WCAG 2.4.11 -- real, fixed. Runs 35396510928, 35397298731,
+ *      35398052148, 35398759713, 35399537534.
+ *   2. The environmental `page.goto: WebKit encountered an internal error` above -- 3 sightings,
+ *      3 different tests, never reproducing.
+ *   3. `TimeoutError: locator.waitFor ... .sk-empty-state--inline` (run 35403525734, item 18) --
+ *      one sighting, did not reproduce at 40 repeats, cause NOT established.
+ *   4. `sk-section-nav.spec.ts:402` on CHROMIUM (PR #457 runs 35401059899, 35403525734) -- a real
+ *      regression introduced BY this mission and fixed in 1125f06b, not a flake. It is listed
+ *      because an accounting that silently omits the author's own regression is worthless.
  *
  * WHY THIS MATTERS FOR READING A COUNT: a single occurrence turns an otherwise clean item into
  * "29/30" and invites a de-flaking change to a test that has nothing wrong with it. Before
