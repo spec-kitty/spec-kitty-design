@@ -13,7 +13,8 @@
  * so it cannot fall behind the library it describes without a red gate.
  *
  * WHAT IS GENERATED, AND WHAT IS AUTHORED.
- *   generated  tokens.css, fonts/, components.html, components.manifest.json, manifest.json, and the
+ *   generated  tokens.css, fonts/, components.html, components.manifest.json, manifest.json,
+ *              metadata.json, and the
  *              region of DESIGN.md between the GENERATED markers
  *   authored   USAGE.md, and DESIGN.md outside the markers — prose written for OpenDesign's agent,
  *              which this script preserves verbatim and never rewrites
@@ -248,6 +249,16 @@ export function buildManifest(d) {
   };
 }
 
+export function buildMetadata() {
+  return {
+    title: 'Spec Kitty — train/elements-first',
+    category: 'Developer tools',
+    surface: 'web',
+    status: 'published',
+    artifactMode: 'agent-managed',
+  };
+}
+
 export function buildDesignRegion(d) {
   const shadow = d.components.filter((c) => c.shadowOnly).map((c) => `\`${c.name}\``);
   return [
@@ -333,6 +344,13 @@ export async function buildPackage(d, designMd, ref) {
   files.set('components.html', Buffer.from(html));
   files.set('components.manifest.json', Buffer.from(`${JSON.stringify(cm, null, 2)}\n`));
   files.set('manifest.json', Buffer.from(manifestJson));
+  // metadata.json IS REQUIRED FOR USE, despite not being in the project schema. Without
+  // `status: "published"` OpenDesign lists the system but refuses to let a project use it —
+  // "DESIGN_SYSTEM_NOT_PUBLISHED: draft design systems cannot be used by projects". Every field is
+  // optional to OpenDesign's reader (readUserMetadata), so this carries no timestamps and no
+  // instance-specific projectId: both would make a byte-exact drift gate impossible to satisfy.
+  // Found by the WP03 consumability run; the schema validator and every static check had passed.
+  files.set('metadata.json', Buffer.from(`${JSON.stringify(buildMetadata(), null, 2)}\n`));
   files.set('tokens.css', Buffer.from(d.tokensCss));
   files.set('DESIGN.md', Buffer.from(spliceDesign(designMd, buildDesignRegion(d))));
   for (const f of d.fonts) files.set(`fonts/${f}`, readFileSync(join(d.fontsDir, f)));
@@ -447,6 +465,8 @@ const PROBES = [
   ['every component gets a section', () => (buildComponentsHtml(FIXTURE).match(/data-od-component=/g) || []).length === 2],
   ['the fixture is deterministic', () => buildComponentsHtml(FIXTURE) === buildComponentsHtml(structuredClone(FIXTURE))],
   ['the manifest records no commit SHA', () => !('commit' in buildManifest(FIXTURE).source)],
+  ['metadata.json publishes the system (a draft cannot be used by projects)', () => buildMetadata().status === 'published'],
+  ['metadata.json carries no timestamp or instance-specific id (drift gate stays satisfiable)', () => !Object.keys(buildMetadata()).some((k) => /At$|projectId/.test(k))],
   ['the design region names excluded elements', () => buildDesignRegion(FIXTURE).includes('`sk-notice`')],
   ['the design region names the :host caveat components', () => /caveat[\s\S]*`grid`/.test(buildDesignRegion(FIXTURE))],
   ['splicing preserves the authored prose', () => spliceDesign(DESIGN_FIXTURE, 'NEW').startsWith('# Title\n\nauthored prose')],
@@ -460,7 +480,7 @@ const PROBES = [
   ['sk-form-input and sk-form-textarea are NOT excluded (their forms live under form-field)', () => { const d = derive(); return !d.excluded.includes('form-input') && !d.excluded.includes('form-textarea'); }],
   ['every real excluded element is a real element without a form', () => { const d = derive(); return d.excluded.every((e) => d.elements.includes(e) && !d.components.some((c) => c.name === e)); }],
 ];
-const PROBE_FLOOR = 21;
+const PROBE_FLOOR = 23;
 
 /**
  * DRIFT PROBES — each mutates a TEMPORARY COPY of the committed package and asserts `diffPackage`
@@ -488,7 +508,7 @@ async function checkProbes() {
   const font = d.fonts[0];
   const cases = [
     ['the committed package matches a fresh build (control)', () => onCopy(() => {}, (ps) => ps.length === 0)],
-    ...['components.html', 'components.manifest.json', 'manifest.json', 'tokens.css', 'DESIGN.md', `fonts/${font}`].map((f) => [
+    ...['components.html', 'components.manifest.json', 'manifest.json', 'metadata.json', 'tokens.css', 'DESIGN.md', `fonts/${font}`].map((f) => [
       `a ONE-BYTE change to ${f} is reported`,
       () => onCopy((dir) => flip(join(dir, f)), names(f)),
     ]),
@@ -511,7 +531,7 @@ async function checkProbes() {
   ];
   return cases;
 }
-const CHECK_PROBE_FLOOR = 13;
+const CHECK_PROBE_FLOOR = 14;
 
 
 async function selftest() {
