@@ -35,6 +35,16 @@ const STORY = '/iframe.html?id=elements-skpageheader--compact-sticky&viewMode=st
  * the suite exercising it. The contract is now scoped to the compact single row, and the default
  * density's remedy — the consumer setting the token from their own header — is what this second
  * arm asserts. Remove the override from that story and this arm reds.
+ *
+ * The compact arm passes on a THIN margin, and that is the point. Measured (#456): a 66-71px
+ * compact header against the 80px derived token (0 offset + 48px minimum height + 32px
+ * `--sk-space-7`) leaves 9-14px of clearance — 18-23px of the 32px absorption budget is spent.
+ * The figure is deterministic geometry, so 60/60 passes proved stability, not headroom. IF THIS
+ * ARM EVER REDS, RAISING THE TOKEN IS THE WRONG FIX: this assertion only became sensitive once the
+ * per-row scroll-margin was removed and the container inset stood alone, so it now tests that the
+ * DERIVATION exceeds the real header. Padding the token restores exactly the masking that removal
+ * exposed — under the old stacked insets a token far too small still passed. Re-derive instead:
+ * find which term (the compact minimum height, or the content that outgrew it) is now wrong.
  */
 const WCAG_STORIES = [
   { label: 'compact, on the derived default token', id: 'elements-skpageheader--compact-sticky' },
