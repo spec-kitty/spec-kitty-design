@@ -43,22 +43,6 @@ the first theme-affecting item in `<head>`, before every stylesheet link. Do not
 storage key or resolver into an application-owned snippet; the artifact is generated from the
 same DOM-free contract imported by the element.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <head>
   <script data-sk-theme-bootstrap>
@@ -66,44 +50,12 @@ scroller.addEventListener('focusin', (event) => {
   </script>
   <link rel="stylesheet" href="/node_modules/@spec-kitty/tokens/dist/tokens.css">
 </head>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The control's visible group and option labels are consumer-supplied so applications can localize
 them. Supply every label; if one is blank or missing, the element deliberately renders no
 interactive controls rather than shipping fallback copy or an unnamed partial choice.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-theme-toggle
   label="Theme preference"
@@ -112,22 +64,6 @@ scroller.addEventListener('focusin', (event) => {
   dark-label="Dark"
 ></sk-theme-toggle>
 <script src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 This is a native labelled radio group, not a binary switch. The browser supplies single-choice
@@ -433,22 +369,6 @@ The shell elements supply layout and landmarks while the consumer supplies desti
 identity, headings, status copy, and actions. They do not know which route is active or whether a
 navigation surface is open.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-app-shell>
   <sk-personal-rail slot="personal-rail" label="Product areas">
@@ -474,22 +394,6 @@ scroller.addEventListener('focusin', (event) => {
 
   <section aria-label="Delivery content">Consumer-owned page content.</section>
 </sk-app-shell>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 `sk-app-shell` exposes the `personal-rail`, `context-sidebar`, `compact-header`,
@@ -511,22 +415,6 @@ The reflected `open` boolean is controlled: it projects consumer state but the s
 it on Escape, activation, resize, or a route change. The `compactTrigger` field is property-only
 (`HTMLElement | null`) and is never serialized. Its only purpose is accepted-Escape focus return.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-app-shell presentation="compact">
   <div slot="compact-header">
@@ -553,22 +441,6 @@ scroller.addEventListener('focusin', (event) => {
     if (event.target.closest('a')) setOpen(false); // route ownership stays here
   });
 </script>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 Use the same composition with `presentation="rail-preserving"` when the personal rail must remain
@@ -639,22 +511,6 @@ stick, and a sticky header need not be compact.
 | `density` | `compact`, or omitted | Padding, gaps and row direction. The same five slots resolve at either density — there is no second header to author. Any other value renders the default density and warns. |
 | `sticky` | present / absent | The header pins itself to the top of its scroll region. |
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-page-header density="compact" sticky>
   <span slot="eyebrow">Runs</span>
@@ -663,22 +519,6 @@ scroller.addEventListener('focusin', (event) => {
   <span slot="sync">Updated 12 seconds ago</span>
   <sk-button slot="actions" size="icon" label="Refresh runs">↻</sk-button>
 </sk-page-header>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 At compact density the eyebrow, title, supporting copy and sync text share one row and truncate
@@ -698,42 +538,10 @@ WCAG 2.4.11 failure. The header cannot reach your content to fix that, so it pub
 for you to apply — you never compute an offset yourself. **Two declarations, and on WebKit a third
 piece; all three are stated in full further down and none of them is optional.**
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```css
 [data-scroller] {                 /* your scroll container */
   scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin);
 }
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 **Put the inset on the CONTAINER, not `scroll-margin` on each row.** One declaration replaces
@@ -744,43 +552,11 @@ the inline axis for the section-nav surface (`packages/styles/src/section-nav/`)
 
 That token is **derived**, not restated:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 --sk-layout-page-header-sticky-scroll-margin =
     --sk-layout-page-header-sticky-offset      (where the header pins, default 0)
   + --sk-layout-page-header-compact-height     (the compact header's MINIMUM block size, 3rem)
   + --sk-space-7                               (2rem, absorbing content taller than that minimum)
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The header's own `min-block-size` at compact density reads the same
@@ -825,43 +601,11 @@ Two things follow, and the second is easy to miss:
   `white-space: nowrap` with an ellipsis and cannot wrap, so the extra 32px is the metadata row
   stacking under the text row, not a wrapped heading.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```css
 /* Default density, or a header column narrower than 720px: your figure, one place. */
 .page-shell {
   --sk-layout-page-header-sticky-scroll-margin: 18rem;
 }
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 **At compact density, prefer raising `--sk-layout-page-header-compact-height` instead.** It is
@@ -924,32 +668,9 @@ scroller.addEventListener('focusin', (event) => {
   const port = scroller.getBoundingClientRect();
   const box = target.getBoundingClientRect();
   if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target?.getBoundingClientRect) return;
-  const inset = parseFloat(getComputedStyle(scroller).scrollPaddingBlockStart) || 0;
-  const portTop = scroller.getBoundingClientRect().top + inset;
-  if (target.getBoundingClientRect().top < portTop) {
-    target.scrollIntoView({ block: 'start' });
-  }
-});
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
+  // Defensive and UNMEASURED: every measurement in this section is of the above-the-inset case.
+  // This branch covers a target below the scrollport, cannot make a clear row unclear, and is a
+  // no-op wherever the engine already scrolls.
   else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
 });
 ```
@@ -959,8 +680,7 @@ inert on any focus that is already clear. **It is not inert in Chromium**, and a
 of this page claimed it was "because the browser has already done the work by the time it runs" —
 backwards: `focus()` fires `focusin` and *then* scrolls, so this handler runs first and aligns to
 `start` where Chromium would have chosen `nearest`. That is why the `sk-page-header` guard above is
-load-bearing rather than defensive: without it, focusing the header's own trailing action scrolls
-the container on every engine.
+load-bearing rather than defensive.
 
 **Why this is yours and not the element's**, for now: #145 ruled that `sk-page-header` observes no
 scrolling and owns no layout measurement, and that boundary is load-bearing elsewhere in this
@@ -1007,22 +727,6 @@ reports it as `No data`. It is never interpolated across and never drawn to the 
 and trailing nulls keep their place, so the window you supplied is the window that renders.
 
 ```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
-```js
 const chart = document.querySelector('sk-time-series-chart');
 chart.label = 'Throughput over time';
 chart.description = 'Requests per second, by hour, as collected';
@@ -1043,22 +747,6 @@ chart.selectedId = 'h0';
 chart.addEventListener('sk-time-series-chart-select', (event) => {
   // A request, not an internal state change: selection stays consumer-controlled.
   chart.selectedId = event.detail.pointId;
-});
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
 });
 ```
 
@@ -1109,22 +797,6 @@ nonblank `id`, a nonblank `label`, a finite nonnegative numeric `value`, and a n
 unavailable”. The component does not fetch, aggregate, sort, localize, or format values.
 
 ```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
-```js
 const chart = document.querySelector('sk-bar-chart');
 chart.label = 'Attributed return over time';
 chart.description = 'Last 30 days';
@@ -1137,22 +809,6 @@ chart.selectedId = 'aug-18';
 chart.addEventListener('sk-bar-chart-select', (event) => {
   // A request, not an internal state change: selection stays consumer-controlled.
   chart.selectedId = event.detail.id;
-});
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
 });
 ```
 
@@ -1177,22 +833,6 @@ scoped consumer adjustments; internal class names are not API.
 the structured inputs as JavaScript properties; arrays are not serialized to attributes.
 
 ```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
-```js
 const matrix = document.querySelector('sk-transition-matrix');
 matrix.columns = Object.freeze([
   Object.freeze({ id: 'previous', label: 'Previous' }),
@@ -1211,22 +851,6 @@ matrix.selectedRouteId = 'queued-active';
 matrix.addEventListener('sk-transition-matrix-select', (event) => {
   // The event requests a change. The consumer remains the owner of selectedRouteId.
   matrix.selectedRouteId = event.detail.routeId;
-});
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
 });
 ```
 
@@ -1248,22 +872,6 @@ one of `neutral`, `info`, `success`, or `attention`. Its public parts are `metri
 list. Supply its only public field, `stages`, as a readonly JavaScript property:
 
 ```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
-```js
 const chain = document.querySelector('sk-evidence-chain');
 chain.stages = Object.freeze([
   Object.freeze({ id: 'received', label: 'Items received', displayValue: '128' }),
@@ -1275,22 +883,6 @@ chain.stages = Object.freeze([
     tone: 'success',
   }),
 ]);
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The consumer owns identifiers, order, formatting, calculations, and domain meaning. The chain
@@ -1309,22 +901,6 @@ directly instead.
 `workflow-board` and `workflow-lane` are styles-only native-HTML families. Load both CSS files;
 there is deliberately no `<sk-workflow-board>` or `<sk-workflow-lane>` custom element.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/workflow-board/sk-workflow-board.css" />
 <link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/workflow-lane/sk-workflow-lane.css" />
@@ -1344,22 +920,6 @@ scroller.addEventListener('focusin', (event) => {
     </section>
   </div>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 This one-lane example fits its scroller, so the overflow-only region, accessible name, and
@@ -1382,22 +942,6 @@ together only while it genuinely overflows. A fitting scroller omits all three. 
 can synchronize that all-or-none state after relevant content or layout changes:
 
 ```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
-```js
 function syncWorkflowScroller(scroller, labelledBy) {
   const overflowing = scroller.scrollWidth > scroller.clientWidth;
   if (overflowing) {
@@ -1412,22 +956,6 @@ function syncWorkflowScroller(scroller, labelledBy) {
     scroller.removeAttribute('aria-labelledby');
   }
 }
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 That example is consumer code, not a package helper: choose when to re-run it from your own render
@@ -1439,42 +967,10 @@ tokens only: `--sk-layout-workflow-lane-min-inline-size`, `--sk-space-*`, `--sk-
 
 ## Installation
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```bash
 npm install @spec-kitty/styles @spec-kitty/tokens     # the CSS, every component
 npm install @spec-kitty/elements @spec-kitty/tokens   # the migrated custom elements
 npm install @spec-kitty/react                         # optional: JSX typing for React
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 > Note: these packages must be published to npm before the import paths below work in consumer projects. Until then, install from the local repository using `npm link` or a path dependency.
@@ -1487,22 +983,6 @@ Primary, secondary, ghost, and danger-secondary call-to-action buttons used to d
 
 **As a custom element** — `sk-button` is migrated, so it needs no wrapper:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
@@ -1511,22 +991,6 @@ scroller.addEventListener('focusin', (event) => {
 <sk-button variant="primary" size="sm">Book demo</sk-button>
 <sk-button variant="ghost" size="icon" label="Refresh evidence">↻</sk-button>
 <sk-button variant="danger-secondary">Deny</sk-button>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 **`danger-secondary`** composes the `secondary` tone's shape (transparent background at rest,
@@ -1557,40 +1021,8 @@ open state already use — rather than a content-drawn glyph, which was consider
 Set `href` and it renders an anchor instead of a button, with the same class list — which is
 what the demo pages actually need, since every button-styled thing there is a link:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-button variant="primary" href="/docs">Read the docs</sk-button>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The visible label or glyph is slotted content. `size="icon"` creates a 40px square control and
@@ -1604,42 +1036,10 @@ actions and links rather than as an implicit form-submit button.
 
 **HTML:**
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <button class="sk-button sk-button--primary">Get started</button>
 <button class="sk-button sk-button--secondary">Learn more</button>
 <button class="sk-button sk-button--danger-secondary">Deny</button>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-button-html--default)
@@ -1652,43 +1052,11 @@ Top-level navigation bar with logo, pill nav links, theme toggle, and external l
 
 **The pill sub-component is migrated**; the nav bar itself is CSS only.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-nav-pill label="Main">
   <a href="#" class="sk-nav-pill__item">Docs</a>
   <a href="#" class="sk-nav-pill__item">About</a>
 </sk-nav-pill>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 It fires `sk-nav-pill-toggle` before the open state changes, with
@@ -1696,22 +1064,6 @@ It fires `sk-nav-pill-toggle` before the open state changes, with
 
 **As CSS (every consumer):**
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <nav class="sk-nav">
   <a class="sk-nav__logo" href="/"><img src="/assets/logo.png" alt="Spec Kitty"></a>
@@ -1720,22 +1072,6 @@ scroller.addEventListener('focusin', (event) => {
     <li><a class="sk-nav__pill" href="/docs">Docs</a></li>
   </ul>
 </nav>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/navigation-sknavpill-html--default)
@@ -1747,61 +1083,13 @@ scroller.addEventListener('focusin', (event) => {
 Use `sk-context-nav` for grouped and nested page destinations inside a context area. Import the
 tokens and the independently exported styles subpath:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```css
 @import '@spec-kitty/tokens';
 @import '@spec-kitty/styles/context-nav/sk-context-nav.css';
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 Apply the classes directly to consumer-authored native light-DOM markup:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <nav class="sk-context-nav" aria-label="Project context">
   <section class="sk-context-nav__group" aria-labelledby="project-destinations">
@@ -1829,22 +1117,6 @@ scroller.addEventListener('focusin', (event) => {
     </ul>
   </section>
 </nav>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The consumer owns every URL, label, group and child order, child count, and `aria-current` value.
@@ -1899,59 +1171,11 @@ destination*, while its typography — type scale, weight and colour — is libr
 to be overridden if you ship a wordmark image or a different brand scale. The brand slot is styled,
 not blank:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```css
 @import '@spec-kitty/tokens';
 @import '@spec-kitty/styles/public-header/sk-public-header.css';
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <header class="sk-public-header">
   <div class="sk-public-header__inner">
@@ -1964,22 +1188,6 @@ scroller.addEventListener('focusin', (event) => {
     </nav>
   </div>
 </header>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The six anatomy classes have fixed semantic homes:
@@ -2063,126 +1271,30 @@ drawer behaviour), `.sk-breadcrumbs` (an ancestor path), or `.sk-segmented-choic
 exclusive button group with no navigation semantics at all). Import the tokens and the
 independently exported styles subpath:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```css
 @import '@spec-kitty/tokens';
 @import '@spec-kitty/styles/section-nav/sk-section-nav.css';
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 Apply the classes directly to a consumer-authored, labelled native `<nav>` and its native `<a>`
 children:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <nav class="sk-section-nav" aria-label="Section navigation">
   <a class="sk-section-nav__link" href="/overview">Overview</a>
   <a class="sk-section-nav__link" href="/members" aria-current="page">Members</a>
   <a class="sk-section-nav__link" href="/settings">Settings</a>
 </nav>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 A permission-filtered subset renders as fewer links, in the consumer's own order — the family
 reserves no gap, placeholder, or affordance for a route the consumer chose not to render:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <nav class="sk-section-nav" aria-label="Section navigation">
   <a class="sk-section-nav__link" href="/overview" aria-current="page">Overview</a>
   <a class="sk-section-nav__link" href="/members">Members</a>
 </nav>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The consumer owns the nav's accessible label, every link's `href` and text, link order, which links
@@ -2242,44 +1354,12 @@ Pill-shaped tags used to label and categorise content inline.
 
 **As a custom element** — `sk-pill-tag` is migrated, so it needs no wrapper:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
 <sk-pill-tag>Design system</sk-pill-tag>
 <sk-pill-tag variant="green">Shipped</sk-pill-tag>
 <sk-pill-tag shape="eyebrow">New</sk-pill-tag>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 `variant` (colour) and `shape` (the eyebrow form) are independent axes and compose. The label
@@ -2292,41 +1372,9 @@ is size, and `status` is operational. It accepts the same six tones `sk-status-i
 `sk-card`'s own `status` axis do — `neutral`, `info`, `success`, `attention`, `danger`,
 `recovery` — because there is one tone vocabulary in this library, not one per component.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-pill-tag status="success">Active</sk-pill-tag>
 <sk-pill-tag status="danger">Revoked</sk-pill-tag>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 **Brand and status may both be set, and the rendering is precedence, not co-existence.** While a
@@ -2355,42 +1403,10 @@ here.
 
 **HTML:**
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <span class="sk-pill-tag">Design system</span>
 <span class="sk-pill-tag sk-pill-tag--eyebrow">New</span>
 <span class="sk-pill-tag sk-pill-tag--status-success">Active</span>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skpilltag-html--default)
@@ -2403,22 +1419,6 @@ Ticked list items, for feature and requirement lists.
 
 **As a custom element** — `sk-check-bullet` is migrated, so it needs no wrapper:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
@@ -2427,22 +1427,6 @@ scroller.addEventListener('focusin', (event) => {
   <sk-check-bullet state="pending">Independent review pending</sk-check-bullet>
   <sk-check-bullet state="complete" icon="★">Decisions live with the feature</sk-check-bullet>
 </ul>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 Keep `role="list"` on the `<ul>`. The element sets `role="listitem"` on itself, because a
@@ -2462,22 +1446,6 @@ that changes it.
 
 **HTML:**
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <li class="sk-check-bullet">
   <span class="sk-check-bullet__icon" aria-hidden="true">✓</span>
@@ -2489,22 +1457,6 @@ scroller.addEventListener('focusin', (event) => {
   <span class="sk-check-bullet__state">Pending</span>
   Independent review pending
 </li>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 Its `--sk-*` dependencies are `--sk-space-3`, `--sk-fg-default`, `--sk-fg-muted`,
@@ -2521,22 +1473,6 @@ alignment declarations remain unchanged rather than becoming new public tokens.
 Breadcrumbs are native navigation and ordered-list markup styled by `.sk-breadcrumbs`; there is
 no `sk-breadcrumbs` custom element.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <nav class="sk-breadcrumbs" aria-label="Breadcrumb">
   <ol class="sk-breadcrumbs__list">
@@ -2551,22 +1487,6 @@ scroller.addEventListener('focusin', (event) => {
     </li>
   </ol>
 </nav>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The consumer owns destinations, labels, route matching, and which one link carries
@@ -2588,22 +1508,6 @@ Its exact token dependencies are `--sk-fg-muted`, `--sk-fg-subtle`, `--sk-fg-def
 `.sk-prose` styles native consumer-authored headings, paragraphs, lists, links, code, and tables.
 It does not parse Markdown, sanitize HTML, choose heading levels, or manufacture missing content.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <article class="sk-prose">
   <h2>Implementation prompt</h2>
@@ -2611,22 +1515,6 @@ scroller.addEventListener('focusin', (event) => {
   <ul><li>Preserve native semantics.</li></ul>
   <pre role="region" aria-label="Command" tabindex="0"><code>spec-kitty next</code></pre>
 </article>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 Give a genuinely overflowing code region a distinct accessible name and keyboard focus as shown.
@@ -2651,22 +1539,6 @@ Its exact token dependencies are `--sk-fg-body`, `--sk-fg-default`, `--sk-color-
 Use `.sk-event-timeline` on a native ordered list when entries form a chronology. The consumer
 supplies and orders every event, actor, timestamp, display string, detail, and trust marker.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <ol class="sk-event-timeline">
   <li class="sk-event-timeline__item">
@@ -2678,22 +1550,6 @@ scroller.addEventListener('focusin', (event) => {
     <span class="sk-event-timeline__marker">Verified by consumer</span>
   </li>
 </ol>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 Add `.sk-event-timeline--compact` to the same `<ol>` for a denser presentation. The modifier
@@ -2701,22 +1557,6 @@ reduces only the timeline's measure, spacing, and typography; it does not change
 its supplied values, or its source order. A compact item may begin with the optional decorative
 leading-marker element:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <ol class="sk-event-timeline sk-event-timeline--compact">
   <li class="sk-event-timeline__item">
@@ -2729,22 +1569,6 @@ scroller.addEventListener('focusin', (event) => {
     </p>
   </li>
 </ol>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 Keep `aria-hidden="true"` on every leading marker, and never make that marker the sole carrier of
@@ -2774,22 +1598,6 @@ A brand column, link columns and a legal line, in a grid that collapses to one c
 
 **As a custom element** — `sk-site-footer` is migrated, so it needs no wrapper:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 <link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/site-footer/sk-site-footer.css" />
@@ -2804,22 +1612,6 @@ scroller.addEventListener('focusin', (event) => {
   <li slot="column-one"><a href="#" class="sk-site-footer__link">Platform</a></li>
   <li slot="column-two"><a href="#" class="sk-site-footer__link">Contact</a></li>
 </sk-site-footer>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 **Text is a property; only the link items are slotted.** The element owns the grid, both `<nav>`s,
@@ -2838,40 +1630,8 @@ Use `sk-site-footer::part(grid)` for a column layout outside the provided `1.5fr
 
 **HTML:**
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <footer class="sk-site-footer">…</footer>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-sitefooter-html--default)
@@ -2884,42 +1644,10 @@ Eyebrow labels and section banners used to introduce sections and add visual hie
 
 **As a custom element** — `sk-section-banner` is migrated, so it needs no wrapper:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
 <sk-section-banner variant="purple">Version 2.x — event architecture</sk-section-banner>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The label is slotted content, not a property: a banner's text belongs to your page. Omit
@@ -2928,44 +1656,12 @@ there is no "plain" form to fall back to.
 
 **HTML:**
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <span class="sk-eyebrow">Getting started</span>
 <div class="sk-section-banner sk-section-banner--neutral">
   <span class="sk-section-banner__dot" aria-hidden="true">●</span>
   <span class="sk-section-banner__label">What's new</span>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The variant class is required — `.sk-section-banner` alone sets no colour. This markup is
@@ -2984,22 +1680,6 @@ have no static HTML form: their contracts are defined by consumer slot compositi
 row-intent event, so a string builder would create a second projection vocabulary.
 `sk-action-row` is the exception — see "Action row static form" below for its two-element wrapper.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-section-header>
   <span slot="eyebrow">Recent activity</span>
@@ -3033,22 +1713,6 @@ scroller.addEventListener('focusin', (event) => {
     console.log(event.detail.id);
   });
 </script>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The consumer owns the native heading and chooses its level; `sk-section-header` never generates a
@@ -3075,22 +1739,6 @@ padding, slots, controls, responsive anatomy, and the primary trigger's focus tr
 non-route flush row retains the selected surface and still has no border. An unknown, empty, or
 removed `presentation` value fails open to the existing bordered presentation.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-action-row href="/missions/272" presentation="flush" selected>
   <strong slot="title">Native route destination</strong>
@@ -3098,22 +1746,6 @@ scroller.addEventListener('focusin', (event) => {
   <time slot="metadata">2 hours ago</time>
   <button slot="controls" type="button">Pin</button>
 </sk-action-row>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 `layout="card"` reflows that same trigger, content and controls into a compact vertical
@@ -3135,42 +1767,10 @@ whitespace-only label makes it decorative and hides it from assistive technology
 contained and cover-cropped inside every size/shape combination. For a meaningful image, put the
 single name on the host and keep the consumer-owned image decorative:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-entity-marker label="Mia" size="sm" shape="circle">
   <img src="/people/mia.webp" alt="">
 </sk-entity-marker>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The component never rewrites `alt`. A nonempty image `alt` beside a nonempty host `label` is a
@@ -3191,22 +1791,6 @@ JavaScript.
 element is never its own container-query container, so `.sk-action-row-host` must be a real,
 separate ancestor of `.sk-action-row`:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-action-row-host">
   <div class="sk-action-row">
@@ -3223,22 +1807,6 @@ scroller.addEventListener('focusin', (event) => {
     </div>
   </div>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 `title` is the only mandatory part. Every other scan-content part (`marker`, `reference`, `tags`,
@@ -3263,84 +1831,20 @@ classes the shadow element reflects from its `presentation`/`layout` attributes.
 **The wrapper's CSS now SHIPS, generated (#309), and a static consumer links it instead of
 `sk-action-row.css`:**
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <link rel="stylesheet" href="@spec-kitty/styles/action-row/static/sk-action-row.static.css">
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 That file is the whole sheet with `:host` rewritten onto `.sk-action-row-host`, in the same source
 order — so link it **instead of** `sk-action-row.css`, never in addition to it, or every
 declaration arrives twice at two different weights. The rule it emits is:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```css
 .sk-action-row-host {
   display: block;
   min-width: 0;
   container-type: inline-size;
 }
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The copy above is pinned against the generated file by
@@ -3379,22 +1883,6 @@ failure, a degraded queue or a "connection lost, retrying" strip belongs on. It 
 it has no positioning, no stacking, no queueing, no auto-dismiss timer and no portal. The consumer
 decides where it appears and whether it exists at all.
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-notice tone="danger" announce="assertive" dismissible
            dismiss-label="Dismiss the deploy failure notice">
@@ -3414,22 +1902,6 @@ scroller.addEventListener('focusin', (event) => {
     notice.remove();
   });
 </script>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 **Announcement is an explicit property, not a side effect of tone.** `announce` takes `off` (the
@@ -3506,44 +1978,12 @@ columns, all collapsing to one below 720px.
 
 **As a custom element** — `sk-grid` is migrated, so it needs no wrapper:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-grid variant="cols-3" gap="6">
   <sk-card>…</sk-card>
   <sk-card>…</sk-card>
   <sk-card>…</sk-card>
 </sk-grid>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 Need a layout outside that set? Use `sk-grid::part(grid)` rather than asking for another
@@ -3551,42 +1991,10 @@ variant — the part exists for exactly that.
 
 **HTML:**
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-grid sk-grid--cols-3 sk-grid--gap-6">
   <article class="sk-card">…</article>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 ---
@@ -3597,22 +2005,6 @@ Surface containers for grouping related content, used in feature grids, blog lis
 
 **As a custom element** — migrated, so it needs no wrapper:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
@@ -3620,22 +2012,6 @@ scroller.addEventListener('focusin', (event) => {
   <h3>Structured requirements</h3>
   <p>Developers spend time building, not being blocked on finalized requirements.</p>
 </sk-card>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 `variant` accepts `blue` or `purple`; omit it for the default surface. `inset` swaps the surface
@@ -3663,22 +2039,6 @@ text you slot in. A status card is a composition, and there is deliberately no `
 element — the `<dl>` and `<details>` below must stay in light DOM, which a wrapper's shadow root
 would break (see ADR-10's styles-only ruling and #92):
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-card status="danger">
   <sk-status-indicator tone="danger"><span slot="marker">●</span>Delivery blocked</sk-status-indicator>
@@ -3693,22 +2053,6 @@ scroller.addEventListener('focusin', (event) => {
     <div class="sk-disclosure__body"><p>Consumer-supplied.</p></div>
   </details>
 </sk-card>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The static path carries the same axis as `.sk-card--status-<tone>`, generated into
@@ -3716,44 +2060,12 @@ The static path carries the same axis as `.sk-card--status-<tone>`, generated in
 
 **As CSS (every consumer):**
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-card">
   <span class="sk-eyebrow">Feature</span>
   <h3>Structured requirements</h3>
   <p>Developers spend time building, not being blocked on finalized requirements.</p>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-card--default)
@@ -3770,22 +2082,6 @@ Labelled text inputs, selects, and validation states for data-entry surfaces.
 
 **Custom element** (`@spec-kitty/elements` — the supported form):
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <sk-form-input
   name="fullName"
@@ -3795,22 +2091,6 @@ scroller.addEventListener('focusin', (event) => {
 ></sk-form-input>
 
 <sk-form-textarea name="goal" label="What are you trying to ship?" rows="4"></sk-form-textarea>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The element owns its own label, description and validation message, and participates in a
@@ -3829,83 +2109,19 @@ responsibilities — label, description, error region — all cross a root bound
 would have contributed is `display: flex; flex-direction: column; gap`, which the CSS-only
 `.sk-form-field` class already provides:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-form-field">
   <sk-form-input name="email" label="Email address"></sk-form-input>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 **CSS-only** (`@spec-kitty/styles`, no JavaScript — unchanged and still published):
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-form-field">
   <label class="sk-form-field__label" for="name">Your name</label>
   <input class="sk-input" id="name" type="text" placeholder="Jane Smith">
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/elements-skforminput--default)
@@ -3918,22 +2134,6 @@ Use the styles-only form-select primitive directly on a native light-DOM `<selec
 with the existing form-field label and description classes so the browser retains option,
 keyboard, validation, reset and form-submission behaviour:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-form-field">
   <label class="sk-form-field__label" for="lane">Lane</label>
@@ -3944,22 +2144,6 @@ scroller.addEventListener('focusin', (event) => {
   </select>
   <span class="sk-form-field__description" id="lane-help">Choose the Work Package lane.</span>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 Add `.sk-form-select--compact` alongside `.sk-form-select` for dense filter bars. These are the
@@ -3982,22 +2166,6 @@ Apply the styles-only checkbox choice group family to native light-DOM form mark
 `fieldset` and `legend` name the group, and every real `label` contains its visible native checkbox,
 label text, and optional metadata:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <fieldset class="sk-checkbox-choice-group">
   <legend class="sk-checkbox-choice-group__legend">Notification topics</legend>
@@ -4014,22 +2182,6 @@ scroller.addEventListener('focusin', (event) => {
     </label>
   </div>
 </fieldset>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The exact public selectors are `.sk-checkbox-choice-group`,
@@ -4066,22 +2218,6 @@ real `fieldset` and `legend` name the group, and every real `label` contains its
 radio, primary label text, and an optional secondary machine value. Every radio in the group shares
 one `name`, which is what makes the browser — not this library — enforce exactly-one selection:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <fieldset class="sk-radio-choice-group">
   <legend class="sk-radio-choice-group__legend">Connect a workspace</legend>
@@ -4111,22 +2247,6 @@ scroller.addEventListener('focusin', (event) => {
     </label>
   </div>
 </fieldset>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The exact public selectors are `.sk-radio-choice-group`, `.sk-radio-choice-group__legend`,
@@ -4178,44 +2298,12 @@ Apply `sk-segmented-choice` to an accessibly named native group and
 `sk-segmented-choice__item` to each direct native button. The supplied `aria-pressed` value is the
 source of truth for the selected presentation:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-segmented-choice" role="group" aria-label="View options">
   <button class="sk-segmented-choice__item" type="button" aria-pressed="true">Overview</button>
   <button class="sk-segmented-choice__item" type="button" aria-pressed="false">Activity</button>
   <button class="sk-segmented-choice__item" type="button" aria-pressed="false">Details</button>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The CSS does not set or toggle `aria-pressed`, manage focus, validate that selection is exclusive,
@@ -4237,22 +2325,6 @@ Full-width hero block with eyebrow, headline, lead copy, checkmark bullet list, 
 
 **As CSS (every consumer):**
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <section class="sk-hero">
   <span class="sk-eyebrow">Open-source</span>
@@ -4268,22 +2340,6 @@ scroller.addEventListener('focusin', (event) => {
     <button class="sk-button sk-button--secondary">View on GitHub</button>
   </div>
 </section>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 _No Storybook entry: this is a CSS-only pattern with no story._
@@ -4296,22 +2352,6 @@ Two-column callout block used for "why/who" benefit statements with bullet lists
 
 **HTML:**
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-callout">
   <div class="sk-callout__panel">
@@ -4330,22 +2370,6 @@ scroller.addEventListener('focusin', (event) => {
     </ul>
   </div>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 _No Storybook entry: this is a CSS-only pattern with no story._
@@ -4359,22 +2383,6 @@ pairs whose label→value association is visual only.
 
 **CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <dl class="sk-facts">
   <dt class="sk-facts__term">Status</dt>
@@ -4382,22 +2390,6 @@ scroller.addEventListener('focusin', (event) => {
   <dt class="sk-facts__term">Owner</dt>
   <dd class="sk-facts__value">Ada Lovelace</dd>
 </dl>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 `.sk-facts--two-col` lays term/value side by side instead of stacked; `.sk-facts--compact`
@@ -4414,22 +2406,6 @@ never a button plus a `hidden` div re-implementing `aria-expanded` by hand.
 
 **CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <details class="sk-disclosure">
   <summary class="sk-disclosure__summary">What changed in this release?</summary>
@@ -4437,22 +2413,6 @@ scroller.addEventListener('focusin', (event) => {
     <p>Three bug fixes and one performance improvement.</p>
   </div>
 </details>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The `open` attribute is entirely the consumer's — the platform owns open/closed state and the
@@ -4492,22 +2452,6 @@ documented narrow-width treatment that never reflows cells.
 
 **CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-data-table__scroller">
   <table class="sk-data-table">
@@ -4520,22 +2464,6 @@ scroller.addEventListener('focusin', (event) => {
     </tbody>
   </table>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 `.sk-data-table__scroller` is part of the markup contract, not an optional narrow-width extra —
@@ -4546,42 +2474,10 @@ nothing.
 At a narrow width, add a labelled, keyboard-scrollable region to that same wrapper instead of
 reflowing cells — block-reflow drops header association and is explicitly rejected:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-data-table__scroller" role="region" aria-label="Recent builds, narrow view" tabindex="0">
   <table class="sk-data-table">…</table>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 Only give the scroller `role="region"`/`tabindex="0"` when it genuinely overflows — on a table
@@ -4607,44 +2503,12 @@ whose fraction is expressed only as an inline `width` style.
 
 **CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #210):
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-progress">
   <label class="sk-progress__label" for="mission-progress">5 of 8 Work Packages done</label>
   <progress class="sk-progress__bar" id="mission-progress" value="5" max="8">63%</progress>
   <span class="sk-progress__meta">63%</span>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The consumer supplies `value`, `max`, the label text, and the visible `sk-progress__meta` text —
@@ -4670,43 +2534,11 @@ exceeding `max` are consumer validation, not a concern this component's CSS or m
 
 **Indeterminate** (#306) — unknown-duration activity, the same markup shape, one modifier:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-progress sk-progress--indeterminate">
   <label class="sk-progress__label" for="sync-progress">Syncing your changes</label>
   <progress class="sk-progress__bar" id="sync-progress"></progress>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 `sk-progress--indeterminate` is a root-class modifier, orthogonal to `--compact`/`--narrow` (all
@@ -4738,22 +2570,6 @@ inconsistent per-page empty panels.
 
 **CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <div class="sk-empty-state">
   <h3 class="sk-empty-state__heading">No runs yet</h3>
@@ -4762,22 +2578,6 @@ scroller.addEventListener('focusin', (event) => {
     <button type="button">Start a run</button>
   </div>
 </div>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 The primitive supplies no copy of its own and no icon — heading, body and the action are entirely
@@ -4786,40 +2586,8 @@ the consumer's.
 For an already-labelled lane that needs one compact structural message rather than the full
 heading/body/action stack, use the passive inline modifier on native light DOM:
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <p class="sk-empty-state sk-empty-state--inline">Nothing here</p>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 “Inline” does not mean forced onto one physical line: complete consumer-supplied copy wraps at
@@ -4840,42 +2608,10 @@ user is not forced to tab through the full navigation rail on every page.
 
 **CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
 
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```html
 <a href="#main" class="sk-skip-link">Skip to main content</a>
 …
 <main id="main">…</main>
-```js
-scroller.addEventListener('focusin', (event) => {
-  const target = event.target;
-  if (!target || target === scroller || !target.getBoundingClientRect) return;
-  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
-  // They sit above the inset by construction, so without this guard focusing one scrolls the
-  // container every time — in Chromium too.
-  if (target.closest('sk-page-header')) return;
-  const style = getComputedStyle(scroller);
-  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
-  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
-  const port = scroller.getBoundingClientRect();
-  const box = target.getBoundingClientRect();
-  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
-  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
-});
 ```
 
 Off-screen technique is `clip-path`, never a bare `transform` — `<a>` is inline by default and
