@@ -870,6 +870,8 @@ else {
     // that the `latest` refusal fires, now that the guard is executed code rather than a regex a
     // reviewer can read.
     [/node\s+scripts\/publish-derived-set\.mjs\s+--selftest(\s|$)/, "the publish refusal's own probe table", 'scripts/publish-derived-set.mjs --selftest'],
+    [/node\s+scripts\/pack-derived-set\.mjs\s+--selftest(\s|$)/, "the tarball pack and re-validation probe table", 'scripts/pack-derived-set.mjs --selftest'],
+    [/node\s+scripts\/verify-published-integrity\.mjs\s+--selftest(\s|$)/, "the published-bytes integrity probe table", 'scripts/verify-published-integrity.mjs --selftest'],
     // REL4 (#396). All four, because each is the only thing standing behind a different failure:
     // the digest check behind an edited vendored reference, --check behind a stale package, and
     // each --selftest behind a check that has quietly stopped seeing what it claims to.

@@ -52,7 +52,14 @@ export const GH_PACKAGES = 'https://npm.pkg.github.com';
  * caller grants fails workflow VALIDATION — the run never starts — so this is a ceiling check, not
  * a preference. Exported for the probe table.
  */
-export const PAYLOAD_PERMISSIONS = { contents: 'read', packages: 'write' };
+export const PAYLOAD_PERMISSIONS = {
+  contents: 'read',
+  packages: 'write',
+  // REL3 (#364): `actions/attest-build-provenance` signs through Sigstore with the job's OIDC token and
+  // stores the attestation on this repo. Justified here, so every caller must grant both (ceiling).
+  'id-token': 'write',
+  attestations: 'write',
+};
 const PERMISSION_RANK = { none: 0, read: 1, write: 2 };
 
 /**
@@ -532,6 +539,73 @@ export function checkForbiddenContents(tarballs) {
  * second list living beside it. So this also refuses any `run:` block in the release job that
  * names two or more known packages literally.
  */
+/**
+ * REL3 (#364): EVERY PUBLISH IS OF ATTESTED BYTES. For either publish path (`publish` = the rc
+ * payload, `release` = prod) this asserts, over the PARSED steps:
+ *   - a SHA-pinned `actions/attest-build-provenance` step, unconditional, whose only subject is
+ *     `dist-tarballs/*.tgz` (the directory pack-derived-set.mjs writes and the publish reads);
+ *   - the order bump < pack < attest < publish < verify — an attestation after the publish, or a pack
+ *     before the bump, certifies bytes other than the ones that shipped;
+ *   - prod's loop publishes only `"$file"` from the attested list, never a package directory;
+ *   - the job actually holds `id-token: write` and `attestations: write` (a floor; the ceiling check
+ *     in checkPublishingCallersDelegate covers the callers).
+ */
+const ATTEST_USES = /^actions\/attest-build-provenance@[0-9a-f]{40}$/;
+const ATTEST_SUBJECT = 'dist-tarballs/*.tgz';
+function checkAttestation(wf, jobName, steps, label, stripShellComments) {
+  const problems = [];
+  const runOf = (st) => (typeof st.run === 'string' ? stripShellComments(st.run) : '');
+  const idx = (pred) => steps.findIndex(pred);
+  const attest = steps.filter((st) => typeof st.uses === 'string' && /attest-build-provenance/.test(st.uses));
+  if (attest.length === 0) {
+    problems.push(`${label} publishes without an \`actions/attest-build-provenance\` step — nothing it ships is attested (#364)`);
+    return problems;
+  }
+  for (const st of attest) {
+    const uses = st.uses.trim();
+    if (!ATTEST_USES.test(uses)) problems.push(`${label}: the attest step uses \`${uses}\`, not a 40-hex SHA pin of actions/attest-build-provenance`);
+    if (st.if !== undefined) problems.push(`${label}: the attest step carries an \`if:\` — a condition can publish unattested bytes`);
+    const w = st.with ?? {};
+    if (w['subject-path'] !== ATTEST_SUBJECT) {
+      problems.push(`${label}: the attest step's subject-path is ${JSON.stringify(w['subject-path'])}, not \`${ATTEST_SUBJECT}\` — it must cover exactly the tarballs that get published`);
+    }
+    for (const k of ['subject-digest', 'subject-checksums', 'subject-name']) {
+      if (w[k] !== undefined) problems.push(`${label}: the attest step sets \`${k}\` — a second subject source can certify something other than dist-tarballs/`);
+    }
+  }
+  const packAt = idx((st) => runOf(st).trim() === 'node scripts/pack-derived-set.mjs');
+  const attestAt = idx((st) => typeof st.uses === 'string' && /attest-build-provenance/.test(st.uses));
+  const publishAt = jobName === 'release' ? idx((st) => /npm\s+publish\b/.test(runOf(st))) : idx((st) => /publish-derived-set\.mjs/.test(runOf(st)));
+  const verifyAt = idx((st) => runOf(st).trim() === 'node scripts/verify-published-integrity.mjs');
+  const bumpAt = idx((st) => /bump-prerelease\.mjs/.test(runOf(st)));
+  if (packAt !== -1 && attestAt !== -1 && publishAt !== -1 && verifyAt !== -1) {
+    if (!(packAt < attestAt)) problems.push(`${label} attests before it packs — the attestation cannot cover the tarballs`);
+    if (!(attestAt < publishAt)) problems.push(`${label} publishes before it attests — an attest failure would come after the bytes shipped`);
+    if (!(publishAt < verifyAt)) problems.push(`${label} runs the integrity check before the publish — it would compare against nothing published yet`);
+  } else if (publishAt === -1) {
+    problems.push(`${label} has no publish step to place the attestation before`);
+  }
+  if (bumpAt !== -1 && packAt !== -1 && !(bumpAt < packAt)) {
+    problems.push(`${label} packs before the prerelease bump — the attested tarballs would carry the unbumped version`);
+  }
+  if (jobName === 'release') {
+    const publishes = steps
+      .flatMap((st) => runOf(st).split(/&&|\|\||;|\n/))
+      .filter((c) => /npm\s+publish\b/.test(c));
+    for (const c of publishes) {
+      if (!/npm\s+publish\s+"\$file"(\s|$|\))/.test(c.trim()) || /packages\//.test(c)) {
+        problems.push(`${label} runs \`${c.trim()}\` — prod must publish only \`"$file"\` from the attested dist-tarballs/ list, never a package directory`);
+      }
+    }
+  }
+  const perms = wf?.jobs?.[jobName]?.permissions ?? wf?.permissions;
+  for (const scope of ['id-token', 'attestations']) {
+    const level = perms && typeof perms === 'object' ? perms[scope] : perms === 'write-all' ? 'write' : undefined;
+    if (level !== 'write') problems.push(`${label} does not hold \`${scope}: write\` — the attest step cannot sign or store its attestation`);
+  }
+  return problems;
+}
+
 export function checkWorkflowUsesDerivedSet(
   workflowText,
   packageNames,
@@ -683,7 +757,13 @@ export function checkWorkflowUsesDerivedSet(
   if (shellOverride !== undefined) {
     problems.push(`${label} overrides the default shell (\`${shellOverride}\`) for the whole job — a shell template can make every exact drift check run nothing`);
   }
-  for (const exact of ['node scripts/measure-elements-sizes.mjs --check', 'node scripts/build-opendesign-package.mjs --check']) {
+  for (const exact of [
+    'node scripts/measure-elements-sizes.mjs --check',
+    'node scripts/build-opendesign-package.mjs --check',
+    // REL3 (#364): the tarballs that get attested and published, and the post-publish byte check.
+    'node scripts/pack-derived-set.mjs',
+    'node scripts/verify-published-integrity.mjs',
+  ]) {
     const own = steps.filter((st) => typeof st.run === 'string' && stripShellComments(st.run).trim() === exact);
     if (!own.length) {
       problems.push(`${label} has no step whose run is exactly \`${exact}\` — a chained, echoed or wrapped form passes without gating anything`);
@@ -693,6 +773,7 @@ export function checkWorkflowUsesDerivedSet(
       problems.push(`${label} runs \`${exact}\` only under a custom \`shell:\` — a shell template such as \`sh -c true {0}\` runs nothing`);
     }
   }
+  problems.push(...checkAttestation(wf, jobName, steps, label, stripShellComments));
   if (jobName !== 'release') {
     // THE PUBLISH MUST GO THROUGH THE SCRIPT. Three regex rules used to live here — per-line
     // `--tag`, a hard-coded-`latest` refusal, and a TAG-from-input requirement — and review
@@ -1126,7 +1207,12 @@ function packOne(pkg) {
  * Starting from a valid baseline is what makes a probe mean "this defect is caught" rather than
  * "this fixture is invalid somehow".
  */
-const VALID_RELEASE_WORKFLOW = `jobs:
+const VALID_RELEASE_WORKFLOW = `permissions:
+  contents: write
+  packages: write
+  id-token: write
+  attestations: write
+jobs:
   release:
     steps:
       - name: Security
@@ -1157,9 +1243,18 @@ const VALID_RELEASE_WORKFLOW = `jobs:
           for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm pack --dry-run ); done
       - name: SBOM
         run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json
+      - name: Pack
+        run: node scripts/pack-derived-set.mjs
+      - name: Attest
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
+        with:
+          subject-path: 'dist-tarballs/*.tgz'
       - name: Publish
         run: |
-          for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm publish ); done
+          FILES="$(node scripts/pack-derived-set.mjs --list)"
+          for file in $FILES; do npm publish "$file"; done
+      - name: Verify
+        run: node scripts/verify-published-integrity.mjs
 `;
 
 /**
@@ -1181,6 +1276,11 @@ const VALID_RELEASE_WORKFLOW = `jobs:
  */
 const REUSABLE_PAYLOAD_FIXTURE = `jobs:
   publish:
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
     steps:
       - name: Resolve
         id: graph
@@ -1210,10 +1310,18 @@ const REUSABLE_PAYLOAD_FIXTURE = `jobs:
         run: OUT="$(npm dist-tag ls "@spec-kitty/tokens" 2>/tmp/e)"
       - name: Bump
         run: node scripts/bump-prerelease.mjs --from-registry
+      - name: Pack
+        run: node scripts/pack-derived-set.mjs
+      - name: Attest
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
+        with:
+          subject-path: 'dist-tarballs/*.tgz'
       - name: Publish
         env:
           DIST_TAG: \${{ inputs.dist-tag }}
         run: node scripts/publish-derived-set.mjs
+      - name: Verify
+        run: node scripts/verify-published-integrity.mjs
 `;
 
 /** A caller fixture, for the delegation checks. Mirrors release-rc.yml's real shape. */
@@ -1226,6 +1334,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
+      attestations: write
     with:
       registry: '${GH_PACKAGES}'
       dist-tag: rc
@@ -1265,7 +1375,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 81;
+const PROBE_FLOOR = 98;
 
 const PROBES = [
   {
@@ -1325,7 +1435,7 @@ const PROBES = [
     what: 'a release workflow with no publish step at all',
     run: () =>
       checkWorkflowUsesDerivedSet(
-        withDefect(/for pkg in [^\n]*npm publish[^\n]*done/, 'echo "release complete"'),
+        withDefect(/for file in [^\n]*npm publish[^\n]*done/, 'echo "release complete"'),
         ['@spec-kitty/tokens'], ['tokens'],
       ),
   },
@@ -1345,7 +1455,7 @@ const PROBES = [
     run: () =>
       checkWorkflowUsesDerivedSet(
         withDefect(
-          /      - name: Publish\n        run: \|\n          for pkg in[^\n]*\n/,
+          /      - name: Publish\n        run: \|\n          FILES=[^\n]*\n          for file in[^\n]*\n/,
           '      - name: "was: npm publish over the derived set"\n        run: echo done\n',
         ),
         ['@spec-kitty/tokens'], ['tokens'],
@@ -1595,6 +1705,44 @@ const PROBES = [
         'publish-packages.yml',
       ),
   },
+  // ── REL3 (#364): every publish is of attested bytes ──────────────────────────────────────
+  ...(() => {
+    const ATTEST = `      - name: Attest\n        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8\n        with:\n          subject-path: 'dist-tarballs/*.tgz'\n`;
+    const PACK = '      - name: Pack\n        run: node scripts/pack-derived-set.mjs\n';
+    const VERIFY = '      - name: Verify\n        run: node scripts/verify-published-integrity.mjs\n';
+    const PUB = '      - name: Publish\n        env:\n          DIST_TAG: ${{ inputs.dist-tag }}\n        run: node scripts/publish-derived-set.mjs\n';
+    const BUMP = '      - name: Bump\n        run: node scripts/bump-prerelease.mjs --from-registry\n';
+    const payload = (what, anchor, text) => ({
+      what: `REL3 payload: ${what}`,
+      run: () => checkWorkflowUsesDerivedSet(withPayloadDefect(anchor, text), ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml'),
+    });
+    const release = (what, anchor, text) => ({
+      what: `REL3 release: ${what}`,
+      run: () => checkWorkflowUsesDerivedSet(withDefect(anchor, text), ['@spec-kitty/tokens'], ['tokens']),
+    });
+    return [
+      payload('the attest step deleted', ATTEST, ''),
+      payload('the attest step moved after the publish', ATTEST + PUB, PUB + ATTEST),
+      payload('the attest step made conditional', '      - name: Attest\n', '      - name: Attest\n        if: false\n'),
+      payload('the attest subject pointed at something other than dist-tarballs/', "subject-path: 'dist-tarballs/*.tgz'", "subject-path: 'packages/*/package.json'"),
+      payload('the attest action pinned to a mutable tag', 'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8', 'actions/attest-build-provenance@v4'),
+      payload('a second subject source alongside the tarballs', "          subject-path: 'dist-tarballs/*.tgz'\n", "          subject-path: 'dist-tarballs/*.tgz'\n          subject-digest: sha256:0000\n"),
+      payload('the pack step deleted', PACK, ''),
+      payload('the pack step moved before the prerelease bump', BUMP + PACK, PACK + BUMP),
+      payload('the pack step moved after the attest step', PACK + ATTEST, ATTEST + PACK),
+      payload('the integrity check deleted', VERIFY, ''),
+      payload('the integrity check moved before the publish', PUB + VERIFY, VERIFY + PUB),
+      payload('the payload job without `id-token: write`', '      id-token: write\n', ''),
+      release('the attest step deleted', ATTEST, ''),
+      release('a publish from a package directory', '          for file in $FILES; do npm publish "$file"; done\n', '          for pkg in tokens; do ( cd "packages/$pkg" && npm publish ); done\n'),
+      release('a bare `npm publish` (repacks in memory)', 'do npm publish "$file"; done', 'do npm publish; done'),
+      release('the workflow without `attestations: write`', '  attestations: write\n', ''),
+      {
+        what: 'REL3 caller: the rc caller without `attestations: write` (the payload needs it; the caller is its ceiling)',
+        run: () => checkPublishingCallersDelegate([{ file: 'release-rc.yml', text: withCallerDefect('      attestations: write\n', '') }], REUSABLE_PAYLOAD_FIXTURE),
+      },
+    ].map((pr) => ({ ...pr, what: pr.what }));
+  })(),
   {
     what: 'the OpenDesign check made conditional with `if: false`',
     run: () =>

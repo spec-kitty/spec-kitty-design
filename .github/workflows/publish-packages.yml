@@ -54,6 +54,11 @@ jobs:
     permissions:
       contents: read
       packages: write
+      # REL3 (#364): `actions/attest-build-provenance` signs through Sigstore with the job's OIDC token
+      # (`id-token: write`) and stores the attestation on this repo (`attestations: write`). Both are
+      # load-bearing, and the rc caller must grant them too — the caller's block is a CEILING.
+      id-token: write
+      attestations: write
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -155,10 +160,26 @@ jobs:
       # what a caller passes or a future editor writes here. It derives its own set from
       # release-graph.mjs (refusing an empty one), publishes in topological order, halts rather than
       # accumulating failures, and treats EPUBLISHCONFLICT as resumption only on a re-run.
+      # REL3 (#364): PACK, ATTEST, PUBLISH THOSE FILES, VERIFY. npm provenance is an npmjs mechanism
+      # and hard-fails on GitHub Packages, so FR-044 is met by GitHub artifact attestations instead.
+      # The order is the guarantee: the tarballs are packed AFTER the bump (they carry the bumped
+      # package.json), attested BEFORE anything is published (an attest failure publishes nothing),
+      # published as those exact files, and then re-downloaded from the registry and compared.
+      - name: "[ENFORCED] Pack the derived set into the tarballs that get attested and published"
+        run: node scripts/pack-derived-set.mjs
+
+      - name: "[ENFORCED] Attest the packed tarballs (#364, FR-044)"
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # actions/attest-build-provenance v4.2.2
+        with:
+          subject-path: 'dist-tarballs/*.tgz'
+
       - name: Publish every package in the derived set
         env:
           DIST_TAG: ${{ inputs.dist-tag }}
         run: node scripts/publish-derived-set.mjs
+
+      - name: "[ENFORCED] The registry holds exactly the attested bytes (#364)"
+        run: node scripts/verify-published-integrity.mjs
 
       # Non-`latest` dist-tags never appear in the GitHub web UI version list, so this is the only
       # place an operator can see that the publish actually landed.

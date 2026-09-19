@@ -30,6 +30,8 @@ on:
 permissions:
   contents: write   # for GitHub Release creation
   packages: write   # to publish to GitHub Packages — load-bearing, and absent before this change
+  id-token: write      # REL3 (#364): Sigstore signing for the tarball attestations
+  attestations: write  # REL3 (#364): store the attestations on this repo
 
 jobs:
   release:
@@ -163,26 +165,35 @@ jobs:
       # exempts the condition of an `if` from `set -e`, and both handled commands are if-conditions.
       # Dropping `-e` therefore bought nothing and silently removed protection from every
       # *unhandled* command in the block.
+      # REL3 (#364): PACK, ATTEST, PUBLISH THOSE FILES, VERIFY — the same order and the same shared
+      # scripts as the rc payload. `--provenance` stays gone (it is the npmjs mechanism and hard-fails
+      # on GitHub Packages); FR-044 is met by these attestations over the exact published bytes.
+      - name: "[ENFORCED] Pack the derived set into the tarballs that get attested and published"
+        run: node scripts/pack-derived-set.mjs
+
+      - name: "[ENFORCED] Attest the packed tarballs (#364, FR-044)"
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # actions/attest-build-provenance v4.2.2
+        with:
+          subject-path: 'dist-tarballs/*.tgz'
+
       - name: Publish every package in the derived set
         run: |
           set -euo pipefail
-          PKGS="${{ steps.graph.outputs.dirs }}"
-          [ -n "$PKGS" ] || { echo "::error::empty publish set reached the publish loop"; exit 1; }
+          # THE ATTESTED FILES, NEVER A PACKAGE DIRECTORY. `--list` re-validates dist-tarballs/ against
+          # the derived set (names, versions, order, every file's hash, no stray tarball) and prints one
+          # path per line in topological order. A directory publish would repack in memory and upload
+          # bytes the attestation never saw.
+          FILES="$(node scripts/pack-derived-set.mjs --list)"
+          [ -n "$FILES" ] || { echo "::error::empty publish set reached the publish loop"; exit 1; }
           failed=""
-          for pkg in $PKGS; do
-            echo "=== publishing packages/$pkg ==="
-            # `--provenance` REMOVED with the registry move, not as a preference: it is the npmjs
-            # MECHANISM, unsupported on GitHub Packages, and it hard-fails without the
-            # `id-token: write` this workflow no longer declares. FR-044's control is relocated, not
-            # retired — #364 scope item 3 replaces it with `actions/attest-build-provenance`.
-            # `--access public` went with it: an npmjs access model; GitHub Packages governs
-            # visibility per package outside the publish call.
-            #
-            # This loop is deliberately NOT routed through scripts/publish-derived-set.mjs yet. That
-            # is REL3's fold, and the operator scoped this change to the registry alone. The script
-            # would permit `latest` here — it keys on GITHUB_REF_TYPE, and this workflow is
-            # tag-triggered — so the fold is available whenever REL3 takes it.
-            if out="$( cd "packages/$pkg" && npm publish 2>&1 )"; then
+          for file in $FILES; do
+            pkg="$(basename "$file" .tgz)"
+            echo "=== publishing $pkg from dist-tarballs/ ==="
+            # `--access public` stays gone: an npmjs access model; GitHub Packages governs visibility
+            # per package outside the publish call. This loop is not routed through
+            # scripts/publish-derived-set.mjs: that script refuses `latest` unconditionally (REL2), and
+            # this is the prod stream, which owns `latest`.
+            if out="$( npm publish "$file" 2>&1 )"; then
               echo "$out"
             else
               echo "$out"
@@ -196,9 +207,9 @@ jobs:
                 # names have never been published, so that is someone else's package, not ours.
                 # Warning, not notice, and never on attempt 1.
                 if [ "${GITHUB_RUN_ATTEMPT:-1}" -gt 1 ]; then
-                  echo "::warning::packages/$pkg is already published at this version — skipping (run attempt ${GITHUB_RUN_ATTEMPT})"
+                  echo "::warning::$pkg is already published at this version — skipping (run attempt ${GITHUB_RUN_ATTEMPT})"
                 else
-                  echo "::error::packages/$pkg reports an existing $pkg version on the FIRST attempt."
+                  echo "::error::$pkg reports an existing version on the FIRST attempt."
                   echo "Nothing under @spec-kitty has ever been published, so this is not a resumption."
                   echo "Verify ownership before re-running: npm view <name>@<version> _npmUser.name"
                   failed="$failed $pkg"
@@ -229,6 +240,9 @@ jobs:
             echo "packages are skipped, so the retry completes the set."
             exit 1
           fi
+
+      - name: "[ENFORCED] The registry holds exactly the attested bytes (#364)"
+        run: node scripts/verify-published-integrity.mjs
 
       # SAME REASONING AS THE RC PAYLOAD, and it applies here now that prod publishes to GitHub
       # Packages too: `npm view` returns exit 0 with zero bytes against this registry, so a report

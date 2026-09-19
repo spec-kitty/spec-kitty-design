@@ -43,6 +43,10 @@ jobs:
     permissions:
       contents: read
       packages: write
+      # REL3 (#364): the payload attests what it publishes; a reusable workflow cannot hold a
+      # permission its caller does not grant, so these two must be here as well as in the payload.
+      id-token: write
+      attestations: write
     with:
       registry: 'https://npm.pkg.github.com'
       # MANDATORY. Omitting it makes npm write `latest`, and the first publish of a package with no

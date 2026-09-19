@@ -81,3 +81,6 @@ tmp/
 # Spec Kitty lane worktrees (created by `agent action implement`); never committed.
 # Without this the untracked dir fails the CLI recorder with DIRTY_WORKTREE.
 .worktrees/
+
+# REL3 (#364): the packed tarballs the release workflows attest and publish. Never committed.
+dist-tarballs/

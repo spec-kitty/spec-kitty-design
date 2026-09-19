@@ -269,6 +269,13 @@ jobs:
       # only when GITHUB_REF_TYPE is `tag`, which a branch push cannot produce.
       - name: "[ENFORCED] Publish refusal's own probe table (#363, FR-009)"
         run: node scripts/publish-derived-set.mjs --selftest
+      # REL3 (#364). Both publish paths publish only the tarballs pack-derived-set.mjs wrote and the
+      # attest step certified, then verify-published-integrity.mjs proves the registry holds the same
+      # bytes. Neither runs on a PR (they need a publish), so their probe tables are the PR-time proof.
+      - name: "[ENFORCED] Tarball pack and re-validation probe table (#364)"
+        run: node scripts/pack-derived-set.mjs --selftest
+      - name: "[ENFORCED] Published-bytes integrity check probe table (#364)"
+        run: node scripts/verify-published-integrity.mjs --selftest
       # REL4 (#396). The OpenDesign package is generated from the library and committed, so it can
       # only go stale if nothing checks it — which is exactly how the last one ended up pinned to a
       # commit 168 lines behind. The vendored OpenDesign reference is verified against upstream's
