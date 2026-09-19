@@ -38,7 +38,8 @@ The outputs are in `proof-outputs/`. Runs 3 and 4 rendered in Chromium are
 preview pages. Later review passes changed only action-row's CSS (its page, its section of
 `components.html`, and so the derived `components.manifest.json` by one selector) and prose in
 `DESIGN.md`/`USAGE.md` (theme selection, a sticky-header sentence, action-row's link and flush forms,
-the static-sheet line of the generated region). None of it touches the four components this prompt
+and in the generated region the static-sheet line and the `:host` caveat list, which lost
+action-row: 11 components to 10). None of it touches the four components this prompt
 exercises. Its copy's `id` matched its folder, so OpenDesign honoured the manifest (see below). The
 agent read the same four component pages and copied from them. One difference from run 3: it
 declared no `@font-face` and pinned `data-theme="dark"`, letting the `--sk-font-*` stacks fall back

@@ -88,7 +88,7 @@
       "criterion_id": "FR-009",
       "description": "--check reds on drift and is wired through all three gate-wiring layers",
       "proof_type": "automated_test",
-      "evidence": "ci-quality.yml lint-code steps; check-gate-wiring REQUIRED_LINT; defeat cases (42); 15 drift probes; check-gate-wiring also refuses a write-mode regeneration step and NODE_OPTIONS (env: or $GITHUB_ENV) in ci-quality \u2014 47 defeat cases",
+      "evidence": "ci-quality.yml lint-code steps; check-gate-wiring REQUIRED_LINT; 51 defeat cases, including write-mode regeneration (package and size record), NODE_OPTIONS (env: at every level, lower-case key, $GITHUB_ENV) and default-shell overrides; build-opendesign-package.mjs --selftest runs 53 unit and 17 drift probes",
       "pass_fail": "pass",
       "verified_by": "claude (REL4, after gate pass 1)",
       "verified_at": "2026-09-19T17:00:02.729471+00:00",
