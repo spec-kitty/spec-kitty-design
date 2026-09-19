@@ -664,6 +664,13 @@ export function checkWorkflowUsesDerivedSet(
       }
     }
   }
+  // …AND IN `run:` TEXT. Pass 3 set it with `echo "NODE_OPTIONS=…" >> "$GITHUB_ENV"`, which no
+  // `env:` block shows. No publishing step has a reason to name it at all.
+  for (const st of steps) {
+    if (typeof st.run === 'string' && /NODE_OPTIONS/i.test(stripShellComments(st.run))) {
+      problems.push(`${label} step "${st.name ?? st.run}" names NODE_OPTIONS in its run — writing it to $GITHUB_ENV preloads every later node step`);
+    }
+  }
   const envLevels = [...steps.map((st) => ['step', st.env]), ['job', wf?.jobs?.[jobName]?.env], ['workflow', wf?.env]];
   for (const [where, e] of envLevels) {
     if (e && typeof e === 'object' && Object.keys(e).some((k) => k.toUpperCase() === 'NODE_OPTIONS')) {
@@ -1256,7 +1263,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 75;
+const PROBE_FLOOR = 76;
 
 const PROBES = [
   {
@@ -1533,6 +1540,17 @@ const PROBES = [
     run: () =>
       checkWorkflowUsesDerivedSet(
         withPayloadDefect(/ {6}- name: OpenDesign\n/, '      - name: OpenDesign\n        env:\n          NODE_OPTIONS: --import=data:text/javascript,process.exit(0)\n'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'a NODE_OPTIONS preload written to $GITHUB_ENV before the OpenDesign check',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n/, '      - name: Env\n        run: echo "NODE_OPTIONS=--import=data:text/javascript,process.exit(0)" >> "$GITHUB_ENV"\n      - name: OpenDesign\n'),
         ['@spec-kitty/tokens'],
         ['tokens'],
         'publish',

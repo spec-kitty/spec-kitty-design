@@ -1156,6 +1156,12 @@ else {
     if (hasNodeOptions(job?.env)) problems.push(`job \`${jobName}\` sets NODE_OPTIONS in \`env:\` — a preload can make its node gates exit 0 without running`);
     for (const st of job?.steps ?? []) {
       if (hasNodeOptions(st.env)) problems.push(`step "${st.name ?? st.run}" in \`${jobName}\` sets NODE_OPTIONS — a preload can make it exit 0 without running`);
+      // `echo "NODE_OPTIONS=…" >> "$GITHUB_ENV"` sets it for every later step with no `env:` block
+      // in sight (REL4 pass 3). A job that genuinely needs, say, --max-old-space-size is a
+      // deliberate edit to this rule, not a silent exemption.
+      if (/NODE_OPTIONS/i.test(String(st.run ?? '').split('\n').filter((l) => !/^\s*#/.test(l)).join('\n'))) {
+        problems.push(`step "${st.name ?? st.run}" in \`${jobName}\` names NODE_OPTIONS in its run — writing it to $GITHUB_ENV preloads every later node step`);
+      }
     }
   }
   for (const [jobName, job] of Object.entries({ ...guarded, gate })) {
