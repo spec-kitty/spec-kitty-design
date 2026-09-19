@@ -534,18 +534,24 @@ const codeNodes = (tree) => {
 };
 
 /** Storybook's own parse, through its PUBLIC loader entry, captured as the mdast it compiles. */
-async function storybookCodeNodes(source) {
-  const { default: loader } = await import('@storybook/addon-docs/mdx-loader');
+async function storybookCodeNodes(source, loader = null) {
+  // The loader is a parameter so the self-test can prove this adapter with substitute loaders,
+  // without Storybook (R3 V2, PR #457).
+  loader ??= (await import('@storybook/addon-docs/mdx-loader')).default;
   let captured = null;
   let calledBack = false;
   const error = console.error;
   console.error = () => {};
   try {
-    await new Promise((done, fail) => loader.call({
-      async: () => (err) => { calledBack = true; return err ? fail(err) : done(); },
-      getOptions: () => ({ mdxCompileOptions: { remarkPlugins: [() => (tree) => { captured = codeNodes(tree); }] } }),
-      resourcePath: 'fence-gate-sentinel.mdx',
-    }, source));
+    await new Promise((done, fail) => {
+      // Storybook's loader is `async`, so a throw before its callback is a REJECTED PROMISE; without
+      // this catch it escaped as a raw stack instead of the labelled contract error (R3 V1).
+      Promise.resolve(loader.call({
+        async: () => (err) => { calledBack = true; return err ? fail(err) : done(); },
+        getOptions: () => ({ mdxCompileOptions: { remarkPlugins: [() => (tree) => { captured = codeNodes(tree); }] } }),
+        resourcePath: 'fence-gate-sentinel.mdx',
+      }, source)).catch(fail);
+    });
   } catch (e) {
     // Failing BEFORE the callback is the loader breaking, not the document being rejected.
     if (!calledBack) throw new Error(`mdx-loader failed before calling back (${String(e?.message ?? e).split('\n')[0]}) — its contract changed`);
@@ -657,7 +663,42 @@ async function sentinelSelftest() {
   const noPages = await driftSentinel({ storybook: agrees, corpus: { pages: [], fixtures }, requirePages: true, log: () => {} });
   if (noPages !== 1) failed += 1;
   console.log(`${noPages === 1 ? '✅' : '❌'} drift sentinel: no tracked page fails when pages are required (got ${noPages})`);
-  return { checks: cases.length + 1, failed };
+
+  // The loader ADAPTER, with substitute loaders (R3 V2): a broken loader must surface as a labelled
+  // contract error, and a rejecting or plugin-skipping one as a result the sentinel fails on.
+  const src = md(F + 'js', 'x', F);
+  const adapter = [
+    ['a loader that throws synchronously', function () { throw new TypeError('boom'); }, 'before calling back'],
+    ['a loader that rejects before calling back', async function () { throw new TypeError('boom'); }, 'before calling back'],
+    ['a loader that reports an error', function () { this.async()(new Error('nope')); }, { nodes: 'REJECTED', pluginRan: false }],
+    ['a loader that never runs the plugin', function () { this.async()(); }, { nodes: 'NOT CAPTURED', pluginRan: false }],
+  ];
+  for (const [name, loader, want] of adapter) {
+    let got;
+    try {
+      got = await storybookCodeNodes(src, loader);
+    } catch (e) {
+      got = e.message;
+    }
+    const ok = typeof want === 'string' ? typeof got === 'string' && got.includes(want) : JSON.stringify(got) === JSON.stringify(want);
+    if (!ok) failed += 1;
+    console.log(`${ok ? '✅' : '❌'} drift sentinel adapter: ${name} (got ${JSON.stringify(got).slice(0, 90)})`);
+  }
+  // The CI step relies on the DEFAULT of requirePages (R1 round 9): pin it by not passing it.
+  const byDefault = await driftSentinel({ storybook: agrees, corpus: { pages: [], fixtures }, log: () => {} });
+  if (byDefault !== 1) failed += 1;
+  console.log(`${byDefault === 1 ? '✅' : '❌'} drift sentinel: by default, no tracked page fails (got ${byDefault})`);
+
+  // An unknown flag is refused with exit 2 instead of falling through to the gate (R1 C1).
+  let flags = 0;
+  for (const flag of ['--no-such-flag', '--drift-sentinal']) {
+    const status = spawnSync(process.execPath, [SELF, flag], { encoding: 'utf8' }).status;
+    const ok = status === 2;
+    if (!ok) failed += 1;
+    flags += 1;
+    console.log(`${ok ? '✅' : '❌'} CLI: the unknown flag ${flag} is refused with exit 2 (got ${status})`);
+  }
+  return { checks: cases.length + 1 + adapter.length + 1 + flags, failed };
 }
 
 async function selftest() {
@@ -726,7 +767,17 @@ async function selftest() {
   console.log(`\n✅ markdown fence gate self-test: ${checks}/${checks} checks hold.`);
 }
 
+/** Flags the CLI accepts. Anything else is refused, not ignored (R1 C1, PR #457): an unknown flag
+ * used to fall through to the plain gate, so renaming `--drift-sentinel` in this file but not in CI
+ * would have turned the sentinel's CI step into a second, passing run of the gate. */
+const KNOWN_FLAGS = new Set(['--selftest', '--drift-sentinel', '--root']);
+
 if (process.argv[1] && resolve(process.argv[1]) === SELF) {
+  const unknown = process.argv.slice(2).filter((a, i, all) => a.startsWith('--') && !KNOWN_FLAGS.has(a) && all[i - 1] !== '--root');
+  if (unknown.length > 0) {
+    console.error(`❌ unknown flag(s): ${unknown.join(' ')} — expected one of ${[...KNOWN_FLAGS].join(', ')}`);
+    process.exit(2);
+  }
   if (process.argv.includes('--selftest')) {
     await selftest();
   } else if (process.argv.includes('--drift-sentinel')) {

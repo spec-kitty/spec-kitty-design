@@ -1048,6 +1048,17 @@ else {
       }
     }
   }
+  // #456, R3 V3 (PR #457): the MDX drift sentinel runs AFTER the fence gate, so a Storybook loader
+  // breakage cannot stop lint-code before the PR has its fence verdict. Order, not just presence.
+  {
+    const at = (re) => lintSteps.findIndex((st) => re.test(commandLines(st)));
+    const gate = at(/node\s+scripts\/check-markdown-fences\.mjs(?!\s*--)(\s|$)/);
+    const sentinel = at(/node\s+scripts\/check-markdown-fences\.mjs\s+--drift-sentinel(\s|$)/);
+    if (gate >= 0 && sentinel >= 0 && sentinel < gate) {
+      problems.push('the fence gate\'s MDX drift sentinel runs BEFORE the fence gate in `lint-code` — a Storybook ' +
+        'loader breakage would then stop the job before the PR has a fence verdict');
+    }
+  }
 
   // REQUIRED describes the `test` job's payload specifically, so it is named rather than looped.
   const steps = wf.jobs?.test?.steps ?? [];
