@@ -312,7 +312,8 @@ export function checkRegistryAuthorityAgrees(packages, workflows) {
       // would only have seen release.yml AFTER REL3 converted it, i.e. after the hazard. Reading
       // every publishing workflow's own registry-url puts it inside the window today.
       const steps = Array.isArray(job?.steps) ? job.steps : [];
-      const publishes = steps.some((st) => /npm\s+publish\b/.test(String(st?.run ?? '')));
+      // Inline `npm publish`, or the prod publish script (REL3), which runs `npm publish` itself.
+      const publishes = steps.some((st) => /npm\s+publish\b|publish-latest\.mjs/.test(String(st?.run ?? '')));
       if (!publishes) continue;
       for (const st of steps) {
         const url = String(st?.uses ?? '').startsWith('actions/setup-node@') ? st?.with?.['registry-url'] : null;
@@ -602,7 +603,7 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
   }
   const packAt = idx((st) => runOf(st).trim() === 'node scripts/pack-derived-set.mjs');
   const attestAt = idx(isAttest);
-  const publishAt = jobName === 'release' ? idx((st) => /npm\s+publish\b/.test(runOf(st))) : idx((st) => /publish-derived-set\.mjs/.test(runOf(st)));
+  const publishAt = jobName === 'release' ? idx((st) => runOf(st).trim() === 'node scripts/publish-latest.mjs') : idx((st) => /publish-derived-set\.mjs/.test(runOf(st)));
   const verifyAt = idx((st) => runOf(st).trim() === 'node scripts/verify-published-integrity.mjs');
   const bumpAt = idx((st) => /bump-prerelease\.mjs/.test(runOf(st)));
   if (packAt !== -1 && attestAt !== -1 && publishAt !== -1 && verifyAt !== -1) {
@@ -617,19 +618,14 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
     problems.push(`${label} packs before the prerelease bump — the attested tarballs would carry the unbumped version`);
   }
   if (jobName === 'release') {
-    // THE LOOP'S INPUT IS THE RE-VALIDATED LIST, and nothing else. `npm publish "$file"` alone was
-    // satisfied by `FILES="$(ls -d packages/*/)"` (review reproduced it green against release.yml).
-    const pubRun = publishAt === -1 ? '' : runOf(steps[publishAt]);
-    if (!/FILES="\$\(node scripts\/pack-derived-set\.mjs --list\)"/.test(pubRun) || !/for file in \$FILES; do/.test(pubRun) || (pubRun.match(/\bFILES=/g) ?? []).length !== 1 || /\bfile=/.test(pubRun) || /\b(read|mapfile|readarray)\b[^\n]*\b(FILES|file)\b/.test(pubRun) || (pubRun.match(/\bfor file in\b/g) ?? []).length !== 1) {
-      problems.push(`${label}'s publish loop must take its files only from \`FILES="$(node scripts/pack-derived-set.mjs --list)"\` and iterate \`for file in $FILES; do\`, reassigning neither`);
-    }
-    const publishes = steps
+    // PROD PUBLISHES ONLY THROUGH publish-latest.mjs (an exact, unconditional step — see the exact list).
+    // Inline shell over the tarballs was defeated five ways in review, so no `npm publish` may appear
+    // anywhere else in the job, in any form.
+    const inline = steps
       .flatMap((st) => runOf(st).split(/&&|\|\||;|\n/))
       .filter((c) => /npm\s+publish\b/.test(c));
-    for (const c of publishes) {
-      if (!/npm\s+publish\s+"\$file"\s+--tag\s+latest(\s|$|\))/.test(c.trim()) || /packages\//.test(c)) {
-        problems.push(`${label} runs \`${c.trim()}\` — prod must publish only \`"$file"\` from the attested dist-tarballs/ list, with an explicit \`--tag latest\` (a manifest key would otherwise choose the channel)`);
-      }
+    for (const c of inline) {
+      problems.push(`${label} runs \`${c.trim().slice(0, 70)}\` inline — prod publishes only through \`node scripts/publish-latest.mjs\`, the attested tarballs under \`latest\``);
     }
   }
   // THE JOB IS THE TRUST BOUNDARY (`id-token: write` reaches every step), so what else each step holds
@@ -638,7 +634,7 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
   //   - checkout keeps no credentials;
   //   - every `npx` runs the lockfile's copy (`--no-install`), never something fetched at release time;
   //   - the verify step pins which workflow, on which commit, signed the attestation.
-  const TOKEN_STEP = /bump-prerelease\.mjs|publish-derived-set\.mjs|npm\s+publish\b|verify-published-integrity\.mjs|npm\s+dist-tag\b/;
+  const TOKEN_STEP = /bump-prerelease\.mjs|publish-derived-set\.mjs|publish-latest\.mjs|npm\s+publish\b|verify-published-integrity\.mjs|npm\s+dist-tag\b/;
   for (const [where, env] of [['job', wf?.jobs?.[jobName]?.env], ['workflow', wf?.env]]) {
     if (env && typeof env === 'object' && 'NODE_AUTH_TOKEN' in env) {
       problems.push(`${label} sets NODE_AUTH_TOKEN at ${where} level — it must reach only the steps that talk to the registry`);
@@ -757,8 +753,8 @@ export function checkWorkflowUsesDerivedSet(
     // false.
     //
     // What remains asserted is that prod actually publishes — dropping the flag must not be a
-    // route to dropping the publish.
-    [/npm\s+publish\b/, 'a publish step'],
+    // route to dropping the publish. Since REL3 (#364) that is publish-latest.mjs, never inline npm.
+    [/node\s+scripts\/publish-latest\.mjs/, 'the prod publish (scripts/publish-latest.mjs)'],
     [/cyclonedx/i, 'the SBOM'],  // prod-only as a RELEASE input; the rc stream still emits one as an artifact
   ];
   const EVERY_STREAM_STEPS = [
@@ -833,6 +829,7 @@ export function checkWorkflowUsesDerivedSet(
     // REL3 (#364): the tarballs that get attested and published, and the post-publish byte check.
     'node scripts/pack-derived-set.mjs',
     'node scripts/verify-published-integrity.mjs',
+    ...(jobName === 'release' ? ['node scripts/publish-latest.mjs'] : []),
   ]) {
     const own = steps.filter((st) => typeof st.run === 'string' && stripShellComments(st.run).trim() === exact);
     if (!own.length) {
@@ -1322,9 +1319,7 @@ jobs:
         with:
           subject-path: 'dist-tarballs/*.tgz'
       - name: Publish
-        run: |
-          FILES="$(node scripts/pack-derived-set.mjs --list)"
-          for file in $FILES; do npm publish "$file" --tag latest; done
+        run: node scripts/publish-latest.mjs
       - name: Verify
         env:
           GH_TOKEN: \${{ github.token }}
@@ -1457,7 +1452,13 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 123;
+// LOWERED 123 -> 116, DELIBERATELY. Ten probes policed the prod publish's inline shell loop
+// (FILES source, reassignment, `read`, a second loop, the loop variable, a directory publish, a bare
+// publish, a missing `--tag latest`, an appended path, the loop's list). REL3 review showed that surface
+// could not be closed by rules over shell text, so the loop was replaced by scripts/publish-latest.mjs,
+// whose own effect probes cover those behaviours by running it. Three probes here hold the workflow to
+// that script (inline publish refused, `|| true` refused, the loop restored refused).
+const PROBE_FLOOR = 118;
 
 const PROBES = [
   {
@@ -1525,7 +1526,7 @@ const PROBES = [
     what: 'a release workflow with no publish step at all',
     run: () =>
       checkWorkflowUsesDerivedSet(
-        withDefect(/for file in [^\n]*npm publish[^\n]*done/, 'echo "release complete"'),
+        withDefect('        run: node scripts/publish-latest.mjs\n', '        run: echo "release complete"\n'),
         ['@spec-kitty/tokens'], ['tokens'],
       ),
   },
@@ -1545,7 +1546,7 @@ const PROBES = [
     run: () =>
       checkWorkflowUsesDerivedSet(
         withDefect(
-          /      - name: Publish\n        run: \|\n          FILES=[^\n]*\n          for file in[^\n]*\n/,
+          /      - name: Publish\n        run: node scripts\/publish-latest\.mjs\n/,
           '      - name: "was: npm publish over the derived set"\n        run: echo done\n',
         ),
         ['@spec-kitty/tokens'], ['tokens'],
@@ -1821,18 +1822,19 @@ const PROBES = [
       payload('the pack step deleted', PACK, ''),
       payload('the pack step moved before the prerelease bump', BUMP + PACK, PACK + BUMP),
       payload('the pack step moved after the attest step', PACK + ATTEST, ATTEST + PACK),
+      // Order probes the adjacency rule cannot mask: attest stays directly before publish.
+      payload('the integrity check moved before the pack step', PACK + ATTEST + PUB + VERIFY, VERIFY + PACK + ATTEST + PUB),
+      payload('the pack step moved after the publish', PACK + ATTEST + PUB, ATTEST + PUB + PACK),
       payload('the integrity check deleted', VERIFY, ''),
       payload('the integrity check moved before the publish', PUB + VERIFY, VERIFY + PUB),
       payload('the payload job without `id-token: write`', '      id-token: write\n', ''),
       release('the attest step deleted', ATTEST, ''),
-      release('a publish from a package directory', '          for file in $FILES; do npm publish "$file" --tag latest; done\n', '          for pkg in tokens; do ( cd "packages/$pkg" && npm publish ); done\n'),
-      release('a bare `npm publish` (repacks in memory)', 'do npm publish "$file" --tag latest; done', 'do npm publish; done'),
-      release('prod publishing without an explicit `--tag latest`', 'do npm publish "$file" --tag latest; done', 'do npm publish "$file"; done'),
       release('the workflow without `attestations: write`', '  attestations: write\n', ''),
       payload('a step between the attest and the publish (could repack dist-tarballs/)', PUB, '      - name: Repack\n        run: rm -rf dist-tarballs && node scripts/pack-derived-set.mjs\n' + PUB),
-      release('a step between the attest and the publish', '      - name: Publish\n        run: |\n          FILES=', '      - name: Tidy\n        run: echo tidy\n      - name: Publish\n        run: |\n          FILES='),
-      release('the publish loop fed from somewhere other than the re-validated list', 'FILES="$(node scripts/pack-derived-set.mjs --list)"', 'FILES="$(ls -d packages/*/)"'),
-      release('the loop variable reassigned inside the loop', 'do npm publish "$file" --tag latest; done', 'do file=packages/tokens; npm publish "$file" --tag latest; done'),
+      release('a step between the attest and the publish', '      - name: Publish\n        run: node scripts/publish-latest.mjs', '      - name: Tidy\n        run: echo tidy\n      - name: Publish\n        run: node scripts/publish-latest.mjs'),
+      release('an inline `npm publish` alongside the script (a second, unattested path)', '        run: node scripts/publish-latest.mjs\n', '        run: node scripts/publish-latest.mjs\n      - name: Extra\n        run: npm publish packages/tokens --tag latest\n'),
+      release('the prod publish script neutralised with `|| true`', 'run: node scripts/publish-latest.mjs\n', 'run: node scripts/publish-latest.mjs || true\n'),
+      release('the prod publish replaced by an inline loop over the tarballs', '        run: node scripts/publish-latest.mjs\n', '        run: for f in dist-tarballs/*.tgz; do npm publish "$f" --tag latest; done\n'),
       payload('NODE_AUTH_TOKEN back at job level', '    steps:\n      - uses: actions/checkout@', '    env:\n      NODE_AUTH_TOKEN: x\n    steps:\n      - uses: actions/checkout@'),
       release('NODE_AUTH_TOKEN handed to the SBOM step', '      - name: SBOM\n', '      - name: SBOM\n        env:\n          NODE_AUTH_TOKEN: x\n'),
       payload('checkout persisting its credentials', '{ fetch-depth: 0, persist-credentials: false }', '{ fetch-depth: 0 }'),
@@ -1841,11 +1843,6 @@ const PROBES = [
       release('the SBOM tool fetched instead of run from the lockfile', 'npx --no-install @cyclonedx/cyclonedx-npm', 'npx @cyclonedx/cyclonedx-npm@latest'),
       payload('the verify step pinned to the wrong signer workflow', 'SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/publish-packages.yml', 'SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/ci-quality.yml'),
       payload('the verify step without a source-digest pin', '          SOURCE_DIGEST: ${{ github.sha }}\n        run: node scripts/verify-published-integrity.mjs', '        run: node scripts/verify-published-integrity.mjs'),
-      release('FILES reassigned after the validated list', 'FILES="$(node scripts/pack-derived-set.mjs --list)"\n', 'FILES="$(node scripts/pack-derived-set.mjs --list)"\n          FILES="$(ls /tmp/*.tgz)"\n'),
-      release('FILES re-read with `read`', 'FILES="$(node scripts/pack-derived-set.mjs --list)"\n', 'FILES="$(node scripts/pack-derived-set.mjs --list)"\n          read -r FILES <<< "/tmp/x.tgz"\n'),
-      release('the loop iterating something other than FILES', 'for file in $FILES; do', 'for file in /tmp/*.tgz; do'),
-      release('a second publish loop over another list', '          for file in $FILES; do npm publish "$file" --tag latest; done\n', '          for file in $FILES; do npm publish "$file" --tag latest; done\n          for file in /tmp/*.tgz; do npm publish "$file" --tag latest; done\n'),
-      release('a package path appended to the publish', 'npm publish "$file" --tag latest;', 'npm publish "$file" --tag latest packages/tokens;'),
       payload('a `subject-checksums` source alongside the tarballs', "          subject-path: 'dist-tarballs/*.tgz'\n", "          subject-path: 'dist-tarballs/*.tgz'\n          subject-checksums: sums.txt\n"),
       payload('a `subject-name` override', "          subject-path: 'dist-tarballs/*.tgz'\n", "          subject-path: 'dist-tarballs/*.tgz'\n          subject-name: other\n"),
       payload('`permissions: write-all` instead of the explicit scopes', '    permissions:\n      contents: read\n      packages: write\n      id-token: write\n      attestations: write\n', '    permissions: write-all\n'),

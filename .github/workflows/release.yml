@@ -155,100 +155,17 @@ jobs:
         with:
           subject-path: 'dist-tarballs/*.tgz'
 
-      # ONE step over the derived set, not one hand-written step per package. Two steps named
-      # `tokens` and `styles` are how `elements` and `react` came to be absent without anyone
-      # noticing: adding a package to the repo did not add it here, and nothing compared the two.
-      #
-      # `set -euo pipefail` is load-bearing. Without it a failing `npm publish` inside a `for` loop
-      # does not fail the step, and the workflow would report a successful release having published
-      # a subset — the same silent-partial-success this whole rewrite is about.
-      # RESUMABLE, AND IT ACCUMULATES. `set -e` with a bare loop aborts on the first failure,
-      # which is not a recovery strategy — npm has no atomic multi-package publish, so a failure
-      # part-way leaves earlier packages on the registry permanently. Re-running then aborted on
-      # the FIRST package, which is the already-published one, so the packages that actually
-      # failed were never retried and the release stayed wedged at that version. A lens walked
-      # through it.
-      #
-      # So an already-published version is a SKIP, not a failure. A re-run re-packs the same commit;
-      # on a GitHub-hosted runner (fixed checkout path, deterministic npm pack) that reproduces the
-      # same bytes, so the retry verifies what is already on the registry. If a toolchain change made
-      # the bytes differ, verify fails and that version cannot be completed — see the runbook.
-      #
-      # `set -euo pipefail` is RESTORED here. An earlier revision dropped `-e` on the stated
-      # grounds that it "would defeat the handling" — that is false, and a lens measured it: POSIX
-      # exempts the condition of an `if` from `set -e`, and both handled commands are if-conditions.
-      # Dropping `-e` therefore bought nothing and silently removed protection from every
-      # *unhandled* command in the block.
+      # THE PROD PUBLISH IS A SCRIPT, NOT AN INLINE LOOP (REL3 review). Rules written over the old
+      # loop's shell were defeated by a second `--tag`, `FILES+=`, `read … FILES` and a repack inside the
+      # step — REL2's lesson again. publish-latest.mjs publishes only the re-validated attested tarballs,
+      # under `latest`, in topological order: an already-published version is a skip only on a re-run
+      # (npm has no atomic multi-package publish, so a re-run completes a partial set), any other failure
+      # halts. A re-run re-packs the same commit; on a GitHub-hosted runner that reproduces the same bytes,
+      # and if it did not, verify fails and that version cannot be completed — see the runbook.
       - name: Publish every package in the derived set
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          # THE ATTESTED FILES, NEVER A PACKAGE DIRECTORY. `--list` re-validates dist-tarballs/ against
-          # the derived set (names, versions, order, every file's hash, no stray tarball) and prints one
-          # path per line in topological order. A directory publish would repack in memory and upload
-          # bytes the attestation never saw.
-          FILES="$(node scripts/pack-derived-set.mjs --list)"
-          [ -n "$FILES" ] || { echo "::error::empty publish set reached the publish loop"; exit 1; }
-          failed=""
-          for file in $FILES; do
-            pkg="$(basename "$file" .tgz)"
-            echo "=== publishing $pkg from dist-tarballs/ ==="
-            # `--access public` stays gone: an npmjs access model; GitHub Packages governs visibility
-            # per package outside the publish call. This loop is not routed through
-            # scripts/publish-derived-set.mjs: that script refuses `latest` unconditionally (REL2), and
-            # this is the prod stream, which owns `latest`.
-            # `--tag latest` EXPLICITLY. Without it a `publishConfig.tag` would choose the channel; with it
-            # the flag wins over `publishConfig.tag` (npm drops publishConfig keys given on the CLI), but
-            # a top-level manifest `tag` still wins over the flag (libnpmpublish: `manifest.tag ||
-            # defaultTag`) — which is why check-release-graph.mjs refuses both keys outright.
-            if out="$( npm publish "$file" --tag latest 2>&1 )"; then
-              echo "$out"
-            else
-              echo "$out"
-              # ANCHORED ON THE ERROR CODE. Matching prose ("previously published", "cannot publish
-              # over") means any error whose body happens to quote those words is swallowed as a
-              # skip — a lens built a synthetic 403 that did exactly that. npm prints a stable
-              # `npm error code EPUBLISHCONFLICT` line; that is the signal.
-              if echo "$out" | grep -qE "code (EPUBLISHCONFLICT|E409)"; then
-                # A conflict on a RETRY is resumption. A conflict on the first attempt means the
-                # name+version is on the registry and this workflow did not put it there — these
-                # names have never been published, so that is someone else's package, not ours.
-                # Warning, not notice, and never on attempt 1.
-                if [ "${GITHUB_RUN_ATTEMPT:-1}" -gt 1 ]; then
-                  echo "::warning::$pkg is already published at this version — skipping (run attempt ${GITHUB_RUN_ATTEMPT})"
-                else
-                  echo "::error::$pkg reports an existing version on the FIRST attempt."
-                  echo "A first-attempt conflict means this version is already on the registry and this run did not put it there."
-                  echo "Verify ownership before re-running: npm view <name>@<version> _npmUser.name"
-                  failed="$failed $pkg"
-                  break
-                fi
-              else
-                # HALT, do not accumulate. The set is published in TOPOLOGICAL order precisely so a
-                # package goes out after everything it depends on. Continuing past a real failure
-                # spends that guarantee in the only path it was for: if `tokens` fails, `styles`,
-                # `elements` and `react` publish anyway, `npm publish` does not resolve peers so all
-                # three succeed, and every consumer install then hard-fails E404 on the peer that is
-                # missing. Those versions are permanent — a version cannot be republished and the
-                # unpublish window is 72h and conditional.
-                #
-                # A lens caught this: the resumability of this loop comes entirely from the
-                # skip-on-conflict branch above, not from continuing past real failures. Halting
-                # loses nothing, because the retry resumes from here.
-                echo "::error::halting — every package after $pkg in the derived set may depend on it"
-                failed="$failed $pkg"
-                break
-              fi
-            fi
-          done
-          if [ -n "$failed" ]; then
-            echo "::error::failed to publish:$failed"
-            echo "Packages published before the failure remain on the registry; npm has no atomic"
-            echo "multi-package publish. Fix the cause and re-run this tag — already-published"
-            echo "packages are skipped, so the retry completes the set."
-            exit 1
-          fi
+        run: node scripts/publish-latest.mjs
 
       - name: "[ENFORCED] The registry holds exactly the attested bytes (#364)"
         run: node scripts/verify-published-integrity.mjs

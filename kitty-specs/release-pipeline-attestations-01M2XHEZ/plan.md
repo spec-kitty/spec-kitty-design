@@ -36,6 +36,11 @@ bump (rc only) ─▶ pack-derived-set.mjs ─▶ attest-build-provenance ─▶
 - **`release.yml`** (prod). It gains the pack step and the attest step, and the loop becomes
   `npm publish "$file"` over `packed.json` with the existing resumable, halting handling. No `cd packages/$pkg`
   publish remains.
+  *(As delivered, after gate pass 2: the inline loop was replaced by `scripts/publish-latest.mjs`, one exact,
+  unconditional step. Review defeated five rules written over the loop's shell text: a second `--tag`,
+  `FILES+=`, `read … FILES`, `printf -v`, and a repack inside the step. The script keeps the loop's
+  semantics (only `latest`, topological order, skip only on a re-run, halt otherwise) and has its own
+  effect probes.)*
 - **`scripts/verify-published-integrity.mjs`** (new, shared). For each `packed.json` entry it runs
   `npm pack <name>@<version> --json` into a temp dir, recomputes that file's SHA-512, and compares it with the attested
   one. It refuses empty input, unreadable downloads and mismatches, and has its own `--selftest`.

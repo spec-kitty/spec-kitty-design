@@ -121,8 +121,9 @@ For every release after this one, step 5 is the ordinary `git tag vX.Y.Z && git 
    recording each file's SHA-512
 7. **Attests** those tarballs with `actions/attest-build-provenance` (SHA-pinned), before anything is
    published. An attestation failure publishes nothing
-8. **Publishes those exact files** to GitHub Packages under dist-tag `latest` (`npm publish "$file"`,
-   never a package directory, which would repack in memory)
+8. **Publishes those exact files** to GitHub Packages under dist-tag `latest` through
+   `scripts/publish-latest.mjs`. It publishes only the re-validated attested tarballs (never a package
+   directory, which would repack in memory), in topological order, and halts on the first real failure
 9. **Verifies** the registry holds the attested bytes: `scripts/verify-published-integrity.mjs`
    re-downloads each `name@version` and compares its SHA-512
 10. **GitHub Release** with the SBOM attached

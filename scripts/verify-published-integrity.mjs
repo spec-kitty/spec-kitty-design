@@ -108,7 +108,7 @@ export function verifyPublished({ root = ROOT, fetch = npmFetch, attest = ghAtte
         if (err.final) throw err;
         lastError = err;
         if (i < attempts) {
-          log(`  ${spec}: not readable yet (attempt ${i}/${attempts}: ${err.message}) — retrying`);
+          log(`  ${spec}: not confirmed yet (attempt ${i}/${attempts}: ${err.message}) — retrying`);
           sleepSync(delayMs);
         }
       } finally {
@@ -187,6 +187,18 @@ async function selftest() {
         rmSync(bin, { recursive: true, force: true });
       }
     }],
+    ['the real attestation check THROWS when gh fails (a stub gh that exits 1)', () => {
+      const bin = mkdtempSync(join(tmpdir(), 'verify-ghf-'));
+      const saved = process.env.PATH;
+      try {
+        writeFileSync(join(bin, 'gh'), '#!/bin/sh\necho "Error: HTTP 404: Not Found" >&2\nexit 1\n', { mode: 0o755 });
+        process.env.PATH = `${bin}:${saved}`;
+        try { ghAttestationVerify('/tmp/x.tgz', {}); return false; } catch (e) { return /404/.test(e.message); }
+      } finally {
+        process.env.PATH = saved;
+        rmSync(bin, { recursive: true, force: true });
+      }
+    }],
     ['in CI, a missing SIGNER_WORKFLOW/SOURCE_DIGEST is refused before any download', () => { const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], { encoding: 'utf8', env: { ...process.env, GITHUB_ACTIONS: 'true', SIGNER_WORKFLOW: '', SOURCE_DIGEST: '' } }); return r.status === 1 && /SIGNER_WORKFLOW and SOURCE_DIGEST must be set/.test(r.stderr); }],
     ['every attested entry is checked, not just the first', () => { const calls = []; run({ fetch: registry({ calls }) }); return calls.length === 2; }],
     ['the real fetch uses a throwaway --cache, so it re-reads bytes instead of hitting the pack step\'s cache', () => {
@@ -210,7 +222,7 @@ async function selftest() {
     ['an unknown argument exits 2', () => spawnSync(process.execPath, [fileURLToPath(import.meta.url), '--nope'], { encoding: 'utf8' }).status === 2],
     ['importing the module verifies nothing', () => { const r = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(import.meta.url)})`], { encoding: 'utf8' }); return r.status === 0 && `${r.stdout}${r.stderr}`.trim() === ''; }],
   ];
-  const PROBE_FLOOR = 15;
+  const PROBE_FLOOR = 16;
   let bad = 0;
   for (const [what, fn] of PROBES) {
     let ok = false;
