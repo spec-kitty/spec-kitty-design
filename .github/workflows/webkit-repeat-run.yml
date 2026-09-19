@@ -92,7 +92,7 @@ jobs:
           WORKERS: ${{ github.event.inputs.workers }}
         run: |
           set -euo pipefail
-          ARGS=(--json-dir=webkit-repeat-run-results "--repeat-each=${REPEAT_EACH:-10}")
+          ARGS=(--json-dir=webkit-repeat-run-results "--repeat-each=${REPEAT_EACH:-60}" --items=13,14,15,16,17,18)
           if [ -n "${ITEMS:-}" ]; then ARGS+=("--items=${ITEMS}"); fi
           if [ -n "${WORKERS:-}" ]; then ARGS+=("--workers=${WORKERS}"); fi
           node scripts/webkit-repeat-run.mjs "${ARGS[@]}"
