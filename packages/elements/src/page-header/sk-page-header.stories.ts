@@ -146,7 +146,12 @@ const longBody = (rows = 40) => `
 // attribute form was also the only inline `on*=` handler in any story in this repository, invisible
 // to every gate (a string literal no linter or tsc can see), and dead under a CSP without
 // `unsafe-inline` -- which is precisely the configuration a consumer is most likely to run.
-export const liftFocusClearOfStickyHeader = (event: FocusEvent): void => {
+// NOT exported: in CSF every exported binding in a story file becomes a STORY. Exporting these
+// two created `elements-skpageheader--attach-focus-lift` and
+// `--lift-focus-clear-of-sticky-header`, which the axe gate then tried to render:
+//   did not render (script error: Cannot read properties of undefined reading 'querySelector')
+// Module-local is all `play` needs, and it keeps the story index honest.
+const liftFocusClearOfStickyHeader = (event: FocusEvent): void => {
   const scroller = event.currentTarget as HTMLElement | null;
   const target = event.target as HTMLElement | null;
   if (!scroller || !target || target === scroller || !target.getBoundingClientRect) return;
@@ -168,7 +173,7 @@ export const liftFocusClearOfStickyHeader = (event: FocusEvent): void => {
 };
 
 /** Attaches the handler and marks the scroller, so a test can wait for it rather than race it. */
-export const attachFocusLift = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+const attachFocusLift = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
   const scroller = canvasElement.querySelector<HTMLElement>('[data-scroller]');
   if (!scroller || scroller.dataset['focusLift'] === 'ready') return;
   scroller.addEventListener('focusin', liftFocusClearOfStickyHeader as EventListener);
