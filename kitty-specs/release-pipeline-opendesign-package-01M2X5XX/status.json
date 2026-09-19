@@ -28,6 +28,7 @@
       "last_transition_at": "2026-09-19T16:12:19.848432+00:00",
       "model": "__resolved_model_absent__",
       "provider": "__resolved_provider_absent__",
+      "review": null,
       "review_result": {
         "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-396/kitty-specs/release-pipeline-opendesign-package-01M2X5XX/tasks/WP01-generator-vendored-opendesign-reference-committe/review-cycle-1.md",
         "reference": "review-cycle://release-pipeline-opendesign-package-01M2X5XX/WP01-generator-vendored-opendesign-reference-committe/review-cycle-1.md",
@@ -35,13 +36,15 @@
         "verdict": "changes_requested"
       },
       "role": "implementer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T001": "done",
-        "T002": "done",
-        "T003": "done",
-        "T004": "done",
-        "T005": "done",
-        "T006": "done"
+        "T001": "planned",
+        "T002": "planned",
+        "T003": "planned",
+        "T004": "planned",
+        "T005": "planned",
+        "T006": "planned"
       }
     },
     "WP02": {
