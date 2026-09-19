@@ -87,7 +87,8 @@
       "last_transition_at": "2026-09-19T17:47:11.861200+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "Docs, install (proof copy + linked-folder project), consumability proof: 0 invented classes, CSS verbatim; see research/consumability-proof.md"
+        "Docs, install (proof copy + linked-folder project), consumability proof: 0 invented classes, CSS verbatim; see research/consumability-proof.md",
+        "Four-lens pre-merge gate (architect, debugger, reviewer, reducer) approved PR #465 at 2c2e9ec53cbfaf048f7ec9377e423d37839d4d9a after four passes; no blocker, major or minor open."
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {

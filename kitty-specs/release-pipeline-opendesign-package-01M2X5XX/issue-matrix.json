@@ -1,7 +1,7 @@
 {
   "rows": {
     "#361": {
-      "evidence_ref": "REL4 is the epic child #396; its release-path gate (FR-011) is in publish-packages.yml and release.yml",
+      "evidence_ref": "Epic stays open: this mission delivers its REL4 child (#396). The remaining work is owned by the epic's other children, REL3 #364 and the REL1 bootstrap follow-through on #362",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,7 +9,7 @@
       "scope": "parent epic",
       "source_file": "spec.md",
       "title": "Epic: Release pipeline \u2014 dual-stream rc/prod publishing",
-      "verdict": "in-mission",
+      "verdict": "deferred-with-followup",
       "wp": "WP02"
     },
     "#364": {
@@ -37,7 +37,7 @@
       "wp": null
     },
     "#396": {
-      "evidence_ref": "PR #465; research/consumability-proof.md",
+      "evidence_ref": "PR #465 into train/elements-first (four-lens gate approved at 2c2e9ec5); research/consumability-proof.md; the issue closes at the train -> main landing",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,7 +45,7 @@
       "scope": "this mission",
       "source_file": "spec.md",
       "title": "[REL4] OpenDesign design-system package \u2014 tokens + components fixture from library static forms",
-      "verdict": "in-mission",
+      "verdict": "fixed",
       "wp": "WP01,WP02,WP03"
     }
   },
