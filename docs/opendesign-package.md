@@ -66,8 +66,8 @@ system then appears in OpenDesign as `user:spec-kitty-train`.
 
 **The folder or symlink must be named `spec-kitty-train`.** OpenDesign ignores `manifest.json`
 unless its `id` equals the directory name (`index.ts:4104`). Under any other name the system still
-lists and still works through a linked folder, but silently loses the manifest: no pull index, no
-`usage`, no preview pages.
+lists and still works through a linked folder, but silently loses the manifest: no pull index and
+no preview pages (`USAGE.md` is still read, under its default name).
 
 ## Refreshing it after a release
 

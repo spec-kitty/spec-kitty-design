@@ -25,7 +25,7 @@
       "wp": null
     },
     "#384": {
-      "evidence_ref": "spec.md Out of scope: overturning the token self-containment ruling (epic #384 / DKM0) \u2014 the package ships the published tokens.css unchanged, so the ruling stands",
+      "evidence_ref": "Open epic, not touched: spec.md Out of scope lists overturning its token self-containment ruling (DKM0); the package ships the published tokens.css unchanged, so the ruling stands and #384 owns any change to it",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,7 +33,7 @@
       "scope": "inherited decision",
       "source_file": "spec.md",
       "title": "Epic: doc-kitty migration \u2014 documentation primitives in the spec-kitty-design library",
-      "verdict": "verified-already-fixed",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#396": {

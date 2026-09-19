@@ -33,19 +33,24 @@ field, and a primary button.
 The outputs are in `proof-outputs/`. Runs 3 and 4 rendered in Chromium are
 `consumability-proof-linked.png` and `consumability-proof-final.png`.
 
-**Run 4 is the one that proves the merged package.** It ran against the package as it stands after
-the first review pass: the published `tokens.css`, the rewritten prose, the showcase-first preview
-pages. Its copy's `id` matched its folder, so OpenDesign honoured the manifest (see below). The
+**Run 4 is the one that proves the package as reviewed.** It ran against the package at `3d015d97`
+(after the first review pass): the published `tokens.css`, the rewritten prose, the showcase-first
+preview pages. The second review pass then changed only the `action-row` page (its static sheet,
+see the design region) and two prose paragraphs (theme selection, a sticky-header sentence); none
+touches the four components this prompt exercises. Its copy's `id` matched its folder, so OpenDesign honoured the manifest (see below). The
 agent read the same four component pages and copied from them. One difference from run 3: it
 declared no `@font-face` and pinned `data-theme="dark"`, letting the `--sk-font-*` stacks fall back
 to system fonts. `DESIGN.md`'s prototype rules allow that when fonts cannot travel with a single
 file; run 3 had copied the font files into its project instead. Fonts are outside the acceptance
 line, and the screenshot shows the fallback.
 
-**Runs 3 and 4 meet the amended acceptance line.** It uses `radio-choice-group`, `form-field`, `button` and
-`card` with the library's own element and modifier classes. Its radio group is the library's static
-form (`sk-radio-choice-group__choice`, `__control`, `__label`, `__secondary-value`), and it spliced
-`tokens.css` and the Inter and Falling Sky font files in from the package.
+**Runs 3 and 4 meet the amended acceptance line.** Both use `radio-choice-group`, `form-field`,
+`button` and `card` with the library's own element and modifier classes, and both radio groups are
+the library's static form (`sk-radio-choice-group__choice`, `__control`, `__label`,
+`__secondary-value`). They differ on tokens and fonts, which the line does not measure: run 3
+spliced `tokens.css` and the Inter and Falling Sky font files in from the package; run 4 carried
+211 of the package's 285 `--sk-*` declarations verbatim (whitespace-normalised), pinned the dark theme and declared no fonts, so it did not
+exercise the published stylesheet's no-`data-theme` fallback.
 
 ## How it was measured
 
@@ -57,8 +62,9 @@ form (`sk-radio-choice-group__choice`, `__control`, `__label`, `__secondary-valu
 - **CSS.** A component's rules count only if every class in the rule's selector is used by the
   output. Rules for `:host`, `::slotted` and the light theme were left out, since the dark page cannot
   exercise them. Each counted rule was then searched for, whitespace-normalised, in the output's
-  `<style>` blocks. Run 3 copied exactly those rules and dropped the rest: button 8 of 24,
-  form-field 7 of 14, card 2 of 19. That is a correct trim, not a loss. For runs 1 and 2 the
+  `<style>` blocks. Run 3 copied every applicable rule and most of the rest it did not need: of
+  form-field's 14 rules, 9 are in its output verbatim — the 7 applicable ones and two for classes it
+  never uses. A missing inapplicable rule is a correct trim, not a loss. For runs 1 and 2 the
   applicable counts are small because a rule selecting an invented class's library counterpart is
   not applicable to an output that never uses it; the invented-class count is the measure there.
   Every figure in this document is the analyser's own output, reproducible with the command above.
@@ -112,22 +118,28 @@ rescues it.
 the agent as a read-only `--add-dir`). The agent read the four component pages it needed and copied
 from them.
 
-## A limit of runs 2 and 3, found at review
+## A limit of runs 1 to 3, found at review
 
 OpenDesign ignores a package's `manifest.json` unless its `id` equals the directory name
 (`index.ts:4104`). The copy was installed as `spec-kitty-train-rel4` with the package's own
-`id: spec-kitty-train`, so for runs 2 and 3 **the manifest was discarded**. There was no pull index
-and no `usage` or preview-page wiring from it. `USAGE.md` and `components.manifest.json` were still
-read, under their default names.
+`id: spec-kitty-train`, so for runs 1, 2 and 3 **the manifest was discarded**. There was no pull
+index and no preview-page wiring from it. `USAGE.md` and `components.manifest.json` were still read,
+under their default names.
 
 Run 3's result does not depend on the manifest: the linked folder is read-only file access, and the
 agent opened the pages directly. That the preview pages reach the pull index was then shown from
 source (the architect lens ran OpenDesign's own `buildDesignSystemPullIndex` over the manifest: 35
-lines under the matching name, 0 under the other), not by a run. Run 4 closes that gap: its copy has
-the `id` rewritten to `spec-kitty-train-rel4` (the only difference from the package), and the
-instance's API then reports the component pages. The same refresh also showed `metadata.json`'s
+entries under the matching name, none under the other), not by a run. Run 4 closes that gap: its
+copy has the `id` rewritten to `spec-kitty-train-rel4` (the only difference from the package), and
+the instance's API then reports the manifest with all 35 preview pages — recorded, trimmed and
+without the token, in `run4-od-design-system-api.json`. The same refresh also showed `metadata.json`'s
 dual ownership live: before it, OpenDesign had written `"projectId": "ds-spec-kitty-train-rel4"`
 into the copy's `metadata.json`.
+
+Run 4 also departed from `DESIGN.md` in one way worth recording: the prototype rules say to paste
+`tokens.css` unchanged, and it carried a subset (211 of 285 declarations, no light blocks' fallback)
+while pinning `data-theme="dark"`. That is the agent's judgment for a single-theme artifact, not a
+package defect, and the acceptance line does not measure tokens.
 
 The docs now state that the folder or symlink must be named `spec-kitty-train`.
 
