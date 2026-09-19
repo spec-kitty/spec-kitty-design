@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workspace connection — Settings</title>
+<style>
+/* @spec-kitty/tokens — ADR-003 naming schema: --sk-<category>-<name> */
+:root {
+  /* ── Brand Colors ────────────────── */
+  --sk-color-yellow:        #F5C518;
+  --sk-color-yellow-soft:   #FFD84D;
+  --sk-color-yellow-deep:   #C99A0E;
+  --sk-color-yellow-alpha-15: rgba(245, 197, 24, 0.14);
+  --sk-color-yellow-alpha-35: rgba(245, 197, 24, 0.35);
+  --sk-color-yellow-alpha-60: rgba(245, 197, 24, 0.60);
+  --sk-color-haygold:       #D9B36A;
+  --sk-color-haygold-soft:  #E8C988;
+  --sk-color-blue:          #A9C7E8;
+  --sk-color-blue-deep:     #6B8FB8;
+  --sk-color-blue-bg:       #14202E;
+  --sk-color-purple:        #B8A9E0;
+  --sk-color-purple-deep:   #8C7AC2;
+  --sk-color-purple-bg:     #1E1A2E;
+  --sk-color-green:         #8FCB8F;
+  --sk-color-green-bg:      #15241A;
+  --sk-color-red:           #E97373;
+  --sk-color-red-soft:      #F0A0A0;
+  --sk-color-sage:          #4F8F4F;
+  --sk-color-sage-deep:     #3D7A3D;
+  --sk-color-sage-soft:     #7CAE7C;
+
+  /* ── Accent ──────────────────────── */
+  --sk-color-accent:        #F5C518;
+  --sk-color-accent-fg:     #1A1408;
+
+  /* ── Dark Surfaces (default — dark mode) ─── */
+  --sk-surface-page:        #0D0E11;
+  --sk-surface-hero:        #121317;
+  --sk-surface-card:        #181A1F;
+  --sk-surface-input:       #1C1F25;
+  --sk-surface-pill:        #212830;
+  --sk-surface-muted:       #262C36;
+
+  /* ── Section Tint Surfaces ───────── */
+  --sk-surface-tint-mint:   #15241A;
+  --sk-surface-tint-butter: #2A2410;
+  --sk-surface-tint-lilac:  #1E1A2E;
+  --sk-surface-tint-sky:    #14202E;
+  --sk-surface-tint-rose:   #2B1515;
+
+  /* ── Tint borders ────────────────── */
+  --sk-border-tint-sky:    rgba(169, 199, 232, 0.20);
+  --sk-border-tint-lilac:  rgba(184, 169, 224, 0.25);
+
+  /* ── On-Tint Foregrounds ─────────── */
+  --sk-on-tint-mint:        var(--sk-color-green);
+  --sk-on-tint-butter:      var(--sk-color-yellow-soft);
+  --sk-on-tint-lilac:       var(--sk-color-purple);
+  --sk-on-tint-sky:         var(--sk-color-blue);
+  --sk-on-tint-rose:        var(--sk-color-red);
+
+  /* ── Data visualisation ──────────── */
+  --sk-color-data-series-primary: var(--sk-on-tint-sky);
+  --sk-color-data-grid: var(--sk-border-default);
+  --sk-color-data-baseline: var(--sk-fg-subtle);
+
+  /* ── Chart family ────────────────── */
+  --sk-chart-series-1: var(--sk-on-tint-sky);
+  --sk-chart-series-2: var(--sk-on-tint-mint);
+  --sk-chart-series-3: var(--sk-on-tint-lilac);
+  --sk-chart-series-4: var(--sk-on-tint-butter);
+  --sk-chart-grid: var(--sk-border-default);
+  --sk-chart-baseline: var(--sk-fg-subtle);
+  --sk-chart-gap: var(--sk-fg-muted);
+  --sk-chart-gap-fill: rgba(169, 169, 176, 0.14);
+  --sk-chart-dash-1: none;
+  --sk-chart-dash-2: 8 4;
+  --sk-chart-dash-3: 2 3;
+  --sk-chart-dash-4: 10 3 2 3;
+  --sk-chart-gap-dash: 3 3;
+  --sk-chart-stroke-width: var(--sk-border-width-2);
+  --sk-chart-plot-block-size: calc(var(--sk-space-10) * 4);
+
+  /* ── Operational Status — semantic pairs ─── */
+  --sk-status-neutral:      var(--sk-surface-muted);
+  --sk-status-info:         var(--sk-surface-tint-sky);
+  --sk-status-success:      var(--sk-surface-tint-mint);
+  --sk-status-attention:    var(--sk-surface-tint-butter);
+  --sk-status-danger:       var(--sk-surface-tint-rose);
+  --sk-status-recovery:     var(--sk-surface-tint-lilac);
+
+  --sk-on-status-neutral:   var(--sk-fg-muted);
+  --sk-on-status-info:      var(--sk-on-tint-sky);
+  --sk-on-status-success:   var(--sk-on-tint-mint);
+  --sk-on-status-attention: var(--sk-on-tint-butter);
+  --sk-on-status-danger:    var(--sk-on-tint-rose);
+  --sk-on-status-recovery:  var(--sk-on-tint-lilac);
+
+  /* ── Pill/Chip Background ────────── */
+  --sk-bg-pill:             #212830;
+
+  /* ── Foreground / Text ───────────── */
+  --sk-fg-default:          #FFFFFF;
+  --sk-fg-body:             #D6D6DA;
+  --sk-fg-muted:            #A9A9B0;
+  --sk-fg-subtle:           #81818B;
+  --sk-fg-placeholder:      #4A4A52;
+  --sk-fg-on-primary:       #1A1408;
+  --sk-fg-on-card:          #D6D6DA;
+  --sk-fg-error:            #E97373;
+
+  /* ── Borders ─────────────────────── */
+  --sk-border-default:      #2B313B;
+  --sk-border-strong:       #353C48;
+  --sk-border-focus:        #F5C518;
+  --sk-border-control:      #81818B;
+  --sk-border-control-invalid: #E97373;
+  --sk-border-width-1:      1px;
+  --sk-border-width-2:      2px;
+  --sk-border-width-4:      4px;
+
+  /* ── Typography — Families ───────── */
+  --sk-font-sans:           'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --sk-font-display:        'Falling Sky', ui-sans-serif, system-ui, sans-serif;
+  --sk-font-reference:      'Swansea', ui-sans-serif, system-ui, sans-serif;
+  --sk-font-condensed:      'Falling Sky Condensed', 'Falling Sky', ui-sans-serif, sans-serif;
+  --sk-font-extended:       'Falling Sky Extended', 'Falling Sky', ui-sans-serif, sans-serif;
+  --sk-font-outline:        'Falling Sky Outline', 'Falling Sky', ui-sans-serif, sans-serif;
+  --sk-font-boldplus:       'Falling Sky Boldplus', 'Falling Sky', ui-sans-serif, sans-serif;
+  --sk-font-mono:           'JetBrains Mono', ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* ── Typography — Scale ──────────── */
+  --sk-text-xs:             0.75rem;
+  --sk-text-sm:             0.875rem;
+  --sk-text-base:           1rem;
+  --sk-text-lg:             1.125rem;
+  --sk-text-xl:             1.25rem;
+  --sk-text-2xl:            1.5rem;
+  --sk-text-3xl:            1.875rem;
+
+  /* ── Typography — Weights ────────── */
+  --sk-weight-normal:       400;
+  --sk-weight-medium:       500;
+  --sk-weight-semibold:     600;
+  --sk-weight-bold:         700;
+  --sk-weight-extrabold:    800;
+
+  /* ── Spacing ─────────────────────── */
+  --sk-space-1:   0.25rem;
+  --sk-space-2:   0.5rem;
+  --sk-space-3:   0.75rem;
+  --sk-space-4:   1rem;
+  --sk-space-5:   1.25rem;
+  --sk-space-6:   1.5rem;
+  --sk-space-7:   2rem;
+  --sk-space-8:   2.5rem;
+  --sk-space-9:   3rem;
+  --sk-space-10:  4rem;
+  --sk-space-11:  6rem;
+  --sk-space-12:  8rem;
+
+  /* ── Layout ──────────────────────── */
+  --sk-layout-personal-rail-width: 3.5rem;
+  --sk-layout-context-sidebar-width: 15rem;
+  --sk-layout-workflow-lane-min-inline-size: 13.75rem;
+  --sk-layout-page-header-sticky-offset: 0rem;
+  --sk-layout-page-header-compact-height: 3rem;
+  --sk-layout-page-header-sticky-layer: 10;
+  --sk-layout-page-header-sticky-scroll-margin:
+    calc(var(--sk-layout-page-header-sticky-offset) +
+         var(--sk-layout-page-header-compact-height) +
+         var(--sk-space-7));
+
+  /* ── Radius ──────────────────────── */
+  --sk-radius-sm:   0.5rem;
+  --sk-radius-md:   0.75rem;
+  --sk-radius-lg:   1rem;
+  --sk-radius-xl:   1.25rem;
+  --sk-radius-pill: 999px;
+
+  /* ── Shadows ─────────────────────── */
+  --sk-shadow-card:          0 1px 0 rgba(255,255,255,0.02) inset, 0 1px 2px rgba(0,0,0,0.4);
+  --sk-shadow-elev:          0 8px 24px rgba(0,0,0,0.45);
+  --sk-shadow-glow-primary:  0 6px 20px -6px rgba(245,197,24,0.45);
+  --sk-shadow-focus:         0 0 0 3px rgba(13,14,17,0.55), 0 0 0 4px rgba(43,49,59,0.6);
+
+  /* ── Motion ──────────────────────── */
+  --sk-motion-duration-fast: 120ms;
+  --sk-motion-duration-base: 200ms;
+  --sk-motion-duration-slow: 320ms;
+  --sk-motion-ease-out:      cubic-bezier(0.22, 1, 0.36, 1);
+  --sk-motion-ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ── Light mode override ─────────────────────────────────────────────────── */
+:root[data-theme="light"],
+.sk-light {
+  --sk-layout-personal-rail-width: 3.5rem;
+  --sk-layout-context-sidebar-width: 15rem;
+  --sk-layout-workflow-lane-min-inline-size: 13.75rem;
+  --sk-layout-page-header-sticky-offset: 0rem;
+  --sk-layout-page-header-compact-height: 3rem;
+  --sk-layout-page-header-sticky-layer: 10;
+  --sk-layout-page-header-sticky-scroll-margin:
+    calc(var(--sk-layout-page-header-sticky-offset) +
+         var(--sk-layout-page-header-compact-height) +
+         var(--sk-space-7));
+
+  --sk-surface-page:        #F8F5EC;
+  --sk-surface-hero:        #FCFAF4;
+  --sk-surface-card:        #FFFFFF;
+  --sk-surface-input:       #F5F1E6;
+  --sk-surface-pill:        #ECE7D8;
+  --sk-surface-muted:       #E8E2D0;
+
+  --sk-fg-default:          #1A1A14;
+  --sk-fg-body:             #2A2A22;
+  --sk-fg-muted:            #5C5C52;
+  --sk-fg-subtle:           #8A8A7E;
+  --sk-fg-placeholder:      #B8B8AC;
+  --sk-fg-error:            #6B2424;
+
+  --sk-border-default:      #EAE4D2;
+  --sk-border-strong:       #D6CFB9;
+  --sk-border-control:      #7A7A6E;
+  --sk-border-control-invalid: #6B2424;
+
+  --sk-color-accent:        var(--sk-color-sage-deep);
+  --sk-color-accent-fg:     #FFFFFF;
+
+  --sk-surface-tint-mint:   #E8F4E8;
+  --sk-surface-tint-butter: #FFF6D9;
+  --sk-surface-tint-lilac:  #F0EAF8;
+  --sk-surface-tint-sky:    #E4EDF8;
+  --sk-surface-tint-rose:   #F8E5E5;
+
+  --sk-border-tint-sky:    rgba(46, 74, 107, 0.15);
+  --sk-border-tint-lilac:  rgba(74, 61, 120, 0.18);
+
+  --sk-on-tint-mint:        #2D5A2D;
+  --sk-on-tint-butter:      #6B5A0E;
+  --sk-on-tint-lilac:       #4A3D78;
+  --sk-on-tint-sky:         #2E4A6B;
+  --sk-on-tint-rose:        #6B2424;
+
+  --sk-color-data-series-primary: var(--sk-on-tint-sky);
+  --sk-color-data-grid: var(--sk-border-default);
+  --sk-color-data-baseline: var(--sk-fg-subtle);
+
+  --sk-chart-series-1: var(--sk-on-tint-sky);
+  --sk-chart-series-2: var(--sk-on-tint-mint);
+  --sk-chart-series-3: var(--sk-on-tint-lilac);
+  --sk-chart-series-4: var(--sk-on-tint-butter);
+  --sk-chart-grid: var(--sk-border-default);
+  --sk-chart-baseline: var(--sk-fg-subtle);
+  --sk-chart-gap: var(--sk-fg-muted);
+  --sk-chart-gap-fill: rgba(92, 92, 82, 0.10);
+  --sk-chart-dash-1: none;
+  --sk-chart-dash-2: 8 4;
+  --sk-chart-dash-3: 2 3;
+  --sk-chart-dash-4: 10 3 2 3;
+  --sk-chart-gap-dash: 3 3;
+  --sk-chart-stroke-width: var(--sk-border-width-2);
+  --sk-chart-plot-block-size: calc(var(--sk-space-10) * 4);
+
+  --sk-status-neutral:      var(--sk-surface-muted);
+  --sk-status-info:         var(--sk-surface-tint-sky);
+  --sk-status-success:      var(--sk-surface-tint-mint);
+  --sk-status-attention:    var(--sk-surface-tint-butter);
+  --sk-status-danger:       var(--sk-surface-tint-rose);
+  --sk-status-recovery:     var(--sk-surface-tint-lilac);
+
+  --sk-on-status-neutral:   var(--sk-fg-muted);
+  --sk-on-status-info:      var(--sk-on-tint-sky);
+  --sk-on-status-success:   var(--sk-on-tint-mint);
+  --sk-on-status-attention: var(--sk-on-tint-butter);
+  --sk-on-status-danger:    var(--sk-on-tint-rose);
+  --sk-on-status-recovery:  var(--sk-on-tint-lilac);
+
+  --sk-bg-pill:             #ECE7D8;
+
+  --sk-shadow-card:         0 1px 2px rgba(20,20,15,0.04), 0 1px 1px rgba(20,20,15,0.06);
+  --sk-shadow-elev:         0 12px 32px -12px rgba(20,20,15,0.18);
+  --sk-shadow-glow-primary: 0 6px 20px -6px rgba(245,197,24,0.55);
+  --sk-shadow-focus:        0 0 0 3px rgba(255,250,235,1), 0 0 0 4px rgba(217,179,106,0.5);
+}
+
+/* ── Page ────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-block-size: 100vh;
+  padding: var(--sk-space-8) var(--sk-space-4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: var(--sk-surface-page);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Settings card ───────────────────────────────────────────────────────── */
+.sk-settings-panel {
+  inline-size: 100%;
+  max-inline-size: 34rem;
+  background: var(--sk-surface-card);
+  color: var(--sk-fg-on-card);
+  border: var(--sk-border-width-1) solid var(--sk-border-strong);
+  border-radius: var(--sk-radius-lg);
+  box-shadow: var(--sk-shadow-card);
+  padding: var(--sk-space-7);
+}
+
+.sk-settings-panel__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-2);
+  padding-block-end: var(--sk-space-6);
+  margin-block-end: var(--sk-space-6);
+  border-block-end: var(--sk-border-width-1) solid var(--sk-border-default);
+}
+
+.sk-settings-panel__eyebrow {
+  margin: 0;
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  color: var(--sk-fg-subtle);
+  letter-spacing: 0.02em;
+}
+
+.sk-settings-panel__title {
+  margin: 0;
+  font-family: var(--sk-font-display);
+  font-size: var(--sk-text-2xl);
+  font-weight: var(--sk-weight-bold);
+  line-height: 1.2;
+  color: var(--sk-fg-default);
+}
+
+.sk-settings-panel__lede {
+  margin: 0;
+  max-inline-size: 28rem;
+  color: var(--sk-fg-muted);
+}
+
+.sk-settings-panel__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-7);
+}
+
+/* ── Choice group ────────────────────────────────────────────────────────── */
+.sk-radio-choice-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.sk-radio-choice-group__legend {
+  padding: 0;
+  margin-block-end: var(--sk-space-1);
+  font-family: var(--sk-font-display);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-semibold);
+  color: var(--sk-fg-default);
+}
+
+.sk-radio-choice-group__hint {
+  margin: 0 0 var(--sk-space-4);
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-xs);
+}
+
+.sk-radio-choice-group__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-2);
+}
+
+.sk-radio-choice-group__option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--sk-space-3);
+  min-block-size: var(--sk-space-9);
+  padding: var(--sk-space-3) var(--sk-space-4);
+  background: var(--sk-surface-input);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  cursor: pointer;
+  transition:
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-radio-choice-group__option:hover {
+  background: var(--sk-surface-pill);
+  border-color: var(--sk-border-strong);
+}
+
+.sk-radio-choice-group__input {
+  appearance: none;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  margin: 0;
+  border: var(--sk-border-width-2) solid var(--sk-border-control);
+  border-radius: var(--sk-radius-pill);
+  background: transparent;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  transition: border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-radio-choice-group__input::before {
+  content: "";
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-radius: var(--sk-radius-pill);
+  background: var(--sk-color-accent);
+  transform: scale(0);
+  transition: transform var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-radio-choice-group__input:checked { border-color: var(--sk-color-accent); }
+.sk-radio-choice-group__input:checked::before { transform: scale(1); }
+
+.sk-radio-choice-group__input:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-2);
+}
+
+.sk-radio-choice-group__option:has(.sk-radio-choice-group__input:checked) {
+  background: var(--sk-surface-pill);
+  border-color: var(--sk-color-yellow-alpha-35);
+}
+
+.sk-radio-choice-group__option:has(.sk-radio-choice-group__input:focus-visible) {
+  border-color: var(--sk-border-focus);
+}
+
+.sk-radio-choice-group__text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--sk-space-3);
+  row-gap: var(--sk-space-1);
+  min-inline-size: 0;
+}
+
+.sk-radio-choice-group__label {
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+  color: var(--sk-fg-body);
+}
+
+.sk-radio-choice-group__option:has(.sk-radio-choice-group__input:checked)
+.sk-radio-choice-group__label {
+  color: var(--sk-fg-default);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-radio-choice-group__slug {
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  color: var(--sk-fg-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ── Text field ──────────────────────────────────────────────────────────── */
+.sk-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-2);
+}
+
+.sk-form-field__label {
+  font-family: var(--sk-font-display);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-semibold);
+  color: var(--sk-fg-default);
+}
+
+.sk-input {
+  inline-size: 100%;
+  min-block-size: var(--sk-space-9);
+  padding: var(--sk-space-2) var(--sk-space-4);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  color: var(--sk-fg-default);
+  background: var(--sk-surface-input);
+  border: var(--sk-border-width-1) solid var(--sk-border-control);
+  border-radius: var(--sk-radius-md);
+  transition:
+    border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-input::placeholder { color: var(--sk-fg-placeholder); }
+
+.sk-input:hover { background: var(--sk-surface-pill); }
+
+.sk-input:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-1);
+  border-color: var(--sk-border-focus);
+}
+
+.sk-form-field__hint {
+  margin: 0;
+  font-size: var(--sk-text-xs);
+  color: var(--sk-fg-muted);
+}
+
+/* ── Actions ─────────────────────────────────────────────────────────────── */
+.sk-settings-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sk-space-3);
+  padding-block-start: var(--sk-space-6);
+  border-block-start: var(--sk-border-width-1) solid var(--sk-border-default);
+}
+
+.sk-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sk-space-2);
+  min-block-size: var(--sk-space-9);
+  padding-inline: var(--sk-space-6);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-semibold);
+  color: var(--sk-fg-on-primary);
+  background: var(--sk-color-yellow);
+  border: var(--sk-border-width-1) solid var(--sk-color-yellow);
+  border-radius: var(--sk-radius-pill);
+  cursor: pointer;
+  transition:
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-button:hover {
+  background: var(--sk-color-yellow-soft);
+  border-color: var(--sk-color-yellow-soft);
+  color: var(--sk-fg-on-primary);
+}
+
+.sk-button:active {
+  background: var(--sk-color-yellow-deep);
+  border-color: var(--sk-color-yellow-deep);
+  color: var(--sk-fg-on-primary);
+}
+
+.sk-button:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-2);
+}
+
+.sk-button--ghost {
+  color: var(--sk-fg-body);
+  background: transparent;
+  border-color: var(--sk-border-strong);
+}
+
+.sk-button--ghost:hover {
+  background: var(--sk-surface-pill);
+  border-color: var(--sk-border-control);
+  color: var(--sk-fg-default);
+}
+
+.sk-button--ghost:active {
+  background: var(--sk-surface-muted);
+  color: var(--sk-fg-default);
+}
+
+@media (max-width: 30rem) {
+  .sk-settings-panel { padding: var(--sk-space-5); }
+  .sk-settings-panel__actions > .sk-button { flex: 1 1 auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+<main class="sk-settings-panel" data-od-id="workspace-settings-panel">
+  <header class="sk-settings-panel__header" data-od-id="panel-header">
+    <p class="sk-settings-panel__eyebrow" data-od-id="panel-eyebrow">settings / connection</p>
+    <h1 class="sk-settings-panel__title" data-od-id="panel-title">Connect a workspace</h1>
+    <p class="sk-settings-panel__lede" data-od-id="panel-lede">
+      This tool connects to one workspace at a time. Pick the workspace you want to work
+      against, then set the name your teammates will see there.
+    </p>
+  </header>
+
+  <form class="sk-settings-panel__form" data-od-id="workspace-form" novalidate>
+    <fieldset class="sk-radio-choice-group" data-od-id="workspace-choice-group">
+      <legend class="sk-radio-choice-group__legend">Workspace</legend>
+      <p class="sk-radio-choice-group__hint" id="workspace-hint" data-od-id="workspace-hint">
+        Exactly one workspace can be connected.
+      </p>
+
+      <div class="sk-radio-choice-group__list">
+        <label class="sk-radio-choice-group__option" data-od-id="workspace-option-acme">
+          <input class="sk-radio-choice-group__input" type="radio" name="workspace"
+                 value="acme" checked aria-describedby="workspace-hint">
+          <span class="sk-radio-choice-group__text">
+            <span class="sk-radio-choice-group__label">Acme</span>
+            <span class="sk-radio-choice-group__slug">acme</span>
+          </span>
+        </label>
+
+        <label class="sk-radio-choice-group__option" data-od-id="workspace-option-acme-platform">
+          <input class="sk-radio-choice-group__input" type="radio" name="workspace"
+                 value="acme/platform" aria-describedby="workspace-hint">
+          <span class="sk-radio-choice-group__text">
+            <span class="sk-radio-choice-group__label">Acme / Platform</span>
+            <span class="sk-radio-choice-group__slug">acme/platform</span>
+          </span>
+        </label>
+
+        <label class="sk-radio-choice-group__option" data-od-id="workspace-option-northwind">
+          <input class="sk-radio-choice-group__input" type="radio" name="workspace"
+                 value="northwind" aria-describedby="workspace-hint">
+          <span class="sk-radio-choice-group__text">
+            <span class="sk-radio-choice-group__label">Northwind</span>
+            <span class="sk-radio-choice-group__slug">northwind</span>
+          </span>
+        </label>
+
+        <label class="sk-radio-choice-group__option" data-od-id="workspace-option-orbital">
+          <input class="sk-radio-choice-group__input" type="radio" name="workspace"
+                 value="orbital" aria-describedby="workspace-hint">
+          <span class="sk-radio-choice-group__text">
+            <span class="sk-radio-choice-group__label">Orbital</span>
+            <span class="sk-radio-choice-group__slug">orbital</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="sk-form-field" data-od-id="display-name-field">
+      <label class="sk-form-field__label" for="display-name">Display name</label>
+      <input class="sk-input" id="display-name" name="display-name" type="text"
+             autocomplete="off" spellcheck="false"
+             placeholder="Your name"
+             aria-describedby="display-name-hint">
+      <p class="sk-form-field__hint" id="display-name-hint" data-od-id="display-name-hint">
+        Shown beside your activity in the connected workspace. Leave empty to use your
+        account name.
+      </p>
+    </div>
+
+    <div class="sk-settings-panel__actions" data-od-id="panel-actions">
+      <button class="sk-button" type="submit" data-od-id="save-connection">Save connection</button>
+      <button class="sk-button sk-button--ghost" type="reset" data-od-id="cancel-changes">Cancel</button>
+    </div>
+  </form>
+</main>
+</body>
+</html>
