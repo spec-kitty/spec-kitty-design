@@ -642,6 +642,19 @@ export function checkWorkflowUsesDerivedSet(
   for (const [re, what] of REQUIRED_STEPS) {
     if (!re.test(commands)) problems.push(`${label} has no step running ${what}`);
   }
+  // DRIFT CHECKS MUST BE THEIR OWN UNCONDITIONAL STEP, RUN EXACTLY. The presence patterns above
+  // are substring matches, and REL4 review measured all three defeats GREEN on the publishing path:
+  // `… --check || true`, `echo … --check`, and an `if: false` on the step. (The size check had
+  // the same hole from REL2; it is closed with the OpenDesign one.) An exact `run` cannot be
+  // chained, echoed or piped, and a step with no `if:` cannot be skipped.
+  for (const exact of ['node scripts/measure-elements-sizes.mjs --check', 'node scripts/build-opendesign-package.mjs --check']) {
+    const own = steps.filter((st) => typeof st.run === 'string' && stripShellComments(st.run).trim() === exact);
+    if (!own.length) {
+      problems.push(`${label} has no step whose run is exactly \`${exact}\` — a chained, echoed or wrapped form passes without gating anything`);
+    } else if (own.every((st) => st.if !== undefined)) {
+      problems.push(`${label} runs \`${exact}\` only under an \`if:\` — a condition can skip the check while the release proceeds`);
+    }
+  }
   if (jobName !== 'release') {
     // THE PUBLISH MUST GO THROUGH THE SCRIPT. Three regex rules used to live here — per-line
     // `--tag`, a hard-coded-`latest` refusal, and a TAG-from-input requirement — and review
@@ -1214,7 +1227,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 67;
+const PROBE_FLOOR = 71;
 
 const PROBES = [
   {
@@ -1440,6 +1453,35 @@ const PROBES = [
           '      - name: Bump\n        run: node scripts/bump-prerelease.mjs --from-registry\n',
           '      - name: Bump\n        run: node scripts/bump-prerelease.mjs --from-registry\n      - name: OpenDesign\n        run: node scripts/build-opendesign-package.mjs --check\n',
         ),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  ...[
+    ['the OpenDesign check neutralised with `|| true`', 'OpenDesign', 'node scripts/build-opendesign-package.mjs --check || true'],
+    ['the OpenDesign check replaced by an echo of itself', 'OpenDesign', 'echo node scripts/build-opendesign-package.mjs --check'],
+    ['the size check neutralised with `|| true` (the REL2 hole REL4 review found)', 'Sizes', 'node scripts/measure-elements-sizes.mjs --check || true'],
+  ].map(([what, name, run]) => ({
+    what,
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(
+          new RegExp(` {6}- name: ${name}\\n {8}run: [^\\n]*\\n`),
+          `      - name: ${name}\n        run: ${run}\n`,
+        ),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  })),
+  {
+    what: 'the OpenDesign check made conditional with `if: false`',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n/, '      - name: OpenDesign\n        if: false\n'),
         ['@spec-kitty/tokens'],
         ['tokens'],
         'publish',

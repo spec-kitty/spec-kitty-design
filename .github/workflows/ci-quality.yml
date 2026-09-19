@@ -274,7 +274,7 @@ jobs:
       # commit 168 lines behind. The vendored OpenDesign reference is verified against upstream's
       # sha256 before anything uses it, the package is regenerated in memory and diffed byte for
       # byte, and both scripts run their own probe tables so a check that stopped seeing is caught.
-      - name: "[ENFORCED] Vendored OpenDesign reference matches upstream (#396, FR-006)"
+      - name: "[ENFORCED] Vendored OpenDesign reference matches its recorded upstream digests (#396, FR-006)"
         run: node scripts/opendesign-reference.mjs
       - name: "[ENFORCED] OpenDesign reference loader's own probe table (#396)"
         run: node scripts/opendesign-reference.mjs --selftest
