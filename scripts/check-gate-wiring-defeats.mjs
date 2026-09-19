@@ -170,6 +170,14 @@ const CASES = [
     if (!job) throw new Error('no lint-code job');
     job.env = { ...(job.env ?? {}), node_options: '--import=data:text/javascript,process.exit(0)' };
   }],
+  ['REL4 the size record rewritten in write mode just before its --check', (wf) => {
+    // The size checks live outside lint-code (ci-quality runs them after the build), so this
+    // finds the first job that runs one, exactly.
+    const isCheck = (s) => String(s.run ?? '').trim() === 'node scripts/measure-elements-sizes.mjs --check';
+    const job = Object.values(wf.jobs ?? {}).find((j) => (j?.steps ?? []).some(isCheck));
+    if (!job) throw new Error('no exact size --check step — the probe would be vacuous');
+    job.steps.splice(job.steps.findIndex(isCheck), 0, { name: 'Refresh sizes', run: 'node scripts/measure-elements-sizes.mjs' });
+  }],
   ['REL4 the OpenDesign package regenerated in write mode just before its --check', (wf) => {
     const steps = wf.jobs?.['lint-code']?.steps;
     const idx = (steps ?? []).findIndex((s) => String(s.run ?? '').trim() === 'node scripts/build-opendesign-package.mjs --check');
@@ -354,7 +362,7 @@ const CASES = [
 // That was false: #436 is an ISSUE about charter.md and never touched this file. Two review
 // lenses caught it independently. Corrected rather than carried forward, because a wrong note
 // here misdirects exactly the person doing the next rebase.
-const MIN_CASES = 50;
+const MIN_CASES = 51;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });
