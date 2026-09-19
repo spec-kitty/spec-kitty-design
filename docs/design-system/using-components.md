@@ -535,13 +535,20 @@ of a short viewport is worse than no sticky header.
 
 A sticky header will otherwise cover a control the browser has just scrolled into view, which is a
 WCAG 2.4.11 failure. The header cannot reach your content to fix that, so it publishes the value
-for you to apply — you never compute an offset yourself:
+for you to apply — you never compute an offset yourself. **Two declarations, and on WebKit a third
+piece; all three are stated in full further down and none of them is optional.**
 
 ```css
-.page-content :is(a, button, input, select, textarea, [tabindex]) {
-  scroll-margin-block-start: var(--sk-layout-page-header-sticky-scroll-margin);
+[data-scroller] {                 /* your scroll container */
+  scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin);
 }
 ```
+
+**Put the inset on the CONTAINER, not `scroll-margin` on each row.** One declaration replaces
+per-row margins, and setting both makes them **stack**: measured, a row landed ~160px down against
+a 66–71px header, roughly twice the needed inset. The same conclusion was reached independently on
+the inline axis for the section-nav surface (`packages/styles/src/section-nav/`), where per-link
+`scroll-margin-inline` was replaced by one `scroll-padding-inline` on its container.
 
 That token is **derived**, not restated:
 
@@ -589,7 +596,7 @@ Two things follow, and the second is easy to miss:
   query on the *header's own width*; dropping stickiness is a `@media` query on the *viewport's*.
   They are deliberately different mechanisms — the header must reflow inside whatever column the
   page gives it, while scrolling is a viewport concern — but it means a 400px header column inside
-  a 1400px viewport is **sticky and stacked at once**, at 96px against the 64px default. Note the
+  a 1400px viewport is **sticky and stacked at once**, at 96px against the 80px default. Note the
   compact numbers above do not move with title length: at compact density the title is
   `white-space: nowrap` with an ellipsis and cannot wrap, so the extra 32px is the metadata row
   stacking under the text row, not a wrapped heading.
@@ -608,10 +615,79 @@ derived rather than restated.
 
 The mechanism, so you can reason about it rather than trust it: focus scrolls an element into view
 only when it needs to. A row that is *already* inside the scroll port but sitting under the sticky
-header gives the browser no reason to scroll — so it stays hidden. An unsatisfied
-`scroll-margin-block-start` is what forces the scroll that lifts it clear. Measured on the
-default-density story, against a 214px header: at `0px` and at `64px` the focused row stayed at
-y=88, entirely behind the header; at `288px` it moved to y=288, clear.
+header gives the browser no reason to scroll — so it stays hidden.
+
+**Chromium resolves that itself** and applies the inset: measured on the default-density story
+against a 214px header, at `0px` and `64px` the focused row stayed at y=88 entirely behind the
+header, and at `288px` it moved to y=288, clear.
+
+**WebKit does not**, and that is the part this contract used to get wrong — see the next section.
+
+The inset itself is one declaration on the container, given at the top of this section. It is
+**not** paired with a per-row `scroll-margin`: the two compose, and a row then lands about twice
+as far down as it needs to.
+
+### Under WebKit, CSS alone is not enough — you need the handler
+
+**`scroll-padding-block-start` is necessary and not sufficient.** Measured under WebKit (#456): focusing an occluded row does **not** scroll it clear. The
+discriminating evidence is run `35398759713` at `--repeat-each=30`, where **every** failure
+reported the scroll position after focus identical to the position before it
+(`focusMovedScroller=false`), and run `35399537534` at `--repeat-each=60`, where the container
+inset was **confirmed applied** at 80px and 288px and the failures continued.
+
+*(An earlier revision of this paragraph said "34 failures at `--repeat-each=60`". Both halves were
+wrong: those 34 come from two runs at `--repeat-each=30`, and neither carried the
+`focusMovedScroller` or `scrollPadding` fields, which did not exist yet. The claim was true of
+later runs and cited against earlier ones.)*
+
+**The properties are not the problem, and an earlier revision of this section said they were.**
+WebKit honours them exactly — to the sub-pixel — the moment a scroll is actually performed:
+`scrollIntoView({block:'start'})` aligns the scroll-margin box inside the scrollport inset by
+scroll-padding, and the probe landed at `0 + 80 + 80 = 160` (measured 160) and
+`−0.19 + 288 + 288 = 575.81` (measured 575.8125). What WebKit declines to do is **initiate** a
+focus-driven scroll for a row it considers already inside the scrollport. The inset was always
+correct; it simply never got a scroll to apply to. Chromium initiates that scroll itself, which is
+why none of this is visible there.
+
+An explicit scroll does work — measured under WebKit: compact `834 → 686`, default `974 → 410`,
+the row clearing the header in both. So the scroll container needs this **in addition to**
+`scroll-padding-block-start`, which the handler reads to know where the scrollport really starts —
+without that inset `portTop` collapses to the container's top edge and the handler never fires:
+
+```js
+scroller.addEventListener('focusin', (event) => {
+  const target = event.target;
+  if (!target || target === scroller || !target.getBoundingClientRect) return;
+  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
+  // They sit above the inset by construction, so without this guard focusing one scrolls the
+  // container every time — in Chromium too.
+  if (target.closest('sk-page-header')) return;
+  const style = getComputedStyle(scroller);
+  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
+  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
+  const port = scroller.getBoundingClientRect();
+  const box = target.getBoundingClientRect();
+  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
+  // Defensive and UNMEASURED: every measurement in this section is of the above-the-inset case.
+  // This branch covers a target below the scrollport, cannot make a clear row unclear, and is a
+  // no-op wherever the engine already scrolls.
+  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
+});
+```
+
+It fires only when the focused element falls outside the scrollport's declared insets, so it is
+inert on any focus that is already clear. **It is not inert in Chromium**, and an earlier revision
+of this page claimed it was "because the browser has already done the work by the time it runs" —
+backwards: `focus()` fires `focusin` and *then* scrolls, so this handler runs first and aligns to
+`start` where Chromium would have chosen `nearest`. That is why the `sk-page-header` guard above is
+load-bearing rather than defensive.
+
+**Why this is yours and not the element's**, for now: #145 ruled that `sk-page-header` observes no
+scrolling and owns no layout measurement, and that boundary is load-bearing elsewhere in this
+component's contract. That ruling predates the measurement above, and whether it should still hold
+given that WCAG 2.4.11 demonstrably cannot be met without layout-observing JS is **escalated as its
+own decision**. If it is relaxed, this snippet becomes the element's job and this section goes
+away.
 
 The element does not measure its own live box to close this gap, because observing layout is the
 class of behaviour it is deliberately barred from owning — the same boundary that keeps the timer

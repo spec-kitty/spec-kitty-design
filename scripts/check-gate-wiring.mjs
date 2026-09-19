@@ -898,6 +898,14 @@ else {
     // mechanism holding either command in place. Both are required, separately: a gate whose
     // probe table stops running is a gate whose defeated forms quietly reopen.
     [/node\s+scripts\/check-commitlint-config\.mjs(\s|$)/, "the commitlint ignore-list's own probe table", 'scripts/check-commitlint-config.mjs'],
+    // #456, registered WITH the gate (R3, PR #457). The probe table is required separately from
+    // the gate: its per-rule mutation proof is the only evidence the swallowed-opener rule fires —
+    // the first version's table stayed 5/5 green with that rule deleted.
+    // No flag at all: the gate itself. `(?!\s*--selftest)` also matched `--drift-sentinel`, so the
+    // gate step could have been deleted with this entry still satisfied by the sentinel's line.
+    [/node\s+scripts\/check-markdown-fences\.mjs(?!\s*--)(\s|$)/, 'the Markdown fence-integrity gate', 'scripts/check-markdown-fences.mjs'],
+    [/node\s+scripts\/check-markdown-fences\.mjs\s+--drift-sentinel(\s|$)/, "the fence gate's MDX drift sentinel", 'scripts/check-markdown-fences.mjs --drift-sentinel'],
+    [/node\s+scripts\/check-markdown-fences\.mjs\s+--selftest(\s|$)/, "the Markdown fence gate's own probe table", 'scripts/check-markdown-fences.mjs --selftest'],
     // NOT registered: `npx commitlint --from=<pr base>` needs pull-request refs, so its step
     // legitimately carries an `if:`, and REQUIRED_LINT refuses `if:`-carrying steps (they cannot
     // fail the job). Registering it makes this checker red — verified. The residual risk is
@@ -1045,6 +1053,17 @@ else {
       for (const why of neutered(st)) {
         problems.push(`the step running ${what} ${why} — it cannot fail the job`);
       }
+    }
+  }
+  // #456, R3 V3 (PR #457): the MDX drift sentinel runs AFTER the fence gate, so a Storybook loader
+  // breakage cannot stop lint-code before the PR has its fence verdict. Order, not just presence.
+  {
+    const at = (re) => lintSteps.findIndex((st) => re.test(commandLines(st)));
+    const gate = at(/node\s+scripts\/check-markdown-fences\.mjs(?!\s*--)(\s|$)/);
+    const sentinel = at(/node\s+scripts\/check-markdown-fences\.mjs\s+--drift-sentinel(\s|$)/);
+    if (gate >= 0 && sentinel >= 0 && sentinel < gate) {
+      problems.push('the fence gate\'s MDX drift sentinel runs BEFORE the fence gate in `lint-code` — a Storybook ' +
+        'loader breakage would then stop the job before the PR has a fence verdict');
     }
   }
 
