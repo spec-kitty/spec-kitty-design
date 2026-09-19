@@ -6,16 +6,21 @@
  * substitution: the pattern it replaced was a bare ```, so a copy of the snippet was spliced in
  * before almost every fence line of `docs/design-system/using-components.md` — closers as well as
  * openers — leaving 143 copies. Measured with the reference parser:
- *   - An example's labelled opener (```html, ```css) cannot close a block, because CommonMark forbids
- *     an info string on a closing fence (spec 0.31.2 §4.5, Example 147). Each one met an injected
- *     block, became CODE CONTENT, and fused into it: 140 swallowed openers. 69 blocks ended up
- *     holding two snippet copies with the example sandwiched between them and two stray language
- *     labels shown as code.
+ *   - A labelled opener cannot close a block, because CommonMark forbids an info string on a closing
+ *     fence (spec 0.31.2 §4.5, Example 147). 140 of them met an open block and became CODE CONTENT:
+ *     64 were the file's own example labels (```html, ```css, ```bash) and 76 were ```js lines —
+ *     mostly the injected snippets' own labels, though the file's six original ```js openers read
+ *     identically, so an alignment cannot say exactly which. 69 blocks ended up holding two snippet
+ *     copies with the example sandwiched between them and two stray language labels shown as code.
  *   - Code became prose. The file's one BARE opener, around the derived
  *     `--sk-layout-page-header-sticky-scroll-margin` formula, instead CLOSED an injected block, so the
  *     formula's four lines rendered as a paragraph and a bulleted list: its `+` operators became
  *     bullets.
  *   - Every block closed, and no prose became code.
+ * Earlier accounts in this PR's history are wrong on three points and superseded by the above:
+ * that blocks "never closed", that ~1,650 lines of prose rendered as code, and that 70 openers were
+ * "consumed as closers" — no closer can carry a label, so none was (ccdc54a0's message, and
+ * 55fd54e1's version of this header and of its CI comment).
  * All 15 CI jobs stayed green. Nothing here parsed Markdown: `lint-code` was ESLint, Stylelint and
  * HTMLHint, and the specs that read that file slice a named heading and assert substrings are
  * PRESENT, which an insertion cannot break. Review lenses caught it by reading the diff.
@@ -27,9 +32,10 @@
  * HTML blocks, lazy continuation, then nested containers such as `- > ```js`). Every container,
  * line-ending, tab and HTML rule is now the spec's own. What remains here is only the two checks
  * below, computed from the parser's code blocks, with the fence character and length read back from
- * the source at the position the parser reports. One private field is read, `_fenceOffset`, because
- * the public API has no equivalent; the gate refuses to run without it, so the exact-pinned version
- * can only be upgraded by someone who re-derives the rule that uses it.
+ * the source at the position the parser reports. Where a check needs to know whether a content line
+ * sits where a fence would count, it asks the parser too (see `wouldOpen`): two successive hand
+ * measurements of that got it wrong, first on tabs and then on a blockquote's optional space. Only
+ * the public API is used.
  *
  * WHAT IT REJECTS, per file:
  *   1. SWALLOWED OPENER — inside a fenced code block, a content line that would itself open a block of
@@ -38,20 +44,24 @@
  *      string), so it renders as code and two blocks fuse. This is the #457 signature. Legitimate
  *      nesting is unaffected: a ````-fence around ```js examples, or ```html inside a ~~~ block, is a
  *      shorter or different fence, as CommonMark itself reads it.
- *   2. UNTERMINATED BLOCK — a fenced block with no closing fence, after which the file holds nothing
- *      but blank lines. CommonMark closes it silently; it is valid, and it is essentially never
- *      intended. Deliberately stricter than "the block's last line is the file's last line": a quoted
- *      callout whose closer was forgotten is reported even when a trailing blank line ends the quote.
+ *   2. UNCLOSED BLOCK — a fenced block that does not end with its own closing fence. CommonMark
+ *      closes it silently wherever it runs out: at the end of the file, or where its list item or
+ *      blockquote ends. Both are valid and both are essentially never intended — they render the
+ *      same, so neither is special-cased (R3, PR #457: an earlier "only before end of file" rule
+ *      reported `> ```js` / `> x` and passed the same forgotten closer followed by prose).
  *
  * WHAT IT DOES NOT ASSERT (stated so nobody trusts it for them): it is not a Markdown linter and not
  * a renderer. It does not detect duplicated content, a block that closes early, or prose moved into
- * or out of a block by an edit that leaves the fence structure well-formed. A fenced block ended by
- * its CONTAINER (a list item or blockquote that ends) is valid CommonMark and not flagged. GitHub
+ * or out of a block by an edit that leaves the fence structure well-formed. GitHub
  * renders GFM, a superset of CommonMark whose fenced-code rules are identical; the GFM extensions
  * (tables, task lists, strikethrough, autolinks) do not open or close code blocks.
  *
  * SCOPE. Every tracked `*.md`, plus `llms.txt` and `llms-full.txt` (the repo's declared LLM
- * surfaces, which are Markdown by content), EXCEPT `kitty-specs/`: those are frozen Spec Kitty
+ * surfaces, which are Markdown by content), plus the Storybook `*.mdx` docs pages (published docs:
+ * `getting-started.mdx` alone has 12 fences). MDX is CommonMark with indented code and HTML blocks
+ * switched off and JSX/ESM in their place, so on MDX this parser is close to, not exactly, the
+ * renderer: fence rules are identical, but a fence written inside a JSX element with no blank line
+ * before it is read here as HTML and not examined. EXCEPT `kitty-specs/`: those are frozen Spec Kitty
  * mission records that CLAUDE.md forbids hand-editing, so a gate over them could only be satisfied
  * by an allowlist. Scope is resolved with `git ls-files` so generated and untracked output is not
  * read. The count is printed, and an empty set is refused.
@@ -66,32 +76,50 @@ import { fileURLToPath } from 'node:url';
 const SELF = fileURLToPath(import.meta.url);
 const REPO_ROOT = resolve(dirname(SELF), '..');
 const EXCLUDED_PREFIXES = ['kitty-specs/'];
-const EXTRA_FILES = ['llms.txt', 'llms-full.txt'];
+const EXTRA_FILES = ['llms.txt', 'llms-full.txt', '*.mdx'];
 
 // commonmark.js ships CommonJS with no default ESM export.
 const { Parser } = createRequire(import.meta.url)('commonmark');
 
 const FENCE = /^(`{3,}|~{3,})(.*)$/;
-/** Leading whitespace in columns, tabs to the next multiple of 4. */
-function columnsOf(line) {
-  let col = 0;
-  for (const ch of line) {
-    if (ch === ' ') col += 1;
-    else if (ch === '\t') col += 4 - (col % 4);
-    else break;
-  }
-  return col;
-}
-const isBlank = (line) => line.trim() === '';
+/** Blank in CommonMark's sense (§2.1): spaces and tabs only — a no-break space is content. */
+const isBlank = (line) => /^[ \t]*$/.test(line);
 /** A backtick fence's info string may not contain a backtick (§4.5); such a line opens nothing. */
 const canOpen = (run, info) => !(run[0] === '`' && info.includes('`'));
+
+/**
+ * Whether content line `index` (0-based) of the block opened at `startLine` sits where a fence would
+ * count — at most 3 columns into its container. Asked of the PARSER rather than measured here: a
+ * copy of the opener's run, written with this line's own container prefix, is inserted just before
+ * it, and the block must then close on that copy. Tabs (which the parser leaves raw in its content),
+ * a blockquote's optional space (present on one line, absent on the next) and nested list items all
+ * resolve by the spec's own rules. Two hand measurements of this failed in turn (R1 T1 on tabs, then
+ * R4's fuzzer on `>` without a space, PR #457).
+ */
+function wouldOpen(lines, startLine, index, contentLine, run) {
+  const src = lines[index];
+  const prefix = src.slice(0, src.length - contentLine.trimStart().length);
+  const variant = [...lines.slice(0, index), prefix + run, ...lines.slice(index)].join('\n');
+  const walker = new Parser().parse(variant).walker();
+  for (let step = walker.next(); step; step = walker.next()) {
+    const { node, entering } = step;
+    if (entering && node.type === 'code_block' && node.sourcepos[0][0] === startLine) {
+      return node.sourcepos[1][0] === index + 1;
+    }
+  }
+  return false;
+}
 
 /**
  * Scans one Markdown source. Returns the findings and, for analysis, which lines belong to a fenced
  * code block (opener, content or closer). `disable` names ONE rule to switch off — used only by the
  * self-test's mutation proof, which must show that removing a rule changes a probe's verdict.
  */
-export function scanMarkdown(text, { disable = null } = {}) {
+export function scanMarkdown(source, { disable = null } = {}) {
+  // GitHub's cmark-gfm (and C cmark) skip a leading UTF-8 byte-order mark; commonmark.js keeps it,
+  // which turns a fence on line 1 into paragraph text. Strip it, so the gate reads what GitHub
+  // renders (R4 N6, PR #457).
+  const text = source.replace(/^\uFEFF/, '');
   // The parser's own line endings (§2.1), so its line numbers index this array.
   const lines = text.split(/\r\n|\r|\n/);
   const findings = [];
@@ -103,26 +131,22 @@ export function scanMarkdown(text, { disable = null } = {}) {
     const [[startLine, startCol], [endLine]] = node.sourcepos;
     // The start column is the fence's first character, whatever container prefixes precede it.
     const opener = FENCE.exec(lines[startLine - 1].slice(startCol - 1));
-    if (!opener) continue;
+    // The parser reported a fenced block whose start column does not hold a fence. That has never
+    // happened (0 times over every tracked file and the review fuzzers); if it ever does, the
+    // parser and this reading of it disagree, and skipping would pass the file unexamined.
+    if (!opener) {
+      throw new Error(`commonmark.js reported a fenced block at ${startLine}:${startCol} with no fence there`);
+    }
     const [, run] = opener;
     for (let l = startLine; l <= endLine; l += 1) inCode[l - 1] = true;
 
-    // The opener's indentation within its container. The parser strips up to that many spaces from
-    // each content line, so a line's indentation within the CONTAINER is its remaining leading
-    // columns plus this — unless nothing is left, when it was at most this. `_fenceOffset` is the one
-    // private field used: the public API has no equivalent. It is checked, not assumed, so an
-    // upgrade that renames it stops this gate instead of quietly weakening it.
-    const offset = node._fenceOffset;
-    if (!Number.isInteger(offset)) {
-      throw new Error('commonmark.js no longer exposes _fenceOffset — re-derive the swallowed-opener indentation rule');
-    }
     const content = node.literal === '' ? [] : node.literal.split('\n').slice(0, -1);
     content.forEach((line, k) => {
-      const lead = columnsOf(line);
       const m = FENCE.exec(line.trimStart());
-      if (!m || disable === 'swallowed' || (lead > 0 && lead + offset > 3)) return;
+      if (!m || disable === 'swallowed') return;
       const [, inner, info] = m;
       if (inner[0] !== run[0] || inner.length < run.length || info.trim() === '' || !canOpen(inner, info)) return;
+      if (!wouldOpen(lines, startLine, startLine + k, line, run)) return;
       const at = startLine + 1 + k;
       findings.push({
         rule: 'swallowed-opener',
@@ -137,13 +161,14 @@ export function scanMarkdown(text, { disable = null } = {}) {
 
     // Closed by a fence: the block spans its opener, its content and exactly one closing line.
     const closed = endLine - startLine + 1 === content.length + 2;
-    const runsToEnd = lines.slice(endLine).every(isBlank);
-    if (!closed && runsToEnd && disable !== 'unterminated') {
+    if (!closed && disable !== 'unterminated') {
+      const atEnd = lines.slice(endLine).every(isBlank);
       findings.push({
         rule: 'unterminated',
         line: startLine,
-        message: `the block opened at line ${startLine} ("${opener[0].trim()}") is never closed — the ` +
-          'rest of the file renders as code',
+        message: `the block opened at line ${startLine} ("${opener[0].trim()}") never reaches a closing ` +
+          (atEnd ? 'fence — the rest of the file renders as code'
+            : `fence — it runs on as code until line ${endLine}, where its list item or blockquote ends`),
       });
     }
   }
@@ -198,9 +223,11 @@ const SIGNATURE = [F + 'js', 'snippet', F + 'html', '<head>', F];
 /**
  * Probe table. Every fixture is a real git work tree, so scope resolution, the `kitty-specs/`
  * exclusion, nested directories and the CLI exit code are all exercised — not just the scanner.
- * `expect` is the exit code. `needs` lists every rule or behaviour a RED probe depends on: the
- * mutation proof disables each one in turn and requires the probe to go GREEN, which is what shows
- * that this rule — not another one that happens to fire first — is what made it red.
+ * `expect` is the exit code. `needs` lists the rule a RED probe depends on: the mutation proof
+ * disables each rule in turn and requires the probe to go GREEN, which is what shows that this rule
+ * — not another one that happens to fire first — is what made it red. `findings`, where given, is
+ * the exact [rule, line, message fragment] list the scanner must report for the single file, which
+ * an exit code cannot show (a finding reported on the wrong line still exits 1).
  */
 const PROBES = [
   { name: 'clean control passes', files: { 'docs/a.md': md('# T', '', F + 'html', '<p>hi</p>', F, '', 'prose') }, expect: 0 },
@@ -212,6 +239,7 @@ const PROBES = [
   },
   { name: 'the #457 signature written with tildes is caught', files: { 'docs/a.md': md(T + 'js', 'snippet', T + 'html', '<head>', T, '', 'prose') }, expect: 1, needs: ['swallowed'] },
   { name: 'the #457 signature with CRLF line endings is caught', files: { 'docs/a.md': crlf(...SIGNATURE, '', 'prose') }, expect: 1, needs: ['swallowed'] },
+  { name: 'the #457 signature after a UTF-8 byte-order mark is caught', files: { 'docs/a.md': `\uFEFF${md(...SIGNATURE)}` }, expect: 1, needs: ['swallowed'] },
   { name: 'the #457 signature with bare-CR line endings is caught', files: { 'docs/a.md': `${[...SIGNATURE, '', 'prose'].join('\r')}\r` }, expect: 1, needs: ['swallowed'] },
   { name: 'the #457 signature after a tab following ">" is caught', files: { 'docs/a.md': md(...SIGNATURE.map((l) => `>\t${l}`)) }, expect: 1, needs: ['swallowed'] },
   { name: 'the #457 signature after a tab following a list marker is caught', files: { 'docs/a.md': md(`-\t${F}js`, '    x', `    ${F}html`, '    y', `    ${F}`) }, expect: 1, needs: ['swallowed'] },
@@ -261,12 +289,25 @@ const PROBES = [
     needs: ['swallowed'],
   },
   { name: 'an unclosed block in a quote followed only by blank lines is caught', files: { 'docs/a.md': md('> ' + F + 'js', '> x', '', '') }, expect: 1, needs: ['unterminated'] },
+  { name: 'an unclosed block ended by its blockquote, prose after, is caught', files: { 'docs/a.md': md('> ' + F + 'js', '> x', '', 'prose after the quote') }, expect: 1, needs: ['unterminated'] },
+  { name: 'an unclosed block ended by its list item, more after, is caught', files: { 'docs/a.md': md('- a', '', '  ' + F + 'js', '  x', 'dedented prose', '', F + 'js', 'y', F) }, expect: 1, needs: ['unterminated'] },
+  // A TAB before the swallowed line, after a container narrower than a tab stop (R1 T1). The parser
+  // leaves that tab raw in its content; measured there it looked 4 columns deep and hid the opener.
+  { name: 'the #457 signature tab-indented in a 2-column list item is caught', files: { 'docs/a.md': md('- item', '', '  ' + F + 'js', '  x', '  \t' + F + 'html', '  y', '  ' + F) }, expect: 1, needs: ['swallowed'], findings: [['swallowed-opener', 5, 'html']] },
+  { name: 'the #457 signature tab-indented in a 3-column list item is caught', files: { 'docs/a.md': md('1. step', '', '   ' + F + 'js', '   x', '   \t' + F + 'html', '   y', '   ' + F) }, expect: 1, needs: ['swallowed'] },
+  { name: 'the #457 signature tab-indented after "> " is caught', files: { 'docs/a.md': md('> ' + F + 'js', '> x', '> \t' + F + 'html', '> y', '> ' + F) }, expect: 1, needs: ['swallowed'] },
+  // R1 M1: each of these kills a source mutant that survived the round-4 battery.
+  { name: 'a swallowed opener indented 3 spaces is caught, on its own line', files: { 'docs/a.md': md(F + 'js', 'x', '   ' + F + 'html', 'y', F) }, expect: 1, needs: ['swallowed'], findings: [['swallowed-opener', 3, 'html']] },
+  { name: 'a tilde opener whose info holds a backtick is still an opener, so it is swallowed', files: { 'docs/a.md': md('~~~js', 'x', '~~~a`b', 'y', '~~~') }, expect: 1, needs: ['swallowed'] },
+  { name: 'an unclosed quoted block followed by a whitespace-only line is caught', files: { 'docs/a.md': '> ' + F + 'js\n> x\n   \n' }, expect: 1, needs: ['unterminated'], findings: [['unterminated', 1, 'rest of the file']] },
+  { name: 'an unclosed quoted block followed by one line of prose is caught, at its container', files: { 'docs/a.md': md('> ' + F + 'js', '> x', 'prose') }, expect: 1, needs: ['unterminated'], findings: [['unterminated', 1, 'blockquote ends']] },
   { name: 'an unterminated backtick block is caught', files: { 'docs/a.md': md('# T', '', F + 'js', 'x', '', 'prose that is now code') }, expect: 1, needs: ['unterminated'] },
   { name: 'an unterminated tilde block is caught', files: { 'docs/a.md': md('# T', '', T + 'js', 'x', '', 'prose') }, expect: 1, needs: ['unterminated'] },
   { name: 'an unterminated block with CRLF line endings is caught', files: { 'docs/a.md': crlf('# T', '', F + 'js', 'x', '', 'prose') }, expect: 1, needs: ['unterminated'] },
   { name: 'a defect in a nested directory is found', files: { 'docs/a.md': md('ok'), 'docs/deep/er/b.md': md(F + 'js', 'x', F + 'html', 'y', F) }, expect: 1, needs: ['swallowed'] },
   { name: 'README.md at the root is in scope', files: { 'README.md': md(F + 'js', 'x') }, expect: 1, needs: ['unterminated'] },
   { name: 'llms.txt is in scope despite its extension', files: { 'docs/a.md': md('ok'), 'llms.txt': md(F + 'js', 'x') }, expect: 1, needs: ['unterminated'] },
+  { name: 'a Storybook .mdx docs page is in scope', files: { 'docs/a.md': md('ok'), 'apps/storybook/src/stories/x.mdx': md("import { Meta } from '@storybook/blocks';", '', ...SIGNATURE) }, expect: 1, needs: ['swallowed'] },
   { name: 'kitty-specs/ is excluded (frozen mission records)', files: { 'docs/a.md': md('ok'), 'kitty-specs/m/tasks/WP01.md': md(F + 'js', 'x') }, expect: 0 },
   { name: 'an empty scope is refused, not passed', files: { 'kitty-specs/only.md': md('ok') }, expect: 1 },
   { name: 'VALID: a 4-backtick fence documenting 3-backtick examples', files: { 'docs/a.md': md('````md', F + 'js', 'x', F, '````') }, expect: 0 },
@@ -287,13 +328,15 @@ const PROBES = [
   // These two are VALID probes that a source-level deletion turns RED (R1's surviving mutants):
   // without the container close, the dedented prose stays code and the next opener is "swallowed";
   // without the 4-column limit, an indented labelled line inside a block reads as an opener.
-  { name: 'VALID: a block in a list item ends when the item does', files: { 'docs/a.md': md('- a', '', '  ' + F + 'js', '  x', 'dedented prose', '', F + 'js', 'y', F) }, expect: 0 },
   { name: 'VALID: a labelled fence line indented 4+ inside a block is content', files: { 'docs/a.md': md(F + 'md', '    ' + F + 'html', F) }, expect: 0 },
   { name: 'VALID: an empty ">" line left of a list item ends the item', files: { 'docs/a.md': md('  - nested', '>', '\t' + F + 'js') }, expect: 0 },
-  // R1 M1: each pins a behaviour whose removal the reference comparison showed to be costly.
-  { name: 'VALID: a block inside a blockquote ends when the quote does', files: { 'docs/a.md': md('> ' + F + 'js', '> x', '', 'prose after the quote') }, expect: 0 },
+  // R1 M1: the first pins the backtick-info rule; the closed-block pair keep the unclosed rule from
+  // flagging a block that its own fence does close, inside a container.
+  { name: 'VALID: a closed block inside a blockquote, then prose', files: { 'docs/a.md': md('> ' + F + 'js', '> x', '> ' + F, '', 'prose after the quote') }, expect: 0 },
+  { name: 'VALID: a closed block inside a list item, then dedented prose', files: { 'docs/a.md': md('- a', '', '  ' + F + 'js', '  x', '  ' + F, 'dedented prose') }, expect: 0 },
   { name: 'VALID: a backtick run whose info string holds a backtick is inline code, not a fence', files: { 'docs/a.md': md(F + 'ts`` is inline code, not a fence.', '', 'More prose.') }, expect: 0 },
   { name: 'VALID: under an indented opener, a labelled line 4 columns into the container is content', files: { 'docs/a.md': md('  ' + F + 'md', '    ' + F + 'html', '  ' + F) }, expect: 0 },
+  { name: 'VALID: a tab-indented tilde line inside a tilde block, 4 columns in, is content', files: { 'docs/a.md': md(T, '\t' + T + 'js', T) }, expect: 0 },
   { name: 'VALID: a line that could never open a block is not a swallowed opener', files: { 'docs/a.md': md(F + 'js', F + 'ab`c', F) }, expect: 0 },
 ];
 
@@ -326,16 +369,27 @@ function selftest() {
       runGate(root, quiet),
       spawnSync(process.execPath, [SELF, '--root', root], { encoding: 'utf8' }).status,
     ]);
-    const ok = got === p.expect && cli === p.expect;
+    let ok = got === p.expect && cli === p.expect;
+    let detail = '';
+    if (p.findings) {
+      const [only] = Object.values(p.files);
+      const actual = scanMarkdown(only).findings;
+      const match = actual.length === p.findings.length && p.findings.every(([rule, line, fragment], i) =>
+        actual[i].rule === rule && actual[i].line === line && actual[i].message.includes(fragment));
+      if (!match) {
+        ok = false;
+        detail = `; findings ${JSON.stringify(actual.map((f) => [f.rule, f.line]))}`;
+      }
+    }
     checks += 1;
     if (!ok) failed += 1;
-    console.log(`${ok ? '✅' : '❌'} ${p.name} (expected exit ${p.expect}; in-process ${got}, CLI ${cli})`);
+    console.log(`${ok ? '✅' : '❌'} ${p.name} (expected exit ${p.expect}; in-process ${got}, CLI ${cli}${detail})`);
   }
 
   // MUTATION PROOF. A probe table can pass for the wrong reason: the first version of this file
   // had its only swallowed-opener probe caught by the parity rule, so the defect-detecting rule
-  // could be deleted with the self-test still 5/5 (R1, PR #457). Here each rule and each parsing
-  // behaviour is switched off in turn, and every probe that names it must then PASS.
+  // could be deleted with the self-test still 5/5 (R1, PR #457). Here each rule is switched off in
+  // turn, and every probe that names it must then PASS.
   for (const rule of ['swallowed', 'unterminated']) {
     const dependent = PROBES.filter((p) => p.needs?.includes(rule));
     checks += 1;
