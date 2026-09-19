@@ -76,6 +76,9 @@
       "last_event_id": "01M2X8K103NZVGDSK350FYK7EX",
       "last_transition_at": "2026-09-19T16:39:29.539414+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "Docs, install (proof copy + linked-folder project), consumability proof: 0 invented classes, CSS verbatim; see research/consumability-proof.md"
+      ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
       "subtasks": {
