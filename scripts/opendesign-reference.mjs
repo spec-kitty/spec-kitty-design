@@ -66,15 +66,13 @@ export async function loadReference(dir = VENDOR_DIR) {
   const ms = await import(pathToFileURL(join(dir, 'manifest.schema.ts')).href);
   for (const [name, fn] of [
     ['extractComponentsManifest', cm.extractComponentsManifest],
-    ['validateDesignSystemProjectManifest', ms.validateDesignSystemProjectManifest],
+    ['parseDesignSystemProjectManifest', ms.parseDesignSystemProjectManifest],
   ]) {
     if (typeof fn !== 'function') throw new Error(`OpenDesign reference is missing ${name}`);
   }
   return {
     extractComponentsManifest: cm.extractComponentsManifest,
-    validateDesignSystemProjectManifest: ms.validateDesignSystemProjectManifest,
-    COMPONENTS_MANIFEST_SCHEMA_VERSION: cm.COMPONENTS_MANIFEST_SCHEMA_VERSION,
-    DESIGN_SYSTEM_PROJECT_SCHEMA_VERSION: ms.DESIGN_SYSTEM_PROJECT_SCHEMA_VERSION,
+    parseDesignSystemProjectManifest: ms.parseDesignSystemProjectManifest,
   };
 }
 
@@ -187,7 +185,7 @@ async function selftest() {
 }
 
 if (isDirectInvocation(process.argv[1], import.meta.url)) {
-  const known = new Set(['--selftest', '--check']);
+  const known = new Set(['--selftest']);
   const stray = process.argv.slice(2).filter((a) => !known.has(a));
   if (stray.length) {
     console.error(`::error::unrecognised argument(s): ${stray.join(' ')}`);
