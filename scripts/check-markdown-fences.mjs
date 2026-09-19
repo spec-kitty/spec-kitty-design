@@ -692,8 +692,9 @@ async function sentinelSelftest() {
   // An unknown flag is refused with exit 2 instead of falling through to the gate (R1 C1).
   // Every argument the CLI does not understand is refused before anything runs (R1 C1; R3, R4).
   let flags = 0;
-  const refused = [['--no-such-flag'], ['--drift-sentinal'], ['-h'], ['drift-sentinel'], ['--root'],
-    ['--root', '--selftest'], ['--selftest', '--drift-sentinel']];
+  const refused = [['--no-such-flag'], ['--drift-sentinal'], ['-h'], ['drift-sentinel'], ['gate'], ['--root'],
+    ['--root', '--selftest'], ['--selftest', '--drift-sentinel'], ['--root', ''], ['--root', '.', '--root', '.'],
+    ['--drift-sentinel', '--root', '.'], ['--selftest', '--root', '.']];
   for (const args of refused) {
     const status = probeRun(args).status;
     const ok = status === 2;
@@ -701,7 +702,12 @@ async function sentinelSelftest() {
     flags += 1;
     console.log(`${ok ? '✅' : '❌'} CLI: \`${args.join(' ')}\` is refused with exit 2 (got ${status})`);
   }
-  return { checks: cases.length + 1 + adapter.length + 1 + flags, failed };
+  // The per-probe time limit is detected, so the first hang stops the run (R3 W2).
+  const slow = spawnSync(process.execPath, ['-e', 'setTimeout(() => {}, 5000)'], { timeout: 200 });
+  const detects = timedOut(slow) && !timedOut(spawnSync(process.execPath, ['-e', ''], { timeout: 5000 }));
+  if (!detects) failed += 1;
+  console.log(`${detects ? '✅' : '❌'} CLI: a probe that hits its time limit is detected (and a quick one is not)`);
+  return { checks: cases.length + 1 + adapter.length + 1 + flags + 1, failed };
 }
 
 /**
@@ -709,14 +715,30 @@ async function sentinelSelftest() {
  * a self-test of its own: with two-mode refusal broken, `--selftest --drift-sentinel` would run the
  * self-test, which spawns that probe again — an unbounded chain that hung, rather than failed, when
  * it happened under mutation (PR #457). The marker turns that into an immediate, named failure.
+ * The MARKER is what contains recursion. The time limit is not a second layer against it:
+ * spawnSync kills only its direct child, so under recursion the grandchildren are orphaned and keep
+ * going (R1 N1). The limit exists for a single hung probe, and stops the run at the first one.
  */
 const PROBE_ENV = 'FENCE_GATE_PROBE';
-const probeRun = (args) => spawnSync(process.execPath, [SELF, ...args], {
-  encoding: 'utf8', timeout: 60_000, env: { ...process.env, [PROBE_ENV]: '1' },
-});
+/** spawnSync reports a time-limit kill as an ETIMEDOUT error with no exit status. */
+const timedOut = (result) => result.error?.code === 'ETIMEDOUT';
+/** Thrown (not process.exit) so every enclosing fixture's `finally` still removes its directory. */
+class ProbeTimeout extends Error {}
+const probeRun = (args) => {
+  const result = spawnSync(process.execPath, [SELF, ...args], {
+    encoding: 'utf8', timeout: 60_000, env: { ...process.env, [PROBE_ENV]: '1' },
+  });
+  // The FIRST probe to hit its limit stops the self-test (R3 W2, PR #457). There are ~100 probes; a
+  // systematic hang (a git lock, say) would otherwise cost ~100 minutes, outlive lint-code's
+  // 30-minute limit, and show as CANCELLED rather than failed.
+  if (timedOut(result)) {
+    throw new ProbeTimeout(`❌ a CLI probe (${args.join(' ') || 'no arguments'}) hit its 60 s limit — stopping the self-test here`);
+  }
+  return result;
+};
 
 async function selftest() {
-  if (process.env[PROBE_ENV]) {
+  if (process.env[PROBE_ENV] === '1') {
     console.error('❌ the self-test was started from inside one of its own CLI probes — refusing to recurse');
     process.exit(3);
   }
@@ -795,10 +817,22 @@ async function selftest() {
  * (R3, R4 round 10).
  */
 const MODES = {
-  '--selftest': async () => { await selftest(); },
+  '--selftest': async () => {
+    try {
+      await selftest();
+    } catch (e) {
+      if (!(e instanceof ProbeTimeout)) throw e;
+      console.error(e.message);
+      process.exit(1);
+    }
+  },
   // Its own CI step, AFTER the gate (R3 U1): a Storybook loader breakage must not stop the job
   // before the fence scan has given the PR its verdict.
   '--drift-sentinel': async () => process.exit(await driftSentinel()),
+  // The gate itself. Its key is not a flag, so it cannot be typed; it is what runs with no mode. With
+  // every mode in this table, dispatch is ONE lookup and has no branch a hand edit could get wrong
+  // (R1 N2: `if (mode === '--selftest') … else gate` sent CI's --drift-sentinel to the gate).
+  gate: async (root) => process.exit(runGate(root ?? REPO_ROOT)),
 };
 
 function parseArgs(args) {
@@ -807,16 +841,19 @@ function parseArgs(args) {
   for (let i = 0; i < args.length; i += 1) {
     const a = args[i];
     if (a === '--root') {
-      if (i + 1 >= args.length || args[i + 1].startsWith('-')) return { error: '--root needs a directory' };
+      if (i + 1 >= args.length || args[i + 1] === '' || args[i + 1].startsWith('-')) return { error: '--root needs a directory' };
+      if (root !== null) return { error: '--root given more than once' };
       root = resolve(args[i + 1]);
       i += 1;
-    } else if (Object.hasOwn(MODES, a)) {
+    } else if (a.startsWith('--') && Object.hasOwn(MODES, a)) {
       modes.push(a);
     } else {
-      return { error: `unknown argument ${a} — expected one of ${[...Object.keys(MODES), '--root <dir>'].join(', ')}` };
+      return { error: `unknown argument ${a} — expected one of ${[...Object.keys(MODES).filter((m) => m.startsWith('--')), '--root <dir>'].join(', ')}` };
     }
   }
   if (modes.length > 1) return { error: `one mode at a time, got ${modes.join(' and ')}` };
+  // Only the gate scans a root; a mode would silently ignore it (R3 W1, R4).
+  if (modes.length === 1 && root !== null) return { error: `--root applies to the gate only, not ${modes[0]}` };
   return { mode: modes[0] ?? null, root };
 }
 
@@ -826,6 +863,5 @@ if (process.argv[1] && resolve(process.argv[1]) === SELF) {
     console.error(`❌ ${parsed.error}`);
     process.exit(2);
   }
-  if (parsed.mode) await MODES[parsed.mode]();
-  else process.exit(runGate(parsed.root ?? REPO_ROOT));
+  await MODES[parsed.mode ?? 'gate'](parsed.root);
 }
