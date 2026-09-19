@@ -159,6 +159,17 @@ const CASES = [
       steps.splice(idx, 0, { name: 'Env', run: 'echo "NODE_OPTIONS=--import=data:text/javascript,process.exit(0)" >> "$GITHUB_ENV"' });
     }],
   ].map(([where, mutate]) => [`REL4 a NODE_OPTIONS preload that exits 0, set at ${where} level`, mutate]),
+  ['REL4 a no-op default shell on the lint-code job', (wf) => {
+    const job = wf.jobs?.['lint-code'];
+    if (!job) throw new Error('no lint-code job');
+    job.defaults = { run: { shell: 'sh -c true {0}' } };
+  }],
+  ['REL4 a no-op default shell for the whole workflow', (wf) => { wf.defaults = { run: { shell: 'sh -c true {0}' } }; }],
+  ['REL4 a NODE_OPTIONS preload under a lower-case key', (wf) => {
+    const job = wf.jobs?.['lint-code'];
+    if (!job) throw new Error('no lint-code job');
+    job.env = { ...(job.env ?? {}), node_options: '--import=data:text/javascript,process.exit(0)' };
+  }],
   ['REL4 the OpenDesign package regenerated in write mode just before its --check', (wf) => {
     const steps = wf.jobs?.['lint-code']?.steps;
     const idx = (steps ?? []).findIndex((s) => String(s.run ?? '').trim() === 'node scripts/build-opendesign-package.mjs --check');
@@ -343,7 +354,7 @@ const CASES = [
 // That was false: #436 is an ISSUE about charter.md and never touched this file. Two review
 // lenses caught it independently. Corrected rather than carried forward, because a wrong note
 // here misdirects exactly the person doing the next rebase.
-const MIN_CASES = 47;
+const MIN_CASES = 50;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });

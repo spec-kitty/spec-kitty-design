@@ -436,8 +436,8 @@ export function buildDesignRegion(d) {
     ...(d.components.some((c) => c.staticSheet)
       ? [
           'Where the library already ships the static equivalent — `static/sk-<name>.static.css`, the same rules',
-          'with `:host` moved onto a wrapper class — the component page carries that sheet instead, and its',
-          'static form uses the wrapper: ' +
+          'with `:host` moved onto a wrapper class — the component page carries that sheet instead:' +
+          ' ' +
             d.components.filter((c) => c.staticSheet).map((c) => `\`${c.name}\``).join(', ') + '.',
           '',
         ]
@@ -661,6 +661,7 @@ const PROBES = [
   ['…unless the paragraph says it cannot be emitted (control)', () => authoredProseProblems('USAGE.md', '`sk-notice` is shadow-DOM only and cannot be emitted here.', FIXTURE).length === 0],
   ['a BEM modifier of an excluded name is not mistaken for the element (the lookahead)', () => authoredProseProblems('USAGE.md', 'Use `sk-notice--x`.', FIXTURE).length === 0],
   ['a qualifier in one LIST ITEM does not exempt the next item', () => authoredProseProblems('USAGE.md', '5. `sk-notice` cannot be emitted.\n6. Prefer `sk-notice` for alerts.', FIXTURE).length === 1],
+  ['…for `-`, `*` and `+` bullets too', () => ['-', '*', '+'].every((b) => authoredProseProblems('USAGE.md', `${b} \`sk-notice\` cannot be emitted.\n${b} Prefer \`sk-notice\` for alerts.`, FIXTURE).length === 1)],
   ['a repository path inside a Markdown link is refused', () => authoredProseProblems('USAGE.md', 'See [the story](packages/elements/src/x.stories.ts).', FIXTURE).length === 1],
   ['a derived count with an adjective ("34 component pages", "16 custom elements") is refused', () => authoredProseProblems('USAGE.md', 'All 34 component pages; 16 custom elements.', FIXTURE).length === 2],
   ['authored prose pointing at a repository path is refused', () => authoredProseProblems('USAGE.md', 'Start from `packages/elements/src/x.stories.ts`.', FIXTURE).length === 1],
@@ -695,7 +696,7 @@ const PROBES = [
   ['the design region lists each component with its page and vocabulary', () => { const r = buildDesignRegion(FIXTURE); return r.includes('| `button` | `components/button.html` | `default` | `sk-button` |') && r.includes('`sk-grid`'); }],
   ['the real vocabulary names the class the first proof run invented a substitute for', () => { const c = derive().components.find((x) => x.name === 'radio-choice-group'); const v = classVocabulary(c.css, c.forms); return v.includes('sk-radio-choice-group__control') && !v.includes('sk-radio-choice__input'); }],
 ];
-const PROBE_FLOOR = 52;
+const PROBE_FLOOR = 53;
 
 /**
  * DRIFT PROBES — each mutates a TEMPORARY COPY of the committed package and asserts `diffPackage`

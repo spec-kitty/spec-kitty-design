@@ -664,8 +664,10 @@ export function checkWorkflowUsesDerivedSet(
       }
     }
   }
-  // …AND IN `run:` TEXT. Pass 3 set it with `echo "NODE_OPTIONS=…" >> "$GITHUB_ENV"`, which no
-  // `env:` block shows. No publishing step has a reason to name it at all.
+  // …AND IN `run:` TEXT, as defence in depth. `echo "NODE_OPTIONS=…" >> "$GITHUB_ENV"` shows in no
+  // `env:` block; GitHub's runner currently refuses NODE_OPTIONS from that file (actions/runner
+  // FileCommandManager), so this guards a runner change or a self-hosted runner, not a live hole.
+  // No publishing step has a reason to name NODE_OPTIONS at all.
   for (const st of steps) {
     if (typeof st.run === 'string' && /NODE_OPTIONS/i.test(stripShellComments(st.run))) {
       problems.push(`${label} step "${st.name ?? st.run}" names NODE_OPTIONS in its run — writing it to $GITHUB_ENV preloads every later node step`);
@@ -1263,7 +1265,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 76;
+const PROBE_FLOOR = 81;
 
 const PROBES = [
   {
@@ -1555,6 +1557,31 @@ const PROBES = [
         ['tokens'],
         'publish',
         'publish-packages.yml',
+      ),
+  },
+  ...[
+    ['the size record rewritten in write mode just before its check', / {6}- name: Sizes\n/, '      - name: Refresh\n        run: node scripts/measure-elements-sizes.mjs\n      - name: Sizes\n'],
+    ['a NODE_OPTIONS preload at job level', /(\n {4}steps:\n)/, '\n    env:\n      NODE_OPTIONS: --import=data:text/javascript,process.exit(0)$1'],
+    ['a NODE_OPTIONS preload under a lower-case step key', / {6}- name: OpenDesign\n/, '      - name: OpenDesign\n        env:\n          node_options: --import=data:text/javascript,process.exit(0)\n'],
+  ].map(([what, anchor, text]) => ({
+    what,
+    run: () =>
+      checkWorkflowUsesDerivedSet(withPayloadDefect(anchor, text), ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml'),
+  })),
+  {
+    what: 'a NODE_OPTIONS preload at workflow level',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        `env:\n  NODE_OPTIONS: --import=data:text/javascript,process.exit(0)\n${REUSABLE_PAYLOAD_FIXTURE}`,
+        ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'a no-op default shell for the whole workflow',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        `defaults:\n  run:\n    shell: sh -c true {0}\n${REUSABLE_PAYLOAD_FIXTURE}`,
+        ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml',
       ),
   },
   {

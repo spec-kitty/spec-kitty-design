@@ -227,7 +227,6 @@ which is still Proposed:
 `blog-card`, `button`, `check-bullet`, `feature-card`, `grid`, `nav-pill`, `pill-tag`, `ribbon-card`, `section-banner`, `site-footer`.
 
 Where the library already ships the static equivalent — `static/sk-<name>.static.css`, the same rules
-with `:host` moved onto a wrapper class — the component page carries that sheet instead, and its
-static form uses the wrapper: `action-row`.
+with `:host` moved onto a wrapper class — the component page carries that sheet instead: `action-row`.
 
 <!-- END GENERATED: components -->

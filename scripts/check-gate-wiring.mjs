@@ -1150,15 +1150,23 @@ else {
   // it, so it is refused at workflow, job and step level alike.
   const hasNodeOptions = (env) => !!env && typeof env === 'object' && Object.keys(env).some((k) => k.toUpperCase() === 'NODE_OPTIONS');
   if (hasNodeOptions(wf.env)) problems.push('the workflow sets NODE_OPTIONS in `env:` — a preload can make every node gate exit 0 without running');
+  // A DEFAULT SHELL IS A `shell:` ON EVERY STEP. The per-step `shell:` refusal below never saw
+  // `defaults.run.shell` at job or workflow level, so `sh -c true {0}` there ran no gate at all
+  // (REL4 gate pass 3). No job in this workflow sets one.
+  if (wf.defaults?.run?.shell !== undefined) problems.push(`the workflow sets \`defaults.run.shell: ${wf.defaults.run.shell}\` — a shell template decides what every step runs`);
+  for (const [jobName, job] of Object.entries(wf.jobs ?? {})) {
+    if (job?.defaults?.run?.shell !== undefined) problems.push(`job \`${jobName}\` sets \`defaults.run.shell: ${job.defaults.run.shell}\` — a shell template decides what its steps run`);
+  }
   // EVERY job, not the `guarded` set: lint-code is outside it by design (see its edge assertions),
   // and it is where the registered node gates run. No job in this workflow uses NODE_OPTIONS.
   for (const [jobName, job] of Object.entries(wf.jobs ?? {})) {
     if (hasNodeOptions(job?.env)) problems.push(`job \`${jobName}\` sets NODE_OPTIONS in \`env:\` — a preload can make its node gates exit 0 without running`);
     for (const st of job?.steps ?? []) {
       if (hasNodeOptions(st.env)) problems.push(`step "${st.name ?? st.run}" in \`${jobName}\` sets NODE_OPTIONS — a preload can make it exit 0 without running`);
-      // `echo "NODE_OPTIONS=…" >> "$GITHUB_ENV"` sets it for every later step with no `env:` block
-      // in sight (REL4 pass 3). A job that genuinely needs, say, --max-old-space-size is a
-      // deliberate edit to this rule, not a silent exemption.
+      // `echo "NODE_OPTIONS=…" >> "$GITHUB_ENV"` would set it for every later step with no `env:`
+      // block in sight. GitHub's runner currently refuses that key from the file (actions/runner
+      // FileCommandManager), so this is defence in depth. A job that genuinely needs, say,
+      // --max-old-space-size is a deliberate edit to this rule, not a silent exemption.
       // A DRIFT CHECK CANNOT FAIL IF THE TREE IS REGENERATED FIRST. A step running the generator (or
       // the size recorder) in write mode rewrites what the next step's --check compares (REL4
       // pass 3, the PR-path twin of the publish-path rule in check-release-graph.mjs).
