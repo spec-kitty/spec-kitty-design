@@ -27,6 +27,9 @@
       "last_event_id": "01M2XHWZRWEBYZ61B0Z6AZY0RR",
       "last_transition_at": "2026-09-19T19:22:13.148196+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "pack/publish-tarball/verify scripts with probes, revert-tested; live verify against rc.2"
+      ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
       "subtasks": {
