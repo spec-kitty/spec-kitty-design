@@ -122,7 +122,7 @@ export function verifyPublished({ root = ROOT, fetch = npmFetch, attest = ghAtte
 
 /* ────────────────────────────── --selftest ────────────────────────────── */
 
-async function fixture() {
+function fixture() {
   const h = sha512Integrity;
   const root = mkdtempSync(join(tmpdir(), 'verify-set-'));
   for (const [dir, name] of [['tokens', '@spec-kitty/tokens'], ['styles', '@spec-kitty/styles']]) {
@@ -152,6 +152,38 @@ const registry = ({ bytes = (spec) => `bytes:${spec.replace(/@1\.0\.0$/, '')}`, 
   };
 };
 const quiet = () => {};
+
+/**
+ * Run the REAL CLI, byte-for-byte, against a fixture: this module and its imports are copied into a
+ * fixture root (so `ROOT` resolves there), with stub `npm` and `gh` on PATH that log their argv. The
+ * in-process probes inject `attest`, so only this one sees what the CLI actually forwards to `gh`
+ * (REL3 pass 3: dropping the pins, `||`→`&&`, or swapping them all stayed green without it).
+ */
+function cliProbe(env) {
+  const root = fixture();
+  const bin = mkdtempSync(join(tmpdir(), 'verify-cli-'));
+  try {
+    mkdirSync(join(root, 'scripts'));
+    for (const f of ['verify-published-integrity.mjs', 'pack-derived-set.mjs', 'release-graph.mjs']) {
+      writeFileSync(join(root, 'scripts', f), readFileSync(join(dirname(fileURLToPath(import.meta.url)), f)));
+    }
+    const log = (tool) => `echo "$*" >> "${join(bin, `${tool}.log`)}"`;
+    // npm pack <spec> --json --pack-destination <dest> …: serve the fixture's attested bytes for <spec>.
+    writeFileSync(join(bin, 'npm'), `#!/bin/sh\n${log('npm')}\nprintf 'bytes:%s' "\${2%@1.0.0}" > "$5/got.tgz"\necho '[{"filename":"got.tgz"}]'\n`, { mode: 0o755 });
+    writeFileSync(join(bin, 'gh'), `#!/bin/sh\n${log('gh')}\nexit 0\n`, { mode: 0o755 });
+    const r = spawnSync(process.execPath, [join(root, 'scripts', 'verify-published-integrity.mjs')], {
+      encoding: 'utf8',
+      env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, GITHUB_ACTIONS: 'true', SIGNER_WORKFLOW: '', SOURCE_DIGEST: '', ...env },
+    });
+    const calls = (tool) => (existsSync(join(bin, `${tool}.log`)) ? readFileSync(join(bin, `${tool}.log`), 'utf8').trim().split('\n') : []);
+    return { status: r.status, stderr: r.stderr, npm: calls('npm'), gh: calls('gh') };
+  } finally {
+    rmSync(bin, { recursive: true, force: true });
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+const CLI_SIGNER = 'spec-kitty/spec-kitty-design/.github/workflows/publish-packages.yml';
+const CLI_DIGEST = '0123456789abcdef0123456789abcdef01234567';
 
 async function selftest() {
   const root = await fixture();
@@ -200,7 +232,14 @@ async function selftest() {
       }
     }],
     ['in CI, a missing SIGNER_WORKFLOW/SOURCE_DIGEST is refused before any download', () => { const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], { encoding: 'utf8', env: { ...process.env, GITHUB_ACTIONS: 'true', SIGNER_WORKFLOW: '', SOURCE_DIGEST: '' } }); return r.status === 1 && /SIGNER_WORKFLOW and SOURCE_DIGEST must be set/.test(r.stderr); }],
-    ['every attested entry is checked, not just the first', () => { const calls = []; run({ fetch: registry({ calls }) }); return calls.length === 2; }],
+    ['the CLI forwards SIGNER_WORKFLOW as --signer-workflow and SOURCE_DIGEST as --source-digest on every gh call', () => {
+      const r = cliProbe({ SIGNER_WORKFLOW: CLI_SIGNER, SOURCE_DIGEST: CLI_DIGEST });
+      const pinned = (a) => a.includes(`--signer-workflow ${CLI_SIGNER}`) && a.includes(`--source-digest ${CLI_DIGEST}`);
+      return r.status === 0 && r.gh.length === 2 && r.gh.every(pinned);
+    }],
+    ['in CI, SIGNER_WORKFLOW alone is refused before any download', () => { const r = cliProbe({ SIGNER_WORKFLOW: CLI_SIGNER }); return r.status === 1 && r.npm.length === 0 && r.gh.length === 0 && /SIGNER_WORKFLOW and SOURCE_DIGEST must be set/.test(r.stderr); }],
+    ['in CI, SOURCE_DIGEST alone is refused before any download', () => { const r = cliProbe({ SOURCE_DIGEST: CLI_DIGEST }); return r.status === 1 && r.npm.length === 0 && r.gh.length === 0 && /SIGNER_WORKFLOW and SOURCE_DIGEST must be set/.test(r.stderr); }],
+    ['every attested entry is checked, not just the first',() => { const calls = []; run({ fetch: registry({ calls }) }); return calls.length === 2; }],
     ['the real fetch uses a throwaway --cache, so it re-reads bytes instead of hitting the pack step\'s cache', () => {
       const bin = mkdtempSync(join(tmpdir(), 'verify-npm-'));
       const dest = mkdtempSync(join(tmpdir(), 'verify-dest-'));
@@ -222,7 +261,7 @@ async function selftest() {
     ['an unknown argument exits 2', () => spawnSync(process.execPath, [fileURLToPath(import.meta.url), '--nope'], { encoding: 'utf8' }).status === 2],
     ['importing the module verifies nothing', () => { const r = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(import.meta.url)})`], { encoding: 'utf8' }); return r.status === 0 && `${r.stdout}${r.stderr}`.trim() === ''; }],
   ];
-  const PROBE_FLOOR = 16;
+  const PROBE_FLOOR = 19;
   let bad = 0;
   for (const [what, fn] of PROBES) {
     let ok = false;
