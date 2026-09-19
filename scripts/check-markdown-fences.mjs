@@ -8,19 +8,24 @@
  * openers — leaving 143 copies. Measured with the reference parser:
  *   - A labelled opener cannot close a block, because CommonMark forbids an info string on a closing
  *     fence (spec 0.31.2 §4.5, Example 147). 140 of them met an open block and became CODE CONTENT:
- *     64 were the file's own example labels (```html, ```css, ```bash) and 76 were ```js lines —
- *     mostly the injected snippets' own labels, though the file's six original ```js openers read
- *     identically, so an alignment cannot say exactly which. 69 blocks ended up holding two snippet
- *     copies with the example sandwiched between them and two stray language labels shown as code.
+ *     70 were the file's own example labels — every labelled opener it still had (57 ```html, 6
+ *     ```css, 1 ```bash and all six of its ```js openers) — and 70 were the injected snippets' own
+ *     ```js labels. Each is identified by the line
+ *     after it: an injected label is followed by the snippet, an original by its own example; the
+ *     canonical handler example, which starts with the same line, is told apart by the old guard on
+ *     its third line. 69 blocks ended up holding two snippet copies with the example sandwiched
+ *     between them and two stray language labels shown as code.
  *   - Code became prose. The file's one BARE opener, around the derived
  *     `--sk-layout-page-header-sticky-scroll-margin` formula, instead CLOSED an injected block, so the
  *     formula's four lines rendered as a paragraph and a bulleted list: its `+` operators became
  *     bullets.
  *   - Every block closed, and no prose became code.
- * Earlier accounts in this PR's history are wrong on three points and superseded by the above:
- * that blocks "never closed", that ~1,650 lines of prose rendered as code, and that 70 openers were
- * "consumed as closers" — no closer can carry a label, so none was (ccdc54a0's message, and
- * 55fd54e1's version of this header and of its CI comment).
+ * Earlier accounts in this PR's history (commit messages, and earlier versions of this header and
+ * its CI comment) are superseded by the above. Among their errors: that blocks "never closed"; that
+ * ~1,650 lines of prose rendered as code; that the file's openers were "consumed as closers" (the
+ * count of 70 was right; the mechanism was not, since no closer can carry a label); that 142
+ * snippets each fused with the following example; and that all 140 swallowed lines were the file's
+ * own ```html/```css openers.
  * All 15 CI jobs stayed green. Nothing here parsed Markdown: `lint-code` was ESLint, Stylelint and
  * HTMLHint, and the specs that read that file slice a named heading and assert substrings are
  * PRESENT, which an insertion cannot break. Review lenses caught it by reading the diff.
@@ -40,8 +45,9 @@
  * WHAT IT REJECTS, per file:
  *   1. SWALLOWED OPENER — inside a fenced code block, a content line that would itself open a block of
  *      the same character and at least the same length, carrying an info string (a backtick fence's
- *      info string may not contain a backtick), indented at most 3 columns within its container. It cannot close the block (closers carry no info
- *      string), so it renders as code and two blocks fuse. This is the #457 signature. Legitimate
+ *      info string may not contain a backtick), indented at most 3 columns within its container. It
+ *      cannot close the block (closers carry no info string), so it renders as code and two blocks
+ *      fuse. This is the #457 signature. Legitimate
  *      nesting is unaffected: a ````-fence around ```js examples, or ```html inside a ~~~ block, is a
  *      shorter or different fence, as CommonMark itself reads it.
  *   2. UNCLOSED BLOCK — a fenced block that does not end with its own closing fence. CommonMark
@@ -49,6 +55,8 @@
  *      blockquote ends. Both are valid and both are essentially never intended — they render the
  *      same, so neither is special-cased (R3, PR #457: an earlier "only before end of file" rule
  *      reported `> ```js` / `> x` and passed the same forgotten closer followed by prose).
+ *   3. MDX-UNVERIFIABLE (.mdx only) — a fence-like line outside every block CommonMark sees as
+ *      fenced. See SCOPE.
  *
  * WHAT IT DOES NOT ASSERT (stated so nobody trusts it for them): it is not a Markdown linter and not
  * a renderer. It does not detect duplicated content, a block that closes early, or prose moved into
@@ -59,9 +67,10 @@
  * SCOPE. Every tracked `*.md`, plus `llms.txt` and `llms-full.txt` (the repo's declared LLM
  * surfaces, which are Markdown by content), plus the Storybook `*.mdx` docs pages (published docs:
  * `getting-started.mdx` alone has 12 fences). MDX is CommonMark with indented code and HTML blocks
- * switched off and JSX/ESM in their place, so on MDX this parser is close to, not exactly, the
- * renderer: fence rules are identical, but a fence written inside a JSX element with no blank line
- * before it is read here as HTML and not examined. EXCEPT `kitty-specs/`: those are frozen Spec Kitty
+ * switched off and JSX/ESM in their place: an indented fence, or a fence written directly after a
+ * JSX tag, is a fence there and not here. The gate cannot see what renders on such a line, so in an
+ * .mdx file it REFUSES any fence-like line outside a block CommonMark also sees as fenced (rule
+ * 3, below). EXCEPT `kitty-specs/`: those are frozen Spec Kitty
  * mission records that CLAUDE.md forbids hand-editing, so a gate over them could only be satisfied
  * by an allowlist. Scope is resolved with `git ls-files` so generated and untracked output is not
  * read. The count is printed, and an empty set is refused.
@@ -115,7 +124,7 @@ function wouldOpen(lines, startLine, index, contentLine, run) {
  * code block (opener, content or closer). `disable` names ONE rule to switch off — used only by the
  * self-test's mutation proof, which must show that removing a rule changes a probe's verdict.
  */
-export function scanMarkdown(source, { disable = null } = {}) {
+export function scanMarkdown(source, { disable = null, mdx = false } = {}) {
   // GitHub's cmark-gfm (and C cmark) skip a leading UTF-8 byte-order mark; commonmark.js keeps it,
   // which turns a fence on line 1 into paragraph text. Strip it, so the gate reads what GitHub
   // renders (R4 N6, PR #457).
@@ -124,6 +133,8 @@ export function scanMarkdown(source, { disable = null } = {}) {
   const lines = text.split(/\r\n|\r|\n/);
   const findings = [];
   const inCode = new Array(lines.length).fill(false);
+  // Lines of one block share its containers, so a candidate's answer depends only on its prefix.
+  const opensAt = new Map();
   const walker = new Parser().parse(text).walker();
   for (let step = walker.next(); step; step = walker.next()) {
     const { node, entering } = step;
@@ -146,7 +157,10 @@ export function scanMarkdown(source, { disable = null } = {}) {
       if (!m || disable === 'swallowed') return;
       const [, inner, info] = m;
       if (inner[0] !== run[0] || inner.length < run.length || info.trim() === '' || !canOpen(inner, info)) return;
-      if (!wouldOpen(lines, startLine, startLine + k, line, run)) return;
+      const src = lines[startLine + k];
+      const key = `${startLine}\u0000${src.slice(0, src.length - line.trimStart().length)}`;
+      if (!opensAt.has(key)) opensAt.set(key, wouldOpen(lines, startLine, startLine + k, line, run));
+      if (!opensAt.get(key)) return;
       const at = startLine + 1 + k;
       findings.push({
         rule: 'swallowed-opener',
@@ -171,6 +185,25 @@ export function scanMarkdown(source, { disable = null } = {}) {
             : `fence — it runs on as code until line ${endLine}, where its list item or blockquote ends`),
       });
     }
+  }
+  // MDX (Storybook's .mdx docs) turns off indented code, which lifts the 3-column limit on a fence's
+  // indentation, and replaces HTML blocks with JSX, so a fence written straight after a JSX tag is a
+  // fence there and HTML here. On such a line this parser cannot see what renders — so in an .mdx
+  // file every fence-like line must belong to a block CommonMark also sees as fenced, or it is
+  // refused rather than passed unexamined (R3 Q1, R4 N8, PR #457).
+  if (mdx && disable !== 'mdx') {
+    lines.forEach((raw, i) => {
+      if (inCode[i]) return;
+      const m = FENCE.exec(raw.replace(/^(?:[ \t]*>)*[ \t]*/, ''));
+      if (!m || !canOpen(m[1], m[2])) return;
+      findings.push({
+        rule: 'mdx-unverifiable',
+        line: i + 1,
+        message: `line ${i + 1} "${raw.trim()}" may open a code block in MDX that CommonMark does not see ` +
+          '(an indented fence, or one directly after a JSX tag) — dedent it to at most 3 columns, or ' +
+          'put a blank line between the JSX tag and the fence',
+      });
+    });
   }
   return { findings, inCode };
 }
@@ -199,7 +232,7 @@ export function runGate(root, { disable = null, log = console.log, error = conso
   }
   let failed = 0;
   for (const file of files) {
-    const { findings } = scanMarkdown(readFileSync(join(root, file), 'utf8'), { disable });
+    const { findings } = scanMarkdown(readFileSync(join(root, file), 'utf8'), { disable, mdx: file.endsWith('.mdx') });
     if (findings.length === 0) continue;
     failed += 1;
     error(`❌ ${file}: ${findings.length} finding(s)`);
@@ -301,6 +334,14 @@ const PROBES = [
   { name: 'a tilde opener whose info holds a backtick is still an opener, so it is swallowed', files: { 'docs/a.md': md('~~~js', 'x', '~~~a`b', 'y', '~~~') }, expect: 1, needs: ['swallowed'] },
   { name: 'an unclosed quoted block followed by a whitespace-only line is caught', files: { 'docs/a.md': '> ' + F + 'js\n> x\n   \n' }, expect: 1, needs: ['unterminated'], findings: [['unterminated', 1, 'rest of the file']] },
   { name: 'an unclosed quoted block followed by one line of prose is caught, at its container', files: { 'docs/a.md': md('> ' + F + 'js', '> x', 'prose') }, expect: 1, needs: ['unterminated'], findings: [['unterminated', 1, 'blockquote ends']] },
+  // R3 Q2: the optional space after `>` is absent on the opener and present on the swallowed line.
+  { name: 'the #457 signature under ">" with no space is caught', files: { 'docs/a.md': md('>' + F + 'js', '>    ' + F + 'html', '>x', '>' + F) }, expect: 1, needs: ['swallowed'], findings: [['swallowed-opener', 2, 'html']] },
+  // R1 round 5: the re-check must examine the candidate's OWN block, not the file's first one, and
+  // insert the opener's own run, not a fixed 3-character one — every earlier signature probe was the
+  // first block and used 3-character fences, so both mutants survived.
+  { name: 'the #457 signature after a clean first block is caught', files: { 'docs/a.md': md(F + 'bash', 'npm ci', F, '', 'prose', '', ...SIGNATURE) }, expect: 1, needs: ['swallowed'], findings: [['swallowed-opener', 9, 'html']] },
+  { name: 'the #457 signature with 4-backtick fences is caught', files: { 'docs/a.md': md('````js', 'x', '````html', 'y', '````') }, expect: 1, needs: ['swallowed'], findings: [['swallowed-opener', 3, 'html']] },
+  { name: 'the #457 signature with 4-tilde fences is caught', files: { 'docs/a.md': md('~~~~js', 'x', '~~~~html', 'y', '~~~~') }, expect: 1, needs: ['swallowed'] },
   { name: 'an unterminated backtick block is caught', files: { 'docs/a.md': md('# T', '', F + 'js', 'x', '', 'prose that is now code') }, expect: 1, needs: ['unterminated'] },
   { name: 'an unterminated tilde block is caught', files: { 'docs/a.md': md('# T', '', T + 'js', 'x', '', 'prose') }, expect: 1, needs: ['unterminated'] },
   { name: 'an unterminated block with CRLF line endings is caught', files: { 'docs/a.md': crlf('# T', '', F + 'js', 'x', '', 'prose') }, expect: 1, needs: ['unterminated'] },
@@ -308,6 +349,10 @@ const PROBES = [
   { name: 'README.md at the root is in scope', files: { 'README.md': md(F + 'js', 'x') }, expect: 1, needs: ['unterminated'] },
   { name: 'llms.txt is in scope despite its extension', files: { 'docs/a.md': md('ok'), 'llms.txt': md(F + 'js', 'x') }, expect: 1, needs: ['unterminated'] },
   { name: 'a Storybook .mdx docs page is in scope', files: { 'docs/a.md': md('ok'), 'apps/storybook/src/stories/x.mdx': md("import { Meta } from '@storybook/blocks';", '', ...SIGNATURE) }, expect: 1, needs: ['swallowed'] },
+  { name: 'in .mdx, a 4-space-indented #457 signature is refused', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('text', '', ...SIGNATURE.map((l) => `    ${l}`)) }, expect: 1, needs: ['mdx'] },
+  { name: 'in .mdx, a fence directly after a JSX tag is refused', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('<Canvas>', ...SIGNATURE, '</Canvas>') }, expect: 1, needs: ['mdx'] },
+  { name: 'VALID: in .mdx, a fence after a JSX tag and a blank line', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('<Canvas>', '', F + 'js', 'x', F, '', '</Canvas>') }, expect: 0 },
+  { name: 'VALID: in .md, an indented fence-like line is indented code, not refused', files: { 'docs/a.md': md('text', '', '    ' + F + 'js', '    x') }, expect: 0 },
   { name: 'kitty-specs/ is excluded (frozen mission records)', files: { 'docs/a.md': md('ok'), 'kitty-specs/m/tasks/WP01.md': md(F + 'js', 'x') }, expect: 0 },
   { name: 'an empty scope is refused, not passed', files: { 'kitty-specs/only.md': md('ok') }, expect: 1 },
   { name: 'VALID: a 4-backtick fence documenting 3-backtick examples', files: { 'docs/a.md': md('````md', F + 'js', 'x', F, '````') }, expect: 0 },
@@ -390,7 +435,7 @@ function selftest() {
   // had its only swallowed-opener probe caught by the parity rule, so the defect-detecting rule
   // could be deleted with the self-test still 5/5 (R1, PR #457). Here each rule is switched off in
   // turn, and every probe that names it must then PASS.
-  for (const rule of ['swallowed', 'unterminated']) {
+  for (const rule of ['swallowed', 'unterminated', 'mdx']) {
     const dependent = PROBES.filter((p) => p.needs?.includes(rule));
     checks += 1;
     if (dependent.length === 0) {
