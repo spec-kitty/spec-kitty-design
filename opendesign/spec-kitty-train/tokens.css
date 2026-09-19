@@ -1,0 +1,672 @@
+/* @spec-kitty/tokens — ADR-003 naming schema: --sk-<category>-<name> */
+/* Values reconciled with Spec Kitty Design System reference (colors_and_type.css). */
+:root {
+  /* ── Brand Colors ────────────────── */
+  /* Core palette — yellow is the signature primary. */
+  --sk-color-yellow:        #F5C518;   /* signature primary, CTAs, logo bow */
+  --sk-color-yellow-soft:   #FFD84D;   /* hover / highlight */
+  --sk-color-yellow-deep:   #C99A0E;   /* pressed / on-light fg */
+  /* Yellow alpha buckets — see PLAN-001 for naming rationale.
+     Suffix is the rounded percent of the alpha channel. */
+  --sk-color-yellow-alpha-15: rgba(245, 197, 24, 0.14);
+  --sk-color-yellow-alpha-35: rgba(245, 197, 24, 0.35);
+  --sk-color-yellow-alpha-60: rgba(245, 197, 24, 0.60);
+  --sk-color-haygold:       #D9B36A;   /* muted warm gold, bullet dots, dim accents */
+  --sk-color-haygold-soft:  #E8C988;
+  --sk-color-blue:          #A9C7E8;   /* soft icy blue (illustration sky / muted info) */
+  --sk-color-blue-deep:     #6B8FB8;   /* hover state for blue */
+  --sk-color-blue-bg:       #14202E;   /* deep blue surface for muted-info panel */
+  --sk-color-purple:        #B8A9E0;   /* soft lavender, v2.x evolution accent */
+  --sk-color-purple-deep:   #8C7AC2;
+  --sk-color-purple-bg:     #1E1A2E;   /* deep purple surface for v2.x section banners */
+  --sk-color-green:         #8FCB8F;   /* checkmark / success / "by the numbers" */
+  --sk-color-green-bg:      #15241A;   /* dark green surface behind numbers banner */
+  /* Brand red — DECORATIVE AND GRAPHIC ONLY, and deliberately dark-only with no light override.
+     Its live consumers are ribbon-card's fill and decorative border and transition-matrix's
+     blocked-row graphic. It is NOT the validation colour: this comment used to say "validation
+     errors" and that is exactly how #350 happened — an author greps for the error colour, lands
+     here, and writes a token with no light value into a light-theme boundary, silently. For
+     validation use `--sk-fg-error` (L211/L459, text, 4.5:1) or `--sk-border-control-invalid`
+     (L251/L472, non-text boundary, 3:1 and never less visible than the resting boundary).
+     The obligations its own remaining consumers carry are unguarded and tracked in #398. */
+  --sk-color-red:           #E97373;
+  --sk-color-red-soft:      #F0A0A0;
+  --sk-color-sage:          #4F8F4F;   /* heading sage on cream (light-mode only) */
+  --sk-color-sage-deep:     #3D7A3D;   /* hover / pressed — AND the light-mode --sk-color-accent
+                                            since #78, so the light ramp has no darker sage left
+                                            for an accent hover state. Extend the ramp if one is
+                                            ever needed rather than reusing -soft upward. */
+  --sk-color-sage-soft:     #7CAE7C;   /* dim / 70% sage for chips */
+
+  /* ── Accent ──────────────────────── */
+  --sk-color-accent:        #F5C518;   /* interactive accent (= yellow) */
+  --sk-color-accent-fg:     #1A1408;   /* dark ink on yellow buttons */
+
+  /* ── Dark Surfaces (default — dark mode) ─── */
+  --sk-surface-page:        #0D0E11;   /* blackish — deepest page background */
+  --sk-surface-hero:        #121317;   /* hero / section background */
+  --sk-surface-card:        #181A1F;   /* card surface */
+  --sk-surface-input:       #1C1F25;   /* elevated card / form input fill */
+  --sk-surface-pill:        #212830;   /* off-gray — nav pill, chips, hover row */
+  --sk-surface-muted:       #262C36;   /* dark gray — muted info panel, code block */
+
+  /* ── Section Tint Surfaces ───────── */
+  /* Dark-mode tint surfaces for cards, status panels, section banners. */
+  --sk-surface-tint-mint:   #15241A;   /* dark: numbers banner / green */
+  --sk-surface-tint-butter: #2A2410;   /* dark: warm-yellow card */
+  --sk-surface-tint-lilac:  #1E1A2E;   /* dark: v2.x banner / purple */
+  --sk-surface-tint-sky:    #14202E;   /* dark: muted info / blue */
+  /* ROSE completes the family at #177, and it is a DERIVATION, not a new brand hue.
+     --sk-color-red already exists (#E97373) and is already the danger marker in
+     sk-status-indicator; what the family lacked was its SURFACE, so `--sk-status-danger`
+     had nothing to alias and would have had to carry a literal of its own.
+     Derived by the rule the four siblings already follow, measured in HLS: the hue's own
+     angle (0deg), dark tints at L 0.11-0.14 (mint 0.112, butter 0.114, sky 0.129,
+     lilac 0.141 -> rose 0.125), saturation in the family's 0.26-0.45 band (0.35). */
+  --sk-surface-tint-rose:   #2B1515;   /* dark: danger / red */
+
+  /* ── Tint borders — the third slot of the tint family ─────────────────────
+     Named for the TINT (sky/lilac), not the component. --sk-surface-tint-sky is
+     already shared by card and blog-card, and --sk-surface-tint-lilac by card and
+     pill-tag; a component-named border would have put this on an
+     N-components x M-variants path (--sk-border-feature-card-*, and so on) beside a
+     family that already scales. Completes surface-tint / on-tint / border-tint.
+     These exist as TOKENS, not as theme-selector overrides in sk-card.css,
+     because a custom property inherits THROUGH a shadow boundary and a selector
+     does not. sk-card.css previously carried
+       :root[data-theme="light"] .sk-card--blue, .sk-light .sk-card--blue { ... }
+     which is inert once the card is a custom element: the themed ancestor is
+     outside the shadow root and the descendant combinator cannot reach in. No
+     error, no warning — a LightMode story would simply render dark styling.
+     `:host-context()` is not the escape hatch (Baseline limited, Chromium-only).
+     Verified in this mission; see #72 and ADR-9. */
+  --sk-border-tint-sky:    rgba(169, 199, 232, 0.20);  /* channels from --sk-color-blue */
+  --sk-border-tint-lilac:  rgba(184, 169, 224, 0.25);  /* channels from --sk-color-purple */
+
+  /* ── On-Tint Foregrounds ─────────── */
+  --sk-on-tint-mint:        var(--sk-color-green);
+  --sk-on-tint-butter:      var(--sk-color-yellow-soft);
+  --sk-on-tint-lilac:       var(--sk-color-purple);
+  --sk-on-tint-sky:         var(--sk-color-blue);
+  --sk-on-tint-rose:        var(--sk-color-red);
+
+  /* ── Data visualisation ──────────── */
+  --sk-color-data-series-primary: var(--sk-on-tint-sky);
+  --sk-color-data-grid: var(--sk-border-default);
+  --sk-color-data-baseline: var(--sk-fg-subtle);
+
+  /* ── Chart family (#179) ─────────────────────────────────────────────────
+     THE chart token family. #179 asked this mission to consume a --sk-chart-*
+     family #148 was expected to land; measured on train/elements-first@5fd031d,
+     `grep -oE '--sk-chart-[a-z-]+' packages/tokens/src/tokens.css` returned
+     NOTHING. #148 shipped the three --sk-color-data-* aliases immediately above
+     instead. #179's own instruction covers exactly this case: "If #148 lands
+     without it, the gap is closed here, once, for both."
+
+     So the family is landed here, and the three roles it SHARES with #148 are
+     given the SAME underlying values rather than new ones. That is not a
+     comment: fixtures/elements-behaviour/src/sk-time-series-chart.test.ts
+     asserts --sk-chart-series-1/grid/baseline resolve to the same COMPUTED
+     values as --sk-color-data-series-primary/grid/baseline, in BOTH themes.
+     One family serves both elements today, and the eventual retrofit of
+     sk-bar-chart is a pure rename.
+
+     sk-bar-chart is deliberately NOT retrofitted here. Doing so would rewrite
+     its authored CSS, its generated module, its class JSDoc "Token
+     dependencies" line — which is PUBLISHED API, copied into
+     custom-elements.json and into the React wrapper's prop docs — and the
+     `semantic data aliases exist exactly once per theme` test, which pins each
+     --sk-color-data-* declaration by exact string twice per theme block. That
+     is not "small and mechanical" on an element that landed unchanged one
+     mission ago, and #179 binds this mission to extend none of its API. Filed
+     as #240, with the surface-by-surface measurement attached, rather than
+     half-done.
+
+     FOUR series inks, not one, because a line chart carries more than one
+     series and the fourth channel matters: hue COLLAPSES under forced colors,
+     so differentiation is also carried by --sk-chart-dash-*, and by marker
+     shape in the element's own geometry. Measured against --sk-surface-card:
+     dark 9.97 / 9.21 / 8.11 / 12.58, light 9.10 / 8.04 / 9.42 / 6.79 — every
+     one over the 3:1 floor the element asserts in both themes. The gap ink is
+     7.45 dark / 6.76 light. The grid is deliberately low-contrast (1.33 / 1.27)
+     because it is a rule, not content, which is why the element's contrast
+     assertion covers the series, baseline and gap inks and not the grid. */
+  --sk-chart-series-1: var(--sk-on-tint-sky);
+  --sk-chart-series-2: var(--sk-on-tint-mint);
+  --sk-chart-series-3: var(--sk-on-tint-lilac);
+  --sk-chart-series-4: var(--sk-on-tint-butter);
+  --sk-chart-grid: var(--sk-border-default);
+  --sk-chart-baseline: var(--sk-fg-subtle);
+  --sk-chart-gap: var(--sk-fg-muted);
+  --sk-chart-gap-fill: rgba(169, 169, 176, 0.14);  /* channels from --sk-fg-muted */
+  --sk-chart-dash-1: none;
+  --sk-chart-dash-2: 8 4;
+  --sk-chart-dash-3: 2 3;
+  --sk-chart-dash-4: 10 3 2 3;
+  --sk-chart-gap-dash: 3 3;
+  --sk-chart-stroke-width: var(--sk-border-width-2);
+  --sk-chart-plot-block-size: calc(var(--sk-space-10) * 4);
+
+  /* ── Operational Status — semantic pairs (#177) ───────────────────────────
+     ONE tone vocabulary, owned by sk-status-indicator (#146) and consumed here:
+     neutral | info | success | attention | danger | recovery.
+
+     ALIASES, not a palette. Every value below resolves to a token that already
+     exists; this category adds meaning, not colour. It is declared in BOTH theme
+     blocks even though the aliases are identical, because a status token defined
+     in one block only is exactly the half-populated theme #93 records — and a
+     reader checking "does light have status?" must be able to answer from the
+     light block.
+
+     PAIRING (hard rule 3): --sk-status-<tone> is the SURFACE, --sk-on-status-<tone>
+     is its foreground and the card's edge colour. Two contrast contracts hold, and
+     both were measured in sRGB rather than assumed:
+       (a) the card's own foreground, --sk-fg-body, on the status surface;
+       (b) the pair itself, --sk-on-status-<tone> on --sk-status-<tone>.
+     DARK       (a) --sk-fg-body #D6D6DA      (b) pair        edge vs page
+       neutral        9.69                       6.01            8.26
+       info          11.36                       9.42           11.05
+       success       11.15                       8.55           10.21
+       attention     10.67                      11.18           13.95
+       danger        11.87                       5.87            6.58
+       recovery      11.66                       7.88            9.00
+     AA needs 4.5 for (a) and (b); WCAG 1.4.11 needs 3 for the edge. */
+  --sk-status-neutral:      var(--sk-surface-muted);
+  --sk-status-info:         var(--sk-surface-tint-sky);
+  --sk-status-success:      var(--sk-surface-tint-mint);
+  --sk-status-attention:    var(--sk-surface-tint-butter);
+  --sk-status-danger:       var(--sk-surface-tint-rose);
+  --sk-status-recovery:     var(--sk-surface-tint-lilac);
+
+  --sk-on-status-neutral:   var(--sk-fg-muted);
+  --sk-on-status-info:      var(--sk-on-tint-sky);
+  --sk-on-status-success:   var(--sk-on-tint-mint);
+  --sk-on-status-attention: var(--sk-on-tint-butter);
+  --sk-on-status-danger:    var(--sk-on-tint-rose);
+  --sk-on-status-recovery:  var(--sk-on-tint-lilac);
+
+  /* ── Pill/Chip Background ────────── */
+  --sk-bg-pill:             #212830;   /* nav pill rail, chips, hover row */
+
+  /* ── Foreground / Text ───────────── */
+  --sk-fg-default:          #FFFFFF;   /* headlines — maps to --sk-fg-0 */
+  --sk-fg-body:             #D6D6DA;   /* body text — maps to --sk-fg-1 */
+  --sk-fg-muted:            #A9A9B0;   /* secondary body, muted copy — maps to --sk-fg-2 */
+  /* tertiary / labels — maps to --sk-fg-3. Was #6E6E78, which failed WCAG AA on
+     BOTH surfaces: 3.45:1 on --sk-surface-card and 3.83:1 on --sk-surface-page.
+     #81818B is the minimum same-hue lightening that clears 4.5:1 (4.51 / 5.01). #101 */
+  --sk-fg-subtle:           #81818B;
+  --sk-fg-placeholder:      #4A4A52;   /* placeholder text — maps to --sk-fg-4 */
+  --sk-fg-on-primary:       #1A1408;   /* dark ink on yellow buttons */
+  --sk-fg-on-card:          #D6D6DA;   /* text on card surface */
+  /* Error-copy foreground (WCAG 1.4.3, ≥4.5:1 for small text) — #350, fixing #321's own gap.
+     `--sk-color-red` carries three incompatible contrast contracts at once (this text
+     contract, --sk-border-control-invalid's 3:1 non-text contract below, and ribbon-card's
+     fill/paired-foreground contract) and has no light override, so any single-hex fix for one
+     contract regresses another. An INDEPENDENTLY DECLARED LITERAL, deliberately NOT
+     var(--sk-color-red) (dark) or var(--sk-on-tint-rose) (light) — same decoupling rationale
+     --sk-border-control's own comment gives below: aliasing would couple this 4.5:1 text
+     obligation to tokens that move for unrelated reasons, and check-token-breaking-changes.sh
+     computes no contrast, so nothing would catch a future silent regression of that coupling.
+     NO NEW COLOUR: both hexes already exist and are already ratified in this file — #E97373 =
+     --sk-color-red (:root, L24, "validation errors") and #6B2424 = --sk-on-tint-rose (light
+     block, derived in HLS under #177, ratified #217). This token adds a NAME, not a value.
+     Measured (relative-luminance formula, both themes, five surfaces — page/card/input/muted/
+     pill): dark #E97373 — page 6.58:1, card 5.94:1, input 5.63:1, muted 4.79:1, pill 5.08:1;
+     light #6B2424 — page 10.12:1, card 11.04:1, input 9.78:1, muted 8.52:1, pill 8.93:1. All
+     ten clear the 4.5:1 floor. Mechanically enforced by
+     tests/node/form-input-border-control-contrast.test.ts. */
+  --sk-fg-error:            #E97373;
+
+  /* ── Borders ─────────────────────── */
+  --sk-border-default:      #2B313B;   /* hairline default — slightly cool */
+  --sk-border-strong:       #353C48;   /* card border */
+  --sk-border-focus:        #F5C518;   /* focus ring (= yellow) */
+  /* Non-text control boundary (WCAG 1.4.11, ≥3:1) — #321. An INDEPENDENTLY DECLARED
+     LITERAL, deliberately NOT var(--sk-fg-subtle): aliasing would couple this border's 3:1
+     non-text obligation to a token that moves for an unrelated text-contrast (4.5:1) reason,
+     and check-token-breaking-changes.sh computes no contrast, so nothing would catch a future
+     silent regression of that coupling. Measured (relative-luminance formula, both themes,
+     five surfaces — page/card/input/muted/pill): dark #81818B — page 5.01:1, card 4.51:1,
+     input 4.28:1, muted 3.64:1, pill 3.86:1; light #7A7A6E — page 3.98:1, card 4.34:1,
+     input 3.85:1, muted 3.35:1, pill 3.51:1. Tightest of the ten (theme x surface) pairs is
+     light vs muted at 3.35:1 — 0.35 of headroom above the 3:1 floor, the margin a future
+     nudge of this hex must not spend. Mechanically enforced by
+     tests/node/form-input-border-control-contrast.test.ts. */
+  --sk-border-control:      #81818B;
+  /* Invalid-state control boundary (WCAG 1.4.11, ≥3:1, AND ≥ --sk-border-control on the same
+     surface/theme) — #350, fixing #321's own gap: #321 raised the resting boundary and
+     deliberately left `[aria-invalid="true"]`/`:invalid` on --sk-color-red, which made the
+     ordering visible and, in light theme, wrong (light invalid measured BELOW the resting
+     boundary on all five surfaces — the exact inverse of the intended emphasis). An
+     INDEPENDENTLY DECLARED LITERAL, deliberately NOT var(--sk-color-red) (dark) or
+     var(--sk-on-tint-rose) (light) — same decoupling rationale as --sk-border-control above:
+     --sk-color-red still serves ribbon-card's fill and transition-matrix's blocked-row
+     graphic; --sk-on-tint-rose's own contract is "readable on --sk-surface-tint-rose", not
+     "readable on five neutral surfaces". check-token-breaking-changes.sh computes no contrast,
+     so nothing would catch a future silent regression of that coupling.
+     NO NEW COLOUR: both hexes already exist and are already ratified in this file — #E97373 =
+     --sk-color-red (:root, L24) and #6B2424 = --sk-on-tint-rose (light block, #177/#217). This
+     token adds a NAME, not a value.
+     Measured against --sk-border-control on the same surface/theme:
+       dark #E97373  — page 6.58:1 (vs 5.01:1), card 5.94:1 (vs 4.51:1), input 5.63:1
+         (vs 4.28:1), muted 4.79:1 (vs 3.64:1), pill 5.08:1 (vs 3.86:1) — byte-identical to
+         today's rendering; these five numbers are also the FR-004 dark non-regression floor.
+       light #6B2424 — page 10.12:1 (vs 3.98:1), card 11.04:1 (vs 4.34:1), input 9.78:1
+         (vs 3.85:1), muted 8.52:1 (vs 3.35:1), pill 8.93:1 (vs 3.51:1) — every surface now
+         clears both the 3:1 absolute floor and the resting boundary, closing #350's inversion.
+     Mechanically enforced by tests/node/form-input-border-control-contrast.test.ts. */
+  --sk-border-control-invalid: #E97373;
+  --sk-border-width-1:      1px;
+  --sk-border-width-2:      2px;
+  /* The accent-edge step. Theme-invariant, like -1 and -2, so it is defined once here and
+     is NOT restated in the light block. Added at #177 for sk-card's status edge: the card's
+     border is already 2px on all four sides, so an edge treatment that reads as an edge
+     needs a step above it. */
+  --sk-border-width-4:      4px;
+
+  /* ── Typography — Families ───────── */
+  /* --sk-font-sans is the BODY/UI face — self-hosted Inter (spec-kitty-saas mission #1673, spec-kitty-saas PR #2203). See the
+     "Font loading" section below for the full rationale; the short version is that a
+     consumer-visible, deterministic body face was needed for cross-machine visual-regression
+     parity (spec-kitty-saas #2203), and Swansea — the previously *documented* body face — was
+     never actually wired to this token and carries an unresolved licensing question (RISK-1,
+     docs/architecture/validation/mission-review-01KQJNTP49SPQNNXQ1TG3BKKKW.md:148-157,215-219).
+     The system stack stays as the fallback tail so a failed asset load still renders text. */
+  --sk-font-sans:           'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --sk-font-display:        'Falling Sky', ui-sans-serif, system-ui, sans-serif;
+  --sk-font-reference:      'Swansea', ui-sans-serif, system-ui, sans-serif;
+  --sk-font-condensed:      'Falling Sky Condensed', 'Falling Sky', ui-sans-serif, sans-serif;
+  --sk-font-extended:       'Falling Sky Extended', 'Falling Sky', ui-sans-serif, sans-serif;
+  --sk-font-outline:        'Falling Sky Outline', 'Falling Sky', ui-sans-serif, sans-serif;
+  --sk-font-boldplus:       'Falling Sky Boldplus', 'Falling Sky', ui-sans-serif, sans-serif;
+  --sk-font-mono:           'JetBrains Mono', ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* ── Typography — Scale ──────────── */
+  --sk-text-xs:             0.75rem;    /* 12px — eyebrow labels */
+  --sk-text-sm:             0.875rem;   /* 14px */
+  --sk-text-base:           1rem;       /* 16px */
+  --sk-text-lg:             1.125rem;   /* 18px — lead / h4 */
+  --sk-text-xl:             1.25rem;
+  --sk-text-2xl:            1.5rem;
+  --sk-text-3xl:            1.875rem;
+
+  /* ── Typography — Weights ────────── */
+  --sk-weight-normal:       400;
+  --sk-weight-medium:       500;
+  --sk-weight-semibold:     600;
+  --sk-weight-bold:         700;
+  --sk-weight-extrabold:    800;
+
+  /* ── Spacing ─────────────────────── */
+  --sk-space-1:   0.25rem;   /*  4px */
+  --sk-space-2:   0.5rem;    /*  8px */
+  --sk-space-3:   0.75rem;   /* 12px */
+  --sk-space-4:   1rem;      /* 16px */
+  --sk-space-5:   1.25rem;   /* 20px */
+  --sk-space-6:   1.5rem;    /* 24px */
+  --sk-space-7:   2rem;      /* 32px */
+  --sk-space-8:   2.5rem;    /* 40px */
+  --sk-space-9:   3rem;      /* 48px */
+  --sk-space-10:  4rem;      /* 64px */
+  --sk-space-11:  6rem;      /* 96px */
+  --sk-space-12:  8rem;      /* 128px */
+
+  /* ── Layout ──────────────────────── */
+  --sk-layout-personal-rail-width: 3.5rem;  /* 56px */
+  --sk-layout-context-sidebar-width: 15rem; /* 240px */
+  /* Browser-calibrated lower bound for a workflow lane (#209). 13.75rem is
+     220px at the repository's 16px root: the smallest tested candidate in the
+     220–360px sweep that keeps long opaque content contained, fits one lane at
+     320/360px, and makes five lanes overflow locally without widening the page. */
+  --sk-layout-workflow-lane-min-inline-size: 13.75rem;
+
+  /* sk-page-header sticky geometry (#182). The offset is what the header pins itself
+     at inside whatever scroll region the shell gives it; a consumer whose shell has its
+     own fixed chrome above the header raises it. The compact height is the header's
+     declared minimum block size at density="compact", which is a single-row form.
+     The scroll-margin token is DERIVED from those two rather than restated, so the
+     value a consumer puts on their own focusable content cannot drift from the
+     header's footprint when either input is retuned (WCAG 2.4.11).
+
+     THE THIRD TERM IS --sk-space-7 (32px) AND THAT IS MEASURED, NOT PADDING FOR
+     LUCK. --sk-layout-page-header-compact-height is a MIN-block-size, so the
+     header's real height is whatever its slotted content needs above that floor:
+     measured 60px for a plain compact row at 900px, and 71px for this repo's own
+     story, whose sync slot also carries a status pill. The term has to absorb that
+     difference or the published margin is short for the element's own catalogue —
+     it was --sk-space-4 (16px) for exactly one round, which made the default 64px
+     against a 71px header. 32px clears the taller measurement by 9px.
+
+     ITS DEFAULT COVERS THE COMPACT, SINGLE-ROW HEADER ONLY — a default-density header's height
+     is the consumer's own slotted content, and a compact header narrower than
+     720px stacks. Both cases override this token; see
+     docs/design-system/using-components.md, which states the measurements. */
+  --sk-layout-page-header-sticky-offset: 0rem;
+  --sk-layout-page-header-compact-height: 3rem;   /* 48px */
+  --sk-layout-page-header-sticky-layer: 10;
+  --sk-layout-page-header-sticky-scroll-margin:
+    calc(var(--sk-layout-page-header-sticky-offset) +
+         var(--sk-layout-page-header-compact-height) +
+         var(--sk-space-7));
+
+  /* ── Radius ──────────────────────── */
+  --sk-radius-sm:   0.5rem;    /*  8px — chips, eyebrow pills */
+  --sk-radius-md:   0.75rem;   /* 12px — form inputs */
+  --sk-radius-lg:   1rem;      /* 16px — cards */
+  --sk-radius-xl:   1.25rem;   /* 20px — hero card */
+  --sk-radius-pill: 999px;     /* nav pills, primary buttons */
+
+  /* ── Shadows ─────────────────────── */
+  --sk-shadow-card:          0 1px 0 rgba(255,255,255,0.02) inset, 0 1px 2px rgba(0,0,0,0.4);
+  --sk-shadow-elev:          0 8px 24px rgba(0,0,0,0.45);
+  --sk-shadow-glow-primary:  0 6px 20px -6px rgba(245,197,24,0.45);
+  --sk-shadow-focus:         0 0 0 3px rgba(13,14,17,0.55), 0 0 0 4px rgba(43,49,59,0.6);
+
+  /* ── Motion ──────────────────────── */
+  --sk-motion-duration-fast: 120ms;
+  --sk-motion-duration-base: 200ms;
+  --sk-motion-duration-slow: 320ms;
+  --sk-motion-ease-out:      cubic-bezier(0.22, 1, 0.36, 1);
+  --sk-motion-ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ── Font loading ────────────────────────────────────────────────────────── */
+
+/* JetBrains Mono is NOT loaded here, and was not loaded before either.
+   This carried:
+     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono...');
+   at this position — which is invalid. CSS requires @import to precede every style rule, and
+   `:root {` opens at line 3 of this file, so the browser dropped it. Measured in chromium:
+   32 rules parsed, 0 import rules, and a route watching fonts.googleapis.com never fired.
+   `--sk-font-mono` has therefore always resolved to `ui-monospace` and its fallbacks.
+
+   DO NOT "FIX" THIS BY MOVING AN @import TO THE TOP OF THE FILE. That is the obvious repair and
+   it breaks a requirement in the same edit: SC-006 asserts a file:// page loads with zero
+   off-machine requests, and scripts/check-offline-load.mjs would red on the request the
+   repositioned @import would finally make. It would also add an unpinned third-party runtime
+   dependency to every consumer page, which ADR-5's control table does not cover.
+
+   Whether JetBrains Mono should be self-hosted (OFL permits it) or dropped from --sk-font-mono
+   so the token declares what actually resolves is a brand decision, raised as fork 2 on #80.
+   Removing the dead line changes nothing observable; it only stops inviting the wrong fix. */
+
+/* --- Inter: body/UI face (OPERATOR DECISION — spec-kitty-saas mission #1673) ---
+   spec-kitty-saas PR #2203 added Playwright visual-regression coverage for 17 screens; all 29
+   assertions failed in CI while passing on a workstation. Root cause: --sk-font-sans resolved
+   to the bare system stack (ui-sans-serif, system-ui, ...) with no self-hosted body webfont, so
+   every screen's line/page height reflowed by host OS — two of three sampled screens differed
+   by ~100px, a bigger signal than the real regression the gate exists to catch.
+
+   Swansea was the DOCUMENTED body face (docs/design-system/brand-guidelines.md before this
+   change) but was never the token's actual value, and its embedded metadata reads "Copyright
+   1993 Roger White — All Rights Reserved — see .txt file for terms" with no such terms file
+   anywhere in this repo. This repo's own mission review flagged that RISK-1 HIGH and blocking
+   publication (docs/architecture/validation/mission-review-01KQJNTP49SPQNNXQ1TG3BKKKW.md:
+   148-157,215-219), with no record it was ever cleared. Swansea's files are left in place,
+   untouched and undeleted — that licensing question is a separate operator matter — but this
+   token no longer documents Swansea as the body face.
+
+   Inter (OFL 1.1, https://github.com/rsms/inter) has unambiguous redistribution rights and is
+   already self-hosted successfully by spec-kitty-saas's own Django app, whose Playwright lane
+   is green in the same CI run where the design-system-fed lane fails. The five weights below
+   (400/500/600/700/800) cover every --sk-weight-* token this library's styles actually pair
+   with --sk-font-sans (--sk-weight-normal through --sk-weight-extrabold; no story uses 900).
+   latin + latin-ext subsets only, via unicode-range, matching spec-kitty-saas's own self-hosting
+   choice — Cyrillic/Greek/Vietnamese are dropped as nothing in either product needs them.
+
+   Files are flat in ./fonts/ (inter-*.woff2), matching every other font already there —
+   subdirectories break both check-offline-load.mjs's flat dist/fonts/ file count and
+   assemble-demo-dist.sh's non-recursive `cp packages/tokens/fonts/*`. They are byte-identical
+   to the npm-published @fontsource/inter@5.3.0 tarball (verified independently, not merely
+   trusted from spec-kitty-saas's copy — see the PR description for the verification method).
+   Inter-OFL.txt sits alongside them, the OFL-required licence text.
+
+   DISCLOSED, NOT FIXED HERE: docs historically also named a --sk-font-body token that does not
+   exist anywhere in this schema, and --sk-font-reference (Swansea) is referenced by 0 of this
+   library's 57 style sheets. Both are pre-existing token-schema drift, tracked as a follow-up
+   rather than reshaped in this change. --sk-font-display (Falling Sky) is unchanged — it
+   remains the heading/display face. */
+@font-face { font-family: 'Inter'; src: url('./fonts/inter-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Inter'; src: url('./fonts/inter-latin-ext-400-normal.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Inter'; src: url('./fonts/inter-latin-500-normal.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Inter'; src: url('./fonts/inter-latin-ext-500-normal.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Inter'; src: url('./fonts/inter-latin-600-normal.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Inter'; src: url('./fonts/inter-latin-ext-600-normal.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Inter'; src: url('./fonts/inter-latin-700-normal.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Inter'; src: url('./fonts/inter-latin-ext-700-normal.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Inter'; src: url('./fonts/inter-latin-800-normal.woff2') format('woff2'); font-weight: 800; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Inter'; src: url('./fonts/inter-latin-ext-800-normal.woff2') format('woff2'); font-weight: 800; font-style: normal; font-display: swap; unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+
+/* --- Falling Sky: converted to woff2 (OPERATOR DECISION, mission #1673 follow-up) ---
+   The 14 upright+oblique .otf files below (300-900, both styles) were rebuilt as woff2 via
+   fontTools (`TTFont(src); ...; f.flavor = 'woff2'; f.save(dst)`), dropping the AAT-only tables
+   `kern`/`morx`/`bsln`/`feat`/`prop`. Verified by inspecting the raw bytes before touching
+   anything: the source .otf's `kern` table's first 32 bits are 0x00010000 — Apple's Fixed 1.0
+   AAT kern format, not the classic Microsoft/OpenType version-0 format non-Apple platforms'
+   'kern' parsers expect. Firefox correctly logs "kern: Unsupported table version: 1" (the
+   literal uint16 read of that same 32 bits) and discards the table — which is what an existing
+   Playwright assertion (zero console errors per story) caught once this repo's own Storybook
+   font-path defect was fixed and these files started actually loading.
+
+   Dropping those five tables loses nothing on any platform this library ships to: none of the
+   14 files carries GPOS/GSUB (verified — every one is AAT-only, no standard OpenType layout
+   table at all), so morx/bsln/feat/prop/kern were never read by Firefox, Chrome, or any
+   non-Apple renderer in the first place; only macOS/iOS Core Text ever consulted them, and only
+   for legacy AAT-style kerning/baseline/feature data that OpenType's GPOS has long superseded.
+   CFF (the actual glyph outlines), cmap, hmtx, head, hhea, maxp, OS/2, post and name are
+   untouched, so rendering is unaffected — verified by re-running the previously-failing Firefox
+   spec (now green) and by the CI-harvested baselines needing no change for these glyphs.
+
+   Falling Sky is OFL 1.1 (verified from the binaries' own embedded copyright/licence text, same
+   as the other bundled families), so redistributing this re-encoded form carries the same
+   licence obligations as the original .otf did — none that a re-encoding changes. */
+/* --- Falling Sky: upright weights --- */
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkyLight-K2EX.woff2') format('woff2');     font-weight: 300; font-style: normal;  font-display: swap; }
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSky-JKwK.woff2') format('woff2');          font-weight: 400; font-style: normal;  font-display: swap; }
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkyMedium-ved9.woff2') format('woff2');    font-weight: 500; font-style: normal;  font-display: swap; }
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkySemibold-Bn7B.woff2') format('woff2');  font-weight: 600; font-style: normal;  font-display: swap; }
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkyBold-zemL.woff2') format('woff2');      font-weight: 700; font-style: normal;  font-display: swap; }
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkyExtrabold-redB.woff2') format('woff2'); font-weight: 800; font-style: normal;  font-display: swap; }
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkyBlack-GYXA.woff2') format('woff2');     font-weight: 900; font-style: normal;  font-display: swap; }
+
+/* --- Falling Sky: oblique weights --- */
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkyLightOblique-2q3o.woff2') format('woff2');    font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkyOblique-n5XV.woff2') format('woff2');         font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkyMediumOblique-leLD.woff2') format('woff2');   font-weight: 500; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkySemiboldOblique-8q7M.woff2') format('woff2'); font-weight: 600; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkyBoldOblique-5zmv.woff2') format('woff2');     font-weight: 700; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkyExtraboldOblique-MwdP.woff2') format('woff2'); font-weight: 800; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkyBlackOblique-j37y.woff2') format('woff2');    font-weight: 900; font-style: italic; font-display: swap; }
+
+/* --- Falling Sky: Bold-plus (a heavier-than-Bold display cut) --- */
+@font-face { font-family: 'Falling Sky Boldplus'; src: url('./fonts/FallingSkyBoldplus-6GZ1.otf') format('opentype');         font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Falling Sky Boldplus'; src: url('./fonts/FallingSkyBoldplusOblique-yxmV.otf') format('opentype');  font-weight: 800; font-style: italic; font-display: swap; }
+
+/* --- Falling Sky: Condensed (use for narrow-column headlines) --- */
+@font-face { font-family: 'Falling Sky Condensed'; src: url('./fonts/FallingSkyCondensed-9qm2.otf') format('opentype');                   font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Falling Sky Condensed'; src: url('./fonts/FallingSkyCondensedOblique-leLw.otf') format('opentype');            font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Falling Sky Condensed Outline'; src: url('./fonts/FallingSkyCondensedOutline-n5XO.otf') format('opentype');             font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Falling Sky Condensed Outline'; src: url('./fonts/FallingSkyCondensedOutlineOblique-1qZv.otf') format('opentype');      font-weight: 400; font-style: italic; font-display: swap; }
+
+/* --- Falling Sky: Extended (use for wide hero numerals / splash) --- */
+@font-face { font-family: 'Falling Sky Extended'; src: url('./fonts/FallingSkyExtended-RLdE.otf') format('opentype');                     font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Falling Sky Extended'; src: url('./fonts/FallingSkyExtendedOblique-BnYw.otf') format('opentype');              font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Falling Sky Extended Outline'; src: url('./fonts/FallingSkyExtendedOutline-8qjn.otf') format('opentype');               font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Falling Sky Extended Outline'; src: url('./fonts/FallingSkyExtendedOutlineOblique-YBO2.otf') format('opentype');        font-weight: 400; font-style: italic; font-display: swap; }
+
+/* --- Falling Sky: Outline (display only, large sizes) --- */
+@font-face { font-family: 'Falling Sky Outline'; src: url('./fonts/FallingSkyOutline-1qZ0.otf') format('opentype');                       font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Falling Sky Outline'; src: url('./fonts/FallingSkyOutlineOblique-RLdV.otf') format('opentype');                font-weight: 400; font-style: italic; font-display: swap; }
+
+/* --- Swansea: secondary reference family --- */
+@font-face { font-family: 'Swansea'; src: url('./fonts/Swansea-q3pd.ttf') format('truetype');           font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Swansea'; src: url('./fonts/SwanseaItalic-AwqD.ttf') format('truetype');     font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Swansea'; src: url('./fonts/SwanseaBold-D0ox.ttf') format('truetype');       font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Swansea'; src: url('./fonts/SwanseaBoldItalic-p3Dv.ttf') format('truetype'); font-weight: 700; font-style: italic; font-display: swap; }
+
+/* ── Light mode override ─────────────────────────────────────────────────── */
+/* Anchored on warm cream (page) → pure white (cards). */
+:root[data-theme="light"],
+.sk-light {
+  /* Layout geometry is theme-invariant. */
+  --sk-layout-personal-rail-width: 3.5rem;
+  --sk-layout-context-sidebar-width: 15rem;
+  --sk-layout-workflow-lane-min-inline-size: 13.75rem;
+  --sk-layout-page-header-sticky-offset: 0rem;
+  --sk-layout-page-header-compact-height: 3rem;
+  --sk-layout-page-header-sticky-layer: 10;
+  --sk-layout-page-header-sticky-scroll-margin:
+    calc(var(--sk-layout-page-header-sticky-offset) +
+         var(--sk-layout-page-header-compact-height) +
+         var(--sk-space-7));
+
+  /* Surface scale — cream page, white cards */
+  --sk-surface-page:        #F8F5EC;   /* warm cream — page background */
+  --sk-surface-hero:        #FCFAF4;   /* hero / banded section background */
+  --sk-surface-card:        #FFFFFF;   /* card surface — pure white, lifted */
+  --sk-surface-input:       #F5F1E6;   /* elevated card / input fill / inset */
+  --sk-surface-pill:        #ECE7D8;   /* off-cream — nav pill rail, chips */
+  --sk-surface-muted:       #E8E2D0;   /* warm-gray — muted info panel */
+
+  --sk-fg-default:          #1A1A14;   /* near-black ink for headlines */
+  --sk-fg-body:             #2A2A22;   /* body */
+  --sk-fg-muted:            #5C5C52;   /* secondary body */
+  /* tertiary / labels. FAILS WCAG AA on the light surfaces it is used against:
+     3.49:1 on #FFFFFF (card) and 3.20:1 on #F8F5EC (page) — the same defect as the
+     dark value this PR raised, and worse. NOT fixed here: #93 makes LightMode
+     unrenderable, so a change could not be verified. Stays with #101. */
+  --sk-fg-subtle:           #8A8A7E;
+  --sk-fg-placeholder:      #B8B8AC;   /* placeholder */
+  /* Error-copy foreground, light theme — independent literal, not an alias. See the :root
+     declaration's comment for the full decoupling rationale. #6B2424 — page 10.12:1,
+     card 11.04:1, input 9.78:1, muted 8.52:1, pill 8.93:1. */
+  --sk-fg-error:            #6B2424;
+
+  --sk-border-default:      #EAE4D2;   /* hairline default */
+  --sk-border-strong:       #D6CFB9;   /* card border / divider */
+  /* Non-text control boundary, light theme — independent literal, not an alias. See the
+     :root declaration's comment for the full decoupling rationale. #7A7A6E — page 3.98:1,
+     card 4.34:1, input 3.85:1, muted 3.35:1 (tightest of all ten pairs), pill 3.51:1. */
+  --sk-border-control:      #7A7A6E;
+  /* Invalid-state control boundary, light theme — independent literal, not an alias. See the
+     :root declaration's comment for the full decoupling rationale (#350, fixing #321's own
+     gap). #6B2424 — page 10.12:1 (vs resting 3.98:1), card 11.04:1 (vs 4.34:1), input 9.78:1
+     (vs 3.85:1), muted 8.52:1 (vs 3.35:1), pill 8.93:1 (vs 3.51:1) — clears both the 3:1 floor
+     and the resting boundary on every surface, closing the inversion #350 reported. */
+  --sk-border-control-invalid: #6B2424;
+
+  /* Light-mode link accent flips to sage — sage-DEEP, and the shade is load-bearing.
+     This said `var(--sk-color-sage)`, and a token documented as a *link* accent has to be
+     readable as body-sized text. Measured: #4F8F4F is 3.58:1 on the cream page and 3.91:1 on
+     the white card — both under AA's 4.5. #3D7A3D is 4.76:1 and 5.19:1. Same hue, one step
+     down the ramp that was already defined.
+     `--sk-color-sage` itself is unchanged and still correct: its comment scopes it to
+     HEADINGS, and 3.58:1 clears AA's 3:1 for large text.
+
+     THIS TOKEN CARRIES THREE ROLES WITH THREE DIFFERENT CONTRAST CONTRACTS, and the ramp step
+     was chosen against the strictest of them. A lens is right that this is worth stating rather
+     than leaving implicit: (a) link TEXT in sk-blog-card, which needs AA 4.5 and is what forced
+     the change; (b) a hover BORDER in the same component, non-text, 3:1 at most; (c) a CTA
+     button FILL in sk-nav-pill, where the contract is on the paired foreground, not on the fill.
+     Consequence for (c) is a real visual change to a shipped component that is not blog-card —
+     the light-mode CTA fill moves #4F8F4F to #3D7A3D. That is a deliberate design change riding
+     along with a contrast fix, and it is named here so it is not discovered as a surprise.
+     Splitting the link role into its own token is the alternative if the roles ever diverge
+     further.
+     This also fixes the PAIR below, which was broken and merely unexercised — #FFFFFF on
+     #4F8F4F is 3.91:1, so any consumer using the accent background with its own designed
+     foreground failed AA. On #3D7A3D it is 5.19:1. Nothing used the pair correctly, which is
+     why nothing reported it; sk-nav-pill now does. */
+  --sk-color-accent:        var(--sk-color-sage-deep);
+  --sk-color-accent-fg:     #FFFFFF;
+
+  /* Pastel tint surfaces — high-key, high-readability */
+  --sk-surface-tint-mint:   #E8F4E8;
+  --sk-surface-tint-butter: #FFF6D9;
+  --sk-surface-tint-lilac:  #F0EAF8;
+  --sk-surface-tint-sky:    #E4EDF8;
+  /* Rose, derived by the same rule as its dark sibling: hue 0deg, L 0.935 against the
+     family's 0.925-0.945 (mint 0.933, butter 0.925, sky 0.933, lilac 0.945). */
+  --sk-surface-tint-rose:   #F8E5E5;
+
+  /* Tint borders — darker channel extractions for a light ground */
+  --sk-border-tint-sky:    rgba(46, 74, 107, 0.15);
+  --sk-border-tint-lilac:  rgba(74, 61, 120, 0.18);
+
+  /* On-tint inks: dark, accessible foregrounds */
+  --sk-on-tint-mint:        #2D5A2D;
+  --sk-on-tint-butter:      #6B5A0E;
+  --sk-on-tint-lilac:       #4A3D78;
+  --sk-on-tint-sky:         #2E4A6B;
+  /* L 0.28, inside the family's 0.237-0.355 ink band. 9.11:1 on --sk-surface-tint-rose. */
+  --sk-on-tint-rose:        #6B2424;
+
+  /* ── Data visualisation ──────────── */
+  --sk-color-data-series-primary: var(--sk-on-tint-sky);
+  --sk-color-data-grid: var(--sk-border-default);
+  --sk-color-data-baseline: var(--sk-fg-subtle);
+
+  /* ── Chart family (#179) ─────────────────────────────────────────────────
+     The light half. Rationale, the retrofit decision and the measured contrast
+     figures for BOTH themes are in the matching block in :root. Declared here
+     rather than inherited for the reason the status block states one category
+     below: a family present in one theme only is the half-populated theme #93
+     records, and a reader must be able to answer "does light have chart inks?"
+     from the light block. The aliases are spelled identically in both blocks
+     and resolve differently, because --sk-on-tint-* and --sk-fg-* differ per
+     theme; the dash patterns and geometry are theme-independent and are
+     restated so the two blocks stay symmetric. */
+  --sk-chart-series-1: var(--sk-on-tint-sky);
+  --sk-chart-series-2: var(--sk-on-tint-mint);
+  --sk-chart-series-3: var(--sk-on-tint-lilac);
+  --sk-chart-series-4: var(--sk-on-tint-butter);
+  --sk-chart-grid: var(--sk-border-default);
+  --sk-chart-baseline: var(--sk-fg-subtle);
+  --sk-chart-gap: var(--sk-fg-muted);
+  --sk-chart-gap-fill: rgba(92, 92, 82, 0.10);     /* channels from --sk-fg-muted */
+  --sk-chart-dash-1: none;
+  --sk-chart-dash-2: 8 4;
+  --sk-chart-dash-3: 2 3;
+  --sk-chart-dash-4: 10 3 2 3;
+  --sk-chart-gap-dash: 3 3;
+  --sk-chart-stroke-width: var(--sk-border-width-2);
+  --sk-chart-plot-block-size: calc(var(--sk-space-10) * 4);
+
+  /* ── Operational Status — semantic pairs (#177) ───────────────────────────
+     The light half. Rationale, pairing rule and the dark measurements are in the
+     matching block in :root; this is deliberately declared rather than inherited,
+     because a status category present in one theme only is the half-populated
+     theme #93 records, and a reader must be able to answer "does light have
+     status?" from the light block.
+     LIGHT      (a) --sk-fg-body #2A2A22      (b) pair        edge vs page
+       neutral       11.17                       5.22            6.20
+       info          12.23                       7.70            8.35
+       success       12.76                       7.10            7.38
+       attention     13.38                       6.28            6.23
+       danger        11.93                       9.11           10.12
+       recovery      12.27                       8.00            8.64
+     AA needs 4.5 for (a) and (b); WCAG 1.4.11 needs 3 for the edge. */
+  --sk-status-neutral:      var(--sk-surface-muted);
+  --sk-status-info:         var(--sk-surface-tint-sky);
+  --sk-status-success:      var(--sk-surface-tint-mint);
+  --sk-status-attention:    var(--sk-surface-tint-butter);
+  --sk-status-danger:       var(--sk-surface-tint-rose);
+  --sk-status-recovery:     var(--sk-surface-tint-lilac);
+
+  --sk-on-status-neutral:   var(--sk-fg-muted);
+  --sk-on-status-info:      var(--sk-on-tint-sky);
+  --sk-on-status-success:   var(--sk-on-tint-mint);
+  --sk-on-status-attention: var(--sk-on-tint-butter);
+  --sk-on-status-danger:    var(--sk-on-tint-rose);
+  --sk-on-status-recovery:  var(--sk-on-tint-lilac);
+
+  /* Pill background */
+  --sk-bg-pill:             #ECE7D8;
+
+  /* Light shadows — visible on cream */
+  --sk-shadow-card:         0 1px 2px rgba(20,20,15,0.04), 0 1px 1px rgba(20,20,15,0.06);
+  --sk-shadow-elev:         0 12px 32px -12px rgba(20,20,15,0.18);
+  --sk-shadow-glow-primary: 0 6px 20px -6px rgba(245,197,24,0.55);
+  --sk-shadow-focus:        0 0 0 3px rgba(255,250,235,1), 0 0 0 4px rgba(217,179,106,0.5);
+}
