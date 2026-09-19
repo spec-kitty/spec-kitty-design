@@ -4,7 +4,7 @@
  *
  * WHAT THIS IS
  *
- * A reproducible invocation that runs the mission's twelve canonical scope items (spec.md's
+ * A reproducible invocation that runs the canonical scope items (spec.md's
  * "Canonical scope" table) under the **webkit** project with `--repeat-each=N` (default 10)
  * and **`retries: 0`**, reporting a per-item pass/fail count. Four other work packages (WP02–
  * WP05) state their acceptance as "10/10 under the WP01 rig" — this file, and the
@@ -21,11 +21,12 @@
  *
  * WHY TWO PLAYWRIGHT INVOCATIONS, NOT ONE
  *
- * Eleven of the twelve items are addressable as an exact `file:line` (Playwright's own
- * test-selection syntax) — RESOLVED from each item's titleAnchor at run time, never stored; the twelfth (item 12, the `sk-action-row.spec.ts` "external
+ * Most items are selected by an exact `file:line` — Playwright's own
+ * test-selection syntax — whose line is RESOLVED from each item's titleAnchor at run time
+ * and never stored. The twelfth (item 12, the `sk-action-row.spec.ts` "external
  * controls" family) is parameterized across six modes with no single line, and is selected by
  * a `--grep` title match instead. Mixing a `--grep` filter into the same invocation as the
- * `file:line` selections would apply that filter GLOBALLY, silently dropping the other eleven
+ * `file:line` selections would apply that filter GLOBALLY, silently dropping the other line-addressed
  * items (their titles do not match item 12's grep pattern) — so item 12 runs as its own,
  * separate invocation against the whole file.
  *
@@ -38,8 +39,47 @@
  * responsible for that, the same separation the ordinary `playwright` job already has from
  * `storybook-build`.
  *
+ *
+ * A KNOWN ENVIRONMENTAL FAULT, SO IT IS NOT CHASED AS A TEST DEFECT
+ *
+ *   Error: page.goto: WebKit encountered an internal error
+ *
+ * This is a browser-level crash during navigation, not an assertion failure, and it lands on
+ * whichever test happens to be running when it occurs. FOUR sightings, none reproducing on an
+ * immediate re-measurement. Three landed on different tests; the fourth repeated on item 13,
+ * which is the first evidence that it is not uniformly distributed:
+ *
+ *   #453  run 35375265259 attempt 1  sk-progress item 4        item 4 was 9/10, 10/10 on
+ *                                                              attempt 2 (the run total was
+ *                                                              199/200; the other rows quote
+ *                                                              ITEM counts, so this one now does)
+ *   #456  run 35396510928            sk-notice item 13         29/30,  60/60 and 40/40 after
+ *   #456  PR #457 CI 35401059899     sk-public-header item 17  1 failure, 40/40 after
+ *   #456  run 35408745117            sk-notice item 13 AGAIN   59/60, and the only failure in
+ *                                                              420 executions of the reworked fix
+ *
+ * FAILURE KINDS SEEN IN THIS MISSION -- kinds, deliberately, not a total. An earlier revision of
+ * this note gave a single arithmetic ("38 + 3 + 17 ... ~1,270 executions ... Nothing else") that
+ * the evidence lens showed was wrong in three ways at once: the per-run counts do not sum to it,
+ * the execution total was short, and it omitted kinds it documents elsewhere in this same file.
+ * Counts change every time a run is added, so they are not restated here; read them from the runs.
+ *
+ *   1. sk-page-header sticky / WCAG 2.4.11 -- real, fixed. Runs 35396510928, 35397298731,
+ *      35398052148, 35398759713, 35399537534.
+ *   2. The environmental `page.goto: WebKit encountered an internal error` above -- 4 sightings,
+ *      never reproducing.
+ *   3. `TimeoutError: locator.waitFor ... .sk-empty-state--inline` (run 35403525734, item 18) --
+ *      one sighting, did not reproduce at 40 repeats, cause NOT established.
+ *   4. `sk-section-nav.spec.ts:402` on CHROMIUM (PR #457 runs 35401059899, 35403525734) -- a real
+ *      regression introduced BY this mission and fixed in 1125f06b, not a flake. It is listed
+ *      because an accounting that silently omits the author's own regression is worthless.
+ *
+ * WHY THIS MATTERS FOR READING A COUNT: a single occurrence turns an otherwise clean item into
+ * "29/30" and invites a de-flaking change to a test that has nothing wrong with it. Before
+ * treating any one-off as a test defect, read the error. If it is this one, re-measure instead.
+ * Two of the five specs #456 originally named were flagged on exactly this basis.
  * USAGE
- *   node scripts/webkit-repeat-run.mjs [--repeat-each=10] [--items=1,2,3,...,12] [--json-dir=DIR]
+ *   node scripts/webkit-repeat-run.mjs [--repeat-each=10] [--items=1,2,3,...,18] [--json-dir=DIR]
  *                                      [--workers=N]
  *
  * WHY `--workers` EXISTS (mission 453, shared-cause investigation)
@@ -70,18 +110,60 @@ const PROJECT = 'webkit'; // C-005 — the only engine this mission's affected t
  *  ever be read without knowing whether its repeats were co-scheduled. */
 let workersSetting = null;
 
-/** spec.md's "Canonical scope" table, items 1–11: each addressable by a unique titleAnchor. */
+/** Line-addressable items. Items 1-11 are #453's canonical scope; 13-18 were added by #456, the
+ *  last two found by this mission's own CI rather than named by the issue. Each carries a unique
+ *  titleAnchor and its line is resolved at run time. */
 const LINE_ITEMS = [
-  //
   { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'forced-colors, two points in cycle', titleAnchor: 'legible' },
   { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'forced-colors + reduced-motion', titleAnchor: 'together' },
   { item: 3, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'the sweep actually runs', titleAnchor: 'sweep' },
-  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'reduced-motion freeze', titleAnchor: 'stops' },  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'no animation leak onto determinate', titleAnchor: 'teeth' },  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'exact 56/240px columns', titleAnchor: 'preserves exact' },
+  { item: 4, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'reduced-motion freeze', titleAnchor: 'stops' },
+  { item: 5, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'no animation leak onto determinate', titleAnchor: 'teeth' },
+  { item: 6, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'exact 56/240px columns', titleAnchor: 'preserves exact' },
   { item: 7, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'narrow shell region order', titleAnchor: 'reachable' },
   { item: 8, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'landmarks/labels/grouping', titleAnchor: 'landmarks' },
   { item: 9, file: 'apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts', label: 'axe-clean in dark mode', titleAnchor: 'axe-clean' },
   { item: 10, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', label: 'focused overflow keyboard scroll', titleAnchor: 'outline' }, // WP03: was 557; T021's waitForScrollSettled helper (added ahead of this test) shifted it. See tmp/finding/wp03-lane-c-rig-line-number-drift.md.
   { item: 11, file: 'apps/storybook/src/tests/sk-radio-choice-group.spec.ts', label: 'legend cue across two stories', titleAnchor: 'non-required legend' },
+  // ---------------------------------------------------------------------------------------
+  // Items 13-16 (#456). The webkit lane flakes BEYOND mission #453's twelve items. These four
+  // were observed flaky in pre-mission CI runs on the train, with run ids recorded in #456:
+  // 35375268744 (sk-notice), 34637284298 (sk-page-header-sticky), 34673156155
+  // (sk-work-explorer-pattern and sk-workflow-board:650 -- a DIFFERENT test from item 10).
+  //
+  // They are added here rather than investigated by reading, deliberately. None of them carries
+  // the shapes this programme has been fixing -- no waitForTimeout, no innerHTML injection over
+  // the story root, no elapsed-time wait -- so they are not variants of the render race, and
+  // reading them produced plausible mechanisms that did not survive checking. #456's own stated
+  // method is to measure first at --retries=0 and find the mechanism from the failure, which is
+  // what items 1-12 established works and what guessing did not.
+  //
+  // The fifth spec named in #456, sk-action-row.spec.ts:110, is NOT added: it is the same
+  // parameterized family already measured as item 12, which has been 10/10 under webkit in every
+  // sample. Its only sighting was chromium (run 34673156155), so if it is real it is an
+  // engine-specific issue this webkit rig cannot see, and it needs its own measurement.
+  { item: 13, file: 'apps/storybook/src/tests/sk-notice-forced-colors.spec.ts', label: 'reduced-motion entrance suppressed, message survives', titleAnchor: 'entrance animation is suppressed' },
+  { item: 14, file: 'apps/storybook/src/tests/sk-page-header-sticky.spec.ts', label: 'focused row lifted clear of sticky header', titleAnchor: 'lifted clear' },
+  { item: 15, file: 'apps/storybook/src/tests/sk-work-explorer-pattern.spec.ts', label: 'W4 rail/context/overflow at shell edges', titleAnchor: 'W4 retains' },
+  { item: 16, file: 'apps/storybook/src/tests/sk-workflow-board.spec.ts', label: '220px smallest qualifying candidate in sweep', titleAnchor: '220px is the smallest' },
+  // Item 17 (#456, found BY this mission rather than named by it). Surfaced in PR #457's own CI
+  // run 35401059899 -- a webkit failure in a spec this branch never touched, absent from the four
+  // pre-mission runs checked (34820757579, 34673156155, 34637284298, 34606532461) and sharing no
+  // story file or helper with anything changed here. So it is an independent member of the
+  // population #456 describes, not a consequence of this work.
+  //
+  // Added rather than filed: the operator ruled that anything this mission's own measurement turns
+  // up is handled in-mission, and a rig that finds a flake and then writes an issue about it is
+  // doing half its job.
+  { item: 17, file: 'apps/storybook/src/tests/sk-public-header.spec.ts', label: 'focus outlines unclipped at narrow and wide widths', titleAnchor: 'focus outlines remain visible' },
+  // Item 18 (#456, found by this mission's own CI, second of two). PR #457 run 35403525734:
+  // `TimeoutError: locator.waitFor: Timeout 20000ms exceeded — waiting for
+  // locator('.sk-empty-state--inline').first() to be visible`, i.e. the story element never became
+  // visible at all. Flaky, not failed: it passed on retry. Absent from the three pre-mission runs
+  // checked, in a spec this branch never touched, and NOT the environmental WebKit-internal-error
+  // signature documented in this file's header -- so it is measured rather than assumed to be
+  // either a defect or noise.
+  { item: 18, file: 'apps/storybook/src/tests/sk-empty-state-inline.spec.ts', label: 'long supplied copy wraps in the inline empty state', titleAnchor: 'long supplied copy wraps' },
 ];
 
 /** Item 12: parameterized across six modes, no single line — selected by title grep instead. */

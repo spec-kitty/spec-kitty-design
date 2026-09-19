@@ -591,9 +591,22 @@ declare module 'vue' {
      * dropped in that reflow.
      *
      * Consumers styling their own content under a sticky header should set
-     * `scroll-margin-block-start: var(--sk-layout-page-header-sticky-scroll-margin)` on the
-     * focusable elements in it, so a focused element scrolled into view is not obscured by the
-     * header (WCAG 2.4.11).
+     * `scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin)` on their SCROLL
+     * CONTAINER, so a focused element scrolled into view is not obscured by the header
+     * (WCAG 2.4.11). One declaration on the container, NOT `scroll-margin-block-start` per focusable:
+     * an earlier version of this note prescribed the per-row form, and setting both makes the insets
+     * STACK to roughly twice the needed offset.
+     *
+     * ON WEBKIT THAT IS NECESSARY AND NOT SUFFICIENT, which this note also used to get wrong.
+     * Measured under webkit at `--repeat-each=60` (#456): focus does not scroll an occluded row clear,
+     * because webkit declines to INITIATE a focus-driven scroll for a row it considers already inside
+     * the scrollport. The inset is honoured exactly once a scroll happens -- it simply never gets one.
+     * Chromium initiates that scroll itself, which is why this is invisible there. The consumer-side
+     * remedy is a `focusin` handler that scrolls explicitly; it is stated in full, with the
+     * measurements, in docs/design-system/using-components.md.
+     *
+     * Whether this element should own that handler instead is issue #458: ADR #145 ruled it observes
+     * no scrolling and measures no layout, and that ruling predates this measurement.
      *
      * That token's DEFAULT VALUE covers ONE configuration: `density="compact"` laid out on a single
      * row, which is the header wider than 720px. It is derived from the header's own sticky offset
