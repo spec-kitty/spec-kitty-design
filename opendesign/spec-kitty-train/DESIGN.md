@@ -9,15 +9,15 @@
 
 ## Authority and source order
 
-The sibling `tokens.css` is a byte-identical copy of
-`packages/tokens/src/tokens.css`, digest-checked on every pull request. It is authoritative for every literal
+The sibling `tokens.css` is the stylesheet `@spec-kitty/tokens` publishes, regenerated and
+drift-checked on every pull request. It is authoritative for every literal
 colour, type family, size, spacing, radius, shadow, motion, and shell-geometry value. Preserve the
 `--sk-*` names and values exactly. Do not translate them into OpenDesign generic token names, add
 parallel aliases, or replace them with values inferred from screenshots.
 
-For component anatomy and behavior, use the `@spec-kitty/elements` and `@spec-kitty/styles`
-contracts from the same library version. The sibling `components.html` shows every
-component's static form, and the generated section at the end of this file lists them. Application screenshots and older Team Kitty CSS are
+For component anatomy, use the component pages in this package: `components/<name>.html` holds a
+component's CSS and every static form it has, and the generated section at the end of this file
+lists them with their exact classes. Application screenshots and older Team Kitty CSS are
 references only; they never override this package.
 
 ## Visual character
@@ -48,8 +48,8 @@ must never communicate state.
 
 ## Typography
 
-Use Falling Sky for product headings and strong labels, Swansea or the declared system sans stack
-for body copy, and `--sk-font-mono` for branches, commits, Work Package identifiers, commands, and
+Use Falling Sky (`--sk-font-display`) for product headings and strong labels, Inter
+(`--sk-font-sans`) for body copy and UI, and `--sk-font-mono` for branches, commits, Work Package identifiers, commands, and
 machine facts. Keep body text readable and compact. Use the published `--sk-text-*` and
 `--sk-weight-*` scales rather than inventing intermediate sizes.
 
@@ -84,48 +84,22 @@ modifier), `facts`, `form-field`, `form-select`, `progress`, `prose`, `segmented
 intentionally not custom elements because light-DOM semantics are part of their contract. Do not
 invent wrapper elements.
 
-The current train adds three especially relevant composition contracts: native checkbox-choice
-groups for multi-select filters such as the detailed Kanban lane filter; compact event timelines
-for dense operational chronology; and `sk-action-row` native-route plus flush presentations for
-real link destinations without card-within-card chrome. Use their source anatomy from the library
-branch rather than recreating approximations.
+Three composition contracts matter most for current Team Kitty screens, and all three have
+component pages here: `checkbox-choice-group` for multi-select filters such as the detailed Kanban
+lane filter, the compact `event-timeline` for dense operational chronology, and `action-row` in its
+native-route and flush presentations for real link destinations without card-within-card chrome.
+Copy their anatomy from their pages rather than recreating approximations.
 
-The current train also includes the complete Mission Reading pattern family from issue #292:
-M1–M8, the compact drawer, unavailable entries, snapshot notice, Other artifacts/Ops states,
-separate truth regions, narrow and threshold fixtures, long-content stress, forced colors, and
-light mode. Reuse this pattern source directly for Mission Reading corrections. M9/M10 terminal
-fragment failure and degraded escaped-source states remain application-owned extensions until the
-library explicitly adopts them.
+**Shell, status and dialog elements are shadow-DOM only and cannot be emitted from this package.**
+The generated section names every one of them. The application shell with its personal rail and
+context sidebar, the page and section headers, metrics, notices, the copy field, charts and the
+confirm dialog render only with the library's JavaScript. Leave them out of a static artifact, or
+mark where one belongs, rather than inventing markup for them. The layout tokens above still
+apply: a static page can reserve the 56px rail and 240px sidebar with plain layout.
 
-Static consumers of the context sidebar, metric, notice, page header, personal rail,
-section header, and site footer must preserve the current cross-sheet `::part()` styling
-contract. The `93c82f1` authority update hardens and documents those adopted-style seams;
-it does not add new product data or navigation capability.
-
-The current train also contains the corrected determinate and compact-indeterminate Progress
-forced-colors contract. Preserve its non-motion cue and visible indicator boundary when a
-screen actually composes the published Progress pattern; this authority update does not alter
-Mission Kanban or workflow-board anatomy.
-
-The current train defines `--sk-border-control` separately from passive boundaries and gives
-native `.sk-input` and `sk-form-input` controls a minimum block size of `--sk-space-9`. Preserve
-that stronger control boundary and minimum target size in application-owned selects and text
-inputs; do not fall back to `--sk-border-default` or a shorter bespoke control.
-
-Issue #274 adds the `sk-app-shell` `presentation="rail-preserving"` mode for applications that
-must retain the 56px personal rail while the context sidebar collapses. It activates against the
-shell's own content-box width through 1100px, reuses the existing consumer-controlled compact
-header/navigation seam, and leaves the personal rail active. The shell suppresses inactive
-light-DOM roots with `inert` and `aria-hidden`; the consumer still owns the trigger,
-`aria-expanded`, routes, `open` value, dismissal acceptance, and navigation-close behavior. Use
-this mode only where product information architecture requires persistent personal navigation;
-do not approximate it with another drawer or a viewport-only media query.
-
-Issue #257 adds `sk-copy-field` for a supplied non-editable value, one native copy action,
-and one stable polite result region. Its outcomes are exactly `copied`, `manual`, or `failed`;
-it never emits the copied value, runs a command, retries, times out, or owns application state.
-Prefer it when a later screen needs this complete interaction contract rather than assembling an
-ad-hoc clipboard control.
+`form-field`'s `.sk-input` has a minimum block size of `--sk-space-9` and uses
+`--sk-border-control`, which is deliberately stronger than passive boundaries. Keep both in any
+text input or select you compose; do not fall back to `--sk-border-default` or a shorter control.
 
 Components own presentation and accessible structure; consumers own routes, labels, timestamps,
 data, polling, calculations, and state transitions. A page header does not calculate freshness,
@@ -156,8 +130,9 @@ stale states must use honest copy and must not manufacture facts or actions.
 
 ## Prototype and handoff rules
 
-For self-contained HTML prototypes, paste `tokens.css` unchanged into the first style block and
-write component rules only with `var(--sk-*)` references. Do not introduce remote CSS, font,
+For self-contained HTML prototypes, paste `tokens.css` unchanged into the first style block, then
+each component page's `<style>` block, and write any further rules only with `var(--sk-*)`
+references. Do not introduce remote CSS, font,
 script, or icon dependencies. If local font assets cannot be emitted with the artifact, retain the
 authoritative font stacks and allow their documented system fallbacks to resolve.
 
@@ -234,10 +209,11 @@ must not be approximated with invented markup. They exist in the library as shad
 ## Forms left out of the fixture
 
 **2** of the library's static forms compose a custom element, so they cannot render
-without JavaScript and are not in `components.html`. The rest of each component is:
+without JavaScript. They are left out of `components.html` and the component pages; every other
+form of the same component is in. Left out:
 
-- `boundary-page` / `forced-colors` — custom-element tags in the fixture: sk-entity-marker
-- `boundary-page` / `form-card` — custom-element tags in the fixture: sk-entity-marker
+- `boundary-page` / `forced-colors` — it composes custom-element tags: sk-entity-marker
+- `boundary-page` / `form-card` — it composes custom-element tags: sk-entity-marker
 
 ## Static-form fidelity caveat
 

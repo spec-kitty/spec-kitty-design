@@ -4,14 +4,18 @@
  *
  * WHY VENDORED RATHER THAN RE-IMPLEMENTED. The OpenDesign package this repository ships has to pass
  * OpenDesign's validator and carry the `components.manifest.json` OpenDesign itself would derive —
- * because OpenDesign REGENERATES that file on import (`apps/daemon/src/design-systems/import.ts:156`)
- * and silently discards anything it did not produce. A copy of the schema rewritten here would share
+ * because at discovery OpenDesign reads that file VERBATIM and summarises it into every prompt
+ * (`apps/daemon/src/design-systems/index.ts:599-609, 927-934`) instead of deriving it again. A cache
+ * computed any other way would be trusted as it is. A copy of the schema rewritten here would share
  * the blind spots of whoever rewrote it; the reference code cannot disagree with itself.
  *
  * Both upstream files have zero imports, so they run standalone. They are verified against the
  * sha256 recorded in `vendor/open-design/DIGESTS.json` BEFORE they are imported, so an edited copy
  * is refused rather than trusted — a vendored file anyone can hand-tweak is a re-implementation with
- * extra steps.
+ * extra steps. THE LIMIT: the digests live in this tree, so an edit to a vendored file AND its digest
+ * in the same change passes. That is a visible, reviewable diff to DIGESTS.json, not a silent drift;
+ * this check catches accidental edits, and review catches deliberate ones. It proves the files match
+ * their RECORDED upstream digests, and says exactly that.
  */
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdtempSync, rmSync, cpSync, realpathSync } from 'node:fs';
@@ -60,6 +64,11 @@ export function verifyVendor(dir = VENDOR_DIR) {
 
 /** Verify, then import. Throws on any digest problem so no caller can use an unverified copy. */
 export async function loadReference(dir = VENDOR_DIR) {
+  // The vendored files are TypeScript, run by Node's built-in type stripping (Node >= 22.18).
+  // Without it the import fails with an opaque ERR_UNKNOWN_FILE_EXTENSION; say why instead.
+  if (!process.features?.typescript) {
+    throw new Error(`OpenDesign reference needs Node's TypeScript stripping (Node >= 22.18); this is ${process.version}`);
+  }
   const problems = verifyVendor(dir);
   if (problems.length) throw new Error(`OpenDesign reference refused:\n  - ${problems.join('\n  - ')}`);
   const cm = await import(pathToFileURL(join(dir, 'components-manifest.ts')).href);
@@ -199,6 +208,6 @@ if (isDirectInvocation(process.argv[1], import.meta.url)) {
       console.error(`❌ vendored OpenDesign reference does not match upstream:\n  - ${problems.join('\n  - ')}`);
       process.exit(1);
     }
-    console.log('✅ vendored OpenDesign reference matches upstream byte-for-byte.');
+    console.log('✅ vendored OpenDesign reference matches its recorded upstream digests.');
   }
 }

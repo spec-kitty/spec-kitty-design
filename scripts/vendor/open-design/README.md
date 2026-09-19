@@ -7,7 +7,9 @@ and the validator for a design-system project manifest — so the gates that use
 repository's package against the reference implementation, not a re-implementation of it.
 
 **Do not edit these files.** `scripts/opendesign-reference.mjs` verifies each one against its
-recorded sha256 before importing it and refuses on any difference. To move to a newer OpenDesign,
+recorded sha256 before importing it and refuses on any difference. The digests are in this tree, so
+changing a file and its digest together passes: such a change is a visible diff to `DIGESTS.json`
+and must be justified in review as an upstream move. To move to a newer OpenDesign,
 copy both files from the new upstream commit with `git show <commit>:<upstreamPath>`, update
 `DIGESTS.json`, and regenerate the package.
 

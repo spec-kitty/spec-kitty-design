@@ -27,8 +27,9 @@
  *   2. Component CSS is inlined VERBATIM. 13 components ship :host/::slotted rules, inert in light DOM.
  *      Rewriting them would teach OpenDesign against a stylesheet no consumer installs.
  *   3. components.manifest.json is produced by OPENDESIGN'S OWN extractComponentsManifest(), vendored
- *      byte-for-byte — because OpenDesign regenerates that file on import and discards anything it
- *      did not produce. A manifest computed any other way would be silently replaced.
+ *      byte-for-byte — because at discovery OpenDesign reads that file verbatim and summarises it into
+ *      every prompt (index.ts:599-609, 927-934); it re-derives only when the file is absent. A
+ *      manifest computed any other way would be trusted as it is.
  *
  * WHAT OPENDESIGN'S AGENT ACTUALLY SEES — measured by the WP03 consumability run, not assumed. The
  * prompt carries DESIGN.md, USAGE.md and tokens.css verbatim, but for components only a SUMMARY of
@@ -48,6 +49,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadReference } from './opendesign-reference.mjs';
+import { buildTokensCss } from './build-tokens-css.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const OUT_REL = 'opendesign/spec-kitty-train';
@@ -137,6 +139,14 @@ export function derive(root = ROOT) {
     components.push({ name, css, cssRel: `packages/styles/src/${name}/sk-${name}.css`, forms: staticForms, shadowOnly });
   }
 
+  // AN EMPTY SET IS A DEFECT, NOT A PACKAGE. A change that routes every form to `omitted` (an
+  // over-broad staticOnlyProblems, say) would otherwise regenerate a valid-looking package of zero
+  // components that --check then certifies — REL4 review measured exactly that as GREEN.
+  const formCount = components.reduce((n, c) => n + c.forms.length, 0);
+  if (components.length === 0 || formCount === 0) {
+    problems.push(`derived ${components.length} components and ${formCount} static forms — refusing to build an empty package`);
+  }
+
   const elements = readdirSync(E, { withFileTypes: true })
     .filter((d) => d.isDirectory() && existsSync(join(E, d.name, `sk-${d.name}.ts`)))
     .map((d) => d.name)
@@ -157,7 +167,10 @@ export function derive(root = ROOT) {
     .filter((e) => formHome.has(e) && formHome.get(e) !== e)
     .map((e) => ({ element: e, component: formHome.get(e) }));
 
-  const tokensCss = readFileSync(join(T, 'tokens.css'), 'utf8');
+  // THE PUBLISHED STYLESHEET, NOT THE SOURCE. @spec-kitty/tokens ships buildTokensCss(src), which adds
+  // the :root:not([data-theme]) prefers-color-scheme fallback. Shipping src would make an OpenDesign
+  // page behave differently from an installed library page whenever no data-theme is set.
+  const tokensCss = buildTokensCss(readFileSync(join(T, 'tokens.css'), 'utf8'));
   const fonts = readdirSync(join(T, 'fonts')).filter((f) => statSync(join(T, 'fonts', f)).isFile()).sort();
   const version = (pkg) => JSON.parse(readFileSync(join(root, 'packages', pkg, 'package.json'), 'utf8')).version;
 
@@ -186,9 +199,9 @@ export function staticOnlyProblems(html) {
   const problems = [];
   const body = html.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<!--[\s\S]*?-->/g, '');
   const custom = [...new Set([...body.matchAll(/<([a-z][a-z0-9]*-[a-z0-9-]*)\b/gi)].map((m) => m[1].toLowerCase()))];
-  if (custom.length) problems.push(`custom-element tags in the fixture: ${custom.join(', ')}`);
-  if (/<script\b/i.test(body)) problems.push('a <script> element is in the fixture');
-  if (/<template\b[^>]*\bshadowroot(mode)?\s*=/i.test(body)) problems.push('a declarative shadow root is in the fixture');
+  if (custom.length) problems.push(`it composes custom-element tags: ${custom.join(', ')}`);
+  if (/<script\b/i.test(body)) problems.push('it contains a <script> element');
+  if (/<template\b[^>]*\bshadowroot(mode)?\s*=/i.test(body)) problems.push('it contains a declarative shadow root');
   return problems;
 }
 
@@ -224,7 +237,7 @@ export function buildComponentsHtml(d) {
     `components, ${d.components.reduce((n, c) => n + c.forms.length, 0)} forms — generated from ` +
     `@spec-kitty/styles ${d.versions.styles}. Markup is static HTML only.`;
   const css = [
-    `/* tokens: packages/tokens/src/tokens.css — @spec-kitty/tokens ${d.versions.tokens} */`,
+    `/* tokens: @spec-kitty/tokens ${d.versions.tokens} (buildTokensCss over packages/tokens/src/tokens.css) */`,
     d.tokensCss.trimEnd(),
     ...d.components.map((c) => `\n/* component: ${c.name} — ${c.cssRel} */\n${c.css.trimEnd()}`),
   ].join('\n');
@@ -315,7 +328,18 @@ export function buildManifest(d) {
     // THE PER-COMPONENT PAGES ARE DECLARED AS PREVIEW PAGES because that is the only manifest key
     // that puts a file on OpenDesign's pull index (buildDesignSystemPullIndex) and its read
     // allowlist (buildDesignSystemPullFileAllowlist). components.html is on neither.
-    preview: { dir: 'components', pages: d.components.map((c) => ({ path: componentPagePath(c), title: c.name, role: 'component' })) },
+    //
+    // components.html IS LISTED FIRST. OpenDesign's Library picks the first page whose path matches
+    // /index|overview|all|showcase|components/ (library-sync.ts:151) — every components/<name>.html
+    // matches — so without it the whole system's Library card would be one component. NO `role`:
+    // the kit view keys its tiles on `role || path` (design-kit.ts:198), so a shared role collides.
+    preview: {
+      dir: 'components',
+      pages: [
+        { path: 'components.html', title: `All ${d.components.length} components (large: read components/<name>.html instead)` },
+        ...d.components.map((c) => ({ path: componentPagePath(c), title: c.name })),
+      ],
+    },
     craft: { applies: [], suggested: ['accessibility-baseline'], exemptions: [] },
   };
 }
@@ -377,7 +401,8 @@ export function buildDesignRegion(d) {
           '## Forms left out of the fixture',
           '',
           `**${d.omitted.length}** of the library's static forms compose a custom element, so they cannot render`,
-          'without JavaScript and are not in `components.html`. The rest of each component is:',
+          'without JavaScript. They are left out of `components.html` and the component pages; every other',
+          'form of the same component is in. Left out:',
           '',
           ...d.omitted.map((o) => `- \`${o.component}\` / \`${o.variant}\` — ${o.why}`),
           '',
@@ -396,6 +421,30 @@ export function buildDesignRegion(d) {
   ].join('\n');
 }
 
+/**
+ * AUTHORED PROSE MAY NOT CONTRADICT THE GENERATED FACTS. OpenDesign pushes USAGE.md and DESIGN.md
+ * into the same prompt, so authored advice to "prefer `sk-copy-field`" beside a generated list
+ * saying it cannot be emitted gives the agent two opposite instructions. Per paragraph, refuses:
+ *   - a `sk-<element>` the generated section excludes, unless the paragraph says it cannot be emitted
+ *   - a repository path (`packages/…`, `*.stories.ts`): the package is all the agent can read
+ *   - a hard-coded derived count ("34 components"): the generated section owns those numbers
+ */
+export function authoredProseProblems(file, text, d) {
+  const problems = [];
+  const outside = text.includes(BEGIN) && text.includes(END) ? text.slice(0, text.indexOf(BEGIN)) + text.slice(text.indexOf(END) + END.length) : text;
+  const excluded = new Set(d.excluded);
+  for (const para of outside.split(/\n\s*\n/)) {
+    const head = para.trim().split('\n')[0].slice(0, 60);
+    const qualified = /cannot be emitted|cannot emit|shadow-DOM only/i.test(para);
+    for (const m of para.matchAll(/\bsk-([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\b(?![_-])/g)) {
+      if (excluded.has(m[1]) && !qualified) problems.push(`${file}: "${head}…" recommends \`sk-${m[1]}\`, which has no static form — say it cannot be emitted, or drop it`);
+    }
+    for (const m of para.matchAll(/`([^`]*(?:packages\/|\.stories\.)[^`]*)`/g)) problems.push(`${file}: "${head}…" points at \`${m[1]}\`, which is not in the package`);
+    for (const m of para.matchAll(/\b(\d+)\s+(components|pages|static forms|forms|elements)\b/g)) problems.push(`${file}: "${head}…" hard-codes "${m[0]}" — the generated section owns derived counts`);
+  }
+  return problems;
+}
+
 /** Splice the generated region into the authored DESIGN.md. Refuses a file without both markers. */
 export function spliceDesign(authored, region) {
   const a = authored.indexOf(BEGIN);
@@ -410,8 +459,11 @@ export function spliceDesign(authored, region) {
  * Build every generated file as bytes, keyed by path relative to the package directory. `designMd`
  * is the committed DESIGN.md, whose authored part is preserved.
  */
-export async function buildPackage(d, designMd, ref) {
+export async function buildPackage(d, designMd, ref, usageMd) {
+  if (typeof usageMd !== 'string') throw new Error('buildPackage needs USAGE.md: its prose is checked against the generated facts too');
   const files = new Map();
+  const prose = [...authoredProseProblems('DESIGN.md', designMd, d), ...authoredProseProblems('USAGE.md', usageMd, d)];
+  if (prose.length) throw new Error(`authored prose contradicts the generated facts:\n  - ${prose.join('\n  - ')}`);
   const html = buildComponentsHtml(d);
   const staticProblems = staticOnlyProblems(html);
   if (staticProblems.length) throw new Error(`the fixture is not static-only:\n  - ${staticProblems.join('\n  - ')}`);
@@ -420,8 +472,8 @@ export async function buildPackage(d, designMd, ref) {
   const parsed = ref.parseDesignSystemProjectManifest(manifestJson);
   if (!parsed.ok) throw new Error(`OpenDesign's own validator rejects manifest.json:\n  - ${parsed.errors.join('\n  - ')}`);
 
-  // Serialised exactly as OpenDesign's importer writes it (import.ts:172-173), so an import rewrites
-  // this file with identical bytes rather than a silently different one.
+  // Serialised as OpenDesign serialises this cache (import.ts:172-173). Discovery reads it verbatim,
+  // so it must be exactly what OpenDesign's own extractor derives from components.html.
   const cm = ref.extractComponentsManifest({ brandId: BRAND_ID, fixtureHtml: html, tokensCss: d.tokensCss });
   files.set('components.html', Buffer.from(html));
   for (const c of d.components) {
@@ -493,7 +545,12 @@ async function main({ check }) {
     process.exit(1);
   }
   const ref = await loadReference();
-  const files = await buildPackage(d, readFileSync(designPath, 'utf8'), ref);
+  const usagePath = join(outDir, 'USAGE.md');
+  if (!existsSync(usagePath)) {
+    console.error(`❌ ${OUT_REL}/USAGE.md is missing — it is the authored read-order OpenDesign pushes first.`);
+    process.exit(1);
+  }
+  const files = await buildPackage(d, readFileSync(designPath, 'utf8'), ref, readFileSync(usagePath, 'utf8'));
 
   if (check) {
     const problems = diffPackage(outDir, files);
@@ -504,7 +561,8 @@ async function main({ check }) {
     const forms = d.components.reduce((n, c) => n + c.forms.length, 0);
     console.log(
       `✅ ${OUT_REL} is current: ${d.components.length} components, ${forms} static forms, ` +
-        `${d.excluded.length} elements and ${d.omitted.length} non-static forms named as not emittable, ${d.fonts.length} fonts.`,
+        `${d.excluded.length} elements and ${d.omitted.length} non-static forms named as not emittable, ` +
+        `${d.fonts.filter((f) => /\.(woff2?|otf|ttf)$/i.test(f)).length} font files (+${d.fonts.filter((f) => !/\.(woff2?|otf|ttf)$/i.test(f)).length} licence).`,
     );
     return;
   }
@@ -529,7 +587,7 @@ const FIXTURE = {
   elements: ['button', 'grid', 'notice'],
   excluded: ['notice'],
   coveredElsewhere: [{ element: 'form-input', component: 'form-field' }],
-  omitted: [{ component: 'boundary-page', variant: 'form-card', file: 'f', why: 'custom-element tags in the fixture: sk-entity-marker' }],
+  omitted: [{ component: 'boundary-page', variant: 'form-card', file: 'f', why: 'it composes custom-element tags: sk-entity-marker' }],
   tokensCss: ':root{--sk-a:#000}',
   fonts: [],
   versions: { tokens: '1.0.0', styles: '1.0.0', elements: '1.0.0' },
@@ -554,7 +612,7 @@ const PROBES = [
   ['splicing replaces the old region', () => !spliceDesign(DESIGN_FIXTURE, 'NEW').includes('old')],
   ['a DESIGN.md without markers is refused', () => { try { spliceDesign('# no markers', 'x'); return false; } catch { return true; } }],
   ['the real tree derives a non-empty set with no problems', () => { const d = derive(); return d.problems.length === 0 && d.components.length > 0; }],
-  ['an omitted non-static form is named in DESIGN.md with its reason', () => /boundary-page`\s*\/\s*`form-card` — custom-element/.test(buildDesignRegion(FIXTURE))],
+  ['an omitted non-static form is named in DESIGN.md with its reason', () => /boundary-page`\s*\/\s*`form-card` — it composes custom-element/.test(buildDesignRegion(FIXTURE))],
   ['the real tree omits exactly the forms that compose a custom element', () => { const d = derive(); return d.omitted.length > 0 && d.omitted.every((o) => /sk-/.test(o.why)) && d.components.every((c) => c.forms.every((f) => staticOnlyProblems(`<body>${f.markup}</body>`).length === 0)); }],
   ['an element whose form lives elsewhere is named with its home', () => buildDesignRegion(FIXTURE).includes('`sk-form-input` — use the `form-field` forms')],
   ['the real tree drops NO form: taken + omitted = every .html on disk', () => { const d = derive(); const taken = d.components.reduce((n, c) => n + c.forms.length, 0); const onDisk = readdirSync(join(ROOT, 'packages/styles/src'), { withFileTypes: true }).filter((x) => x.isDirectory()).reduce((n, x) => n + readdirSync(join(ROOT, 'packages/styles/src', x.name)).filter((f) => f.endsWith('.html')).length, 0); return taken + d.omitted.length === onDisk && onDisk > 0; }],
@@ -565,11 +623,26 @@ const PROBES = [
   ['the class vocabulary skips an at-rule header but keeps the rules inside it', () => classVocabulary('@layer base.components{ .sk-a{} }', []).join() === 'sk-a'],
   ['the class vocabulary includes classes the forms use', () => classVocabulary('', [{ markup: '<p class="sk-a  is-open"></p>' }]).join() === 'is-open,sk-a'],
   ['every component gets its own static-only page carrying its CSS verbatim', () => FIXTURE.components.every((c) => { const p = buildComponentPage(FIXTURE, c); return p.includes(c.css) && staticOnlyProblems(p).length === 0 && p.includes('href="../tokens.css"'); })],
-  ['the manifest declares exactly one preview page per component (the pull-index entry)', () => { const m = buildManifest(FIXTURE); return m.preview.pages.length === FIXTURE.components.length && m.preview.pages.every((pg, i) => pg.path === componentPagePath(FIXTURE.components[i])); }],
+  ['the manifest declares the showcase first, then one preview page per component', () => { const m = buildManifest(FIXTURE); const [first, ...rest] = m.preview.pages; return first.path === 'components.html' && rest.length === FIXTURE.components.length && rest.every((pg, i) => pg.path === componentPagePath(FIXTURE.components[i])); }],
+  ['OpenDesign\'s Library card resolves to the showcase, not one component (library-sync.ts:151 rule)', () => buildManifest(FIXTURE).preview.pages.find((p) => /index|overview|all|showcase|components/i.test(p.path)).path === 'components.html'],
+  ['every preview tile has a distinct kit-view key (design-kit.ts:198: role || path)', () => { const ks = buildManifest(FIXTURE).preview.pages.map((p) => p.role?.trim() || p.path); return new Set(ks).size === ks.length; }],
+  ['authored prose that recommends a non-emittable element is refused', () => authoredProseProblems('USAGE.md', 'Prefer `sk-notice` for alerts.', FIXTURE).length === 1],
+  ['…unless the paragraph says it cannot be emitted (control)', () => authoredProseProblems('USAGE.md', '`sk-notice` is shadow-DOM only and cannot be emitted here.', FIXTURE).length === 0],
+  ['a BEM class of an emittable block is not mistaken for an excluded element (control)', () => authoredProseProblems('USAGE.md', 'Use `sk-notice__x`? no: `sk-button--primary`.', FIXTURE).every((p) => !p.includes('sk-button'))],
+  ['authored prose pointing at a repository path is refused', () => authoredProseProblems('USAGE.md', 'Start from `packages/elements/src/x.stories.ts`.', FIXTURE).length === 1],
+  ['authored prose hard-coding a derived count is refused', () => authoredProseProblems('USAGE.md', 'It holds all 34 pages.', FIXTURE).length === 1],
+  ['the generated region is exempt from the prose check (it owns the counts)', () => authoredProseProblems('DESIGN.md', spliceDesign(DESIGN_FIXTURE, buildDesignRegion(FIXTURE)), FIXTURE).length === 0],
+  ['the committed USAGE.md and DESIGN.md pass the prose check', () => { const d = derive(); const dir = join(ROOT, OUT_REL); return authoredProseProblems('USAGE.md', readFileSync(join(dir, 'USAGE.md'), 'utf8'), d).length === 0 && authoredProseProblems('DESIGN.md', readFileSync(join(dir, 'DESIGN.md'), 'utf8'), d).length === 0; }],
+  ['an empty derived set is refused (every form omitted → 0 components)', () => { const d = derive(); return d.problems.length === 0 && d.components.length > 0; }],
+  ['the design region states the class vocabulary is closed', () => /The class vocabulary is closed/.test(buildDesignRegion(FIXTURE)) && /does not exist in the library/.test(buildDesignRegion(FIXTURE))],
+  ['EVERY committed component page carries exactly its component\'s forms (read from disk, not from the builder)', () => { const d = derive(); return d.components.every((c) => { const page = readFileSync(join(ROOT, OUT_REL, componentPagePath(c)), 'utf8'); return (page.match(/<figure data-od-variant=/g) || []).length === c.forms.length && c.forms.every((f) => page.includes(f.markup.split('\n')[0].trim())); }); }],
+  ['EVERY section of the committed components.html carries exactly its component\'s forms', () => { const d = derive(); const html = readFileSync(join(ROOT, OUT_REL, 'components.html'), 'utf8'); return d.components.every((c) => { const sec = html.split(`data-od-component="${c.name}"`)[1]?.split(/data-od-component="/)[0] ?? ''; return (sec.match(/<figure data-od-variant=/g) || []).length === c.forms.length; }); }],
+  ['the committed components.html carries every component\'s CSS', () => { const d = derive(); const html = readFileSync(join(ROOT, OUT_REL, 'components.html'), 'utf8'); return d.components.every((c) => html.includes(c.css.trimEnd())); }],
+  ['tokens.css is the PUBLISHED stylesheet (buildTokensCss), with its no-data-theme fallback', () => { const d = derive(); return d.tokensCss === buildTokensCss(readFileSync(join(ROOT, 'packages/tokens/src/tokens.css'), 'utf8')) && d.tokensCss.includes(':root:not([data-theme])'); }],
   ['the design region lists each component with its page and vocabulary', () => { const r = buildDesignRegion(FIXTURE); return r.includes('| `button` | `components/button.html` | `default` | `sk-button` |') && r.includes('`sk-grid`'); }],
   ['the real vocabulary names the class the first proof run invented a substitute for', () => { const c = derive().components.find((x) => x.name === 'radio-choice-group'); const v = classVocabulary(c.css, c.forms); return v.includes('sk-radio-choice-group__control') && !v.includes('sk-radio-choice__input'); }],
 ];
-const PROBE_FLOOR = 31;
+const PROBE_FLOOR = 46;
 
 /**
  * DRIFT PROBES — each mutates a TEMPORARY COPY of the committed package and asserts `diffPackage`
@@ -580,7 +653,8 @@ async function checkProbes() {
   const outDir = join(ROOT, OUT_REL);
   const d = derive();
   const ref = await loadReference();
-  const files = await buildPackage(d, readFileSync(join(outDir, 'DESIGN.md'), 'utf8'), ref);
+  const usageMd = readFileSync(join(outDir, 'USAGE.md'), 'utf8');
+  const files = await buildPackage(d, readFileSync(join(outDir, 'DESIGN.md'), 'utf8'), ref, usageMd);
   const flip = (p) => { const b = readFileSync(p); b[Math.floor(b.length / 2)] ^= 0x01; writeFileSync(p, b); };
   const onCopy = (mutate, want) => {
     const dir = mkdtempSync(join(tmpdir(), 'od-pkg-'));
@@ -607,7 +681,7 @@ async function checkProbes() {
     ['a new static form that was not regenerated is reported', async () => {
       const d2 = structuredClone(d);
       d2.components[0].forms.push({ variant: 'probe-new', file: 'x.html', markup: '<p class="sk-probe">new</p>' });
-      const f2 = await buildPackage(d2, readFileSync(join(outDir, 'DESIGN.md'), 'utf8'), ref);
+      const f2 = await buildPackage(d2, readFileSync(join(outDir, 'DESIGN.md'), 'utf8'), ref, usageMd);
       const ps = diffPackage(outDir, f2);
       return ps.some((x) => x.startsWith('components.html')) && ps.some((x) => x.startsWith('components.manifest.json'));
     }],

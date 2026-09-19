@@ -1316,8 +1316,8 @@
     }
   ],
   "literals": {
-    "colorExpressions": 39,
-    "pixelValues": 53,
+    "colorExpressions": 76,
+    "pixelValues": 65,
     "hardcodedFontFamilies": 100
   }
 }

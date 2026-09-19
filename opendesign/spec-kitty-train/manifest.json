@@ -21,174 +21,144 @@
     "dir": "components",
     "pages": [
       {
+        "path": "components.html",
+        "title": "All 34 components (large: read components/<name>.html instead)"
+      },
+      {
         "path": "components/action-row.html",
-        "title": "action-row",
-        "role": "component"
+        "title": "action-row"
       },
       {
         "path": "components/blog-card.html",
-        "title": "blog-card",
-        "role": "component"
+        "title": "blog-card"
       },
       {
         "path": "components/boundary-page.html",
-        "title": "boundary-page",
-        "role": "component"
+        "title": "boundary-page"
       },
       {
         "path": "components/breadcrumbs.html",
-        "title": "breadcrumbs",
-        "role": "component"
+        "title": "breadcrumbs"
       },
       {
         "path": "components/button.html",
-        "title": "button",
-        "role": "component"
+        "title": "button"
       },
       {
         "path": "components/card.html",
-        "title": "card",
-        "role": "component"
+        "title": "card"
       },
       {
         "path": "components/check-bullet.html",
-        "title": "check-bullet",
-        "role": "component"
+        "title": "check-bullet"
       },
       {
         "path": "components/checkbox-choice-group.html",
-        "title": "checkbox-choice-group",
-        "role": "component"
+        "title": "checkbox-choice-group"
       },
       {
         "path": "components/collection.html",
-        "title": "collection",
-        "role": "component"
+        "title": "collection"
       },
       {
         "path": "components/context-nav.html",
-        "title": "context-nav",
-        "role": "component"
+        "title": "context-nav"
       },
       {
         "path": "components/data-table.html",
-        "title": "data-table",
-        "role": "component"
+        "title": "data-table"
       },
       {
         "path": "components/disclosure.html",
-        "title": "disclosure",
-        "role": "component"
+        "title": "disclosure"
       },
       {
         "path": "components/empty-state.html",
-        "title": "empty-state",
-        "role": "component"
+        "title": "empty-state"
       },
       {
         "path": "components/event-timeline.html",
-        "title": "event-timeline",
-        "role": "component"
+        "title": "event-timeline"
       },
       {
         "path": "components/facts.html",
-        "title": "facts",
-        "role": "component"
+        "title": "facts"
       },
       {
         "path": "components/feature-card.html",
-        "title": "feature-card",
-        "role": "component"
+        "title": "feature-card"
       },
       {
         "path": "components/form-field.html",
-        "title": "form-field",
-        "role": "component"
+        "title": "form-field"
       },
       {
         "path": "components/form-select.html",
-        "title": "form-select",
-        "role": "component"
+        "title": "form-select"
       },
       {
         "path": "components/grid.html",
-        "title": "grid",
-        "role": "component"
+        "title": "grid"
       },
       {
         "path": "components/nav-pill.html",
-        "title": "nav-pill",
-        "role": "component"
+        "title": "nav-pill"
       },
       {
         "path": "components/pill-tag.html",
-        "title": "pill-tag",
-        "role": "component"
+        "title": "pill-tag"
       },
       {
         "path": "components/progress.html",
-        "title": "progress",
-        "role": "component"
+        "title": "progress"
       },
       {
         "path": "components/prose.html",
-        "title": "prose",
-        "role": "component"
+        "title": "prose"
       },
       {
         "path": "components/public-header.html",
-        "title": "public-header",
-        "role": "component"
+        "title": "public-header"
       },
       {
         "path": "components/radio-choice-group.html",
-        "title": "radio-choice-group",
-        "role": "component"
+        "title": "radio-choice-group"
       },
       {
         "path": "components/ribbon-card.html",
-        "title": "ribbon-card",
-        "role": "component"
+        "title": "ribbon-card"
       },
       {
         "path": "components/section-banner.html",
-        "title": "section-banner",
-        "role": "component"
+        "title": "section-banner"
       },
       {
         "path": "components/section-nav.html",
-        "title": "section-nav",
-        "role": "component"
+        "title": "section-nav"
       },
       {
         "path": "components/segmented-choice.html",
-        "title": "segmented-choice",
-        "role": "component"
+        "title": "segmented-choice"
       },
       {
         "path": "components/site-footer.html",
-        "title": "site-footer",
-        "role": "component"
+        "title": "site-footer"
       },
       {
         "path": "components/skip-link.html",
-        "title": "skip-link",
-        "role": "component"
+        "title": "skip-link"
       },
       {
         "path": "components/stub.html",
-        "title": "stub",
-        "role": "component"
+        "title": "stub"
       },
       {
         "path": "components/workflow-board.html",
-        "title": "workflow-board",
-        "role": "component"
+        "title": "workflow-board"
       },
       {
         "path": "components/workflow-lane.html",
-        "title": "workflow-lane",
-        "role": "component"
+        "title": "workflow-lane"
       }
     ]
   },
