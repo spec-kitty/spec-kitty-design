@@ -269,6 +269,19 @@ jobs:
       # only when GITHUB_REF_TYPE is `tag`, which a branch push cannot produce.
       - name: "[ENFORCED] Publish refusal's own probe table (#363, FR-009)"
         run: node scripts/publish-derived-set.mjs --selftest
+      # REL4 (#396). The OpenDesign package is generated from the library and committed, so it can
+      # only go stale if nothing checks it — which is exactly how the last one ended up pinned to a
+      # commit 168 lines behind. The vendored OpenDesign reference is verified against upstream's
+      # sha256 before anything uses it, the package is regenerated in memory and diffed byte for
+      # byte, and both scripts run their own probe tables so a check that stopped seeing is caught.
+      - name: "[ENFORCED] Vendored OpenDesign reference matches upstream (#396, FR-006)"
+        run: node scripts/opendesign-reference.mjs
+      - name: "[ENFORCED] OpenDesign reference loader's own probe table (#396)"
+        run: node scripts/opendesign-reference.mjs --selftest
+      - name: "[ENFORCED] OpenDesign package is current with the library (#396, FR-009)"
+        run: node scripts/build-opendesign-package.mjs --check
+      - name: "[ENFORCED] OpenDesign package generator's own probe table (#396, FR-010)"
+        run: node scripts/build-opendesign-package.mjs --selftest
       # The published token build derives the no-JS System/light media fallback from the one
       # authored light block. Generate then compare in this clean job, and probe the missing,
       # duplicate and stale forms independently.

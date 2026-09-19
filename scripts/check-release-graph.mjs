@@ -623,6 +623,7 @@ export function checkWorkflowUsesDerivedSet(
     [/check-release-graph\.mjs\s+--selftest/, "the gate's own blindness check on the publishing path"],
     [/check-vue-packed-types\.mjs/, 'the packed Vue declaration check on the publishing path'],
     [/measure-elements-sizes\.mjs\s+--check/, 'the size and SRI drift check on the publishing path'],
+    [/build-opendesign-package\.mjs\s+--check/, 'the OpenDesign package drift check on the publishing path'],
     // ADDED AFTER REVIEW MEASURED ITS DELETION AS GREEN. The audit gate carries an
     // `[ENFORCED]` label in the payload, and in this repo that prefix means "registered in a wiring
     // checker" — it was decoration until now. (The bump is asserted separately below, not here.)
@@ -767,6 +768,15 @@ export function checkWorkflowUsesDerivedSet(
     const posOf = (re) => flat.find((f) => re.test(f.line))?.at ?? -1;
     const sizeAt = posOf(/measure-elements-sizes\.mjs\s+--check/);
     const bumpAt = posOf(/bump-prerelease\.mjs/);
+    // REL4: the OpenDesign package records the library version, which the bump rewrites — the same
+    // ordering hazard as the size record, so it gets the same rule.
+    const odAt = posOf(/build-opendesign-package\.mjs\s+--check/);
+    if (bumpAt !== -1 && odAt !== -1 && odAt > bumpAt) {
+      problems.push(
+        `${label} runs the prerelease bump BEFORE \`build-opendesign-package.mjs --check\`; the package ` +
+          'records the library version the bump rewrites, so the check would compare against mutated manifests.',
+      );
+    }
     const publishAt = posOf(/publish-derived-set\.mjs/);
     if (bumpAt !== -1) {
       if (sizeAt === -1) {
@@ -1089,6 +1099,8 @@ const VALID_RELEASE_WORKFLOW = `jobs:
         run: node scripts/check-vue-packed-types.mjs
       - name: Sizes
         run: node scripts/measure-elements-sizes.mjs --check
+      - name: OpenDesign
+        run: node scripts/build-opendesign-package.mjs --check
       - name: Audit
         run: |
           for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm pack --dry-run ); done
@@ -1136,6 +1148,8 @@ const REUSABLE_PAYLOAD_FIXTURE = `jobs:
         run: node scripts/check-vue-packed-types.mjs
       - name: Sizes
         run: node scripts/measure-elements-sizes.mjs --check
+      - name: OpenDesign
+        run: node scripts/build-opendesign-package.mjs --check
       - name: Audit
         run: |
           for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm pack --dry-run ); done
@@ -1398,6 +1412,33 @@ const PROBES = [
         withPayloadDefect(
           /run: node scripts\/publish-derived-set\.mjs/,
           'run: |\n          node scripts/publish-derived-set.mjs\n          npm publish --tag latest',
+        ),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    // REL4 (#396): the OpenDesign package check is an every-stream step, so deleting it is refused.
+    what: 'the payload with the OpenDesign package check deleted',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n {8}run: node scripts\/build-opendesign-package\.mjs --check\n/, ''),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    // REL4: after the bump it compares against mutated manifests — the size-check blocker, again.
+    what: 'the OpenDesign package check moved AFTER the prerelease bump',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n {8}run: node scripts\/build-opendesign-package\.mjs --check\n/, '').replace(
+          '      - name: Bump\n        run: node scripts/bump-prerelease.mjs --from-registry\n',
+          '      - name: Bump\n        run: node scripts/bump-prerelease.mjs --from-registry\n      - name: OpenDesign\n        run: node scripts/build-opendesign-package.mjs --check\n',
         ),
         ['@spec-kitty/tokens'],
         ['tokens'],
