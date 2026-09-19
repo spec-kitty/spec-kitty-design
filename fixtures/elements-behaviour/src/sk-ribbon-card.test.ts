@@ -209,12 +209,22 @@ test('an unknown variant or ribbon colour degrades on RENDER and throws on AUTHO
 
   expect(() => ribbonCardStaticHtml({ variant: 'nope' })).toThrow(/unknown ribbon-card variant/);
   expect(() => ribbonCardStaticHtml({ accent: 'nope' })).toThrow(/unknown ribbon colour/);
-  for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
-    expect(() => ribbonCardStaticHtml({ variant: key })).toThrow(/unknown ribbon-card variant/);
-    expect(() => ribbonCardStaticHtml({ accent: key })).toThrow(/unknown ribbon colour/);
-    expect(ribbonCardClasses(key).trim()).toBe('sk-ribbon-card');
-    expect(ribbonCardClasses(key, true).trim()).toBe('sk-ribbon-card sk-ribbon-card--has-ribbon');
-    expect(ribbonClasses(key).trim()).toBe('sk-ribbon-card__ribbon sk-ribbon-card__ribbon--yellow');
+  // console.warn is intercepted for this loop only (WP06, FR-010/NFR-006): the *Classes() calls
+  // below warn on every degrade, and that replay volume is a large share of what pushed the
+  // behaviour-suite job log past its truncation cap. Only the side channel is suppressed; every
+  // expectation below still runs unchanged (FR-011).
+  const loopWarn = console.warn;
+  console.warn = () => {};
+  try {
+    for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+      expect(() => ribbonCardStaticHtml({ variant: key })).toThrow(/unknown ribbon-card variant/);
+      expect(() => ribbonCardStaticHtml({ accent: key })).toThrow(/unknown ribbon colour/);
+      expect(ribbonCardClasses(key).trim()).toBe('sk-ribbon-card');
+      expect(ribbonCardClasses(key, true).trim()).toBe('sk-ribbon-card sk-ribbon-card--has-ribbon');
+      expect(ribbonClasses(key).trim()).toBe('sk-ribbon-card__ribbon sk-ribbon-card__ribbon--yellow');
+    }
+  } finally {
+    console.warn = loopWarn;
   }
 });
 

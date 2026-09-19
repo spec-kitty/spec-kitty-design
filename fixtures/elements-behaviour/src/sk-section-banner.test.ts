@@ -171,12 +171,22 @@ test('an unknown variant degrades on the RENDER path and throws on the AUTHORING
     /unknown section-banner variant/,
   );
   // Prototype-chain keys are not variants.
-  for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
-    expect(() => sectionBannerStaticHtml({ variant: key }), `${key} must not be accepted`).toThrow(
-      /unknown section-banner variant/,
-    );
-    expect(sectionBannerClasses(key), `${key} must degrade to the default variant`).toBe(
-      'sk-section-banner sk-section-banner--neutral',
-    );
+  // console.warn is intercepted for this loop only (WP06, FR-010/NFR-006): `sectionBannerClasses`
+  // warns on every degrade below, and that replay volume is a large share of what pushed the
+  // behaviour-suite job log past its truncation cap. Only the side channel is suppressed; every
+  // expectation below still runs unchanged (FR-011).
+  const loopWarn = console.warn;
+  console.warn = () => {};
+  try {
+    for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+      expect(() => sectionBannerStaticHtml({ variant: key }), `${key} must not be accepted`).toThrow(
+        /unknown section-banner variant/,
+      );
+      expect(sectionBannerClasses(key), `${key} must degrade to the default variant`).toBe(
+        'sk-section-banner sk-section-banner--neutral',
+      );
+    }
+  } finally {
+    console.warn = loopWarn;
   }
 });

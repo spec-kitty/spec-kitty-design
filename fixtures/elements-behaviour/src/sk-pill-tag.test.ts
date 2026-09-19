@@ -179,11 +179,21 @@ test('an unknown variant or shape degrades on RENDER and throws on AUTHORING', a
 
   expect(() => pillTagStaticHtml({ variant: 'nope' })).toThrow(/unknown pill-tag variant/);
   expect(() => pillTagStaticHtml({ shape: 'nope' })).toThrow(/unknown pill-tag shape/);
-  for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
-    expect(() => pillTagStaticHtml({ variant: key })).toThrow(/unknown pill-tag variant/);
-    expect(() => pillTagStaticHtml({ shape: key })).toThrow(/unknown pill-tag shape/);
-    expect(pillTagClasses(key).trim()).toBe('sk-pill-tag');
-    expect(pillTagClasses(undefined, key).trim()).toBe('sk-pill-tag');
+  // console.warn is intercepted for this loop only (WP06, FR-010/NFR-006): `pillTagClasses`
+  // warns on every degrade below, and that replay volume is a large share of what pushed the
+  // behaviour-suite job log past its truncation cap. Only the side channel is suppressed; every
+  // expectation below still runs unchanged (FR-011).
+  const loopWarn = console.warn;
+  console.warn = () => {};
+  try {
+    for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+      expect(() => pillTagStaticHtml({ variant: key })).toThrow(/unknown pill-tag variant/);
+      expect(() => pillTagStaticHtml({ shape: key })).toThrow(/unknown pill-tag shape/);
+      expect(pillTagClasses(key).trim()).toBe('sk-pill-tag');
+      expect(pillTagClasses(undefined, key).trim()).toBe('sk-pill-tag');
+    }
+  } finally {
+    console.warn = loopWarn;
   }
 });
 
@@ -292,14 +302,23 @@ test('an unknown status THROWS on the authoring path — it never reaches genera
   expect(() => pillTagStaticHtml({ status: 'rogue' })).toThrow(/unknown pill-tag status/);
   // Prototype-chain keys are not statuses. `in` would reach them, and this module generates
   // server-rendered HTML.
-  for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
-    expect(() => pillTagStaticHtml({ status: key }), `${key} must not be accepted`).toThrow(
-      /unknown pill-tag status/,
-    );
-    expect(
-      pillTagClasses(undefined, undefined, key).trim(),
-      `${key} must degrade to the base tag`,
-    ).toBe('sk-pill-tag');
+  // See the sibling loop above: console.warn is intercepted for the duration of this loop to
+  // cut the job log's warn-replay volume (WP06, FR-010/NFR-006) without touching what is
+  // asserted.
+  const loopWarn = console.warn;
+  console.warn = () => {};
+  try {
+    for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+      expect(() => pillTagStaticHtml({ status: key }), `${key} must not be accepted`).toThrow(
+        /unknown pill-tag status/,
+      );
+      expect(
+        pillTagClasses(undefined, undefined, key).trim(),
+        `${key} must degrade to the base tag`,
+      ).toBe('sk-pill-tag');
+    }
+  } finally {
+    console.warn = loopWarn;
   }
   // Every real tone works on both paths, derived from the map rather than hardcoded.
   for (const [tone, cls] of Object.entries(PILL_TAG_STATUSES)) {

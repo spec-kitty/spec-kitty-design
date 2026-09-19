@@ -81,17 +81,20 @@ fi
 # --- tokens, fonts, brand assets --------------------------------------------
 cp packages/tokens/dist/tokens.css "$DIST/tokens.css"
 
-# tokens.css declares ~30 @font-face src: url('./fonts/...'). A silently missing
-# fonts tree used to leave every one of them 404ing with the gate still green,
-# and the old fallback named packages/tokens/src/fonts, a path that has never
-# existed in any commit. The real source is packages/tokens/fonts.
+# tokens.css declares ~40 @font-face src: url('./fonts/...'). A silently missing
+# fonts tree used to leave every one of them 404ing with the gate still green.
+# The real source moved to packages/tokens/src/fonts (mission #1673's Storybook
+# font-path fix) so that packages/tokens/src/tokens.css's own relative
+# url('./fonts/...') resolves correctly wherever that SOURCE file is consumed
+# directly, not only from the built dist/tokens.css — packages/tokens/fonts (the
+# prior location, a sibling of dist/ but not of src/) no longer exists.
 if [ -d packages/tokens/dist/fonts ]; then
   cp -r packages/tokens/dist/fonts "$DIST/fonts"
-elif [ -d packages/tokens/fonts ]; then
+elif [ -d packages/tokens/src/fonts ]; then
   mkdir -p "$DIST/fonts"
-  cp packages/tokens/fonts/* "$DIST/fonts/"
+  cp packages/tokens/src/fonts/* "$DIST/fonts/"
 else
-  echo "ERROR: no fonts source found (packages/tokens/dist/fonts or packages/tokens/fonts)" >&2
+  echo "ERROR: no fonts source found (packages/tokens/dist/fonts or packages/tokens/src/fonts)" >&2
   exit 1
 fi
 

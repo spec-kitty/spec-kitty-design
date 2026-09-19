@@ -806,8 +806,23 @@ test("theme, RTL, long values, zoom, and threshold edges remain contained", asyn
     await expect(root.locator("[data-document-frame]")).toBeVisible();
   }
 
-  await page.setViewportSize({ width: 780, height: 844 });
-  await page.goto(`/iframe.html?id=${STORY_PREFIX}long-content&viewMode=story`);
+  // #455. This block used to `page.goto` the story directly, bypassing this file's own
+  // `openStory` -- which waits for the pattern root to be visible AND to carry
+  // `data-render-complete="true"`. `page.goto` resolves at `load`, while Storybook renders on
+  // the client after that, so the containment assertion below could run against a root that had
+  // not rendered yet. And it would PASS: `contained` is `scrollWidth === clientWidth`, which an
+  // EMPTY documentElement satisfies trivially, and `expect.poll` returns on its first match.
+  //
+  // A vacuous ASSERTION -- narrower than an earlier revision of this comment claimed. That said
+  // "the test would report success having proved nothing", which overstates it: the next
+  // `expect.poll` resolves `[data-command-table-scroller]` and asserts overflow plus three
+  // attributes, and cannot pass against an unrendered root. Only THIS assertion could pass
+  // vacuously, and it is still worse than the loud 20s timeout the sibling site in
+  // visual.spec.ts produces, because it fails by succeeding.
+  //
+  // Using the existing loader rather than adding another wait: the correct precondition was
+  // already written in this file, eight hundred lines up, and only this caller skipped it.
+  await openStory(page, "long-content", { width: 780, height: 844 });
   await page.evaluate(() => {
     document.documentElement.style.zoom = "2";
   });

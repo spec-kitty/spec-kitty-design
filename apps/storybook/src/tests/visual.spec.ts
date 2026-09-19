@@ -249,6 +249,37 @@ const transitionMatrixStory = async (page: Page, id: string): Promise<Locator> =
 
 const teamOverviewShellStory = async (page: Page, light = false): Promise<Locator> => {
   await page.goto('/iframe.html?id=elements-skappshell--desktop-composition&viewMode=story');
+  // #455. `page.goto` resolves at `load`; Storybook renders the story into #storybook-root on
+  // the CLIENT after that. Overwriting the root immediately therefore races that render, and a
+  // render landing second replaces the root's children and destroys the composition injected
+  // below. Same defect, same story id, as the one fixed in sk-team-overview-shell-layout.spec.ts
+  // under #453 -- where it was directly observed (18/18 `hosts-in-dom=0`, CI run 35373693252).
+  //
+  // Here it fails LOUDLY rather than silently: the host locator below keys on
+  // `data-visual-shell`, which exists only in the injected markup, so a wipe makes it match
+  // nothing and `waitFor` throws at 20s. That is a flake and 20 wasted seconds, not a corrupt
+  // baseline -- no screenshot can be taken without passing that gate.
+  //
+  // Waiting for a selector only the story's own render can produce, which is this repo's
+  // convention (compare `openStory` in sk-workflow-board.spec.ts and the
+  // `data-render-complete="true"` waits in the pattern specs). `attached` rather than `visible`
+  // because /elements-dist/elements.js is injected on the next line, so at wait time this is an
+  // un-upgraded unknown element with a possibly zero box.
+  //
+  // DISCLOSED for the suppression scan (SC-003 / C-001, "wait durations increased = 0"): this is
+  // a NEW 10000ms budget, not a widened one. Its #453 sibling in
+  // sk-team-overview-shell-layout.spec.ts discloses the identical budget and this one did not,
+  // which the pre-merge squad flagged.
+  //
+  // THIS DEPENDS ON THE STORY RETURNING A STRING. `DesktopComposition` renders
+  // `storyFrame(composition())`, a string, so Storybook takes its one-synchronous-`innerHTML`
+  // branch and any attached `sk-app-shell` implies the whole render landed -- which is what makes
+  // `attached` sufficient rather than merely convenient. If that story is ever changed to return a
+  // `TemplateResult`, Storybook takes a different branch and this precondition must be re-derived.
+  await page
+    .locator('#storybook-root sk-app-shell')
+    .first()
+    .waitFor({ state: 'attached', timeout: 10000 });
   await page.addScriptTag({ url: '/elements-dist/elements.js' });
   await page.evaluate(async (isLight) => {
     await Promise.all([
