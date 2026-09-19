@@ -664,12 +664,10 @@ export function checkWorkflowUsesDerivedSet(
       }
     }
   }
-  for (const [where, env] of [['step', null], ['job', wf?.jobs?.[jobName]?.env], ['workflow', wf?.env]]) {
-    const envs = where === 'step' ? steps.map((st) => st.env) : [env];
-    for (const e of envs) {
-      if (e && typeof e === 'object' && Object.keys(e).some((k) => k.toUpperCase() === 'NODE_OPTIONS')) {
-        problems.push(`${label} sets NODE_OPTIONS at ${where} level — a preload can make every node check exit 0 without running`);
-      }
+  const envLevels = [...steps.map((st) => ['step', st.env]), ['job', wf?.jobs?.[jobName]?.env], ['workflow', wf?.env]];
+  for (const [where, e] of envLevels) {
+    if (e && typeof e === 'object' && Object.keys(e).some((k) => k.toUpperCase() === 'NODE_OPTIONS')) {
+      problems.push(`${label} sets NODE_OPTIONS at ${where} level — a preload can make every node check exit 0 without running`);
     }
   }
   const shellOverride = wf?.jobs?.[jobName]?.defaults?.run?.shell ?? wf?.defaults?.run?.shell;

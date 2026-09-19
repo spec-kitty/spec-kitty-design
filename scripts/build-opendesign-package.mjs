@@ -151,6 +151,7 @@ export function derive(root = ROOT) {
       cssRel: useStatic ? `packages/styles/src/${name}/static/sk-${name}.static.css` : `packages/styles/src/${name}/sk-${name}.css`,
       forms: staticForms,
       shadowOnly,
+      staticSheet: useStatic,
     });
   }
 
@@ -432,12 +433,12 @@ export function buildDesignRegion(d) {
     '',
     shadow.join(', ') + '.',
     '',
-    ...(d.components.some((c) => c.cssRel.endsWith('.static.css'))
+    ...(d.components.some((c) => c.staticSheet)
       ? [
           'Where the library already ships the static equivalent — `static/sk-<name>.static.css`, the same rules',
           'with `:host` moved onto a wrapper class — the component page carries that sheet instead, and its',
           'static form uses the wrapper: ' +
-            d.components.filter((c) => c.cssRel.endsWith('.static.css')).map((c) => `\`${c.name}\``).join(', ') + '.',
+            d.components.filter((c) => c.staticSheet).map((c) => `\`${c.name}\``).join(', ') + '.',
           '',
         ]
       : []),
@@ -684,8 +685,8 @@ const PROBES = [
     }
   }],
   ['the design region states the class vocabulary is closed', () => /The class vocabulary is closed/.test(buildDesignRegion(FIXTURE)) && /does not exist in the library/.test(buildDesignRegion(FIXTURE))],
-  ['EVERY committed component page carries exactly its component\'s forms, in full (read from disk)', () => { const d = derive(); return d.components.every((c) => { const page = dedent(readFileSync(join(ROOT, OUT_REL, componentPagePath(c)), 'utf8')); return (page.match(/<figure data-od-variant=/g) || []).length === c.forms.length && c.forms.every((f) => page.includes(dedent(renderFigure(f)))); }); }],
-  ['EVERY section of the committed components.html carries exactly its component\'s forms, in full', () => { const d = derive(); const html = readFileSync(join(ROOT, OUT_REL, 'components.html'), 'utf8'); return d.components.every((c) => { const sec = dedent(html.split(`data-od-component="${c.name}"`)[1]?.split(/data-od-component="/)[0] ?? ''); return (sec.match(/<figure data-od-variant=/g) || []).length === c.forms.length && c.forms.every((f) => sec.includes(dedent(renderFigure(f)))); }); }],
+  ['EVERY committed component page carries exactly its component\'s forms, in full (read from disk)', () => { const d = derive(); return d.components.every((c) => { const page = dedent(readFileSync(join(ROOT, OUT_REL, componentPagePath(c)), 'utf8')); return (page.match(/<figure data-od-variant=/g) || []).length === c.forms.length && c.forms.every((f) => page.includes(dedent(f.markup))); }); }],
+  ['EVERY section of the committed components.html carries exactly its component\'s forms, in full', () => { const d = derive(); const html = readFileSync(join(ROOT, OUT_REL, 'components.html'), 'utf8'); return d.components.every((c) => { const sec = dedent(html.split(`data-od-component="${c.name}"`)[1]?.split(/data-od-component="/)[0] ?? ''); return (sec.match(/<figure data-od-variant=/g) || []).length === c.forms.length && c.forms.every((f) => sec.includes(dedent(f.markup))); }); }],
   ['a component whose library ships a static sheet is packaged with THAT sheet (action-row, ADR-15)', () => { const d = derive(); const withStatic = d.components.filter((c) => existsSync(join(ROOT, 'packages/styles/src', c.name, 'static', `sk-${c.name}.static.css`))); return withStatic.length > 0 && withStatic.some((c) => c.name === 'action-row') && withStatic.every((c) => c.cssRel.endsWith('.static.css') && c.css === readFileSync(join(ROOT, c.cssRel), 'utf8') && !/:host\b/.test(c.css.replace(/\/\*[\s\S]*?\*\//g, ''))); }],
   ['the committed action-row page carries the static sheet, whose wrapper class its markup uses', () => { const page = readFileSync(join(ROOT, OUT_REL, 'components/action-row.html'), 'utf8'); return page.includes('static/sk-action-row.static.css') && /\.sk-action-row-host\s*\{/.test(page) && page.includes('class="sk-action-row-host'); }],
   ['the committed tokens.css, and the tokens inlined in components.html, are the PUBLISHED stylesheet', () => { const pub = buildTokensCss(readFileSync(join(ROOT, 'packages/tokens/src/tokens.css'), 'utf8')); return readFileSync(join(ROOT, OUT_REL, 'tokens.css'), 'utf8') === pub && readFileSync(join(ROOT, OUT_REL, 'components.html'), 'utf8').includes(pub.trimEnd()); }],
