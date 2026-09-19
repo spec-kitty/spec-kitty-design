@@ -137,6 +137,22 @@ const CASES = [
   ['#396 the OpenDesign reference selftest weakened with a `|| true` tail', fallbackExact('node scripts/opendesign-reference.mjs --selftest', '|| true')],
   ['#396 the OpenDesign package drift check weakened with a `|| true` tail', fallbackExact('node scripts/build-opendesign-package.mjs --check', '|| true')],
   ['#396 the OpenDesign generator selftest weakened with a `|| true` tail', fallbackExact('node scripts/build-opendesign-package.mjs --selftest', '|| true')],
+  // REL4 pass 2: a NODE_OPTIONS preload exits 0 before any gate script runs, `run:` untouched.
+  ...[
+    ['step', (wf) => {
+      const step = (wf.jobs?.['lint-code']?.steps ?? []).find((s) => String(s.run ?? '').trim() === 'node scripts/build-opendesign-package.mjs --check');
+      if (!step) throw new Error('no exact OpenDesign --check step — the probe would be vacuous');
+      step.env = { ...(step.env ?? {}), NODE_OPTIONS: '--import=data:text/javascript,process.exit(0)' };
+    }],
+    ['job', (wf) => {
+      const job = wf.jobs?.['lint-code'];
+      if (!job) throw new Error('no lint-code job');
+      job.env = { ...(job.env ?? {}), NODE_OPTIONS: '--import=data:text/javascript,process.exit(0)' };
+    }],
+    ['workflow', (wf) => {
+      wf.env = { ...(wf.env ?? {}), NODE_OPTIONS: '--import=data:text/javascript,process.exit(0)' };
+    }],
+  ].map(([where, mutate]) => [`REL4 a NODE_OPTIONS preload that exits 0, set at ${where} level`, mutate]),
   // ── #202: the gate job's failure disjunction, matched as shell TEXT ──────────────────
   ['#202 conjunct on the lint-code disjunct', conjunct('lint-code')],
   ['#202 conjunct on the test disjunct', conjunct('test')],
@@ -315,7 +331,7 @@ const CASES = [
 // That was false: #436 is an ISSUE about charter.md and never touched this file. Two review
 // lenses caught it independently. Corrected rather than carried forward, because a wrong note
 // here misdirects exactly the person doing the next rebase.
-const MIN_CASES = 42;
+const MIN_CASES = 45;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });

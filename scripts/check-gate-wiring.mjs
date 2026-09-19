@@ -1144,6 +1144,20 @@ else {
   // this chain makes a failure unreachable. lint-code uses continue-on-error deliberately,
   // rescued by an explicit "Fail if lint errors" step; nothing here is.
   const guarded = Object.fromEntries(JOBS.map((j) => [j, wf.jobs?.[j]]));
+  // NODE_OPTIONS IS A PRELOAD. `--import=data:text/javascript,process.exit(0)` makes every `node`
+  // gate exit 0 before its script runs, with every `run:` line intact — measured live against the
+  // OpenDesign check at REL4 gate pass 2, and it held for every node gate here. No gated job needs
+  // it, so it is refused at workflow, job and step level alike.
+  const hasNodeOptions = (env) => !!env && typeof env === 'object' && Object.keys(env).some((k) => k.toUpperCase() === 'NODE_OPTIONS');
+  if (hasNodeOptions(wf.env)) problems.push('the workflow sets NODE_OPTIONS in `env:` — a preload can make every node gate exit 0 without running');
+  // EVERY job, not the `guarded` set: lint-code is outside it by design (see its edge assertions),
+  // and it is where the registered node gates run. No job in this workflow uses NODE_OPTIONS.
+  for (const [jobName, job] of Object.entries(wf.jobs ?? {})) {
+    if (hasNodeOptions(job?.env)) problems.push(`job \`${jobName}\` sets NODE_OPTIONS in \`env:\` — a preload can make its node gates exit 0 without running`);
+    for (const st of job?.steps ?? []) {
+      if (hasNodeOptions(st.env)) problems.push(`step "${st.name ?? st.run}" in \`${jobName}\` sets NODE_OPTIONS — a preload can make it exit 0 without running`);
+    }
+  }
   for (const [jobName, job] of Object.entries({ ...guarded, gate })) {
     if (!job) continue;
     if (job['continue-on-error']) problems.push(`job \`${jobName}\` carries continue-on-error — its failure cannot reach the gate`);

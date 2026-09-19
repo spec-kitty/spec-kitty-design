@@ -646,13 +646,44 @@ export function checkWorkflowUsesDerivedSet(
   // are substring matches, and REL4 review measured all three defeats GREEN on the publishing path:
   // `… --check || true`, `echo … --check`, and an `if: false` on the step. (The size check had
   // the same hole from REL2; it is closed with the OpenDesign one.) An exact `run` cannot be
-  // chained, echoed or piped, and a step with no `if:` cannot be skipped.
+  // chained, echoed or piped, and a step with no `if:` cannot be skipped. Pass 2 then ran the exact
+  // command under `shell: sh -c true {0}`, which executes nothing — so a `shell:` on the step, the
+  // job's `defaults.run.shell` or the workflow's is refused too: the runner's default shell is the
+  // only one under which the exact text means what it says.
+  // PASS 2 FOUND TWO MORE. A step that runs the generator in WRITE mode just before the check
+  // regenerates whatever it is about to compare, so the check can only pass; and `NODE_OPTIONS`
+  // (`--import=data:…process.exit(0)`) makes the exact command exit 0 without running. Neither
+  // belongs on a publishing path, so both are refused outright.
+  for (const st of steps) {
+    const run = typeof st.run === 'string' ? stripShellComments(st.run) : '';
+    for (const [script, what] of [['build-opendesign-package.mjs', 'OpenDesign package'], ['measure-elements-sizes.mjs', 'size record']]) {
+      for (const inv of run.split(/&&|\|\||;|\||\n/)) {
+        if (inv.includes(script) && !/--check\b/.test(inv) && !/--selftest\b/.test(inv)) {
+          problems.push(`${label} runs \`${script}\` in write mode ("${inv.trim()}") — it would regenerate the ${what} the drift check then compares`);
+        }
+      }
+    }
+  }
+  for (const [where, env] of [['step', null], ['job', wf?.jobs?.[jobName]?.env], ['workflow', wf?.env]]) {
+    const envs = where === 'step' ? steps.map((st) => st.env) : [env];
+    for (const e of envs) {
+      if (e && typeof e === 'object' && Object.keys(e).some((k) => k.toUpperCase() === 'NODE_OPTIONS')) {
+        problems.push(`${label} sets NODE_OPTIONS at ${where} level — a preload can make every node check exit 0 without running`);
+      }
+    }
+  }
+  const shellOverride = wf?.jobs?.[jobName]?.defaults?.run?.shell ?? wf?.defaults?.run?.shell;
+  if (shellOverride !== undefined) {
+    problems.push(`${label} overrides the default shell (\`${shellOverride}\`) for the whole job — a shell template can make every exact drift check run nothing`);
+  }
   for (const exact of ['node scripts/measure-elements-sizes.mjs --check', 'node scripts/build-opendesign-package.mjs --check']) {
     const own = steps.filter((st) => typeof st.run === 'string' && stripShellComments(st.run).trim() === exact);
     if (!own.length) {
       problems.push(`${label} has no step whose run is exactly \`${exact}\` — a chained, echoed or wrapped form passes without gating anything`);
     } else if (own.every((st) => st.if !== undefined)) {
       problems.push(`${label} runs \`${exact}\` only under an \`if:\` — a condition can skip the check while the release proceeds`);
+    } else if (own.every((st) => st.if !== undefined || st.shell !== undefined)) {
+      problems.push(`${label} runs \`${exact}\` only under a custom \`shell:\` — a shell template such as \`sh -c true {0}\` runs nothing`);
     }
   }
   if (jobName !== 'release') {
@@ -1227,7 +1258,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 71;
+const PROBE_FLOOR = 75;
 
 const PROBES = [
   {
@@ -1477,6 +1508,50 @@ const PROBES = [
         'publish-packages.yml',
       ),
   })),
+  {
+    what: 'the OpenDesign check run under `shell: sh -c true {0}` (executes nothing)',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n/, '      - name: OpenDesign\n        shell: sh -c true {0}\n'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'the OpenDesign package regenerated in write mode just before its check',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n/, '      - name: Refresh\n        run: node scripts/build-opendesign-package.mjs\n      - name: OpenDesign\n'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'the OpenDesign check given a NODE_OPTIONS preload that exits 0',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n/, '      - name: OpenDesign\n        env:\n          NODE_OPTIONS: --import=data:text/javascript,process.exit(0)\n'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'the publish job given a no-op default shell',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/(\n {4}steps:\n)/, '\n    defaults:\n      run:\n        shell: sh -c true {0}$1'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
   {
     what: 'the OpenDesign check made conditional with `if: false`',
     run: () =>
