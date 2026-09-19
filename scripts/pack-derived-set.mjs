@@ -194,9 +194,22 @@ const PROBES = [
   ['readPacked refuses a pack from before the version bump', () => withRoot(TWO, (root) => { packSet({ root, pack: fakePack() }); const f = join(root, 'packages/tokens/package.json'); writeFileSync(f, JSON.stringify({ ...JSON.parse(readFileSync(f, 'utf8')), version: '1.1.0-rc.3' })); return throws(() => readPacked({ root }), /does not match the derived set/); })],
   ['readPacked refuses a manifest whose order differs from the topological set', () => withRoot(TWO, (root) => { const { outDir } = packSet({ root, pack: fakePack() }); const p = join(outDir, MANIFEST); const m = JSON.parse(readFileSync(p, 'utf8')); m.entries.reverse(); writeFileSync(p, JSON.stringify(m)); return throws(() => readPacked({ root }), /does not match/); })],
   ['readPacked refuses an empty entry list', () => withRoot(TWO, (root) => { mkdirSync(join(root, PACK_DIR_NAME)); writeFileSync(join(root, PACK_DIR_NAME, MANIFEST), JSON.stringify({ entries: [] })); return throws(() => readPacked({ root }), /no tarballs/); })],
-  ['unknown argv is refused', () => ['--nope'].filter((a) => !KNOWN_ARGV.has(a)).length === 1],
-  ['importing does not pack', () => isDirectInvocation('/some/other.mjs', import.meta.url) === false],
+  // SPAWNED, not a Set lookup: the probe must fail if the real argv refusal or the import guard goes.
+  ['an unknown argument exits 2 before anything is packed', () => childLeavesNoPack([fileURLToPath(import.meta.url), '--nope'], (r) => r.status === 2)],
+  ['importing the module packs nothing', () => childLeavesNoPack(['--input-type=module', '-e', `await import(${JSON.stringify(import.meta.url)})`], (r) => r.status === 0 && `${r.stdout}${r.stderr}`.trim() === '')],
 ];
+
+/** Run a node child against the real tree and assert it left no dist-tarballs/ behind (cleaning up if it did). */
+function childLeavesNoPack(args, ok) {
+  const out = join(ROOT, PACK_DIR_NAME);
+  if (existsSync(out)) throw new Error(`${PACK_DIR_NAME}/ already exists — this probe needs a clean tree`);
+  try {
+    const r = spawnSync(process.execPath, args, { cwd: ROOT, encoding: 'utf8' });
+    return ok(r) && !existsSync(out);
+  } finally {
+    rmSync(out, { recursive: true, force: true });
+  }
+}
 const PROBE_FLOOR = 17;
 
 function selftest() {

@@ -132,7 +132,8 @@ export function payloadDeclaredPermissions(payloadText) {
 
 /** Workflows allowed to run `npm publish` without delegating. EXACT paths: a suffix test exempted
  *  `nightly-release.yml` as well, because it ends with `release.yml`. `release.yml` is the
- *  sanctioned holdout until REL3 (#364) converts it into a caller. */
+ *  sanctioned holdout: it owns `latest`, which the payload refuses unconditionally, so it keeps its
+ *  own publish loop (REL3, #364, publishes the attested tarballs there rather than folding it in). */
 const INLINE_PUBLISH_EXEMPT = new Set(['.github/workflows/publish-packages.yml', '.github/workflows/release.yml']);
 
 /** Only THIS repo's payload counts as delegation. `uses.includes(...)` accepted a third-party
@@ -177,14 +178,14 @@ export function checkPublishingCallersDelegate(workflows, payloadText = null) {
       const uses = typeof job?.uses === 'string' ? job.uses : null;
       if (!uses || !isOwnPayload(uses)) {
         // A workflow that publishes with its own inline steps instead of delegating is the exact
-        // state the reshape undid. `release.yml` is the one sanctioned holdout until REL3 folds it
-        // in; anything else re-inlining a payload is a regression that must not pass silently.
+        // state the reshape undid. `release.yml` is the one sanctioned holdout, because it owns
+        // `latest`; anything else re-inlining a payload is a regression that must not pass silently.
         const inline = Object.values(job?.steps ?? [])
           .map((s) => (typeof s?.run === 'string' ? s.run : ''))
           .join('\n');
         // Two exemptions, both deliberate. `publish-packages.yml` IS the payload — it is supposed
         // to publish inline, and flagging it would make the check reject the thing it protects.
-        // `release.yml` is the sanctioned holdout until REL3 folds it in.
+        // `release.yml` is the sanctioned holdout: it owns `latest`, which the payload cannot publish.
         // EXACT paths. A suffix test exempted `nightly-release.yml` too, because
         // `'nightly-release.yml'.endsWith('release.yml')` is true — so any workflow whose name
         // happened to end that way could publish inline, unnoticed.
@@ -556,7 +557,8 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
   const problems = [];
   const runOf = (st) => (typeof st.run === 'string' ? stripShellComments(st.run) : '');
   const idx = (pred) => steps.findIndex(pred);
-  const attest = steps.filter((st) => typeof st.uses === 'string' && /attest-build-provenance/.test(st.uses));
+  const isAttest = (st) => typeof st.uses === 'string' && /attest-build-provenance/.test(st.uses);
+  const attest = steps.filter(isAttest);
   if (attest.length === 0) {
     problems.push(`${label} publishes without an \`actions/attest-build-provenance\` step — nothing it ships is attested (#364)`);
     return problems;
@@ -574,7 +576,7 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
     }
   }
   const packAt = idx((st) => runOf(st).trim() === 'node scripts/pack-derived-set.mjs');
-  const attestAt = idx((st) => typeof st.uses === 'string' && /attest-build-provenance/.test(st.uses));
+  const attestAt = idx(isAttest);
   const publishAt = jobName === 'release' ? idx((st) => /npm\s+publish\b/.test(runOf(st))) : idx((st) => /publish-derived-set\.mjs/.test(runOf(st)));
   const verifyAt = idx((st) => runOf(st).trim() === 'node scripts/verify-published-integrity.mjs');
   const bumpAt = idx((st) => /bump-prerelease\.mjs/.test(runOf(st)));
@@ -582,8 +584,6 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
     if (!(packAt < attestAt)) problems.push(`${label} attests before it packs — the attestation cannot cover the tarballs`);
     if (!(attestAt < publishAt)) problems.push(`${label} publishes before it attests — an attest failure would come after the bytes shipped`);
     if (!(publishAt < verifyAt)) problems.push(`${label} runs the integrity check before the publish — it would compare against nothing published yet`);
-  } else if (publishAt === -1) {
-    problems.push(`${label} has no publish step to place the attestation before`);
   }
   if (bumpAt !== -1 && packAt !== -1 && !(bumpAt < packAt)) {
     problems.push(`${label} packs before the prerelease bump — the attested tarballs would carry the unbumped version`);
@@ -1741,7 +1741,7 @@ const PROBES = [
         what: 'REL3 caller: the rc caller without `attestations: write` (the payload needs it; the caller is its ceiling)',
         run: () => checkPublishingCallersDelegate([{ file: 'release-rc.yml', text: withCallerDefect('      attestations: write\n', '') }], REUSABLE_PAYLOAD_FIXTURE),
       },
-    ].map((pr) => ({ ...pr, what: pr.what }));
+    ];
   })(),
   {
     what: 'the OpenDesign check made conditional with `if: false`',

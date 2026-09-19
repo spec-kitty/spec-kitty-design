@@ -15,15 +15,10 @@ on:
 #   `packages: write`  is now required — without it GITHUB_TOKEN cannot publish here at all, and
 #                      this workflow did not have it, so it would have 403'd even after the
 #                      registry change.
-#   `id-token: write`  is gone with `--provenance` below. npm provenance is an npmjs.org MECHANISM
-#                      and is unsupported on GitHub Packages. The CONTROL it implements is not lost:
-#                      #364 scope item 3 replaces it with `actions/attest-build-provenance` over the
-#                      packed tarballs, needing `attestations: write` and `id-token: write` — under
-#                      the operator amendment of 2026-09-11 (#361), "GitHub artifact attestations
-#                      replace npm provenance". So FR-044 is RELOCATED, not retired, and this file
-#                      must not say otherwise: an earlier revision of this comment claimed it "cannot
-#                      be satisfied by any configuration", which is false and is exactly the kind of
-#                      confident wrong statement a later mission cites as settled.
+#   `--provenance`     is gone: npm provenance is an npmjs.org MECHANISM, unsupported on GitHub
+#                      Packages. FR-044 is met instead by `actions/attest-build-provenance` over the
+#                      packed tarballs (REL3, #364, per the 2026-09-11 amendment on #361), which is
+#                      why `id-token: write` and `attestations: write` are declared below.
 #   `NPM_TOKEN`        never existed as a secret (verified: zero secrets by that name), so prod
 #                      could not publish to npmjs today regardless. GITHUB_TOKEN is a credential
 #                      that actually exists.
@@ -144,6 +139,17 @@ jobs:
             --output-file spec-kitty-design-sbom.cdx.json
           echo "SBOM components: $(node -e "const d=require('./spec-kitty-design-sbom.cdx.json'); console.log(d.components.length)")"
 
+      # REL3 (#364): PACK, ATTEST, PUBLISH THOSE FILES, VERIFY — the same order and the same shared
+      # scripts as the rc payload. `--provenance` stays gone (it is the npmjs mechanism and hard-fails
+      # on GitHub Packages); FR-044 is met by these attestations over the exact published bytes.
+      - name: "[ENFORCED] Pack the derived set into the tarballs that get attested and published"
+        run: node scripts/pack-derived-set.mjs
+
+      - name: "[ENFORCED] Attest the packed tarballs (#364, FR-044)"
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # actions/attest-build-provenance v4.2.2
+        with:
+          subject-path: 'dist-tarballs/*.tgz'
+
       # ONE step over the derived set, not one hand-written step per package. Two steps named
       # `tokens` and `styles` are how `elements` and `react` came to be absent without anyone
       # noticing: adding a package to the repo did not add it here, and nothing compared the two.
@@ -158,24 +164,15 @@ jobs:
       # failed were never retried and the release stayed wedged at that version. A lens walked
       # through it.
       #
-      # So an already-published version is a SKIP, not a failure.
+      # So an already-published version is a SKIP, not a failure. A re-run re-packs the same tree,
+      # which yields byte-identical tarballs (npm pack is deterministic), so the retry attests and
+      # verifies the same bytes that are already on the registry.
       #
       # `set -euo pipefail` is RESTORED here. An earlier revision dropped `-e` on the stated
       # grounds that it "would defeat the handling" — that is false, and a lens measured it: POSIX
       # exempts the condition of an `if` from `set -e`, and both handled commands are if-conditions.
       # Dropping `-e` therefore bought nothing and silently removed protection from every
       # *unhandled* command in the block.
-      # REL3 (#364): PACK, ATTEST, PUBLISH THOSE FILES, VERIFY — the same order and the same shared
-      # scripts as the rc payload. `--provenance` stays gone (it is the npmjs mechanism and hard-fails
-      # on GitHub Packages); FR-044 is met by these attestations over the exact published bytes.
-      - name: "[ENFORCED] Pack the derived set into the tarballs that get attested and published"
-        run: node scripts/pack-derived-set.mjs
-
-      - name: "[ENFORCED] Attest the packed tarballs (#364, FR-044)"
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # actions/attest-build-provenance v4.2.2
-        with:
-          subject-path: 'dist-tarballs/*.tgz'
-
       - name: Publish every package in the derived set
         run: |
           set -euo pipefail
@@ -210,7 +207,7 @@ jobs:
                   echo "::warning::$pkg is already published at this version — skipping (run attempt ${GITHUB_RUN_ATTEMPT})"
                 else
                   echo "::error::$pkg reports an existing version on the FIRST attempt."
-                  echo "Nothing under @spec-kitty has ever been published, so this is not a resumption."
+                  echo "A first-attempt conflict means this version is already on the registry and this run did not put it there."
                   echo "Verify ownership before re-running: npm view <name>@<version> _npmUser.name"
                   failed="$failed $pkg"
                   break

@@ -126,8 +126,8 @@ export function decidePublish({ tag }) {
   // it can make it.
   //
   // WHAT THIS COSTS, stated plainly: the reusable payload can never serve prod. `release.yml`
-  // publishes `latest` through its own loop, and REL3's fold must give prod a separately audited
-  // path rather than passing `dist-tag: latest` here. That is a real architectural constraint, and
+  // publishes `latest` through its own loop — REL3 (#364) kept it there, publishing the attested
+  // tarballs from that loop rather than passing `dist-tag: latest` here. That is a real architectural constraint, and
   // it is the honest one — an rc payload that CAN claim the prod channel is a payload one edit away
   // from claiming it, which is precisely what five passes demonstrated.
   if (t === 'latest') {
@@ -217,10 +217,10 @@ function publishAll(decision, { dryRun }) {
   }
 
   const attempt = process.env.GITHUB_RUN_ATTEMPT ?? '1';
-  for (const e of packed.entries) {
-    const p = { name: e.name };
-    const tarball = join(packed.outDir, e.file);
-    console.log(`\n=== publishing ${e.name}@${e.version} under ${tag} from ${PACK_DIR_NAME}/${e.file} ===`);
+  for (const entry of packed.entries) {
+    const p = entry;
+    const tarball = join(packed.outDir, entry.file);
+    console.log(`\n=== publishing ${entry.name}@${entry.version} under ${tag} from ${PACK_DIR_NAME}/${entry.file} ===`);
     try {
       // BOTH STREAMS. `execFileSync` returns stdout only, and npm writes its publish notices to
       // stderr — so the success path logged almost nothing, in the one place where the log IS the

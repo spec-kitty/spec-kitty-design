@@ -16,11 +16,11 @@
  * number of times. A mismatch is never retried: bytes that differ do not converge.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync, existsSync, realpathSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readPacked, sha512Integrity } from './pack-derived-set.mjs';
+import { readPacked, sha512Integrity, packSet, isDirectInvocation } from './pack-derived-set.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const KNOWN_ARGV = new Set(['--selftest']);
@@ -84,23 +84,10 @@ export function verifyPublished({ root = ROOT, fetch = npmFetch, attempts = 6, d
   return results;
 }
 
-export function isDirectInvocation(argv1, moduleUrl) {
-  if (!argv1 || !moduleUrl) return false;
-  const real = (x) => {
-    try {
-      return realpathSync(x);
-    } catch {
-      return resolve(x);
-    }
-  };
-  return real(argv1) === real(fileURLToPath(moduleUrl));
-}
-
 /* ────────────────────────────── --selftest ────────────────────────────── */
 
 async function fixture() {
-  const { packSet, sha512Integrity: h } = await import('./pack-derived-set.mjs');
-  const { mkdirSync, readFileSync } = await import('node:fs');
+  const h = sha512Integrity;
   const root = mkdtempSync(join(tmpdir(), 'verify-set-'));
   for (const [dir, name] of [['tokens', '@spec-kitty/tokens'], ['styles', '@spec-kitty/styles']]) {
     mkdirSync(join(root, 'packages', dir), { recursive: true });
@@ -147,8 +134,9 @@ async function selftest() {
     ['a version never readable fails after the bounded attempts', () => { const calls = []; const r = run({ fetch: registry({ failFirst: 99, calls }), attempts: 3 }); return !r.ok && calls.length === 3 && /after 3 attempts/.test(r.error); }],
     ['a missing packed.json is refused before any download', () => { const calls = []; const empty = mkdtempSync(join(tmpdir(), 'verify-empty-')); try { verifyPublished({ root: empty, fetch: registry({ calls }), log: quiet }); return false; } catch (e) { return calls.length === 0 && /missing|no packages/.test(e.message); } finally { rmSync(empty, { recursive: true, force: true }); } }],
     ['every attested entry is checked, not just the first', () => { const calls = []; run({ fetch: registry({ calls }) }); return calls.length === 2; }],
-    ['unknown argv is refused', () => ['--nope'].filter((a) => !KNOWN_ARGV.has(a)).length === 1],
-    ['importing does not verify', () => isDirectInvocation('/some/other.mjs', import.meta.url) === false],
+    // SPAWNED, not a Set lookup: these fail if the real argv refusal or the import guard goes.
+    ['an unknown argument exits 2', () => spawnSync(process.execPath, [fileURLToPath(import.meta.url), '--nope'], { encoding: 'utf8' }).status === 2],
+    ['importing the module verifies nothing', () => { const r = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(import.meta.url)})`], { encoding: 'utf8' }); return r.status === 0 && `${r.stdout}${r.stderr}`.trim() === ''; }],
   ];
   const PROBE_FLOOR = 9;
   let bad = 0;
