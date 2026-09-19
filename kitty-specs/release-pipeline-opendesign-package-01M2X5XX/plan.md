@@ -13,8 +13,8 @@
 | Is the fixture self-contained or linked? | **Self-contained** — one `<style>` block with `:root` inline, no `<link>`, in every reference inspected (`agentic`, `ant`, `bento`; `apple` has two blocks) | reference packages |
 | What happens to our manifest on import? | **OpenDesign regenerates it** and overwrites the file, discarding keys it did not produce | `apps/daemon/src/design-systems/import.ts:156-173` |
 | How is a local package imported? | `od design-systems import local` → `POST /api/design-systems/import/local` | `apps/daemon/src/cli.ts:9722` |
-| Which fonts does the library use? | **Inter** (+ JetBrains Mono via Google Fonts `@import`), 40 files in `packages/tokens/src/fonts/`, referenced as `./fonts/*.woff2` | `tokens.css:378,430+` |
-| Which fonts does today's package ship? | **30 "Falling Sky" `.otf` files** — not the library's; `tokens.css` there points at files the package does not contain | `ux_redesign/.../spec-kitty-train/fonts/` |
+| Which fonts does the library use? | **Falling Sky** (`--sk-font-display`), **Inter** (`--sk-font-sans`) and **Swansea**, via 40 `@font-face` rules over files in `packages/tokens/src/fonts/`; every referenced file is present. JetBrains Mono (`--sk-font-mono`) is not loaded — a comment in `tokens.css` records that its old `@import` was always dropped by the browser. | `tokens.css:276-283`, `@font-face` scan, reference-vs-file diff |
+| Which fonts does today's package ship? | 30 Falling Sky `.otf` files — **exactly what its own stale `tokens.css` references**, so the package is internally consistent. It lacks Inter and Swansea only because that `tokens.css` predates them. | reference-vs-file diff: 30 referenced, 30 shipped, 0 missing |
 | Does the static-only line in the spec hold as first written? | **No** — 13 of 34 components ship `:host`/`::slotted` rules in their CSS; spec amended | per-component grep, control on `action-row` (14) |
 
 ## Architecture
@@ -99,8 +99,8 @@ variable at call time and is never written, echoed or committed.
   matches what is deployed.
 - **The imported project in the instance is a copy.** Refreshing needs a re-import, not a file edit;
   the docs say so and the proof exercises it.
-- **Fonts double in size**, Falling Sky → Inter set (40 `woff2` files). They are the library's own
-  fonts, so this is a correction, not growth for its own sake.
+- **The font set grows from 30 files to the library's 40+**, adding Inter and Swansea. That is the
+  current `tokens.css` catching up with the fonts it declares, not a change of typeface.
 
 ## Open question deliberately left to WP01
 
