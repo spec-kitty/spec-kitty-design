@@ -48,6 +48,9 @@
       "last_event_id": "01M2XNEQ2JB4P9DMTFJ0E0BJ8M",
       "last_transition_at": "2026-09-19T20:24:19.794233+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "attest steps + permissions on both streams; 17 release-graph probes and 2 wiring cases, all revert-tested"
+      ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
       "subtasks": {
