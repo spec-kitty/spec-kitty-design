@@ -118,6 +118,10 @@ jobs:
         run: node scripts/check-vue-packed-types.mjs
       - name: "[ENFORCED] Sizes and the SRI hash match the built artifacts (FR-005, NFR-004)"
         run: node scripts/measure-elements-sizes.mjs --check
+      # REL4 (#396). The prod stream publishes the committed version, so there is no bump here; the
+      # check refuses a tag whose committed OpenDesign package has drifted from the library.
+      - name: "[ENFORCED] OpenDesign package is current with the library (#396, FR-011)"
+        run: node scripts/build-opendesign-package.mjs --check
       - name: "[ENFORCED] Dist contents audit — no secrets/sourcemaps (ADR-005)"
         run: |
           set -euo pipefail

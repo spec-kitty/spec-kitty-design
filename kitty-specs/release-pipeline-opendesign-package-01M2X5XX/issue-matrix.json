@@ -1,0 +1,53 @@
+{
+  "rows": {
+    "#361": {
+      "evidence_ref": "REL4 is the epic child #396; its release-path gate (FR-011) is in publish-packages.yml and release.yml",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": "parent epic",
+      "source_file": "spec.md",
+      "title": "Epic: Release pipeline \u2014 dual-stream rc/prod publishing",
+      "verdict": "in-mission",
+      "wp": "WP02"
+    },
+    "#364": {
+      "evidence_ref": "spec.md Out of scope: making the npm packages public is REL3 (#364), which owns it",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": "sibling, out of scope",
+      "source_file": "spec.md",
+      "title": "[REL3] prod stream on GitHub Packages and registry routing",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#384": {
+      "evidence_ref": "spec.md Out of scope: overturning the token self-containment ruling (epic #384 / DKM0) \u2014 the package ships the published tokens.css unchanged, so the ruling stands",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": "inherited decision",
+      "source_file": "spec.md",
+      "title": "Epic: doc-kitty migration \u2014 documentation primitives in the spec-kitty-design library",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#396": {
+      "evidence_ref": "PR #465; research/consumability-proof.md",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": "this mission",
+      "source_file": "spec.md",
+      "title": "[REL4] OpenDesign design-system package \u2014 tokens + components fixture from library static forms",
+      "verdict": "in-mission",
+      "wp": "WP01,WP02,WP03"
+    }
+  },
+  "schema_version": 1
+}

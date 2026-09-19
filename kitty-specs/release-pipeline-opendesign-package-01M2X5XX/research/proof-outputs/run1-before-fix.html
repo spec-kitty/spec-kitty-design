@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workspace connection — settings</title>
+<style>
+/* @spec-kitty/tokens — ADR-003 naming schema: --sk-<category>-<name> */
+/* Values reconciled with Spec Kitty Design System reference (colors_and_type.css). */
+:root {
+  /* ── Brand Colors ────────────────── */
+  /* Core palette — yellow is the signature primary. */
+  --sk-color-yellow:        #F5C518;   /* signature primary, CTAs, logo bow */
+  --sk-color-yellow-soft:   #FFD84D;   /* hover / highlight */
+  --sk-color-yellow-deep:   #C99A0E;   /* pressed / on-light fg */
+  /* Yellow alpha buckets — see PLAN-001 for naming rationale.
+     Suffix is the rounded percent of the alpha channel. */
+  --sk-color-yellow-alpha-15: rgba(245, 197, 24, 0.14);
+  --sk-color-yellow-alpha-35: rgba(245, 197, 24, 0.35);
+  --sk-color-yellow-alpha-60: rgba(245, 197, 24, 0.60);
+  --sk-color-haygold:       #D9B36A;   /* muted warm gold, bullet dots, dim accents */
+  --sk-color-haygold-soft:  #E8C988;
+  --sk-color-blue:          #A9C7E8;   /* soft icy blue (illustration sky / muted info) */
+  --sk-color-blue-deep:     #6B8FB8;   /* hover state for blue */
+  --sk-color-blue-bg:       #14202E;   /* deep blue surface for muted-info panel */
+  --sk-color-purple:        #B8A9E0;   /* soft lavender, v2.x evolution accent */
+  --sk-color-purple-deep:   #8C7AC2;
+  --sk-color-purple-bg:     #1E1A2E;   /* deep purple surface for v2.x section banners */
+  --sk-color-green:         #8FCB8F;   /* checkmark / success / "by the numbers" */
+  --sk-color-green-bg:      #15241A;   /* dark green surface behind numbers banner */
+  --sk-color-red:           #E97373;
+  --sk-color-red-soft:      #F0A0A0;
+  --sk-color-sage:          #4F8F4F;   /* heading sage on cream (light-mode only) */
+  --sk-color-sage-deep:     #3D7A3D;
+  --sk-color-sage-soft:     #7CAE7C;   /* dim / 70% sage for chips */
+
+  /* ── Accent ──────────────────────── */
+  --sk-color-accent:        #F5C518;   /* interactive accent (= yellow) */
+  --sk-color-accent-fg:     #1A1408;   /* dark ink on yellow buttons */
+
+  /* ── Dark Surfaces (default — dark mode) ─── */
+  --sk-surface-page:        #0D0E11;   /* blackish — deepest page background */
+  --sk-surface-hero:        #121317;   /* hero / section background */
+  --sk-surface-card:        #181A1F;   /* card surface */
+  --sk-surface-input:       #1C1F25;   /* elevated card / form input fill */
+  --sk-surface-pill:        #212830;   /* off-gray — nav pill, chips, hover row */
+  --sk-surface-muted:       #262C36;   /* dark gray — muted info panel, code block */
+
+  /* ── Section Tint Surfaces ───────── */
+  --sk-surface-tint-mint:   #15241A;   /* dark: numbers banner / green */
+  --sk-surface-tint-butter: #2A2410;   /* dark: warm-yellow card */
+  --sk-surface-tint-lilac:  #1E1A2E;   /* dark: v2.x banner / purple */
+  --sk-surface-tint-sky:    #14202E;   /* dark: muted info / blue */
+  --sk-surface-tint-rose:   #2B1515;   /* dark: danger / red */
+
+  --sk-border-tint-sky:    rgba(169, 199, 232, 0.20);  /* channels from --sk-color-blue */
+  --sk-border-tint-lilac:  rgba(184, 169, 224, 0.25);  /* channels from --sk-color-purple */
+
+  /* ── On-Tint Foregrounds ─────────── */
+  --sk-on-tint-mint:        var(--sk-color-green);
+  --sk-on-tint-butter:      var(--sk-color-yellow-soft);
+  --sk-on-tint-lilac:       var(--sk-color-purple);
+  --sk-on-tint-sky:         var(--sk-color-blue);
+  --sk-on-tint-rose:        var(--sk-color-red);
+
+  /* ── Data visualisation ──────────── */
+  --sk-color-data-series-primary: var(--sk-on-tint-sky);
+  --sk-color-data-grid: var(--sk-border-default);
+  --sk-color-data-baseline: var(--sk-fg-subtle);
+
+  /* ── Chart family (#179) ─────────── */
+  --sk-chart-series-1: var(--sk-on-tint-sky);
+  --sk-chart-series-2: var(--sk-on-tint-mint);
+  --sk-chart-series-3: var(--sk-on-tint-lilac);
+  --sk-chart-series-4: var(--sk-on-tint-butter);
+  --sk-chart-grid: var(--sk-border-default);
+  --sk-chart-baseline: var(--sk-fg-subtle);
+  --sk-chart-gap: var(--sk-fg-muted);
+  --sk-chart-gap-fill: rgba(169, 169, 176, 0.14);  /* channels from --sk-fg-muted */
+  --sk-chart-dash-1: none;
+  --sk-chart-dash-2: 8 4;
+  --sk-chart-dash-3: 2 3;
+  --sk-chart-dash-4: 10 3 2 3;
+  --sk-chart-gap-dash: 3 3;
+  --sk-chart-stroke-width: var(--sk-border-width-2);
+  --sk-chart-plot-block-size: calc(var(--sk-space-10) * 4);
+
+  /* ── Operational Status — semantic pairs (#177) ── */
+  --sk-status-neutral:      var(--sk-surface-muted);
+  --sk-status-info:         var(--sk-surface-tint-sky);
+  --sk-status-success:      var(--sk-surface-tint-mint);
+  --sk-status-attention:    var(--sk-surface-tint-butter);
+  --sk-status-danger:       var(--sk-surface-tint-rose);
+  --sk-status-recovery:     var(--sk-surface-tint-lilac);
+
+  --sk-on-status-neutral:   var(--sk-fg-muted);
+  --sk-on-status-info:      var(--sk-on-tint-sky);
+  --sk-on-status-success:   var(--sk-on-tint-mint);
+  --sk-on-status-attention: var(--sk-on-tint-butter);
+  --sk-on-status-danger:    var(--sk-on-tint-rose);
+  --sk-on-status-recovery:  var(--sk-on-tint-lilac);
+
+  /* ── Pill/Chip Background ────────── */
+  --sk-bg-pill:             #212830;   /* nav pill rail, chips, hover row */
+
+  /* ── Foreground / Text ───────────── */
+  --sk-fg-default:          #FFFFFF;   /* headlines — maps to --sk-fg-0 */
+  --sk-fg-body:             #D6D6DA;   /* body text — maps to --sk-fg-1 */
+  --sk-fg-muted:            #A9A9B0;   /* secondary body, muted copy — maps to --sk-fg-2 */
+  --sk-fg-subtle:           #81818B;
+  --sk-fg-placeholder:      #4A4A52;   /* placeholder text — maps to --sk-fg-4 */
+  --sk-fg-on-primary:       #1A1408;   /* dark ink on yellow buttons */
+  --sk-fg-on-card:          #D6D6DA;   /* text on card surface */
+  --sk-fg-error:            #E97373;
+
+  /* ── Borders ─────────────────────── */
+  --sk-border-default:      #2B313B;   /* hairline default — slightly cool */
+  --sk-border-strong:       #353C48;   /* card border */
+  --sk-border-focus:        #F5C518;   /* focus ring (= yellow) */
+  --sk-border-control:      #81818B;
+  --sk-border-control-invalid: #E97373;
+  --sk-border-width-1:      1px;
+  --sk-border-width-2:      2px;
+  --sk-border-width-4:      4px;
+
+  /* ── Typography — Families ───────── */
+  --sk-font-sans:           'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --sk-font-display:        'Falling Sky', ui-sans-serif, system-ui, sans-serif;
+  --sk-font-reference:      'Swansea', ui-sans-serif, system-ui, sans-serif;
+  --sk-font-condensed:      'Falling Sky Condensed', 'Falling Sky', ui-sans-serif, sans-serif;
+  --sk-font-extended:       'Falling Sky Extended', 'Falling Sky', ui-sans-serif, sans-serif;
+  --sk-font-outline:        'Falling Sky Outline', 'Falling Sky', ui-sans-serif, sans-serif;
+  --sk-font-boldplus:       'Falling Sky Boldplus', 'Falling Sky', ui-sans-serif, sans-serif;
+  --sk-font-mono:           'JetBrains Mono', ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* ── Typography — Scale ──────────── */
+  --sk-text-xs:             0.75rem;    /* 12px — eyebrow labels */
+  --sk-text-sm:             0.875rem;   /* 14px */
+  --sk-text-base:           1rem;       /* 16px */
+  --sk-text-lg:             1.125rem;   /* 18px — lead / h4 */
+  --sk-text-xl:             1.25rem;
+  --sk-text-2xl:            1.5rem;
+  --sk-text-3xl:            1.875rem;
+
+  /* ── Typography — Weights ────────── */
+  --sk-weight-normal:       400;
+  --sk-weight-medium:       500;
+  --sk-weight-semibold:     600;
+  --sk-weight-bold:         700;
+  --sk-weight-extrabold:    800;
+
+  /* ── Spacing ─────────────────────── */
+  --sk-space-1:   0.25rem;   /*  4px */
+  --sk-space-2:   0.5rem;    /*  8px */
+  --sk-space-3:   0.75rem;   /* 12px */
+  --sk-space-4:   1rem;      /* 16px */
+  --sk-space-5:   1.25rem;   /* 20px */
+  --sk-space-6:   1.5rem;    /* 24px */
+  --sk-space-7:   2rem;      /* 32px */
+  --sk-space-8:   2.5rem;    /* 40px */
+  --sk-space-9:   3rem;      /* 48px */
+  --sk-space-10:  4rem;      /* 64px */
+  --sk-space-11:  6rem;      /* 96px */
+  --sk-space-12:  8rem;      /* 128px */
+
+  /* ── Layout ──────────────────────── */
+  --sk-layout-personal-rail-width: 3.5rem;  /* 56px */
+  --sk-layout-context-sidebar-width: 15rem; /* 240px */
+  --sk-layout-workflow-lane-min-inline-size: 13.75rem;
+  --sk-layout-page-header-sticky-offset: 0rem;
+  --sk-layout-page-header-compact-height: 3rem;   /* 48px */
+  --sk-layout-page-header-sticky-layer: 10;
+  --sk-layout-page-header-sticky-scroll-margin:
+    calc(var(--sk-layout-page-header-sticky-offset) +
+         var(--sk-layout-page-header-compact-height) +
+         var(--sk-space-7));
+
+  /* ── Radius ──────────────────────── */
+  --sk-radius-sm:   0.5rem;    /*  8px — chips, eyebrow pills */
+  --sk-radius-md:   0.75rem;   /* 12px — form inputs */
+  --sk-radius-lg:   1rem;      /* 16px — cards */
+  --sk-radius-xl:   1.25rem;   /* 20px — hero card */
+  --sk-radius-pill: 999px;     /* nav pills, primary buttons */
+
+  /* ── Shadows ─────────────────────── */
+  --sk-shadow-card:          0 1px 0 rgba(255,255,255,0.02) inset, 0 1px 2px rgba(0,0,0,0.4);
+  --sk-shadow-elev:          0 8px 24px rgba(0,0,0,0.45);
+  --sk-shadow-glow-primary:  0 6px 20px -6px rgba(245,197,24,0.45);
+  --sk-shadow-focus:         0 0 0 3px rgba(13,14,17,0.55), 0 0 0 4px rgba(43,49,59,0.6);
+
+  /* ── Motion ──────────────────────── */
+  --sk-motion-duration-fast: 120ms;
+  --sk-motion-duration-base: 200ms;
+  --sk-motion-duration-slow: 320ms;
+  --sk-motion-ease-out:      cubic-bezier(0.22, 1, 0.36, 1);
+  --sk-motion-ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);
+}
+</style>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-block-size: 100vh;
+  display: grid;
+  place-items: start center;
+  padding: var(--sk-space-10) var(--sk-space-4);
+  background: var(--sk-surface-page);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  line-height: 1.5;
+}
+
+/* ── Panel ─────────────────────────────── */
+.settings-panel {
+  inline-size: 100%;
+  max-inline-size: 32rem;
+  background: var(--sk-surface-card);
+  color: var(--sk-fg-on-card);
+  border: var(--sk-border-width-1) solid var(--sk-border-strong);
+  border-radius: var(--sk-radius-lg);
+  box-shadow: var(--sk-shadow-card);
+}
+
+.settings-panel__header {
+  padding: var(--sk-space-6) var(--sk-space-6) var(--sk-space-5);
+  border-block-end: var(--sk-border-width-1) solid var(--sk-border-default);
+}
+
+.settings-panel__title {
+  margin: 0;
+  font-family: var(--sk-font-display);
+  font-size: var(--sk-text-2xl);
+  font-weight: var(--sk-weight-bold);
+  line-height: 1.2;
+  color: var(--sk-fg-default);
+}
+
+.settings-panel__lead {
+  margin: var(--sk-space-2) 0 0;
+  font-size: var(--sk-text-sm);
+  color: var(--sk-fg-muted);
+  text-wrap: pretty;
+}
+
+.settings-panel__body {
+  display: grid;
+  gap: var(--sk-space-6);
+  padding: var(--sk-space-6);
+}
+
+.settings-panel__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sk-space-3) var(--sk-space-4);
+  padding: var(--sk-space-4) var(--sk-space-6);
+  border-block-start: var(--sk-border-width-1) solid var(--sk-border-default);
+  background: var(--sk-surface-hero);
+  border-end-start-radius: var(--sk-radius-lg);
+  border-end-end-radius: var(--sk-radius-lg);
+}
+
+/* ── Shared field text ─────────────────── */
+.sk-field-label {
+  display: block;
+  padding: 0;
+  font-family: var(--sk-font-display);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-semibold);
+  color: var(--sk-fg-default);
+}
+
+.sk-field-hint {
+  margin: var(--sk-space-1) 0 0;
+  font-size: var(--sk-text-sm);
+  color: var(--sk-fg-muted);
+}
+
+.sk-field-error {
+  margin: var(--sk-space-2) 0 0;
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+  color: var(--sk-fg-error);
+}
+.sk-field-error:empty { display: none; }
+
+/* ── Radio choice group (native fieldset) ─ */
+.sk-radio-choice-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.sk-radio-choice-group__list {
+  list-style: none;
+  margin: var(--sk-space-3) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sk-space-2);
+}
+
+.sk-radio-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-space-3);
+  min-block-size: var(--sk-space-9);
+  padding: var(--sk-space-2) var(--sk-space-4);
+  background: var(--sk-surface-input);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  color: var(--sk-fg-body);
+  cursor: pointer;
+  transition:
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-radio-choice:hover {
+  background: var(--sk-surface-pill);
+  border-color: var(--sk-border-strong);
+}
+
+.sk-radio-choice:has(:checked) {
+  background: var(--sk-surface-pill);
+  border-color: var(--sk-color-yellow-alpha-60);
+  color: var(--sk-fg-default);
+}
+
+.sk-radio-choice:has(:focus-visible) {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-2);
+}
+
+.sk-radio-choice__input {
+  appearance: none;
+  flex: none;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  inline-size: var(--sk-space-5);
+  block-size: var(--sk-space-5);
+  border: var(--sk-border-width-2) solid var(--sk-border-control);
+  border-radius: 50%;
+  background: var(--sk-surface-card);
+  cursor: pointer;
+}
+.sk-radio-choice__input::before {
+  content: "";
+  inline-size: var(--sk-space-2);
+  block-size: var(--sk-space-2);
+  border-radius: 50%;
+  background: var(--sk-color-yellow);
+  transform: scale(0);
+  transition: transform var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+.sk-radio-choice__input:checked { border-color: var(--sk-color-yellow); }
+.sk-radio-choice__input:checked::before { transform: scale(1); }
+.sk-radio-choice__input:focus-visible { outline: none; }
+
+.sk-radio-choice-group[aria-invalid="true"] .sk-radio-choice__input {
+  border-color: var(--sk-border-control-invalid);
+}
+
+.sk-radio-choice__label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  font-weight: var(--sk-weight-medium);
+}
+.sk-radio-choice__sep {
+  color: var(--sk-fg-subtle);
+  padding-inline: var(--sk-space-1);
+}
+
+/* ── Text input ────────────────────────── */
+.sk-form-field { display: grid; }
+
+.sk-input {
+  margin-block-start: var(--sk-space-3);
+  inline-size: 100%;
+  min-block-size: var(--sk-space-9);
+  padding: var(--sk-space-2) var(--sk-space-4);
+  background: var(--sk-surface-input);
+  color: var(--sk-fg-default);
+  border: var(--sk-border-width-1) solid var(--sk-border-control);
+  border-radius: var(--sk-radius-md);
+  font: inherit;
+  transition: border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+.sk-input::placeholder { color: var(--sk-fg-subtle); }
+.sk-input:hover { border-color: var(--sk-fg-muted); }
+.sk-input:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-2);
+  border-color: var(--sk-border-focus);
+}
+.sk-input[aria-invalid="true"] { border-color: var(--sk-border-control-invalid); }
+
+/* ── Buttons ───────────────────────────── */
+.sk-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sk-space-2);
+  min-block-size: var(--sk-space-9);
+  padding: var(--sk-space-2) var(--sk-space-6);
+  border: var(--sk-border-width-1) solid transparent;
+  border-radius: var(--sk-radius-pill);
+  font-family: var(--sk-font-display);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-bold);
+  cursor: pointer;
+  transition:
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    box-shadow var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+.sk-button--primary {
+  background: var(--sk-color-yellow);
+  color: var(--sk-fg-on-primary);
+}
+.sk-button--primary:hover {
+  background: var(--sk-color-yellow-soft);
+  color: var(--sk-fg-on-primary);
+  box-shadow: var(--sk-shadow-glow-primary);
+}
+.sk-button--primary:active {
+  background: var(--sk-color-yellow-deep);
+  color: var(--sk-fg-on-primary);
+  box-shadow: none;
+}
+.sk-button:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-2);
+}
+
+/* ── Save status (polite live region) ──── */
+.settings-status {
+  flex: 1 1 12rem;
+  margin: 0;
+  min-inline-size: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sk-space-2);
+  font-size: var(--sk-text-sm);
+  color: var(--sk-fg-muted);
+  overflow-wrap: anywhere;
+}
+.settings-status[data-state="saved"] { color: var(--sk-on-status-success); }
+.settings-status[data-state="error"] { color: var(--sk-fg-error); }
+.settings-status__icon { flex: none; display: none; }
+.settings-status[data-state="saved"] .settings-status__icon { display: block; }
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px; block-size: 1px;
+  overflow: hidden; clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 30rem) {
+  body { padding: var(--sk-space-4) var(--sk-space-3); }
+  .settings-panel__header,
+  .settings-panel__body { padding-inline: var(--sk-space-4); }
+  .settings-panel__footer { padding-inline: var(--sk-space-4); }
+  .sk-button--primary { flex: 1 1 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-radio-choice,
+  .sk-radio-choice__input::before,
+  .sk-input,
+  .sk-button { transition: none; }
+}
+
+@media (forced-colors: active) {
+  .sk-radio-choice__input { appearance: auto; border: 0; }
+  .sk-radio-choice__input::before { display: none; }
+  .sk-radio-choice:has(:checked) { border-width: var(--sk-border-width-2); }
+  .sk-button--primary { border-color: ButtonText; }
+}
+</style>
+</head>
+<body>
+<main class="settings-panel" data-od-id="settings-panel" aria-labelledby="panel-title">
+  <form id="settings-form" novalidate>
+    <header class="settings-panel__header" data-od-id="panel-header">
+      <h1 class="settings-panel__title" id="panel-title" data-od-id="panel-title">Workspace connection</h1>
+      <p class="settings-panel__lead">Choose the workspace to connect and how your name appears there.</p>
+    </header>
+
+    <div class="settings-panel__body">
+      <fieldset class="sk-radio-choice-group" id="workspace-group" data-od-id="workspace-choice"
+                aria-describedby="workspace-hint workspace-error">
+        <legend class="sk-field-label" data-od-id="workspace-legend">Workspace</legend>
+        <p class="sk-field-hint" id="workspace-hint">Pick one. You can change this later.</p>
+        <ul class="sk-radio-choice-group__list">
+          <li>
+            <label class="sk-radio-choice" data-od-id="workspace-option-acme">
+              <input class="sk-radio-choice__input" type="radio" name="workspace" value="acme" data-label="Acme" required>
+              <span class="sk-radio-choice__label">Acme</span>
+            </label>
+          </li>
+          <li>
+            <label class="sk-radio-choice" data-od-id="workspace-option-acme-platform">
+              <input class="sk-radio-choice__input" type="radio" name="workspace" value="acme-platform" data-label="Acme / Platform">
+              <span class="sk-radio-choice__label">Acme<span class="sk-radio-choice__sep" aria-hidden="true">/</span><span class="visually-hidden"> / </span>Platform</span>
+            </label>
+          </li>
+          <li>
+            <label class="sk-radio-choice" data-od-id="workspace-option-northwind">
+              <input class="sk-radio-choice__input" type="radio" name="workspace" value="northwind" data-label="Northwind">
+              <span class="sk-radio-choice__label">Northwind</span>
+            </label>
+          </li>
+          <li>
+            <label class="sk-radio-choice" data-od-id="workspace-option-orbital">
+              <input class="sk-radio-choice__input" type="radio" name="workspace" value="orbital" data-label="Orbital">
+              <span class="sk-radio-choice__label">Orbital</span>
+            </label>
+          </li>
+        </ul>
+        <p class="sk-field-error" id="workspace-error"></p>
+      </fieldset>
+
+      <div class="sk-form-field" data-od-id="display-name-field">
+        <label class="sk-field-label" for="display-name">Display name</label>
+        <p class="sk-field-hint" id="display-name-hint">Shown next to your activity in the connected workspace.</p>
+        <input class="sk-input" id="display-name" name="displayName" type="text"
+               autocomplete="nickname" spellcheck="false" required
+               aria-describedby="display-name-hint display-name-error"
+               data-od-id="display-name-input">
+        <p class="sk-field-error" id="display-name-error"></p>
+      </div>
+    </div>
+
+    <footer class="settings-panel__footer">
+      <p class="settings-status" id="settings-status" role="status" aria-live="polite" data-od-id="save-status">
+        <svg class="settings-status__icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span id="settings-status-text">Not saved yet.</span>
+      </p>
+      <button class="sk-button sk-button--primary" type="submit" data-od-id="save-button">Save settings</button>
+    </footer>
+  </form>
+</main>
+
+<script>
+(function () {
+  var form = document.getElementById('settings-form');
+  var group = document.getElementById('workspace-group');
+  var groupError = document.getElementById('workspace-error');
+  var nameInput = document.getElementById('display-name');
+  var nameError = document.getElementById('display-name-error');
+  var status = document.getElementById('settings-status');
+  var statusText = document.getElementById('settings-status-text');
+
+  function setStatus(state, text) {
+    if (state) status.setAttribute('data-state', state);
+    else status.removeAttribute('data-state');
+    statusText.textContent = text;
+  }
+
+  function clearGroupError() {
+    group.removeAttribute('aria-invalid');
+    groupError.textContent = '';
+  }
+  function clearNameError() {
+    nameInput.removeAttribute('aria-invalid');
+    nameError.textContent = '';
+  }
+
+  form.addEventListener('change', function (e) {
+    if (e.target.name === 'workspace') clearGroupError();
+    if (status.getAttribute('data-state') === 'saved') setStatus(null, 'Unsaved changes.');
+  });
+  nameInput.addEventListener('input', function () {
+    clearNameError();
+    if (status.getAttribute('data-state') === 'saved') setStatus(null, 'Unsaved changes.');
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var checked = form.querySelector('input[name="workspace"]:checked');
+    var name = nameInput.value.trim();
+    var firstInvalid = null;
+
+    if (!checked) {
+      group.setAttribute('aria-invalid', 'true');
+      groupError.textContent = 'Choose a workspace to connect.';
+      firstInvalid = form.querySelector('input[name="workspace"]');
+    } else {
+      clearGroupError();
+    }
+
+    if (!name) {
+      nameInput.setAttribute('aria-invalid', 'true');
+      nameError.textContent = 'Enter a display name.';
+      firstInvalid = firstInvalid || nameInput;
+    } else {
+      clearNameError();
+    }
+
+    if (firstInvalid) {
+      setStatus('error', 'Fix the highlighted fields to save.');
+      firstInvalid.focus();
+      return;
+    }
+
+    var workspace = checked.getAttribute('data-label');
+    setStatus('saved', 'Saved: ' + workspace + ', shown as “' + name + '”.');
+  });
+})();
+</script>
+</body>
+</html>

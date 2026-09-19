@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>site-footer — Spec Kitty</title>
+    <meta name="description" content="site-footer: 1 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: site-footer — packages/styles/src/site-footer/sk-site-footer.css */
+/* @spec-kitty/styles — sk-site-footer */
+/* All values use --sk-* tokens only */
+
+/* A custom element defaults to `display: inline`; `block` lets the footer fill its column and
+   lets a consumer size the host. Inert in the static path, where the root IS the <footer>. */
+:host {
+  display: block;
+}
+
+/* WHAT THIS SHEET REACHES IN EACH PATH.
+
+   Under the #77 ruling the element owns the whole structure — the grid, the <nav>s, the
+   headings, the <ul>s, the divider and the legal line — and text arrives as PROPERTIES. So every
+   rule below except the link rule targets a node in the element's own shadow tree, and a bare
+   class selector serves both paths.
+
+   The one slotted thing is the link ITEM: a consumer supplies <li> elements that land directly
+   inside the element's <ul>, so `::slotted(li)` reaches them — directly assigned, which is
+   exactly why the ruling put the boundary there rather than around the whole column.
+
+   The <a> INSIDE each <li> is a grandchild and is not reachable from here. That is deliberate
+   and is the ruling's stated trade: the anchor keeps its own light-DOM class from this same
+   sheet, loaded in the consumer's document, which they are already doing for the static path.
+
+   AND A STATE PSEUDO-CLASS MUST SIT INSIDE `::slotted()`. `::slotted(x):hover` does not parse,
+   and one invalid selector invalidates its whole comma list (#143). The gate rejects it. */
+
+.sk-site-footer {
+  /* A HORIZONTAL GUTTER OF ITS OWN. This was `... 0 ...` — vertical padding only — so the footer
+     ran its content flush to the viewport edge. It was invisible in review because the LightMode
+     story compensated with `padding: 0 var(--sk-space-7)` on its own wrapper while the default
+     story did not, so the two themes looked different for a reason that had nothing to do with
+     theming. Owning the gutter here means every consumer gets it, not just the one that
+     remembered.
+
+     NOT because "a footer is a full-bleed band" — an earlier draft of this comment said that,
+     and it is false for the only consumer in this repo: apps/demo/blog-demo.html wraps it in a
+     max-width `.demo-container`. That wrapper's own horizontal padding is dropped there so the
+     gutter is not applied twice, and --sk-space-6 is chosen to MATCH that page's content inset —
+     measured, the footer's columns now start at the same x as the nav pill and the feature grid
+     above them, where --sk-space-7 left them 8px inboard of everything else. */
+  padding: var(--sk-space-11) var(--sk-space-6) var(--sk-space-8);
+  border-top: 1px solid var(--sk-border-default);
+}
+
+.sk-site-footer__grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: var(--sk-space-10);
+}
+
+@media (max-width: 640px) {
+  .sk-site-footer__grid { grid-template-columns: 1fr; gap: var(--sk-space-8); }
+}
+
+/* The grid's direct children, in both paths. `::slotted()` reaches these because they ARE the
+   assigned nodes; the bare class serves the document. */
+.sk-site-footer__column,
+::slotted(.sk-site-footer__column) {
+  min-width: 0;
+}
+
+.sk-site-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-space-3);
+  margin-bottom: var(--sk-space-4);
+}
+
+.sk-site-footer__wordmark {
+  font-family: var(--sk-font-display);
+  font-weight: var(--sk-weight-extrabold);
+  font-size: var(--sk-text-base);
+  color: var(--sk-fg-default);
+  letter-spacing: -0.01em;
+}
+
+.sk-site-footer__tagline {
+  font-size: var(--sk-text-sm);
+  color: var(--sk-fg-muted);
+  line-height: 1.55;
+  max-width: 360px;
+  margin: 0;
+}
+
+.sk-site-footer__heading {
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  font-weight: var(--sk-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sk-fg-muted);
+  margin-bottom: var(--sk-space-5);
+}
+
+/* The slotted <li> items, reachable because they are DIRECTLY assigned into the element's own
+   <ul>. */
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   Unlike `.sk-site-footer__column` above, this rule ships NO paired bare-class spelling — it is
+   SHADOW-ONLY, same as every other `::slotted()` construct ADR-15 ruled on: a page's outer-tree
+   declaration beats an inner-tree `::slotted()` one by CSS Cascade's tree-order rule regardless
+   of specificity or source order (generalised in ADR-16 — not a special case of `::slotted()`).
+
+   THE CLASS — or rather, the absence of one. `sk-site-footer`'s generated static markup
+   (`siteFooterStaticHtml()`, sk-site-footer.markup.ts) renders each item as a PLAIN `<li>` with
+   no class at all, directly inside `<ul class="sk-site-footer__links">`:
+
+       <ul class="sk-site-footer__links"><li><a href="#" class="sk-site-footer__link">...</a></li></ul>
+
+   So the static rewrite is a bare descendant type selector, not a class:
+
+       .sk-site-footer__links > li {
+         margin: 0;
+       }
+
+   That reproduces the appearance, at (0,1,1) — competing on ordinary terms rather than winning
+   unconditionally the way the shadow rule does. A consumer overriding it needs specificity
+   STRICTLY HIGHER than (0,1,1); at a tie the winner is whichever stylesheet comes last, where
+   the element form would have yielded regardless of order.
+
+   ADR-15 holds the full mechanism and outcome table. This comment adds no rule and changes
+   none. */
+::slotted(li) {
+  margin: 0;
+}
+
+.sk-site-footer__links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-3);
+}
+
+.sk-site-footer__link {
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+  text-decoration: none;
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  transition:
+    color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    text-decoration-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-site-footer__link:hover {
+  color: var(--sk-fg-default);
+  text-decoration-color: var(--sk-color-yellow);
+}
+
+.sk-site-footer__divider {
+  height: 1px;
+  background: var(--sk-border-default);
+  border: 0;
+  margin: var(--sk-space-7) 0;
+}
+
+.sk-site-footer__legal {
+  font-size: var(--sk-text-xs);
+  color: var(--sk-fg-muted);
+  margin: 0;
+}
+
+/* THE COMPACT PRESENTATION (#354, plan.md D-4/D-8/D-9). Layout only: no `background`, no
+   `box-shadow`, no `transition`, no `animation`, and no `color` declaration anywhere below — the
+   existing `.sk-site-footer { border-top: ... }` above already survives `forced-colors: active`
+   with zero authored CSS, and adding a colour here would reach the shared `.sk-site-footer__link`
+   rule this file already ships for the full presentation.
+
+   EVERY RULE HERE IS AN ORDINARY ROOT-BLOCK BEM CLASS SELECTOR — never a host-attribute
+   selector, and this file adds no inline-size query container or query rule anywhere. That is
+   what keeps ADR-15's #309/#310 host-axis machinery untriggered (a grep for the three
+   container/host-selector tokens over this file, in the task prompt, must report only the
+   pre-existing display rule at the top): the class is written identically by the element (on
+   its own shadow `<footer>`) and by the static form (on the document `<footer>`), via the
+   shared `siteFooterClasses()` helper, so a bare class selector matches in both.
+
+   NO PHYSICAL left/right/margin-left/margin-right/text-align anywhere below — RTL (FR-013) must
+   mirror automatically via logical and flex properties alone. */
+
+/* `.sk-site-footer--compact` ITSELF CARRIES NO DECLARATION. The base `.sk-site-footer` rule
+   above (padding, border-top) already applies — both classes are always present together, via
+   `siteFooterClasses()` — and nothing about the compact layout needs to override it. The
+   modifier exists to be targeted (by a test, or a consumer override) independently of
+   `__row`/`__meta`; a `.sk-site-footer--compact .sk-site-footer__link--compact` DESCENDANT
+   selector would not match in the element path, where the root class sits in the shadow root
+   and the anchor does not descend from it — which is why `__link--compact` below is a bare
+   class selector, not scoped under the modifier. */
+
+.sk-site-footer__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sk-space-4);
+}
+
+.sk-site-footer__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-2);
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .sk-site-footer__row { flex-direction: column; align-items: flex-start; }
+}
+
+/* THE 44px TARGET-SIZE FLOOR (NFR-006), on a LIGHT-DOM class on the anchor — never a descendant
+   selector from `.sk-site-footer--compact`, which does not match in the element path (see
+   above). --sk-space-8 (40px) + --sk-space-1 (4px) = 44px; re-verified against
+   packages/tokens/src/tokens.css at implementation time.
+
+   No focus-ring CSS and no `color:`/`outline-color:` here — the compact links keep the UA's own
+   `:focus-visible` ring, the same one the full presentation's `.sk-site-footer__link` already
+   ships, so nothing here can reach the frozen full presentation. */
+/* PAIRED SPELLING, and it is load-bearing rather than stylistic. The compact anchors are
+   DIRECTLY ASSIGNED to `slot[name=compact-links]`, so they stay light-DOM nodes: a bare class
+   selector in this sheet reaches them in the static/document path and reaches NOTHING once the
+   sheet is adopted into the shadow root. (Do NOT read the `__column` pairing above as the
+   precedent for this: since the #77 ruling the element renders `.sk-site-footer__column` itself,
+   inside the shadow root, and only the `<li>` items are slotted — so there the BARE half is the
+   live one and the `::slotted()` half is a vestige of the pre-#77 design. Here the live halves
+   are the other way round.) Without the `::slotted()` half, the 44px
+   target-size floor applied only where a consumer had separately adopted this sheet into their
+   document — the stories do, which is why the target-size test passed while the shipped element
+   did not carry the rule. `::slotted()` takes no state pseudo-class here, so the caveat in this
+   file's header does not bite. */
+.sk-site-footer__link--compact,
+::slotted(.sk-site-footer__link--compact) {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: calc(var(--sk-space-8) + var(--sk-space-1));
+  min-inline-size: calc(var(--sk-space-8) + var(--sk-space-1));
+  padding-inline: var(--sk-space-2);
+}
+    </style>
+  </head>
+  <body>
+    <section id="site-footer" data-od-component="site-footer">
+      <h1>site-footer</h1>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <footer class="sk-site-footer"><div class="sk-site-footer__grid"><div class="sk-site-footer__column"><div class="sk-site-footer__brand"><span class="sk-site-footer__wordmark">Your Brand</span></div><p class="sk-site-footer__tagline">One sentence on what you do.</p></div><nav class="sk-site-footer__column" aria-label="Product links"><div class="sk-site-footer__heading">Product</div><ul class="sk-site-footer__links"><li><a href="#" class="sk-site-footer__link">Platform</a></li><li><a href="#" class="sk-site-footer__link">Docs</a></li></ul></nav><nav class="sk-site-footer__column" aria-label="Connect links"><div class="sk-site-footer__heading">Connect</div><ul class="sk-site-footer__links"><li><a href="#" class="sk-site-footer__link">Contact</a></li><li><a href="#" class="sk-site-footer__link">GitHub</a></li></ul></nav></div><hr class="sk-site-footer__divider" /><p class="sk-site-footer__legal">© YYYY Your Company. All rights reserved.</p></footer>
+      </figure>
+    </section>
+  </body>
+</html>

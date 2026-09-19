@@ -1,0 +1,15 @@
+{
+  "upstream": "https://github.com/nexu-io/open-design",
+  "commit": "c5ae6292c464094de80d0191fab50144bff8a027",
+  "packageVersion": "0.21.1",
+  "files": {
+    "components-manifest.ts": {
+      "upstreamPath": "packages/contracts/src/design-systems/components-manifest.ts",
+      "sha256": "b3161dc39e365d45b7adec62f84799da2096af503850fa292a5f265afe41876f"
+    },
+    "manifest.schema.ts": {
+      "upstreamPath": "design-systems/_schema/manifest.schema.ts",
+      "sha256": "a22a2fc50d3778b72a5929efd79ed7025e28111859a511d6a290f2ccad104334"
+    }
+  }
+}

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>grid — Spec Kitty</title>
+    <meta name="description" content="grid: 1 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: grid — packages/styles/src/grid/sk-grid.css */
+/* @spec-kitty/styles — sk-grid responsive CSS Grid layout primitive */
+/* All values use --sk-* tokens only — no hardcoded values */
+/* Breakpoint note: the 720px media query is a raw pixel literal matching the
+   established mobile breakpoint used by sk-nav-pill (same convention). This
+   single literal is an accepted deviation — it is not a design value that
+   belongs in tokens, but a structural layout boundary. Documented inline per
+   CLAUDE.md §3 rule 1 exception. */
+/* Scope note (PLAN-007): this primitive is bounded by what the docsite blog
+   listing and reference preview pages need. It is NOT a general-purpose
+   CSS Grid system. Column variants are limited to 2, 3, and 4 columns. */
+
+/* ── The host box ────────────────────────────────────────────────────────── */
+/* A custom element's UA default is `display: inline`, and `max-width` does not apply to a
+   non-replaced inline box. Without this, every `style="max-width: …"` a consumer or a story
+   puts on <sk-grid> is silently inert — five stories in this repo did exactly that and
+   rendered full-canvas. `sk-form-input.css` and `sk-form-textarea.css` already set this;
+   the layout primitive is the element that most needs it.
+   Inert in the static consumption path, where the root IS the .sk-grid div — the same
+   "inert in a document" shape the nav-pill drawer sheet documents. */
+:host {
+  display: block;
+}
+
+/* ── Base grid ───────────────────────────────────────────────────────────── */
+/* Default: single-column, gap matches --sk-space-4 (16px). */
+.sk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sk-space-4);
+}
+
+/* ── Column modifiers ────────────────────────────────────────────────────── */
+.sk-grid--cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.sk-grid--cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.sk-grid--cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ── Gap modifiers ───────────────────────────────────────────────────────── */
+.sk-grid--gap-3 {
+  gap: var(--sk-space-3);
+}
+
+.sk-grid--gap-4 {
+  gap: var(--sk-space-4);
+}
+
+.sk-grid--gap-6 {
+  gap: var(--sk-space-6);
+}
+
+/* ── Responsive: collapse to single column below 720px ──────────────────── */
+/* 720px matches the sk-nav-pill hamburger breakpoint — the established mobile
+   breakpoint for this design system. Raw literal is intentional; see file header. */
+@media (max-width: 720px) {
+  .sk-grid--cols-2,
+  .sk-grid--cols-3,
+  .sk-grid--cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
+    </style>
+  </head>
+  <body>
+    <section id="grid" data-od-component="grid">
+      <h1>grid</h1>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <div class="sk-grid"><div>Grid item 1</div><div>Grid item 2</div><div>Grid item 3</div></div>
+      </figure>
+    </section>
+  </body>
+</html>

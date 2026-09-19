@@ -870,6 +870,13 @@ else {
     // that the `latest` refusal fires, now that the guard is executed code rather than a regex a
     // reviewer can read.
     [/node\s+scripts\/publish-derived-set\.mjs\s+--selftest(\s|$)/, "the publish refusal's own probe table", 'scripts/publish-derived-set.mjs --selftest'],
+    // REL4 (#396). All four, because each is the only thing standing behind a different failure:
+    // the digest check behind an edited vendored reference, --check behind a stale package, and
+    // each --selftest behind a check that has quietly stopped seeing what it claims to.
+    [/node\s+scripts\/opendesign-reference\.mjs(?!\s*--selftest)(\s|$)/, 'the vendored OpenDesign reference digest check', 'scripts/opendesign-reference.mjs'],
+    [/node\s+scripts\/opendesign-reference\.mjs\s+--selftest(\s|$)/, "the OpenDesign reference loader's own probe table", 'scripts/opendesign-reference.mjs --selftest'],
+    [/node\s+scripts\/build-opendesign-package\.mjs\s+--check(\s|$)/, 'the OpenDesign package drift check', 'scripts/build-opendesign-package.mjs --check'],
+    [/node\s+scripts\/build-opendesign-package\.mjs\s+--selftest(\s|$)/, "the OpenDesign package generator's own probe table", 'scripts/build-opendesign-package.mjs --selftest'],
     [/node\s+scripts\/check-adopted-css-boundaries\.mjs(?!\s*--selftest)(\s|$)/, 'the cross-root selector gate', 'scripts/check-adopted-css-boundaries.mjs'],
     [/node\s+scripts\/check-adopted-css-boundaries\.mjs\s+--selftest(\s|$)/, "the cross-root gate's own probe table", 'scripts/check-adopted-css-boundaries.mjs --selftest'],
     [/node\s+scripts\/check-elements-entries\.mjs(?!\s*--selftest)(\s|$)/, 'the distribution-entry gate', 'scripts/check-elements-entries.mjs'],

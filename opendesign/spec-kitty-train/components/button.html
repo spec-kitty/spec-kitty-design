@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>button — Spec Kitty</title>
+    <meta name="description" content="button: 1 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: button — packages/styles/src/button/sk-button.css */
+/* @spec-kitty/styles — sk-button shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+
+/* A custom element defaults to `display: inline`, so without this the host cannot be sized or
+   spaced by a consumer. `inline-flex` matches the static form's own display, which is what the
+   two consumption paths must agree on (#77, #78). Inert in the static path. */
+:host {
+  display: inline-flex;
+}
+
+.sk-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sk-space-2);
+  padding: var(--sk-space-3) var(--sk-space-7);
+  border: 1px solid transparent;
+  border-radius: var(--sk-radius-pill);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-medium);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    box-shadow var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    background var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+  text-decoration: none;
+  /* Positioning container for the busy cue below (#305). Inert on its own — a `position`
+     change with no absolutely-positioned descendant changes nothing about this element's own
+     box, so this line alone cannot be the source of a layout-shift regression. */
+  position: relative;
+}
+
+/* Primary variant — yellow fill, dark ink text, pill shape */
+.sk-button--primary {
+  background: var(--sk-color-yellow);
+  color: var(--sk-fg-on-primary);
+  border-color: transparent;
+}
+
+.sk-button--primary:hover {
+  box-shadow: var(--sk-shadow-glow-primary);
+}
+
+.sk-button--primary:active {
+  transform: scale(0.97);
+}
+
+/* Secondary variant — transparent background, border, default text */
+.sk-button--secondary {
+  background: transparent;
+  color: var(--sk-fg-default);
+  border-color: var(--sk-border-default);
+}
+
+.sk-button--secondary:hover {
+  border-color: var(--sk-border-strong);
+}
+
+/* Ghost variant — no border, transparent, muted text */
+.sk-button--ghost {
+  background: transparent;
+  color: var(--sk-fg-muted);
+  border-color: transparent;
+}
+
+.sk-button--ghost:hover {
+  color: var(--sk-fg-default);
+}
+
+/* ---- Danger-secondary: reuses the secondary SHAPE with the danger role's own boundary ----
+   Binding under BORDER-ROLE-319 (kitty-specs/../.../_program-319/DECISION-border-role.md): THIS
+   TONE'S OWN RULES never reach for --sk-border-default/--sk-border-strong (#155's failing
+   hairline). The control boundary IS the danger role itself, `--sk-on-status-danger`, already
+   published and used by sk-status-indicator and sk-pill-tag's status axis. No new token.
+   SCOPE OF THAT CLAIM, stated precisely (pre-merge squad finding #5, two lenses
+   independently): it covers this tone's own selectors below, not the composed
+   `danger-secondary` + `busy` state. `.sk-button__busy-cue` (the busy axis, #305/#327, bottom
+   of this file)'s resting ring is `border-color: var(--sk-border-default)`, with only a
+   `.sk-button--primary .sk-button__busy-cue` override for the other tone — so a BUSY
+   `danger-secondary` button currently paints that ring in the exact hairline this tone's own
+   boundary rule exists to avoid. That is the busy axis's own coverage gap, not this tone's — no
+   per-tone cue colour override is added here (out of scope for this mission; filed separately)
+   — but the claim above is scoped to this tone's OWN rules so a reader does not mistake it for
+   covering the composed state too.
+   MEASURED (WCAG 1.4.11), independently re-derived on this branch, not quoted from BORDER-ROLE-319:
+     --sk-on-status-danger vs --sk-surface-page:   6.58:1 dark  / 10.12:1 light
+     --sk-on-status-danger vs --sk-surface-card:   5.94:1 dark  / 11.04:1 light
+     --sk-on-status-danger vs --sk-surface-input:  5.63:1 dark  /  9.78:1 light
+   All six clear the 3:1 control-boundary floor with wide margin in both themes. */
+.sk-button--danger-secondary {
+  background: transparent;
+  color: var(--sk-on-status-danger);
+  border-color: var(--sk-on-status-danger);
+}
+
+.sk-button--danger-secondary:hover {
+  /* The danger pair's SURFACE member — a subtle danger-tinted fill — rather than inventing a
+     "strong" danger border token the way .sk-button--secondary:hover reaches for
+     --sk-border-strong. Border colour and text colour are unchanged on hover. */
+  background: var(--sk-status-danger);
+}
+
+/* Explicit :active on this tone only — see spec.md's Assumptions for why "parity with the
+   existing tones" is resolved as "adopt the value the issue names" rather than "inherit whichever
+   tone's current, and mutually inconsistent, :active behaviour this one happens to be shaped
+   like." .sk-button--secondary and .sk-button--ghost are NOT retrofitted (C-003) — that is a
+   pre-existing inconsistency across the other three tones and out of this mission's scope. */
+.sk-button--danger-secondary:active {
+  transform: scale(0.97);
+}
+
+/* Forced colors: `.sk-button--secondary` already declares an unconditional, non-transparent
+   border-color, so it already gets the platform's automatic border-colour remap with zero author
+   CSS — which means danger-secondary's own (equally unconditional, non-transparent) border would
+   remap to the IDENTICAL system colour as plain secondary and the two would become visually
+   indistinguishable. Colour and border-presence therefore cannot carry the distinction the issue
+   asks for here (contrast with sk-pill-tag's forced-colors case, where the base pill has NO border
+   at all, so presence-vs-absence alone was sufficient there).
+
+   THE MECHANISM IS BORDER-WIDTH, not colour and not generated content — this repo has already
+   established it, in writing, twice. sk-card.css's own status-axis comment: "forced colors remaps
+   COLOR and leaves width alone, so that step survives untouched while the tint does not" — and
+   that same comment records that an EARLIER `@media (forced-colors: active)` block there, setting
+   `border-inline-start-color: CanvasText`, was a NO-OP and was deleted (#218): the colour was
+   already auto-remapped and the width was already unconditional, so restating either did nothing.
+   sk-confirm-dialog.css does the forced-colors-SCOPED version of the same move (its border is 1px
+   in normal rendering, unlike sk-card's permanently-4px status accent, so the step belongs inside
+   the media query, not outside it) — that is the shape this rule follows.
+
+   A content-drawn glyph was considered in an earlier draft of this plan and rejected: it risks
+   colliding with size="icon"'s consumer-supplied glyph inside a padding:0, fixed 40x40 box; its
+   accessible-name safety depends on alt-text-syntax support that is not universal, landing
+   undocumented content inside a #286-governed consumer-supplied label if unsupported; it is a
+   scope ADDITION where the width step is the repo's own existing pattern applied unchanged; and it
+   would have been this repo's first use of the technique for a forced-colors purpose, where the
+   width step already has two working, CI-verified precedents. See spec.md's Assumptions for the
+   full four-point comparison.
+
+   LAYOUT CONSEQUENCE, stated rather than left implicit. At size="icon", `.sk-button--icon`
+   already declares `box-sizing: border-box`, so the extra 1px is absorbed into the existing 40x40
+   box (content area shrinks by 1px per side; the box itself does not grow) — no compensation
+   needed. At the default and size="sm" sizes, this file sets no box-sizing (browser default,
+   content-box, applies), so the step grows the button's total box by 1px per side, forced-colors
+   mode only — accepted as minor and scoped, the same order of magnitude as sk-confirm-dialog's own
+   unremarked growth under the identical mechanism. */
+@media (forced-colors: active) {
+  .sk-button--danger-secondary {
+    border-width: var(--sk-border-width-2);
+  }
+}
+
+/* Small size modifier */
+.sk-button--sm {
+  padding: var(--sk-space-2) var(--sk-space-5);
+  font-size: var(--sk-text-sm);
+}
+
+/* Icon size — the glyph remains consumer-owned. */
+.sk-button--icon {
+  box-sizing: border-box;
+  width: var(--sk-space-8);
+  height: var(--sk-space-8);
+  padding: 0;
+  flex: none;
+}
+
+.sk-button:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-2);
+}
+
+/* Disabled state */
+.sk-button:disabled,
+.sk-button[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============================================================================================
+ * Busy axis (#305): a decorative, non-flow-participating activity cue.
+ *
+ * MARKUP SHAPE: `sk-button.ts` renders an unconditional, `aria-hidden="true"`, text-free
+ * `<span part="busy-cue">` inside BOTH the `<button>` and `<a>` branches, alongside the
+ * existing `part="button"` node. Its DOM presence never changes between idle and busy — only
+ * the CSS below (keyed on `.sk-button--busy` / `:host([busy])`) changes its
+ * `visibility`/`opacity`/`animation`. This is deliberate: a cue whose presence in the DOM was
+ * itself conditional on `busy` would make the layout-shift measurement (FR-006) test the
+ * wrong thing (DOM mutation cost, not the CSS mechanism below).
+ *
+ * ZERO LAYOUT SHIFT BY CONSTRUCTION, not by assertion. `.sk-button__busy-cue` is
+ * `position: absolute`, confined to the button's own padding box (`.sk-button` above gains
+ * `position: relative` as its positioning container). An absolutely-positioned element does
+ * not participate in flex-row sizing, so the cue's mere presence or absence under
+ * `.sk-button--busy` cannot change `.sk-button`'s own `getBoundingClientRect()` box — this is
+ * the MECHANISM FR-006's idle/busy/idle geometry test measures, not an assumption the test
+ * merely restates. Do not reserve space for the cue with padding, margin, or a flex-basis
+ * change keyed on `busy` — that would reintroduce the exact defect both hand-authored Family 4
+ * spinners (`.saving-spinner`, `.sending-spinner`) shipped with.
+ *
+ * NEITHER DISABLING MECHANISM (C-002, FR-003/004/005). Every rule below is keyed exclusively
+ * on `.sk-button--busy` / `:host([busy])` — never on `:disabled`, `[disabled]`, or
+ * `[aria-disabled]`. The existing `:disabled, [disabled]` block above is untouched and composes
+ * independently: a busy+disabled button dims (existing rule, unmodified) AND shows the cue
+ * (this rule, unmodified by the dimming) at the same time, because the two rule sets share no
+ * selector.
+ *
+ * NO SHARED PRIMITIVE WITH sk-progress/#306 (C-004, C-005). This cue is authored independently
+ * of the progress family per the ratified TKT5/TKT6 cross-mission decision — see
+ * kitty-specs/button-busy-axis-01M25DE5/spec.md's "Cross-Mission Decision" section. It reuses
+ * no `sk-progress__bar`, no `<progress>`-based element, and no DOM primitive shared with that
+ * family, and it is not designed, named, or structured to be a general-purpose spinner usable
+ * by other components.
+ *
+ * THE STATIC FORM GETS THE CLASS, NOT THE CUE. `.sk-button--busy` is an ordinary root-class
+ * modifier the static markup module (`sk-button.markup.ts`) can append, sharing this one CSS
+ * source (ADR-10 §3) — confirmed this component's `:host` rule is a bare `display` declaration,
+ * so ADR-15 does not gate it and ADR-15's generated-wrapper cases do not apply. But the cue
+ * itself is a real shadow-DOM node with no static-path equivalent: the static form has no
+ * `render()` to emit it, so `.sk-button__busy-cue` never exists in flattened static markup. A
+ * static consumer wanting the visual cue authors their own node against this same generated
+ * stylesheet — see `sk-button.markup.ts`'s doc comment for the consumer-facing statement of
+ * this boundary.
+ *
+ * TOKENS: `--sk-motion-duration-slow` (rotation duration — `linear` timing is a CSS keyword,
+ * not a token, chosen so the spin reads as constant-speed activity rather than
+ * decelerating/accelerating), `--sk-space-*` (inset/size), `--sk-border-width-2` /
+ * `--sk-border-default` (resting ring), `--sk-fg-default` / `--sk-fg-on-primary` (active arc,
+ * per tone) — all pre-existing tokens, no new category (NFR-005).
+ * ============================================================================================ */
+
+.sk-button__busy-cue {
+  position: absolute;
+  inset-block: 0;
+  /* Vertical centering via auto margins on both inset-block edges, NOT `transform`. The spin
+     keyframes below own `transform` exclusively — combining a static `translate` with an
+     animated `rotate` on the same property would force the browser to interpolate between two
+     different transform-function lists (matrix-decomposed), which does not produce a clean
+     spin around a fixed centre. */
+  margin-block: auto;
+  inset-inline-start: var(--sk-space-2);
+  inline-size: var(--sk-space-4);
+  block-size: var(--sk-space-4);
+  box-sizing: border-box;
+  border-radius: var(--sk-radius-pill); /* clamps to a full circle on a square box */
+  /* LONGHANDS, not the `border` shorthand — a shorthand value containing `var(...)` cannot be
+     split into individual longhands in the CSSOM (stored as a pending-substitution value), so
+     `CSSStyleRule.style.borderStyle` reads back as `''` instead of `'solid'`. The
+     forced-colors test below (and FR-010's evidence) needs to read this back. */
+  border-width: var(--sk-border-width-2);
+  border-style: solid;
+  border-color: var(--sk-border-default);
+  border-top-color: var(--sk-fg-default);
+  visibility: hidden;
+  opacity: 0;
+}
+
+.sk-button--busy .sk-button__busy-cue,
+:host([busy]) .sk-button__busy-cue {
+  visibility: visible;
+  opacity: 1;
+  /* LONGHANDS, not the `animation` shorthand — matching sk-status-indicator.css's own pulse
+     rule. A shorthand whose value contains `var(...)` cannot be split into individual longhand
+     components in the CSSOM (it is stored as a pending-substitution value), so
+     `CSSStyleRule.style.animationName` reads back as `''` instead of the keyframe name — this
+     broke the reduced-motion test below until switched to longhands, the same way
+     sk-status-indicator.test.ts's `authoredStatusSheet` technique already relies on longhands
+     existing to read.
+     `linear`, not an `--sk-motion-ease-*` token: a constant-speed spin reads as "in progress";
+     easing the rotation itself would read as decelerating/accelerating activity, which is not
+     the signal intended. The duration still comes from a token (NFR-001). */
+  animation-name: sk-button-busy-spin;
+  animation-duration: var(--sk-motion-duration-slow);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes sk-button-busy-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Primary's arc reuses the same dark ink already used for its text (matches
+   --sk-fg-on-primary's existing role on this tone) — secondary/ghost/base keep the base rule's
+   --sk-fg-default, which already matches their own text colour. */
+.sk-button--primary .sk-button__busy-cue {
+  border-top-color: var(--sk-fg-on-primary);
+}
+
+/* --sm: smaller box, smaller cue and inset — measured against the real built stylesheet
+   (~32px control height at this size) so the ring does not crowd the shorter padding box. */
+.sk-button--sm .sk-button__busy-cue {
+  inset-inline-start: var(--sk-space-1);
+  inline-size: var(--sk-space-3);
+  block-size: var(--sk-space-3);
+}
+
+/* --icon: a fixed 40px square with zero padding (`.sk-button--icon` above) and a
+   consumer-slotted glyph already filling the box — measured against that real 40px render
+   rather than assuming the default inset transfers. A corner-anchored cue smaller than the
+   default size leaves the glyph legible while still being clearly present. */
+.sk-button--icon .sk-button__busy-cue {
+  inset-inline-start: var(--sk-space-1);
+  inline-size: var(--sk-space-3);
+  block-size: var(--sk-space-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Motion stops; the cue does NOT. Scoped to exactly the cue selector and the `animation`
+     property — never a wildcard over the button's own subtree, and never touching
+     `visibility`/`opacity`, which stay at the busy-visible values above. A cue that vanished
+     here would read as "the activity disappeared", not "motion stopped" (FR-009). Distinguishable
+     from idle by construction: idle's `.sk-button__busy-cue` is `opacity: 0`/`visibility: hidden`
+     (invisible), while this frozen frame stays fully opaque and visible — no additional
+     reduced-motion-only styling is needed to tell the two apart. */
+  .sk-button--busy .sk-button__busy-cue,
+  :host([busy]) .sk-button__busy-cue {
+    animation-name: none;
+  }
+}
+
+/* No explicit forced-colors override for the cue (checked, not assumed absent — T001 Activity
+   Log). `border` survives `forced-colors: active` automatically with zero author CSS (the
+   browser remaps border colors to a system color), per this doc's own established guidance
+   (docs/contributing/adding-a-component.md, "Forced-colors and reduced-motion baselines"), and
+   this cue is entirely border-drawn (no `background`/`box-shadow` carrying its shape). The base
+   rule's `border-style: solid` (via the `border` shorthand above) is therefore the only
+   assertion this needs — see `fixtures/elements-behaviour/src/sk-button.test.ts`'s
+   forced-colors coverage. */
+    </style>
+  </head>
+  <body>
+    <section id="button" data-od-component="button">
+      <h1>button</h1>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <button class="sk-button" type="button">Label</button>
+      </figure>
+    </section>
+  </body>
+</html>
