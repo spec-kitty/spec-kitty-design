@@ -90,7 +90,8 @@
       "model": "__resolved_model_absent__",
       "notes": [
         "Docs, install (proof copy + linked-folder project), consumability proof: 0 invented classes, CSS verbatim; see research/consumability-proof.md",
-        "Four-lens pre-merge gate (architect, debugger, reviewer, reducer) approved PR #465 at 2c2e9ec53cbfaf048f7ec9377e423d37839d4d9a after four passes; no blocker, major or minor open."
+        "Four-lens pre-merge gate (architect, debugger, reviewer, reducer) approved PR #465 at 2c2e9ec53cbfaf048f7ec9377e423d37839d4d9a after four passes; no blocker, major or minor open.",
+        "Done override: single_branch topology creates no lane branch for the ancestry verifier. REL4 lands through PR #465 into train/elements-first as a MERGE commit (not a squash, so the branch SHAs its records cite stay reachable); that merge is the next step after this record, under the operator's train-only merge grant."
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
