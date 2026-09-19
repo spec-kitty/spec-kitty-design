@@ -17,8 +17,15 @@
  * registry ADVERTISES and never re-reads a byte (REL3 review, reproduced: `(cache hit)`, no blob GET).
  * A fresh cache per fetch forces the real blob download (`cache miss`, a GET to the blob store).
  *
- * A just-published version can take a moment to become readable, so a download is retried a bounded
- * number of times. A mismatch is never retried: bytes that differ do not converge.
+ * AND AGAINST THE ATTESTATION ITSELF, NOT ONLY packed.json (REL3 review). packed.json is not attested:
+ * a step that repacked and rewrote it would make "matches packed.json" a check of the substitute. So each
+ * downloaded tarball is also run through `gh attestation verify --repo spec-kitty/spec-kitty-design
+ * --deny-self-hosted-runners`, which passes only if an attestation from this repo covers exactly those
+ * registry bytes.
+ *
+ * A just-published version, or a just-written attestation, can take a moment to become readable, so a
+ * download or an attestation lookup is retried a bounded number of times. A byte mismatch is never
+ * retried: bytes that differ do not converge.
  */
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from 'node:fs';
@@ -38,12 +45,27 @@ export function npmFetch(spec, dest) {
     maxBuffer: 32 * 1024 * 1024,
   });
   if (r.error) throw r.error;
-  if (r.status !== 0) throw new Error(`npm pack ${spec} exited ${r.status}: ${String(r.stderr).trim().split('\n').pop()}`);
+  if (r.status !== 0) {
+    // The npm ERROR CODE, not the trailing log-path line npm prints last (REL3 review: an E404 was lost).
+    const lines = String(r.stderr).trim().split('\n');
+    const why = lines.find((l) => /npm error code/.test(l)) ?? lines.find((l) => /\b(E\d{3}|ENOTFOUND|ETARGET)\b/.test(l)) ?? lines.pop();
+    throw new Error(`npm pack ${spec} exited ${r.status}: ${why}`);
+  }
   const rec = JSON.parse(r.stdout)?.[0];
   if (!rec?.filename) throw new Error(`npm pack ${spec} reported no tarball`);
   const file = join(dest, rec.filename);
   if (!existsSync(file)) throw new Error(`npm pack ${spec} reported ${rec.filename} but wrote no such file`);
   return file;
+}
+
+/** `gh attestation verify` over a downloaded file; throws unless an attestation from this repo covers it. */
+export function ghAttestationVerify(file) {
+  const r = spawnSync('gh', ['attestation', 'verify', file, '--repo', 'spec-kitty/spec-kitty-design', '--deny-self-hosted-runners'], {
+    encoding: 'utf8',
+    maxBuffer: 8 * 1024 * 1024,
+  });
+  if (r.error) throw r.error;
+  if (r.status !== 0) throw new Error(`gh attestation verify failed: ${String(r.stderr || r.stdout).trim().split('\n').filter(Boolean).pop()}`);
 }
 
 const sleepSync = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
@@ -53,7 +75,7 @@ const sleepSync = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),
  * probes can drive failure and retry without a registry. Returns the per-entry results; throws on the
  * first entry that cannot be confirmed.
  */
-export function verifyPublished({ root = ROOT, fetch = npmFetch, attempts = 6, delayMs = 10_000, log = console.log } = {}) {
+export function verifyPublished({ root = ROOT, fetch = npmFetch, attest = ghAttestationVerify, attempts = 6, delayMs = 10_000, log = console.log } = {}) {
   const { entries } = readPacked({ root }); // re-validates the local files and refuses an empty set
   const results = [];
   for (const e of entries) {
@@ -69,8 +91,9 @@ export function verifyPublished({ root = ROOT, fetch = npmFetch, attempts = 6, d
           // NOT retried: different bytes will not become the same bytes.
           throw Object.assign(new Error(`${spec}: the registry serves ${got}, but the attested tarball is ${e.integrity}`), { final: true });
         }
+        attest(file); // retryable: a fresh attestation can lag; throws unless this repo attested these bytes
         results.push({ spec, integrity: got, attempt: i });
-        log(`✅ ${spec} on the registry matches the attested tarball (${got.slice(0, 22)}…)`);
+        log(`✅ ${spec} on the registry matches the packed tarball (${got.slice(0, 22)}…) and carries this repo's attestation`);
         lastError = undefined;
         break;
       } catch (err) {
@@ -84,7 +107,7 @@ export function verifyPublished({ root = ROOT, fetch = npmFetch, attempts = 6, d
         rmSync(dest, { recursive: true, force: true });
       }
     }
-    if (lastError) throw new Error(`${spec}: could not read the published tarball after ${attempts} attempts — ${lastError.message}`);
+    if (lastError) throw new Error(`${spec}: could not confirm the published tarball and its attestation after ${attempts} attempts — ${lastError.message}`);
   }
   return results;
 }
@@ -126,7 +149,7 @@ async function selftest() {
   const root = await fixture();
   const run = (opts) => {
     try {
-      return { ok: true, value: verifyPublished({ root, delayMs: 0, log: quiet, ...opts }) };
+      return { ok: true, value: verifyPublished({ root, delayMs: 0, log: quiet, attest: () => {}, ...opts }) };
     } catch (e) {
       return { ok: false, error: e.message };
     }
@@ -138,6 +161,23 @@ async function selftest() {
     ['a version not yet readable is retried, then passes', () => { const r = run({ fetch: registry({ failFirst: 2 }), attempts: 4 }); return r.ok && r.value[0].attempt === 3; }],
     ['a version never readable fails after the bounded attempts', () => { const calls = []; const r = run({ fetch: registry({ failFirst: 99, calls }), attempts: 3 }); return !r.ok && calls.length === 3 && /after 3 attempts/.test(r.error); }],
     ['a missing packed.json is refused before any download', () => { const calls = []; const empty = mkdtempSync(join(tmpdir(), 'verify-empty-')); try { verifyPublished({ root: empty, fetch: registry({ calls }), log: quiet }); return false; } catch (e) { return calls.length === 0 && /missing|no packages/.test(e.message); } finally { rmSync(empty, { recursive: true, force: true }); } }],
+    ['registry bytes with NO attestation from this repo are refused, even when they match packed.json', () => { const r = run({ fetch: registry(), attest: () => { throw new Error('HTTP 404'); }, attempts: 2 }); return !r.ok && /404/.test(r.error); }],
+    ['a lagging attestation is retried, then passes', () => { let n = 0; const r = run({ fetch: registry(), attest: () => { n++; if (n === 1) throw new Error('HTTP 404'); }, attempts: 3 }); return r.ok && r.value[0].attempt === 2; }],
+    ['the attestation is checked against the DOWNLOADED file, not the local one', () => { const seen = []; run({ fetch: registry(), attest: (f) => seen.push(f) }); return seen.length === 2 && seen.every((f) => !f.includes('dist-tarballs')); }],
+    ['the real attestation check pins this repo and refuses self-hosted runners', () => {
+      const bin = mkdtempSync(join(tmpdir(), 'verify-gh-'));
+      const saved = process.env.PATH;
+      try {
+        writeFileSync(join(bin, 'gh'), `#!/bin/sh\necho "$*" > "${join(bin, 'args')}"\nexit 0\n`, { mode: 0o755 });
+        process.env.PATH = `${bin}:${saved}`;
+        ghAttestationVerify('/tmp/x.tgz');
+        const a = readFileSync(join(bin, 'args'), 'utf8');
+        return /attestation verify \/tmp\/x\.tgz/.test(a) && /--repo spec-kitty\/spec-kitty-design/.test(a) && /--deny-self-hosted-runners/.test(a);
+      } finally {
+        process.env.PATH = saved;
+        rmSync(bin, { recursive: true, force: true });
+      }
+    }],
     ['every attested entry is checked, not just the first', () => { const calls = []; run({ fetch: registry({ calls }) }); return calls.length === 2; }],
     ['the real fetch uses a throwaway --cache, so it re-reads bytes instead of hitting the pack step\'s cache', () => {
       const bin = mkdtempSync(join(tmpdir(), 'verify-npm-'));
@@ -160,7 +200,7 @@ async function selftest() {
     ['an unknown argument exits 2', () => spawnSync(process.execPath, [fileURLToPath(import.meta.url), '--nope'], { encoding: 'utf8' }).status === 2],
     ['importing the module verifies nothing', () => { const r = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(import.meta.url)})`], { encoding: 'utf8' }); return r.status === 0 && `${r.stdout}${r.stderr}`.trim() === ''; }],
   ];
-  const PROBE_FLOOR = 10;
+  const PROBE_FLOOR = 14;
   let bad = 0;
   for (const [what, fn] of PROBES) {
     let ok = false;

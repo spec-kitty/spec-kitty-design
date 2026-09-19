@@ -29,6 +29,7 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { publishable, buildable, all } from './release-graph.mjs';
+import { PACK_DIR_NAME } from './pack-derived-set.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const WORKFLOW = '.github/workflows/release.yml';
@@ -572,7 +573,7 @@ export function checkForbiddenContents(tarballs) {
  *     in checkPublishingCallersDelegate covers the callers).
  */
 const ATTEST_USES = /^actions\/attest-build-provenance@[0-9a-f]{40}$/;
-const ATTEST_SUBJECT = 'dist-tarballs/*.tgz';
+const ATTEST_SUBJECT = `${PACK_DIR_NAME}/*.tgz`; // the one directory pack-derived-set.mjs writes
 function checkAttestation(wf, jobName, steps, label, stripShellComments) {
   const problems = [];
   const runOf = (st) => (typeof st.run === 'string' ? stripShellComments(st.run) : '');
@@ -1408,7 +1409,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 106;
+const PROBE_FLOOR = 107;
 
 const PROBES = [
   {
@@ -1767,6 +1768,7 @@ const PROBES = [
       payload('the attest step made conditional', '      - name: Attest\n', '      - name: Attest\n        if: false\n'),
       payload('the attest subject pointed at something other than dist-tarballs/', "subject-path: 'dist-tarballs/*.tgz'", "subject-path: 'packages/*/package.json'"),
       payload('the attest action pinned to a mutable tag', 'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8', 'actions/attest-build-provenance@v4'),
+      payload('an attest action from another owner, even SHA-pinned', 'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8', 'evil/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8'),
       payload('a second subject source alongside the tarballs', "          subject-path: 'dist-tarballs/*.tgz'\n", "          subject-path: 'dist-tarballs/*.tgz'\n          subject-digest: sha256:0000\n"),
       payload('the pack step deleted', PACK, ''),
       payload('the pack step moved before the prerelease bump', BUMP + PACK, PACK + BUMP),

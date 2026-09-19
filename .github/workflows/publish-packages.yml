@@ -190,6 +190,9 @@ jobs:
         run: node scripts/verify-published-integrity.mjs
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # `gh attestation verify` reads the attestations API; each downloaded tarball must carry
+          # an attestation from this repo, not merely match packed.json (which is not attested).
+          GH_TOKEN: ${{ github.token }}
 
       # Non-`latest` dist-tags never appear in the GitHub web UI version list, so this is the only
       # place an operator can see that the publish actually landed.

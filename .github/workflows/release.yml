@@ -251,6 +251,9 @@ jobs:
         run: node scripts/verify-published-integrity.mjs
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # `gh attestation verify` reads the attestations API; each downloaded tarball must carry
+          # an attestation from this repo, not merely match packed.json (which is not attested).
+          GH_TOKEN: ${{ github.token }}
 
       # SAME REASONING AS THE RC PAYLOAD, and it applies here now that prod publishes to GitHub
       # Packages too: `npm view` returns exit 0 with zero bytes against this registry, so a report
