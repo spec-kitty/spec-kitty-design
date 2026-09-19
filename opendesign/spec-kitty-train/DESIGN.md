@@ -33,11 +33,13 @@ focus, and a small number of brand moments—not as a general-purpose decoration
 
 ## Colour and theme rules
 
-Dark is the default theme. Its core ladder is page `#0D0E11`, hero `#121317`, card `#181A1F`,
+Dark is the base palette. Its core ladder is page `#0D0E11`, hero `#121317`, card `#181A1F`,
 input `#1C1F25`, pill `#212830`, and muted surface `#262C36`. Text progresses from white headings
 through `#D6D6DA`, `#A9A9B0`, and `#81818B`. Borders are `#2B313B` and `#353C48`.
 
-Light theme is selected with `:root[data-theme="light"]` or `.sk-light`. It uses a warm cream
+Light theme is selected with `:root[data-theme="light"]` or `.sk-light`, and `data-theme="dark"`
+pins dark. With no `data-theme` at all, `tokens.css` follows the operating system's
+`prefers-color-scheme`, so set `data-theme` when an artifact must render in one theme. Light uses a warm cream
 page (`#F8F5EC`), white cards, near-black ink, and sage (`#3D7A3D`) for interactive accents. Yellow
 remains the brand mark and focus colour. Never implement light mode by inverting the dark palette.
 
@@ -66,9 +68,7 @@ Kitty shells use a 56px personal rail and a 240px context sidebar via
 `minmax(0, 1fr)` and permit long repository names, branches, and identifiers to wrap safely.
 
 At narrow widths, preserve document order and collapse the shell to one column. Do not hide
-content simply to make a desktop composition fit. Sticky compact headers lose stickiness below
-720px viewport width or 480px viewport height, and focused content must use the published sticky
-scroll-margin token.
+content simply to make a desktop composition fit.
 
 ## Components and composition
 
@@ -217,11 +217,15 @@ form of the same component is in. Left out:
 
 ## Static-form fidelity caveat
 
-These 11 components ship `:host` or `::slotted` rules in their CSS. The rules are inert in
+These 10 components ship `:host` or `::slotted` rules in their CSS. The rules are inert in
 static markup, so a behaviour the element gets from its host — for example a container-query
 reflow — may not apply to the static form. Whether such constructs get a static equivalent is ADR-15,
 which is still Proposed:
 
-`action-row`, `blog-card`, `button`, `check-bullet`, `feature-card`, `grid`, `nav-pill`, `pill-tag`, `ribbon-card`, `section-banner`, `site-footer`.
+`blog-card`, `button`, `check-bullet`, `feature-card`, `grid`, `nav-pill`, `pill-tag`, `ribbon-card`, `section-banner`, `site-footer`.
+
+Where the library already ships the static equivalent — `static/sk-<name>.static.css`, the same rules
+with `:host` moved onto a wrapper class — the component page carries that sheet instead, and its
+static form uses the wrapper: `action-row`.
 
 <!-- END GENERATED: components -->

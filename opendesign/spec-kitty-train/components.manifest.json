@@ -9,7 +9,7 @@
     "title": "Spec Kitty — reference components",
     "description": "Every component of the Spec Kitty design library that has a static form — 34 components, 157 forms — generated from @spec-kitty/styles 1.0.0. Markup is static HTML only.",
     "styleBlockCount": 1,
-    "selectorCount": 431,
+    "selectorCount": 432,
     "classCount": 178,
     "elementCount": 72
   },
@@ -347,6 +347,7 @@
     ".sk-action-row--flush",
     ".sk-action-row--flush:has(> .sk-action-row__trigger[aria-current=\"page\"])",
     ".sk-action-row--flush[aria-current=\"true\"]",
+    ".sk-action-row-host",
     ".sk-action-row:has(> .sk-action-row__trigger[aria-current=\"page\"])",
     ".sk-action-row[aria-current=\"true\"]",
     ".sk-blog-card",

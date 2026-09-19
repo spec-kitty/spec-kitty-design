@@ -24,7 +24,8 @@
  *      authored forms of styles-only components, which have no element to generate from. Both are
  *      what a consumer installs. A form that composes a custom element is left out and named — no
  *      custom element, <script> or shadow root may reach the fixture: OpenDesign emits static HTML.
- *   2. Component CSS is inlined VERBATIM. 13 components ship :host/::slotted rules, inert in light DOM.
+ *   2. Component CSS is inlined VERBATIM. Some components ship :host/::slotted rules (DESIGN.md names
+ *      them), inert in light DOM; where the library ships a static sheet, that sheet is used instead.
  *      Rewriting them would teach OpenDesign against a stylesheet no consumer installs.
  *   3. components.manifest.json is produced by OPENDESIGN'S OWN extractComponentsManifest(), vendored
  *      byte-for-byte — because at discovery OpenDesign reads that file verbatim and summarises it into
@@ -33,7 +34,8 @@
  *
  * WHAT OPENDESIGN'S AGENT ACTUALLY SEES — measured by the WP03 consumability run, not assumed. The
  * prompt carries DESIGN.md, USAGE.md and tokens.css verbatim, but for components only a SUMMARY of
- * components.manifest.json: nine generic groups, at most eight selectors each (system.ts:1295,
+ * components.manifest.json: the generic groups it detects (seven here, two empty), at most eight
+ * selectors each (system.ts:1295,
  * summarizeComponentsManifestForPrompt). components.html itself is never injected when a manifest
  * exists, and at 430 KB it could not be. The agent's sandbox could not open the design-system
  * folder either. Given only component names, it emitted the right blocks with invented elements:
@@ -103,7 +105,14 @@ export function derive(root = ROOT) {
       problems.push(`${name} has static forms but no sk-${name}.css — its forms would render unstyled`);
       continue;
     }
-    const css = readFileSync(cssPath, 'utf8');
+    // THE STATIC SHEET WHEN THE LIBRARY SHIPS ONE. `static/sk-<name>.static.css` (ADR-15, #309) is the
+    // same rules with `:host` rewritten onto a wrapper class, and the source sheet itself tells a
+    // static consumer to link it INSTEAD: the source's container lives on `:host`, which is inert in
+    // a document, so its @container reflow never fires (#301). The first package inlined the source
+    // for action-row, whose static form is the two-element wrapper markup — found at REL4 gate pass 2.
+    const staticPath = join(S, name, 'static', `sk-${name}.static.css`);
+    const useStatic = existsSync(staticPath);
+    const css = readFileSync(useStatic ? staticPath : cssPath, 'utf8');
     // AN @import CANNOT BE INLINED. It is only valid before every style rule; concatenated into one
     // <style> it is silently dropped — exactly how tokens.css lost JetBrains Mono for its whole life.
     if (/@import\b/.test(stripCssComments(css))) {
@@ -136,7 +145,13 @@ export function derive(root = ROOT) {
       noStaticForm.push(name);
       continue;
     }
-    components.push({ name, css, cssRel: `packages/styles/src/${name}/sk-${name}.css`, forms: staticForms, shadowOnly });
+    components.push({
+      name,
+      css,
+      cssRel: useStatic ? `packages/styles/src/${name}/static/sk-${name}.static.css` : `packages/styles/src/${name}/sk-${name}.css`,
+      forms: staticForms,
+      shadowOnly,
+    });
   }
 
   // AN EMPTY SET IS A DEFECT, NOT A PACKAGE. A change that routes every form to `omitted` (an
@@ -325,12 +340,12 @@ export function buildManifest(d) {
     componentsManifest: 'components.manifest.json',
     usage: 'USAGE.md',
     importMode: 'verbatim',
-    // THE PER-COMPONENT PAGES ARE DECLARED AS PREVIEW PAGES because that is the only manifest key
-    // that puts a file on OpenDesign's pull index (buildDesignSystemPullIndex) and its read
-    // allowlist (buildDesignSystemPullFileAllowlist). components.html is on neither.
+    // THE PER-COMPONENT PAGES ARE DECLARED AS PREVIEW PAGES because that is the manifest key that
+    // lists each page by name on OpenDesign's pull index (buildDesignSystemPullIndex) and its read
+    // allowlist (buildDesignSystemPullFileAllowlist).
     //
     // components.html IS LISTED FIRST. OpenDesign's Library picks the first page whose path matches
-    // /index|overview|all|showcase|components/ (library-sync.ts:151) — every components/<name>.html
+    // /index|overview|all|showcase|components/ (library-sync.ts:152) — every components/<name>.html
     // matches — so without it the whole system's Library card would be one component. NO `role`:
     // the kit view keys its tiles on `role || path` (design-kit.ts:198), so a shared role collides.
     preview: {
@@ -417,6 +432,15 @@ export function buildDesignRegion(d) {
     '',
     shadow.join(', ') + '.',
     '',
+    ...(d.components.some((c) => c.cssRel.endsWith('.static.css'))
+      ? [
+          'Where the library already ships the static equivalent — `static/sk-<name>.static.css`, the same rules',
+          'with `:host` moved onto a wrapper class — the component page carries that sheet instead, and its',
+          'static form uses the wrapper: ' +
+            d.components.filter((c) => c.cssRel.endsWith('.static.css')).map((c) => `\`${c.name}\``).join(', ') + '.',
+          '',
+        ]
+      : []),
     END,
   ].join('\n');
 }
@@ -433,14 +457,17 @@ export function authoredProseProblems(file, text, d) {
   const problems = [];
   const outside = text.includes(BEGIN) && text.includes(END) ? text.slice(0, text.indexOf(BEGIN)) + text.slice(text.indexOf(END) + END.length) : text;
   const excluded = new Set(d.excluded);
-  for (const para of outside.split(/\n\s*\n/)) {
+  // A BLOCK IS A PARAGRAPH OR A LIST ITEM. Paragraph scope let one item's "cannot be emitted"
+  // qualify a whole blank-line-free numbered list, so "prefer `sk-copy-field`" in the next item
+  // passed (REL4 gate pass 2).
+  for (const para of outside.split(/\n\s*\n|\n(?=\s*(?:\d+\.|[-*+])\s)/)) {
     const head = para.trim().split('\n')[0].slice(0, 60);
     const qualified = /cannot be emitted|cannot emit|shadow-DOM only/i.test(para);
     for (const m of para.matchAll(/\bsk-([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\b(?![_-])/g)) {
       if (excluded.has(m[1]) && !qualified) problems.push(`${file}: "${head}…" recommends \`sk-${m[1]}\`, which has no static form — say it cannot be emitted, or drop it`);
     }
-    for (const m of para.matchAll(/`([^`]*(?:packages\/|\.stories\.)[^`]*)`/g)) problems.push(`${file}: "${head}…" points at \`${m[1]}\`, which is not in the package`);
-    for (const m of para.matchAll(/\b(\d+)\s+(components|pages|static forms|forms|elements)\b/g)) problems.push(`${file}: "${head}…" hard-codes "${m[0]}" — the generated section owns derived counts`);
+    for (const m of para.matchAll(/`([^`]*(?:packages\/|\.stories\.)[^`]*)`|\]\(([^)]*(?:packages\/|\.stories\.)[^)]*)\)/g)) problems.push(`${file}: "${head}…" points at \`${m[1] ?? m[2]}\`, which is not in the package`);
+    for (const m of para.matchAll(/\b(\d+)\s+(?:[a-z-]+\s+){0,2}?(components?|pages?|forms?|elements?)\b/gi)) problems.push(`${file}: "${head}…" hard-codes "${m[0]}" — the generated section owns derived counts`);
   }
   return problems;
 }
@@ -559,10 +586,11 @@ async function main({ check }) {
       process.exit(1);
     }
     const forms = d.components.reduce((n, c) => n + c.forms.length, 0);
+    const fontFiles = d.fonts.filter((f) => /\.(woff2?|otf|ttf)$/i.test(f)).length;
     console.log(
       `✅ ${OUT_REL} is current: ${d.components.length} components, ${forms} static forms, ` +
         `${d.excluded.length} elements and ${d.omitted.length} non-static forms named as not emittable, ` +
-        `${d.fonts.filter((f) => /\.(woff2?|otf|ttf)$/i.test(f)).length} font files (+${d.fonts.filter((f) => !/\.(woff2?|otf|ttf)$/i.test(f)).length} licence).`,
+        `${fontFiles} font files (+${d.fonts.length - fontFiles} licence).`,
     );
     return;
   }
@@ -592,6 +620,8 @@ const FIXTURE = {
   fonts: [],
   versions: { tokens: '1.0.0', styles: '1.0.0', elements: '1.0.0' },
 };
+/** Line-indentation-insensitive form of a block, so a figure can be found wherever it is nested. */
+const dedent = (s) => s.split('\n').map((l) => l.trim()).join('\n');
 const DESIGN_FIXTURE = `# Title\n\nauthored prose\n\n${BEGIN}\nold\n${END}\n`;
 
 const PROBES = [
@@ -624,25 +654,47 @@ const PROBES = [
   ['the class vocabulary includes classes the forms use', () => classVocabulary('', [{ markup: '<p class="sk-a  is-open"></p>' }]).join() === 'is-open,sk-a'],
   ['every component gets its own static-only page carrying its CSS verbatim', () => FIXTURE.components.every((c) => { const p = buildComponentPage(FIXTURE, c); return p.includes(c.css) && staticOnlyProblems(p).length === 0 && p.includes('href="../tokens.css"'); })],
   ['the manifest declares the showcase first, then one preview page per component', () => { const m = buildManifest(FIXTURE); const [first, ...rest] = m.preview.pages; return first.path === 'components.html' && rest.length === FIXTURE.components.length && rest.every((pg, i) => pg.path === componentPagePath(FIXTURE.components[i])); }],
-  ['OpenDesign\'s Library card resolves to the showcase, not one component (library-sync.ts:151 rule)', () => buildManifest(FIXTURE).preview.pages.find((p) => /index|overview|all|showcase|components/i.test(p.path)).path === 'components.html'],
+  ['OpenDesign\'s Library card resolves to the showcase, not one component (library-sync.ts:152 rule)', () => buildManifest(FIXTURE).preview.pages.find((p) => /index|overview|all|showcase|components/i.test(p.path)).path === 'components.html'],
   ['every preview tile has a distinct kit-view key (design-kit.ts:198: role || path)', () => { const ks = buildManifest(FIXTURE).preview.pages.map((p) => p.role?.trim() || p.path); return new Set(ks).size === ks.length; }],
   ['authored prose that recommends a non-emittable element is refused', () => authoredProseProblems('USAGE.md', 'Prefer `sk-notice` for alerts.', FIXTURE).length === 1],
   ['…unless the paragraph says it cannot be emitted (control)', () => authoredProseProblems('USAGE.md', '`sk-notice` is shadow-DOM only and cannot be emitted here.', FIXTURE).length === 0],
-  ['a BEM class of an emittable block is not mistaken for an excluded element (control)', () => authoredProseProblems('USAGE.md', 'Use `sk-notice__x`? no: `sk-button--primary`.', FIXTURE).every((p) => !p.includes('sk-button'))],
+  ['a BEM modifier of an excluded name is not mistaken for the element (the lookahead)', () => authoredProseProblems('USAGE.md', 'Use `sk-notice--x`.', FIXTURE).length === 0],
+  ['a qualifier in one LIST ITEM does not exempt the next item', () => authoredProseProblems('USAGE.md', '5. `sk-notice` cannot be emitted.\n6. Prefer `sk-notice` for alerts.', FIXTURE).length === 1],
+  ['a repository path inside a Markdown link is refused', () => authoredProseProblems('USAGE.md', 'See [the story](packages/elements/src/x.stories.ts).', FIXTURE).length === 1],
+  ['a derived count with an adjective ("34 component pages", "16 custom elements") is refused', () => authoredProseProblems('USAGE.md', 'All 34 component pages; 16 custom elements.', FIXTURE).length === 2],
   ['authored prose pointing at a repository path is refused', () => authoredProseProblems('USAGE.md', 'Start from `packages/elements/src/x.stories.ts`.', FIXTURE).length === 1],
   ['authored prose hard-coding a derived count is refused', () => authoredProseProblems('USAGE.md', 'It holds all 34 pages.', FIXTURE).length === 1],
   ['the generated region is exempt from the prose check (it owns the counts)', () => authoredProseProblems('DESIGN.md', spliceDesign(DESIGN_FIXTURE, buildDesignRegion(FIXTURE)), FIXTURE).length === 0],
   ['the committed USAGE.md and DESIGN.md pass the prose check', () => { const d = derive(); const dir = join(ROOT, OUT_REL); return authoredProseProblems('USAGE.md', readFileSync(join(dir, 'USAGE.md'), 'utf8'), d).length === 0 && authoredProseProblems('DESIGN.md', readFileSync(join(dir, 'DESIGN.md'), 'utf8'), d).length === 0; }],
-  ['an empty derived set is refused (every form omitted → 0 components)', () => { const d = derive(); return d.problems.length === 0 && d.components.length > 0; }],
+  ['an empty derived set is refused (every form omitted → 0 components), over a fixture tree', () => {
+    // A TREE, not the real one: the real tree is non-empty, so a probe over it cannot see this guard.
+    const root = mkdtempSync(join(tmpdir(), 'od-empty-'));
+    try {
+      const w = (rel, text) => { mkdirSync(dirname(join(root, rel)), { recursive: true }); writeFileSync(join(root, rel), text); };
+      w('packages/styles/src/x/sk-x.css', '.sk-x{color:var(--sk-a)}');
+      w('packages/styles/src/x/sk-x.html', '<sk-marker></sk-marker>');
+      w('packages/tokens/src/tokens.css', ':root{--sk-a:#000}\n:root[data-theme="light"], .sk-light{--sk-a:#fff}\n');
+      mkdirSync(join(root, 'packages/tokens/src/fonts'), { recursive: true });
+      mkdirSync(join(root, 'packages/elements/src'), { recursive: true });
+      for (const pkg of ['tokens', 'styles', 'elements']) w(`packages/${pkg}/package.json`, '{"version":"0.0.0"}');
+      const d = derive(root);
+      return d.components.length === 0 && d.omitted.length === 1 && d.problems.some((x) => /refusing to build an empty package/.test(x));
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }],
   ['the design region states the class vocabulary is closed', () => /The class vocabulary is closed/.test(buildDesignRegion(FIXTURE)) && /does not exist in the library/.test(buildDesignRegion(FIXTURE))],
-  ['EVERY committed component page carries exactly its component\'s forms (read from disk, not from the builder)', () => { const d = derive(); return d.components.every((c) => { const page = readFileSync(join(ROOT, OUT_REL, componentPagePath(c)), 'utf8'); return (page.match(/<figure data-od-variant=/g) || []).length === c.forms.length && c.forms.every((f) => page.includes(f.markup.split('\n')[0].trim())); }); }],
-  ['EVERY section of the committed components.html carries exactly its component\'s forms', () => { const d = derive(); const html = readFileSync(join(ROOT, OUT_REL, 'components.html'), 'utf8'); return d.components.every((c) => { const sec = html.split(`data-od-component="${c.name}"`)[1]?.split(/data-od-component="/)[0] ?? ''; return (sec.match(/<figure data-od-variant=/g) || []).length === c.forms.length; }); }],
+  ['EVERY committed component page carries exactly its component\'s forms, in full (read from disk)', () => { const d = derive(); return d.components.every((c) => { const page = dedent(readFileSync(join(ROOT, OUT_REL, componentPagePath(c)), 'utf8')); return (page.match(/<figure data-od-variant=/g) || []).length === c.forms.length && c.forms.every((f) => page.includes(dedent(renderFigure(f)))); }); }],
+  ['EVERY section of the committed components.html carries exactly its component\'s forms, in full', () => { const d = derive(); const html = readFileSync(join(ROOT, OUT_REL, 'components.html'), 'utf8'); return d.components.every((c) => { const sec = dedent(html.split(`data-od-component="${c.name}"`)[1]?.split(/data-od-component="/)[0] ?? ''); return (sec.match(/<figure data-od-variant=/g) || []).length === c.forms.length && c.forms.every((f) => sec.includes(dedent(renderFigure(f)))); }); }],
+  ['a component whose library ships a static sheet is packaged with THAT sheet (action-row, ADR-15)', () => { const d = derive(); const withStatic = d.components.filter((c) => existsSync(join(ROOT, 'packages/styles/src', c.name, 'static', `sk-${c.name}.static.css`))); return withStatic.length > 0 && withStatic.some((c) => c.name === 'action-row') && withStatic.every((c) => c.cssRel.endsWith('.static.css') && c.css === readFileSync(join(ROOT, c.cssRel), 'utf8') && !/:host\b/.test(c.css.replace(/\/\*[\s\S]*?\*\//g, ''))); }],
+  ['the committed action-row page carries the static sheet, whose wrapper class its markup uses', () => { const page = readFileSync(join(ROOT, OUT_REL, 'components/action-row.html'), 'utf8'); return page.includes('static/sk-action-row.static.css') && /\.sk-action-row-host\s*\{/.test(page) && page.includes('class="sk-action-row-host'); }],
+  ['the committed tokens.css, and the tokens inlined in components.html, are the PUBLISHED stylesheet', () => { const pub = buildTokensCss(readFileSync(join(ROOT, 'packages/tokens/src/tokens.css'), 'utf8')); return readFileSync(join(ROOT, OUT_REL, 'tokens.css'), 'utf8') === pub && readFileSync(join(ROOT, OUT_REL, 'components.html'), 'utf8').includes(pub.trimEnd()); }],
   ['the committed components.html carries every component\'s CSS', () => { const d = derive(); const html = readFileSync(join(ROOT, OUT_REL, 'components.html'), 'utf8'); return d.components.every((c) => html.includes(c.css.trimEnd())); }],
   ['tokens.css is the PUBLISHED stylesheet (buildTokensCss), with its no-data-theme fallback', () => { const d = derive(); return d.tokensCss === buildTokensCss(readFileSync(join(ROOT, 'packages/tokens/src/tokens.css'), 'utf8')) && d.tokensCss.includes(':root:not([data-theme])'); }],
   ['the design region lists each component with its page and vocabulary', () => { const r = buildDesignRegion(FIXTURE); return r.includes('| `button` | `components/button.html` | `default` | `sk-button` |') && r.includes('`sk-grid`'); }],
   ['the real vocabulary names the class the first proof run invented a substitute for', () => { const c = derive().components.find((x) => x.name === 'radio-choice-group'); const v = classVocabulary(c.css, c.forms); return v.includes('sk-radio-choice-group__control') && !v.includes('sk-radio-choice__input'); }],
 ];
-const PROBE_FLOOR = 46;
+const PROBE_FLOOR = 52;
 
 /**
  * DRIFT PROBES — each mutates a TEMPORARY COPY of the committed package and asserts `diffPackage`
@@ -690,10 +742,16 @@ async function checkProbes() {
       return ref.parseDesignSystemProjectManifest(JSON.stringify({ ...j, notInSchema: 1 })).ok === false;
     }],
     ['an empty generated set is refused, not certified', () => diffPackage(outDir, new Map()).length === 1],
+    ['the build (and so --check) refuses contradicting USAGE.md prose', async () => {
+      try { await buildPackage(d, readFileSync(join(outDir, 'DESIGN.md'), 'utf8'), ref, `${usageMd}\n\nPrefer \`sk-${d.excluded[0]}\` here.\n`); return false; } catch (e) { return /authored prose contradicts/.test(e.message); }
+    }],
+    ['the build refuses to run without USAGE.md at all', async () => {
+      try { await buildPackage(d, readFileSync(join(outDir, 'DESIGN.md'), 'utf8'), ref); return false; } catch (e) { return /needs USAGE\.md/.test(e.message); }
+    }],
   ];
   return cases;
 }
-const CHECK_PROBE_FLOOR = 15;
+const CHECK_PROBE_FLOOR = 17;
 
 
 async function selftest() {
