@@ -1,7 +1,7 @@
 {
-  "event_count": 5,
-  "last_event_id": "01M2X68EM6MBC2X3FB7T8SYFW2",
-  "materialized_at": "2026-09-19T15:58:45.894247+00:00",
+  "event_count": 6,
+  "last_event_id": "01M2X719G8GHSS6XXKAVMMHSW2",
+  "materialized_at": "2026-09-19T16:12:19.848432+00:00",
   "mission_number": "",
   "mission_slug": "release-pipeline-opendesign-package-01M2X5XX",
   "mission_type": "software-dev",
@@ -12,22 +12,37 @@
     "claimed": 0,
     "done": 0,
     "for_review": 0,
-    "in_progress": 1,
+    "in_progress": 0,
     "in_review": 0,
-    "planned": 2
+    "planned": 3
   },
   "work_packages": {
     "WP01": {
       "actor": "claude",
+      "agent": "claude",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
-      "force_count": 0,
-      "lane": "in_progress",
-      "last_event_id": "01M2X68EM6MBC2X3FB7T8SYFW2",
-      "last_transition_at": "2026-09-19T15:58:45.894247+00:00",
+      "force_count": 1,
+      "lane": "planned",
+      "last_event_id": "01M2X719G8GHSS6XXKAVMMHSW2",
+      "last_transition_at": "2026-09-19T16:12:19.848432+00:00",
       "model": "__resolved_model_absent__",
       "provider": "__resolved_provider_absent__",
-      "role": "implementer"
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-396/kitty-specs/release-pipeline-opendesign-package-01M2X5XX/tasks/WP01-generator-vendored-opendesign-reference-committe/review-cycle-1.md",
+        "reference": "review-cycle://release-pipeline-opendesign-package-01M2X5XX/WP01-generator-vendored-opendesign-reference-committe/review-cycle-1.md",
+        "reviewer": "claude",
+        "verdict": "changes_requested"
+      },
+      "role": "implementer",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done"
+      }
     },
     "WP02": {
       "actor": "finalize-tasks",
