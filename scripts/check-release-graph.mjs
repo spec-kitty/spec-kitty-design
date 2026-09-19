@@ -1214,7 +1214,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 65;
+const PROBE_FLOOR = 67;
 
 const PROBES = [
   {
