@@ -461,6 +461,10 @@ jobs:
         run: node scripts/check-markdown-fences.mjs --selftest
       - name: "[ENFORCED] No swallowed fence openers, no unterminated code blocks (#456)"
         run: node scripts/check-markdown-fences.mjs
+      # After the gate, so a Storybook loader breakage cannot stop the job before the PR has its fence
+      # verdict. Storybook's own MDX parse must match the pinned parser's on every .mdx page.
+      - name: "[ENFORCED] Pinned MDX parser matches Storybook's own parse (#456)"
+        run: node scripts/check-markdown-fences.mjs --drift-sentinel
       # #438 F3: this probe table (NI-001/visual-evidence-gate-integrity) had red-then-green
       # coverage of a real defect but no CI caller at all — the shell half of the same fold had
       # both. It needs no train ref and no built artifacts, so wiring it here is free; the real,

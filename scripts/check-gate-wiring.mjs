@@ -894,7 +894,10 @@ else {
     // #456, registered WITH the gate (R3, PR #457). The probe table is required separately from
     // the gate: its per-rule mutation proof is the only evidence the swallowed-opener rule fires —
     // the first version's table stayed 5/5 green with that rule deleted.
-    [/node\s+scripts\/check-markdown-fences\.mjs(?!\s*--selftest)(\s|$)/, 'the Markdown fence-integrity gate', 'scripts/check-markdown-fences.mjs'],
+    // No flag at all: the gate itself. `(?!\s*--selftest)` also matched `--drift-sentinel`, so the
+    // gate step could have been deleted with this entry still satisfied by the sentinel's line.
+    [/node\s+scripts\/check-markdown-fences\.mjs(?!\s*--)(\s|$)/, 'the Markdown fence-integrity gate', 'scripts/check-markdown-fences.mjs'],
+    [/node\s+scripts\/check-markdown-fences\.mjs\s+--drift-sentinel(\s|$)/, "the fence gate's MDX drift sentinel", 'scripts/check-markdown-fences.mjs --drift-sentinel'],
     [/node\s+scripts\/check-markdown-fences\.mjs\s+--selftest(\s|$)/, "the Markdown fence gate's own probe table", 'scripts/check-markdown-fences.mjs --selftest'],
     // NOT registered: `npx commitlint --from=<pr base>` needs pull-request refs, so its step
     // legitimately carries an `if:`, and REQUIRED_LINT refuses `if:`-carrying steps (they cannot

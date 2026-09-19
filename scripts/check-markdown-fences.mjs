@@ -80,7 +80,7 @@
  */
 import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -316,7 +316,8 @@ const SIGNATURE = [F + 'js', 'snippet', F + 'html', '<head>', F];
  * disables each rule in turn and requires the probe to go GREEN, which is what shows that this rule
  * — not another one that happens to fire first — is what made it red. `findings`, where given, is
  * the exact [rule, line, message fragment] list the scanner must report for the LAST file, which
- * an exit code cannot show (a finding reported on the wrong line still exits 1).
+ * an exit code cannot show (a finding reported on the wrong line still exits 1). `output`, where
+ * given, lists fragments the run must print (a file named in an error, for instance).
  */
 const PROBES = [
   { name: 'clean control passes', files: { 'docs/a.md': md('# T', '', F + 'html', '<p>hi</p>', F, '', 'prose') }, expect: 0 },
@@ -458,6 +459,8 @@ const PROBES = [
   { name: 'in .mdx, a last line with an info string does not close', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': F + 'js\nx\n' + F + 'a`b' }, expect: 1, needs: ['unterminated'] },
   { name: 'in .mdx, an opener on the last line closes nothing', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': 'text\n\n' + F }, expect: 1, needs: ['unterminated'] },
   { name: 'in .mdx, a closer of the other character does not close', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': F + 'js\nx\n~~~' }, expect: 1, needs: ['unterminated'] },
+  // R4 round 8: a file that cannot even be read is NAMED, and the files after it are still scanned.
+  { name: 'an unreadable file is named and later files are still read', files: { 'docs/a.md': { symlink: 'nowhere.md' }, 'docs/z.md': md(...SIGNATURE) }, expect: 1, findings: [['swallowed-opener', 3, 'html']], output: ['docs/a.md', 'gate-error', 'docs/z.md'] },
   { name: 'an .mdx file MDX cannot parse is reported, not passed', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('<Canvas>', '', 'unclosed JSX') }, expect: 1 },
   { name: 'VALID: in .mdx, a 4-backtick block holding 3-backtick example lines', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('````md', '    ' + F + 'js', '    ' + F, '````') }, expect: 0 },
   { name: 'VALID: in .mdx, a fence after a JSX tag and a blank line', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('<Canvas>', '', F + 'js', 'x', F, '', '</Canvas>') }, expect: 0 },
@@ -508,7 +511,8 @@ function withFixture(files, fn) {
     git(root, 'init', '-q');
     for (const [path, body] of Object.entries(files)) {
       mkdirSync(dirname(join(root, path)), { recursive: true });
-      writeFileSync(join(root, path), body);
+      if (typeof body === 'object') symlinkSync(body.symlink, join(root, path));
+      else writeFileSync(join(root, path), body);
     }
     git(root, 'add', '-A');
     return fn(root);
@@ -533,21 +537,25 @@ const codeNodes = (tree) => {
 async function storybookCodeNodes(source) {
   const { default: loader } = await import('@storybook/addon-docs/mdx-loader');
   let captured = null;
+  let calledBack = false;
   const error = console.error;
   console.error = () => {};
   try {
     await new Promise((done, fail) => loader.call({
-      async: () => (err) => (err ? fail(err) : done()),
+      async: () => (err) => { calledBack = true; return err ? fail(err) : done(); },
       getOptions: () => ({ mdxCompileOptions: { remarkPlugins: [() => (tree) => { captured = codeNodes(tree); }] } }),
       resourcePath: 'fence-gate-sentinel.mdx',
     }, source));
-  } catch {
-    return captured ?? 'REJECTED';
+  } catch (e) {
+    // Failing BEFORE the callback is the loader breaking, not the document being rejected.
+    if (!calledBack) throw new Error(`mdx-loader failed before calling back (${String(e?.message ?? e).split('\n')[0]}) — its contract changed`);
+    return { nodes: captured ?? 'REJECTED', pluginRan: captured !== null };
   } finally {
     console.error = error;
   }
-  if (captured === null) throw new Error('mdx-loader compiled without running the capture plugin — its contract changed');
-  return captured;
+  // `pluginRan` is evidence the comparison is against STORYBOOK's parse: a stand-in that returns
+  // code nodes without running the plugin (the pinned parser itself, say) cannot supply it.
+  return { nodes: captured ?? 'NOT CAPTURED', pluginRan: captured !== null };
 }
 
 function pinnedCodeNodes(source, { withMdx = true } = {}) {
@@ -566,31 +574,90 @@ function pinnedCodeNodes(source, { withMdx = true } = {}) {
  * with the MDX extension removed, and must differ somewhere: otherwise the corpus exercises nothing
  * MDX-specific, and a green sentinel would prove nothing.
  */
-async function driftSentinel() {
-  const corpus = [];
-  for (const file of resolveScope(REPO_ROOT).filter((f) => f.endsWith('.mdx'))) {
-    corpus.push([file, readFileSync(join(REPO_ROOT, file), 'utf8')]);
-  }
+function sentinelCorpus() {
+  const pages = resolveScope(REPO_ROOT).filter((f) => f.endsWith('.mdx'))
+    .map((file) => [file, readFileSync(join(REPO_ROOT, file), 'utf8')]);
+  const fixtures = [];
   for (const p of PROBES) {
-    for (const [file, body] of Object.entries(p.files)) if (file.endsWith('.mdx')) corpus.push([`${p.name} :: ${file}`, body]);
+    for (const [file, body] of Object.entries(p.files)) {
+      if (file.endsWith('.mdx') && typeof body === 'string') fixtures.push([`${p.name} :: ${file}`, body]);
+    }
   }
+  return { pages, fixtures };
+}
+
+/**
+ * The sentinel's decision, with its parsers and corpus injected so the self-test can prove it FIRES
+ * without touching Storybook (R1 S1, PR #457; the self-test must not depend on the loader, R3 U1).
+ * It fails on: an empty corpus; no tracked page when `requirePages`; any document whose Storybook
+ * side shows no evidence the capture plugin ran; any disagreement; and a control that never differs.
+ */
+async function driftSentinel({ storybook = storybookCodeNodes, pinned = pinnedCodeNodes, corpus = sentinelCorpus(),
+  requirePages = true, log = console.log } = {}) {
+  const docs = [...corpus.pages, ...corpus.fixtures];
   let failed = 0;
   let controlDiffers = 0;
-  for (const [label, body] of corpus) {
-    const theirs = await storybookCodeNodes(body);
-    const ours = pinnedCodeNodes(body);
-    if (theirs !== ours) {
+  if (docs.length === 0) { log('❌ drift sentinel: the corpus is empty — refusing to pass over nothing'); failed += 1; }
+  if (requirePages && corpus.pages.length === 0) { log('❌ drift sentinel: no tracked .mdx page was read'); failed += 1; }
+  for (const [label, body] of docs) {
+    const theirs = await storybook(body);
+    const ours = pinned(body);
+    if (theirs?.nodes !== 'REJECTED' && theirs?.pluginRan !== true) {
       failed += 1;
-      console.log(`❌ drift: Storybook and the pinned MDX parser disagree on ${label}`);
-      console.log(`   storybook ${theirs.slice(0, 200)}`);
-      console.log(`   pinned    ${ours.slice(0, 200)}`);
+      log(`❌ Storybook's mdx-loader compiled ${label} without running the capture plugin — its contract changed`);
+      continue;
     }
-    if (pinnedCodeNodes(body, { withMdx: false }) !== theirs) controlDiffers += 1;
+    if (theirs.nodes !== ours) {
+      failed += 1;
+      if (theirs.nodes === 'REJECTED') {
+        log(`❌ Storybook's mdx-loader rejects ${label}, which the pinned parser accepts — the loader's ` +
+          'contract or Storybook\'s MDX grammar changed; check what the loader now requires');
+      } else {
+        log(`❌ drift: Storybook and the pinned MDX parser disagree on ${label}`);
+        log(`   storybook ${String(theirs.nodes).slice(0, 200)}`);
+        log(`   pinned    ${String(ours).slice(0, 200)}`);
+      }
+    }
+    if (pinned(body, { withMdx: false }) !== theirs.nodes) controlDiffers += 1;
   }
-  const ok = failed === 0 && controlDiffers > 0 && corpus.length > 0;
-  console.log(`${ok ? '✅' : '❌'} drift sentinel: ${corpus.length} .mdx documents, ${failed} disagree with Storybook; ` +
-    `control (no MDX extension) differs on ${controlDiffers}`);
-  return ok ? 0 : 1;
+  if (docs.length > 0 && controlDiffers === 0) {
+    log('❌ drift sentinel: the control never differs — the corpus exercises nothing MDX-specific');
+    failed += 1;
+  }
+  if (failed > 0) {
+    log('   Remedy for real drift: re-pin micromark, micromark-extension-mdxjs, mdast-util-from-markdown ' +
+      'and mdast-util-mdx to the grammar @storybook/addon-docs bundles, then re-run this step.');
+  }
+  log(`${failed === 0 ? '✅' : '❌'} drift sentinel: ${docs.length} .mdx documents (${corpus.pages.length} tracked ` +
+    `pages), control (no MDX extension) differs on ${controlDiffers}`);
+  return failed === 0 ? 0 : 1;
+}
+
+/** Proves the sentinel can fire, with injected parsers — no Storybook involved. */
+async function sentinelSelftest() {
+  const { fixtures } = sentinelCorpus();
+  const agrees = async (src) => ({ nodes: pinnedCodeNodes(src), pluginRan: true });
+  const plain = { pages: [], fixtures: [['plain', md('# T', '', F + 'js', 'x', F)]] };
+  const cases = [
+    ['agreeing parsers pass', { storybook: agrees }, 0],
+    ['a drifted Storybook side fails', { storybook: async (src) => ({ nodes: pinnedCodeNodes(src).replace(/\[(\d+),(\d+)/, (m, l, c) => `[${l},${+c + 1}`), pluginRan: true }) }, 1],
+    ['a capture plugin that never ran fails', { storybook: async (src) => ({ nodes: pinnedCodeNodes(src), pluginRan: false }) }, 1],
+    ['the pinned parser standing in for Storybook fails', { storybook: async (src) => pinnedCodeNodes(src) }, 1],
+    ['Storybook rejecting what the pinned parser accepts fails', { storybook: async () => ({ nodes: 'REJECTED', pluginRan: false }) }, 1],
+    ['a corpus with nothing MDX-specific fails its control', { storybook: agrees, corpus: plain }, 1],
+    ['an empty corpus fails', { storybook: agrees, corpus: { pages: [], fixtures: [] } }, 1],
+  ];
+  let failed = 0;
+  for (const [name, opts, expect] of cases) {
+    const got = await driftSentinel({ corpus: { pages: [], fixtures }, requirePages: false, log: () => {}, ...opts });
+    const ok = got === expect;
+    if (!ok) failed += 1;
+    console.log(`${ok ? '✅' : '❌'} drift sentinel: ${name} (expected exit ${expect}, got ${got})`);
+  }
+  const noPages = await driftSentinel({ storybook: agrees, corpus: { pages: [], fixtures }, requirePages: true, log: () => {} });
+  if (noPages !== 1) failed += 1;
+  console.log(`${noPages === 1 ? '✅' : '❌'} drift sentinel: no tracked page fails when pages are required (got ${noPages})`);
+  return { checks: cases.length + 1, failed };
 }
 
 async function selftest() {
@@ -598,12 +665,19 @@ async function selftest() {
   let failed = 0;
   let checks = 0;
   for (const p of PROBES) {
+    const said = [];
     const [got, cli] = withFixture(p.files, (root) => [
-      runGate(root, quiet),
+      runGate(root, { log: () => {}, error: (m) => said.push(m) }),
       spawnSync(process.execPath, [SELF, '--root', root], { encoding: 'utf8' }).status,
     ]);
     let ok = got === p.expect && cli === p.expect;
     let detail = '';
+    for (const fragment of p.output ?? []) {
+      if (!said.some((m) => m.includes(fragment))) {
+        ok = false;
+        detail += `; output lacks "${fragment}"`;
+      }
+    }
     if (p.findings) {
       // Findings are asserted on the fixture's LAST file, parsed as its extension says.
       const [path, body] = Object.entries(p.files).at(-1);
@@ -641,8 +715,9 @@ async function selftest() {
     }
   }
 
-  checks += 1;
-  failed += await driftSentinel();
+  const sentinel = await sentinelSelftest();
+  checks += sentinel.checks;
+  failed += sentinel.failed;
 
   if (failed > 0) {
     console.error(`\n❌ markdown fence gate self-test: ${failed} of ${checks} checks failed.`);
@@ -654,6 +729,10 @@ async function selftest() {
 if (process.argv[1] && resolve(process.argv[1]) === SELF) {
   if (process.argv.includes('--selftest')) {
     await selftest();
+  } else if (process.argv.includes('--drift-sentinel')) {
+    // Its own CI step, AFTER the gate (R3 U1): a Storybook loader breakage must not stop the job
+    // before the fence scan has given the PR its verdict.
+    process.exit(await driftSentinel());
   } else {
     const at = process.argv.indexOf('--root');
     process.exit(runGate(at > -1 ? resolve(process.argv[at + 1]) : REPO_ROOT));
