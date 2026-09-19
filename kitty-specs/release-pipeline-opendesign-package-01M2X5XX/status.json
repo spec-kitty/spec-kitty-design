@@ -30,7 +30,7 @@
       "provider": "__resolved_provider_absent__",
       "review": null,
       "review_result": {
-        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-396/kitty-specs/release-pipeline-opendesign-package-01M2X5XX/tasks/WP01-generator-vendored-opendesign-reference-committe/review-cycle-1.md",
+        "feedback_path": "kitty-specs/release-pipeline-opendesign-package-01M2X5XX/tasks/WP01-generator-vendored-opendesign-reference-committe/review-cycle-1.md",
         "reference": "review-cycle://release-pipeline-opendesign-package-01M2X5XX/WP01-generator-vendored-opendesign-reference-committe/review-cycle-1.md",
         "reviewer": "claude",
         "verdict": "changes_requested"
