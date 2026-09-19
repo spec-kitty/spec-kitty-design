@@ -43,6 +43,13 @@ const WCAG_STORIES = [
 
 const ready = async (page: Page) => {
   await page.waitForSelector('sk-page-header');
+  // #456. The focus-lift handler is attached by the story's `play`, which Storybook runs
+  // asynchronously AFTER render. Waiting for the mark it sets is what makes that safe: focusing
+  // before the listener exists would test the unfixed behaviour and fail intermittently, which is
+  // exactly the race that made an earlier revision reach for an inline `onfocusin=` attribute
+  // instead. The repo's own convention for this is a readiness marker -- the same shape as
+  // `data-render-complete="true"` in the pattern specs.
+  await page.waitForSelector('[data-scroller][data-focus-lift="ready"]', { timeout: 20_000 });
   await page.evaluate(async () => {
     await customElements.whenDefined('sk-page-header');
     const el = document.querySelector('sk-page-header') as HTMLElement & {
@@ -169,8 +176,13 @@ for (const { label, id } of WCAG_STORIES) {
     // and those need different fixes. An earlier round read `atMaxScroll=true` in 16 of 16
     // failures as the cause, shipped a fix for it, and the failures continued at the same rate --
     // it was where the test had left the scroller, not why focus failed to lift the row.
-    const scrollBeforeFocus = await page.evaluate(
-      () => document.querySelector('[data-scroller]')!.scrollTop,
+    // Math.round to match `geometry.scrollTop` below, which is also rounded. The squad found
+    // these compared an UNROUNDED reading against a rounded one, so any fractional scroll
+    // position reported `focusMovedScroller=true` when focus had moved the scroller by exactly
+    // zero -- the one discriminator this test exists to provide, lying in the direction that
+    // recreates the misdiagnosis it was added to prevent.
+    const scrollBeforeFocus = await page.evaluate(() =>
+      Math.round(document.querySelector('[data-scroller]')!.scrollTop),
     );
     await page.locator(`a[href="${target.href}"]`).focus();
 
@@ -222,12 +234,17 @@ for (const { label, id } of WCAG_STORIES) {
         `scrollPadding=${geometry.scrollPaddingBlockStart}, ` +
         `scrollRemaining=${geometry.scrollRemaining}, ` +
         `atMaxScroll=${geometry.atMaxScroll}, scroll-margin-block-start=` +
-        `${geometry.appliedScrollMargin}] — atMaxScroll=true means the container had no range ` +
-        'left to honour the margin, which no token value can fix; atMaxScroll=false with a ' +
-        'margin smaller than the header height means the token is short. ' +
-        'focusMovedScroller=false means focus did not scroll AT ALL — the browser treated an ' +
-        'occluded row as already visible, which no margin value can change and which ' +
-        'scroll-padding on the container is the mechanism for.',
+        `${geometry.appliedScrollMargin}]. ` +
+        'READ focusMovedScroller FIRST. false means focus did not scroll at all — webkit ' +
+        'declines to initiate a focus-driven scroll for a row it considers already in the ' +
+        'scrollport, and NO css value can change that, because the properties are only applied ' +
+        'to a scroll that happens. The fix for that is an explicit scrollIntoView, which is what ' +
+        "the story's focusin handler does. true means a scroll DID happen and landed short, " +
+        'which is a genuine sizing problem in the container inset. ' +
+        'atMaxScroll and scrollRemaining describe DOWNWARD range only and are reported for ' +
+        'context — an earlier round read atMaxScroll=true as the cause, shipped a fix for it and ' +
+        'saw no change, because lifting a row out from under a sticky header scrolls UPWARD, ' +
+        'where range is available. Do not repeat that inference.',
     ).toBeGreaterThanOrEqual(geometry.headerBottom);
   });
 }

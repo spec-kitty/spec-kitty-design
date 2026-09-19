@@ -265,6 +265,17 @@ const teamOverviewShellStory = async (page: Page, light = false): Promise<Locato
   // `data-render-complete="true"` waits in the pattern specs). `attached` rather than `visible`
   // because /elements-dist/elements.js is injected on the next line, so at wait time this is an
   // un-upgraded unknown element with a possibly zero box.
+  //
+  // DISCLOSED for the suppression scan (SC-003 / C-001, "wait durations increased = 0"): this is
+  // a NEW 10000ms budget, not a widened one. Its #453 sibling in
+  // sk-team-overview-shell-layout.spec.ts discloses the identical budget and this one did not,
+  // which the pre-merge squad flagged.
+  //
+  // THIS DEPENDS ON THE STORY RETURNING A STRING. `DesktopComposition` renders
+  // `storyFrame(composition())`, a string, so Storybook takes its one-synchronous-`innerHTML`
+  // branch and any attached `sk-app-shell` implies the whole render landed -- which is what makes
+  // `attached` sufficient rather than merely convenient. If that story is ever changed to return a
+  // `TemplateResult`, Storybook takes a different branch and this precondition must be re-derived.
   await page
     .locator('#storybook-root sk-app-shell')
     .first()

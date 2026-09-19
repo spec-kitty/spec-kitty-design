@@ -106,64 +106,77 @@ const longBody = (rows = 40) => `
     ${Array.from({ length: rows }, (_, i) => `
       <p style="margin: 0 0 var(--sk-space-4)">
         <a href="#row-${i + 1}"
-           style="color: var(--sk-fg-default); scroll-margin-block-start: var(--sk-layout-page-header-sticky-scroll-margin)"
+           style="color: var(--sk-fg-default)"
            >Run ${i + 1}</a>
       </p>`).join('')}
   </div>`;
 
-// `scroll-padding-block-start` on the CONTAINER, not margin on the rows (#456). MEASURED under
-// webkit, --retries=0, repeat-each=30: every failure reported `focusMovedScroller=false` with
-// `scrollBeforeFocus` equal to `scrollTop` — focus did not scroll AT ALL. A row already inside the
-// scrollport but occluded by the sticky header is "visible" as far as the browser is concerned, so
-// `scroll-margin-block-start` on the row is never consulted; four of those failures carried a
-// 288px margin over a 205.8px header, i.e. far more than enough, and still failed.
+// WCAG 2.4.11 under webkit needs BOTH the container inset and an explicit scroll (#456).
 //
-// `scroll-padding-block-start` is the mechanism for this: it declares the scrollport's own top
-// inset, so an occluded row counts as OUT of view and focus scrolls it clear.
+// MECHANISM, corrected by the pre-merge squad after an earlier revision of this comment got it
+// wrong. That revision said webkit "never consults" scroll-margin or scroll-padding. It does --
+// exactly, to the sub-pixel -- the moment a scroll is actually performed. The probe's own numbers
+// prove it: `scrollIntoView({block:'start'})` aligns the scroll-MARGIN box inside the scrollport
+// inset by scroll-PADDING, so the landing position is scrollerTop + padding + margin:
 //
-// This repo already measured the identical defect on the INLINE axis and reached the identical
-// conclusion — see the section-nav stylesheet under packages/styles/src/section-nav/, where
-// `scroll-margin-inline` on the link "had zero effect on that specific defect" and a single
-// `scroll-padding-inline` on the container replaced it. The page-header contract had asked
-// consumers for the row-margin form that surface had already found insufficient. It does not
-// reproduce on chromium (20/20 locally), which is why it survived.
+//   compact  0 + 80 + 80       = 160      measured 160
+//   default  -0.19 + 288 + 288 = 575.81   measured 575.8125
 //
-// Named by DIRECTORY, never by its `sk-` filename: that surface has a contract test asserting its
-// name appears nowhere under packages/elements/src, because it is styles-only with no element-tree
-// presence. Citing it by filename here reddened that gate, correctly — twice, because the first
-// fix named the gate itself and put the token straight back.
-// WCAG 2.4.11 UNDER WEBKIT NEEDS THIS, AND CSS CANNOT DO IT (#456).
+// What webkit does NOT do is INITIATE a focus-driven scroll for a row it considers already in the
+// scrollport. That is the whole defect, and it is why no CSS value could fix it: the properties
+// were correct and simply never got a scroll to apply to. Chromium initiates that scroll itself,
+// which is why this never reproduces there.
 //
-// Measured, --retries=0, repeat-each=60: focusing a row occluded by the sticky header does NOT
-// scroll it clear under webkit. `scroll-margin-block-start` on the row and
-// `scroll-padding-block-start` on the container BOTH had zero effect -- 34 failures, every one
-// reporting that the scroll position after focus was identical to the position before it, with
-// both properties confirmed applied (80px and 288px). Webkit treats an occluded-but-in-scrollport
-// row as visible and declines to scroll at all, so neither property is ever consulted.
+// The cure therefore DEPENDS on the container's scroll-padding: `portTop` below is the scroller's
+// top plus that inset, and without it the guard compares against the bare top edge, `12 < 0` is
+// false, and nothing fires. An earlier revision of this PR labelled scroll-padding "refuted" --
+// it is load-bearing.
 //
-// An EXPLICIT scroll does work, and that is measured too -- under webkit, compact: 834 -> 686 and
-// the row cleared the header; default: 974 -> 410, cleared. Chromium scrolls on focus by itself
-// (834 -> 416), which is why this defect is invisible there and why the CSS-only contract read as
-// complete for as long as it did.
+// The rows no longer carry `scroll-margin-block-start`. With both set they STACKED: a row landed
+// ~160px down against a 66-71px header, roughly twice the needed inset, which no assertion in the
+// contract test could see. One declaration on the container replaces per-row margins -- the same
+// conclusion the section-nav surface reached on the inline axis (packages/styles/src/section-nav/,
+// named by directory because a contract test forbids its `sk-` filename under packages/elements).
 //
-// Attached as an inline handler rather than a Storybook `play` function on purpose: `play` runs
-// asynchronously after render, and the contract test focuses without waiting for it, so a `play`
-// would introduce a fresh race into the very test this fixes.
-//
-// See docs/design-system/using-components.md for the consumer contract. Whether the ELEMENT
-// should own this instead -- #145 ruled it "observes no scrolling" -- is escalated separately;
-// that ruling predates this measurement.
-const liftFocusClear = [
-  "const s=this;",
-  "const t=event.target;",
-  "if(!t||!t.getBoundingClientRect)return;",
-  "const i=parseFloat(getComputedStyle(s).scrollPaddingBlockStart)||0;",
-  "const portTop=s.getBoundingClientRect().top+i;",
-  "if(t.getBoundingClientRect().top<portTop)t.scrollIntoView({block:'start'});",
-].join('');
+// ATTACHED VIA `play`, NOT AN INLINE `onfocusin=` ATTRIBUTE. An earlier revision used the
+// attribute form on the grounds that `play` runs after render while the contract test focuses
+// without waiting. That was true about `play` and a false dichotomy: the squad pointed out this
+// same PR's other half establishes the readiness-marker pattern (`data-render-complete`), so the
+// race closes by marking the scroller once attached and having the test wait for the mark. The
+// attribute form was also the only inline `on*=` handler in any story in this repository, invisible
+// to every gate (a string literal no linter or tsc can see), and dead under a CSP without
+// `unsafe-inline` -- which is precisely the configuration a consumer is most likely to run.
+export const liftFocusClearOfStickyHeader = (event: FocusEvent): void => {
+  const scroller = event.currentTarget as HTMLElement | null;
+  const target = event.target as HTMLElement | null;
+  if (!scroller || !target || target === scroller || !target.getBoundingClientRect) return;
+  // The header lives INSIDE the scroll container and has its own focusables (the trailing action).
+  // Those sit above the inset by construction, so without this guard focusing one scrolls the
+  // container every time -- in Chromium too. Nothing in the fixture focuses it, which is exactly
+  // why the contract test would never have shown it.
+  if (target.closest('sk-page-header')) return;
+  const style = getComputedStyle(scroller);
+  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
+  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
+  const port = scroller.getBoundingClientRect();
+  const box = target.getBoundingClientRect();
+  // Both edges: the squad noted every observation had the row INSIDE the scrollport, so whether
+  // webkit also declines to scroll a target entirely below it was untested and a one-sided guard
+  // would silently do nothing there.
+  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
+  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
+};
+
+/** Attaches the handler and marks the scroller, so a test can wait for it rather than race it. */
+export const attachFocusLift = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+  const scroller = canvasElement.querySelector<HTMLElement>('[data-scroller]');
+  if (!scroller || scroller.dataset['focusLift'] === 'ready') return;
+  scroller.addEventListener('focusin', liftFocusClearOfStickyHeader as EventListener);
+  scroller.dataset['focusLift'] = 'ready';
+};
 
 const scroller = (content: string, height = '100vh', className = '', extraStyle = '') => `
-  <div data-scroller onfocusin="${liftFocusClear}"${className ? ` class="${className}"` : ''} style="${storyFrameStyle}; min-height: 0; height: ${height}; overflow: auto; scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin)${extraStyle ? `; ${extraStyle}` : ''}">
+  <div data-scroller${className ? ` class="${className}"` : ''} style="${storyFrameStyle}; min-height: 0; height: ${height}; overflow: auto; scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin)${extraStyle ? `; ${extraStyle}` : ''}">
     ${content}
   </div>`;
 
@@ -207,6 +220,7 @@ export const CompactSticky: Story = {
       },
     },
   },
+  play: attachFocusLift,
   render: () => scroller(`${header('density="compact" sticky')}${longBody()}`),
 };
 
@@ -225,6 +239,7 @@ export const DefaultSticky: Story = {
       },
     },
   },
+  play: attachFocusLift,
   render: () =>
     scroller(
       `${header('sticky')}${longBody()}`,
@@ -266,6 +281,7 @@ export const ShortViewport: Story = {
       },
     },
   },
+  play: attachFocusLift,
   render: () => scroller(`${header('density="compact" sticky')}${longBody(12)}`, '360px'),
 };
 
@@ -291,5 +307,6 @@ export const CompactTruncation: Story = {
 
 export const CompactStickyLightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
+  play: attachFocusLift,
   render: () => scroller(`${header('density="compact" sticky')}${longBody(20)}`, '100vh', 'sk-light'),
 };

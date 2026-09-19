@@ -21,7 +21,7 @@
  *
  * WHY TWO PLAYWRIGHT INVOCATIONS, NOT ONE
  *
- * Eleven of the twelve items are selected by an exact `file:line` — Playwright's own
+ * Most items are selected by an exact `file:line` — Playwright's own
  * test-selection syntax — whose line is RESOLVED from each item's titleAnchor at run time
  * and never stored. The twelfth (item 12, the `sk-action-row.spec.ts` "external
  * controls" family) is parameterized across six modes with no single line, and is selected by
@@ -52,16 +52,22 @@
  *   #456  run 35396510928            sk-notice item 13         29/30,  60/60 and 40/40 after
  *   #456  PR #457 CI 35401059899     sk-public-header item 17  1 failure, 40/40 after
  *
- * Failure accounting across this mission's ~1,270 measured executions: every failure was either
- * the sk-page-header sticky/WCAG-2.4.11 defect (38 + 3 + 17, fixed, zero in the two runs since)
- * or this fault (1). Nothing else.
+ * Failure accounting across this mission's measured executions, THREE kinds not two:
+ *   1. the sk-page-header sticky / WCAG-2.4.11 defect (38 + 3 + 17) -- real, fixed
+ *   2. this environmental fault (3 sightings, listed above, on 3 different tests)
+ *   3. item 18's `TimeoutError: locator.waitFor ... .sk-empty-state--inline` (run 35403525734)
+ *      -- one sighting, did not reproduce at 40 repeats, cause NOT established
+ *
+ * An earlier revision of this note said "every failure was either (1) or this fault (1). Nothing
+ * else", which both undercounted the fault's own sightings and omitted kind 3 entirely. Corrected
+ * by the pre-merge squad.
  *
  * WHY THIS MATTERS FOR READING A COUNT: a single occurrence turns an otherwise clean item into
  * "29/30" and invites a de-flaking change to a test that has nothing wrong with it. Before
  * treating any one-off as a test defect, read the error. If it is this one, re-measure instead.
  * Two of the five specs #456 originally named were flagged on exactly this basis.
  * USAGE
- *   node scripts/webkit-repeat-run.mjs [--repeat-each=10] [--items=1,2,3,...,12] [--json-dir=DIR]
+ *   node scripts/webkit-repeat-run.mjs [--repeat-each=10] [--items=1,2,3,...,18] [--json-dir=DIR]
  *                                      [--workers=N]
  *
  * WHY `--workers` EXISTS (mission 453, shared-cause investigation)
@@ -92,7 +98,9 @@ const PROJECT = 'webkit'; // C-005 — the only engine this mission's affected t
  *  ever be read without knowing whether its repeats were co-scheduled. */
 let workersSetting = null;
 
-/** spec.md's "Canonical scope" table, items 1–11: each addressable by a unique titleAnchor. */
+/** Line-addressable items. Items 1-11 are #453's canonical scope; 13-18 were added by #456, the
+ *  last two found by this mission's own CI rather than named by the issue. Each carries a unique
+ *  titleAnchor and its line is resolved at run time. */
 const LINE_ITEMS = [
   { item: 1, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'forced-colors, two points in cycle', titleAnchor: 'legible' },
   { item: 2, file: 'apps/storybook/src/tests/sk-progress.spec.ts', label: 'forced-colors + reduced-motion', titleAnchor: 'together' },
