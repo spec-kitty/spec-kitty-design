@@ -623,6 +623,7 @@ export function checkWorkflowUsesDerivedSet(
     [/check-release-graph\.mjs\s+--selftest/, "the gate's own blindness check on the publishing path"],
     [/check-vue-packed-types\.mjs/, 'the packed Vue declaration check on the publishing path'],
     [/measure-elements-sizes\.mjs\s+--check/, 'the size and SRI drift check on the publishing path'],
+    [/build-opendesign-package\.mjs\s+--check/, 'the OpenDesign package drift check on the publishing path'],
     // ADDED AFTER REVIEW MEASURED ITS DELETION AS GREEN. The audit gate carries an
     // `[ENFORCED]` label in the payload, and in this repo that prefix means "registered in a wiring
     // checker" — it was decoration until now. (The bump is asserted separately below, not here.)
@@ -640,6 +641,57 @@ export function checkWorkflowUsesDerivedSet(
   const REQUIRED_STEPS = jobName === 'release' ? [...PROD_ONLY_STEPS, ...EVERY_STREAM_STEPS] : EVERY_STREAM_STEPS;
   for (const [re, what] of REQUIRED_STEPS) {
     if (!re.test(commands)) problems.push(`${label} has no step running ${what}`);
+  }
+  // DRIFT CHECKS MUST BE THEIR OWN UNCONDITIONAL STEP, RUN EXACTLY. The presence patterns above
+  // are substring matches, and REL4 review measured all three defeats GREEN on the publishing path:
+  // `… --check || true`, `echo … --check`, and an `if: false` on the step. (The size check had
+  // the same hole from REL2; it is closed with the OpenDesign one.) An exact `run` cannot be
+  // chained, echoed or piped, and a step with no `if:` cannot be skipped. Pass 2 then ran the exact
+  // command under `shell: sh -c true {0}`, which executes nothing — so a `shell:` on the step, the
+  // job's `defaults.run.shell` or the workflow's is refused too: the runner's default shell is the
+  // only one under which the exact text means what it says.
+  // PASS 2 FOUND TWO MORE. A step that runs the generator in WRITE mode just before the check
+  // regenerates whatever it is about to compare, so the check can only pass; and `NODE_OPTIONS`
+  // (`--import=data:…process.exit(0)`) makes the exact command exit 0 without running. Neither
+  // belongs on a publishing path, so both are refused outright.
+  for (const st of steps) {
+    const run = typeof st.run === 'string' ? stripShellComments(st.run) : '';
+    for (const [script, what] of [['build-opendesign-package.mjs', 'OpenDesign package'], ['measure-elements-sizes.mjs', 'size record']]) {
+      for (const inv of run.split(/&&|\|\||;|\||\n/)) {
+        if (inv.includes(script) && !/--check\b/.test(inv) && !/--selftest\b/.test(inv)) {
+          problems.push(`${label} runs \`${script}\` in write mode ("${inv.trim()}") — it would regenerate the ${what} the drift check then compares`);
+        }
+      }
+    }
+  }
+  // …AND IN `run:` TEXT, as defence in depth. `echo "NODE_OPTIONS=…" >> "$GITHUB_ENV"` shows in no
+  // `env:` block; GitHub's runner currently refuses NODE_OPTIONS from that file (actions/runner
+  // FileCommandManager), so this guards a runner change or a self-hosted runner, not a live hole.
+  // No publishing step has a reason to name NODE_OPTIONS at all.
+  for (const st of steps) {
+    if (typeof st.run === 'string' && /NODE_OPTIONS/i.test(stripShellComments(st.run))) {
+      problems.push(`${label} step "${st.name ?? st.run}" names NODE_OPTIONS in its run — writing it to $GITHUB_ENV preloads every later node step`);
+    }
+  }
+  const envLevels = [...steps.map((st) => ['step', st.env]), ['job', wf?.jobs?.[jobName]?.env], ['workflow', wf?.env]];
+  for (const [where, e] of envLevels) {
+    if (e && typeof e === 'object' && Object.keys(e).some((k) => k.toUpperCase() === 'NODE_OPTIONS')) {
+      problems.push(`${label} sets NODE_OPTIONS at ${where} level — a preload can make every node check exit 0 without running`);
+    }
+  }
+  const shellOverride = wf?.jobs?.[jobName]?.defaults?.run?.shell ?? wf?.defaults?.run?.shell;
+  if (shellOverride !== undefined) {
+    problems.push(`${label} overrides the default shell (\`${shellOverride}\`) for the whole job — a shell template can make every exact drift check run nothing`);
+  }
+  for (const exact of ['node scripts/measure-elements-sizes.mjs --check', 'node scripts/build-opendesign-package.mjs --check']) {
+    const own = steps.filter((st) => typeof st.run === 'string' && stripShellComments(st.run).trim() === exact);
+    if (!own.length) {
+      problems.push(`${label} has no step whose run is exactly \`${exact}\` — a chained, echoed or wrapped form passes without gating anything`);
+    } else if (own.every((st) => st.if !== undefined)) {
+      problems.push(`${label} runs \`${exact}\` only under an \`if:\` — a condition can skip the check while the release proceeds`);
+    } else if (own.every((st) => st.if !== undefined || st.shell !== undefined)) {
+      problems.push(`${label} runs \`${exact}\` only under a custom \`shell:\` — a shell template such as \`sh -c true {0}\` runs nothing`);
+    }
   }
   if (jobName !== 'release') {
     // THE PUBLISH MUST GO THROUGH THE SCRIPT. Three regex rules used to live here — per-line
@@ -767,6 +819,15 @@ export function checkWorkflowUsesDerivedSet(
     const posOf = (re) => flat.find((f) => re.test(f.line))?.at ?? -1;
     const sizeAt = posOf(/measure-elements-sizes\.mjs\s+--check/);
     const bumpAt = posOf(/bump-prerelease\.mjs/);
+    // REL4: the OpenDesign package records the library version, which the bump rewrites — the same
+    // ordering hazard as the size record, so it gets the same rule.
+    const odAt = posOf(/build-opendesign-package\.mjs\s+--check/);
+    if (bumpAt !== -1 && odAt !== -1 && odAt > bumpAt) {
+      problems.push(
+        `${label} runs the prerelease bump BEFORE \`build-opendesign-package.mjs --check\`; the package ` +
+          'records the library version the bump rewrites, so the check would compare against mutated manifests.',
+      );
+    }
     const publishAt = posOf(/publish-derived-set\.mjs/);
     if (bumpAt !== -1) {
       if (sizeAt === -1) {
@@ -1089,6 +1150,8 @@ const VALID_RELEASE_WORKFLOW = `jobs:
         run: node scripts/check-vue-packed-types.mjs
       - name: Sizes
         run: node scripts/measure-elements-sizes.mjs --check
+      - name: OpenDesign
+        run: node scripts/build-opendesign-package.mjs --check
       - name: Audit
         run: |
           for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm pack --dry-run ); done
@@ -1136,6 +1199,8 @@ const REUSABLE_PAYLOAD_FIXTURE = `jobs:
         run: node scripts/check-vue-packed-types.mjs
       - name: Sizes
         run: node scripts/measure-elements-sizes.mjs --check
+      - name: OpenDesign
+        run: node scripts/build-opendesign-package.mjs --check
       - name: Audit
         run: |
           for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm pack --dry-run ); done
@@ -1200,7 +1265,7 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-const PROBE_FLOOR = 65;
+const PROBE_FLOOR = 81;
 
 const PROBES = [
   {
@@ -1399,6 +1464,142 @@ const PROBES = [
           /run: node scripts\/publish-derived-set\.mjs/,
           'run: |\n          node scripts/publish-derived-set.mjs\n          npm publish --tag latest',
         ),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    // REL4 (#396): the OpenDesign package check is an every-stream step, so deleting it is refused.
+    what: 'the payload with the OpenDesign package check deleted',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n {8}run: node scripts\/build-opendesign-package\.mjs --check\n/, ''),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    // REL4: after the bump it compares against mutated manifests — the size-check blocker, again.
+    what: 'the OpenDesign package check moved AFTER the prerelease bump',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n {8}run: node scripts\/build-opendesign-package\.mjs --check\n/, '').replace(
+          '      - name: Bump\n        run: node scripts/bump-prerelease.mjs --from-registry\n',
+          '      - name: Bump\n        run: node scripts/bump-prerelease.mjs --from-registry\n      - name: OpenDesign\n        run: node scripts/build-opendesign-package.mjs --check\n',
+        ),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  ...[
+    ['the OpenDesign check neutralised with `|| true`', 'OpenDesign', 'node scripts/build-opendesign-package.mjs --check || true'],
+    ['the OpenDesign check replaced by an echo of itself', 'OpenDesign', 'echo node scripts/build-opendesign-package.mjs --check'],
+    ['the size check neutralised with `|| true` (the REL2 hole REL4 review found)', 'Sizes', 'node scripts/measure-elements-sizes.mjs --check || true'],
+  ].map(([what, name, run]) => ({
+    what,
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(
+          new RegExp(` {6}- name: ${name}\\n {8}run: [^\\n]*\\n`),
+          `      - name: ${name}\n        run: ${run}\n`,
+        ),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  })),
+  {
+    what: 'the OpenDesign check run under `shell: sh -c true {0}` (executes nothing)',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n/, '      - name: OpenDesign\n        shell: sh -c true {0}\n'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'the OpenDesign package regenerated in write mode just before its check',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n/, '      - name: Refresh\n        run: node scripts/build-opendesign-package.mjs\n      - name: OpenDesign\n'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'the OpenDesign check given a NODE_OPTIONS preload that exits 0',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n/, '      - name: OpenDesign\n        env:\n          NODE_OPTIONS: --import=data:text/javascript,process.exit(0)\n'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'a NODE_OPTIONS preload written to $GITHUB_ENV before the OpenDesign check',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n/, '      - name: Env\n        run: echo "NODE_OPTIONS=--import=data:text/javascript,process.exit(0)" >> "$GITHUB_ENV"\n      - name: OpenDesign\n'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  ...[
+    ['the size record rewritten in write mode just before its check', / {6}- name: Sizes\n/, '      - name: Refresh\n        run: node scripts/measure-elements-sizes.mjs\n      - name: Sizes\n'],
+    ['a NODE_OPTIONS preload at job level', /(\n {4}steps:\n)/, '\n    env:\n      NODE_OPTIONS: --import=data:text/javascript,process.exit(0)$1'],
+    ['a NODE_OPTIONS preload under a lower-case step key', / {6}- name: OpenDesign\n/, '      - name: OpenDesign\n        env:\n          node_options: --import=data:text/javascript,process.exit(0)\n'],
+  ].map(([what, anchor, text]) => ({
+    what,
+    run: () =>
+      checkWorkflowUsesDerivedSet(withPayloadDefect(anchor, text), ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml'),
+  })),
+  {
+    what: 'a NODE_OPTIONS preload at workflow level',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        `env:\n  NODE_OPTIONS: --import=data:text/javascript,process.exit(0)\n${REUSABLE_PAYLOAD_FIXTURE}`,
+        ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'a no-op default shell for the whole workflow',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        `defaults:\n  run:\n    shell: sh -c true {0}\n${REUSABLE_PAYLOAD_FIXTURE}`,
+        ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'the publish job given a no-op default shell',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/(\n {4}steps:\n)/, '\n    defaults:\n      run:\n        shell: sh -c true {0}$1'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'publish',
+        'publish-packages.yml',
+      ),
+  },
+  {
+    what: 'the OpenDesign check made conditional with `if: false`',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withPayloadDefect(/ {6}- name: OpenDesign\n/, '      - name: OpenDesign\n        if: false\n'),
         ['@spec-kitty/tokens'],
         ['tokens'],
         'publish',

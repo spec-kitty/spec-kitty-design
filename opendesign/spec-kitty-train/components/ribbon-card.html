@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ribbon-card — Spec Kitty</title>
+    <meta name="description" content="ribbon-card: 1 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: ribbon-card — packages/styles/src/ribbon-card/sk-ribbon-card.css */
+/* @spec-kitty/styles — sk-ribbon-card shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+/* Deviation note: the ribbon's width/top/right use fixed px values for precise corner
+   anchoring — accepted layout constants not representable as spacing tokens. They are one
+   derived set, not three free numbers; see the geometry note on the rule itself. */
+
+/* A custom element defaults to `display: inline`, so without this the host cannot be sized or
+   spaced and a consumer's max-width on it is inert. `block` matches the static <article>; the
+   two consumption paths must agree about their own box (#77). Inert in the static path. */
+/* COLOUR ON THE HOST, so SLOTTED content is legible — and on the HOST specifically so the
+   static path cannot move.
+
+   The title and body classes style nodes in the shadow tree; slotted content is not in the
+   shadow tree, so those classes reach nothing and the text falls back to the UA default black
+   on a dark card surface. axe reported color-contrast on EVERY element story of this
+   component. `color` is inherited, and inheritance follows the FLATTENED tree, so a slotted
+   node inherits through the slot from `:host` — which a selector could never reach it with.
+
+   An earlier fix put this on the `.sk-<name>` class instead. That works for the element and
+   also changes the STATIC path, where that class is the article and its untinted descendants
+   would have picked up a new inherited colour — moving a committed visual baseline as a side
+   effect of an a11y fix. `:host` is inert in a document, so this cannot.
+
+   --sk-fg-body, not --sk-fg-on-card, for the reason sk-card.css records: the latter is defined
+   only in the dark block, so it would fall back to light grey inside a .sk-light subtree. */
+:host {
+  display: block;
+  color: var(--sk-fg-body);
+}
+
+.sk-ribbon-card {
+  position: relative;
+  padding: var(--sk-space-6);
+  background: var(--sk-surface-card);
+  border: 1px solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  /* CLIPPED, and this is what makes it a corner ribbon rather than a floating tab.
+     `overflow: visible` let the rotated banner swing clear of the card entirely — it hung above
+     and to the right of the top-right corner, attached to nothing. A corner ribbon is defined by
+     being cut off at the corner it crosses; without the clip the rotation has nothing to cut
+     against. `border-radius` on the card makes this clip follow the rounded corner. */
+  overflow: hidden;
+}
+
+/* The ribbon crosses the top-right corner at 45 degrees and is clipped by the card.
+   The bar is wider than the corner it covers so both ends disappear under the card's edges —
+   that is what stops it reading as a rotated label rather than a ribbon.
+
+   WHAT WAS ACTUALLY WRONG: this was a DROP TAB that had been rotated and never re-anchored.
+   `top: 0; right: var(--sk-space-6)` with `border-radius: 0 0 sm sm` positions a tab hanging
+   from the top edge; once the bar is rotated 45 degrees those offsets put it off the corner
+   attached to nothing, and the card's `overflow: visible` let it hang there. `position:
+   absolute` was always present and is not the fix — the offsets and the clip are.
+
+   THE THREE NUMBERS ARE DERIVED FROM ONE, so do not tune them independently. Let `a` be the
+   leg of the corner triangle the ribbon covers (a = 88px) and `h` the bar's own height
+   (~25px = two space-1 paddings plus a text-xs mono line). Then:
+       width = a*sqrt(2) + 2h = 174px   (the visible chord, plus a tuck under each edge)
+       top   = (a - h)/2      =  32px
+       right = (a - width)/2  = -43px   (negative: the lower end overhangs and is clipped)
+   This centres the bar on the corner's diagonal and leaves ~8px of it tucked under the top and
+   right edges, so neither end shows a cut. Changing `a` alone and recomputing keeps that true;
+   changing one number alone exposes an end or uncovers the corner.
+
+   THE LABEL IS FOR SHORT STRINGS: the visible chord is a*sqrt(2) long and the text is centred
+   in it, so a long label is cut by the clip above. RIBBON_LABEL_MAX (8) in
+   sk-ribbon-card.markup.ts is the measured budget, and it warns when exceeded. */
+.sk-ribbon-card__ribbon {
+  position: absolute;
+  top: 32px;
+  right: -43px;
+  width: 174px;
+  transform: rotate(45deg);
+  transform-origin: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sk-space-1);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  font-weight: var(--sk-weight-bold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: var(--sk-space-1) var(--sk-space-3);
+  box-sizing: border-box;
+}
+
+/* REMOVED at #78: the ribbon's label is a string property, rendered as a TEXT NODE by the
+   element, so no SVG can appear there. The documented contract is a label string.
+   Narrower than an earlier revision of this comment claimed: `ribbonCardStaticHtml` does raw
+   string concatenation, not escaping, so a caller passing markup on the STATIC path would
+   render it — "no SVG on either path" was wrong. `gap` on the ribbon is kept; the tab is still
+   a flex container. */
+
+/* Ribbon colour variants */
+/* Deviation: text colours for ribbon variants use dark warm-toned values
+   that match the reference design; these are fixed ink colours on coloured
+   backgrounds and are accepted design constants (not representable as
+   semantic fg tokens). */
+.sk-ribbon-card__ribbon--yellow {
+  background: var(--sk-color-yellow);
+  color: var(--sk-fg-on-primary);
+}
+
+.sk-ribbon-card__ribbon--green {
+  background: var(--sk-color-green);
+  color: var(--sk-fg-on-primary);
+}
+
+.sk-ribbon-card__ribbon--purple {
+  background: var(--sk-color-purple);
+  color: var(--sk-fg-on-primary);
+}
+
+.sk-ribbon-card__ribbon--blue {
+  background: var(--sk-color-blue);
+  color: var(--sk-fg-on-primary);
+}
+
+.sk-ribbon-card__ribbon--red {
+  background: var(--sk-color-red);
+  color: var(--sk-fg-on-primary);
+}
+
+/* Colorized-border variants — accent the card edge with a brand colour
+   instead of the default neutral hairline border. Per WP01 / issue #10.
+   Pairs with a matching ribbon variant for a coherent accent treatment. */
+.sk-ribbon-card--border-yellow {
+  border-color: var(--sk-color-yellow);
+}
+
+.sk-ribbon-card--border-green {
+  border-color: var(--sk-color-green);
+}
+
+.sk-ribbon-card--border-purple {
+  border-color: var(--sk-color-purple);
+}
+
+.sk-ribbon-card--border-blue {
+  border-color: var(--sk-color-blue);
+}
+
+.sk-ribbon-card--border-red {
+  border-color: var(--sk-color-red);
+}
+
+/* Card content — the top margin predates the corner ribbon (it spaced a drop tab) and is kept
+   only because it still reads well; it is NOT derived from the ribbon geometry, and it applies
+   to ribbon-less cards too. The content column is at the card's top-LEFT; the ribbon is at the
+   top-RIGHT and out of flow, so it does not push this. */
+.sk-ribbon-card__content {
+  margin-top: var(--sk-space-5);
+}
+
+/* BOTH SPELLINGS, ONE RULE, because the title and body are SLOTTED in the element path.
+   A shadow-tree selector cannot match a slotted node — slotted content stays in the light DOM —
+   so these rules applied on the static path and were INERT on the element path, and the two
+   consumption paths this component's markup module exists to keep identical rendered with
+   different fonts, sizes, weights and margins. `:host { color }` fixed only the CONTRAST slice,
+   which is the one axe could see; all three pre-merge lenses found the rest independently.
+   `::slotted()` is inert in a document and the bare class is inert in a shadow tree, so one
+   selector list serves both paths with no declaration written twice. `::slotted()` is an
+   accepted owning compound in check-adopted-css-boundaries.mjs, and sk-nav-pill.css has used
+   this shape since #73. */
+/* RESERVE THE CORNER. The ribbon is out of flow, so without this it paints over the title —
+   measured at 1-3 covered glyphs for every card width from 280px up. The heading is the only
+   thing that reaches the corner (the body text sits below the band's chord), so the indent is
+   on the heading rather than the whole content column, and only when a ribbon is actually
+   present — a plain card keeps its full width.
+
+   Both spellings, for the reason the rule below records: the heading is SLOTTED in the element
+   path, so a shadow-tree selector cannot match it, and `::slotted()` is inert in a document. */
+.sk-ribbon-card--has-ribbon .sk-ribbon-card__content h3,
+.sk-ribbon-card--has-ribbon .sk-ribbon-card__content h4,
+.sk-ribbon-card--has-ribbon .sk-ribbon-card__content ::slotted(h3),
+.sk-ribbon-card--has-ribbon .sk-ribbon-card__content ::slotted(h4) {
+  padding-right: 72px;
+}
+
+.sk-ribbon-card__content h3,
+.sk-ribbon-card__content h4,
+.sk-ribbon-card__content ::slotted(h3),
+.sk-ribbon-card__content ::slotted(h4) {
+  margin: 0 0 var(--sk-space-2);
+  font-family: var(--sk-font-sans);
+  font-weight: var(--sk-weight-bold);
+  color: var(--sk-fg-default);
+}
+
+.sk-ribbon-card__content p,
+.sk-ribbon-card__content ::slotted(p) {
+  margin: 0;
+  font-size: var(--sk-text-sm);
+  line-height: 1.55;
+  color: var(--sk-fg-muted);
+}
+    </style>
+  </head>
+  <body>
+    <section id="ribbon-card" data-od-component="ribbon-card">
+      <h1>ribbon-card</h1>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <article class="sk-ribbon-card"><div class="sk-ribbon-card__content"><h4>Card title</h4><p>What this card is offering the reader.</p></div></article>
+      </figure>
+    </section>
+  </body>
+</html>

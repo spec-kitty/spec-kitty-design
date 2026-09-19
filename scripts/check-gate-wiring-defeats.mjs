@@ -94,6 +94,16 @@ const fallback = (needle, tail) => (wf) => {
   step.run = `${String(step.run).trimEnd()} ${tail}\n`;
 };
 
+/** EXACT-MATCH variant of `fallback`. `lintStep` returns the first step whose command CONTAINS the
+ *  needle, and `node scripts/opendesign-reference.mjs` is a substring of its own `--selftest`
+ *  invocation — so a needle lookup could weaken the selftest instead of the gate it was aimed at,
+ *  and the case would certify nothing. This locates the step whose trimmed `run` IS the command. */
+const fallbackExact = (exactRun, tail) => (wf) => {
+  const step = (wf.jobs?.['lint-code']?.steps ?? []).find((s) => String(s.run ?? '').trim() === exactRun);
+  if (!step) throw new Error(`no lint-code step running exactly \`${exactRun}\` — the probe would be vacuous`);
+  step.run = `${String(step.run).trimEnd()} ${tail}\n`;
+};
+
 /** The `release-gate` job's steps array, or a loud error if the job/steps are gone. */
 const releaseSteps = (wf) => {
   const steps = wf.jobs?.['release-gate']?.steps;
@@ -123,6 +133,57 @@ const CASES = [
   // able to fail. That is #205's hole, and this proves it is refused for the new gate too.
   ['#363 the prerelease bump selftest weakened with a `|| true` tail', fallback('scripts/bump-prerelease.mjs --selftest', '|| true')],
   ['#363 the publish-refusal selftest weakened with a `|| true` tail', fallback('scripts/publish-derived-set.mjs --selftest', '|| true')],
+  ['#396 the vendored OpenDesign digest check weakened with a `|| true` tail', fallbackExact('node scripts/opendesign-reference.mjs', '|| true')],
+  ['#396 the OpenDesign reference selftest weakened with a `|| true` tail', fallbackExact('node scripts/opendesign-reference.mjs --selftest', '|| true')],
+  ['#396 the OpenDesign package drift check weakened with a `|| true` tail', fallbackExact('node scripts/build-opendesign-package.mjs --check', '|| true')],
+  ['#396 the OpenDesign generator selftest weakened with a `|| true` tail', fallbackExact('node scripts/build-opendesign-package.mjs --selftest', '|| true')],
+  // REL4 pass 2: a NODE_OPTIONS preload exits 0 before any gate script runs, `run:` untouched.
+  ...[
+    ['step', (wf) => {
+      const step = (wf.jobs?.['lint-code']?.steps ?? []).find((s) => String(s.run ?? '').trim() === 'node scripts/build-opendesign-package.mjs --check');
+      if (!step) throw new Error('no exact OpenDesign --check step — the probe would be vacuous');
+      step.env = { ...(step.env ?? {}), NODE_OPTIONS: '--import=data:text/javascript,process.exit(0)' };
+    }],
+    ['job', (wf) => {
+      const job = wf.jobs?.['lint-code'];
+      if (!job) throw new Error('no lint-code job');
+      job.env = { ...(job.env ?? {}), NODE_OPTIONS: '--import=data:text/javascript,process.exit(0)' };
+    }],
+    ['workflow', (wf) => {
+      wf.env = { ...(wf.env ?? {}), NODE_OPTIONS: '--import=data:text/javascript,process.exit(0)' };
+    }],
+    ['$GITHUB_ENV', (wf) => {
+      const steps = wf.jobs?.['lint-code']?.steps;
+      const idx = (steps ?? []).findIndex((s) => String(s.run ?? '').trim() === 'node scripts/build-opendesign-package.mjs --check');
+      if (idx === -1) throw new Error('no exact OpenDesign --check step — the probe would be vacuous');
+      steps.splice(idx, 0, { name: 'Env', run: 'echo "NODE_OPTIONS=--import=data:text/javascript,process.exit(0)" >> "$GITHUB_ENV"' });
+    }],
+  ].map(([where, mutate]) => [`REL4 a NODE_OPTIONS preload that exits 0, set at ${where} level`, mutate]),
+  ['REL4 a no-op default shell on the lint-code job', (wf) => {
+    const job = wf.jobs?.['lint-code'];
+    if (!job) throw new Error('no lint-code job');
+    job.defaults = { run: { shell: 'sh -c true {0}' } };
+  }],
+  ['REL4 a no-op default shell for the whole workflow', (wf) => { wf.defaults = { run: { shell: 'sh -c true {0}' } }; }],
+  ['REL4 a NODE_OPTIONS preload under a lower-case key', (wf) => {
+    const job = wf.jobs?.['lint-code'];
+    if (!job) throw new Error('no lint-code job');
+    job.env = { ...(job.env ?? {}), node_options: '--import=data:text/javascript,process.exit(0)' };
+  }],
+  ['REL4 the size record rewritten in write mode just before its --check', (wf) => {
+    // The size checks live outside lint-code (ci-quality runs them after the build), so this
+    // finds the first job that runs one, exactly.
+    const isCheck = (s) => String(s.run ?? '').trim() === 'node scripts/measure-elements-sizes.mjs --check';
+    const job = Object.values(wf.jobs ?? {}).find((j) => (j?.steps ?? []).some(isCheck));
+    if (!job) throw new Error('no exact size --check step — the probe would be vacuous');
+    job.steps.splice(job.steps.findIndex(isCheck), 0, { name: 'Refresh sizes', run: 'node scripts/measure-elements-sizes.mjs' });
+  }],
+  ['REL4 the OpenDesign package regenerated in write mode just before its --check', (wf) => {
+    const steps = wf.jobs?.['lint-code']?.steps;
+    const idx = (steps ?? []).findIndex((s) => String(s.run ?? '').trim() === 'node scripts/build-opendesign-package.mjs --check');
+    if (idx === -1) throw new Error('no exact OpenDesign --check step — the probe would be vacuous');
+    steps.splice(idx, 0, { name: 'Refresh', run: 'node scripts/build-opendesign-package.mjs' });
+  }],
   // ── #202: the gate job's failure disjunction, matched as shell TEXT ──────────────────
   ['#202 conjunct on the lint-code disjunct', conjunct('lint-code')],
   ['#202 conjunct on the test disjunct', conjunct('test')],
@@ -301,7 +362,7 @@ const CASES = [
 // That was false: #436 is an ISSUE about charter.md and never touched this file. Two review
 // lenses caught it independently. Corrected rather than carried forward, because a wrong note
 // here misdirects exactly the person doing the next rebase.
-const MIN_CASES = 38;
+const MIN_CASES = 51;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });
