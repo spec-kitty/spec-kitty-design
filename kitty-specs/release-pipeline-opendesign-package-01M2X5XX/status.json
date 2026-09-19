@@ -1,7 +1,7 @@
 {
-  "event_count": 15,
-  "last_event_id": "01M2X8K103NZVGDSK350FYK7EX",
-  "materialized_at": "2026-09-19T16:39:29.539414+00:00",
+  "event_count": 16,
+  "last_event_id": "01M2XCEXD3T2JAF7GRPVNHMZR9",
+  "materialized_at": "2026-09-19T17:47:09.091584+00:00",
   "mission_number": "",
   "mission_slug": "release-pipeline-opendesign-package-01M2X5XX",
   "mission_type": "software-dev",
@@ -11,21 +11,21 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 3,
+    "for_review": 2,
     "in_progress": 0,
-    "in_review": 0,
+    "in_review": 1,
     "planned": 0
   },
   "work_packages": {
     "WP01": {
-      "actor": "claude",
+      "actor": "user",
       "agent": "claude",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
-      "lane": "for_review",
-      "last_event_id": "01M2X748W3DPCREG8CQWXRP5NT",
-      "last_transition_at": "2026-09-19T16:13:57.507537+00:00",
+      "lane": "in_review",
+      "last_event_id": "01M2XCEXD3T2JAF7GRPVNHMZR9",
+      "last_transition_at": "2026-09-19T17:47:09.091584+00:00",
       "model": "__resolved_model_absent__",
       "provider": "__resolved_provider_absent__",
       "review": null,
@@ -35,7 +35,7 @@
         "reviewer": "claude",
         "verdict": "changes_requested"
       },
-      "role": "implementer",
+      "role": "reviewer",
       "shell_pid": null,
       "shell_pid_created_at": null,
       "subtasks": {
