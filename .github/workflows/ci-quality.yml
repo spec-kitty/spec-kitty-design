@@ -448,14 +448,16 @@ jobs:
       - name: "[ENFORCED] Multi-screenshot tests use expect.soft throughout (#367)"
         run: node scripts/check-visual-screenshot-softness.mjs
       # #456. A commit on PR #457 inserted one snippet at 143 sites instead of 1 in
-      # using-components.md, consuming 70 existing openers as closers and rendering ~1,650 lines
-      # of consumer-facing prose as code. All 15 jobs went green: nothing here parses Markdown,
-      # and the specs that read that file assert substrings are PRESENT, which an insertion
-      # cannot break. Three review lenses caught it; no gate could. This is the cheapest check
-      # that would have failed, and it needs no build artifacts.
-      - name: "[ENFORCED] Markdown fence gate self-test (#456)"
+      # using-components.md. Each injected ```js block met the file's own next ```html/```css
+      # opener, which cannot close a block (closers carry no info string), so it rendered as code
+      # and the two blocks fused — 142 times. All 15 jobs went green: nothing here parsed
+      # Markdown, and the specs that read that file assert substrings are PRESENT, which an
+      # insertion cannot break. The gate scans fences by CommonMark's rules (both fence
+      # characters, lengths, list/quote indentation) over every tracked *.md plus llms*.txt,
+      # except the frozen kitty-specs/ records; its header states what it does NOT catch.
+      - name: "[ENFORCED] Markdown fence gate self-test, with per-rule mutation proof (#456)"
         run: node scripts/check-markdown-fences.mjs --selftest
-      - name: "[ENFORCED] Every docs code fence pairs, every closer is bare (#456)"
+      - name: "[ENFORCED] No swallowed fence openers, no unterminated code blocks (#456)"
         run: node scripts/check-markdown-fences.mjs
       # #438 F3: this probe table (NI-001/visual-evidence-gate-integrity) had red-then-green
       # coverage of a real defect but no CI caller at all — the shell half of the same fold had

@@ -891,6 +891,11 @@ else {
     // mechanism holding either command in place. Both are required, separately: a gate whose
     // probe table stops running is a gate whose defeated forms quietly reopen.
     [/node\s+scripts\/check-commitlint-config\.mjs(\s|$)/, "the commitlint ignore-list's own probe table", 'scripts/check-commitlint-config.mjs'],
+    // #456, registered WITH the gate (R3, PR #457). The probe table is required separately from
+    // the gate: its per-rule mutation proof is the only evidence the swallowed-opener rule fires —
+    // the first version's table stayed 5/5 green with that rule deleted.
+    [/node\s+scripts\/check-markdown-fences\.mjs(?!\s*--selftest)(\s|$)/, 'the Markdown fence-integrity gate', 'scripts/check-markdown-fences.mjs'],
+    [/node\s+scripts\/check-markdown-fences\.mjs\s+--selftest(\s|$)/, "the Markdown fence gate's own probe table", 'scripts/check-markdown-fences.mjs --selftest'],
     // NOT registered: `npx commitlint --from=<pr base>` needs pull-request refs, so its step
     // legitimately carries an `if:`, and REQUIRED_LINT refuses `if:`-carrying steps (they cannot
     // fail the job). Registering it makes this checker red — verified. The residual risk is
