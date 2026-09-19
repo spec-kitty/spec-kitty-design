@@ -86,6 +86,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import { mdxFromMarkdown } from 'mdast-util-mdx';
+import { parse as micromarkParse, postprocess, preprocess } from 'micromark';
 import { mdxjs } from 'micromark-extension-mdxjs';
 
 const SELF = fileURLToPath(import.meta.url);
@@ -115,7 +116,16 @@ function wouldOpen(lines, startLine, index, contentLine, run, mdx) {
   const src = lines[index];
   const prefix = src.slice(0, src.length - contentLine.trimStart().length);
   const variant = [...lines.slice(0, index), prefix + run, ...lines.slice(index)].join('\n');
-  const block = fencedBlocks(variant, mdx).find((b) => b.startLine === startLine);
+  let blocks;
+  try {
+    blocks = fencedBlocks(variant, mdx);
+  } catch {
+    // The original parsed and the variant does not. Code content is opaque to the parser, so the
+    // inserted line must have CLOSED the block, exposing former content as markup — which is exactly
+    // "this line would open a block" (R4 N11, PR #457: the throw used to escape and end the run).
+    return true;
+  }
+  const block = blocks.find((b) => b.startLine === startLine);
   return Boolean(block) && block.endLine === index + 1;
 }
 
@@ -131,21 +141,34 @@ function fencedBlocks(text, mdx) {
   const blocks = [];
   if (mdx) {
     const tree = fromMarkdown(text, { extensions: [mdxjs()], mdastExtensions: [mdxFromMarkdown()] });
+    const nodes = [];
     (function walk(node) {
-      if (node.type === 'code') {
-        const { start, end } = node.position;
-        const opener = FENCE.exec(lines[start.line - 1].slice(start.column - 1));
-        // MDX has no indented code, so every code node opens with a fence; the closer is the block's
-        // own last line, reduced to a bare run of the opener's character (container markers aside).
-        const closer = opener && end.line > start.line
-          && new RegExp(`^[ \\t>]*\\${opener[1][0]}{${opener[1].length},}[ \\t]*$`).test(lines[end.line - 1]);
-        blocks.push({
-          startLine: start.line, startCol: start.column, endLine: end.line,
-          content: node.value === '' ? [] : node.value.split('\n'), closed: Boolean(closer),
-        });
-      }
+      if (node.type === 'code') nodes.push(node);
       (node.children || []).forEach(walk);
     })(tree);
+    // Closed by its own fence, from the parser's own TOKENS: micromark emits one codeFencedFence
+    // for the opener and a second only for a real closer. Reading the last line instead took three
+    // rounds of review to get wrong three ways — a content line reading `> ```` (R3 T1), the next
+    // block's opener counted into the span (R2 N-1), `>` characters that were code (R1 N1) — so it
+    // is not read at all (R1, PR #457).
+    const fencesAt = new Map();
+    let open = null;
+    for (const [kind, token] of postprocess(micromarkParse({ extensions: [mdxjs()] }).document().write(preprocess()(text, undefined, true)))) {
+      if (token.type === 'codeFenced') {
+        if (kind === 'enter') open = { line: token.start.line, fences: 0 };
+        else { fencesAt.set(open.line, open.fences); open = null; }
+      } else if (token.type === 'codeFencedFence' && kind === 'enter' && open) open.fences += 1;
+    }
+    for (const node of nodes) {
+      const { start, end } = node.position;
+      if (!fencesAt.has(start.line)) {
+        throw new Error(`micromark and mdast disagree about the code block at line ${start.line}`);
+      }
+      blocks.push({
+        startLine: start.line, startCol: start.column, endLine: end.line,
+        content: node.value === '' ? [] : node.value.split('\n'), closed: fencesAt.get(start.line) === 2,
+      });
+    }
     return blocks;
   }
   const walker = new Parser().parse(text).walker();
@@ -165,7 +188,7 @@ function fencedBlocks(text, mdx) {
  * code block (opener, content or closer). `mdx` parses with the MDX grammar instead of CommonMark.
  * `disable` names ONE rule to switch off — used only by the self-test's mutation proof.
  */
-export function scanMarkdown(source, { disable = null, mdx = false } = {}) {
+export function scanMarkdown(source, { disable = null, mdx = false, limit = Infinity } = {}) {
   // GitHub's cmark-gfm (and C cmark) skip a leading UTF-8 byte-order mark; commonmark.js keeps it,
   // which turns a fence on line 1 into paragraph text. Strip it, so the gate reads what GitHub
   // renders (R4 N6, PR #457).
@@ -187,6 +210,8 @@ export function scanMarkdown(source, { disable = null, mdx = false } = {}) {
   // Lines of one block share its containers, so a candidate's answer depends only on its prefix.
   const opensAt = new Map();
   for (const { startLine, startCol, endLine, content, closed } of blocks) {
+    // A failing file needs only as many findings as are printed; each can cost a re-parse.
+    if (findings.length >= limit) break;
     // The start column is the fence's first character, whatever container prefixes precede it.
     const opener = FENCE.exec(lines[startLine - 1].slice(startCol - 1));
     // The parser reported a fenced block whose start column does not hold a fence. That has never
@@ -257,12 +282,18 @@ export function runGate(root, { disable = null, log = console.log, error = conso
   }
   let failed = 0;
   for (const file of files) {
-    const { findings } = scanMarkdown(readFileSync(join(root, file), 'utf8'), { disable, mdx: file.endsWith('.mdx') });
+    let findings;
+    try {
+      findings = scanMarkdown(readFileSync(join(root, file), 'utf8'), { disable, mdx: file.endsWith('.mdx'), limit: 11 }).findings;
+    } catch (e) {
+      // Name the file and keep going: one unexpected throw must not leave every later file unread.
+      findings = [{ rule: 'gate-error', message: `the gate could not scan this file: ${e.message.split('\n')[0]}` }];
+    }
     if (findings.length === 0) continue;
     failed += 1;
-    error(`❌ ${file}: ${findings.length} finding(s)`);
+    error(`❌ ${file}: ${findings.length > 10 ? 'more than 10' : findings.length} finding(s)`);
     for (const f of findings.slice(0, 10)) error(`   [${f.rule}] ${f.message}`);
-    if (findings.length > 10) error(`   … and ${findings.length - 10} more`);
+    if (findings.length > 10) error('   … stopped after 10');
   }
   if (failed > 0) {
     error(`\n❌ markdown fence integrity: ${failed} of ${files.length} file(s) failed.`);
@@ -410,6 +441,23 @@ const PROBES = [
   },
   { name: 'in .mdx, an indented fence on a list-marker line is caught', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('# T', '', '-     ' + F + 'js', '      x') }, expect: 1, needs: ['unterminated', 'mdx'] },
   { name: 'in .mdx, an indented fence inside a quote is caught', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('# T', '', '>     ' + F + 'js', '>     x') }, expect: 1, needs: ['unterminated', 'mdx'], findings: [['unterminated', 3, 'never reaches']] },
+  // R3 T1: a content line reading `> ``` ` must not pass for the block's own closer.
+  { name: 'in .mdx, a quoted-looking content line is not taken for the closer (end of file)', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': F + 'md\n> ' + F }, expect: 1, needs: ['unterminated'] },
+  { name: 'in .mdx, a quoted-looking content line is not taken for the closer (mid-file)', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('- item', '', '  ' + F + 'md', '  > ' + F, 'prose after') }, expect: 1, needs: ['unterminated'], findings: [['unterminated', 3, 'list item or blockquote']] },
+  { name: 'VALID: in .mdx, a block holding one blank line is closed', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md(F, '', F, '', 'prose', '', '      ' + F + 'html', '', '      ' + F) }, expect: 0 },
+  // R2 N-1: a list-item block that lost its closer runs into the next line, a quoted block's opener.
+  { name: 'in .mdx, the next block\'s opener is not taken for this block\'s closer', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('- x', '  ~~~', '  code', '> ~~~', '> quoted prose', '> ~~~') }, expect: 1, needs: ['unterminated'], findings: [['unterminated', 2, 'never reaches']] },
+  // R4 N11: re-parsing this file's variant used to throw out of the run, unnamed, and skip every
+  // later file — here docs/z.md, which carries a real defect of its own.
+  { name: 'a variant MDX cannot parse counts as an opener, and later files are still read', files: { 'docs/z.md': md(...SIGNATURE), 'apps/a.mdx': "export const meta = { title: 'X' };\n\n<div title=\"t\">\n       ```{.x}\n const a = 1;\n````ts\n   ```ts\n~~~~\n```\n   ``` js title=\"a.js\"\n\n~~~~~js\n    ``` a b\n\n```\n</div>\n\nA line ending in a tag <Kbd>k</Kbd>.\n>~~~tsx\n>   ~~~\n" }, expect: 1, needs: ['swallowed'], findings: [['swallowed-opener', 6, 'ts'], ['swallowed-opener', 7, 'ts'], ['swallowed-opener', 13, 'a b']] },
+  // R1 round 7: closure comes from micromark's tokens, and each of these kills a way of reading it
+  // off the last line instead (all verified against Storybook's render; no final newline on purpose).
+  { name: 'VALID: in .mdx, a closed block inside a quote', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('> ' + F + 'js', '> x', '> ' + F, '', 'After.') }, expect: 0 },
+  { name: 'in .mdx, a quoted callout whose closer is quoted one level too deep is caught', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('> **Example**', '>', '> ' + F + 'md', '> > Quoted note', '> > ' + F, '', 'Next section.') }, expect: 1, needs: ['unterminated'], findings: [['unterminated', 3, 'never reaches']] },
+  { name: 'in .mdx, a closer shorter than its opener does not close', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': '````md\nx\n' + F }, expect: 1, needs: ['unterminated'] },
+  { name: 'in .mdx, a last line with an info string does not close', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': F + 'js\nx\n' + F + 'a`b' }, expect: 1, needs: ['unterminated'] },
+  { name: 'in .mdx, an opener on the last line closes nothing', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': 'text\n\n' + F }, expect: 1, needs: ['unterminated'] },
+  { name: 'in .mdx, a closer of the other character does not close', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': F + 'js\nx\n~~~' }, expect: 1, needs: ['unterminated'] },
   { name: 'an .mdx file MDX cannot parse is reported, not passed', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('<Canvas>', '', 'unclosed JSX') }, expect: 1 },
   { name: 'VALID: in .mdx, a 4-backtick block holding 3-backtick example lines', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('````md', '    ' + F + 'js', '    ' + F, '````') }, expect: 0 },
   { name: 'VALID: in .mdx, a fence after a JSX tag and a blank line', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('<Canvas>', '', F + 'js', 'x', F, '', '</Canvas>') }, expect: 0 },
@@ -469,7 +517,83 @@ function withFixture(files, fn) {
   }
 }
 
-function selftest() {
+const codeNodes = (tree) => {
+  const out = [];
+  (function walk(n) {
+    if (n.type === 'code') {
+      const { start, end } = n.position;
+      out.push([start.line, start.column, end.line, end.column, n.lang ?? null, n.meta ?? null, n.value]);
+    }
+    (n.children || []).forEach(walk);
+  })(tree);
+  return JSON.stringify(out);
+};
+
+/** Storybook's own parse, through its PUBLIC loader entry, captured as the mdast it compiles. */
+async function storybookCodeNodes(source) {
+  const { default: loader } = await import('@storybook/addon-docs/mdx-loader');
+  let captured = null;
+  const error = console.error;
+  console.error = () => {};
+  try {
+    await new Promise((done, fail) => loader.call({
+      async: () => (err) => (err ? fail(err) : done()),
+      getOptions: () => ({ mdxCompileOptions: { remarkPlugins: [() => (tree) => { captured = codeNodes(tree); }] } }),
+      resourcePath: 'fence-gate-sentinel.mdx',
+    }, source));
+  } catch {
+    return captured ?? 'REJECTED';
+  } finally {
+    console.error = error;
+  }
+  if (captured === null) throw new Error('mdx-loader compiled without running the capture plugin — its contract changed');
+  return captured;
+}
+
+function pinnedCodeNodes(source, { withMdx = true } = {}) {
+  try {
+    return codeNodes(fromMarkdown(source, withMdx ? { extensions: [mdxjs()], mdastExtensions: [mdxFromMarkdown()] } : {}));
+  } catch {
+    return 'REJECTED';
+  }
+}
+
+/**
+ * DRIFT SENTINEL (R3 T2, PR #457). The gate parses .mdx with pinned micromark packages; Storybook
+ * renders it with its OWN bundled copy of that grammar, which moves whenever Storybook is upgraded.
+ * Every tracked .mdx page and every .mdx probe fixture must produce identical code blocks in both —
+ * positions, language, meta and content. A CONTROL runs the same corpus through the pinned parser
+ * with the MDX extension removed, and must differ somewhere: otherwise the corpus exercises nothing
+ * MDX-specific, and a green sentinel would prove nothing.
+ */
+async function driftSentinel() {
+  const corpus = [];
+  for (const file of resolveScope(REPO_ROOT).filter((f) => f.endsWith('.mdx'))) {
+    corpus.push([file, readFileSync(join(REPO_ROOT, file), 'utf8')]);
+  }
+  for (const p of PROBES) {
+    for (const [file, body] of Object.entries(p.files)) if (file.endsWith('.mdx')) corpus.push([`${p.name} :: ${file}`, body]);
+  }
+  let failed = 0;
+  let controlDiffers = 0;
+  for (const [label, body] of corpus) {
+    const theirs = await storybookCodeNodes(body);
+    const ours = pinnedCodeNodes(body);
+    if (theirs !== ours) {
+      failed += 1;
+      console.log(`❌ drift: Storybook and the pinned MDX parser disagree on ${label}`);
+      console.log(`   storybook ${theirs.slice(0, 200)}`);
+      console.log(`   pinned    ${ours.slice(0, 200)}`);
+    }
+    if (pinnedCodeNodes(body, { withMdx: false }) !== theirs) controlDiffers += 1;
+  }
+  const ok = failed === 0 && controlDiffers > 0 && corpus.length > 0;
+  console.log(`${ok ? '✅' : '❌'} drift sentinel: ${corpus.length} .mdx documents, ${failed} disagree with Storybook; ` +
+    `control (no MDX extension) differs on ${controlDiffers}`);
+  return ok ? 0 : 1;
+}
+
+async function selftest() {
   const quiet = { log: () => {}, error: () => {} };
   let failed = 0;
   let checks = 0;
@@ -517,6 +641,9 @@ function selftest() {
     }
   }
 
+  checks += 1;
+  failed += await driftSentinel();
+
   if (failed > 0) {
     console.error(`\n❌ markdown fence gate self-test: ${failed} of ${checks} checks failed.`);
     process.exit(1);
@@ -526,7 +653,7 @@ function selftest() {
 
 if (process.argv[1] && resolve(process.argv[1]) === SELF) {
   if (process.argv.includes('--selftest')) {
-    selftest();
+    await selftest();
   } else {
     const at = process.argv.indexOf('--root');
     process.exit(runGate(at > -1 ? resolve(process.argv[at + 1]) : REPO_ROOT));
