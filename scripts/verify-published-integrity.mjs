@@ -9,8 +9,16 @@
  * same bytes on the registry, but "should" is not evidence: a publish that repacked, a registry that
  * rewrote, or a step that published something else would leave a valid attestation over bytes nobody
  * can install. So after publishing, each name@version is DOWNLOADED again — `npm pack <spec> --json`
- * (`npm view` returns exit 0 with zero bytes against GitHub Packages, measured in REL2,
- * bump-prerelease.mjs) — and its SHA-512 is recomputed and compared with the attested one.
+ * — and its SHA-512 is recomputed and compared with the attested one.
+ *
+ * NOT `npm view <spec> dist.integrity`, for two separate reasons, and only one of them is the
+ * registry's. Measured 2026-09-20 on this registry, with controls: for a VERSIONED spec that query
+ * does work (96 bytes, the right hash); it is the UNVERSIONED queries — `dist-tags`, `versions`,
+ * `version` — that return exit 0 with zero bytes (REL2, bump-prerelease.mjs). An earlier version of
+ * this comment said `npm view` was unusable outright, which is wrong (REL3 pass 5 records
+ * fact-check). The reason that stands is the stronger one: `dist.integrity` is the hash the registry
+ * ADVERTISES, so comparing against it asks the registry to confirm itself. Re-downloading the bytes
+ * and hashing them here does not.
  *
  * WITH A THROWAWAY `--cache`. The pack step already put each tarball into npm's shared cache, keyed by
  * its integrity, so a plain `npm pack <spec>` answers from the cache: it checks only the integrity the
@@ -32,7 +40,8 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync, existsSync
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readPacked, sha512Integrity, packSet, isDirectInvocation } from './pack-derived-set.mjs';
+import { readPacked, sha512Integrity, packSet } from './pack-derived-set.mjs';
+import { isDirectInvocation } from './lib/direct-invocation.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const KNOWN_ARGV = new Set(['--selftest']);
@@ -163,8 +172,8 @@ function cliProbe(env) {
   const root = fixture();
   const bin = mkdtempSync(join(tmpdir(), 'verify-cli-'));
   try {
-    mkdirSync(join(root, 'scripts'));
-    for (const f of ['verify-published-integrity.mjs', 'pack-derived-set.mjs', 'release-graph.mjs']) {
+    mkdirSync(join(root, 'scripts', 'lib'), { recursive: true });
+    for (const f of ['verify-published-integrity.mjs', 'pack-derived-set.mjs', 'release-graph.mjs', 'lib/direct-invocation.mjs']) {
       writeFileSync(join(root, 'scripts', f), readFileSync(join(dirname(fileURLToPath(import.meta.url)), f)));
     }
     const log = (tool) => `echo "$*" >> "${join(bin, `${tool}.log`)}"`;

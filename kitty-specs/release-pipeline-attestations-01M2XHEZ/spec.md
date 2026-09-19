@@ -9,7 +9,7 @@ routing docs) and making the packages public are **not** in this mission. Merge 
 
 npm provenance (`--provenance`) is an npmjs.org mechanism, and it hard-fails on GitHub Packages, so REL2 removed it. The
 2026-09-11 operator amendment on #361 replaces it with **GitHub artifact attestations** over the packed tarballs. Today
-nothing is attested: `1.1.0-rc.1` and `rc.2` were published with no provenance at all. A consumer cannot tell a tarball
+nothing is attested: `1.1.0-rc.0`, `rc.1` and `rc.2` were published with no provenance at all. A consumer cannot tell a tarball
 this repository's release workflow built from one built anywhere else.
 
 ## Measured starting point
@@ -55,5 +55,10 @@ this repository's release workflow built from one built anywhere else.
 
 - Change only packing, attestation, publish input and verification. The derived set, topological halt-on-failure,
   already-published skip, dist-tag report, SBOM and SHA pins all stay as they are.
+  *(As delivered, gate pass 5: the dist-tag report's BEHAVIOUR is unchanged, but it moved from ~30 lines of
+  shell in both workflows into `scripts/report-dist-tags.mjs`. Review showed the step could not be held to
+  what it did while it was shell, because it was the one step allowed to hold `NODE_AUTH_TOKEN`. The SBOM
+  tool is now a pinned devDependency run with `npx --no-install`, so the SBOM itself also lists that dev
+  tree — see FR-008.)*
 - `release.yml` stays its own workflow. Converting it into a payload caller is not in this mission.
 - Every new gate refuses an empty set and prints its count.

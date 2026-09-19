@@ -26,7 +26,8 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { publishable } from './release-graph.mjs';
-import { readPacked, sha512Integrity, PACK_DIR_NAME, MANIFEST, isDirectInvocation } from './pack-derived-set.mjs';
+import { readPacked, sha512Integrity, PACK_DIR_NAME, MANIFEST } from './pack-derived-set.mjs';
+import { isDirectInvocation } from './lib/direct-invocation.mjs';
 import { classifyFailure } from './publish-derived-set.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -95,21 +96,41 @@ function main() {
 
 /* ────────────────────────────── --selftest ────────────────────────────── */
 
-/** A fixture dist-tarballs/ at the real ROOT (the only place the publish reads). Refuses to clobber one. */
-function withFixturePack(fn) {
-  const out = join(ROOT, PACK_DIR_NAME);
-  if (existsSync(out)) throw new Error(`${PACK_DIR_NAME}/ already exists — the effect probes need a clean tree`);
-  mkdirSync(out);
+/**
+ * A FIXTURE REPO IN A TEMP DIRECTORY, not the real one (REL3 pass 5, architect). These probes run the
+ * CLI with a complete forged prod environment, so the only thing between them and a real publish was
+ * a stubbed `npm` on PATH; they also wrote `dist-tarballs/` into the working tree and rewrote a
+ * tracked `package.json`, which a crash between the write and the restore would have left behind. The
+ * fixture root carries its own copy of this script and its imports, so `ROOT` resolves there, and its
+ * own packages — nothing tracked is touched, and there is no `.npmrc` pointing at a real registry.
+ */
+function withFixtureRepo(fn) {
+  const root = mkdtempSync(join(tmpdir(), 'pub-latest-repo-'));
   try {
-    const entries = publishable().map((p) => {
+    mkdirSync(join(root, 'scripts', 'lib'), { recursive: true });
+    const here = dirname(fileURLToPath(import.meta.url));
+    for (const f of ['publish-latest.mjs', 'publish-derived-set.mjs', 'pack-derived-set.mjs', 'release-graph.mjs', 'lib/direct-invocation.mjs']) {
+      writeFileSync(join(root, 'scripts', f), readFileSync(join(here, f)));
+    }
+    // styles depends on tokens, so the derived set has a real topological order to preserve.
+    for (const [dir, name, deps] of [
+      ['tokens', '@spec-kitty/tokens', {}],
+      ['styles', '@spec-kitty/styles', { '@spec-kitty/tokens': '1.0.0' }],
+    ]) {
+      mkdirSync(join(root, 'packages', dir), { recursive: true });
+      writeFileSync(join(root, 'packages', dir, 'package.json'), JSON.stringify({ name, version: '1.0.0', dependencies: deps }, null, 2));
+    }
+    const out = join(root, PACK_DIR_NAME);
+    mkdirSync(out);
+    const entries = publishable(join(root, 'packages')).map((p) => {
       const file = `${p.name.replace('@', '').replace('/', '-')}-${p.version}.tgz`;
       writeFileSync(join(out, file), `fixture:${p.name}`);
       return { name: p.name, version: p.version, dir: p.dir, file, integrity: sha512Integrity(join(out, file)) };
     });
     writeFileSync(join(out, MANIFEST), JSON.stringify({ schemaVersion: 1, entries }));
-    return fn(out);
+    return fn(root);
   } finally {
-    rmSync(out, { recursive: true, force: true });
+    rmSync(root, { recursive: true, force: true });
   }
 }
 
@@ -121,6 +142,7 @@ const PROD_ENV = {
 };
 
 function selftest() {
+  let FIX = ROOT; // the fixture repo, for the duration of the probe run
   const dir = mkdtempSync(join(tmpdir(), 'pub-latest-'));
   const log = join(dir, 'npm.log');
   const bin = join(dir, 'bin');
@@ -128,14 +150,14 @@ function selftest() {
   const stub = (body) => writeFileSync(join(bin, 'npm'), `#!/bin/sh\necho "npm $* cwd=$PWD" >> "${log}"\n${body}\n`, { mode: 0o755 });
   const run = (env = {}, args = []) => {
     writeFileSync(log, '');
-    const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url), ...args], {
+    const r = spawnSync(process.execPath, [join(FIX, 'scripts', 'publish-latest.mjs'), ...args], {
       encoding: 'utf8',
       env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, ...PROD_ENV, GITHUB_RUN_ATTEMPT: '1', ...env },
     });
     const calls = readFileSync(log, 'utf8').trim();
     return { status: r.status, calls: calls === '' ? [] : calls.split('\n'), out: `${r.stdout}${r.stderr}` };
   };
-  const want = () => publishable().map((p) => `${PACK_DIR_NAME}/${p.name.replace('@', '').replace('/', '-')}-${p.version}.tgz`);
+  const want = () => publishable(join(FIX, 'packages')).map((p) => `${PACK_DIR_NAME}/${p.name.replace('@', '').replace('/', '-')}-${p.version}.tgz`);
   const PROBES = [
     ['publishes every attested tarball in topological order (control)', () => { stub('exit 0'); const r = run(); const w = want(); return r.status === 0 && r.calls.length === w.length && r.calls.every((c, i) => c.includes(w[i])); }],
     ['every call carries exactly one `--tag`, and it is `latest`', () => { stub('exit 0'); const r = run(); return r.calls.length > 0 && r.calls.every((c) => (c.match(/--tag/g) ?? []).length === 1 && / --tag latest /.test(`${c} `)); }],
@@ -143,13 +165,13 @@ function selftest() {
     ['a failing publish halts the set (tokens first, one call, non-zero)', () => { stub('case "$*" in *spec-kitty-tokens-*) exit 1;; esac\nexit 0'); const r = run(); return r.status !== 0 && r.calls.length === 1; }],
     ['a conflict on the FIRST attempt is an error, not a skip', () => { stub('echo "npm error code EPUBLISHCONFLICT" >&2\nexit 1'); const r = run({ GITHUB_RUN_ATTEMPT: '1' }); return r.status !== 0 && r.calls.length === 1; }],
     ['a conflict on a RE-RUN is a skip, and the set completes', () => { stub('echo "npm error code EPUBLISHCONFLICT" >&2\nexit 1'); const r = run({ GITHUB_RUN_ATTEMPT: '2' }); return r.status === 0 && r.calls.length === want().length; }],
-    ['a tarball changed after attestation is refused before any npm call', () => { stub('exit 0'); const f = join(ROOT, PACK_DIR_NAME, want()[0].split('/')[1]); const orig = readFileSync(f); try { writeFileSync(f, 'swapped'); const r = run(); return r.status !== 0 && r.calls.length === 0; } finally { writeFileSync(f, orig); } }],
-    ['an unattested extra tarball is refused before any npm call', () => { stub('exit 0'); const x = join(ROOT, PACK_DIR_NAME, 'smuggled-1.0.0.tgz'); try { writeFileSync(x, 'x'); const r = run(); return r.status !== 0 && r.calls.length === 0; } finally { rmSync(x, { force: true }); } }],
-    ['a manifest `publishConfig.tag` is refused before any npm call', () => { stub('exit 0'); const f = join(ROOT, 'packages/tokens/package.json'); const o = readFileSync(f, 'utf8'); const j = JSON.parse(o); if (j.publishConfig?.tag !== undefined) return false; try { writeFileSync(f, `${JSON.stringify({ ...j, publishConfig: { ...(j.publishConfig ?? {}), tag: 'next' } }, null, 2)}\n`); const r = run(); return r.status !== 0 && r.calls.length === 0; } finally { writeFileSync(f, o); } }],
+    ['a tarball changed after attestation is refused before any npm call', () => { stub('exit 0'); const f = join(FIX, PACK_DIR_NAME, want()[0].split('/')[1]); const orig = readFileSync(f); try { writeFileSync(f, 'swapped'); const r = run(); return r.status !== 0 && r.calls.length === 0; } finally { writeFileSync(f, orig); } }],
+    ['an unattested extra tarball is refused before any npm call', () => { stub('exit 0'); const x = join(FIX, PACK_DIR_NAME, 'smuggled-1.0.0.tgz'); try { writeFileSync(x, 'x'); const r = run(); return r.status !== 0 && r.calls.length === 0; } finally { rmSync(x, { force: true }); } }],
+    ['a manifest `publishConfig.tag` is refused before any npm call', () => { stub('exit 0'); const f = join(FIX, 'packages/tokens/package.json'); const o = readFileSync(f, 'utf8'); const j = JSON.parse(o); if (j.publishConfig?.tag !== undefined) return false; try { writeFileSync(f, `${JSON.stringify({ ...j, publishConfig: { ...(j.publishConfig ?? {}), tag: 'next' } }, null, 2)}\n`); const r = run(); return r.status !== 0 && r.calls.length === 0; } finally { writeFileSync(f, o); } }],
     ['refuses a BRANCH-triggered run (the develop rc stream, a nightly)', () => { stub('exit 0'); const r = run({ GITHUB_REF_TYPE: 'branch' }); return r.status !== 0 && r.calls.length === 0; }],
     ['refuses a tag that is not vX.Y.Z', () => { stub('exit 0'); const r = run({ GITHUB_REF: 'refs/tags/parity-anchor/rel2' }); return r.status !== 0 && r.calls.length === 0; }],
     ['refuses a tag push of any workflow other than release.yml', () => { stub('exit 0'); const r = run({ GITHUB_WORKFLOW_REF: 'spec-kitty/spec-kitty-design/.github/workflows/nightly.yml@refs/tags/v1.2.3' }); return r.status !== 0 && r.calls.length === 0; }],
-    ['a manifest top-level `tag` is refused before any npm call', () => { stub('exit 0'); const f = join(ROOT, 'packages/tokens/package.json'); const o = readFileSync(f, 'utf8'); const j = JSON.parse(o); if (j.tag !== undefined) return false; try { writeFileSync(f, `${JSON.stringify({ ...j, tag: 'next' }, null, 2)}\n`); const r = run(); return r.status !== 0 && r.calls.length === 0; } finally { writeFileSync(f, o); } }],
+    ['a manifest top-level `tag` is refused before any npm call', () => { stub('exit 0'); const f = join(FIX, 'packages/tokens/package.json'); const o = readFileSync(f, 'utf8'); const j = JSON.parse(o); if (j.tag !== undefined) return false; try { writeFileSync(f, `${JSON.stringify({ ...j, tag: 'next' }, null, 2)}\n`); const r = run(); return r.status !== 0 && r.calls.length === 0; } finally { writeFileSync(f, o); } }],
     ['refuses to publish outside GitHub Actions', () => { stub('exit 0'); const r = run({ GITHUB_ACTIONS: '' }); return r.status !== 0 && r.calls.length === 0; }],
     ['an unknown argument exits 2 before any npm call', () => { stub('exit 0'); const r = run({}, ['--nope']); return r.status === 2 && r.calls.length === 0; }],
     ['importing the module publishes nothing', () => { stub('exit 0'); writeFileSync(log, ''); const r = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(import.meta.url)})`], { encoding: 'utf8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, GITHUB_ACTIONS: 'true' } }); return r.status === 0 && readFileSync(log, 'utf8').trim() === ''; }],
@@ -157,7 +179,8 @@ function selftest() {
   const FLOOR = 16;
   let bad = 0;
   try {
-    withFixturePack(() => {
+    withFixtureRepo((fixtureRoot) => {
+      FIX = fixtureRoot;
       for (const [what, fn] of PROBES) {
         let ok = false;
         try {

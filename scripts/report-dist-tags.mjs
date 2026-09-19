@@ -18,9 +18,11 @@
  *     stderr kept OUT of the success test. The original shell wrote `OUT="$(… 2>&1)" || true`,
  *     which folded an E404/E401 body into $OUT — so an auth failure passed the emptiness check as
  *     a non-empty "reading", and `|| true` discarded the status;
- *   - an EMPTY reading is a FAILED read on this registry, not an absent tag. `npm view` returns
- *     exit 0 with zero bytes against GitHub Packages (measured in REL2), which is the whole
- *     reason this family of checks exists.
+ *   - an EMPTY reading is a FAILED read on this registry, not an absent tag. `npm view <pkg>
+ *     dist-tags` returns exit 0 with zero bytes against GitHub Packages (REL2; re-measured with
+ *     controls 2026-09-20 — a VERSIONED `npm view <pkg>@<ver> dist.integrity` does work, so the
+ *     zero-byte behaviour is specific to the unversioned queries a report would use), which is the
+ *     whole reason this family of checks exists.
  */
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
@@ -28,7 +30,7 @@ import { fileURLToPath } from 'node:url';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { publishable } from './release-graph.mjs';
-import { isDirectInvocation } from './pack-derived-set.mjs';
+import { isDirectInvocation } from './lib/direct-invocation.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const KNOWN_ARGV = new Set(['--selftest']);
@@ -90,8 +92,8 @@ function cliProbe({ npmBody, names }) {
   const root = fixture(names);
   const bin = mkdtempSync(join(tmpdir(), 'disttag-cli-'));
   try {
-    mkdirSync(join(root, 'scripts'));
-    for (const f of ['report-dist-tags.mjs', 'release-graph.mjs', 'pack-derived-set.mjs']) {
+    mkdirSync(join(root, 'scripts', 'lib'), { recursive: true });
+    for (const f of ['report-dist-tags.mjs', 'release-graph.mjs', 'pack-derived-set.mjs', 'lib/direct-invocation.mjs']) {
       writeFileSync(join(root, 'scripts', f), readFileSync(join(dirname(fileURLToPath(import.meta.url)), f)));
     }
     writeFileSync(join(bin, 'npm'), `#!/bin/sh\necho "$*" >> "${join(bin, 'npm.log')}"\n${npmBody}\n`, { mode: 0o755 });
@@ -119,6 +121,10 @@ function selftest() {
   const PROBES = [
     ['every package reading a tag passes (control)', () => { const r = call({ run: ok() }); return r.ok && r.value.length === 2; }],
     ['a non-zero exit fails, naming the package', () => { const r = call({ run: () => ({ status: 1, stdout: '', stderr: 'npm error code E401' }) }); return !r.ok && /@spec-kitty\/tokens/.test(r.error) && /@spec-kitty\/styles/.test(r.error); }],
+    // THE VERDICT, not just the logging (REL3 pass 5, reducer): a mutant that kept the error line but
+    // only failed on an empty reading passed 15/15, and then accepted a FAILED read that printed a tag.
+    ['a non-zero exit fails even when it printed a tag', () => { const r = call({ run: () => ({ status: 1, stdout: 'latest: 1.0.0\n', stderr: 'npm error code E401' }) }); return !r.ok && /@spec-kitty\/tokens/.test(r.error); }],
+    ['a non-zero exit is not counted as a reading', () => { const r = call({ run: (n) => (n === '@spec-kitty/styles' ? { status: 1, stdout: 'latest: 1.0.0\n', stderr: 'x' } : ok()()) }); return !r.ok && /styles/.test(r.error); }],
     ['an EMPTY reading at exit 0 fails — the founding defect of this gate family', () => { const r = call({ run: () => ({ status: 0, stdout: '', stderr: '' }) }); return !r.ok; }],
     ['a whitespace-only reading at exit 0 fails', () => { const r = call({ run: () => ({ status: 0, stdout: '  \n\t\n', stderr: '' }) }); return !r.ok; }],
     ['an error body on STDERR does not count as a reading', () => { const r = call({ run: () => ({ status: 0, stdout: '', stderr: 'npm error code E404\nnot found' }) }); return !r.ok; }],
@@ -140,7 +146,7 @@ function selftest() {
     ['an unknown argument exits 2', () => spawnSync(process.execPath, [fileURLToPath(import.meta.url), '--nope'], { encoding: 'utf8' }).status === 2],
     ['importing the module reads nothing', () => { const r = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(import.meta.url)})`], { encoding: 'utf8' }); return r.status === 0 && `${r.stdout}${r.stderr}`.trim() === ''; }],
   ];
-  const PROBE_FLOOR = 15;
+  const PROBE_FLOOR = 17;
   let bad = 0;
   for (const [what, fn] of PROBES) {
     let good = false;

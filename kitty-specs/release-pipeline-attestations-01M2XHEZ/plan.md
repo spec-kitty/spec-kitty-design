@@ -9,7 +9,7 @@
 | Are artifact attestations available here? | **Yes.** The repo is public, and attestations are free for public repos on every plan. The org is on Team. | `gh api repos/spec-kitty/spec-kitty-design` → `visibility: public`; `orgs/spec-kitty` → `plan: team`; the attestations endpoint answers (404 for an unknown digest, not 403) |
 | Which action and pin? | `actions/attest-build-provenance` **v4.2.2** = `4d101475d8b20a2381f78447822ac1eab6504dd8`, input `subject-path` (glob) | releases API; `action.yml` inputs |
 | Does `npm pack --json` give the tarball's true digest? | **Yes.** Its `integrity` equals `sha512-` + base64 of the file's own SHA-512, and a repack gives the same bytes | `npm pack --json` on `packages/tokens`, compared against `openssl dgst -sha512` and a second pack |
-| Can a published version be re-fetched to check it? | **Yes.** `npm pack @spec-kitty/tokens@1.1.0-rc.2 --json` downloads it from GitHub Packages and reports its integrity. `npm view` is **not** usable: REL2 measured exit 0 with zero bytes on this registry | live download, 2026-09-19 |
+| Can a published version be re-fetched to check it? | **Yes.** `npm pack @spec-kitty/tokens@1.1.0-rc.2 --json` downloads it from GitHub Packages and reports its integrity. `npm view <name>@<version> dist.integrity` is not used for two reasons: it reports the integrity the registry ADVERTISES rather than the bytes, and the UNVERSIONED `npm view` queries return exit 0 with zero bytes here (REL2). *(Corrected at gate pass 5: the versioned query itself does work — re-measured 2026-09-20 with controls — so the original "npm view is not usable" was wrong as written. The design stands on the first reason.)* | live download, 2026-09-19 |
 | Where must packing sit in the rc payload? | **After** the bump (`publish-packages.yml:138`) and before the publish (`:158`): the tarball carries the bumped `package.json` | payload order |
 | Can prod be folded into `publish-derived-set.mjs`? | **No.** That script makes `latest` unreachable by construction (REL2 pass 5). `release.yml` keeps its own loop and publishes the same kind of file | script header |
 
@@ -41,6 +41,11 @@ bump (rc only) ─▶ pack-derived-set.mjs ─▶ attest-build-provenance ─▶
   `FILES+=`, `read … FILES`, `printf -v`, and a repack inside the step. The script keeps the loop's
   semantics (only `latest`, topological order, skip only on a re-run, halt otherwise) and has its own
   effect probes.)*
+- **`scripts/report-dist-tags.mjs`** *(added at gate pass 5, not planned)*. The published dist-tag report,
+  moved out of ~30 lines of shell in each workflow. While it was shell it was the one step allowed to hold
+  `NODE_AUTH_TOKEN`, and the gate could bound how many such steps existed but not what they did. Same
+  behaviour — derived set, empty set refused, status read on its own, an empty listing counted as a failed
+  read — as one exact step with a 17-probe selftest, wired through all three gate-wiring layers.
 - **`scripts/verify-published-integrity.mjs`** (new, shared). For each `packed.json` entry it runs
   `npm pack <name>@<version> --json` into a temp dir, recomputes that file's SHA-512, and compares it with the attested
   one. It refuses empty input, unreadable downloads and mismatches, and has its own `--selftest`.

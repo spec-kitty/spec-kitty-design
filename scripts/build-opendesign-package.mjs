@@ -791,17 +791,8 @@ async function selftest() {
   console.log(`\n✅ All ${PROBES.length} unit probes and ${cases.length} drift probes behaved as recorded.`);
 }
 
-export function isDirectInvocation(argv1, moduleUrl) {
-  if (!argv1 || !moduleUrl) return false;
-  const real = (x) => {
-    try {
-      return realpathSync(x);
-    } catch {
-      return resolve(x);
-    }
-  };
-  return real(argv1) === real(fileURLToPath(moduleUrl));
-}
+import { isDirectInvocation } from './lib/direct-invocation.mjs';
+export { isDirectInvocation };
 
 if (isDirectInvocation(process.argv[1], import.meta.url)) {
   const known = new Set(['--check', '--selftest']);

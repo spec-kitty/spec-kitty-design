@@ -51,24 +51,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
  *  flag used to fall through to the destructive default in the sibling bump script. */
 const KNOWN_ARGV = new Set(['--dry-run', '--selftest', '--']);
 
-export function isDirectInvocation(argv1, moduleUrl) {
-  if (!argv1 || !moduleUrl) return false;
-  // realpath BOTH SIDES. Plain `resolve` made an invocation through a symlink compare unequal, so
-  // the module went inert and `--selftest` printed nothing and exited 0 — a fail-open entry point
-  // in the one file whose whole thesis is fail-closed, and indistinguishable from a green run.
-  const real = (x) => {
-    try {
-      return realpathSync(x);
-    } catch {
-      return resolve(x);
-    }
-  };
-  try {
-    return real(argv1) === real(fileURLToPath(moduleUrl));
-  } catch {
-    return false;
-  }
-}
+import { isDirectInvocation } from './lib/direct-invocation.mjs';
+export { isDirectInvocation };
 
 export function unknownArgv(argv) {
   // NO `startsWith('-')` PREDICATE. It structurally could not see a bare word, so a plain

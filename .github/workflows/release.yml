@@ -22,14 +22,17 @@ on:
 #   `NPM_TOKEN`        never existed as a secret (verified: zero secrets by that name), so prod
 #                      could not publish to npmjs today regardless. GITHUB_TOKEN is a credential
 #                      that actually exists.
-permissions:
-  contents: write   # for GitHub Release creation
-  packages: write   # to publish to GitHub Packages — load-bearing, and absent before this change
-  id-token: write      # REL3 (#364): Sigstore signing for the tarball attestations
-  attestations: write  # REL3 (#364): store the attestations on this repo
+# PERMISSIONS ARE DECLARED ON THE JOB, NOT THE WORKFLOW (REL3 pass 5, architect). At workflow level
+# they are inherited by every job this file ever gains, so a second job would hold Sigstore signing
+# and `packages: write` while every rule in check-release-graph.mjs audits the `release` job alone.
 
 jobs:
   release:
+    permissions:
+      contents: write   # for GitHub Release creation
+      packages: write   # to publish to GitHub Packages — load-bearing, and absent before this change
+      id-token: write      # REL3 (#364): Sigstore signing for the tarball attestations
+      attestations: write  # REL3 (#364): store the attestations on this repo
     runs-on: ubuntu-latest
     timeout-minutes: 45
     # THE REGISTRY TOKEN IS STEP-SCOPED, NOT JOB-WIDE (REL3 review). `id-token: write` makes every step
@@ -179,8 +182,9 @@ jobs:
           SOURCE_DIGEST: ${{ github.sha }}
 
       # SAME REASONING AS THE RC PAYLOAD, and it applies here now that prod publishes to GitHub
-      # Packages too: `npm view` returns exit 0 with zero bytes against this registry, so a report
-      # built on it is blind and green. `npm dist-tag ls` works, and an empty read is a FAILED read.
+      # Packages too: the UNVERSIONED `npm view` queries a tag report would use (`dist-tags`,
+      # `versions`) return exit 0 with zero bytes against this registry, so a report built on them is
+      # blind and green. `npm dist-tag ls` works, and an empty read is a FAILED read.
       - name: "[ENFORCED] Report the published dist-tags"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -50,7 +50,8 @@ jobs:
     # GITHUB_TOKEN cannot publish to GitHub Packages. Nothing else in this job writes to contents:
     # the audit gate runs `npm audit` only, and the bump touches manifests on the runner's disk and
     # never commits or pushes. Cutting a GitHub Release DOES need `contents: write`, which is
-    # exactly why it is no longer here — see the SBOM upload below.
+    # exactly why it is no longer here: the SBOM leaves as a run artifact for the caller to attach,
+    # and the comment above that step records the rest.
     permissions:
       contents: read
       packages: write
@@ -203,6 +204,19 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/report-dist-tags.mjs
+      # THE RELEASE STEP IS DELIBERATELY NOT HERE. Cutting a GitHub Release needs `contents: write`,
+      # and declaring that in this job is what made the rc stream unstartable (see the permissions
+      # block above). It is also prod-only, so it does not belong in a shared spine. The SBOM leaves
+      # as a run artifact instead. Prod (`release.yml`) is not a caller: it generates its own SBOM and
+      # attaches it to the GitHub Release from its own job, which holds `contents: write`.
+      #
+      # PROD IS NOT A CALLER OF THIS PAYLOAD, AND REL3 (#364) KEPT IT THAT WAY. This payload refuses
+      # `latest` unconditionally (publish-derived-set.mjs), so `release.yml` publishes through its own scripts/publish-latest.mjs
+      # for the prod channel and runs the same pack → attest → publish-files → verify sequence there,
+      # with the same shared scripts. `--provenance` must not return (the npmjs mechanism; hard-fails
+      # here), and `--access public` neither (GitHub Packages governs visibility per package). The
+      # GitHub Release needs `contents: write`, which this payload must never hold — see the ceiling.
+
       - name: Upload the SBOM for the caller to attach
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         with:

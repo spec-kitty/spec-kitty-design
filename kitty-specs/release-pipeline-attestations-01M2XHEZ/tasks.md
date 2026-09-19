@@ -12,9 +12,9 @@
 | T002 | `scripts/verify-published-integrity.mjs`: for each `packed.json` entry, `npm pack <name>@<version> --json` into a temp dir, recompute SHA-512, and compare; refuse an empty input, an unreadable download or a mismatch; `--selftest` with a floor | FR-004 | |
 | T003 | `publish-derived-set.mjs`: publish the tarballs in `packed.json` (`npm publish <abs tgz> --tag <tag>`), cross-checked against its own derived set; keep the `latest` refusal, the branded decision and the `manifest.tag` guard; the effect probes prove a `.tgz` argument and no package-dir `cwd` | FR-003, FR-006 | |
 | T004 | `publish-packages.yml` and `release-rc.yml`: pack after the bump, attest (`actions/attest-build-provenance@4d101475… # v4.2.2`, `subject-path: dist-tarballs/*.tgz`), publish, verify; add `id-token: write` and `attestations: write` to the payload job and the rc caller | FR-001–FR-005, FR-008 | |
-| T005 | `release.yml`: the same pack, attest and verify steps; the loop publishes `"$file"` from `packed.json` with its resumable, halting handling intact; permissions added | FR-001–FR-005, FR-008 | |
+| T005 | `release.yml`: the same pack, attest and verify steps; the loop publishes `"$file"` from `packed.json` with its resumable, halting handling intact; permissions added *(as delivered: the loop is `scripts/publish-latest.mjs`, one exact step — gate pass 2 defeated five rules written over the loop's shell text; the same semantics, with its own effect probes)* | FR-001–FR-005, FR-008 | |
 | T006 | `check-release-graph.mjs`: the rules and probes listed in plan.md's Gates section, for both publish paths | FR-007 | |
-| T007 | Three-layer gate wiring for the two new selftests; `MIN_CASES` taken from the table's own count; `check-action-pins.sh` green | FR-007 | |
+| T007 | Three-layer gate wiring for each new selftest (two planned; `publish-latest.mjs` and `report-dist-tags.mjs` were added by review, making four); `MIN_CASES` taken from the table's own count; `check-action-pins.sh` green | FR-007 | |
 | T008 | `docs/release-runbook.md`: consumer verification with `gh attestation verify`; FR-044 met by attestations | FR-009 | |
 | T009 | Post-merge live proof: the promotion-triggered rc publish is attested; `gh attestation verify` passes on every published tarball fetched from the registry; recorded in `research/` | acceptance | |
 

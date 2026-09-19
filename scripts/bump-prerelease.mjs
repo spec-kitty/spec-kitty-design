@@ -66,27 +66,8 @@ export function unknownArgv(argv) {
 }
 
 
-/**
- * PURE. Is this module being RUN, rather than imported?
- *
- * WHY THIS EXISTS, learned the hard way. `main()` used to run at module scope, so merely
- * importing this file to inspect an export EXECUTED A REAL BUMP: four manifests, five workspace
- * consumers and the lockfile rewritten in a live working tree, by an `import` statement. Two
- * review lenses flagged it as a hazard on the previous pass and I left it as a residual; it then
- * did exactly that to me while I was investigating something unrelated.
- *
- * `release-graph.mjs:151` already guards its CLI this way — this copies an in-repo pattern rather
- * than inventing one, and it is a named predicate rather than an inline condition so it can be
- * probed instead of merely believed.
- */
-export function isDirectInvocation(argv1, moduleUrl) {
-  if (!argv1 || !moduleUrl) return false;
-  try {
-    return resolve(argv1) === resolve(fileURLToPath(moduleUrl));
-  } catch {
-    return false;
-  }
-}
+import { isDirectInvocation } from './lib/direct-invocation.mjs';
+export { isDirectInvocation };
 
 /** The range that admits every rc in `next`'s line, and the eventual final. */
 export function admittingRange(next, id = PRERELEASE_ID) {

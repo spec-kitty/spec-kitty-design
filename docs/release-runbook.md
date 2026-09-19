@@ -168,6 +168,12 @@ prerelease version bump is applied on the runner and is never committed, so that
 attestation cannot vouch that no step in it misbehaved. The workflows keep that job small, and
 `check-release-graph.mjs` enforces it on every PR:
 
+- only two `(workflow, job)` pairs may publish at all — `release.yml:release` and
+  `publish-packages.yml:publish`. Any other job that holds the registry token, runs `npm
+  publish`/`npm dist-tag`, runs one of the registry scripts or signs an attestation is refused, in any
+  workflow; so is any composite action that does those things, and any `node scripts/…` path that is
+  not literal (a glob or an interpolation is unreadable to every rule here). The rules below apply
+  **within** those two jobs;
 - `NODE_AUTH_TOKEN` reaches only steps whose `run` is exactly one of the registry scripts
   (`bump-prerelease.mjs --from-registry`, `publish-derived-set.mjs`, `publish-latest.mjs`,
   `verify-published-integrity.mjs`, `report-dist-tags.mjs`) — no shell step may hold it. The rule binds
@@ -177,7 +183,10 @@ attestation cannot vouch that no step in it misbehaved. The workflows keep that 
 - checkout keeps no credentials;
 - every `npx` and `npm exec` runs the lockfile's copy (`--no-install` / `--no`), never a package fetched at
   release time;
-- no step may name the token in its script, so it cannot be re-exported to later steps.
+- no step may name the token in its script, so it cannot be re-exported to later steps;
+- neither job may set `GITHUB_REF`, `GITHUB_REF_TYPE`, `GITHUB_REF_NAME`, `GITHUB_WORKFLOW_REF`,
+  `GITHUB_EVENT_PATH` or `GITHUB_RUN_ATTEMPT` in an `env:` block: those are the signals the publish
+  scripts' own guards read, and a job that can author them can authorise itself.
 
 It is still provenance, not a guarantee of a clean build. Attestations on this plan also need the repository to stay **public**;
 making it private would stop new releases from being attestable.
