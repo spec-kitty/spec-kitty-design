@@ -129,7 +129,6 @@ export function readPacked({ root = ROOT } = {}) {
 }
 
 import { isDirectInvocation } from './lib/direct-invocation.mjs';
-export { isDirectInvocation };
 
 /* ────────────────────────────── --selftest ────────────────────────────── */
 

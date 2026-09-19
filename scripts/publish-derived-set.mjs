@@ -52,7 +52,6 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const KNOWN_ARGV = new Set(['--dry-run', '--selftest', '--']);
 
 import { isDirectInvocation } from './lib/direct-invocation.mjs';
-export { isDirectInvocation };
 
 export function unknownArgv(argv) {
   // NO `startsWith('-')` PREDICATE. It structurally could not see a bare word, so a plain

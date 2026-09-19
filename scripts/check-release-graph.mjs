@@ -34,6 +34,10 @@ import { PACK_DIR_NAME } from './pack-derived-set.mjs';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const WORKFLOW = '.github/workflows/release.yml';
 const REUSABLE_WORKFLOW = '.github/workflows/publish-packages.yml';
+// The job names, so AUDITED_PUBLISH_JOBS is the SAME pair main() audits rather than a second list
+// that could quietly gain an entry (REL3 pass 6, architect).
+const RELEASE_JOB = 'release';
+const PAYLOAD_JOB = 'publish';
 
 /**
  * A thin caller has NO publish step of its own — the payload is in the reusable workflow — so a
@@ -142,8 +146,63 @@ export function payloadDeclaredPermissions(payloadText) {
 // Left as an empty set, not deleted, so re-adding a file here is a visible edit.
 const INLINE_PUBLISH_EXEMPT = new Set([]);
 
+/**
+ * The publishing predicates, in one place. They were spelled out at three call sites each (REL3 pass 6,
+ * reducer): the five script names, the `npm publish|dist-tag` regex and the attest `uses` test. A sixth
+ * registry script would have had to be added three times — the drifting-lists defect this mission began
+ * with, one level up.
+ */
+const REGISTRY_SCRIPTS = ['bump-prerelease', 'publish-derived-set', 'publish-latest', 'verify-published-integrity', 'report-dist-tags'];
+const RUNS_REGISTRY_SCRIPT = new RegExp(`scripts/(${REGISTRY_SCRIPTS.join('|')})\\.mjs(?!\\s*--selftest)`);
+// FLAGS MAY PRECEDE THE SUBCOMMAND (REL3 pass 6, architect, measured on this npm):
+// `npm --loglevel=error publish --tag latest` publishes, and read green everywhere. So does an
+// interpreter named by path: `/usr/bin/node …`, `$(which node) …`. Both are absorbed here rather than
+// at each call site — there were six spellings of the npm test alone.
+const NPM_FLAGS = '(?:--?[\\w-]+(?:=\\S+)?\\s+)*';
+const RUNS_NPM_PUBLISH = new RegExp(`(^|[\\s;&|($\`])npm\\s+${NPM_FLAGS}(publish|dist-tag)\\b`);
+/** `npm publish` in particular (not dist-tag), flags and all. */
+const RUNS_INLINE_PUBLISH = new RegExp(`(^|[\\s;&|($\`])npm\\s+${NPM_FLAGS}publish\\b`);
+// A CREDENTIAL IN THE RUN TEXT, not only in an `env:` block (REL3 pass 6, debugger: R01 and R02 are
+// the same file except that one writes the token through the run). Every indirection — a Makefile, a
+// shell script, a workspace npm script — must still bring the credential into the workflow file,
+// because only the workflow can expand `${{ secrets.* }}`. The literal word `secrets.` is NOT the
+// test: ci-quality's promote-develop job prints an error message containing it.
+const WRITES_AUTH_TOKEN = /_authToken|NODE_AUTH_TOKEN|\$\{\{\s*secrets\./;
+const SIGNS_ATTESTATION = (steps) => steps.some((st) => typeof st?.uses === 'string' && /attest-build-provenance/.test(st.uses));
+
 /** A `node` argument this gate can read: a literal path under scripts/, no expansion of any kind. */
-const LITERAL_SCRIPT_PATH = /^\.?\/?scripts\/[\w.-]+$/;
+// Nested paths are literal too: this mission created `scripts/lib/direct-invocation.mjs`, and the
+// first form of this rule refused it while telling the author to "write the plain path" (REL3 pass 6,
+// debugger).
+const LITERAL_SCRIPT_PATH = /^\.?\/?scripts\/[\w.-]+(?:\/[\w.-]+)*$/;
+
+/**
+ * Every `scripts/…` token of every `node` invocation in `text` that this gate cannot read literally.
+ *
+ * EVERY TOKEN, not the first one (REL3 pass 6, reviewer). Reading one token after `node` meant an
+ * interpreter flag hid the path: `node --no-warnings scripts/publish-lat*.mjs` was checked as
+ * `--no-warnings`, so the globbed path went unexamined by this rule and unnamed by every rule that
+ * matches a script's name. Reviewer's chain: a branch job writing its own `.npmrc` auth line and
+ * running `node --no-warnings scripts/publish-derived*.mjs` with `DIST_TAG: rc` published real rc
+ * versions, unattested, holding no NODE_AUTH_TOKEN and naming no publisher. Every probe written
+ * before this put the path first, which is why it read green.
+ */
+export function nonLiteralScriptTokens(text) {
+  // EVERY `scripts/…` TOKEN, whatever runs it. Three passes of review each closed one more spelling of
+  // "name the interpreter differently" — `node --no-warnings <path>` (pass 6, reviewer),
+  // `/usr/bin/node <path>` and `$(which node) <path>` (pass 6, architect) — which is the shape of a
+  // rule that cannot converge. So the interpreter is not matched at all: any token naming something
+  // under scripts/ must be a literal path. Measured against this repository: no real step, composite
+  // action or npm script contains such a token with a metacharacter in it, so the rule costs nothing
+  // here and does not depend on guessing how a future step spells `node`.
+  const bad = [];
+  const withoutComments = String(text ?? '').replace(/(^|\n)\s*#[^\n]*/g, '$1');
+  for (const token of withoutComments.split(/[\s;|&()]+/).filter(Boolean)) {
+    const cleaned = token.replace(/^["'`]+|["'`]+$/g, '');
+    if (cleaned.includes('scripts/') && !LITERAL_SCRIPT_PATH.test(cleaned)) bad.push(cleaned);
+  }
+  return bad;
+}
 
 /** Only THIS repo's payload counts as delegation. `uses.includes(...)` accepted a third-party
  *  `some-org/evil/.github/workflows/publish-packages.yml@main`, which satisfied the floor while
@@ -199,6 +258,8 @@ export function checkReleaseTrigger(text, label = WORKFLOW) {
  * scripts may not name the publishing scripts at all. Every real invocation is an exact `node …` step.
  */
 export function checkNoIndirectPublishScripts(rootPkg, label = 'package.json') {
+  // Called per manifest — the root one AND every workspace (REL3 pass 6, debugger: `npm run -w` put
+  // the body in a workspace manifest, which nothing read).
   const problems = [];
   for (const [name, body] of Object.entries(rootPkg?.scripts ?? {})) {
     if (typeof body !== 'string') continue;
@@ -209,11 +270,8 @@ export function checkNoIndirectPublishScripts(rootPkg, label = 'package.json') {
     }
     // AND THE SAME LITERAL-PATH RULE AS A WORKFLOW STEP (REL3 pass 5, debugger): the name test above
     // is a substring test, so `node scripts/publish-lat*.mjs` in an npm script named neither.
-    for (const m of body.matchAll(/(?:^|[\s;|&(`'"])node\s+([^\s;|&)]+)/g)) {
-      const arg = m[1];
-      if (arg.includes('scripts/') && !LITERAL_SCRIPT_PATH.test(arg)) {
-        problems.push(`${label} script \`${name}\` runs \`node ${arg}\` — a script path that is not literal is outside every rule that names a script`);
-      }
+    for (const arg of nonLiteralScriptTokens(body)) {
+      problems.push(`${label} script \`${name}\` runs \`node … ${arg}\` — a script path that is not literal is outside every rule that names a script`);
     }
   }
   return problems;
@@ -226,8 +284,49 @@ export function checkNoIndirectPublishScripts(rootPkg, label = 'package.json') {
  * absolute rather than conditional: no registry script, no `npm publish`/`dist-tag`, no attestation
  * signing, no registry token, and no non-literal `node scripts/…` path.
  */
-export function checkCompositeActionsDoNotPublish(actions) {
+/**
+ * Every local action a workflow actually USES, as `{ ref, file, text }`. Globbing
+ * one directory of `action.yml` files read a directory, not the graph: `uses: ./tools/promote` and
+ * `uses: ./.github/actions/ops/promote` (one level deeper) were both invisible (REL3 pass 6,
+ * architect). A reference that cannot be resolved is a refusal, not a skip.
+ */
+export function collectUsedLocalActions(workflows, readAction) {
+  const refs = new Map();
   const problems = [];
+  for (const { file, text } of workflows ?? []) {
+    let wf;
+    try {
+      wf = parse(text);
+    } catch {
+      continue;
+    }
+    for (const [jobName, job] of Object.entries(wf?.jobs ?? {})) {
+      const uses = [typeof job?.uses === 'string' ? job.uses : null, ...(Array.isArray(job?.steps) ? job.steps.map((st) => (typeof st?.uses === 'string' ? st.uses : null)) : [])];
+      for (const u of uses) {
+        if (!u || !u.trim().startsWith('./')) continue;
+        const ref = u.trim();
+        if (/\.ya?ml$/.test(ref)) continue; // a reusable WORKFLOW, checked as a workflow
+        const found = readAction(ref);
+        if (!found) {
+          problems.push(`${file} job \`${jobName}\` uses the local action \`${ref}\`, which has no readable action.yml — an action this gate cannot read is an action it cannot hold to anything`);
+          continue;
+        }
+        refs.set(found.file, found);
+      }
+    }
+  }
+  return { actions: [...refs.values()], problems };
+}
+
+export function checkCompositeActionsDoNotPublish(actions, { dirExists = false } = {}) {
+  const problems = [];
+  // A GREEN LINE OVER ZERO INPUTS is the founding defect of this gate family (REL3 pass 6, reducer):
+  // a renamed `.github/actions` would leave this scanning nothing and saying so cheerfully. There is
+  // no composite action in this repository today, so an EMPTY list is only refused when the directory
+  // is actually there.
+  if (dirExists && (!Array.isArray(actions) || actions.length === 0)) {
+    return ['.github/actions exists but no action.yml was read from it — refusing to certify composite actions over nothing'];
+  }
   for (const { file, text } of actions ?? []) {
     let doc;
     try {
@@ -238,13 +337,13 @@ export function checkCompositeActionsDoNotPublish(actions) {
     const steps = Array.isArray(doc?.runs?.steps) ? doc.runs.steps : [];
     const runs = steps.map((st) => (typeof st?.run === 'string' ? st.run : '')).join('\n');
     const why = [];
-    if (/scripts\/(bump-prerelease|publish-derived-set|publish-latest|verify-published-integrity|report-dist-tags)\.mjs(?!\s*--selftest)/.test(runs)) why.push('runs a registry script');
-    if (/(^|[\s;&|($`])npm\s+(publish|dist-tag)\b/.test(runs)) why.push('runs `npm publish`/`npm dist-tag`');
-    if (steps.some((st) => typeof st?.uses === 'string' && /attest-build-provenance/.test(st.uses))) why.push('signs attestations');
-    if (steps.some((st) => st?.env && typeof st.env === 'object' && 'NODE_AUTH_TOKEN' in st.env) || (doc?.runs?.env && 'NODE_AUTH_TOKEN' in doc.runs.env)) why.push('holds NODE_AUTH_TOKEN');
-    for (const m of runs.matchAll(/(?:^|[\s;|&(`'"])node\s+([^\s;|&)]+)/g)) {
-      if (m[1].includes('scripts/') && !LITERAL_SCRIPT_PATH.test(m[1])) why.push(`runs \`node ${m[1]}\`, which is not a literal script path`);
-    }
+    if (RUNS_REGISTRY_SCRIPT.test(runs)) why.push('runs a registry script');
+    if (RUNS_NPM_PUBLISH.test(runs)) why.push('runs `npm publish`/`npm dist-tag`');
+    if (WRITES_AUTH_TOKEN.test(runs)) why.push('writes a registry auth token');
+    if (SIGNS_ATTESTATION(steps)) why.push('signs attestations');
+    if (steps.some((st) => st?.env && typeof st.env === 'object' && 'NODE_AUTH_TOKEN' in st.env)) why.push('holds NODE_AUTH_TOKEN in a step');
+    if (doc?.runs?.env && typeof doc.runs.env === 'object' && 'NODE_AUTH_TOKEN' in doc.runs.env) why.push('holds NODE_AUTH_TOKEN for the whole action');
+    for (const arg of nonLiteralScriptTokens(runs)) why.push(`runs \`node … ${arg}\`, which is not a literal script path`);
     if (why.length) {
       problems.push(`${file} ${why.join(' and ')} — a composite action's steps are outside every rule this gate applies to the publishing jobs, so none may publish`);
     }
@@ -254,8 +353,8 @@ export function checkCompositeActionsDoNotPublish(actions) {
 
 /** The (file, job) pairs every REL3 rule is applied to. Anything else that can publish is refused. */
 export const AUDITED_PUBLISH_JOBS = [
-  ['.github/workflows/release.yml', 'release'],
-  ['.github/workflows/publish-packages.yml', 'publish'],
+  [WORKFLOW, RELEASE_JOB],
+  [REUSABLE_WORKFLOW, PAYLOAD_JOB],
 ];
 
 /**
@@ -274,7 +373,6 @@ export function checkNoUnauditedPublishingJobs(workflows, audited = AUDITED_PUBL
   if (!Array.isArray(workflows) || workflows.length === 0) {
     return ['no workflow files found — refusing to certify the publishing-job set over nothing'];
   }
-  const REGISTRY_SCRIPT = /scripts\/(bump-prerelease|publish-derived-set|publish-latest|verify-published-integrity|report-dist-tags)\.mjs(?!\s*--selftest)/;
   const isAudited = (file, job) => audited.some(([f, j]) => f === file && j === job);
   for (const { file, text } of workflows) {
     let wf;
@@ -285,14 +383,37 @@ export function checkNoUnauditedPublishingJobs(workflows, audited = AUDITED_PUBL
     }
     for (const [jobName, job] of Object.entries(wf?.jobs ?? {})) {
       if (isAudited(file, jobName)) continue;
+      // A job that only delegates to our own payload is the rc caller: it grants the ceiling and runs
+      // no steps of its own, and the payload's own pair is audited.
+      if (typeof job?.uses === 'string' && isOwnPayload(job.uses)) continue;
       const steps = Array.isArray(job?.steps) ? job.steps : [];
-      const runs = steps.map((st) => (typeof st?.run === 'string' ? st.run : '')).join('\n');
+      // COMMENTS STRIPPED (REL3 pass 6, reviewer): raw run text meant an unrelated job whose comment
+      // mentioned `npm dist-tag ls` was refused. The rest of this file reads shell the same way.
+      const runs = steps.map((st) => (typeof st?.run === 'string' ? st.run.replace(/(^|\n)\s*#[^\n]*/g, '$1') : '')).join('\n');
       const why = [];
+      // THE PRIVILEGE ITSELF IS A SIGNAL (REL3 pass 6, reviewer): a job can publish through a
+      // third-party action, which no text rule here reads. `packages: write` and `attestations: write`
+      // are held by nothing in this repository but the publishing path — unlike `id-token: write`,
+      // which Pages deployment also needs, so that one cannot serve as a signal.
+      const perms = job?.permissions ?? wf?.permissions;
+      if (perms && typeof perms === 'object') {
+        for (const scope of ['packages', 'attestations']) {
+          if (perms[scope] === 'write') why.push(`declares \`${scope}: write\``);
+        }
+      } else if (perms === 'write-all') {
+        why.push('declares `permissions: write-all`');
+      }
       const holdsToken = (e) => e && typeof e === 'object' && 'NODE_AUTH_TOKEN' in e;
       if (holdsToken(wf?.env) || holdsToken(job?.env) || steps.some((st) => holdsToken(st?.env))) why.push('holds NODE_AUTH_TOKEN');
-      if (/(^|[\s;&|($`])npm\s+(publish|dist-tag)\b/.test(runs)) why.push('runs `npm publish`/`npm dist-tag`');
-      if (REGISTRY_SCRIPT.test(runs)) why.push('runs a registry script');
-      if (steps.some((st) => typeof st?.uses === 'string' && /attest-build-provenance/.test(st.uses))) why.push('signs attestations');
+      if (RUNS_NPM_PUBLISH.test(runs)) why.push('runs `npm publish`/`npm dist-tag`');
+      if (RUNS_REGISTRY_SCRIPT.test(runs)) why.push('runs a registry script');
+      if (SIGNS_ATTESTATION(steps)) why.push('signs attestations');
+      // A CREDENTIAL UNDER ANOTHER NAME (REL3 pass 6, reducer): a step that writes its own `.npmrc`
+      // auth line holds the registry credential without ever naming NODE_AUTH_TOKEN. `_authToken`
+      // appears nowhere in this repository. It does not close the class — `secrets.GITHUB_TOKEN` is
+      // legitimately used elsewhere, and a wrapper outside scripts/ can assemble the rest — and the
+      // runbook records that residual: the durable fence there is a privilege boundary, not a regex.
+      if (WRITES_AUTH_TOKEN.test(runs)) why.push('writes a registry auth token');
       if (why.length) {
         problems.push(
           `${file} job \`${jobName}\` ${why.join(' and ')}, but it is not one of the audited publishing jobs ` +
@@ -341,7 +462,7 @@ export function checkPublishingCallersDelegate(workflows, payloadText = null) {
         // `'nightly-release.yml'.endsWith('release.yml')` is true — so any workflow whose name
         // happened to end that way could publish inline, unnoticed.
         const isPayloadOrProd = INLINE_PUBLISH_EXEMPT.has(file);
-        if (/npm\s+publish\b/.test(inline) && !isPayloadOrProd) {
+        if (RUNS_INLINE_PUBLISH.test(inline) && !isPayloadOrProd) {
           inlinePublishers.push(`${file} job \`${jobName}\``);
         }
         // publish-latest.mjs IS A PUBLISHER, AND ONLY PROD MAY RUN IT (REL3 review). It writes `latest`,
@@ -353,16 +474,11 @@ export function checkPublishingCallersDelegate(workflows, payloadText = null) {
         // matched nothing. Any `node scripts/…` argument carrying a glob or a quote is refused
         // outright, in every workflow and every job: no honest step needs one, and a path the
         // gate cannot read literally is a path it cannot confine.
-        // AFTER A QUOTE OR BACKTICK TOO (REL3 pass 5, reducer): `sh -c 'node scripts/publish-lat*.mjs'`
-        // put the interpreter behind a quote, where the old character class could not see it.
-        for (const m of inline.matchAll(/(?:^|[\s;|&(`'"])node\s+([^\s;|&)]+)/g)) {
-          const arg = m[1];
-          // AN ALLOWLIST, not a list of refused characters (REL3 pass 5, architect): the denylist
-          // caught `*`, `?`, `[` and quotes but not `$NAME` or `${NAME}`, which the shell expands
-          // the same way. A literal path is the only readable one.
-          if (arg.includes('scripts/') && !LITERAL_SCRIPT_PATH.test(arg)) {
-            problems.push(`${file} job \`${jobName}\` runs \`node ${arg}\` — every rule in this gate reads a script path literally, so a globbed or quoted one is outside all of them (write the plain path)`);
-          }
+        // AN ALLOWLIST, not a list of refused characters (REL3 pass 5, architect): a denylist caught
+        // `*`, `?`, `[` and quotes but not `$NAME` or `${NAME}`, which the shell expands the same way.
+        // A literal path is the only readable one. See nonLiteralScriptTokens for the flag case.
+        for (const arg of nonLiteralScriptTokens(inline)) {
+          problems.push(`${file} job \`${jobName}\` runs \`node … ${arg}\` — every rule in this gate reads a script path literally, so a globbed, quoted or interpolated one is outside all of them (write the plain path)`);
         }
         if (/publish-latest\.mjs(?!\s*--selftest)/.test(inline) && !(file === '.github/workflows/release.yml' && jobName === 'release')) {
           problems.push(
@@ -489,7 +605,7 @@ export function checkRegistryAuthorityAgrees(packages, workflows) {
       // every publishing workflow's own registry-url puts it inside the window today.
       const steps = Array.isArray(job?.steps) ? job.steps : [];
       // Inline `npm publish`, or the prod publish script (REL3), which runs `npm publish` itself.
-      const publishes = steps.some((st) => /npm\s+publish\b|publish-(latest|derived-set)\.mjs(?!\s*--selftest)/.test(String(st?.run ?? '')));
+      const publishes = steps.some((st) => new RegExp(`${RUNS_INLINE_PUBLISH.source}|publish-(latest|derived-set)\\.mjs(?!\\s*--selftest)`).test(String(st?.run ?? '')));
       if (!publishes) continue;
       for (const st of steps) {
         const url = String(st?.uses ?? '').startsWith('actions/setup-node@') ? st?.with?.['registry-url'] : null;
@@ -811,7 +927,7 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
     // anywhere else in the job, in any form.
     const inline = steps
       .flatMap((st) => runOf(st).split(/&&|\|\||;|\n/))
-      .filter((c) => /npm\s+publish\b/.test(c));
+      .filter((c) => RUNS_INLINE_PUBLISH.test(c));
     for (const c of inline) {
       problems.push(`${label} runs \`${c.trim().slice(0, 70)}\` inline — prod publishes only through \`node scripts/publish-latest.mjs\`, the attested tarballs under \`latest\``);
     }
@@ -1681,7 +1797,7 @@ const withCallerDefect = (anchor, withText) => {
 // could not be closed by rules over shell text, so the loop was replaced by scripts/publish-latest.mjs,
 // whose own effect probes cover those behaviours by running it. Three probes here hold the workflow to
 // that script (inline publish refused, `|| true` refused, the loop restored refused).
-const PROBE_FLOOR = 165;
+const PROBE_FLOOR = 190;
 
 const VALID_RELEASE_TRIGGER = "on:\n  push:\n    tags: ['v*.*.*']\n";
 const withTrigger = (from, to) => {
@@ -1703,6 +1819,47 @@ const PROBES = [
         ],
       ),
   },
+  {
+    // A FLAG BEFORE THE SUBCOMMAND: measured on this npm, `npm --loglevel=error publish` publishes.
+    what: 'REL3: `npm publish` behind a flag, inside the audited release job',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withDefect('      - name: Pack\n', '      - name: Sneak\n        run: npm --loglevel=error publish ./packages/tokens --tag latest\n      - name: Pack\n'),
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+        'release',
+        'release.yml',
+      ),
+  },
+  { what: 'REL3: a publisher run through an interpreter named by path', run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: /usr/bin/node scripts/publish-lat*.mjs\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }]) },
+  { what: 'REL3: a publisher run through `$(which node)`', run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: $(which node) scripts/publish-lat*.mjs\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }]) },
+  { what: 'REL3: a local action OUTSIDE .github/actions is resolved and read', run: () => { const { actions, problems } = collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./tools/promote\n' }], () => ({ file: 'tools/promote/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: node scripts/publish-latest.mjs\n      shell: bash\n' })); return [...problems, ...checkCompositeActionsDoNotPublish(actions)]; } },
+  { what: 'REL3: a local action reference that cannot be resolved', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./.github/actions/ghost\n' }], () => null).problems },
+  { what: 'REL3: a JOB-level `uses:` of a local action is resolved too', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    uses: ./tools/promote\n' }], () => null).problems },
+  // THE INDIRECTION CLASS (REL3 pass 6, debugger): every one of these must bring the credential into
+  // the workflow file, because only the workflow can expand `${{ secrets.* }}`. That is the arm these
+  // probes hold — not the spelling of the wrapper.
+  { what: 'REL3 discovery: a token echoed into .npmrc, then a shell wrapper', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: |\n          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc\n          bash scripts/promote.sh\n' }]) },
+  { what: 'REL3 discovery: a token in the run, then `make promote`', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: |\n          echo "NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> "$GITHUB_ENV"\n          make promote\n' }]) },
+  { what: 'REL3 discovery: a token in the run, then `npm run -w <workspace>`', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc && npm run -w @spec-kitty/tokens promote\n' }]) },
+  { what: 'REL3: a WORKSPACE manifest script that reaches the publisher', run: () => checkNoIndirectPublishScripts({ scripts: { promote: 'node ../../scripts/publish-latest.mjs' } }, 'packages/tokens/package.json') },
+  { what: 'REL3 composite: an action holding the token for the whole action (runs.env)', run: () => checkCompositeActionsDoNotPublish([{ file: '.github/actions/x/action.yml', text: 'runs:\n  using: composite\n  env:\n    NODE_AUTH_TOKEN: x\n  steps:\n    - run: echo hi\n      shell: bash\n' }]) },
+  { what: 'REL3: the release job forging GITHUB_REF_NAME', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Pack\n        env:\n          GITHUB_REF_NAME: v9.9.9\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
+  // SINGLE-SIGNAL probes (REL3 pass 6, reducer): every discovery fixture carried two or three signals,
+  // so deleting one clause left the table green while that shape passed. One fixture per clause.
+  { what: 'REL3 discovery: a job whose ONLY signal is holding NODE_AUTH_TOKEN', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - env:\n          NODE_AUTH_TOKEN: x\n        run: echo hi\n' }]) },
+  { what: 'REL3 discovery: a job whose ONLY signal is `npm publish`', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: npm publish\n' }]) },
+  { what: 'REL3 discovery: a job whose ONLY signal is a registry script', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: node scripts/report-dist-tags.mjs\n' }]) },
+  { what: 'REL3 discovery: a job whose ONLY signal is writing an .npmrc auth token', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc\n' }]) },
+  { what: 'REL3 composite: an action whose ONLY signal is holding NODE_AUTH_TOKEN', run: () => checkCompositeActionsDoNotPublish([{ file: '.github/actions/x/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: echo hi\n      shell: bash\n      env:\n        NODE_AUTH_TOKEN: x\n' }]) },
+  { what: 'REL3 composite: an action whose ONLY signal is writing an .npmrc auth token', run: () => checkCompositeActionsDoNotPublish([{ file: '.github/actions/x/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: echo "//npm.pkg.github.com/:_authToken=$TOKEN" >> .npmrc\n      shell: bash\n' }]) },
+  { what: 'REL3 composite: the action set certified over no files at all', run: () => checkCompositeActionsDoNotPublish([], { dirExists: true }) },
+  { what: 'REL3: an interpreter flag hiding a globbed publisher path', run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'on:\n  push:\n    branches: [develop]\njobs:\n  n:\n    runs-on: ubuntu-latest\n    steps:\n      - run: node --no-warnings scripts/publish-lat*.mjs\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }]) },
+  { what: 'REL3: an npm script with a flag before a globbed path', run: () => checkNoIndirectPublishScripts({ scripts: { promote: 'node --no-warnings scripts/publish-derived*.mjs' } }) },
+  { what: 'REL3: a composite action with a flag before an interpolated path', run: () => checkCompositeActionsDoNotPublish([{ file: '.github/actions/x/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: node --experimental-vm-modules scripts/publish-lat${X}.mjs\n      shell: bash\n' }]) },
+  { what: 'REL3: an unaudited job holding `packages: write` (it could publish through any action)', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    permissions:\n      packages: write\n    steps:\n      - uses: JS-DevTools/npm-publish@0000000000000000000000000000000000000000\n' }]) },
+  { what: 'REL3: an unaudited job holding `attestations: write`', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    permissions:\n      attestations: write\n    steps:\n      - run: echo hi\n' }]) },
+  { what: 'REL3: an unaudited job taking `permissions: write-all`', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    permissions: write-all\n    steps:\n      - run: echo hi\n' }]) },
   { what: 'REL3: a composite action that runs the publisher', run: () => checkCompositeActionsDoNotPublish([{ file: '.github/actions/promote/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: node scripts/publish-latest.mjs\n      shell: bash\n' }]) },
   { what: 'REL3: a composite action holding the registry token', run: () => checkCompositeActionsDoNotPublish([{ file: '.github/actions/x/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: npm publish\n      shell: bash\n      env:\n        NODE_AUTH_TOKEN: x\n' }]) },
   { what: 'REL3: a composite action with a non-literal script path', run: () => checkCompositeActionsDoNotPublish([{ file: '.github/actions/x/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: node scripts/publish-lat${X}.mjs\n      shell: bash\n' }]) },
@@ -2584,6 +2741,9 @@ function selftest() {
     ['REUSABLE_PAYLOAD_FIXTURE', () => checkWorkflowUsesDerivedSet(REUSABLE_PAYLOAD_FIXTURE, ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml')],
     ['VALID_CALLER_FIXTURE', () => checkPublishingCallersDelegate([{ file: 'release-rc.yml', text: VALID_CALLER_FIXTURE }])],
     ['VALID_RELEASE_TRIGGER', () => checkReleaseTrigger(VALID_RELEASE_TRIGGER, 'release.yml')],
+    // An ordinary job whose COMMENT mentions a publish command is not a publishing job (REL3 pass 6,
+    // reviewer): the discovery detector reads shell, and prose is not shell.
+    ['an unaudited job whose comment mentions npm dist-tag ls', () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/docs.yml', text: 'jobs:\n  docs:\n    steps:\n      - run: |\n          # the release job runs `npm dist-tag ls` later; this one only builds docs\n          node scripts/render-diagrams.js\n' }])],
     // The token-holder rule must not over-refuse: the report script holding the token is clean.
     ['VALID_RELEASE_WORKFLOW, report holding the token', () => checkWorkflowUsesDerivedSet(withDefect('      - name: Report\n        run: node scripts/report-dist-tags.mjs', '      - name: Report\n        env:\n          NODE_AUTH_TOKEN: x\n        run: node scripts/report-dist-tags.mjs'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml')],
   ];
@@ -2628,6 +2788,18 @@ function selftest() {
 
 function main() {
   const pkgs = all();
+  const workflowFiles = readdirSync(join(ROOT, '.github/workflows'))
+    .filter((f) => /\.ya?ml$/.test(f))
+    .map((f) => ({ file: `.github/workflows/${f}`, text: readFileSync(join(ROOT, '.github/workflows', f), 'utf8') }));
+  // Local actions are resolved from what the workflows USE, so one outside .github/actions, or nested
+  // deeper than one level, is read rather than missed (REL3 pass 6, architect).
+  const usedLocalActions = collectUsedLocalActions(workflowFiles, (ref) => {
+    const base = join(ROOT, ref.replace(/^\.\//, ''));
+    for (const name of ['action.yml', 'action.yaml']) {
+      if (existsSync(join(base, name))) return { file: `${ref.replace(/^\.\//, '')}/${name}`, text: readFileSync(join(base, name), 'utf8') };
+    }
+    return existsSync(base) && /\.ya?ml$/.test(base) ? { file: ref.replace(/^\.\//, ''), text: readFileSync(base, 'utf8') } : null;
+  });
   const pub = publishable();
   const build = buildable();
 
@@ -2661,15 +2833,16 @@ function main() {
     // payload now lives in the reusable `publish-packages.yml`, and its `publish` job is what
     // actually resolves, builds, verifies and publishes. Auditing only the first is what left the
     // second unguarded.
-    ...checkWorkflowUsesDerivedSet(readFileSync(join(ROOT, WORKFLOW), 'utf8'), pkgs.map((p) => p.name), pkgs.map((p) => p.dir), 'release', WORKFLOW),
+    ...checkWorkflowUsesDerivedSet(readFileSync(join(ROOT, WORKFLOW), 'utf8'), pkgs.map((p) => p.name), pkgs.map((p) => p.dir), RELEASE_JOB, WORKFLOW),
     ...checkReleaseTrigger(readFileSync(join(ROOT, WORKFLOW), 'utf8')),
     ...checkNoIndirectPublishScripts(JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))),
+    ...pkgs.flatMap((p) => checkNoIndirectPublishScripts(JSON.parse(readFileSync(join(ROOT, 'packages', p.dir, 'package.json'), 'utf8')), `packages/${p.dir}/package.json`)),
     ...(existsSync(join(ROOT, REUSABLE_WORKFLOW))
       ? checkWorkflowUsesDerivedSet(
           readFileSync(join(ROOT, REUSABLE_WORKFLOW), 'utf8'),
           pkgs.map((p) => p.name),
           pkgs.map((p) => p.dir),
-          'publish',
+          PAYLOAD_JOB,
           REUSABLE_WORKFLOW,
         )
       : [`${REUSABLE_WORKFLOW} is missing — the rc stream's publish payload has nowhere to live`]),
@@ -2680,17 +2853,8 @@ function main() {
       // The payload's own text, so the ceiling is PARSED rather than mirrored by a constant.
       existsSync(join(ROOT, REUSABLE_WORKFLOW)) ? readFileSync(join(ROOT, REUSABLE_WORKFLOW), 'utf8') : null,
     ),
-    ...checkCompositeActionsDoNotPublish(
-      existsSync(join(ROOT, '.github/actions'))
-        ? readdirSync(join(ROOT, '.github/actions'), { withFileTypes: true })
-            .filter((d) => d.isDirectory())
-            .flatMap((d) =>
-              ['action.yml', 'action.yaml']
-                .filter((n) => existsSync(join(ROOT, '.github/actions', d.name, n)))
-                .map((n) => ({ file: `.github/actions/${d.name}/${n}`, text: readFileSync(join(ROOT, '.github/actions', d.name, n), 'utf8') })),
-            )
-        : [],
-    ),
+    ...usedLocalActions.problems,
+    ...checkCompositeActionsDoNotPublish(usedLocalActions.actions),
     ...checkNoUnauditedPublishingJobs(
       readdirSync(join(ROOT, '.github/workflows'))
         .filter((f) => /\.ya?ml$/.test(f))

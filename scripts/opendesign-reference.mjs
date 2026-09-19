@@ -86,7 +86,6 @@ export async function loadReference(dir = VENDOR_DIR) {
 }
 
 import { isDirectInvocation } from './lib/direct-invocation.mjs';
-export { isDirectInvocation };
 
 /* ─────────────────────────────── --selftest ─────────────────────────────── */
 

@@ -792,7 +792,6 @@ async function selftest() {
 }
 
 import { isDirectInvocation } from './lib/direct-invocation.mjs';
-export { isDirectInvocation };
 
 if (isDirectInvocation(process.argv[1], import.meta.url)) {
   const known = new Set(['--check', '--selftest']);

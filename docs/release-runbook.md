@@ -168,12 +168,23 @@ prerelease version bump is applied on the runner and is never committed, so that
 attestation cannot vouch that no step in it misbehaved. The workflows keep that job small, and
 `check-release-graph.mjs` enforces it on every PR:
 
-- only two `(workflow, job)` pairs may publish at all — `release.yml:release` and
-  `publish-packages.yml:publish`. Any other job that holds the registry token, runs `npm
-  publish`/`npm dist-tag`, runs one of the registry scripts or signs an attestation is refused, in any
-  workflow; so is any composite action that does those things, and any `node scripts/…` path that is
-  not literal (a glob or an interpolation is unreadable to every rule here). The rules below apply
-  **within** those two jobs;
+- only two `(workflow, job)` pairs may publish — `release.yml:release` and
+  `publish-packages.yml:publish`. Any other job in any workflow is refused when it declares
+  `packages: write` or `attestations: write`, holds the registry credential (in an `env:` block, or
+  written into the run text as `NODE_AUTH_TOKEN`, `_authToken` or a `${{ secrets.… }}` expansion), runs
+  `npm publish`/`npm dist-tag`, runs one of the registry scripts, or signs an attestation. The same
+  applies to every local action a workflow `uses:`, resolved by reference, and an unresolvable
+  reference is itself a refusal. No `scripts/…` token anywhere may be non-literal — a glob, a quote or
+  an interpolation is unreadable to every rule here — in a workflow, a local action or any package
+  manifest's npm scripts.
+
+  **What this does not cover, stated rather than implied.** These are text and YAML rules over this
+  repository's own files. A job that publishes with a *third-party action* and a credential this gate
+  cannot recognise, or a wrapper that assembles the publisher's name at runtime, is bounded by the
+  privilege signals above rather than by pattern-matching, and a determined edit can still get past a
+  regex. The durable fence is a privilege boundary — a GitHub `environment:` on the two audited jobs, or
+  a publish-scoped secret rather than `GITHUB_TOKEN` — which is a repository-settings change, not a
+  code change, and is not in this mission. The rules below apply **within** the two audited jobs;
 - `NODE_AUTH_TOKEN` reaches only steps whose `run` is exactly one of the registry scripts
   (`bump-prerelease.mjs --from-registry`, `publish-derived-set.mjs`, `publish-latest.mjs`,
   `verify-published-integrity.mjs`, `report-dist-tags.mjs`) — no shell step may hold it. The rule binds

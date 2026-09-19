@@ -67,7 +67,6 @@ export function unknownArgv(argv) {
 
 
 import { isDirectInvocation } from './lib/direct-invocation.mjs';
-export { isDirectInvocation };
 
 /** The range that admits every rc in `next`'s line, and the eventual final. */
 export function admittingRange(next, id = PRERELEASE_ID) {
