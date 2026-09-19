@@ -1,7 +1,7 @@
 {
   "rows": {
     "#361": {
-      "evidence_ref": "Epic stays open: this mission delivers its REL4 child (#396). The remaining work is owned by the epic's other children, REL3 #364 and the REL1 bootstrap follow-through on #362",
+      "evidence_ref": "Epic stays open: this mission delivers its REL4 child (#396). The remaining work is owned by the epic's other open children: REL3 #364 and the REL1 bootstrap follow-through on #362; REL2 #363's work is on the train (ee324f84, #439) and closes with it at train -> main",
       "fr": null,
       "nfr": null,
       "repo": null,
