@@ -25,9 +25,9 @@ field, and a primary button.
 
 | Run | Package | Project | Library-namespace classes | Invented | CSS for the classes used |
 |---|---|---|---|---|---|
-| 1 `ece117c9` | before the fix | design system only | 13 | **8** | hand-written; radio group 0/20 rules |
-| 2 `2a35a44a` | after the fix | design system only (push) | 22 | **14** | hand-written; radio group 0/20 rules |
-| 3 `c1cf3581` | after the fix | design-system folder **linked** | 15 | **0** | **verbatim**: radio group 20/20, form-field 7/7, button 8/8, card 2/2 |
+| 1 `ece117c9` | before the fix | design system only | 13 | **8** | hand-written: applicable rules verbatim — radio group 0/1, form-field 1/5, button 1/6 |
+| 2 `2a35a44a` | after the fix | design system only (push) | 22 | **14** | hand-written: applicable rules verbatim — radio group 0/3, form-field 1/6, button 1/5 |
+| 3 `c1cf3581` | after the fix | design-system folder **linked** | 15 | **0** | **verbatim**: applicable rules radio group 20/20, form-field 7/7, button 8/8, card 2/2 |
 
 The outputs are in `proof-outputs/`. Run 3 rendered in Chromium is `consumability-proof-linked.png`.
 
@@ -47,7 +47,10 @@ form (`sk-radio-choice-group__choice`, `__control`, `__label`, `__secondary-valu
   output. Rules for `:host`, `::slotted` and the light theme were left out, since the dark page cannot
   exercise them. Each counted rule was then searched for, whitespace-normalised, in the output's
   `<style>` blocks. Run 3 copied exactly those rules and dropped the rest: button 8 of 24,
-  form-field 7 of 14, card 2 of 19. That is a correct trim, not a loss.
+  form-field 7 of 14, card 2 of 19. That is a correct trim, not a loss. For runs 1 and 2 the
+  applicable counts are small because a rule selecting an invented class's library counterpart is
+  not applicable to an output that never uses it; the invented-class count is the measure there.
+  Every figure in this document is the analyser's own output, reproducible with the command above.
 
 It was checked against controls before any conclusion was drawn from it:
 
