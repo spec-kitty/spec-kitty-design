@@ -45,12 +45,15 @@
  *   Error: page.goto: WebKit encountered an internal error
  *
  * This is a browser-level crash during navigation, not an assertion failure, and it lands on
- * whichever test happens to be running when it occurs. Three sightings so far, each on a
- * DIFFERENT test, none reproducing on an immediate re-measurement:
+ * whichever test happens to be running when it occurs. FOUR sightings, none reproducing on an
+ * immediate re-measurement. Three landed on different tests; the fourth repeated on item 13,
+ * which is the first evidence that it is not uniformly distributed:
  *
  *   #453  run 35375265259 attempt 1  sk-progress item 4        199/200, 200/200 on attempt 2
  *   #456  run 35396510928            sk-notice item 13         29/30,  60/60 and 40/40 after
  *   #456  PR #457 CI 35401059899     sk-public-header item 17  1 failure, 40/40 after
+ *   #456  run 35408745117            sk-notice item 13 AGAIN   59/60, and the only failure in
+ *                                                              420 executions of the reworked fix
  *
  * FAILURE KINDS SEEN IN THIS MISSION -- kinds, deliberately, not a total. An earlier revision of
  * this note gave a single arithmetic ("38 + 3 + 17 ... ~1,270 executions ... Nothing else") that
@@ -60,8 +63,8 @@
  *
  *   1. sk-page-header sticky / WCAG 2.4.11 -- real, fixed. Runs 35396510928, 35397298731,
  *      35398052148, 35398759713, 35399537534.
- *   2. The environmental `page.goto: WebKit encountered an internal error` above -- 3 sightings,
- *      3 different tests, never reproducing.
+ *   2. The environmental `page.goto: WebKit encountered an internal error` above -- 4 sightings,
+ *      never reproducing.
  *   3. `TimeoutError: locator.waitFor ... .sk-empty-state--inline` (run 35403525734, item 18) --
  *      one sighting, did not reproduce at 40 repeats, cause NOT established.
  *   4. `sk-section-nav.spec.ts:402` on CHROMIUM (PR #457 runs 35401059899, 35403525734) -- a real
