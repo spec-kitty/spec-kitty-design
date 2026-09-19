@@ -41,7 +41,7 @@ components fixture — and keeps it current from the same derived package set th
 | FR-009 | A `--check` mode regenerates the package and fails on any difference from what is committed, and CI runs it on every PR, wired through all three gate-wiring layers (CI step, `REQUIRED_LINT` entry, defeat case). | High |
 | FR-010 | The generator refuses an empty or shrunken component set: a green run over zero components is a defect. | High |
 | FR-011 | The release path regenerates the package from the same derived package set it publishes, so a release can never ship a stale package. | Medium |
-| FR-012 | `docs/` documents how to install the package into the self-hosted OpenDesign instance and how to refresh it after a release, including re-importing the existing `ds-spec-kitty-train` project. | Medium |
+| FR-012 | `docs/` documents how to install the package into the self-hosted OpenDesign instance and how to refresh it after a release. *(Amended during WP01: the instance DISCOVERS prepared packages through a symlink in its design-systems root rather than importing them; `import local` regenerates every file and is the wrong path. Install = point the symlink at the package; refresh = pull the clone it points into.)* | Medium |
 
 ## Acceptance essentials
 
@@ -55,7 +55,7 @@ components fixture — and keeps it current from the same derived package set th
 ## Constraints and consequences the operator must know
 
 - **The package moves repositories.** Operator decision 2026-09-19: the package is committed in the design repository, not in `team-kitty-ux`. The existing copy there becomes stale the moment this lands; retiring it or replacing it with a pointer is part of this mission's documentation, but changing that private repository is not in scope without a separate instruction.
-- **The instance holds an imported copy.** OpenDesign stores `ds-spec-kitty-train` in its data volume; editing a mounted folder does not update it. The proof therefore re-imports, and the documentation says so.
+- **The instance reads the package through a symlink.** `design-systems/spec-kitty-train` in its data volume points into a mounted clone; the clone is what goes stale (it sat at `a9f385d4`). A *project* `ds-spec-kitty-train` also exists, created from the design system, and is a separate copy that the design system's refresh does not update. *(Corrected during WP01.)*
 - **Static-only means incomplete by design.** 18 elements cannot appear in the fixture until they grow a static form. The exclusion list is the honest record of that, not a defect of this mission.
 - **The OpenDesign schema is upstream's.** A future OpenDesign release may change the contract; the gate validates against the vendored reference, so an upstream change surfaces as a red check rather than a silent mismatch.
 

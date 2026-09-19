@@ -12,7 +12,8 @@
 | Can CI reach upstream? | Upstream `nexu-io/open-design` is **public**; the local commit `c5ae6292c4` exists there | GitHub API |
 | Is the fixture self-contained or linked? | **Self-contained** — one `<style>` block with `:root` inline, no `<link>`, in every reference inspected (`agentic`, `ant`, `bento`; `apple` has two blocks) | reference packages |
 | What happens to our manifest on import? | **OpenDesign regenerates it** and overwrites the file, discarding keys it did not produce | `apps/daemon/src/design-systems/import.ts:156-173` |
-| How is a local package imported? | `od design-systems import local` → `POST /api/design-systems/import/local` | `apps/daemon/src/cli.ts:9722` |
+| How does the instance load a prepared package? | **By discovery, not import.** Its user design-systems root holds a *symlink* `spec-kitty-train -> /workspace/team-kitty-ux/open-design-systems/spec-kitty-train`, read verbatim (`index.ts:604`) and listed as `user:spec-kitty-train`. `od design-systems import local` is the WRONG path: it scans a source codebase and generates its own DESIGN.md, generic-schema tokens.css and generic components.html (`import.ts:119-178`), discarding every file we build. *(Corrected during WP01; the first version of this row named `import local`.)* | data-volume listing; `GET /api/design-systems`; `import.ts` |
+| Why was the old package pinned to `a9f385d`? | The container mounts a design-repo clone at `/workspace/spec-kitty-design`; it sits on `train/elements-first` at **`a9f385d4`** and has not been pulled since 2026-09-11. The package was generated from it and never refreshed. | `git -C references/spec-kitty-design-train log -1` |
 | Which fonts does the library use? | **Falling Sky** (`--sk-font-display`), **Inter** (`--sk-font-sans`) and **Swansea**, via 40 `@font-face` rules over files in `packages/tokens/src/fonts/`; every referenced file is present. JetBrains Mono (`--sk-font-mono`) is not loaded — a comment in `tokens.css` records that its old `@import` was always dropped by the browser. | `tokens.css:276-283`, `@font-face` scan, reference-vs-file diff |
 | Which fonts does today's package ship? | 30 Falling Sky `.otf` files — **exactly what its own stale `tokens.css` references**, so the package is internally consistent. It lacks Inter and Swansea only because that `tokens.css` predates them. | reference-vs-file diff: 30 referenced, 30 shipped, 0 missing |
 | Does the static-only line in the spec hold as first written? | **No** — 13 of 34 components ship `:host`/`::slotted` rules in their CSS; spec amended | per-component grep, control on `action-row` (14) |
@@ -76,8 +77,11 @@ own count.
 **IC-04 — the release path.** `--check` runs in `publish-packages.yml` and `release.yml` alongside the
 existing size check, so a release cannot ship while the committed package is stale.
 
-**IC-05 — docs and proof.** `docs/opendesign-package.md`: install, refresh after a release, and
-re-importing the existing `ds-spec-kitty-train` project. The consumability proof runs one real
+**IC-05 — docs and proof.** `docs/opendesign-package.md`: install by pointing the instance's
+`spec-kitty-train` symlink at `opendesign/spec-kitty-train` inside the mounted design-repo clone; refresh
+by pulling that clone. No import. The pre-merge proof installs a copy under a NEW id in the data volume
+so the live `spec-kitty-train` symlink and the `team-kitty-ux` repository are untouched, and removes it
+afterwards. The consumability proof runs one real
 generation on the local instance; the token is read from `~/dev/open-design-local/.env` into a shell
 variable at call time and is never written, echoed or committed.
 
