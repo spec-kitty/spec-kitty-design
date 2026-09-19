@@ -452,9 +452,10 @@ jobs:
       # opener, which cannot close a block (closers carry no info string), so it rendered as code
       # and the two blocks fused — 142 times. All 15 jobs went green: nothing here parsed
       # Markdown, and the specs that read that file assert substrings are PRESENT, which an
-      # insertion cannot break. The gate scans fences by CommonMark's rules (both fence
-      # characters, lengths, list/quote indentation) over every tracked *.md plus llms*.txt,
-      # except the frozen kitty-specs/ records; its header states what it does NOT catch.
+      # insertion cannot break. The gate scans fences by CommonMark's block rules (both fence
+      # characters, lengths, CRLF, tabs, lists, blockquotes, HTML blocks) over every tracked *.md
+      # plus llms*.txt, except the frozen kitty-specs/ records; it agrees with the reference
+      # parser on all of them, and its header states what it does NOT catch.
       - name: "[ENFORCED] Markdown fence gate self-test, with per-rule mutation proof (#456)"
         run: node scripts/check-markdown-fences.mjs --selftest
       - name: "[ENFORCED] No swallowed fence openers, no unterminated code blocks (#456)"
