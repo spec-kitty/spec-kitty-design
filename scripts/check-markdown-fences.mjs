@@ -42,36 +42,39 @@
  * measurements of that got it wrong, first on tabs and then on a blockquote's optional space. Only
  * the public API is used.
  *
+ * .mdx files are parsed with the MDX grammar instead — micromark with the mdxjs extension, read
+ * through mdast-util-from-markdown and mdast-util-mdx, all exact-pinned devDependencies. It is the
+ * grammar Storybook compiles .mdx with, and it differs from CommonMark exactly where this gate looks:
+ * indented code is off, so a fence may open or close at any indentation, and JSX/ESM replace HTML
+ * blocks, so a fence straight after a JSX tag is a fence while one inside a `{/* ... * /}` comment or
+ * a template literal is not a block at all. The same two rules run on its code blocks. A hand
+ * approximation of MDX was tried first and failed in both directions under review (PR #457), the
+ * same way the hand CommonMark parser had. An .mdx file the grammar cannot parse fails Storybook's
+ * build too, and is reported rather than passed.
+ *
  * WHAT IT REJECTS, per file:
  *   1. SWALLOWED OPENER — inside a fenced code block, a content line that would itself open a block of
  *      the same character and at least the same length, carrying an info string (a backtick fence's
  *      info string may not contain a backtick), indented at most 3 columns within its container. It
  *      cannot close the block (closers carry no info string), so it renders as code and two blocks
- *      fuse. This is the #457 signature. Legitimate
- *      nesting is unaffected: a ````-fence around ```js examples, or ```html inside a ~~~ block, is a
- *      shorter or different fence, as CommonMark itself reads it.
+ *      fuse. This is the #457 signature. Legitimate nesting is unaffected: a ````-fence around ```js
+ *      examples, or ```html inside a ~~~ block, is a shorter or different fence, as the parser
+ *      itself reads it.
  *   2. UNCLOSED BLOCK — a fenced block that does not end with its own closing fence. CommonMark
  *      closes it silently wherever it runs out: at the end of the file, or where its list item or
  *      blockquote ends. Both are valid and both are essentially never intended — they render the
  *      same, so neither is special-cased (R3, PR #457: an earlier "only before end of file" rule
  *      reported `> ```js` / `> x` and passed the same forgotten closer followed by prose).
- *   3. MDX-UNVERIFIABLE (.mdx only) — a fence-like line outside every block CommonMark sees as
- *      fenced. See SCOPE.
  *
  * WHAT IT DOES NOT ASSERT (stated so nobody trusts it for them): it is not a Markdown linter and not
  * a renderer. It does not detect duplicated content, a block that closes early, or prose moved into
- * or out of a block by an edit that leaves the fence structure well-formed. GitHub
- * renders GFM, a superset of CommonMark whose fenced-code rules are identical; the GFM extensions
+ * or out of a block by an edit that leaves the fence structure well-formed. GitHub renders GFM, a superset of CommonMark whose fenced-code rules are identical; the GFM extensions
  * (tables, task lists, strikethrough, autolinks) do not open or close code blocks.
  *
  * SCOPE. Every tracked `*.md`, plus `llms.txt` and `llms-full.txt` (the repo's declared LLM
  * surfaces, which are Markdown by content), plus the Storybook `*.mdx` docs pages (published docs:
- * `getting-started.mdx` alone has 12 fences). MDX is CommonMark with indented code and HTML blocks
- * switched off and JSX/ESM in their place: an indented fence, or a fence written directly after a
- * JSX tag, is a fence there and not here. The gate cannot see what renders on such a line, so in an
- * .mdx file it REFUSES any fence-like line outside a block CommonMark also sees as fenced (rule
- * 3, below). EXCEPT `kitty-specs/`: those are frozen Spec Kitty
- * mission records that CLAUDE.md forbids hand-editing, so a gate over them could only be satisfied
+ * `getting-started.mdx` alone has 12 fences), parsed as MDX (above). EXCEPT `kitty-specs/`: those
+ * are frozen Spec Kitty mission records that CLAUDE.md forbids hand-editing, so a gate over them could only be satisfied
  * by an allowlist. Scope is resolved with `git ls-files` so generated and untracked output is not
  * read. The count is printed, and an empty set is refused.
  */
@@ -81,6 +84,9 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fromMarkdown } from 'mdast-util-from-markdown';
+import { mdxFromMarkdown } from 'mdast-util-mdx';
+import { mdxjs } from 'micromark-extension-mdxjs';
 
 const SELF = fileURLToPath(import.meta.url);
 const REPO_ROOT = resolve(dirname(SELF), '..');
@@ -105,53 +111,93 @@ const canOpen = (run, info) => !(run[0] === '`' && info.includes('`'));
  * resolve by the spec's own rules. Two hand measurements of this failed in turn (R1 T1 on tabs, then
  * R4's fuzzer on `>` without a space, PR #457).
  */
-function wouldOpen(lines, startLine, index, contentLine, run) {
+function wouldOpen(lines, startLine, index, contentLine, run, mdx) {
   const src = lines[index];
   const prefix = src.slice(0, src.length - contentLine.trimStart().length);
   const variant = [...lines.slice(0, index), prefix + run, ...lines.slice(index)].join('\n');
-  const walker = new Parser().parse(variant).walker();
+  const block = fencedBlocks(variant, mdx).find((b) => b.startLine === startLine);
+  return Boolean(block) && block.endLine === index + 1;
+}
+
+/**
+ * The fenced code blocks of `text`, as its renderer parses them: CommonMark for Markdown, the MDX
+ * grammar (micromark with mdxjs — what Storybook compiles .mdx with) for MDX. Each block has its
+ * opener's position, its last line, its content lines, and whether its own closing fence ends it.
+ * MDX differs where it matters here: indented code is off, so a fence may be indented any amount,
+ * and JSX/ESM replace HTML blocks, so fences inside JSX comments or expressions are not blocks.
+ */
+function fencedBlocks(text, mdx) {
+  const lines = text.split(/\r\n|\r|\n/);
+  const blocks = [];
+  if (mdx) {
+    const tree = fromMarkdown(text, { extensions: [mdxjs()], mdastExtensions: [mdxFromMarkdown()] });
+    (function walk(node) {
+      if (node.type === 'code') {
+        const { start, end } = node.position;
+        const opener = FENCE.exec(lines[start.line - 1].slice(start.column - 1));
+        // MDX has no indented code, so every code node opens with a fence; the closer is the block's
+        // own last line, reduced to a bare run of the opener's character (container markers aside).
+        const closer = opener && end.line > start.line
+          && new RegExp(`^[ \\t>]*\\${opener[1][0]}{${opener[1].length},}[ \\t]*$`).test(lines[end.line - 1]);
+        blocks.push({
+          startLine: start.line, startCol: start.column, endLine: end.line,
+          content: node.value === '' ? [] : node.value.split('\n'), closed: Boolean(closer),
+        });
+      }
+      (node.children || []).forEach(walk);
+    })(tree);
+    return blocks;
+  }
+  const walker = new Parser().parse(text).walker();
   for (let step = walker.next(); step; step = walker.next()) {
     const { node, entering } = step;
-    if (entering && node.type === 'code_block' && node.sourcepos[0][0] === startLine) {
-      return node.sourcepos[1][0] === index + 1;
-    }
+    if (!entering || node.type !== 'code_block' || node.info === null) continue; // null: indented code
+    const [[startLine, startCol], [endLine]] = node.sourcepos;
+    const content = node.literal === '' ? [] : node.literal.split('\n').slice(0, -1);
+    // Closed by a fence: the block spans its opener, its content and exactly one closing line.
+    blocks.push({ startLine, startCol, endLine, content, closed: endLine - startLine + 1 === content.length + 2 });
   }
-  return false;
+  return blocks;
 }
 
 /**
  * Scans one Markdown source. Returns the findings and, for analysis, which lines belong to a fenced
- * code block (opener, content or closer). `disable` names ONE rule to switch off — used only by the
- * self-test's mutation proof, which must show that removing a rule changes a probe's verdict.
+ * code block (opener, content or closer). `mdx` parses with the MDX grammar instead of CommonMark.
+ * `disable` names ONE rule to switch off — used only by the self-test's mutation proof.
  */
 export function scanMarkdown(source, { disable = null, mdx = false } = {}) {
   // GitHub's cmark-gfm (and C cmark) skip a leading UTF-8 byte-order mark; commonmark.js keeps it,
   // which turns a fence on line 1 into paragraph text. Strip it, so the gate reads what GitHub
   // renders (R4 N6, PR #457).
   const text = source.replace(/^\uFEFF/, '');
-  // The parser's own line endings (§2.1), so its line numbers index this array.
+  // The parsers' own line endings (§2.1), so their line numbers index this array.
   const lines = text.split(/\r\n|\r|\n/);
   const findings = [];
   const inCode = new Array(lines.length).fill(false);
+  // The `mdx` mutation parses an .mdx file as CommonMark — the approximation this replaced.
+  const asMdx = mdx && disable !== 'mdx';
+  let blocks;
+  try {
+    blocks = fencedBlocks(text, asMdx);
+  } catch (e) {
+    // An .mdx file the MDX grammar rejects fails Storybook's build as well; it cannot be checked.
+    findings.push({ rule: 'mdx-parse-error', line: e.line ?? 1, message: `MDX cannot parse this file: ${e.message.split('\n')[0]}` });
+    return { findings, inCode };
+  }
   // Lines of one block share its containers, so a candidate's answer depends only on its prefix.
   const opensAt = new Map();
-  const walker = new Parser().parse(text).walker();
-  for (let step = walker.next(); step; step = walker.next()) {
-    const { node, entering } = step;
-    if (!entering || node.type !== 'code_block' || node.info === null) continue; // null: indented code
-    const [[startLine, startCol], [endLine]] = node.sourcepos;
+  for (const { startLine, startCol, endLine, content, closed } of blocks) {
     // The start column is the fence's first character, whatever container prefixes precede it.
     const opener = FENCE.exec(lines[startLine - 1].slice(startCol - 1));
     // The parser reported a fenced block whose start column does not hold a fence. That has never
     // happened (0 times over every tracked file and the review fuzzers); if it ever does, the
     // parser and this reading of it disagree, and skipping would pass the file unexamined.
     if (!opener) {
-      throw new Error(`commonmark.js reported a fenced block at ${startLine}:${startCol} with no fence there`);
+      throw new Error(`the parser reported a fenced block at ${startLine}:${startCol} with no fence there`);
     }
     const [, run] = opener;
     for (let l = startLine; l <= endLine; l += 1) inCode[l - 1] = true;
 
-    const content = node.literal === '' ? [] : node.literal.split('\n').slice(0, -1);
     content.forEach((line, k) => {
       const m = FENCE.exec(line.trimStart());
       if (!m || disable === 'swallowed') return;
@@ -159,7 +205,7 @@ export function scanMarkdown(source, { disable = null, mdx = false } = {}) {
       if (inner[0] !== run[0] || inner.length < run.length || info.trim() === '' || !canOpen(inner, info)) return;
       const src = lines[startLine + k];
       const key = `${startLine}\u0000${src.slice(0, src.length - line.trimStart().length)}`;
-      if (!opensAt.has(key)) opensAt.set(key, wouldOpen(lines, startLine, startLine + k, line, run));
+      if (!opensAt.has(key)) opensAt.set(key, wouldOpen(lines, startLine, startLine + k, line, run, asMdx));
       if (!opensAt.get(key)) return;
       const at = startLine + 1 + k;
       findings.push({
@@ -173,8 +219,6 @@ export function scanMarkdown(source, { disable = null, mdx = false } = {}) {
       });
     });
 
-    // Closed by a fence: the block spans its opener, its content and exactly one closing line.
-    const closed = endLine - startLine + 1 === content.length + 2;
     if (!closed && disable !== 'unterminated') {
       const atEnd = lines.slice(endLine).every(isBlank);
       findings.push({
@@ -185,25 +229,6 @@ export function scanMarkdown(source, { disable = null, mdx = false } = {}) {
             : `fence — it runs on as code until line ${endLine}, where its list item or blockquote ends`),
       });
     }
-  }
-  // MDX (Storybook's .mdx docs) turns off indented code, which lifts the 3-column limit on a fence's
-  // indentation, and replaces HTML blocks with JSX, so a fence written straight after a JSX tag is a
-  // fence there and HTML here. On such a line this parser cannot see what renders — so in an .mdx
-  // file every fence-like line must belong to a block CommonMark also sees as fenced, or it is
-  // refused rather than passed unexamined (R3 Q1, R4 N8, PR #457).
-  if (mdx && disable !== 'mdx') {
-    lines.forEach((raw, i) => {
-      if (inCode[i]) return;
-      const m = FENCE.exec(raw.replace(/^(?:[ \t]*>)*[ \t]*/, ''));
-      if (!m || !canOpen(m[1], m[2])) return;
-      findings.push({
-        rule: 'mdx-unverifiable',
-        line: i + 1,
-        message: `line ${i + 1} "${raw.trim()}" may open a code block in MDX that CommonMark does not see ` +
-          '(an indented fence, or one directly after a JSX tag) — dedent it to at most 3 columns, or ' +
-          'put a blank line between the JSX tag and the fence',
-      });
-    });
   }
   return { findings, inCode };
 }
@@ -259,7 +284,7 @@ const SIGNATURE = [F + 'js', 'snippet', F + 'html', '<head>', F];
  * `expect` is the exit code. `needs` lists the rule a RED probe depends on: the mutation proof
  * disables each rule in turn and requires the probe to go GREEN, which is what shows that this rule
  * — not another one that happens to fire first — is what made it red. `findings`, where given, is
- * the exact [rule, line, message fragment] list the scanner must report for the single file, which
+ * the exact [rule, line, message fragment] list the scanner must report for the LAST file, which
  * an exit code cannot show (a finding reported on the wrong line still exits 1).
  */
 const PROBES = [
@@ -342,6 +367,20 @@ const PROBES = [
   { name: 'the #457 signature after a clean first block is caught', files: { 'docs/a.md': md(F + 'bash', 'npm ci', F, '', 'prose', '', ...SIGNATURE) }, expect: 1, needs: ['swallowed'], findings: [['swallowed-opener', 9, 'html']] },
   { name: 'the #457 signature with 4-backtick fences is caught', files: { 'docs/a.md': md('````js', 'x', '````html', 'y', '````') }, expect: 1, needs: ['swallowed'], findings: [['swallowed-opener', 3, 'html']] },
   { name: 'the #457 signature with 4-tilde fences is caught', files: { 'docs/a.md': md('~~~~js', 'x', '~~~~html', 'y', '~~~~') }, expect: 1, needs: ['swallowed'] },
+  // R3 S2: two candidates in one block with DIFFERENT prefixes need different answers; a memo key
+  // without the prefix answers line 3 from line 2 and misses it.
+  { name: 'a memoised re-check keys on the line\'s own prefix', files: { 'docs/a.md': md(F + 'md', '    ' + F + 'html', F + 'css', F) }, expect: 1, needs: ['swallowed'], findings: [['swallowed-opener', 3, 'css']] },
+  // R1 round 6: a candidate rightly rejected must not answer for a later one in another block or
+  // with another prefix — a constant key, a start-line-only key, and a prefix-only key each pass a
+  // real signature green.
+  { name: 'a rejected candidate does not answer for a later real one', files: { 'docs/a.md': md(F + 'md', '    ' + F + 'html', F + 'css', 'a{}', F) }, expect: 1, needs: ['swallowed'], findings: [['swallowed-opener', 3, 'css']] },
+  {
+    name: 'two blocks sharing a candidate prefix are answered separately',
+    files: { 'docs/a.md': md(F + 'md', '      ' + F + 'html', F, '', '1.  step', '', '    ' + F + 'js', '    snippet', '      ' + F + 'html', '    <head>', '    ' + F) },
+    expect: 1,
+    needs: ['swallowed'],
+    findings: [['swallowed-opener', 9, 'html']],
+  },
   { name: 'an unterminated backtick block is caught', files: { 'docs/a.md': md('# T', '', F + 'js', 'x', '', 'prose that is now code') }, expect: 1, needs: ['unterminated'] },
   { name: 'an unterminated tilde block is caught', files: { 'docs/a.md': md('# T', '', T + 'js', 'x', '', 'prose') }, expect: 1, needs: ['unterminated'] },
   { name: 'an unterminated block with CRLF line endings is caught', files: { 'docs/a.md': crlf('# T', '', F + 'js', 'x', '', 'prose') }, expect: 1, needs: ['unterminated'] },
@@ -349,10 +388,35 @@ const PROBES = [
   { name: 'README.md at the root is in scope', files: { 'README.md': md(F + 'js', 'x') }, expect: 1, needs: ['unterminated'] },
   { name: 'llms.txt is in scope despite its extension', files: { 'docs/a.md': md('ok'), 'llms.txt': md(F + 'js', 'x') }, expect: 1, needs: ['unterminated'] },
   { name: 'a Storybook .mdx docs page is in scope', files: { 'docs/a.md': md('ok'), 'apps/storybook/src/stories/x.mdx': md("import { Meta } from '@storybook/blocks';", '', ...SIGNATURE) }, expect: 1, needs: ['swallowed'] },
-  { name: 'in .mdx, a 4-space-indented #457 signature is refused', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('text', '', ...SIGNATURE.map((l) => `    ${l}`)) }, expect: 1, needs: ['mdx'] },
-  { name: 'in .mdx, a fence directly after a JSX tag is refused', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('<Canvas>', ...SIGNATURE, '</Canvas>') }, expect: 1, needs: ['mdx'] },
+  // .mdx is parsed with the MDX grammar. Each RED probe below needs "mdx": parsed as CommonMark (the
+  // mutation), the construct is indented code, HTML or content, and the defect passes green.
+  { name: 'in .mdx, a 4-space-indented #457 signature is caught', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('text', '', ...SIGNATURE.map((l) => `    ${l}`)) }, expect: 1, needs: ['swallowed', 'mdx'] },
+  { name: 'in .mdx, the #457 signature directly after a JSX tag is caught', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('<Canvas>', ...SIGNATURE, '</Canvas>') }, expect: 1, needs: ['swallowed', 'mdx'], findings: [['swallowed-opener', 4, 'html']] },
+  {
+    name: 'in .mdx, an indented bare fence closes the block early and the page runs on as code',
+    files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md(F + 'js', 'const a = 1;', '    ' + F, '', 'Explanation paragraph.', '', F, '', '## Next section', '', 'Consumer-facing prose.') },
+    expect: 1,
+    needs: ['unterminated', 'mdx'],
+  },
+  { name: 'in .mdx, an indented bare fence that makes MDX fuse the next blocks is caught', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md(F + 'md', '    ' + F, F, 'x', F + 'html', 'y', F) }, expect: 1, needs: ['swallowed', 'mdx'] },
+  // R1 round 6: a docs page teaching nested fences — valid .md, and in MDX the outer block closes at
+  // the indented inner closer, so everything after it, `## Theming` included, renders as code.
+  {
+    name: 'in .mdx, a nested-fence lesson that MDX closes early is caught',
+    files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('## Steps', '', F + 'md', '1. Install:', '', '    ' + F + 'bash', '    npm ci', '    ' + F, F, '', '## Theming', '', 'Prose.') },
+    expect: 1,
+    needs: ['mdx'],
+    findings: [['swallowed-opener', 6, 'bash'], ['unterminated', 9, 'rest of the file']],
+  },
+  { name: 'in .mdx, an indented fence on a list-marker line is caught', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('# T', '', '-     ' + F + 'js', '      x') }, expect: 1, needs: ['unterminated', 'mdx'] },
+  { name: 'in .mdx, an indented fence inside a quote is caught', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('# T', '', '>     ' + F + 'js', '>     x') }, expect: 1, needs: ['unterminated', 'mdx'], findings: [['unterminated', 3, 'never reaches']] },
+  { name: 'an .mdx file MDX cannot parse is reported, not passed', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('<Canvas>', '', 'unclosed JSX') }, expect: 1 },
+  { name: 'VALID: in .mdx, a 4-backtick block holding 3-backtick example lines', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('````md', '    ' + F + 'js', '    ' + F, '````') }, expect: 0 },
   { name: 'VALID: in .mdx, a fence after a JSX tag and a blank line', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('<Canvas>', '', F + 'js', 'x', F, '', '</Canvas>') }, expect: 0 },
-  { name: 'VALID: in .md, an indented fence-like line is indented code, not refused', files: { 'docs/a.md': md('text', '', '    ' + F + 'js', '    x') }, expect: 0 },
+  // R4 N10: MDX renders no code block for these, so neither may the gate.
+  { name: 'VALID: in .mdx, a #457 signature inside a JSX comment is not a block', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('{/*', ...SIGNATURE, '*/}') }, expect: 0 },
+  { name: 'VALID: in .mdx, fence lines inside a JSX template literal are not a block', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md("import { Source } from '@storybook/blocks';", '', '<Source', '  language="md"', '  code={`', '    ~~~js', '    const a = 1;', '    ~~~', '  `}', '/>') }, expect: 0 },
+  { name: 'VALID: in .mdx, inline code that starts a line is not a fence', files: { 'docs/a.md': md('ok'), 'apps/x.mdx': md('# T', '', F + 'ts`` is inline code.', '', 'More.') }, expect: 0 },
   { name: 'kitty-specs/ is excluded (frozen mission records)', files: { 'docs/a.md': md('ok'), 'kitty-specs/m/tasks/WP01.md': md(F + 'js', 'x') }, expect: 0 },
   { name: 'an empty scope is refused, not passed', files: { 'kitty-specs/only.md': md('ok') }, expect: 1 },
   { name: 'VALID: a 4-backtick fence documenting 3-backtick examples', files: { 'docs/a.md': md('````md', F + 'js', 'x', F, '````') }, expect: 0 },
@@ -417,8 +481,9 @@ function selftest() {
     let ok = got === p.expect && cli === p.expect;
     let detail = '';
     if (p.findings) {
-      const [only] = Object.values(p.files);
-      const actual = scanMarkdown(only).findings;
+      // Findings are asserted on the fixture's LAST file, parsed as its extension says.
+      const [path, body] = Object.entries(p.files).at(-1);
+      const actual = scanMarkdown(body, { mdx: path.endsWith('.mdx') }).findings;
       const match = actual.length === p.findings.length && p.findings.every(([rule, line, fragment], i) =>
         actual[i].rule === rule && actual[i].line === line && actual[i].message.includes(fragment));
       if (!match) {

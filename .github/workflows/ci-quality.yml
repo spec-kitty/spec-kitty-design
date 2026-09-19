@@ -454,8 +454,9 @@ jobs:
       # block, so a token formula rendered as a bulleted list.
       # All 15 jobs went green: nothing here parsed Markdown, and the specs that read that file
       # assert substrings are PRESENT, which an insertion cannot break. The gate parses with
-      # commonmark.js (the CommonMark reference implementation, an exact-pinned devDependency)
-      # over every tracked *.md, llms*.txt and Storybook *.mdx, except the frozen kitty-specs/ records.
+      # commonmark.js (the CommonMark reference implementation) and, for Storybook *.mdx, with the
+      # MDX grammar Storybook compiles with (micromark + mdxjs), all exact-pinned devDependencies,
+      # over every tracked *.md, llms*.txt and *.mdx, except the frozen kitty-specs/ records.
       - name: "[ENFORCED] Markdown fence gate self-test, with per-rule mutation proof (#456)"
         run: node scripts/check-markdown-fences.mjs --selftest
       - name: "[ENFORCED] No swallowed fence openers, no unterminated code blocks (#456)"
