@@ -161,14 +161,18 @@ published. **Versions published before that, `1.1.0-rc.0` to `1.1.0-rc.2`, carry
 
 **What an attestation does and does not prove.** It is SLSA Build Level 2 provenance: a signed
 statement, from this repository's release workflow on a GitHub-hosted runner, that it produced these
-exact bytes from the named commit. The attest step runs in the same job as the build, and
+exact bytes from the named commit. For rc versions, the named commit is the `develop` commit: the
+prerelease version bump is applied on the runner and is never committed, so that commit's
+`package.json` still shows the previous version. The attest step runs in the same job as the build, and
 `id-token: write` reaches every step of that job. **The job, not the step, is the trust boundary**: the
 attestation cannot vouch that no step in it misbehaved. The workflows keep that job small, and
 `check-release-graph.mjs` enforces it on every PR:
 
 - the registry token reaches only the steps that talk to the registry;
 - checkout keeps no credentials;
-- every `npx` runs the lockfile's copy (`--no-install`), so nothing is fetched at release time.
+- every `npx` and `npm exec` runs the lockfile's copy (`--no-install` / `--no`), never a package fetched at
+  release time;
+- no step may name the token in its script, so it cannot be re-exported to later steps.
 
 It is still provenance, not a guarantee of a clean build. Attestations on this plan also need the repository to stay **public**;
 making it private would stop new releases from being attestable.

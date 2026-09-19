@@ -133,8 +133,8 @@ export function payloadDeclaredPermissions(payloadText) {
 
 /** Workflows allowed to run `npm publish` without delegating. EXACT paths: a suffix test exempted
  *  `nightly-release.yml` as well, because it ends with `release.yml`. `release.yml` is the
- *  sanctioned holdout: it owns `latest`, which the payload refuses unconditionally, so it keeps its
- *  own publish loop (REL3, #364, publishes the attested tarballs there rather than folding it in). */
+ *  sanctioned holdout: it owns `latest`, which the payload refuses unconditionally, so it publishes
+ *  through its own scripts/publish-latest.mjs (REL3, #364) rather than the payload. */
 const INLINE_PUBLISH_EXEMPT = new Set(['.github/workflows/publish-packages.yml', '.github/workflows/release.yml']);
 
 /** Only THIS repo's payload counts as delegation. `uses.includes(...)` accepted a third-party
@@ -193,6 +193,16 @@ export function checkPublishingCallersDelegate(workflows, payloadText = null) {
         const isPayloadOrProd = INLINE_PUBLISH_EXEMPT.has(file);
         if (/npm\s+publish\b/.test(inline) && !isPayloadOrProd) {
           inlinePublishers.push(`${file} job \`${jobName}\``);
+        }
+        // publish-latest.mjs IS A PUBLISHER, AND ONLY PROD MAY RUN IT (REL3 review). It writes `latest`,
+        // so a step running it anywhere but release.yml's tag-triggered `release` job — the rc payload
+        // included — claims the prod channel, irreversibly. The `npm publish` text match above cannot
+        // see it, which is how a branch-triggered job running it passed every gate.
+        if (/publish-latest\.mjs(?!\s*--selftest)/.test(inline) && !(file === '.github/workflows/release.yml' && jobName === 'release')) {
+          problems.push(
+            `${file} job \`${jobName}\` runs scripts/publish-latest.mjs, which publishes \`latest\` — only ` +
+              "release.yml's tag-triggered `release` job may run it",
+          );
         }
         continue;
       }
@@ -313,11 +323,13 @@ export function checkRegistryAuthorityAgrees(packages, workflows) {
       // every publishing workflow's own registry-url puts it inside the window today.
       const steps = Array.isArray(job?.steps) ? job.steps : [];
       // Inline `npm publish`, or the prod publish script (REL3), which runs `npm publish` itself.
-      const publishes = steps.some((st) => /npm\s+publish\b|publish-latest\.mjs/.test(String(st?.run ?? '')));
+      const publishes = steps.some((st) => /npm\s+publish\b|publish-(latest|derived-set)\.mjs(?!\s*--selftest)/.test(String(st?.run ?? '')));
       if (!publishes) continue;
       for (const st of steps) {
         const url = String(st?.uses ?? '').startsWith('actions/setup-node@') ? st?.with?.['registry-url'] : null;
-        if (typeof url === 'string' && url.trim() !== '') declared.add(url.trim().replace(/\/+$/, ''));
+        // A workflow EXPRESSION (the payload's `${{ inputs.registry }}`) is resolved by its caller, whose
+        // concrete `registry` input is collected above; it is not itself a registry.
+        if (typeof url === 'string' && url.trim() !== '' && !url.includes('${{')) declared.add(url.trim().replace(/\/+$/, ''));
       }
     }
   }
@@ -617,6 +629,9 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
   if (bumpAt !== -1 && packAt !== -1 && !(bumpAt < packAt)) {
     problems.push(`${label} packs before the prerelease bump — the attested tarballs would carry the unbumped version`);
   }
+  if (jobName !== 'release' && steps.some((st) => /publish-latest\.mjs(?!\s*--selftest)/.test(runOf(st)))) {
+    problems.push(`${label} runs scripts/publish-latest.mjs — the prerelease payload must never write \`latest\``);
+  }
   if (jobName === 'release') {
     // PROD PUBLISHES ONLY THROUGH publish-latest.mjs (an exact, unconditional step — see the exact list).
     // Inline shell over the tarballs was defeated five ways in review, so no `npm publish` may appear
@@ -645,9 +660,20 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
       problems.push(`${label} step "${st.name ?? runOf(st).trim().slice(0, 40)}" holds NODE_AUTH_TOKEN but does not talk to the registry`);
     }
     for (const inv of runOf(st).split(/&&|\|\||;|\n/)) {
-      if (/(^|\s)npx\s/.test(inv) && !/(^|\s)npx\s+--no-install\s/.test(inv)) {
+      // `npx` anywhere in the command (including inside `$( … )` or backticks), and `npm exec`: both
+      // may fetch. `--no-install` and its documented synonym `--no` pin them to the lockfile's copy.
+      const pinned = (tool) => new RegExp(`${tool}\\s+(--no-install|--no)(\\s|$)`).test(inv);
+      if (/(^|[\s($`|&;])npx\s/.test(inv) && !pinned('npx')) {
         problems.push(`${label} runs \`${inv.trim().slice(0, 60)}\` — every npx in a publish job must be \`npx --no-install\` (the lockfile's copy, never a release-time fetch)`);
       }
+      if (/\bnpm\s+exec\b/.test(inv) && !pinned('npm\\s+exec')) {
+        problems.push(`${label} runs \`${inv.trim().slice(0, 60)}\` — \`npm exec\` in a publish job must pass \`--no\` (never a release-time fetch)`);
+      }
+    }
+    // …AND THE TOKEN MAY NOT BE NAMED IN A RUN: `echo "NODE_AUTH_TOKEN=…" >> "$GITHUB_ENV"` would make
+    // it job-wide again from a step that holds it.
+    if (/NODE_AUTH_TOKEN/.test(runOf(st))) {
+      problems.push(`${label} step "${st.name ?? runOf(st).trim().slice(0, 40)}" names NODE_AUTH_TOKEN in its run — it could re-export the token to every later step`);
     }
   }
   const checkouts = steps.filter((st) => typeof st.uses === 'string' && /^actions\/checkout@/.test(st.uses.trim()));
@@ -1452,13 +1478,14 @@ const withCallerDefect = (anchor, withText) => {
 
 // Set from the table's own reported count, never from arithmetic — see the floor's own comment
 // in selftest(). Raise it in the SAME commit that adds probes.
-// LOWERED 123 -> 116, DELIBERATELY. Ten probes policed the prod publish's inline shell loop
+// LOWERED 123 -> 116, DELIBERATELY (then back up as probes were added: 118 with two order probes the
+// adjacency rule had masked, and more for publish-latest.mjs's confinement and the npx/npm-exec rules). Ten probes policed the prod publish's inline shell loop
 // (FILES source, reassignment, `read`, a second loop, the loop variable, a directory publish, a bare
 // publish, a missing `--tag latest`, an appended path, the loop's list). REL3 review showed that surface
 // could not be closed by rules over shell text, so the loop was replaced by scripts/publish-latest.mjs,
 // whose own effect probes cover those behaviours by running it. Three probes here hold the workflow to
 // that script (inline publish refused, `|| true` refused, the loop restored refused).
-const PROBE_FLOOR = 118;
+const PROBE_FLOOR = 125;
 
 const PROBES = [
   {
@@ -1846,6 +1873,29 @@ const PROBES = [
       payload('a `subject-checksums` source alongside the tarballs', "          subject-path: 'dist-tarballs/*.tgz'\n", "          subject-path: 'dist-tarballs/*.tgz'\n          subject-checksums: sums.txt\n"),
       payload('a `subject-name` override', "          subject-path: 'dist-tarballs/*.tgz'\n", "          subject-path: 'dist-tarballs/*.tgz'\n          subject-name: other\n"),
       payload('`permissions: write-all` instead of the explicit scopes', '    permissions:\n      contents: read\n      packages: write\n      id-token: write\n      attestations: write\n', '    permissions: write-all\n'),
+      payload('the rc payload running the prod publish script', PUB, PUB + '      - name: Prod\n        run: node scripts/publish-latest.mjs\n'),
+      payload('an `npx` inside a command substitution, unpinned', 'npx --no-install nx run-many', 'echo "$(npx some-tool@latest)" && npx --no-install nx run-many'),
+      payload('`npm exec` fetching a package at release time', 'npx --no-install nx run-many', 'npm exec --yes -- some-tool@latest && npx --no-install nx run-many'),
+      payload('the token re-exported through $GITHUB_ENV', 'npx --no-install nx run-many', 'echo "NODE_AUTH_TOKEN=$NODE_AUTH_TOKEN" >> "$GITHUB_ENV" && npx --no-install nx run-many'),
+      {
+        what: 'REL3 caller: a branch-triggered workflow running publish-latest.mjs (claims latest)',
+        run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'on:\n  push:\n    branches: [develop]\njobs:\n  n:\n    runs-on: ubuntu-latest\n    steps:\n      - run: node scripts/pack-derived-set.mjs\n      - run: node scripts/publish-latest.mjs\n' }]),
+      },
+      {
+        what: 'REL3 caller: the rc payload file running publish-latest.mjs',
+        run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/publish-packages.yml', text: 'on:\n  workflow_call: {}\njobs:\n  publish:\n    runs-on: ubuntu-latest\n    steps:\n      - run: node scripts/publish-latest.mjs\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }], REUSABLE_PAYLOAD_FIXTURE),
+      },
+      {
+        what: 'REL3: prod (publishing via publish-latest.mjs) pointing setup-node at another registry',
+        run: () => {
+          const pkgs = [{ name: '@spec-kitty/tokens', publishConfig: { registry: 'https://npm.pkg.github.com' } }];
+          const wf = VALID_RELEASE_WORKFLOW.replace('jobs:\n  release:\n    steps:\n', "jobs:\n  release:\n    steps:\n      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e\n        with:\n          registry-url: 'https://registry.npmjs.org'\n");
+          if (wf === VALID_RELEASE_WORKFLOW) throw new Error('anchor not found');
+          // The rc caller rides along with a CORRECT registry, so the set is never empty and only the
+          // prod workflow's npmjs registry-url can trip this probe.
+          return checkRegistryAuthorityAgrees(pkgs, [{ file: '.github/workflows/release.yml', text: wf }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }]);
+        },
+      },
       payload('a custom predicate on the attest step', "          subject-path: 'dist-tarballs/*.tgz'\n", "          subject-path: 'dist-tarballs/*.tgz'\n          predicate-type: https://example.com/custom\n"),
       {
         what: 'REL3 caller: the rc caller without `attestations: write` (the payload needs it; the caller is its ceiling)',

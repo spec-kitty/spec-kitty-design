@@ -24,7 +24,7 @@
  * review defeated every one, because the file supplying the evidence is the file being guarded.
  * Enriching the evidence never raised the attacker's price. So there is no decision left to
  * subvert: this payload publishes prereleases and has no path to the prod channel. `release.yml`
- * owns `latest`, through its own loop, on a tag trigger.
+ * owns `latest`, through scripts/publish-latest.mjs, on a tag trigger.
  *
  * AND THE DECISION IS BRANDED. `publishAll()` accepts only a token minted by `decidePublish`,
  * because pass 4 deleted one line from `main()` — the call itself — and published four packages
@@ -126,8 +126,8 @@ export function decidePublish({ tag }) {
   // it can make it.
   //
   // WHAT THIS COSTS, stated plainly: the reusable payload can never serve prod. `release.yml`
-  // publishes `latest` through its own loop — REL3 (#364) kept it there, publishing the attested
-  // tarballs from that loop rather than passing `dist-tag: latest` here. That is a real architectural constraint, and
+  // publishes `latest` through its own scripts/publish-latest.mjs (REL3, #364), over the same attested
+  // tarballs, rather than passing `dist-tag: latest` here. That is a real architectural constraint, and
   // it is the honest one — an rc payload that CAN claim the prod channel is a payload one edit away
   // from claiming it, which is precisely what five passes demonstrated.
   if (t === 'latest') {

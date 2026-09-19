@@ -10,8 +10,8 @@
       "proof_type": "automated_test",
       "evidence": "scripts/pack-derived-set.mjs (18 probes); pack step in publish-packages.yml and release.yml; release-graph order rule bump < pack < attest",
       "pass_fail": "pass",
-      "verified_by": "claude (REL3, after gate pass 1)",
-      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "verified_by": "claude (REL3, after gate pass 3)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
       "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
@@ -20,18 +20,18 @@
       "proof_type": "automated_test",
       "evidence": "attest step v4.2.2 = 4d101475\u2026 in both workflows; checkAttestation: pin, unconditional, sole subject, no predicate override, publish directly after attest (probes, revert-tested)",
       "pass_fail": "pass",
-      "verified_by": "claude (REL3, after gate pass 1)",
-      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "verified_by": "claude (REL3, after gate pass 3)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
       "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
       "criterion_id": "FR-003",
       "description": "Both paths publish the attested tarball files, never a directory",
       "proof_type": "automated_test",
-      "evidence": "rc: publish-derived-set.mjs publishes readPacked() tarballs (effect probes). Prod: scripts/publish-latest.mjs publishes only the re-validated tarballs under latest (12 effect probes: order, one --tag latest, no package-dir cwd, halt, conflict handling, swapped/extra tarball, manifest tag, outside-Actions); release-graph refuses any inline npm publish in release.yml",
+      "evidence": "rc: publish-derived-set.mjs publishes readPacked() tarballs (effect probes). Prod: scripts/publish-latest.mjs publishes only the re-validated tarballs under latest (16 effect probes: order, one --tag latest, no package-dir cwd, halt, conflict handling, swapped/extra tarball, manifest tag and publishConfig.tag, outside-Actions, branch run, non-vX.Y.Z tag, other workflow); release-graph refuses any inline npm publish in release.yml; release-graph refuses publish-latest.mjs outside release.yml's release job",
       "pass_fail": "pass",
-      "verified_by": "claude (REL3, after gate pass 1)",
-      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "verified_by": "claude (REL3, after gate pass 3)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
       "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
@@ -40,8 +40,8 @@
       "proof_type": "automated_test",
       "evidence": "scripts/verify-published-integrity.mjs: re-downloads through a throwaway npm cache (a real blob GET), compares SHA-512 with the packed file, and runs gh attestation verify --repo --signer-workflow --source-digest --deny-self-hosted-runners on the DOWNLOADED file; 16 probes. Live: rc.2's bytes match, a registry-mismatch control is refused, and rc.2 (unattested) is refused with HTTP 404",
       "pass_fail": "pass",
-      "verified_by": "claude (REL3, after gate pass 1)",
-      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "verified_by": "claude (REL3, after gate pass 3)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
       "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
@@ -50,8 +50,8 @@
       "proof_type": "automated_test",
       "evidence": "PAYLOAD_PERMISSIONS + checkPublishingCallersDelegate (ceiling) + checkAttestation (floor); probes for payload, caller and prod",
       "pass_fail": "pass",
-      "verified_by": "claude (REL3, after gate pass 1)",
-      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "verified_by": "claude (REL3, after gate pass 3)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
       "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
@@ -60,18 +60,18 @@
       "proof_type": "automated_test",
       "evidence": "22 decision + 14 effect probes, including tarball argument, no package-dir cwd, swapped/smuggled tarball, manifest tag and publishConfig.tag",
       "pass_fail": "pass",
-      "verified_by": "claude (REL3, after gate pass 1)",
-      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "verified_by": "claude (REL3, after gate pass 3)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
       "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
       "criterion_id": "FR-007",
       "description": "check-release-graph.mjs asserts the attestation contract for both paths",
       "proof_type": "automated_test",
-      "evidence": "checkAttestation + exact-step rule (incl. publish-latest.mjs) + job hardening (token scope, persist-credentials, npx --no-install, verify signer/digest pins) + no inline prod publish; 118 probes, each rule revert-tested red",
+      "evidence": "checkAttestation + exact-step rule (incl. publish-latest.mjs) + job hardening (token scope and no token in run text, persist-credentials, npx/npm exec pinned, verify signer/digest pins) + publish-latest confined to release.yml; 125 probes, each rule revert-tested red",
       "pass_fail": "pass",
-      "verified_by": "claude (REL3, after gate pass 1)",
-      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "verified_by": "claude (REL3, after gate pass 3)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
       "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
@@ -80,8 +80,8 @@
       "proof_type": "automated_test",
       "evidence": "SBOM step kept on both paths; the tool is now an exact devDependency (6.0.1) run with npx --no-install, so the SBOM also lists that tool's dev tree",
       "pass_fail": "pass",
-      "verified_by": "claude (REL3, after gate pass 1)",
-      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "verified_by": "claude (REL3, after gate pass 3)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
       "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     },
     {
@@ -90,8 +90,8 @@
       "proof_type": "automated_test",
       "evidence": "docs/release-runbook.md: steps, Verifying a published package (incl. rc.0\u2013rc.2 unattested, SLSA L2 scope), failure modes",
       "pass_fail": "pass",
-      "verified_by": "claude (REL3, after gate pass 1)",
-      "verified_at": "2026-09-19T20:42:48.606288+00:00",
+      "verified_by": "claude (REL3, after gate pass 3)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
       "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
     }
   ],

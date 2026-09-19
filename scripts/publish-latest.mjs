@@ -13,7 +13,8 @@
  *
  * WHY NOT publish-derived-set.mjs. That script refuses `latest` unconditionally, by construction (REL2):
  * the rc payload must have no path to the prod channel. This one publishes ONLY `latest` and runs only
- * from the tag-triggered release.yml, which check-release-graph.mjs holds it to.
+ * from the tag-triggered release.yml: check-release-graph.mjs refuses it anywhere else, and the script
+ * itself refuses unless the run is a vX.Y.Z tag push of release.yml.
  *
  * Semantics carried over unchanged from the loop: topological order; an already-published version is a
  * SKIP only on a re-run (GITHUB_RUN_ATTEMPT > 1) and an error on the first attempt; any other failure
@@ -37,8 +38,25 @@ function fail(msg) {
   process.exit(1);
 }
 
+/**
+ * ONLY A VERSION-TAG PUSH OF release.yml MAY PUBLISH `latest` (REL3 review: a branch-triggered job
+ * running this script passed every gate). Defence in depth: check-release-graph.mjs is the primary
+ * fence (it refuses this script outside release.yml's `release` job, and release.yml's step is an exact,
+ * unconditional run, so no prefix can forge these variables there). These are the runner's values.
+ */
+export function prodRunProblem(env) {
+  if (env.GITHUB_REF_TYPE !== 'tag') return `GITHUB_REF_TYPE is ${JSON.stringify(env.GITHUB_REF_TYPE)}, not "tag"`;
+  if (!/^refs\/tags\/v\d+\.\d+\.\d+$/.test(env.GITHUB_REF ?? '')) return `GITHUB_REF ${JSON.stringify(env.GITHUB_REF)} is not a vX.Y.Z tag`;
+  if (!String(env.GITHUB_WORKFLOW_REF ?? '').startsWith('spec-kitty/spec-kitty-design/.github/workflows/release.yml@refs/tags/')) {
+    return `GITHUB_WORKFLOW_REF ${JSON.stringify(env.GITHUB_WORKFLOW_REF)} is not release.yml on a tag`;
+  }
+  return null;
+}
+
 function main() {
   if (process.env.GITHUB_ACTIONS !== 'true') fail('refusing to publish outside GitHub Actions (GITHUB_ACTIONS is not "true")');
+  const why = prodRunProblem(process.env);
+  if (why) fail(`refusing to publish \`latest\`: ${why}. Only a version-tag push of release.yml may.`);
   // A MANIFEST MAY NOT CHOOSE THE CHANNEL. A top-level `tag` beats `--tag` (libnpmpublish:
   // `manifest.tag || defaultTag`); `publishConfig.tag` is refused as insurance.
   const overriding = publishable().filter((p) => (typeof p.tag === 'string' && p.tag.trim()) || (typeof p.publishConfig?.tag === 'string' && p.publishConfig.tag.trim()));
@@ -93,6 +111,13 @@ function withFixturePack(fn) {
   }
 }
 
+const PROD_ENV = {
+  GITHUB_ACTIONS: 'true',
+  GITHUB_REF_TYPE: 'tag',
+  GITHUB_REF: 'refs/tags/v1.2.3',
+  GITHUB_WORKFLOW_REF: 'spec-kitty/spec-kitty-design/.github/workflows/release.yml@refs/tags/v1.2.3',
+};
+
 function selftest() {
   const dir = mkdtempSync(join(tmpdir(), 'pub-latest-'));
   const log = join(dir, 'npm.log');
@@ -103,7 +128,7 @@ function selftest() {
     writeFileSync(log, '');
     const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url), ...args], {
       encoding: 'utf8',
-      env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, GITHUB_ACTIONS: 'true', GITHUB_RUN_ATTEMPT: '1', ...env },
+      env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, ...PROD_ENV, GITHUB_RUN_ATTEMPT: '1', ...env },
     });
     const calls = readFileSync(log, 'utf8').trim();
     return { status: r.status, calls: calls === '' ? [] : calls.split('\n'), out: `${r.stdout}${r.stderr}` };
@@ -119,11 +144,15 @@ function selftest() {
     ['a tarball changed after attestation is refused before any npm call', () => { stub('exit 0'); const f = join(ROOT, PACK_DIR_NAME, want()[0].split('/')[1]); const orig = readFileSync(f); try { writeFileSync(f, 'swapped'); const r = run(); return r.status !== 0 && r.calls.length === 0; } finally { writeFileSync(f, orig); } }],
     ['an unattested extra tarball is refused before any npm call', () => { stub('exit 0'); const x = join(ROOT, PACK_DIR_NAME, 'smuggled-1.0.0.tgz'); try { writeFileSync(x, 'x'); const r = run(); return r.status !== 0 && r.calls.length === 0; } finally { rmSync(x, { force: true }); } }],
     ['a manifest `publishConfig.tag` is refused before any npm call', () => { stub('exit 0'); const f = join(ROOT, 'packages/tokens/package.json'); const o = readFileSync(f, 'utf8'); const j = JSON.parse(o); if (j.publishConfig?.tag !== undefined) return false; try { writeFileSync(f, `${JSON.stringify({ ...j, publishConfig: { ...(j.publishConfig ?? {}), tag: 'next' } }, null, 2)}\n`); const r = run(); return r.status !== 0 && r.calls.length === 0; } finally { writeFileSync(f, o); } }],
+    ['refuses a BRANCH-triggered run (the develop rc stream, a nightly)', () => { stub('exit 0'); const r = run({ GITHUB_REF_TYPE: 'branch' }); return r.status !== 0 && r.calls.length === 0; }],
+    ['refuses a tag that is not vX.Y.Z', () => { stub('exit 0'); const r = run({ GITHUB_REF: 'refs/tags/parity-anchor/rel2' }); return r.status !== 0 && r.calls.length === 0; }],
+    ['refuses a tag push of any workflow other than release.yml', () => { stub('exit 0'); const r = run({ GITHUB_WORKFLOW_REF: 'spec-kitty/spec-kitty-design/.github/workflows/nightly.yml@refs/tags/v1.2.3' }); return r.status !== 0 && r.calls.length === 0; }],
+    ['a manifest top-level `tag` is refused before any npm call', () => { stub('exit 0'); const f = join(ROOT, 'packages/tokens/package.json'); const o = readFileSync(f, 'utf8'); const j = JSON.parse(o); if (j.tag !== undefined) return false; try { writeFileSync(f, `${JSON.stringify({ ...j, tag: 'next' }, null, 2)}\n`); const r = run(); return r.status !== 0 && r.calls.length === 0; } finally { writeFileSync(f, o); } }],
     ['refuses to publish outside GitHub Actions', () => { stub('exit 0'); const r = run({ GITHUB_ACTIONS: '' }); return r.status !== 0 && r.calls.length === 0; }],
     ['an unknown argument exits 2 before any npm call', () => { stub('exit 0'); const r = run({}, ['--nope']); return r.status === 2 && r.calls.length === 0; }],
     ['importing the module publishes nothing', () => { stub('exit 0'); writeFileSync(log, ''); const r = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(import.meta.url)})`], { encoding: 'utf8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, GITHUB_ACTIONS: 'true' } }); return r.status === 0 && readFileSync(log, 'utf8').trim() === ''; }],
   ];
-  const FLOOR = 12;
+  const FLOOR = 16;
   let bad = 0;
   try {
     withFixturePack(() => {
