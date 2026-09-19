@@ -1,7 +1,7 @@
 {
-  "event_count": 3,
-  "last_event_id": "01M2X6803B2GCBF7E2XC3KE9R7",
-  "materialized_at": "2026-09-19T15:58:31.019945+00:00",
+  "event_count": 4,
+  "last_event_id": "01M2X68EFKDGF34JY1N2MESANY",
+  "materialized_at": "2026-09-19T15:58:45.748013+00:00",
   "mission_number": "",
   "mission_slug": "release-pipeline-opendesign-package-01M2X5XX",
   "mission_type": "software-dev",
@@ -9,20 +9,25 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 3
+    "planned": 2
   },
   "work_packages": {
     "WP01": {
-      "actor": "finalize-tasks",
+      "actor": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M2X67ZYB1B96E1A0YSZXSX8Y",
-      "last_transition_at": "2026-09-19T15:58:30.859975+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M2X68EFKDGF34JY1N2MESANY",
+      "last_transition_at": "2026-09-19T15:58:45.748013+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer"
     },
     "WP02": {
       "actor": "finalize-tasks",
