@@ -4,7 +4,7 @@
  *
  * WHAT THIS IS
  *
- * A reproducible invocation that runs the mission's twelve canonical scope items (spec.md's
+ * A reproducible invocation that runs the canonical scope items (spec.md's
  * "Canonical scope" table) under the **webkit** project with `--repeat-each=N` (default 10)
  * and **`retries: 0`**, reporting a per-item pass/fail count. Four other work packages (WP02–
  * WP05) state their acceptance as "10/10 under the WP01 rig" — this file, and the
@@ -26,7 +26,7 @@
  * and never stored. The twelfth (item 12, the `sk-action-row.spec.ts` "external
  * controls" family) is parameterized across six modes with no single line, and is selected by
  * a `--grep` title match instead. Mixing a `--grep` filter into the same invocation as the
- * `file:line` selections would apply that filter GLOBALLY, silently dropping the other eleven
+ * `file:line` selections would apply that filter GLOBALLY, silently dropping the other line-addressed
  * items (their titles do not match item 12's grep pattern) — so item 12 runs as its own,
  * separate invocation against the whole file.
  *
@@ -49,7 +49,10 @@
  * immediate re-measurement. Three landed on different tests; the fourth repeated on item 13,
  * which is the first evidence that it is not uniformly distributed:
  *
- *   #453  run 35375265259 attempt 1  sk-progress item 4        199/200, 200/200 on attempt 2
+ *   #453  run 35375265259 attempt 1  sk-progress item 4        item 4 was 9/10, 10/10 on
+ *                                                              attempt 2 (the run total was
+ *                                                              199/200; the other rows quote
+ *                                                              ITEM counts, so this one now does)
  *   #456  run 35396510928            sk-notice item 13         29/30,  60/60 and 40/40 after
  *   #456  PR #457 CI 35401059899     sk-public-header item 17  1 failure, 40/40 after
  *   #456  run 35408745117            sk-notice item 13 AGAIN   59/60, and the only failure in
