@@ -11,7 +11,7 @@ requirement_refs:
 - FR-008
 planning_base_branch: mission/release-pipeline-attestations
 merge_target_branch: mission/release-pipeline-attestations
-branch_strategy: Planning artifacts for this mission were generated on mission/release-pipeline-attestations. Completed changes merge back into mission/release-pipeline-attestations unless the human explicitly redirects the landing branch.
+branch_strategy: Planning artifacts for this mission were generated on mission/release-pipeline-attestations. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/release-pipeline-attestations unless the human explicitly redirects the landing branch.
 subtasks:
 - T004
 - T005

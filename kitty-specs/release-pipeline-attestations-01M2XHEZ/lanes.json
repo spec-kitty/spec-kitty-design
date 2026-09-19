@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "mission_slug": "release-pipeline-attestations-01M2XHEZ",
+  "mission_id": "01M2XHEZ3CG5YWAEFZXPSTRGBS",
+  "mission_branch": "kitty/mission-release-pipeline-attestations-01M2XHEZ",
+  "target_branch": "mission/release-pipeline-attestations",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "scripts/pack-derived-set.mjs",
+        "scripts/publish-derived-set.mjs",
+        "scripts/verify-published-integrity.mjs"
+      ],
+      "predicted_surfaces": [],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        ".github/workflows/ci-quality.yml",
+        ".github/workflows/publish-packages.yml",
+        ".github/workflows/release-rc.yml",
+        ".github/workflows/release.yml",
+        ".gitignore",
+        "scripts/check-gate-wiring-defeats.mjs",
+        "scripts/check-gate-wiring.mjs",
+        "scripts/check-release-graph.mjs"
+      ],
+      "predicted_surfaces": [],
+      "depends_on_lanes": [
+        "lane-a"
+      ],
+      "parallel_group": 1
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "docs/release-runbook.md"
+      ],
+      "predicted_surfaces": [],
+      "depends_on_lanes": [
+        "lane-b"
+      ],
+      "parallel_group": 2
+    }
+  ],
+  "computed_at": "2026-09-19T19:17:29.899990+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "18d09026a09734ae3d367412128d8c033f1e9e2e"
+}
