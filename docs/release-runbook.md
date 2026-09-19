@@ -117,8 +117,37 @@ For every release after this one, step 5 is the ordinary `git tag vX.Y.Z && git 
    resolve, no sourcemaps, tests or dev files), then `npm pack --dry-run` lists them for the log.
    The assertion is the gate; the listing is for a human reading the release afterwards
 5. **CycloneDX SBOM** (ADR-5 FR-045)
-6. **Publishes** each package to GitHub Packages under dist-tag `latest`. `--provenance` was removed on 2026-09-13: it is the npmjs mechanism and is unsupported on GitHub Packages. FR-044's control relocates to `actions/attest-build-provenance` (#364 scope item 3), per the operator amendment of 2026-09-11 on #361.
-7. **GitHub Release** with the SBOM attached
+6. **Packs** each package into a tarball file in `dist-tarballs/` (`scripts/pack-derived-set.mjs`),
+   recording each file's SHA-512
+7. **Attests** those tarballs with `actions/attest-build-provenance` (SHA-pinned), before anything is
+   published. An attestation failure publishes nothing
+8. **Publishes those exact files** to GitHub Packages under dist-tag `latest` (`npm publish "$file"`,
+   never a package directory, which would repack in memory)
+9. **Verifies** the registry holds the attested bytes: `scripts/verify-published-integrity.mjs`
+   re-downloads each `name@version` and compares its SHA-512
+10. **GitHub Release** with the SBOM attached
+
+The rc stream (`release-rc.yml` → `publish-packages.yml`) runs the same pack, attest, publish and
+verify steps, after its prerelease bump.
+
+**FR-044 (provenance) is met by these attestations** (#364, 2026-09-19). `--provenance` was removed on
+2026-09-13: it is the npmjs mechanism, and it is unsupported on GitHub Packages. The operator amendment
+of 2026-09-11 on #361 replaced it with GitHub artifact attestations.
+
+## Verifying a published package
+
+Every tarball either stream publishes carries a GitHub artifact attestation, stored on
+`spec-kitty/spec-kitty-design`. To check one, fetch the tarball from the registry (your `.npmrc`
+must map `@spec-kitty` to `https://npm.pkg.github.com`) and verify it:
+
+```sh
+npm pack @spec-kitty/elements@1.1.0-rc.3          # writes spec-kitty-elements-1.1.0-rc.3.tgz
+gh attestation verify spec-kitty-elements-1.1.0-rc.3.tgz --repo spec-kitty/spec-kitty-design
+```
+
+A pass means the tarball's digest was attested by a workflow run in this repository. The output names
+the workflow, ref and commit that built it. A failure means the bytes you hold are not the bytes this
+repository's release workflows published.
 
 There is one package list, and it is computed. Until #80 there were three hand-written ones and they
 disagreed: `elements` was built on every release and never published, and `react` appeared in none of
@@ -132,7 +161,7 @@ It short-circuits before `ensureProvenanceGeneration` (`npm/lib/commands/publish
 call with `if (!dryRun)`), verified by running it with a full GitHub Actions environment faked —
 provenance was never exercised. So a green dry run says nothing about:
 
-- **provenance** — needs a real GHA OIDC token
+- **attestation** — needs a real GHA OIDC token (`id-token: write`)
 - **authentication** — the built-in `GITHUB_TOKEN` with `packages: write` (was `NPM_TOKEN`, which never existed; changed with the 2026-09-13 registry move)
 - **registry acceptance** — name availability, scope ownership, version collision
 
@@ -196,10 +225,15 @@ it is the brand assets and 30 OTF font files that `FR-105` records as intended p
 ## If the release fails
 
 - **`404 Not Found - PUT`** — the scope does not exist, or the token cannot write to it. Steps 2–4.
-- **`Can't generate provenance for new or private package`** — `--access public` is missing, or the
-  package is private. The gate should have caught the second on the PR.
-- **`Provenance generation … requires "write" access to the "id-token" permission`** — the workflow's
-  `permissions:` block lost `id-token: write`.
+- **The attest step fails** (`Unable to get ACTIONS_ID_TOKEN_REQUEST_URL`, or a 403 on the attestations
+  API) — the workflow lost `id-token: write` or `attestations: write`. For the rc stream the CALLER
+  (`release-rc.yml`) must grant both too, because a reusable workflow cannot exceed its caller.
+  `check-release-graph.mjs` refuses either loss on the PR. Nothing was published: the attest step runs
+  first.
+- **`… changed after packing` or `… does not list`** — something touched `dist-tarballs/` between the
+  pack and the publish. The publish refuses rather than ship unattested bytes.
+- **`the registry serves … but the attested tarball is …`** — the verify step found different bytes on
+  the registry. Treat that published version as suspect, and do not re-run over it.
 - **A package published and another did not** — this is **expected** on any mid-loop failure, not
   impossible. npm has no atomic multi-package publish, so whatever went out stays out. The publish
   step is built for it: an already-published version is skipped rather than treated as an error,
