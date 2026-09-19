@@ -690,18 +690,36 @@ async function sentinelSelftest() {
   console.log(`${byDefault === 1 ? '✅' : '❌'} drift sentinel: by default, no tracked page fails (got ${byDefault})`);
 
   // An unknown flag is refused with exit 2 instead of falling through to the gate (R1 C1).
+  // Every argument the CLI does not understand is refused before anything runs (R1 C1; R3, R4).
   let flags = 0;
-  for (const flag of ['--no-such-flag', '--drift-sentinal']) {
-    const status = spawnSync(process.execPath, [SELF, flag], { encoding: 'utf8' }).status;
+  const refused = [['--no-such-flag'], ['--drift-sentinal'], ['-h'], ['drift-sentinel'], ['--root'],
+    ['--root', '--selftest'], ['--selftest', '--drift-sentinel']];
+  for (const args of refused) {
+    const status = probeRun(args).status;
     const ok = status === 2;
     if (!ok) failed += 1;
     flags += 1;
-    console.log(`${ok ? '✅' : '❌'} CLI: the unknown flag ${flag} is refused with exit 2 (got ${status})`);
+    console.log(`${ok ? '✅' : '❌'} CLI: \`${args.join(' ')}\` is refused with exit 2 (got ${status})`);
   }
   return { checks: cases.length + 1 + adapter.length + 1 + flags, failed };
 }
 
+/**
+ * Every CLI run the self-test spawns is marked as a PROBE and time-limited. A probe must never start
+ * a self-test of its own: with two-mode refusal broken, `--selftest --drift-sentinel` would run the
+ * self-test, which spawns that probe again — an unbounded chain that hung, rather than failed, when
+ * it happened under mutation (PR #457). The marker turns that into an immediate, named failure.
+ */
+const PROBE_ENV = 'FENCE_GATE_PROBE';
+const probeRun = (args) => spawnSync(process.execPath, [SELF, ...args], {
+  encoding: 'utf8', timeout: 60_000, env: { ...process.env, [PROBE_ENV]: '1' },
+});
+
 async function selftest() {
+  if (process.env[PROBE_ENV]) {
+    console.error('❌ the self-test was started from inside one of its own CLI probes — refusing to recurse');
+    process.exit(3);
+  }
   const quiet = { log: () => {}, error: () => {} };
   let failed = 0;
   let checks = 0;
@@ -709,7 +727,7 @@ async function selftest() {
     const said = [];
     const [got, cli] = withFixture(p.files, (root) => [
       runGate(root, { log: () => {}, error: (m) => said.push(m) }),
-      spawnSync(process.execPath, [SELF, '--root', root], { encoding: 'utf8' }).status,
+      probeRun(['--root', root]).status,
     ]);
     let ok = got === p.expect && cli === p.expect;
     let detail = '';
@@ -767,25 +785,47 @@ async function selftest() {
   console.log(`\n✅ markdown fence gate self-test: ${checks}/${checks} checks hold.`);
 }
 
-/** Flags the CLI accepts. Anything else is refused, not ignored (R1 C1, PR #457): an unknown flag
- * used to fall through to the plain gate, so renaming `--drift-sentinel` in this file but not in CI
- * would have turned the sentinel's CI step into a second, passing run of the gate. */
-const KNOWN_FLAGS = new Set(['--selftest', '--drift-sentinel', '--root']);
+/**
+ * The CLI's modes, in ONE table that both routes the run and defines the accepted flags (R1, PR #457).
+ * An unknown flag used to fall through to the plain gate, so renaming `--drift-sentinel` in this file
+ * but not in CI would have turned the sentinel's CI step into a second, passing run of the gate; and
+ * with the allow-list and the routing as separate strings, renaming only the routing did the same.
+ * Now a rename changes both, and CI's old flag is refused loudly. Every other argument is refused
+ * too: positional words, single-dash flags, a `--root` with no directory, and two modes at once
+ * (R3, R4 round 10).
+ */
+const MODES = {
+  '--selftest': async () => { await selftest(); },
+  // Its own CI step, AFTER the gate (R3 U1): a Storybook loader breakage must not stop the job
+  // before the fence scan has given the PR its verdict.
+  '--drift-sentinel': async () => process.exit(await driftSentinel()),
+};
+
+function parseArgs(args) {
+  const modes = [];
+  let root = null;
+  for (let i = 0; i < args.length; i += 1) {
+    const a = args[i];
+    if (a === '--root') {
+      if (i + 1 >= args.length || args[i + 1].startsWith('-')) return { error: '--root needs a directory' };
+      root = resolve(args[i + 1]);
+      i += 1;
+    } else if (Object.hasOwn(MODES, a)) {
+      modes.push(a);
+    } else {
+      return { error: `unknown argument ${a} — expected one of ${[...Object.keys(MODES), '--root <dir>'].join(', ')}` };
+    }
+  }
+  if (modes.length > 1) return { error: `one mode at a time, got ${modes.join(' and ')}` };
+  return { mode: modes[0] ?? null, root };
+}
 
 if (process.argv[1] && resolve(process.argv[1]) === SELF) {
-  const unknown = process.argv.slice(2).filter((a, i, all) => a.startsWith('--') && !KNOWN_FLAGS.has(a) && all[i - 1] !== '--root');
-  if (unknown.length > 0) {
-    console.error(`❌ unknown flag(s): ${unknown.join(' ')} — expected one of ${[...KNOWN_FLAGS].join(', ')}`);
+  const parsed = parseArgs(process.argv.slice(2));
+  if (parsed.error) {
+    console.error(`❌ ${parsed.error}`);
     process.exit(2);
   }
-  if (process.argv.includes('--selftest')) {
-    await selftest();
-  } else if (process.argv.includes('--drift-sentinel')) {
-    // Its own CI step, AFTER the gate (R3 U1): a Storybook loader breakage must not stop the job
-    // before the fence scan has given the PR its verdict.
-    process.exit(await driftSentinel());
-  } else {
-    const at = process.argv.indexOf('--root');
-    process.exit(runGate(at > -1 ? resolve(process.argv[at + 1]) : REPO_ROOT));
-  }
+  if (parsed.mode) await MODES[parsed.mode]();
+  else process.exit(runGate(parsed.root ?? REPO_ROOT));
 }
