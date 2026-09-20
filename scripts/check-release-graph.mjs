@@ -169,6 +169,21 @@ const RUNS_INLINE_PUBLISH = new RegExp(`(^|[\\s;&|($\`])npm\\s+${NPM_FLAGS}publi
  *  ones, for the command that repoints `latest` directly (REL3 pass 9, architect). */
 const RUNS_DIST_TAG_ADD = new RegExp(`(^|[\\s;&|($\`])npm\\s+${NPM_FLAGS}dist-tag\\s+${NPM_FLAGS}add\\b`);
 
+/**
+ * May this `env:` entry, inside one of the two audited publishing jobs, carry what it carries?
+ * Returns null when it may, or the reason it may not. Both exemptions are here, with the condition
+ * that earns them, because keeping them apart from the rule is what produced the pass-10 defect.
+ */
+function forbiddenEnvCredential({ key, value, step }) {
+  if (typeof value !== 'string' || !EXPANDS_A_SECRET.test(value)) return null;
+  // NODE_AUTH_TOKEN is bounded elsewhere, by TOKEN_SCRIPT_RUN: only an exact registry-script step.
+  if (key === 'NODE_AUTH_TOKEN') return null;
+  // GH_TOKEN is what `gh attestation verify` reads, and the verify step is the only step in either
+  // workflow that carries it. Exempt by exact key, exact value AND exact run — not by key alone.
+  if (key === 'GH_TOKEN' && value.trim() === '${{ github.token }}' && String(step?.run ?? '').trim() === 'node scripts/verify-published-integrity.mjs') return null;
+  return 'inside a publishing job any secret, `toJSON(secrets)` or `${{ github.token }}` is the registry credential under another name; only `NODE_AUTH_TOKEN` on a registry-script step, and `GH_TOKEN: ${{ github.token }}` on the verify step, may carry one';
+}
+
 /** Inline `npm publish`, or one of the publish scripts, which runs it. Hoisted: it was rebuilt inside a
  *  per-step callback (REL3 pass 7, reducer). */
 const PUBLISHES_SOMEHOW = new RegExp(`${RUNS_INLINE_PUBLISH.source}|publish-(latest|derived-set)\\.mjs(?!\\s*--selftest)`);
@@ -990,13 +1005,6 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
   if (jobName !== 'release' && steps.some((st) => /publish-latest\.mjs(?!\s*--selftest)/.test(runOf(st)))) {
     problems.push(`${label} runs scripts/publish-latest.mjs — the prerelease payload must never write \`latest\``);
   }
-  if (jobName === 'release') {
-    // (An inline `npm publish` in this job is refused by the hoisted rule below, which covers both
-    // audited jobs. A release-only copy lived here until REL3 pass 9, when the reducer measured it as
-    // dead weight: deleting it left the release job covered, with the probe table green. The hoisted
-    // rule is therefore the ONLY inline-publish refusal for either job — stubbing it reds four probes
-    // across both — so it is not the redundant half of a pair.)
-  }
   // THE JOB IS THE TRUST BOUNDARY (`id-token: write` reaches every step), so what else each step holds
   // is gated, not just stated (REL3 review: six reverts of this hardening were green):
   //   - the registry token only on the steps that talk to the registry, never job- or workflow-wide;
@@ -1182,26 +1190,22 @@ export function checkWorkflowUsesDerivedSet(
     // presence test (REL3 pass 5, architect — deleting the presence entry left every probe green,
     // so the line was not doing the work its comment claimed).
   ];
-  // AND NO ENV VALUE MAY CARRY A SECRET EXCEPT THE REGISTRY TOKEN (REL3 pass 8, debugger). Every
-  // credential rule here reads run text or the env KEY `NODE_AUTH_TOKEN`, so `env: T: ${{ secrets.… }}`
-  // handed the job the same credential under a name nothing matched, and the step could then assemble
-  // an `.npmrc` line from `$T`. Measured: the only env value expanding a secret in either audited job
-  // is NODE_AUTH_TOKEN itself, so this costs nothing here. (It is deliberately NOT applied to other
-  // jobs: pr-preview's SURGE_TOKEN and ci-quality's release App key are honest uses of that shape.)
-  for (const [where, block] of [['workflow', wf?.env], ['job', wf?.jobs?.[jobName]?.env], ...steps.map((st) => ['step', st?.env])]) {
+  // AND NO ENV VALUE MAY CARRY A CREDENTIAL EXCEPT ON THE STEP THAT NEEDS IT (REL3 pass 8, debugger;
+  // tightened at pass 10 by the reducer and the debugger together). Every other credential rule reads
+  // run text or the env KEY, so `env: T: ${{ secrets.… }}` handed the job the same credential under a
+  // name nothing matched. The two exemptions live INSIDE this decision rather than in the loop around
+  // it: the pass-10 defect was exactly that the loop flattened workflow/job/step blocks and discarded
+  // the step, so the GH_TOKEN exemption applied to any step at all — one with `env: GH_TOKEN` and a
+  // wrapper that writes the token into an npmrc published green, with the reducer's runtime proof.
+  for (const [where, block, step] of [
+    ['workflow', wf?.env, null],
+    ['job', wf?.jobs?.[jobName]?.env, null],
+    ...steps.map((st) => ['step', st?.env, st]),
+  ]) {
     if (!block || typeof block !== 'object') continue;
     for (const [key, value] of Object.entries(block)) {
-      if (key === 'NODE_AUTH_TOKEN') continue; // held to the registry scripts by the rule above
-      // `GH_TOKEN: ${{ github.token }}` is how the verify step authenticates `gh attestation verify`,
-      // and it is the only other credential either audited job carries. Exempt by exact key AND exact
-      // value: `GH_TOKEN: ${{ secrets.ANYTHING }}` is still refused.
-      if (key === 'GH_TOKEN' && typeof value === 'string' && value.trim() === '${{ github.token }}') continue;
-      if (typeof value === 'string' && EXPANDS_A_SECRET.test(value)) {
-        problems.push(
-          `${label} puts a secret in the ${where}-level \`${key}\` — inside a publishing job any secret is ` +
-            'the registry credential under another name; only `NODE_AUTH_TOKEN`, on a registry-script step, may carry one',
-        );
-      }
+      const why = forbiddenEnvCredential({ key, value, step });
+      if (why) problems.push(`${label} puts a credential in the ${where}-level \`${key}\` — ${why}`);
     }
   }
   // THE JOB MAY NOT AUTHOR THE SIGNALS ITS OWN GUARD READS. Both publish scripts decide their
@@ -1240,6 +1244,9 @@ export function checkWorkflowUsesDerivedSet(
     );
   }
   // ...AND NOTHING ELSE MAY PUBLISH. The script is only a guarantee if it is the sole route.
+  // THE ONLY INLINE-PUBLISH REFUSAL FOR EITHER JOB. A release-only copy lived in the prod branch until
+  // REL3 pass 9, when the reducer measured it as dead weight; stubbing this one reds four probes across
+  // both jobs, so it is not the redundant half of a pair — do not delete it looking for a duplicate.
   // THROUGH THE SHARED PREDICATE (REL3 pass 9, reducer): this carried its own hand-spelling — a fourth
   // one, right after the commits that folded three into one, and the one place a future NPM_FLAGS
   // widening would not have reached. The lookahead stays beside it: it tolerates anything at all
@@ -1902,7 +1909,7 @@ const withCallerDefect = (anchor, withText) => {
 // could not be closed by rules over shell text, so the loop was replaced by scripts/publish-latest.mjs,
 // whose own effect probes cover those behaviours by running it. Three probes here hold the workflow to
 // that script (inline publish refused, `|| true` refused, the loop restored refused).
-const PROBE_FLOOR = 216;
+const PROBE_FLOOR = 220;
 
 const VALID_RELEASE_TRIGGER = "on:\n  push:\n    tags: ['v*.*.*']\n";
 const withTrigger = (from, to) => {
@@ -1941,6 +1948,13 @@ const PROBES = [
   { what: 'REL3: a local action OUTSIDE .github/actions is resolved and read', run: () => { const { actions, problems } = collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./tools/promote\n' }], () => ({ file: 'tools/promote/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: node scripts/publish-latest.mjs\n      shell: bash\n' })); return [...problems, ...checkCompositeActionsDoNotPublish(actions)]; } },
   { what: 'REL3: a local action reference that cannot be resolved', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./.github/actions/ghost\n' }], () => null).problems },
   { what: 'REL3: a JOB-level `uses:` of a local action is resolved too', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    uses: ./tools/promote\n' }], () => null).problems },
+  // The GH_TOKEN exemption must be tied to the step that needs it (REL3 pass 10, reducer with a runtime
+  // proof, debugger independently): borrowing the exempt key on any other step published green.
+  { what: 'REL3: the exempt GH_TOKEN borrowed by a wrapper step in the release job', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Promote\n        env:\n          GH_TOKEN: ${{ github.token }}\n        run: node tools/promote.mjs\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
+  { what: 'REL3: the exempt GH_TOKEN borrowed by a wrapper step in the payload job', run: () => checkWorkflowUsesDerivedSet(withPayloadDefect('      - name: Pack', '      - name: Promote\n        env:\n          GH_TOKEN: ${{ github.token }}\n        run: node tools/promote.mjs\n      - name: Pack'), ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml') },
+  // Arms whose probes used spellings that did not exercise them (REL3 pass 10, debugger).
+  { what: 'REL3: an UPPERCASE `${{ SECRETS.X }}` expansion (the expression language is case-insensitive)', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Sneak\n        env:\n          T: ${{ SECRETS.PAT }}\n        run: echo hi\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
+  { what: 'REL3: a flag BETWEEN `dist-tag` and `add`', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Promote\n        run: npm dist-tag --loglevel=error add @spec-kitty/tokens@0.0.1 latest\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
   // `${{ github.token }}` under another name is the same credential (REL3 pass 9, debugger).
   { what: 'REL3: `${{ github.token }}` in an audited job env value under another name', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Sneak\n        env:\n          T: ${{ github.token }}\n        run: echo hi\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
   { what: 'REL3: `toJSON(secrets)`, which hands over every secret at once', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Sneak\n        env:\n          T: ${{ toJSON(secrets) }}\n        run: echo hi\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },

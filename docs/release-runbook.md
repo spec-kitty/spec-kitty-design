@@ -208,11 +208,14 @@ attestation cannot vouch that no step in it misbehaved. The workflows keep that 
   (`bump-prerelease.mjs --from-registry`, `publish-derived-set.mjs`, `publish-latest.mjs`,
   `verify-published-integrity.mjs`, `report-dist-tags.mjs`) — no shell step may hold it; and **no step
   may put a credential in its `run` at all**: not `NODE_AUTH_TOKEN` (which `$GITHUB_ENV` would re-export
-  to every later step), not an `_authToken`/`_auth` line, and not a `${{ secrets.… }}` expansion of any
-  secret, since an `.npmrc` auth line authenticates npm without naming the variable. **Also refused** in
+  to every later step), not an `_authToken`/`_auth` line, and not a `${{ secrets.… }}`,
+  `${{ github.token }}` or `toJSON(secrets)` expansion, since an `.npmrc` auth line authenticates npm
+  without naming the variable. **Also refused** in
   these two jobs: **any** `env:` value that expands a secret or `${{ github.token }}`, under any name
-  (`GH_TOKEN: ${{ github.token }}`, which the verify step needs for `gh attestation verify`, is exempt by
-  exact key and exact value — `GH_TOKEN: ${{ secrets.ANYTHING }}` is not) — inside a publishing job a
+  (`GH_TOKEN: ${{ github.token }}` is exempt by exact key, exact value **and exact step** — only on
+  `run: node scripts/verify-published-integrity.mjs`, which is the one step in either workflow that needs
+  it for `gh attestation verify`. `GH_TOKEN: ${{ secrets.ANYTHING }}` is refused, and so is the exempt
+  key borrowed by any other step) — inside a publishing job a
   secret is the registry credential wearing a different hat, and `NODE_AUTH_TOKEN` on a registry-script
   step is the only one allowed. (That rule is deliberately scoped to the two audited
   jobs: `pr-preview.yml`'s `SURGE_TOKEN` and `ci-quality.yml`'s release App key are honest uses of the
