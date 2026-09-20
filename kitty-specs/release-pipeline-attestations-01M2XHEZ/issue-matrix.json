@@ -13,7 +13,7 @@
       "wp": null
     },
     "#364": {
-      "evidence_ref": "PR #469; items 4 (republish error code) and 5 (routing docs) and making packages public are outside this mission and stay on #364",
+      "evidence_ref": "Scope item 3 (attestations) delivered by PR #469 and gate-approved at 15aef1cd. Items 4 (republish error code) and 5 (routing docs), and making the packages public, were excluded by the operator's 2026-09-19 scope ruling and stay on #364, which remains open as the follow-up. Hardening residuals are #471; the probe-harness dedup is #472.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,7 +21,7 @@
       "scope": "scope item 3 only (attestations), per the operator",
       "source_file": "spec.md",
       "title": "[REL3] prod stream on GitHub Packages and registry routing",
-      "verdict": "in-mission",
+      "verdict": "deferred-with-followup",
       "wp": "WP01,WP02,WP03"
     }
   },
