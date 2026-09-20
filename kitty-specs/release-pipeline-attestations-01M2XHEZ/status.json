@@ -55,7 +55,8 @@
       "last_transition_at": "2026-09-20T02:05:23.430079+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "attest steps + permissions on both streams; 17 release-graph probes and 2 wiring cases, all revert-tested"
+        "attest steps + permissions on both streams; 17 release-graph probes and 2 wiring cases, all revert-tested",
+        "Four-lens adversarial gate APPROVE at 15aef1cd; workflow steps, permissions, release-graph rules and gate wiring all revert-tested"
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
