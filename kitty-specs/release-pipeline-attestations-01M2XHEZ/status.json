@@ -57,7 +57,8 @@
       "model": "__resolved_model_absent__",
       "notes": [
         "attest steps + permissions on both streams; 17 release-graph probes and 2 wiring cases, all revert-tested",
-        "Four-lens adversarial gate APPROVE at 15aef1cd; workflow steps, permissions, release-graph rules and gate wiring all revert-tested"
+        "Four-lens adversarial gate APPROVE at 15aef1cd; workflow steps, permissions, release-graph rules and gate wiring all revert-tested",
+        "Done override: Static acceptance complete and gate-approved at 15aef1cd; the live attestation proof is T009, owned by WP03, which can only run after the merge triggers the promotion publish"
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
