@@ -185,7 +185,10 @@ attestation cannot vouch that no step in it misbehaved. The workflows keep that 
   a job either as `GITHUB_TOKEN` with `packages: write` — which must be declared, since this repository's
   default workflow permission is read — or as a secret the workflow file expands. **One case escapes
   both**: a *new* secret (a PAT) handed to a third-party action as an input, `with: token: ${{ secrets.… }}`,
-  declares no privilege and puts nothing in a `run`. The gate does not read `with:` values for secrets,
+  declares no privilege and puts nothing in a `run`. Its sibling is the same shape one step earlier: a
+  secret under any name in an **unaudited** job's `env:`, consumed by a wrapper file — the env-value rule
+  above is scoped to the two audited jobs precisely because the honest uses of that shape live outside
+  them. The gate does not read `with:` values for secrets,
   and it should not: `ci-quality.yml`'s `promote-develop` job legitimately passes two secrets that way to
   `actions/create-github-app-token`, so the rule would refuse honest work. That case needs a new secret in
   repository settings, which is where the durable fence belongs: a GitHub `environment:` on the two
@@ -206,10 +209,12 @@ attestation cannot vouch that no step in it misbehaved. The workflows keep that 
   `verify-published-integrity.mjs`, `report-dist-tags.mjs`) — no shell step may hold it; and **no step
   may put a credential in its `run` at all**: not `NODE_AUTH_TOKEN` (which `$GITHUB_ENV` would re-export
   to every later step), not an `_authToken`/`_auth` line, and not a `${{ secrets.… }}` expansion of any
-  secret, since an `.npmrc` auth line authenticates npm without naming the variable. What is *not*
-  refused inside these two jobs: **any** `env:` value that expands a secret, under any name — inside a
-  publishing job a secret is the registry credential wearing a different hat, and `NODE_AUTH_TOKEN` on a
-  registry-script step is the only one allowed. (That rule is deliberately scoped to the two audited
+  secret, since an `.npmrc` auth line authenticates npm without naming the variable. **Also refused** in
+  these two jobs: **any** `env:` value that expands a secret or `${{ github.token }}`, under any name
+  (`GH_TOKEN: ${{ github.token }}`, which the verify step needs for `gh attestation verify`, is exempt by
+  exact key and exact value — `GH_TOKEN: ${{ secrets.ANYTHING }}` is not) — inside a publishing job a
+  secret is the registry credential wearing a different hat, and `NODE_AUTH_TOKEN` on a registry-script
+  step is the only one allowed. (That rule is deliberately scoped to the two audited
   jobs: `pr-preview.yml`'s `SURGE_TOKEN` and `ci-quality.yml`'s release App key are honest uses of the
   same shape.) What is *not* refused is a step that assembles such a value at runtime from pieces the
   gate cannot recognise — a step whose only purpose would be hiding from this rule;
@@ -222,7 +227,8 @@ attestation cannot vouch that no step in it misbehaved. The workflows keep that 
 - checkout keeps no credentials;
 - every `npx` and `npm exec` runs the lockfile's copy (`--no-install` / `--no`), never a package fetched at
   release time;
-- secrets reach a step through `env:` on that step;
+- (outside these two jobs, a secret reaches a step through `env:` on that step — inside them, only
+  `NODE_AUTH_TOKEN` on a registry-script step may);
 - neither job may set `GITHUB_REF`, `GITHUB_REF_TYPE`, `GITHUB_REF_NAME`, `GITHUB_WORKFLOW_REF`,
   `GITHUB_EVENT_PATH` or `GITHUB_RUN_ATTEMPT` in an `env:` block: those are the signals the publish
   scripts' own guards read, and a job that can author them can authorise itself.

@@ -164,6 +164,11 @@ const NPM_FLAGS = '(?:-{1,2}[\\w-]+(?:=\\S+)?\\s+(?:[^-\\s]\\S*\\s+)?)*';
 const RUNS_NPM_PUBLISH = new RegExp(`(^|[\\s;&|($\`])npm\\s+${NPM_FLAGS}(publish|dist-tag)\\b`);
 /** `npm publish` in particular (not dist-tag), flags and all. */
 const RUNS_INLINE_PUBLISH = new RegExp(`(^|[\\s;&|($\`])npm\\s+${NPM_FLAGS}publish\\b`);
+/** `npm dist-tag add`, flags and all — it kept a flagless regex of its own when it was hoisted, so
+ *  `npm --loglevel=error dist-tag add` was refused in an unaudited job and allowed in the two audited
+ *  ones, for the command that repoints `latest` directly (REL3 pass 9, architect). */
+const RUNS_DIST_TAG_ADD = new RegExp(`(^|[\\s;&|($\`])npm\\s+${NPM_FLAGS}dist-tag\\s+${NPM_FLAGS}add\\b`);
+
 /** Inline `npm publish`, or one of the publish scripts, which runs it. Hoisted: it was rebuilt inside a
  *  per-step callback (REL3 pass 7, reducer). */
 const PUBLISHES_SOMEHOW = new RegExp(`${RUNS_INLINE_PUBLISH.source}|publish-(latest|derived-set)\\.mjs(?!\\s*--selftest)`);
@@ -178,7 +183,11 @@ const WRITES_REGISTRY_CREDENTIAL = /_authToken|_auth\b|NODE_AUTH_TOKEN/;
 // repository's own idiom — pass it through `env:`, as pr-preview.yml does — not to widen the audited
 // list. Kept because it is the arm that closes the indirection class: a Makefile or a shell wrapper
 // still needs the workflow to expand the secret.
-const EXPANDS_A_SECRET = /\$\{\{\s*secrets\./;
+// `${{ github.token }}` IS THE SAME CREDENTIAL (REL3 pass 9, debugger, with a runtime proof: npm
+// expands `${T}` inside `.npmrc`, so a step holding it under any name authenticates as the
+// GITHUB_TOKEN the job legitimately has). `toJSON(secrets)` hands over all of them at once, and the
+// expression language is case-insensitive.
+const EXPANDS_A_SECRET = /\$\{\{\s*(?:secrets\.|toJSON\(\s*secrets\b|github\.token\b)/i;
 const SIGNS_ATTESTATION = (steps) => steps.some((st) => typeof st?.uses === 'string' && /attest-build-provenance/.test(st.uses));
 
 /** A `node` argument this gate can read: a literal path under scripts/, no expansion of any kind. */
@@ -982,15 +991,11 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
     problems.push(`${label} runs scripts/publish-latest.mjs — the prerelease payload must never write \`latest\``);
   }
   if (jobName === 'release') {
-    // PROD PUBLISHES ONLY THROUGH publish-latest.mjs (an exact, unconditional step — see the exact list).
-    // Inline shell over the tarballs was defeated five ways in review, so no `npm publish` may appear
-    // anywhere else in the job, in any form.
-    const inline = steps
-      .flatMap((st) => runOf(st).split(/&&|\|\||;|\n/))
-      .filter((c) => RUNS_INLINE_PUBLISH.test(c));
-    for (const c of inline) {
-      problems.push(`${label} runs \`${c.trim().slice(0, 70)}\` inline — prod publishes only through \`node scripts/publish-latest.mjs\`, the attested tarballs under \`latest\``);
-    }
+    // (An inline `npm publish` in this job is refused by the hoisted rule below, which covers both
+    // audited jobs. A release-only copy lived here until REL3 pass 9, when the reducer measured it as
+    // dead weight: deleting it left the release job covered, with the probe table green. The hoisted
+    // rule is therefore the ONLY inline-publish refusal for either job — stubbing it reds four probes
+    // across both — so it is not the redundant half of a pair.)
   }
   // THE JOB IS THE TRUST BOUNDARY (`id-token: write` reaches every step), so what else each step holds
   // is gated, not just stated (REL3 review: six reverts of this hardening were green):
@@ -1187,6 +1192,10 @@ export function checkWorkflowUsesDerivedSet(
     if (!block || typeof block !== 'object') continue;
     for (const [key, value] of Object.entries(block)) {
       if (key === 'NODE_AUTH_TOKEN') continue; // held to the registry scripts by the rule above
+      // `GH_TOKEN: ${{ github.token }}` is how the verify step authenticates `gh attestation verify`,
+      // and it is the only other credential either audited job carries. Exempt by exact key AND exact
+      // value: `GH_TOKEN: ${{ secrets.ANYTHING }}` is still refused.
+      if (key === 'GH_TOKEN' && typeof value === 'string' && value.trim() === '${{ github.token }}') continue;
       if (typeof value === 'string' && EXPANDS_A_SECRET.test(value)) {
         problems.push(
           `${label} puts a secret in the ${where}-level \`${key}\` — inside a publishing job any secret is ` +
@@ -1224,15 +1233,19 @@ export function checkWorkflowUsesDerivedSet(
   // running `npm dist-tag add @spec-kitty/tokens@1.0.0 latest` passed every gate and claimed the
   // prod channel. Unlike the `--tag` arms race this closes in one line rather than a pattern to
   // be excused, because the command has no legitimate use in a prerelease payload at all.
-  if (/npm\s+dist-tag\s+add\b/.test(commands)) {
+  if (RUNS_DIST_TAG_ADD.test(commands)) {
     problems.push(
       `${label} runs \`npm dist-tag add\`, which writes a dist-tag directly and bypasses the ` +
         'publish script entirely — there is no legitimate use for it on either publish path',
     );
   }
   // ...AND NOTHING ELSE MAY PUBLISH. The script is only a guarantee if it is the sole route.
+  // THROUGH THE SHARED PREDICATE (REL3 pass 9, reducer): this carried its own hand-spelling — a fourth
+  // one, right after the commits that folded three into one, and the one place a future NPM_FLAGS
+  // widening would not have reached. The lookahead stays beside it: it tolerates anything at all
+  // between `npm` and the subcommand, which is wider still.
   for (const line of commands.split('\n')) {
-    if (/npm\s+publish\b/.test(line) || /\bnpm\b(?=[^\n;|&]*\bpublish\b)/.test(line)) {
+    if (RUNS_INLINE_PUBLISH.test(line) || /\bnpm\b(?=[^\n;|&]*\bpublish\b)/.test(line)) {
       problems.push(
         `${label} runs \`${line.trim()}\` directly instead of going through ` +
           'the publish script for this stream, which is where the channel refusal lives',
@@ -1889,7 +1902,7 @@ const withCallerDefect = (anchor, withText) => {
 // could not be closed by rules over shell text, so the loop was replaced by scripts/publish-latest.mjs,
 // whose own effect probes cover those behaviours by running it. Three probes here hold the workflow to
 // that script (inline publish refused, `|| true` refused, the loop restored refused).
-const PROBE_FLOOR = 208;
+const PROBE_FLOOR = 216;
 
 const VALID_RELEASE_TRIGGER = "on:\n  push:\n    tags: ['v*.*.*']\n";
 const withTrigger = (from, to) => {
@@ -1928,6 +1941,15 @@ const PROBES = [
   { what: 'REL3: a local action OUTSIDE .github/actions is resolved and read', run: () => { const { actions, problems } = collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./tools/promote\n' }], () => ({ file: 'tools/promote/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: node scripts/publish-latest.mjs\n      shell: bash\n' })); return [...problems, ...checkCompositeActionsDoNotPublish(actions)]; } },
   { what: 'REL3: a local action reference that cannot be resolved', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./.github/actions/ghost\n' }], () => null).problems },
   { what: 'REL3: a JOB-level `uses:` of a local action is resolved too', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    uses: ./tools/promote\n' }], () => null).problems },
+  // `${{ github.token }}` under another name is the same credential (REL3 pass 9, debugger).
+  { what: 'REL3: `${{ github.token }}` in an audited job env value under another name', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Sneak\n        env:\n          T: ${{ github.token }}\n        run: echo hi\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
+  { what: 'REL3: `toJSON(secrets)`, which hands over every secret at once', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Sneak\n        env:\n          T: ${{ toJSON(secrets) }}\n        run: echo hi\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
+  { what: 'REL3: GH_TOKEN carrying a real secret rather than github.token', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Sneak\n        env:\n          GH_TOKEN: ${{ secrets.PAT }}\n        run: echo hi\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
+  { what: 'REL3 discovery: an unaudited job taking `${{ github.token }}` in its run', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: echo "//npm.pkg.github.com/:_x=${{ github.token }}" > /tmp/x\n' }]) },
+  { what: 'REL3: `npm dist-tag add` behind a flag, in the audited release job', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Promote\n        run: npm --loglevel=error dist-tag add @spec-kitty/tokens@0.0.1 latest\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
+  { what: 'REL3: `npm dist-tag add` behind a flag, in the audited payload job', run: () => checkWorkflowUsesDerivedSet(withPayloadDefect('      - name: Pack', '      - name: Promote\n        run: npm --loglevel=error dist-tag add @spec-kitty/tokens@0.0.1 rc\n      - name: Pack'), ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml') },
+  { what: 'REL3 discovery: an `_auth` npmrc line, the sibling key of `_authToken`', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    env:\n      K: x\n    steps:\n      - run: echo "//npm.pkg.github.com/:_auth=$K" > ~/.npmrc\n' }]) },
+  { what: 'REL3: an inline `npm publish` in the audited PAYLOAD job', run: () => checkWorkflowUsesDerivedSet(withPayloadDefect('      - name: Pack', '      - name: Sneak\n        run: npm publish ./packages/tokens --tag rc\n      - name: Pack'), ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml') },
   // Pass 8, debugger: the prod job was the one place `npm dist-tag add` was permitted, its
   // inline-publish test was the weaker of the two, and no rule read an `env:` VALUE for a secret.
   { what: 'REL3: `npm dist-tag add` inside the audited release job', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Promote\n        run: npm dist-tag add @spec-kitty/tokens@0.0.1 latest\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
@@ -2867,6 +2889,10 @@ function selftest() {
     // The rc caller delegates to our own payload and runs no steps: it must stay clean, and the
     // exemption that makes it so has no must-trip probe (REL3 pass 7, reducer).
     ['the rc caller job, which only delegates to the payload', () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/release-rc.yml', text: 'jobs:\n  rc:\n    uses: ./.github/workflows/publish-packages.yml\n    permissions:\n      contents: read\n      packages: write\n      id-token: write\n      attestations: write\n' }])],
+    // The token rule's "could resolve to a registry script" narrowing is an OVER-REFUSAL fix, so its
+    // guard is a clean baseline rather than a must-trip probe (REL3 pass 9, debugger — third report of
+    // this shape): honest commands that merely name something under scripts/ must stay clean.
+    ['ordinary commands that name scripts/ without being able to run a publisher', () => checkPublishingCallersDelegate([{ file: '.github/workflows/docs.yml', text: 'jobs:\n  d:\n    steps:\n      - run: |\n          cp scripts/*.md docs/\n          ls scripts/\n          node scripts/render-diagrams.js --check\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }])],
     // An ordinary job whose COMMENT mentions a publish command is not a publishing job (REL3 pass 6,
     // reviewer): the discovery detector reads shell, and prose is not shell.
     ['an unaudited job whose comment mentions npm dist-tag ls', () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/docs.yml', text: 'jobs:\n  docs:\n    steps:\n      - run: |\n          # the release job runs `npm dist-tag ls` later; this one only builds docs\n          node scripts/render-diagrams.js\n' }])],
