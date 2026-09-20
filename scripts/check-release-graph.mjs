@@ -1790,6 +1790,8 @@ jobs:
         with:
           subject-path: 'dist-tarballs/*.tgz'
       - name: Publish
+        env:
+          NODE_AUTH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
         run: node scripts/publish-latest.mjs
       - name: Verify
         env:
@@ -1863,6 +1865,7 @@ const REUSABLE_PAYLOAD_FIXTURE = `jobs:
       - name: Publish
         env:
           DIST_TAG: \${{ inputs.dist-tag }}
+          NODE_AUTH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
         run: node scripts/publish-derived-set.mjs
       - name: Verify
         env:
@@ -1931,7 +1934,7 @@ const withCallerDefect = (anchor, withText) => {
 // could not be closed by rules over shell text, so the loop was replaced by scripts/publish-latest.mjs,
 // whose own effect probes cover those behaviours by running it. Three probes here hold the workflow to
 // that script (inline publish refused, `|| true` refused, the loop restored refused).
-const PROBE_FLOOR = 222;
+const PROBE_FLOOR = 224;
 
 const VALID_RELEASE_TRIGGER = "on:\n  push:\n    tags: ['v*.*.*']\n";
 const withTrigger = (from, to) => {
@@ -1970,6 +1973,8 @@ const PROBES = [
   { what: 'REL3: a local action OUTSIDE .github/actions is resolved and read', run: () => { const { actions, problems } = collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./tools/promote\n' }], () => ({ file: 'tools/promote/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: node scripts/publish-latest.mjs\n      shell: bash\n' })); return [...problems, ...checkCompositeActionsDoNotPublish(actions)]; } },
   { what: 'REL3: a local action reference that cannot be resolved', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./.github/actions/ghost\n' }], () => null).problems },
   { what: 'REL3: a JOB-level `uses:` of a local action is resolved too', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    uses: ./tools/promote\n' }], () => null).problems },
+  { what: 'REL3: the verify step itself carrying a real secret as GH_TOKEN', run: () => checkWorkflowUsesDerivedSet(withDefect('          GH_TOKEN: ${{ github.token }}\n          SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/release.yml', '          GH_TOKEN: ${{ secrets.PAT }}\n          SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/release.yml'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
+  { what: 'REL3: an auth line in the .npmrc that is NOT commented out', run: () => checkNpmrcHasNoAuth('; //npm.pkg.github.com/:_authToken=OLD\n//npm.pkg.github.com/:_authToken=${GH_TOKEN}\n') },
   { what: 'REL3: an auth line added to the tracked .npmrc', run: () => checkNpmrcHasNoAuth('@spec-kitty:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=${GH_TOKEN}\n') },
   { what: 'REL3: a username/password pair in the tracked .npmrc', run: () => checkNpmrcHasNoAuth('//npm.pkg.github.com/:username=x\n') },
   // The GH_TOKEN exemption must be tied to the step that needs it (REL3 pass 10, reducer with a runtime
@@ -2934,6 +2939,12 @@ function selftest() {
     // An ordinary job whose COMMENT mentions a publish command is not a publishing job (REL3 pass 6,
     // reviewer): the discovery detector reads shell, and prose is not shell.
     ['an unaudited job whose comment mentions npm dist-tag ls', () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/docs.yml', text: 'jobs:\n  docs:\n    steps:\n      - run: |\n          # the release job runs `npm dist-tag ls` later; this one only builds docs\n          node scripts/render-diagrams.js\n' }])],
+    // The npmrc check must not refuse a comment that merely mentions an auth key, or an ordinary
+    // setting (REL3 pass 11, debugger).
+    ['a .npmrc with a commented auth line and an ordinary setting', () => checkNpmrcHasNoAuth('@spec-kitty:registry=https://npm.pkg.github.com\n; //npm.pkg.github.com/:_authToken=set-by-setup-node\nalways-auth=true\n')],
+    // The verify step written WITHOUT inner spaces must stay clean: the exemption normalises whitespace
+    // inside the expression, and nothing else tested that (REL3 pass 11, reducer).
+    ['VALID_RELEASE_WORKFLOW, verify step written `${{github.token}}`', () => checkWorkflowUsesDerivedSet(withDefect('GH_TOKEN: ${{ github.token }}', 'GH_TOKEN: ${{github.token}}'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml')],
     // The token-holder rule must not over-refuse: the report script holding the token is clean.
     ['VALID_RELEASE_WORKFLOW, report holding the token', () => checkWorkflowUsesDerivedSet(withDefect('      - name: Report\n        run: node scripts/report-dist-tags.mjs', '      - name: Report\n        env:\n          NODE_AUTH_TOKEN: x\n        run: node scripts/report-dist-tags.mjs'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml')],
   ];

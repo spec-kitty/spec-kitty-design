@@ -28,7 +28,8 @@
       "last_transition_at": "2026-09-20T02:04:35.377667+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "pack/publish-tarball/verify scripts with probes, revert-tested; live verify against rc.2"
+        "pack/publish-tarball/verify scripts with probes, revert-tested; live verify against rc.2",
+        "Four-lens adversarial gate APPROVE at 15aef1cd (architect, debugger, reviewer, reducer); eleven passes, every finding folded"
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
