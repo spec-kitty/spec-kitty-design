@@ -117,8 +117,131 @@ For every release after this one, step 5 is the ordinary `git tag vX.Y.Z && git 
    resolve, no sourcemaps, tests or dev files), then `npm pack --dry-run` lists them for the log.
    The assertion is the gate; the listing is for a human reading the release afterwards
 5. **CycloneDX SBOM** (ADR-5 FR-045)
-6. **Publishes** each package to GitHub Packages under dist-tag `latest`. `--provenance` was removed on 2026-09-13: it is the npmjs mechanism and is unsupported on GitHub Packages. FR-044's control relocates to `actions/attest-build-provenance` (#364 scope item 3), per the operator amendment of 2026-09-11 on #361.
-7. **GitHub Release** with the SBOM attached
+6. **Packs** each package into a tarball file in `dist-tarballs/` (`scripts/pack-derived-set.mjs`),
+   recording each file's SHA-512
+7. **Attests** those tarballs with `actions/attest-build-provenance` (SHA-pinned), before anything is
+   published. An attestation failure publishes nothing
+8. **Publishes those exact files** to GitHub Packages under dist-tag `latest` through
+   `scripts/publish-latest.mjs`. It publishes only the re-validated attested tarballs (never a package
+   directory, which would repack in memory), in topological order, and halts on the first real failure
+9. **Verifies** the registry holds the attested bytes: `scripts/verify-published-integrity.mjs`
+   re-downloads each `name@version` and compares its SHA-512
+10. **GitHub Release** with the SBOM attached
+
+The rc stream (`release-rc.yml` → `publish-packages.yml`) runs the same pack, attest, publish and
+verify steps, after its prerelease bump.
+
+**FR-044 (provenance) is met by these attestations** (#364, 2026-09-19). `--provenance` was removed on
+2026-09-13: it is the npmjs mechanism, and it is unsupported on GitHub Packages. The operator amendment
+of 2026-09-11 on #361 replaced it with GitHub artifact attestations.
+
+## Verifying a published package
+
+Every tarball either stream publishes carries a GitHub artifact attestation, stored on
+`spec-kitty/spec-kitty-design`. To check one, fetch the tarball from the registry (your `.npmrc`
+must map `@spec-kitty` to `https://npm.pkg.github.com`) and verify it:
+
+```sh
+npm pack @spec-kitty/elements@1.1.0-rc.3          # writes spec-kitty-elements-1.1.0-rc.3.tgz
+gh attestation verify spec-kitty-elements-1.1.0-rc.3.tgz --repo spec-kitty/spec-kitty-design \
+  --signer-workflow spec-kitty/spec-kitty-design/.github/workflows/publish-packages.yml
+```
+
+`--repo` alone accepts an attestation from any workflow in the repository, on any ref, so pin the
+signer. rc versions are signed by the reusable `publish-packages.yml`, and `latest` versions by
+`release.yml`. Add `--source-ref refs/heads/develop` for rc, or `--source-ref refs/tags/vX.Y.Z` for
+prod, to pin the ref as well. The release workflows' own verify step pins the signer workflow and the
+exact commit (`--source-digest`).
+
+A pass means the tarball's digest was attested by a workflow run in this repository. The output names
+the workflow, ref and commit that built it. For any version published after attestations were added
+(REL3, #364), a failure means the bytes you hold are not the bytes this repository's release workflows
+published. **Versions published before that, `1.1.0-rc.0` to `1.1.0-rc.2`, carry no attestation**, so
+`gh attestation verify` finds nothing for them.
+
+**What an attestation does and does not prove.** It is SLSA Build Level 2 provenance: a signed
+statement, from this repository's release workflow on a GitHub-hosted runner, that it produced these
+exact bytes from the named commit. For rc versions, the named commit is the `develop` commit: the
+prerelease version bump is applied on the runner and is never committed, so that commit's
+`package.json` still shows the previous version. The attest step runs in the same job as the build, and
+`id-token: write` reaches every step of that job. **The job, not the step, is the trust boundary**: the
+attestation cannot vouch that no step in it misbehaved. The workflows keep that job small, and
+`check-release-graph.mjs` enforces it on every PR:
+
+- only two `(workflow, job)` pairs may publish — `release.yml:release` and
+  `publish-packages.yml:publish`. Any other job in any workflow is refused when it declares
+  `packages: write` or `attestations: write`, holds the registry credential (in an `env:` block, or
+  written into the run text as `NODE_AUTH_TOKEN`, `_authToken` or a `${{ secrets.… }}` expansion), runs
+  `npm publish`/`npm dist-tag`, runs one of the registry scripts, or signs an attestation. The same
+  applies to every local action a workflow `uses:`, resolved by reference, and an unresolvable
+  reference is itself a refusal. And no `scripts/…` token that could resolve to one of the registry
+  scripts may be non-literal — a glob, a quoted split or an interpolation is unreadable to every rule
+  that names a script — in a workflow, a local action or any package manifest's npm scripts.
+  (`scripts/*.mjs` is refused because it could expand to a publisher; `scripts/*.md` and a bare
+  directory are not.)
+
+  **What this does not cover, stated rather than implied.** These are text and YAML rules over this
+  repository's own files. The signals hold because a publish needs a credential, and a credential reaches
+  a job either as `GITHUB_TOKEN` with `packages: write` — which must be declared, since this repository's
+  default workflow permission is read — or as a secret the workflow file expands. **One case escapes
+  both**: a *new* secret (a PAT) handed to a third-party action as an input, `with: token: ${{ secrets.… }}`,
+  declares no privilege and puts nothing in a `run`. Its sibling is the same shape one step earlier: a
+  secret under any name in an **unaudited** job's `env:`, consumed by a wrapper file — the env-value rule
+  above is scoped to the two audited jobs precisely because the honest uses of that shape live outside
+  them. The gate does not read `with:` values for secrets,
+  and it should not: `ci-quality.yml`'s `promote-develop` job legitimately passes two secrets that way to
+  `actions/create-github-app-token`, so the rule would refuse honest work. That case needs a new secret in
+  repository settings, which is where the durable fence belongs: a GitHub `environment:` on the two
+  audited jobs, or a publish-scoped secret rather than `GITHUB_TOKEN`. That is a repository-settings
+  change rather than a code change, it is not in this mission's scope, and it is filed as #471.
+
+  **The capability signal rests on a repository setting too.** `packages: write` is worth keying on
+  because this repository's default workflow permission is `read`
+  (`gh api repos/spec-kitty/spec-kitty-design/actions/permissions/workflow` → `"read"`, measured
+  2026-09-20). An admin can change that in settings without touching a file here; every job would then
+  hold the write scopes implicitly, and no gate in this repository would notice. Same remedy, same issue.
+
+  The rules below apply **within** the two audited jobs;
+- **the registry credential reaches exactly the steps that publish, and nothing else.** Two halves of one
+  rule, kept together because they drifted apart once already: `NODE_AUTH_TOKEN` in an `env:` block is
+  allowed only on a step whose `run` is exactly one of the registry scripts
+  (`bump-prerelease.mjs --from-registry`, `publish-derived-set.mjs`, `publish-latest.mjs`,
+  `verify-published-integrity.mjs`, `report-dist-tags.mjs`) — no shell step may hold it; and **no step
+  may put a credential in its `run` at all**: not `NODE_AUTH_TOKEN` (which `$GITHUB_ENV` would re-export
+  to every later step), not an `_authToken`/`_auth` line, and not a `${{ secrets.… }}`,
+  `${{ github.token }}` or `toJSON(secrets)` expansion, since an `.npmrc` auth line authenticates npm
+  without naming the variable. **Also refused** in
+  these two jobs: **any** `env:` value that expands a secret or `${{ github.token }}`, under any name
+  (`GH_TOKEN: ${{ github.token }}` is exempt by exact key, exact value **and exact step** — only on
+  `run: node scripts/verify-published-integrity.mjs`, which is the one step in either workflow that needs
+  it for `gh attestation verify`. `GH_TOKEN: ${{ secrets.ANYTHING }}` is refused, and so is the exempt
+  key borrowed by any other step) — inside a publishing job a
+  secret is the registry credential wearing a different hat, and `NODE_AUTH_TOKEN` on a registry-script
+  step is the only one allowed. (That rule is deliberately scoped to the two audited
+  jobs: `pr-preview.yml`'s `SURGE_TOKEN` and `ci-quality.yml`'s release App key are honest uses of the
+  same shape.) What is *not* refused is a step that assembles such a value at runtime from pieces the
+  gate cannot recognise — a step whose only purpose would be hiding from this rule;
+- neither job may run `npm dist-tag add`, the other documented way to write a dist-tag, and neither may
+  run `npm publish` inline in any spelling — flags before the subcommand, a flag whose value is a
+  separate word, or anything between `npm` and `publish`. Both rules used to apply to the rc payload
+  alone, which left prod — the job that owns `latest` — as the one place in the repository where a
+  "Promote the release tag" step would have passed;
+- the tracked `.npmrc` carries the scope-to-registry mapping and no auth line. npm expands `${VAR}` in
+  an npmrc from the process environment, so an auth line there — documented practice, innocuous in a
+  diff — would let any step holding a token authenticate. The credential reaches npm through the
+  runner's own npmrc, written by `setup-node`, never through a file in this repository;
+- no step may run a local (`./…`) action, whose steps the gate cannot read;
+- checkout keeps no credentials;
+- every `npx` and `npm exec` runs the lockfile's copy (`--no-install` / `--no`), never a package fetched at
+  release time;
+- (outside these two jobs, a secret reaches a step through `env:` on that step — inside them, only
+  `NODE_AUTH_TOKEN` on a registry-script step may);
+- neither job may set `GITHUB_REF`, `GITHUB_REF_TYPE`, `GITHUB_REF_NAME`, `GITHUB_WORKFLOW_REF`,
+  `GITHUB_EVENT_PATH` or `GITHUB_RUN_ATTEMPT` in an `env:` block: those are the signals the publish
+  scripts' own guards read, and a job that can author them can authorise itself.
+
+It is still provenance, not a guarantee of a clean build. Attestations on this plan also need the repository to stay **public**;
+making it private would stop new releases from being attestable.
 
 There is one package list, and it is computed. Until #80 there were three hand-written ones and they
 disagreed: `elements` was built on every release and never published, and `react` appeared in none of
@@ -132,7 +255,7 @@ It short-circuits before `ensureProvenanceGeneration` (`npm/lib/commands/publish
 call with `if (!dryRun)`), verified by running it with a full GitHub Actions environment faked —
 provenance was never exercised. So a green dry run says nothing about:
 
-- **provenance** — needs a real GHA OIDC token
+- **attestation** — needs a real GHA OIDC token (`id-token: write`)
 - **authentication** — the built-in `GITHUB_TOKEN` with `packages: write` (was `NPM_TOKEN`, which never existed; changed with the 2026-09-13 registry move)
 - **registry acceptance** — name availability, scope ownership, version collision
 
@@ -196,15 +319,34 @@ it is the brand assets and 30 OTF font files that `FR-105` records as intended p
 ## If the release fails
 
 - **`404 Not Found - PUT`** — the scope does not exist, or the token cannot write to it. Steps 2–4.
-- **`Can't generate provenance for new or private package`** — `--access public` is missing, or the
-  package is private. The gate should have caught the second on the PR.
-- **`Provenance generation … requires "write" access to the "id-token" permission`** — the workflow's
-  `permissions:` block lost `id-token: write`.
+- **The attest step fails with `missing "id-token" permission`, or a 403 on the attestations API** —
+  the workflow lost `id-token: write` or `attestations: write`. For the rc stream, a CALLER
+  (`release-rc.yml`) missing either fails workflow validation before any step runs, because a reusable
+  workflow cannot exceed its caller. `check-release-graph.mjs` refuses either loss on the PR. Nothing
+  was published: the attest step runs first.
+- **The attest step fails for no reason in this repository** (Sigstore, Rekor or the attestations API
+  unavailable) — nothing was published, because attesting comes first. Re-run once the service is
+  back.
+- **`… changed after packing` or `… does not list`** — something touched `dist-tarballs/` between the
+  pack and the publish. The publish refuses rather than ship unattested bytes.
+- **The verify step cannot confirm an attestation** (`could not confirm the published tarball and its
+  attestation`), for example during an attestations-API outage. This happens AFTER the publish, so the
+  bytes are already out. For prod, re-run the tag once the service is back: the retry skips the published
+  packages and verifies them. For rc, a re-run bumps to the next rc, so a transient outage costs a
+  version number. Check the published one by hand with `gh attestation verify` instead.
+- **`the registry serves … but the attested tarball is …`** — the verify step found different bytes on
+  the registry. Treat that published version as suspect and investigate before anything else.
+  Re-running cannot fix a published version.
 - **A package published and another did not** — this is **expected** on any mid-loop failure, not
   impossible. npm has no atomic multi-package publish, so whatever went out stays out. The publish
-  step is built for it: an already-published version is skipped rather than treated as an error,
-  and real failures are collected and reported together. Fix the cause and re-run the same tag —
-  the retry skips what is already on the registry and completes the set.
+  step halts at the first real failure, and on a re-run an already-published version is skipped
+  rather than treated as an error. Fix the cause and re-run the same tag. The retry re-packs,
+  re-attests and verifies the whole set, and completes it.
+  **The retry is sound only if the rebuild reproduces the same bytes.** The same commit on a
+  GitHub-hosted runner does, because the checkout path is fixed and `npm pack` is deterministic.
+  A changed toolchain between attempts could change a bundle. The Node version floats within `22`.
+  If the bytes differ, the verify step fails for the packages already published, and that version
+  cannot be completed: cut the next version instead.
 
 ## What this repo does not do
 

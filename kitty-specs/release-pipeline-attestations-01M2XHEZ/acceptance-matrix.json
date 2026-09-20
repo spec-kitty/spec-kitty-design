@@ -1,0 +1,100 @@
+{
+  "mission_slug": "release-pipeline-attestations-01M2XHEZ",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pending",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Each publish path packs the derived set into dist-tarballs/ after any bump, recording SHA-512s",
+      "proof_type": "automated_test",
+      "evidence": "scripts/pack-derived-set.mjs (18 probes); pack step in publish-packages.yml and release.yml; release-graph order rule bump < pack < attest",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 5)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "A SHA-pinned attest-build-provenance step attests exactly dist-tarballs/*.tgz before any publish",
+      "proof_type": "automated_test",
+      "evidence": "attest step v4.2.2 = 4d101475… in both workflows; checkAttestation: pin, unconditional, sole subject, no predicate override, publish directly after attest (probes, revert-tested)",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 5)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Both paths publish the attested tarball files, never a directory",
+      "proof_type": "automated_test",
+      "evidence": "rc: publish-derived-set.mjs publishes readPacked() tarballs (effect probes). Prod: scripts/publish-latest.mjs publishes only the re-validated tarballs under latest (16 effect probes: order, one --tag latest, no package-dir cwd, halt, conflict handling, swapped/extra tarball, manifest tag and publishConfig.tag, outside-Actions, branch run, non-vX.Y.Z tag, other workflow); release-graph refuses any inline npm publish in release.yml; release-graph refuses publish-latest.mjs outside release.yml's release job",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 5)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "After publishing, the registry bytes are re-downloaded and compared with the attested SHA-512",
+      "proof_type": "automated_test",
+      "evidence": "scripts/verify-published-integrity.mjs: re-downloads through a throwaway npm cache (a real blob GET), compares SHA-512 with the packed file, and runs gh attestation verify --repo --signer-workflow --source-digest --deny-self-hosted-runners on the DOWNLOADED file; 19 probes (one runs the CLI against a stub gh and asserts the pins it forwards). Live: rc.2's bytes match, a registry-mismatch control is refused, and rc.2 (unattested) is refused with HTTP 404",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 5)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "id-token and attestations write on the payload job, rc caller and release.yml; no contents: write in the payload; ceiling holds",
+      "proof_type": "automated_test",
+      "evidence": "PAYLOAD_PERMISSIONS + checkPublishingCallersDelegate (ceiling) + checkAttestation (floor); probes for payload, caller and prod",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 5)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "publish-derived-set.mjs keeps its latest refusal and branded decision and publishes tarballs",
+      "proof_type": "automated_test",
+      "evidence": "22 decision + 14 effect probes, including tarball argument, no package-dir cwd, swapped/smuggled tarball, manifest tag and publishConfig.tag",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 5)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "check-release-graph.mjs asserts the attestation contract for both paths",
+      "proof_type": "automated_test",
+      "evidence": "checkAttestation + exact-step rule (pack, verify, report-dist-tags, publish-latest) + job hardening (NODE_AUTH_TOKEN only on exact registry-script runs; no token named in a run; persist-credentials; npx/npm exec pinned incl. `npm x` and pipes; verify signer/digest pins; no local actions; no auth line in the tracked .npmrc; no forged GITHUB_* env; no secret, `toJSON(secrets)` or `github.token` in any env value but NODE_AUTH_TOKEN and GH_TOKEN bound to exact key, value AND the verify step's exact run; no `npm dist-tag add`; no inline `npm publish` in any flag spelling — the last two applied to the rc payload only until gate pass 8) + publish-latest confined to release.yml's tag-triggered release job at gate and runtime + release.yml's trigger pinned to push tags ['v*.*.*'] + publishing capability DISCOVERED (privilege, credential in env or run text, npm publish/dist-tag, registry script, attest action) and held to two audited (workflow, job) pairs, over workflows, every local action a workflow uses (resolved by reference; an unresolvable one is refused) and every package manifest's npm scripts + no `scripts/…` token may be non-literal; 224 probes, each rule and each detection arm revert-tested red. Inside the audited jobs no step may put a credential in its run at all (a secret expansion as well as the variable name). Residual, recorded in the runbook and #471: a NEW secret handed to a third-party action through `with:` declares no privilege and appears in no run — and the capability signal itself rests on the repository's default workflow permission being `read` (measured).",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 5)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "The CycloneDX SBOM is still produced on both paths (its contents changed: see evidence)",
+      "proof_type": "automated_test",
+      "evidence": "Both workflows still run CycloneDX and the rc payload still uploads sbom-<dist-tag>. DEVIATION, recorded rather than glossed (gate pass 5 records fact-check): the tool was a release-time `npx @cyclonedx/cyclonedx-npm` fetch and is now an exact devDependency (6.0.1) run with `npx --no-install`, so the SBOM additionally lists that dev tree and the lockfile gained 122 dev entries. The pin was required by FR-005's hardening: an unpinned npx on a job holding id-token: write is a release-time fetch into the signing job. 'Unchanged' in the FR means the step and its artifact, not the byte content.",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 5)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "The runbook documents verification and FR-044 met by attestations",
+      "proof_type": "automated_test",
+      "evidence": "docs/release-runbook.md: steps, Verifying a published package (incl. rc.0–rc.2 unattested, SLSA L2 scope), failure modes",
+      "pass_fail": "pass",
+      "verified_by": "claude (REL3, after gate pass 5)",
+      "verified_at": "2026-09-19T21:40:44.574464+00:00",
+      "notes": "Static and local evidence; the first live attested publish is post-merge (T009)."
+    }
+  ],
+  "negative_invariants": [],
+  "notes": ""
+}

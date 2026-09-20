@@ -1,0 +1,94 @@
+{
+  "event_count": 17,
+  "last_event_id": "01M2Y90DGEFP87A2K1SVNBT239",
+  "materialized_at": "2026-09-20T02:06:02.766148+00:00",
+  "mission_number": "",
+  "mission_slug": "release-pipeline-attestations-01M2XHEZ",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 2,
+    "for_review": 0,
+    "in_progress": 1,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 0,
+      "lane": "done",
+      "last_event_id": "01M2Y90C9VN607NV6G9YK8PH3S",
+      "last_transition_at": "2026-09-20T02:06:01.531510+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "pack/publish-tarball/verify scripts with probes, revert-tested; live verify against rc.2",
+        "Four-lens adversarial gate APPROVE at 15aef1cd (architect, debugger, reviewer, reducer); eleven passes, every finding folded",
+        "Done override: Static acceptance complete and gate-approved at 15aef1cd; the live attestation proof is T009, owned by WP03, which can only run after the merge triggers the promotion publish"
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "reference": "Four-lens adversarial gate APPROVE at 15aef1cd (architect, debugger, reviewer, reducer); eleven passes, every finding folded",
+        "reviewer": "MOES-Media",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done"
+      }
+    },
+    "WP02": {
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 0,
+      "lane": "done",
+      "last_event_id": "01M2Y90DGEFP87A2K1SVNBT239",
+      "last_transition_at": "2026-09-20T02:06:02.766148+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "attest steps + permissions on both streams; 17 release-graph probes and 2 wiring cases, all revert-tested",
+        "Four-lens adversarial gate APPROVE at 15aef1cd; workflow steps, permissions, release-graph rules and gate wiring all revert-tested",
+        "Done override: Static acceptance complete and gate-approved at 15aef1cd; the live attestation proof is T009, owned by WP03, which can only run after the merge triggers the promotion publish"
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "reference": "Four-lens adversarial gate APPROVE at 15aef1cd; workflow steps, permissions, release-graph rules and gate wiring all revert-tested",
+        "reviewer": "MOES-Media",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "subtasks": {
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done"
+      }
+    },
+    "WP03": {
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 0,
+      "lane": "in_progress",
+      "last_event_id": "01M2XNF3ZHTNK42QYCBKRJYR0N",
+      "last_transition_at": "2026-09-19T20:24:33.009533+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer",
+      "subtasks": {
+        "T008": "done"
+      }
+    }
+  }
+}

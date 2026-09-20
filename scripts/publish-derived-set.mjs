@@ -24,7 +24,7 @@
  * review defeated every one, because the file supplying the evidence is the file being guarded.
  * Enriching the evidence never raised the attacker's price. So there is no decision left to
  * subvert: this payload publishes prereleases and has no path to the prod channel. `release.yml`
- * owns `latest`, through its own loop, on a tag trigger.
+ * owns `latest`, through scripts/publish-latest.mjs, on a tag trigger.
  *
  * AND THE DECISION IS BRANDED. `publishAll()` accepts only a token minted by `decidePublish`,
  * because pass 4 deleted one line from `main()` — the call itself — and published four packages
@@ -34,7 +34,7 @@
  * invocations: those cannot be satisfied by a bypassed `main()`.
  */
 import { spawnSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, rmSync, realpathSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, rmSync, realpathSync, existsSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -42,6 +42,8 @@ import { fileURLToPath } from 'node:url';
 // react), which is exactly what the halting behaviour below depends on. Reusing it rather than
 // re-deriving is the same fail-closed accessor the workflow's own resolve step uses.
 import { publishable } from './release-graph.mjs';
+// REL3: the publish reads the ATTESTED tarballs, fully re-validated, from the fixed dist-tarballs/.
+import { readPacked, sha512Integrity, PACK_DIR_NAME, MANIFEST } from './pack-derived-set.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -49,24 +51,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
  *  flag used to fall through to the destructive default in the sibling bump script. */
 const KNOWN_ARGV = new Set(['--dry-run', '--selftest', '--']);
 
-export function isDirectInvocation(argv1, moduleUrl) {
-  if (!argv1 || !moduleUrl) return false;
-  // realpath BOTH SIDES. Plain `resolve` made an invocation through a symlink compare unequal, so
-  // the module went inert and `--selftest` printed nothing and exited 0 — a fail-open entry point
-  // in the one file whose whole thesis is fail-closed, and indistinguishable from a green run.
-  const real = (x) => {
-    try {
-      return realpathSync(x);
-    } catch {
-      return resolve(x);
-    }
-  };
-  try {
-    return real(argv1) === real(fileURLToPath(moduleUrl));
-  } catch {
-    return false;
-  }
-}
+import { isDirectInvocation } from './lib/direct-invocation.mjs';
 
 export function unknownArgv(argv) {
   // NO `startsWith('-')` PREDICATE. It structurally could not see a bare word, so a plain
@@ -124,8 +109,8 @@ export function decidePublish({ tag }) {
   // it can make it.
   //
   // WHAT THIS COSTS, stated plainly: the reusable payload can never serve prod. `release.yml`
-  // publishes `latest` through its own loop, and REL3's fold must give prod a separately audited
-  // path rather than passing `dist-tag: latest` here. That is a real architectural constraint, and
+  // publishes `latest` through its own scripts/publish-latest.mjs (REL3, #364), over the same attested
+  // tarballs, rather than passing `dist-tag: latest` here. That is a real architectural constraint, and
   // it is the honest one — an rc payload that CAN claim the prod channel is a payload one edit away
   // from claiming it, which is precisely what five passes demonstrated.
   if (t === 'latest') {
@@ -183,10 +168,15 @@ function publishAll(decision, { dryRun }) {
   // Nothing in the repo read that key, so it was one JSON line from here to `latest`, unobservable
   // in the run log. This is the same lesson as the workflow guards, one layer down: the refusal has
   // to cover every input npm actually consults, not just the one this file passes.
-  const overriding = pkgs.filter((p) => typeof p.tag === 'string' && p.tag.trim() !== '');
+  // …AND `publishConfig.tag`. Measured on npm 10.9.7: the explicit `--tag` this script passes WINS
+  // over `publishConfig.tag` (npm drops publishConfig keys also given on the CLI), while a top-level
+  // `tag` wins over `--tag`. The publishConfig refusal is insurance against that precedence changing.
+  const overriding = pkgs.filter(
+    (p) => (typeof p.tag === 'string' && p.tag.trim() !== '') || (typeof p.publishConfig?.tag === 'string' && p.publishConfig.tag.trim() !== ''),
+  );
   if (overriding.length > 0) {
     console.error(
-      `::error::${overriding.map((p) => `${p.name} declares "tag": ${JSON.stringify(p.tag)}`).join('; ')}. ` +
+      `::error::${overriding.map((p) => `${p.name} declares ${p.tag ? `"tag": ${JSON.stringify(p.tag)}` : `"publishConfig.tag": ${JSON.stringify(p.publishConfig.tag)}`}`).join('; ')}. ` +
         'npm resolves `manifest.tag || --tag`, so a manifest tag silently overrides the dist-tag this ' +
         'script passes — including to `latest`. Remove the key; the dist-tag is the workflow\'s to set.',
     );
@@ -201,16 +191,31 @@ function publishAll(decision, { dryRun }) {
     return;
   }
 
+  // PUBLISH THE ATTESTED FILES, NEVER A DIRECTORY (REL3, #364). `npm publish` inside a package
+  // directory packs in memory, so the bytes it uploads are not the bytes the attest step certified.
+  // `readPacked()` re-validates the whole set first: the same names, versions and order as `pkgs`,
+  // every file still hashing to its recorded integrity, and no stray tarball the attest glob covered.
+  let packed;
+  try {
+    packed = readPacked();
+  } catch (e) {
+    console.error(`::error::${e.message}`);
+    console.error('The publish reads only the attested tarballs in dist-tarballs/; refusing to publish anything else.');
+    process.exit(1);
+  }
+
   const attempt = process.env.GITHUB_RUN_ATTEMPT ?? '1';
-  for (const p of pkgs) {
-    const cwd = join(ROOT, 'packages', p.dir);
-    console.log(`\n=== publishing ${p.name} under ${tag} ===`);
+  for (const entry of packed.entries) {
+    const p = entry;
+    const tarball = join(packed.outDir, entry.file);
+    console.log(`\n=== publishing ${entry.name}@${entry.version} under ${tag} from ${PACK_DIR_NAME}/${entry.file} ===`);
     try {
       // BOTH STREAMS. `execFileSync` returns stdout only, and npm writes its publish notices to
       // stderr — so the success path logged almost nothing, in the one place where the log IS the
       // evidence. maxBuffer is raised explicitly: the 1 MB default turns a chatty publish into an
-      // ENOBUFS throw that would be misreported as a publish failure.
-      const r = spawnSync('npm', ['publish', '--tag', tag], { cwd, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
+      // ENOBUFS throw that would be misreported as a publish failure. `cwd` is the repo root, whose
+      // .npmrc maps the scope; the package directory is never the working directory of a publish.
+      const r = spawnSync('npm', ['publish', tarball, '--tag', tag], { cwd: ROOT, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
       if (r.error) throw r.error;
       const out = `${r.stdout ?? ''}${r.stderr ?? ''}`;
       if (r.status !== 0) throw Object.assign(new Error(`npm publish exited ${r.status}`), { stdout: r.stdout, stderr: r.stderr });
@@ -237,7 +242,7 @@ function publishAll(decision, { dryRun }) {
       process.exit(1);
     }
   }
-  console.log(`\n✅ published ${pkgs.length} package(s) under \`${tag}\`.`);
+  console.log(`\n✅ published ${packed.entries.length} attested tarball(s) under \`${tag}\`.`);
 }
 
 function main({ dryRun }) {
@@ -341,12 +346,35 @@ const PROBES = [
  * stub `npm` first on PATH, and assert on what npm was actually asked to do. A `main()` that skips
  * the decision fails them, because they count invocations rather than inspecting a return value.
  */
+/**
+ * A FIXTURE dist-tarballs/ at the real ROOT — the publish reads that fixed path and nothing else (no
+ * override exists, deliberately). Fake bytes are fine: `readPacked()` checks names, versions, order and
+ * that each file hashes to its record, not that it is a real npm tarball. Refuses to clobber a real one.
+ */
+function withFixturePack(fn) {
+  const out = join(ROOT, PACK_DIR_NAME);
+  if (existsSync(out)) throw new Error(`${PACK_DIR_NAME}/ already exists — the effect probes need a clean tree`);
+  mkdirSync(out);
+  try {
+    const entries = publishable().map((p) => {
+      const file = `${p.name.replace('@', '').replace('/', '-')}-${p.version}.tgz`;
+      writeFileSync(join(out, file), `fixture:${p.name}`);
+      return { name: p.name, version: p.version, dir: p.dir, file, integrity: sha512Integrity(join(out, file)) };
+    });
+    writeFileSync(join(out, MANIFEST), JSON.stringify({ schemaVersion: 1, entries }));
+    return fn(out);
+  } finally {
+    rmSync(out, { recursive: true, force: true });
+  }
+}
+
 function effectProbes() {
   const dir = mkdtempSync(join(tmpdir(), 'pds-effect-'));
   const log = join(dir, 'npm.log');
   const bin = join(dir, 'bin');
   mkdirSync(bin);
-  writeFileSync(join(bin, 'npm'), `#!/bin/sh\necho "npm $*" >> "${log}"\nexit 0\n`, { mode: 0o755 });
+  // The stub records its working directory too, so a probe can prove no publish runs in packages/.
+  writeFileSync(join(bin, 'npm'), `#!/bin/sh\necho "npm $* cwd=$PWD" >> "${log}"\nexit 0\n`, { mode: 0o755 });
 
   const run = (env) => {
     writeFileSync(log, '');
@@ -404,9 +432,9 @@ function effectProbes() {
       // its three dependents publish against a peer that does not exist — permanently.
       'EFFECT: a failing publish HALTS the set rather than continuing past it',
       () => {
-        writeFileSync(join(bin, 'npm'), `#!/bin/sh\necho "npm $*" >> "${log}"\ncase "$PWD" in *tokens) exit 1;; esac\nexit 0\n`, { mode: 0o755 });
+        writeFileSync(join(bin, 'npm'), `#!/bin/sh\necho "npm $* cwd=$PWD" >> "${log}"\ncase "$*" in *spec-kitty-tokens-*) exit 1;; esac\nexit 0\n`, { mode: 0o755 });
         const r = run({ DIST_TAG: 'rc', GITHUB_REF_TYPE: 'branch', GITHUB_REF: 'refs/heads/develop' });
-        writeFileSync(join(bin, 'npm'), `#!/bin/sh\necho "npm $*" >> "${log}"\nexit 0\n`, { mode: 0o755 });
+        writeFileSync(join(bin, 'npm'), `#!/bin/sh\necho "npm $* cwd=$PWD" >> "${log}"\nexit 0\n`, { mode: 0o755 });
         // tokens is first in topological order: exactly one call, then a halt.
         return r.status !== 0 && r.calls.length === 1;
       },
@@ -422,6 +450,22 @@ function effectProbes() {
         if (j.tag !== undefined) return false; // anchor gone; probe would be vacuous
         try {
           writeFileSync(f, `${JSON.stringify({ ...j, tag: 'latest' }, null, 2)}\n`);
+          const r = run({ DIST_TAG: 'rc' });
+          return r.status !== 0 && r.calls.length === 0;
+        } finally {
+          writeFileSync(f, original);
+        }
+      },
+    ],
+    [
+      'EFFECT (REL3): a manifest `publishConfig.tag` override is refused before any npm call',
+      () => {
+        const f = join(ROOT, 'packages/tokens/package.json');
+        const original = readFileSync(f, 'utf8');
+        const j = JSON.parse(original);
+        if (j.publishConfig?.tag !== undefined) return false; // anchor gone; probe would be vacuous
+        try {
+          writeFileSync(f, `${JSON.stringify({ ...j, publishConfig: { ...(j.publishConfig ?? {}), tag: 'latest' } }, null, 2)}\n`);
           const r = run({ DIST_TAG: 'rc' });
           return r.status !== 0 && r.calls.length === 0;
         } finally {
@@ -451,6 +495,48 @@ function effectProbes() {
         return r.status === 0 && d.status !== 0 && readFileSync(log, 'utf8').trim() === '';
       },
     ],
+    [
+      'EFFECT (REL3): every publish names an attested tarball from dist-tarballs/, in topological order',
+      () => {
+        const r = run({ DIST_TAG: 'rc', GITHUB_REF_TYPE: 'branch', GITHUB_REF: 'refs/heads/develop' });
+        const want = publishable().map((p) => `${PACK_DIR_NAME}/${p.name.replace('@', '').replace('/', '-')}-${p.version}.tgz`);
+        return r.status === 0 && r.calls.length === want.length && r.calls.every((c, i) => c.includes(want[i]));
+      },
+    ],
+    [
+      'EFFECT (REL3): no publish runs with a package directory as its working directory',
+      () => {
+        const r = run({ DIST_TAG: 'rc', GITHUB_REF_TYPE: 'branch', GITHUB_REF: 'refs/heads/develop' });
+        return r.calls.length > 0 && r.calls.every((c) => !/cwd=\S*\/packages\//.test(c) && !/cwd=\S*\/packages$/.test(c));
+      },
+    ],
+    [
+      'EFFECT (REL3): a tarball changed after attestation is refused before any npm call',
+      () => {
+        const f = readdirSync(join(ROOT, PACK_DIR_NAME)).find((x) => x.endsWith('.tgz'));
+        const original = readFileSync(join(ROOT, PACK_DIR_NAME, f));
+        try {
+          writeFileSync(join(ROOT, PACK_DIR_NAME, f), 'swapped after the attest step');
+          const r = run({ DIST_TAG: 'rc', GITHUB_REF_TYPE: 'branch', GITHUB_REF: 'refs/heads/develop' });
+          return r.status !== 0 && r.calls.length === 0;
+        } finally {
+          writeFileSync(join(ROOT, PACK_DIR_NAME, f), original);
+        }
+      },
+    ],
+    [
+      'EFFECT (REL3): an unattested extra tarball in dist-tarballs/ is refused before any npm call',
+      () => {
+        const extra = join(ROOT, PACK_DIR_NAME, 'smuggled-1.0.0.tgz');
+        try {
+          writeFileSync(extra, 'x');
+          const r = run({ DIST_TAG: 'rc', GITHUB_REF_TYPE: 'branch', GITHUB_REF: 'refs/heads/develop' });
+          return r.status !== 0 && r.calls.length === 0;
+        } finally {
+          rmSync(extra, { force: true });
+        }
+      },
+    ],
   ];
 
   let bad = 0;
@@ -477,7 +563,7 @@ function effectProbes() {
 // defect this floor exists to catch.
 const PROBE_FLOOR = 22;
 // Effect probes have their own floor: they are the only ones a bypassed `main()` cannot satisfy.
-const EFFECT_FLOOR = 9;
+const EFFECT_FLOOR = 14;
 
 function selftest() {
   let bad = 0;
@@ -500,7 +586,7 @@ function selftest() {
     process.exit(1);
   }
   console.log('\n── effect probes (spawned child + stub npm; a bypassed main() fails these) ──');
-  const eff = effectProbes();
+  const eff = withFixturePack(() => effectProbes());
   if (eff.bad) {
     console.error(`\n❌ ${eff.bad} of ${eff.total} EFFECT probe(s) failed — the decision is not reaching the publish.`);
     process.exit(1);

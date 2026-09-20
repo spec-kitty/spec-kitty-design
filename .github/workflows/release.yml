@@ -15,31 +15,36 @@ on:
 #   `packages: write`  is now required — without it GITHUB_TOKEN cannot publish here at all, and
 #                      this workflow did not have it, so it would have 403'd even after the
 #                      registry change.
-#   `id-token: write`  is gone with `--provenance` below. npm provenance is an npmjs.org MECHANISM
-#                      and is unsupported on GitHub Packages. The CONTROL it implements is not lost:
-#                      #364 scope item 3 replaces it with `actions/attest-build-provenance` over the
-#                      packed tarballs, needing `attestations: write` and `id-token: write` — under
-#                      the operator amendment of 2026-09-11 (#361), "GitHub artifact attestations
-#                      replace npm provenance". So FR-044 is RELOCATED, not retired, and this file
-#                      must not say otherwise: an earlier revision of this comment claimed it "cannot
-#                      be satisfied by any configuration", which is false and is exactly the kind of
-#                      confident wrong statement a later mission cites as settled.
+#   `--provenance`     is gone: npm provenance is an npmjs.org MECHANISM, unsupported on GitHub
+#                      Packages. FR-044 is met instead by `actions/attest-build-provenance` over the
+#                      packed tarballs (REL3, #364, per the 2026-09-11 amendment on #361), which is
+#                      why `id-token: write` and `attestations: write` are declared below.
 #   `NPM_TOKEN`        never existed as a secret (verified: zero secrets by that name), so prod
 #                      could not publish to npmjs today regardless. GITHUB_TOKEN is a credential
 #                      that actually exists.
-permissions:
-  contents: write   # for GitHub Release creation
-  packages: write   # to publish to GitHub Packages — load-bearing, and absent before this change
+# PERMISSIONS ARE DECLARED ON THE JOB, NOT THE WORKFLOW (REL3 pass 5, architect). At workflow level
+# they are inherited by every job this file ever gains, so a second job would hold Sigstore signing
+# and `packages: write` while every rule in check-release-graph.mjs audits the `release` job alone.
 
 jobs:
   release:
+    permissions:
+      contents: write   # for GitHub Release creation
+      packages: write   # to publish to GitHub Packages — load-bearing, and absent before this change
+      id-token: write      # REL3 (#364): Sigstore signing for the tarball attestations
+      attestations: write  # REL3 (#364): store the attestations on this repo
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # THE REGISTRY TOKEN IS STEP-SCOPED, NOT JOB-WIDE (REL3 review). `id-token: write` makes every step
+    # in this job able to mint an OIDC token and so sign an attestation; a job-wide NODE_AUTH_TOKEN and
+    # checkout's persisted credentials widened what any one step could do on top. So: the token goes
+    # only to the steps that talk to the registry, checkout does not persist credentials, and the SBOM
+    # tool runs from the lockfile (`npx --no-install`) instead of being fetched unpinned at release time.
+    # What remains is inherent to attesting in the building job (SLSA Build L2): the attestation proves
+    # these bytes came from this workflow on a GitHub-hosted runner, not that no step in it misbehaved.
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 0, persist-credentials: false }
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
         with:
           node-version: '22'
@@ -89,7 +94,7 @@ jobs:
 
 
       - name: Build all packages
-        run: npx nx run-many --target=build --projects=${{ steps.graph.outputs.projects }}
+        run: npx --no-install nx run-many --target=build --projects=${{ steps.graph.outputs.projects }}
 
       # The `cp sk-nav-pill.js` step that stood here is gone with the helper (#73). It existed
       # only because @nx/js:tsc copies **/*.{html,css} assets and not .js, and @spec-kitty/styles
@@ -137,135 +142,53 @@ jobs:
 
       - name: Generate CycloneDX SBOM (FR-045)
         run: |
-          npx @cyclonedx/cyclonedx-npm \
+          npx --no-install @cyclonedx/cyclonedx-npm \
             --output-format json \
             --output-file spec-kitty-design-sbom.cdx.json
           echo "SBOM components: $(node -e "const d=require('./spec-kitty-design-sbom.cdx.json'); console.log(d.components.length)")"
 
-      # ONE step over the derived set, not one hand-written step per package. Two steps named
-      # `tokens` and `styles` are how `elements` and `react` came to be absent without anyone
-      # noticing: adding a package to the repo did not add it here, and nothing compared the two.
-      #
-      # `set -euo pipefail` is load-bearing. Without it a failing `npm publish` inside a `for` loop
-      # does not fail the step, and the workflow would report a successful release having published
-      # a subset — the same silent-partial-success this whole rewrite is about.
-      # RESUMABLE, AND IT ACCUMULATES. `set -e` with a bare loop aborts on the first failure,
-      # which is not a recovery strategy — npm has no atomic multi-package publish, so a failure
-      # part-way leaves earlier packages on the registry permanently. Re-running then aborted on
-      # the FIRST package, which is the already-published one, so the packages that actually
-      # failed were never retried and the release stayed wedged at that version. A lens walked
-      # through it.
-      #
-      # So an already-published version is a SKIP, not a failure.
-      #
-      # `set -euo pipefail` is RESTORED here. An earlier revision dropped `-e` on the stated
-      # grounds that it "would defeat the handling" — that is false, and a lens measured it: POSIX
-      # exempts the condition of an `if` from `set -e`, and both handled commands are if-conditions.
-      # Dropping `-e` therefore bought nothing and silently removed protection from every
-      # *unhandled* command in the block.
+      # REL3 (#364): PACK, ATTEST, PUBLISH THOSE FILES, VERIFY — the same order and the same shared
+      # scripts as the rc payload. `--provenance` stays gone (it is the npmjs mechanism and hard-fails
+      # on GitHub Packages); FR-044 is met by these attestations over the exact published bytes.
+      - name: "[ENFORCED] Pack the derived set into the tarballs that get attested and published"
+        run: node scripts/pack-derived-set.mjs
+
+      - name: "[ENFORCED] Attest the packed tarballs (#364, FR-044)"
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # actions/attest-build-provenance v4.2.2
+        with:
+          subject-path: 'dist-tarballs/*.tgz'
+
+      # THE PROD PUBLISH IS A SCRIPT, NOT AN INLINE LOOP (REL3 review). Rules written over the old
+      # loop's shell were defeated by a second `--tag`, `FILES+=`, `read … FILES` and a repack inside the
+      # step — REL2's lesson again. publish-latest.mjs publishes only the re-validated attested tarballs,
+      # under `latest`, in topological order: an already-published version is a skip only on a re-run
+      # (npm has no atomic multi-package publish, so a re-run completes a partial set), any other failure
+      # halts. A re-run re-packs the same commit; on a GitHub-hosted runner that reproduces the same bytes,
+      # and if it did not, verify fails and that version cannot be completed — see the runbook.
       - name: Publish every package in the derived set
-        run: |
-          set -euo pipefail
-          PKGS="${{ steps.graph.outputs.dirs }}"
-          [ -n "$PKGS" ] || { echo "::error::empty publish set reached the publish loop"; exit 1; }
-          failed=""
-          for pkg in $PKGS; do
-            echo "=== publishing packages/$pkg ==="
-            # `--provenance` REMOVED with the registry move, not as a preference: it is the npmjs
-            # MECHANISM, unsupported on GitHub Packages, and it hard-fails without the
-            # `id-token: write` this workflow no longer declares. FR-044's control is relocated, not
-            # retired — #364 scope item 3 replaces it with `actions/attest-build-provenance`.
-            # `--access public` went with it: an npmjs access model; GitHub Packages governs
-            # visibility per package outside the publish call.
-            #
-            # This loop is deliberately NOT routed through scripts/publish-derived-set.mjs yet. That
-            # is REL3's fold, and the operator scoped this change to the registry alone. The script
-            # would permit `latest` here — it keys on GITHUB_REF_TYPE, and this workflow is
-            # tag-triggered — so the fold is available whenever REL3 takes it.
-            if out="$( cd "packages/$pkg" && npm publish 2>&1 )"; then
-              echo "$out"
-            else
-              echo "$out"
-              # ANCHORED ON THE ERROR CODE. Matching prose ("previously published", "cannot publish
-              # over") means any error whose body happens to quote those words is swallowed as a
-              # skip — a lens built a synthetic 403 that did exactly that. npm prints a stable
-              # `npm error code EPUBLISHCONFLICT` line; that is the signal.
-              if echo "$out" | grep -qE "code (EPUBLISHCONFLICT|E409)"; then
-                # A conflict on a RETRY is resumption. A conflict on the first attempt means the
-                # name+version is on the registry and this workflow did not put it there — these
-                # names have never been published, so that is someone else's package, not ours.
-                # Warning, not notice, and never on attempt 1.
-                if [ "${GITHUB_RUN_ATTEMPT:-1}" -gt 1 ]; then
-                  echo "::warning::packages/$pkg is already published at this version — skipping (run attempt ${GITHUB_RUN_ATTEMPT})"
-                else
-                  echo "::error::packages/$pkg reports an existing $pkg version on the FIRST attempt."
-                  echo "Nothing under @spec-kitty has ever been published, so this is not a resumption."
-                  echo "Verify ownership before re-running: npm view <name>@<version> _npmUser.name"
-                  failed="$failed $pkg"
-                  break
-                fi
-              else
-                # HALT, do not accumulate. The set is published in TOPOLOGICAL order precisely so a
-                # package goes out after everything it depends on. Continuing past a real failure
-                # spends that guarantee in the only path it was for: if `tokens` fails, `styles`,
-                # `elements` and `react` publish anyway, `npm publish` does not resolve peers so all
-                # three succeed, and every consumer install then hard-fails E404 on the peer that is
-                # missing. Those versions are permanent — a version cannot be republished and the
-                # unpublish window is 72h and conditional.
-                #
-                # A lens caught this: the resumability of this loop comes entirely from the
-                # skip-on-conflict branch above, not from continuing past real failures. Halting
-                # loses nothing, because the retry resumes from here.
-                echo "::error::halting — every package after $pkg in the derived set may depend on it"
-                failed="$failed $pkg"
-                break
-              fi
-            fi
-          done
-          if [ -n "$failed" ]; then
-            echo "::error::failed to publish:$failed"
-            echo "Packages published before the failure remain on the registry; npm has no atomic"
-            echo "multi-package publish. Fix the cause and re-run this tag — already-published"
-            echo "packages are skipped, so the retry completes the set."
-            exit 1
-          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/publish-latest.mjs
+
+      - name: "[ENFORCED] The registry holds exactly the attested bytes (#364)"
+        run: node scripts/verify-published-integrity.mjs
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # `gh attestation verify` reads the attestations API; each downloaded tarball must carry
+          # an attestation from this repo, not merely match packed.json (which is not attested).
+          GH_TOKEN: ${{ github.token }}
+          # Pin WHICH workflow, on WHICH commit, signed: `--repo` alone accepts any workflow on any ref.
+          SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/release.yml
+          SOURCE_DIGEST: ${{ github.sha }}
 
       # SAME REASONING AS THE RC PAYLOAD, and it applies here now that prod publishes to GitHub
-      # Packages too: `npm view` returns exit 0 with zero bytes against this registry, so a report
-      # built on it is blind and green. `npm dist-tag ls` works, and an empty read is a FAILED read.
+      # Packages too: the UNVERSIONED `npm view` queries a tag report would use (`dist-tags`,
+      # `versions`) return exit 0 with zero bytes against this registry, so a report built on them is
+      # blind and green. `npm dist-tag ls` works, and an empty read is a FAILED read.
       - name: "[ENFORCED] Report the published dist-tags"
-        run: |
-          set -euo pipefail
-          FAILED=""
-          # A GREEN LINE OVER ZERO PACKAGES IS THE FOUNDING DEFECT OF THIS GATE FAMILY. With `dirs`
-          # empty the loop iterated zero times and the step exited 0, reporting a confirmed publish
-          # having confirmed nothing.
-          REPORT_PKGS="${{ steps.graph.outputs.dirs }}"
-          [ -n "$REPORT_PKGS" ] || { echo "::error::empty publish set reached the dist-tag report"; exit 1; }
-          for pkg in $REPORT_PKGS; do
-            NAME="$(node -p "require('./packages/$pkg/package.json').name")"
-            echo "=== $NAME ==="
-            # STATUS ON ITS OWN LINE, and stderr kept OUT of the success test. The first version
-            # wrote `OUT="$(npm dist-tag ls "$NAME" 2>&1)" || true`, folding an E404/E401 body INTO
-            # $OUT — so an auth failure sailed through the emptiness check as a non-empty "reading"
-            # and `|| true` discarded the status. Same blind-and-green shape this step was written
-            # to fix, one layer in.
-            set +e
-            OUT="$(npm dist-tag ls "$NAME" 2>/tmp/disttag.err)"
-            RC=$?
-            set -e
-            printf '%s\n' "$OUT"
-            if [ "$RC" -ne 0 ]; then
-              echo "::error::$NAME: npm dist-tag ls exited $RC"
-              sed 's/^/    /' /tmp/disttag.err
-              FAILED="$FAILED $NAME"
-            elif [ -z "$(printf '%s' "$OUT" | tr -d '[:space:]')" ]; then
-              echo "::error::$NAME returned an empty dist-tag listing — a failed read, not an absent tag"
-              FAILED="$FAILED $NAME"
-            fi
-          done
-          [ -z "$FAILED" ] || { echo "::error::could not confirm dist-tags for:$FAILED"; exit 1; }
-
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/report-dist-tags.mjs
       - name: Create GitHub Release with SBOM
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # softprops/action-gh-release v3.0.0
         with:

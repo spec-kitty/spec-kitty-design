@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-19T19:14:33.709045+00:00",
+  "flattened": false,
+  "friendly_name": "release pipeline attestations",
+  "mission_id": "01M2XHEZ3CG5YWAEFZXPSTRGBS",
+  "mission_number": null,
+  "mission_slug": "release-pipeline-attestations-01M2XHEZ",
+  "mission_type": "software-dev",
+  "purpose_context": "REL3 (#364, epic #361), scope item 3: replace npm provenance (unsupported on GitHub Packages) with GitHub artifact attestations over the packed tarballs, SHA-pinned actions/attest-build-provenance with attestations: write and id-token: write, on the shared publish payload so both the rc and prod streams attest what they publish; keep the CycloneDX SBOM.",
+  "purpose_tldr": "Attest every published @spec-kitty tarball with GitHub artifact attestations",
+  "slug": "release-pipeline-attestations-01M2XHEZ",
+  "target_branch": "mission/release-pipeline-attestations",
+  "topology": "single_branch"
+}
