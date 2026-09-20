@@ -2157,7 +2157,7 @@ const PROBES = [
     run: () =>
       checkWorkflowUsesDerivedSet(
         withDefect(
-          /      - name: Publish\n        run: node scripts\/publish-latest\.mjs\n/,
+          /      - name: Publish\n        env:\n          NODE_AUTH_TOKEN: \$\{\{ secrets\.GITHUB_TOKEN \}\}\n        run: node scripts\/publish-latest\.mjs\n/,
           '      - name: "was: npm publish over the derived set"\n        run: echo done\n',
         ),
         ['@spec-kitty/tokens'], ['tokens'],
@@ -2412,7 +2412,7 @@ const PROBES = [
     const ATTEST = `      - name: Attest\n        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8\n        with:\n          subject-path: 'dist-tarballs/*.tgz'\n`;
     const PACK = '      - name: Pack\n        run: node scripts/pack-derived-set.mjs\n';
     const VERIFY = '      - name: Verify\n        env:\n          GH_TOKEN: ${{ github.token }}\n          SIGNER_WORKFLOW: spec-kitty/spec-kitty-design/.github/workflows/publish-packages.yml\n          SOURCE_DIGEST: ${{ github.sha }}\n        run: node scripts/verify-published-integrity.mjs\n';
-    const PUB = '      - name: Publish\n        env:\n          DIST_TAG: ${{ inputs.dist-tag }}\n        run: node scripts/publish-derived-set.mjs\n';
+    const PUB = '      - name: Publish\n        env:\n          DIST_TAG: ${{ inputs.dist-tag }}\n          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}\n        run: node scripts/publish-derived-set.mjs\n';
     const BUMP = '      - name: Bump\n        run: node scripts/bump-prerelease.mjs --from-registry\n';
     const payload = (what, anchor, text) => ({
       what: `REL3 payload: ${what}`,
@@ -2442,7 +2442,7 @@ const PROBES = [
       release('the attest step deleted', ATTEST, ''),
       release('the workflow without `attestations: write`', '  attestations: write\n', ''),
       payload('a step between the attest and the publish (could repack dist-tarballs/)', PUB, '      - name: Repack\n        run: rm -rf dist-tarballs && node scripts/pack-derived-set.mjs\n' + PUB),
-      release('a step between the attest and the publish', '      - name: Publish\n        run: node scripts/publish-latest.mjs', '      - name: Tidy\n        run: echo tidy\n      - name: Publish\n        run: node scripts/publish-latest.mjs'),
+      release('a step between the attest and the publish', '      - name: Publish\n', '      - name: Tidy\n        run: echo tidy\n      - name: Publish\n'),
       release('an inline `npm publish` alongside the script (a second, unattested path)', '        run: node scripts/publish-latest.mjs\n', '        run: node scripts/publish-latest.mjs\n      - name: Extra\n        run: npm publish packages/tokens --tag latest\n'),
       release('the prod publish script neutralised with `|| true`', 'run: node scripts/publish-latest.mjs\n', 'run: node scripts/publish-latest.mjs || true\n'),
       release('the prod publish replaced by an inline loop over the tarballs', '        run: node scripts/publish-latest.mjs\n', '        run: for f in dist-tarballs/*.tgz; do npm publish "$f" --tag latest; done\n'),
@@ -2605,8 +2605,10 @@ const PROBES = [
     run: () =>
       checkWorkflowUsesDerivedSet(
         withPayloadDefect(
-          / {8}env:\n {10}DIST_TAG: [^\n]*\n/,
-          '        # DIST_TAG is supplied by the caller\n',
+          // The DIST_TAG LINE only: the fixture's env block also carries NODE_AUTH_TOKEN now, and
+          // removing the whole block left that entry orphaned and the YAML unparseable.
+          / {10}DIST_TAG: [^\n]*\n/,
+          '          # DIST_TAG is supplied by the caller\n',
         ),
         ['@spec-kitty/tokens'],
         ['tokens'],
@@ -2631,7 +2633,9 @@ const PROBES = [
     what: 'the payload dropping the DIST_TAG env hand-off to the publish script',
     run: () =>
       checkWorkflowUsesDerivedSet(
-        withPayloadDefect(/ {8}env:\n {10}DIST_TAG: [^\n]*\n/, ''),
+        // The DIST_TAG LINE only — the env block also carries NODE_AUTH_TOKEN now, and removing the
+        // whole block left it orphaned and the YAML unparseable, which is a different defect.
+        withPayloadDefect(/ {10}DIST_TAG: [^\n]*\n/, ''),
         ['@spec-kitty/tokens'],
         ['tokens'],
         'publish',
