@@ -162,12 +162,15 @@ const NPM_FLAGS = '(?:--?[\\w-]+(?:=\\S+)?\\s+)*';
 const RUNS_NPM_PUBLISH = new RegExp(`(^|[\\s;&|($\`])npm\\s+${NPM_FLAGS}(publish|dist-tag)\\b`);
 /** `npm publish` in particular (not dist-tag), flags and all. */
 const RUNS_INLINE_PUBLISH = new RegExp(`(^|[\\s;&|($\`])npm\\s+${NPM_FLAGS}publish\\b`);
+/** Inline `npm publish`, or one of the publish scripts, which runs it. Hoisted: it was rebuilt inside a
+ *  per-step callback (REL3 pass 7, reducer). */
+const PUBLISHES_SOMEHOW = new RegExp(`${RUNS_INLINE_PUBLISH.source}|publish-(latest|derived-set)\\.mjs(?!\\s*--selftest)`);
 // A CREDENTIAL IN THE RUN TEXT, not only in an `env:` block (REL3 pass 6, debugger: R01 and R02 are
 // the same file except that one writes the token through the run). Every indirection — a Makefile, a
 // shell script, a workspace npm script — must still bring the credential into the workflow file,
 // because only the workflow can expand `${{ secrets.* }}`. The literal word `secrets.` is NOT the
 // test: ci-quality's promote-develop job prints an error message containing it.
-const WRITES_REGISTRY_CREDENTIAL = /_authToken|NODE_AUTH_TOKEN/;
+const WRITES_REGISTRY_CREDENTIAL = /_authToken|_auth\b|NODE_AUTH_TOKEN/;
 // A secret expanded in run text is a WEAKER signal and gets its own message (REL3 pass 7, reducer):
 // it also matches an honest surge or codecov upload written inline. The remedy for those is this
 // repository's own idiom — pass it through `env:`, as pr-preview.yml does — not to widen the audited
@@ -204,7 +207,11 @@ export function nonLiteralScriptTokens(text) {
   const bad = [];
   const withoutComments = String(text ?? '').replace(/(^|\n)\s*#[^\n]*/g, '$1');
   const targets = REGISTRY_SCRIPTS.map((n) => `scripts/${n}.mjs`);
-  for (const token of withoutComments.split(/[\s;|&()]+/).filter(Boolean)) {
+  // COLLAPSE SUBSTITUTIONS BEFORE TOKENISING (REL3 pass 8, reducer): `$(echo publish-latest).mjs`
+  // contains a space, so splitting on whitespace and parens tore it into pieces that each looked
+  // harmless. A substitution is one opaque "anything" — make it one token first.
+  const collapsed = withoutComments.replace(/\$\([^)]*\)/g, '$(S)').replace(/`[^`]*`/g, '$(S)');
+  for (const token of collapsed.split(/[\s;|&]+/).filter(Boolean)) {
     const cleaned = token.replace(/^["'`]+|["'`]+$/g, '');
     if (!cleaned.includes('scripts/') || LITERAL_SCRIPT_PATH.test(cleaned)) continue;
     // The shell CONCATENATES quoted pieces, so `scripts/publish-lat"est".mjs` is the publisher spelled
@@ -215,9 +222,14 @@ export function nonLiteralScriptTokens(text) {
     // `${E}` into something the widening pattern no longer matched.
     const WIDE = '\u0000';
     const ONE = '\u0001';
+    // `[pr]ublish`, `mj[s]` and `{mjs,js}` are shell expansions too, and all three expand to the real
+    // publisher here (REL3 pass 8, reviewer — a bracket expression has cost this repository a mission
+    // before). A character class stands for one character; a brace list for anything it contains.
     const widened = dequoted
       .replace(/^\.\//, '')
       .replace(/\$\{[^}]*\}|\$\([^)]*\)|\$[A-Za-z_]\w*|\*/g, WIDE)
+      .replace(/\{[^}]*\}/g, WIDE)
+      .replace(/\[[^\]]*\]/g, ONE)
       .replace(/\?/g, ONE)
       .replace(/[.+^${}()|[\]\\]/g, '\\$&')
       .split(WIDE)
@@ -303,7 +315,7 @@ export function checkNoIndirectPublishScripts(rootPkg, label = 'package.json') {
     // AND THE SAME LITERAL-PATH RULE AS A WORKFLOW STEP (REL3 pass 5, debugger): the name test above
     // is a substring test, so `node scripts/publish-lat*.mjs` in an npm script named neither.
     for (const arg of nonLiteralScriptTokens(body)) {
-      problems.push(`${label} script \`${name}\` runs \`node … ${arg}\` — a script path that is not literal is outside every rule that names a script`);
+      problems.push(`${label} script \`${name}\` names \`${arg}\`, a path that could expand to one of the release scripts — a path that is not literal is outside every rule that names a script`);
     }
   }
   return problems;
@@ -376,7 +388,7 @@ export function checkCompositeActionsDoNotPublish(actions, { dirExists = false }
     if (SIGNS_ATTESTATION(steps)) why.push('signs attestations');
     if (steps.some((st) => st?.env && typeof st.env === 'object' && 'NODE_AUTH_TOKEN' in st.env)) why.push('holds NODE_AUTH_TOKEN in a step');
     if (doc?.runs?.env && typeof doc.runs.env === 'object' && 'NODE_AUTH_TOKEN' in doc.runs.env) why.push('holds NODE_AUTH_TOKEN for the whole action');
-    for (const arg of nonLiteralScriptTokens(runs)) why.push(`runs \`node … ${arg}\`, which is not a literal script path`);
+    for (const arg of nonLiteralScriptTokens(runs)) why.push(`names \`${arg}\`, a path that could expand to one of the release scripts`);
     if (why.length) {
       problems.push(`${file} ${why.join(' and ')} — a composite action's steps are outside every rule this gate applies to the publishing jobs, so none may publish`);
     }
@@ -524,7 +536,7 @@ export function checkPublishingCallersDelegate(workflows, payloadText = null) {
         // `*`, `?`, `[` and quotes but not `$NAME` or `${NAME}`, which the shell expands the same way.
         // A literal path is the only readable one. See nonLiteralScriptTokens for the flag case.
         for (const arg of nonLiteralScriptTokens(inline)) {
-          problems.push(`${file} job \`${jobName}\` runs \`node … ${arg}\` — every rule in this gate reads a script path literally, so a globbed, quoted or interpolated one is outside all of them (write the plain path)`);
+          problems.push(`${file} job \`${jobName}\` names \`${arg}\`, a path that could expand to one of the release scripts — every rule in this gate reads a script path literally, so a globbed, quoted, braced or interpolated one is outside all of them (write the plain path)`);
         }
         if (/publish-latest\.mjs(?!\s*--selftest)/.test(inline) && !(file === '.github/workflows/release.yml' && jobName === 'release')) {
           problems.push(
@@ -651,7 +663,7 @@ export function checkRegistryAuthorityAgrees(packages, workflows) {
       // every publishing workflow's own registry-url puts it inside the window today.
       const steps = Array.isArray(job?.steps) ? job.steps : [];
       // Inline `npm publish`, or the prod publish script (REL3), which runs `npm publish` itself.
-      const publishes = steps.some((st) => new RegExp(`${RUNS_INLINE_PUBLISH.source}|publish-(latest|derived-set)\\.mjs(?!\\s*--selftest)`).test(String(st?.run ?? '')));
+      const publishes = steps.some((st) => PUBLISHES_SOMEHOW.test(String(st?.run ?? '')));
       if (!publishes) continue;
       for (const st of steps) {
         const url = String(st?.uses ?? '').startsWith('actions/setup-node@') ? st?.with?.['registry-url'] : null;
@@ -992,7 +1004,9 @@ function checkAttestation(wf, jobName, steps, label, stripShellComments) {
   // variable. The report is now scripts/report-dist-tags.mjs, so the exception is gone.
   // BUILT FROM THE SHARED LIST (REL3 pass 7, reviewer and reducer): this re-spelled the five names, so a
   // sixth registry script would have needed two edits — the drift this mission is about.
-  const TOKEN_SCRIPT_RUN = new RegExp(`^node scripts/(?:${REGISTRY_SCRIPTS.join('|')})\\.mjs(?: --from-registry)?$`);
+  // `--from-registry` belongs to the bump alone; the refactor to the shared list briefly allowed it
+  // after any of the five (REL3 pass 8, reducer).
+  const TOKEN_SCRIPT_RUN = new RegExp(`^node scripts/(?:bump-prerelease\\.mjs --from-registry|(?:${REGISTRY_SCRIPTS.filter((n) => n !== 'bump-prerelease').join('|')})\\.mjs)$`);
   for (const [where, env] of [['job', wf?.jobs?.[jobName]?.env], ['workflow', wf?.env]]) {
     if (env && typeof env === 'object' && 'NODE_AUTH_TOKEN' in env) {
       problems.push(`${label} sets NODE_AUTH_TOKEN at ${where} level — it must reach only the steps that talk to the registry`);
@@ -1850,7 +1864,7 @@ const withCallerDefect = (anchor, withText) => {
 // could not be closed by rules over shell text, so the loop was replaced by scripts/publish-latest.mjs,
 // whose own effect probes cover those behaviours by running it. Three probes here hold the workflow to
 // that script (inline publish refused, `|| true` refused, the loop restored refused).
-const PROBE_FLOOR = 194;
+const PROBE_FLOOR = 200;
 
 const VALID_RELEASE_TRIGGER = "on:\n  push:\n    tags: ['v*.*.*']\n";
 const withTrigger = (from, to) => {
@@ -1889,6 +1903,17 @@ const PROBES = [
   { what: 'REL3: a local action OUTSIDE .github/actions is resolved and read', run: () => { const { actions, problems } = collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./tools/promote\n' }], () => ({ file: 'tools/promote/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: node scripts/publish-latest.mjs\n      shell: bash\n' })); return [...problems, ...checkCompositeActionsDoNotPublish(actions)]; } },
   { what: 'REL3: a local action reference that cannot be resolved', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./.github/actions/ghost\n' }], () => null).problems },
   { what: 'REL3: a JOB-level `uses:` of a local action is resolved too', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    uses: ./tools/promote\n' }], () => null).problems },
+  // ONE FIXTURE PER CREDENTIAL ARM (REL3 pass 8, architect and reducer, independently): splitting the
+  // predicate re-opened the gap its own pass-6 probes had closed — each arm was load-bearing, and
+  // deleting either left the table green.
+  { what: 'REL3 discovery: a run writing `_authToken` with the secret taken through env:', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    env:\n      T: x\n    steps:\n      - run: echo "//npm.pkg.github.com/:_authToken=$T" >> .npmrc\n' }]) },
+  { what: 'REL3 discovery: a run expanding a secret with no registry credential named', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: curl -u "x:${{ secrets.CODECOV_TOKEN }}" https://example.invalid\n' }]) },
+  { what: 'REL3: a publisher path assembled by command substitution', run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: node scripts/$(echo publish-latest).mjs\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }]) },
+  // Shell expansions that are not `*` or `$…` (REL3 pass 8, reviewer): each expands to the real
+  // publisher in this tree, verified with `ls`.
+  { what: 'REL3: a publisher path spelled with a bracket expression', run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: node scripts/[pr]ublish-latest.mjs\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }]) },
+  { what: 'REL3: a publisher path whose extension is a bracket expression', run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: node scripts/publish-latest.mj[s]\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }]) },
+  { what: 'REL3: a publisher path spelled with brace expansion', run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: node scripts/publish-latest.{mjs,js}\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }]) },
   // Pass 7. The within-job credential rule, the local-action `with:` signal, and the token rule's
   // new precision (a token that CANNOT resolve to a registry script is not refused).
   { what: 'REL3: an audited step writing an .npmrc auth line from a secret', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Sneak\n        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc && node tools/pub.mjs\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },

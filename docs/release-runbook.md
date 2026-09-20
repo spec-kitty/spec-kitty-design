@@ -199,16 +199,22 @@ attestation cannot vouch that no step in it misbehaved. The workflows keep that 
   hold the write scopes implicitly, and no gate in this repository would notice. Same remedy, same issue.
 
   The rules below apply **within** the two audited jobs;
-- `NODE_AUTH_TOKEN` reaches only steps whose `run` is exactly one of the registry scripts
+- **the registry credential reaches exactly the steps that publish, and nothing else.** Two halves of one
+  rule, kept together because they drifted apart once already: `NODE_AUTH_TOKEN` in an `env:` block is
+  allowed only on a step whose `run` is exactly one of the registry scripts
   (`bump-prerelease.mjs --from-registry`, `publish-derived-set.mjs`, `publish-latest.mjs`,
-  `verify-published-integrity.mjs`, `report-dist-tags.mjs`) — no shell step may hold it. The rule binds
-  that variable name, which is the one npm reads: a step passing some other secret under another name is
-  not refused by it;
+  `verify-published-integrity.mjs`, `report-dist-tags.mjs`) — no shell step may hold it; and **no step
+  may put a credential in its `run` at all**: not `NODE_AUTH_TOKEN` (which `$GITHUB_ENV` would re-export
+  to every later step), not an `_authToken`/`_auth` line, and not a `${{ secrets.… }}` expansion of any
+  secret, since an `.npmrc` auth line authenticates npm without naming the variable. What is *not*
+  refused: a step taking some unrelated secret through `env:` under another name, and a step that
+  assembles such a value at runtime from pieces the gate cannot recognise — a step whose only purpose
+  would be hiding from this rule;
 - no step may run a local (`./…`) action, whose steps the gate cannot read;
 - checkout keeps no credentials;
 - every `npx` and `npm exec` runs the lockfile's copy (`--no-install` / `--no`), never a package fetched at
   release time;
-- no step may name the token in its script, so it cannot be re-exported to later steps;
+- secrets reach a step through `env:` on that step;
 - neither job may set `GITHUB_REF`, `GITHUB_REF_TYPE`, `GITHUB_REF_NAME`, `GITHUB_WORKFLOW_REF`,
   `GITHUB_EVENT_PATH` or `GITHUB_RUN_ATTEMPT` in an `env:` block: those are the signals the publish
   scripts' own guards read, and a job that can author them can authorise itself.
