@@ -174,17 +174,31 @@ attestation cannot vouch that no step in it misbehaved. The workflows keep that 
   written into the run text as `NODE_AUTH_TOKEN`, `_authToken` or a `${{ secrets.… }}` expansion), runs
   `npm publish`/`npm dist-tag`, runs one of the registry scripts, or signs an attestation. The same
   applies to every local action a workflow `uses:`, resolved by reference, and an unresolvable
-  reference is itself a refusal. No `scripts/…` token anywhere may be non-literal — a glob, a quote or
-  an interpolation is unreadable to every rule here — in a workflow, a local action or any package
-  manifest's npm scripts.
+  reference is itself a refusal. And no `scripts/…` token that could resolve to one of the registry
+  scripts may be non-literal — a glob, a quoted split or an interpolation is unreadable to every rule
+  that names a script — in a workflow, a local action or any package manifest's npm scripts.
+  (`scripts/*.mjs` is refused because it could expand to a publisher; `scripts/*.md` and a bare
+  directory are not.)
 
   **What this does not cover, stated rather than implied.** These are text and YAML rules over this
-  repository's own files. A job that publishes with a *third-party action* and a credential this gate
-  cannot recognise, or a wrapper that assembles the publisher's name at runtime, is bounded by the
-  privilege signals above rather than by pattern-matching, and a determined edit can still get past a
-  regex. The durable fence is a privilege boundary — a GitHub `environment:` on the two audited jobs, or
-  a publish-scoped secret rather than `GITHUB_TOKEN` — which is a repository-settings change, not a
-  code change, and is not in this mission. The rules below apply **within** the two audited jobs;
+  repository's own files. The signals hold because a publish needs a credential, and a credential reaches
+  a job either as `GITHUB_TOKEN` with `packages: write` — which must be declared, since this repository's
+  default workflow permission is read — or as a secret the workflow file expands. **One case escapes
+  both**: a *new* secret (a PAT) handed to a third-party action as an input, `with: token: ${{ secrets.… }}`,
+  declares no privilege and puts nothing in a `run`. The gate does not read `with:` values for secrets,
+  and it should not: `ci-quality.yml`'s `promote-develop` job legitimately passes two secrets that way to
+  `actions/create-github-app-token`, so the rule would refuse honest work. That case needs a new secret in
+  repository settings, which is where the durable fence belongs: a GitHub `environment:` on the two
+  audited jobs, or a publish-scoped secret rather than `GITHUB_TOKEN`. That is a repository-settings
+  change rather than a code change, it is not in this mission's scope, and it is filed as #471.
+
+  **The capability signal rests on a repository setting too.** `packages: write` is worth keying on
+  because this repository's default workflow permission is `read`
+  (`gh api repos/spec-kitty/spec-kitty-design/actions/permissions/workflow` → `"read"`, measured
+  2026-09-20). An admin can change that in settings without touching a file here; every job would then
+  hold the write scopes implicitly, and no gate in this repository would notice. Same remedy, same issue.
+
+  The rules below apply **within** the two audited jobs;
 - `NODE_AUTH_TOKEN` reaches only steps whose `run` is exactly one of the registry scripts
   (`bump-prerelease.mjs --from-registry`, `publish-derived-set.mjs`, `publish-latest.mjs`,
   `verify-published-integrity.mjs`, `report-dist-tags.mjs`) — no shell step may hold it. The rule binds
