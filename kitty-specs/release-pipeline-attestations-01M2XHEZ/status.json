@@ -1,19 +1,19 @@
 {
-  "event_count": 12,
-  "last_event_id": "01M2Y8XR32MVBJVVMS5H6RYARM",
-  "materialized_at": "2026-09-20T02:04:35.298615+00:00",
+  "event_count": 13,
+  "last_event_id": "01M2Y8XR5HS40SV2TMGGMMCRTH",
+  "materialized_at": "2026-09-20T02:04:35.377667+00:00",
   "mission_number": "",
   "mission_slug": "release-pipeline-attestations-01M2XHEZ",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 0,
+    "approved": 1,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
     "done": 0,
     "for_review": 1,
     "in_progress": 1,
-    "in_review": 1,
+    "in_review": 0,
     "planned": 0
   },
   "work_packages": {
@@ -23,14 +23,19 @@
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "in_review",
-      "last_event_id": "01M2Y8XR32MVBJVVMS5H6RYARM",
-      "last_transition_at": "2026-09-20T02:04:35.298615+00:00",
+      "lane": "approved",
+      "last_event_id": "01M2Y8XR5HS40SV2TMGGMMCRTH",
+      "last_transition_at": "2026-09-20T02:04:35.377667+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "pack/publish-tarball/verify scripts with probes, revert-tested; live verify against rc.2"
       ],
       "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "reference": "Four-lens adversarial gate APPROVE at 15aef1cd (architect, debugger, reviewer, reducer); eleven passes, every finding folded",
+        "reviewer": "MOES-Media",
+        "verdict": "approved"
+      },
       "role": "reviewer",
       "subtasks": {
         "T001": "done",
