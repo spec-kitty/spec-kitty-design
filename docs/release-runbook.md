@@ -226,6 +226,10 @@ attestation cannot vouch that no step in it misbehaved. The workflows keep that 
   separate word, or anything between `npm` and `publish`. Both rules used to apply to the rc payload
   alone, which left prod — the job that owns `latest` — as the one place in the repository where a
   "Promote the release tag" step would have passed;
+- the tracked `.npmrc` carries the scope-to-registry mapping and no auth line. npm expands `${VAR}` in
+  an npmrc from the process environment, so an auth line there — documented practice, innocuous in a
+  diff — would let any step holding a token authenticate. The credential reaches npm through the
+  runner's own npmrc, written by `setup-node`, never through a file in this repository;
 - no step may run a local (`./…`) action, whose steps the gate cannot read;
 - checkout keeps no credentials;
 - every `npx` and `npm exec` runs the lockfile's copy (`--no-install` / `--no`), never a package fetched at

@@ -180,7 +180,10 @@ function forbiddenEnvCredential({ key, value, step }) {
   if (key === 'NODE_AUTH_TOKEN') return null;
   // GH_TOKEN is what `gh attestation verify` reads, and the verify step is the only step in either
   // workflow that carries it. Exempt by exact key, exact value AND exact run — not by key alone.
-  if (key === 'GH_TOKEN' && value.trim() === '${{ github.token }}' && String(step?.run ?? '').trim() === 'node scripts/verify-published-integrity.mjs') return null;
+  // Whitespace inside the expression is normalised: `${{github.token}}` is the same thing, and a
+  // reformat of the verify step should not red the gate with no hint why (REL3 pass 10, architect).
+  const normalised = value.replace(/\$\{\{\s*([\s\S]*?)\s*\}\}/g, '${{ $1 }}').trim();
+  if (key === 'GH_TOKEN' && normalised === '${{ github.token }}' && String(step?.run ?? '').trim() === 'node scripts/verify-published-integrity.mjs') return null;
   return 'inside a publishing job any secret, `toJSON(secrets)` or `${{ github.token }}` is the registry credential under another name; only `NODE_AUTH_TOKEN` on a registry-script step, and `GH_TOKEN: ${{ github.token }}` on the verify step, may carry one';
 }
 
@@ -327,6 +330,25 @@ export function checkReleaseTrigger(text, label = WORKFLOW) {
  * follow (REL3 pass 4, reducer), so the indirection is closed at the other end: the root manifest's
  * scripts may not name the publishing scripts at all. Every real invocation is an exact `node …` step.
  */
+/**
+ * THE TRACKED `.npmrc` IS PART OF THE PUBLISH PATH (REL3 pass 10, architect). It maps the scope to
+ * GitHub Packages and nothing more; an auth line added to it — `_authToken=${GH_TOKEN}`, documented
+ * practice and innocuous-looking in a diff — would let any step that happens to hold a token
+ * authenticate, with every workflow rule here still green. npm expands `${VAR}` in an npmrc from the
+ * process env (measured with a control), so the file is where a credential becomes usable.
+ */
+export function checkNpmrcHasNoAuth(text, label = '.npmrc') {
+  const problems = [];
+  for (const line of String(text ?? '').split('\n')) {
+    const bare = line.trim();
+    if (!bare || bare.startsWith(';') || bare.startsWith('#')) continue;
+    if (/_authToken|_auth\b|_password|username\s*=/.test(bare)) {
+      problems.push(`${label} carries an auth line (\`${bare.slice(0, 50)}\`) — the registry credential reaches npm through the runner's own npmrc, written by setup-node, never through a file in this repository`);
+    }
+  }
+  return problems;
+}
+
 export function checkNoIndirectPublishScripts(rootPkg, label = 'package.json') {
   // Called per manifest — the root one AND every workspace (REL3 pass 6, debugger: `npm run -w` put
   // the body in a workspace manifest, which nothing read).
@@ -1909,7 +1931,7 @@ const withCallerDefect = (anchor, withText) => {
 // could not be closed by rules over shell text, so the loop was replaced by scripts/publish-latest.mjs,
 // whose own effect probes cover those behaviours by running it. Three probes here hold the workflow to
 // that script (inline publish refused, `|| true` refused, the loop restored refused).
-const PROBE_FLOOR = 220;
+const PROBE_FLOOR = 222;
 
 const VALID_RELEASE_TRIGGER = "on:\n  push:\n    tags: ['v*.*.*']\n";
 const withTrigger = (from, to) => {
@@ -1948,6 +1970,8 @@ const PROBES = [
   { what: 'REL3: a local action OUTSIDE .github/actions is resolved and read', run: () => { const { actions, problems } = collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./tools/promote\n' }], () => ({ file: 'tools/promote/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: node scripts/publish-latest.mjs\n      shell: bash\n' })); return [...problems, ...checkCompositeActionsDoNotPublish(actions)]; } },
   { what: 'REL3: a local action reference that cannot be resolved', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./.github/actions/ghost\n' }], () => null).problems },
   { what: 'REL3: a JOB-level `uses:` of a local action is resolved too', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    uses: ./tools/promote\n' }], () => null).problems },
+  { what: 'REL3: an auth line added to the tracked .npmrc', run: () => checkNpmrcHasNoAuth('@spec-kitty:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=${GH_TOKEN}\n') },
+  { what: 'REL3: a username/password pair in the tracked .npmrc', run: () => checkNpmrcHasNoAuth('//npm.pkg.github.com/:username=x\n') },
   // The GH_TOKEN exemption must be tied to the step that needs it (REL3 pass 10, reducer with a runtime
   // proof, debugger independently): borrowing the exempt key on any other step published green.
   { what: 'REL3: the exempt GH_TOKEN borrowed by a wrapper step in the release job', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Promote\n        env:\n          GH_TOKEN: ${{ github.token }}\n        run: node tools/promote.mjs\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
@@ -3002,6 +3026,7 @@ function main() {
     ...checkWorkflowUsesDerivedSet(readFileSync(join(ROOT, WORKFLOW), 'utf8'), pkgs.map((p) => p.name), pkgs.map((p) => p.dir), RELEASE_JOB, WORKFLOW),
     ...checkReleaseTrigger(readFileSync(join(ROOT, WORKFLOW), 'utf8')),
     ...checkNoIndirectPublishScripts(JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))),
+    ...(existsSync(join(ROOT, '.npmrc')) ? checkNpmrcHasNoAuth(readFileSync(join(ROOT, '.npmrc'), 'utf8')) : ['.npmrc is missing — the scope-to-registry mapping the publish path depends on is not in the repository']),
     ...pkgs.flatMap((p) => checkNoIndirectPublishScripts(JSON.parse(readFileSync(join(ROOT, 'packages', p.dir, 'package.json'), 'utf8')), `packages/${p.dir}/package.json`)),
     ...(existsSync(join(ROOT, REUSABLE_WORKFLOW))
       ? checkWorkflowUsesDerivedSet(
