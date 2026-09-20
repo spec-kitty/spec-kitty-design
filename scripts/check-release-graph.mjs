@@ -158,7 +158,9 @@ const RUNS_REGISTRY_SCRIPT = new RegExp(`scripts/(${REGISTRY_SCRIPTS.join('|')})
 // `npm --loglevel=error publish --tag latest` publishes, and read green everywhere. So does an
 // interpreter named by path: `/usr/bin/node …`, `$(which node) …`. Both are absorbed here rather than
 // at each call site — there were six spellings of the npm test alone.
-const NPM_FLAGS = '(?:--?[\\w-]+(?:=\\S+)?\\s+)*';
+// `--flag`, `--flag=value` AND `--flag value` (REL3 pass 8, debugger): `npm --workspace packages/tokens
+// publish` read green because only the first two forms were tolerated.
+const NPM_FLAGS = '(?:-{1,2}[\\w-]+(?:=\\S+)?\\s+(?:[^-\\s]\\S*\\s+)?)*';
 const RUNS_NPM_PUBLISH = new RegExp(`(^|[\\s;&|($\`])npm\\s+${NPM_FLAGS}(publish|dist-tag)\\b`);
 /** `npm publish` in particular (not dist-tag), flags and all. */
 const RUNS_INLINE_PUBLISH = new RegExp(`(^|[\\s;&|($\`])npm\\s+${NPM_FLAGS}publish\\b`);
@@ -1175,6 +1177,24 @@ export function checkWorkflowUsesDerivedSet(
     // presence test (REL3 pass 5, architect — deleting the presence entry left every probe green,
     // so the line was not doing the work its comment claimed).
   ];
+  // AND NO ENV VALUE MAY CARRY A SECRET EXCEPT THE REGISTRY TOKEN (REL3 pass 8, debugger). Every
+  // credential rule here reads run text or the env KEY `NODE_AUTH_TOKEN`, so `env: T: ${{ secrets.… }}`
+  // handed the job the same credential under a name nothing matched, and the step could then assemble
+  // an `.npmrc` line from `$T`. Measured: the only env value expanding a secret in either audited job
+  // is NODE_AUTH_TOKEN itself, so this costs nothing here. (It is deliberately NOT applied to other
+  // jobs: pr-preview's SURGE_TOKEN and ci-quality's release App key are honest uses of that shape.)
+  for (const [where, block] of [['workflow', wf?.env], ['job', wf?.jobs?.[jobName]?.env], ...steps.map((st) => ['step', st?.env])]) {
+    if (!block || typeof block !== 'object') continue;
+    for (const [key, value] of Object.entries(block)) {
+      if (key === 'NODE_AUTH_TOKEN') continue; // held to the registry scripts by the rule above
+      if (typeof value === 'string' && EXPANDS_A_SECRET.test(value)) {
+        problems.push(
+          `${label} puts a secret in the ${where}-level \`${key}\` — inside a publishing job any secret is ` +
+            'the registry credential under another name; only `NODE_AUTH_TOKEN`, on a registry-script step, may carry one',
+        );
+      }
+    }
+  }
   // THE JOB MAY NOT AUTHOR THE SIGNALS ITS OWN GUARD READS. Both publish scripts decide their
   // channel from GITHUB_REF/GITHUB_REF_TYPE, the runner's event file and (REL3) GITHUB_WORKFLOW_REF;
   // GITHUB_RUN_ATTEMPT turns an unexpected first-attempt conflict into a silent "resumption". A step
@@ -1192,6 +1212,31 @@ export function checkWorkflowUsesDerivedSet(
             'guard weighs, and a job that can author it is a job that can authorise itself',
         );
       }
+    }
+  }
+  // BOTH AUDITED JOBS, not the payload alone (REL3 pass 8, debugger). These two rules lived inside the
+  // `jobName !== 'release'` branch, so prod — the job that owns `latest` — was the one place in the
+  // repository where `npm dist-tag add` was permitted, and its inline-publish test was the weaker of
+  // the two. A "Promote the release tag" step would have repointed `latest` at any version it named,
+  // gate green.
+    // ...AND `npm dist-tag` IS REFUSED OUTRIGHT. Closing the `npm publish --tag` route left the
+  // OTHER documented way to write a dist-tag wide open: a plausible "Promote to latest" step
+  // running `npm dist-tag add @spec-kitty/tokens@1.0.0 latest` passed every gate and claimed the
+  // prod channel. Unlike the `--tag` arms race this closes in one line rather than a pattern to
+  // be excused, because the command has no legitimate use in a prerelease payload at all.
+  if (/npm\s+dist-tag\s+add\b/.test(commands)) {
+    problems.push(
+      `${label} runs \`npm dist-tag add\`, which writes a dist-tag directly and bypasses the ` +
+        'publish script entirely — there is no legitimate use for it on either publish path',
+    );
+  }
+  // ...AND NOTHING ELSE MAY PUBLISH. The script is only a guarantee if it is the sole route.
+  for (const line of commands.split('\n')) {
+    if (/npm\s+publish\b/.test(line) || /\bnpm\b(?=[^\n;|&]*\bpublish\b)/.test(line)) {
+      problems.push(
+        `${label} runs \`${line.trim()}\` directly instead of going through ` +
+          'the publish script for this stream, which is where the channel refusal lives',
+      );
     }
   }
   const REQUIRED_STEPS = jobName === 'release' ? [...PROD_ONLY_STEPS, ...EVERY_STREAM_STEPS] : EVERY_STREAM_STEPS;
@@ -1273,26 +1318,6 @@ export function checkWorkflowUsesDerivedSet(
         `${label} does not publish through scripts/publish-derived-set.mjs — the dist-tag refusal ` +
           'lives in that script, and an inline publish bypasses it entirely',
       );
-    }
-    // ...AND `npm dist-tag` IS REFUSED OUTRIGHT. Closing the `npm publish --tag` route left the
-    // OTHER documented way to write a dist-tag wide open: a plausible "Promote to latest" step
-    // running `npm dist-tag add @spec-kitty/tokens@1.0.0 latest` passed every gate and claimed the
-    // prod channel. Unlike the `--tag` arms race this closes in one line rather than a pattern to
-    // be excused, because the command has no legitimate use in a prerelease payload at all.
-    if (/npm\s+dist-tag\s+add\b/.test(commands)) {
-      problems.push(
-        `${label} runs \`npm dist-tag add\`, which writes a dist-tag directly and bypasses the ` +
-          'publish script entirely — there is no legitimate use for it in a prerelease payload',
-      );
-    }
-    // ...AND NOTHING ELSE MAY PUBLISH. The script is only a guarantee if it is the sole route.
-    for (const line of commands.split('\n')) {
-      if (/npm\s+publish\b/.test(line) || /\bnpm\b(?=[^\n;|&]*\bpublish\b)/.test(line)) {
-        problems.push(
-          `${label} runs \`${line.trim()}\` directly instead of going through ` +
-            'scripts/publish-derived-set.mjs, which is where the `latest` refusal lives',
-        );
-      }
     }
     // THE HAND-OFF, READ FROM THE PARSED STEP. `/DIST_TAG/.test(workflowText)` asserted that eight
     // characters appear SOMEWHERE in the file — satisfied by a comment, and satisfied by
@@ -1864,7 +1889,7 @@ const withCallerDefect = (anchor, withText) => {
 // could not be closed by rules over shell text, so the loop was replaced by scripts/publish-latest.mjs,
 // whose own effect probes cover those behaviours by running it. Three probes here hold the workflow to
 // that script (inline publish refused, `|| true` refused, the loop restored refused).
-const PROBE_FLOOR = 200;
+const PROBE_FLOOR = 208;
 
 const VALID_RELEASE_TRIGGER = "on:\n  push:\n    tags: ['v*.*.*']\n";
 const withTrigger = (from, to) => {
@@ -1903,6 +1928,20 @@ const PROBES = [
   { what: 'REL3: a local action OUTSIDE .github/actions is resolved and read', run: () => { const { actions, problems } = collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./tools/promote\n' }], () => ({ file: 'tools/promote/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: node scripts/publish-latest.mjs\n      shell: bash\n' })); return [...problems, ...checkCompositeActionsDoNotPublish(actions)]; } },
   { what: 'REL3: a local action reference that cannot be resolved', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - uses: ./.github/actions/ghost\n' }], () => null).problems },
   { what: 'REL3: a JOB-level `uses:` of a local action is resolved too', run: () => collectUsedLocalActions([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    uses: ./tools/promote\n' }], () => null).problems },
+  // Pass 8, debugger: the prod job was the one place `npm dist-tag add` was permitted, its
+  // inline-publish test was the weaker of the two, and no rule read an `env:` VALUE for a secret.
+  { what: 'REL3: `npm dist-tag add` inside the audited release job', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Promote\n        run: npm dist-tag add @spec-kitty/tokens@0.0.1 latest\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
+  // ISOLATES NPM_FLAGS. The audited-job version of this case trips the hoisted inline-publish rule as
+  // well, so it would stay green with the flag widening reverted — a decoy. Discovery has no such
+  // second rule, so this one fails alone.
+  { what: 'REL3 discovery: `npm --workspace <dir> publish`, a flag whose value is a separate word', run: () => checkNoUnauditedPublishingJobs([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: npm --workspace packages/tokens publish\n' }]) },
+  { what: 'REL3: `npm --workspace <dir> publish` (a flag whose value is a separate word)', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Sneak\n        run: npm --workspace packages/tokens publish --tag latest\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
+  { what: 'REL3: a secret in an audited job env value under another name', run: () => checkWorkflowUsesDerivedSet(withDefect('      - name: Pack\n', '      - name: Sneak\n        env:\n          T: ${{ secrets.GITHUB_TOKEN }}\n        run: echo hi\n      - name: Pack\n'), ['@spec-kitty/tokens'], ['tokens'], 'release', 'release.yml') },
+  { what: 'REL3: a secret in the audited PAYLOAD job env value under another name', run: () => checkWorkflowUsesDerivedSet(withPayloadDefect('      - name: Pack', '      - name: Sneak\n        env:\n          T: ${{ secrets.GITHUB_TOKEN }}\n        run: echo hi\n      - name: Pack'), ['@spec-kitty/tokens'], ['tokens'], 'publish', 'publish-packages.yml') },
+  // Arms the debugger measured as still masked: every composite fixture tripped two arms at once.
+  { what: 'REL3 composite: an action whose ONLY signal is `npm publish`', run: () => checkCompositeActionsDoNotPublish([{ file: '.github/actions/x/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: npm publish\n      shell: bash\n' }]) },
+  { what: 'REL3 composite: an action whose ONLY signal is expanding a secret', run: () => checkCompositeActionsDoNotPublish([{ file: '.github/actions/x/action.yml', text: 'runs:\n  using: composite\n  steps:\n    - run: curl -u "x:${{ secrets.CODECOV_TOKEN }}" https://example.invalid\n      shell: bash\n' }]) },
+  { what: 'REL3: a `?` wildcard in a publisher path', run: () => checkPublishingCallersDelegate([{ file: '.github/workflows/nightly.yml', text: 'jobs:\n  n:\n    steps:\n      - run: node scripts/publish-la?est.mjs\n' }, { file: '.github/workflows/release-rc.yml', text: VALID_CALLER_FIXTURE }]) },
   // ONE FIXTURE PER CREDENTIAL ARM (REL3 pass 8, architect and reducer, independently): splitting the
   // predicate re-opened the gap its own pass-6 probes had closed — each arm was load-bearing, and
   // deleting either left the table green.

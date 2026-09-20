@@ -207,9 +207,17 @@ attestation cannot vouch that no step in it misbehaved. The workflows keep that 
   may put a credential in its `run` at all**: not `NODE_AUTH_TOKEN` (which `$GITHUB_ENV` would re-export
   to every later step), not an `_authToken`/`_auth` line, and not a `${{ secrets.… }}` expansion of any
   secret, since an `.npmrc` auth line authenticates npm without naming the variable. What is *not*
-  refused: a step taking some unrelated secret through `env:` under another name, and a step that
-  assembles such a value at runtime from pieces the gate cannot recognise — a step whose only purpose
-  would be hiding from this rule;
+  refused inside these two jobs: **any** `env:` value that expands a secret, under any name — inside a
+  publishing job a secret is the registry credential wearing a different hat, and `NODE_AUTH_TOKEN` on a
+  registry-script step is the only one allowed. (That rule is deliberately scoped to the two audited
+  jobs: `pr-preview.yml`'s `SURGE_TOKEN` and `ci-quality.yml`'s release App key are honest uses of the
+  same shape.) What is *not* refused is a step that assembles such a value at runtime from pieces the
+  gate cannot recognise — a step whose only purpose would be hiding from this rule;
+- neither job may run `npm dist-tag add`, the other documented way to write a dist-tag, and neither may
+  run `npm publish` inline in any spelling — flags before the subcommand, a flag whose value is a
+  separate word, or anything between `npm` and `publish`. Both rules used to apply to the rc payload
+  alone, which left prod — the job that owns `latest` — as the one place in the repository where a
+  "Promote the release tag" step would have passed;
 - no step may run a local (`./…`) action, whose steps the gate cannot read;
 - checkout keeps no credentials;
 - every `npx` and `npm exec` runs the lockfile's copy (`--no-install` / `--no`), never a package fetched at
