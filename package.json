@@ -37,7 +37,7 @@
     "@nx/eslint": "^22.7.1",
     "@nx/eslint-plugin": "^22.7.1",
     "@nx/storybook": "^22.7.1",
-    "@playwright/test": "1.62.1",
+    "@playwright/test": "1.63.0",
     "@storybook/addon-a11y": "^10.6.0",
     "@storybook/addon-docs": "^10.6.0",
     "@storybook/web-components": "^10.6.0",
