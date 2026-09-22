@@ -57,9 +57,9 @@ export const startServer = async () => {
       const body = await readFile(filePath);
       res.writeHead(200, { 'content-type': MIME[ext] ?? 'application/octet-stream' });
       res.end(body);
-    } catch (error) {
+    } catch {
       res.writeHead(404, { 'content-type': 'text/plain' });
-      res.end(String(error?.message ?? error));
+      res.end('Not found');
     }
   });
   // Port 0 — a kernel-assigned free port. Sibling agents contend for 6006; this probe never

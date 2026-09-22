@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
+import { stripCssAndHtmlComments as stripComments } from './source-comments.mjs';
 
 const SELECT_CSS = 'packages/styles/src/form-select/sk-form-select.css';
 const SELECT_BARREL = 'packages/styles/src/form-select/index.ts';
@@ -60,10 +61,6 @@ function readGeneratedFixtures(): Array<{ name: string; html: string }> {
   }
   if (fixtures.length === 0) throw new Error(`no generated fixtures parsed from ${SELECT_BARREL}`);
   return fixtures;
-}
-
-function stripComments(source: string): string {
-  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '');
 }
 
 function classSelectorInventory(source: string): string[] {

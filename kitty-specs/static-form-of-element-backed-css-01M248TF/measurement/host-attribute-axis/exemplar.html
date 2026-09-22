@@ -134,15 +134,22 @@
     </div>`;
 
   const mount = document.getElementById('mount');
+  const component = document.createElement('div');
+  component.id = 'component';
   if (v === 'A') {
-    const mod = presentation ? ` sk-app-shell--${presentation}` : '';
-    mount.outerHTML = `<div id="component" class="sk-app-shell${mod}">${inner}</div>`;
+    component.className = 'sk-app-shell';
+    if (presentation) component.classList.add(`sk-app-shell--${presentation}`);
+    component.innerHTML = inner;
   } else {
     // B and Babbrev share the markup exactly; only the wrapper's own rule differs.
-    const mod = presentation ? ` sk-app-shell-host--${presentation}` : '';
-    mount.outerHTML =
-      `<div id="component" class="sk-app-shell-host${mod}"><div class="sk-app-shell">${inner}</div></div>`;
+    component.className = 'sk-app-shell-host';
+    if (presentation) component.classList.add(`sk-app-shell-host--${presentation}`);
+    const shell = document.createElement('div');
+    shell.className = 'sk-app-shell';
+    shell.innerHTML = inner;
+    component.append(shell);
   }
+  mount.replaceWith(component);
 
   const DEFAULT_WIDTH = 800;
   const outer = document.getElementById('outer');

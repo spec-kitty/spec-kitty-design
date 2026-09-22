@@ -59,9 +59,9 @@ export const startServer = async () => {
       const body = await readFile(filePath);
       res.writeHead(200, { 'content-type': MIME[ext] ?? 'application/octet-stream' });
       res.end(body);
-    } catch (error) {
+    } catch {
       res.writeHead(404, { 'content-type': 'text/plain' });
-      res.end(String(error?.message ?? error));
+      res.end('Not found');
     }
   });
   await new Promise((done) => server.listen(0, '127.0.0.1', done));

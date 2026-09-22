@@ -5,6 +5,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import postcss from "postcss";
 import selectorParser from "postcss-selector-parser";
+import { stripCssAndHtmlComments as stripComments } from "./source-comments.mjs";
 
 const COMPONENT_DIR = "packages/styles/src/checkbox-choice-group";
 const CHOICE_GROUP_CSS = `${COMPONENT_DIR}/sk-checkbox-choice-group.css`;
@@ -158,12 +159,6 @@ const focusDocumentBody = (page: Page): Promise<void> =>
     document.body.focus();
     document.body.removeAttribute("tabindex");
   });
-
-function stripComments(source: string): string {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/<!--[\s\S]*?-->/g, "");
-}
 
 function classSelectorInventory(source: string): string[] {
   const classes = new Set<string>();

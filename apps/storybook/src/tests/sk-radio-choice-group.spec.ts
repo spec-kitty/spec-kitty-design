@@ -5,6 +5,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import postcss from "postcss";
 import selectorParser from "postcss-selector-parser";
+import { stripCssAndHtmlComments as stripComments } from "./source-comments.mjs";
 import { PNG } from "pngjs";
 
 // Counts pixels that differ by more than `tolerance` per channel between two same-size PNG
@@ -368,12 +369,6 @@ async function withForm<T>(
       form?.replaceWith(node);
     });
   }
-}
-
-function stripComments(source: string): string {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/<!--[\s\S]*?-->/g, "");
 }
 
 function classSelectorInventory(source: string): string[] {
