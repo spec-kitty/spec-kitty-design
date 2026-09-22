@@ -2,7 +2,7 @@
 
 The loop prompt for driving the elements-first programme. One iteration = one mission. Paste it as-is, or point a loop at this file.
 
-**Repo:** `spec-kitty/spec-kitty-design` · **Integration branch:** `train/elements-first`
+**Repo:** `spec-kitty/spec-kitty-design` · **Integration branch:** `develop`
 
 **Live programmes** — the loop draws from all three, not from a number range:
 
@@ -16,7 +16,7 @@ The loop prompt for driving the elements-first programme. One iteration = one mi
 
 ## The prompt
 
-> Drive one mission from the live programmes in `spec-kitty/spec-kitty-design` — epics #66, #144 and #183. Follow the procedure in `docs/architecture/elements-first-run-prompt.md` exactly: select an unclaimed, unblocked issue, claim it before doing any work, drive it to a PR into `train/elements-first`, then release or close the claim. Do not make architectural decisions — every one you need is already in an ADR, and if one is missing, stop and say so.
+> Drive one mission from the live programmes in `spec-kitty/spec-kitty-design` — epics #66, #144 and #183. Follow the procedure in `docs/architecture/elements-first-run-prompt.md` exactly: select an unclaimed, unblocked issue, claim it before doing any work, drive it to a PR into `develop`, then release or close the claim. Do not make architectural decisions — every one you need is already in an ADR, and if one is missing, stop and say so.
 
 ---
 
@@ -117,7 +117,7 @@ Then post the claim comment. It exists so a human watching the epic can see what
 gh issue comment <N> --repo spec-kitty/spec-kitty-design --body "$(cat <<'EOF'
 🔨 **Claimed** — starting this mission. _(session `<short session id>`)_
 
-- **Branch:** `mission/<slug>` off `train/elements-first`
+- **Branch:** `mission/<slug>` off `develop`
 - **Squad tier:** <tier from the issue body>
 - **Reading first:** <the ADRs the issue names>
 
@@ -135,7 +135,7 @@ Observed twice while preparing this programme: `spec-kitty charter generate`, ru
 So: **clone, do not add a worktree.**
 
 ```sh
-git clone --branch train/elements-first \
+git clone --branch develop \
   https://github.com/spec-kitty/spec-kitty-design.git <workdir>
 cd <workdir>
 [ -d .git ] || { echo "worktree, not a primary checkout — stop"; exit 1; }
@@ -143,9 +143,9 @@ npm ci --ignore-scripts
 git checkout -b mission/<slug>
 ```
 
-If you are resuming in an existing clone: `git checkout train/elements-first && git pull --ff-only` first, then branch.
+If you are resuming in an existing clone: `git checkout develop && git pull --ff-only` first, then branch.
 
-Never branch from `main`, and never PR into `main` — the train lands on `main` once, at the end, by the operator. (A third branch, `develop`, is now part of the picture too — see [`branch-model.md`](./branch-model.md) for the full three-branch model; this loop's mission PRs still target `train/elements-first` only.)
+Never branch from or PR ordinary work into `main`; use `develop`. Promotion from `develop` to production remains an operator act. See [`branch-model.md`](./branch-model.md).
 
 ## 4. Drive
 
@@ -172,18 +172,18 @@ Discovering a decision is a legitimate outcome. Deciding one silently is not —
 
 ```sh
 gh pr create --repo spec-kitty/spec-kitty-design \
-  --base train/elements-first --head mission/<slug> \
+  --base develop --head mission/<slug> \
   --title "<type>(<scope>): <subject>" \
   --body "Refs #<N> · part of #66 ..."
 ```
 
-**Use `Refs #<N>`, not `Closes`.** A PR merging into the train does not auto-close anything — GitHub only honours closing keywords on merges into the default branch. The issue is closed by hand in step 8.
+**Use `Refs #<N>`, not `Closes`.** A PR merging into `develop` does not auto-close anything — GitHub only honours closing keywords on merges into the default branch. The issue is closed by hand in step 8.
 
-CI Quality runs on train PRs; the workflow's branch filters were extended to `train/**` for exactly this. A PR that touches a new package directory must also extend `ci-quality.yml`'s `components` path filter, or its component gates silently skip.
+CI Quality runs on `develop` PRs. A PR that touches a new package directory must also extend `ci-quality.yml`'s `components` path filter, or its component gates silently skip.
 
 ## 6. Run the full adversarial gate and post its evidence — every PR, no exceptions
 
-**No PR merges into the train until the gate has run against its head SHA and the evidence is a comment on that PR.** This is uniform: tier governs the earlier point-cuts, never this one.
+**No PR merges into `develop` until the gate has run against its head SHA and the evidence is a comment on that PR.** This is uniform: tier governs the earlier point-cuts, never this one.
 
 Dispatch all four lenses in parallel, each prompt opening with the profile load:
 
@@ -227,9 +227,9 @@ EOF
 - **Two passes maximum, and no severity arithmetic.** A pass is done when every finding it raised is folded or filed. If pass 2 raises new in-scope findings, fold them and merge — do not run a third, and do not escalate because a count failed to fall. Escalate only when a lens names a specific blocker you cannot resolve, or when a governing document contradicts another.
 - **Re-read a second-pass review against the current head before acting on it.** A reviewer pinned to an older SHA will report findings you have already fixed; that is the SHA pin working, not the reviewer being wrong.
 
-## 7. Merge — mission branch into the train, and only that
+## 7. Merge — mission branch into `develop`, and only that
 
-**Operator standing order, 2026-09-02.** The loop **may** merge a mission branch into `train/elements-first`. The loop **never** merges the train into `main` — that is an operator act and is not delegated.
+**Operator standing order, amended 2026-09-22.** The loop **may** merge a mission branch into `develop`. The loop **never** promotes `develop` into `main` — that is an operator act and is not delegated.
 
 Both conditions must hold, and neither substitutes for the other:
 
@@ -247,10 +247,10 @@ If either condition fails, do not merge. If CI went green *before* a later push,
 
 ## 8. Close out — always release the claim
 
-**On success**, after the PR merges into the train:
+**On success**, after the PR merges into `develop`:
 
 ```sh
-gh issue comment <N> --repo spec-kitty/spec-kitty-design --body "✅ **Done** — merged to \`train/elements-first\` in <PR link>.
+gh issue comment <N> --repo spec-kitty/spec-kitty-design --body "✅ **Done** — merged to \`develop\` in <PR link>.
 
 Exit criteria: <one line per criterion, with the evidence>.
 <Anything the next mission should know that is not already in an ADR.>"
@@ -289,7 +289,7 @@ The dependency graph rarely permits more than two independent missions — curre
 Two loops sharing a checkout will fight over `HEAD` and `node_modules`, and the `spec-kitty` CLI's primary-checkout resolution turns that into cross-contamination. Path per iteration, never reused while another loop is live:
 
 ```sh
-git clone --branch train/elements-first \
+git clone --branch develop \
   https://github.com/spec-kitty/spec-kitty-design.git ~/work/ef-$(date +%s)-$$
 ```
 
@@ -299,10 +299,10 @@ Step 1's "lowest-numbered eligible" rule makes two loops collide on the same iss
 
 ### 4. A rebase invalidates the gate
 
-This is the rule that actually bites. Both the CI verdict and the adversarial-gate evidence are **pinned to a SHA**. If your PR needs a rebase because the other loop merged into the train first, the rebase produces a new head — and both the green check and the gate evidence now refer to a commit that is no longer the head.
+This is the rule that actually bites. Both the CI verdict and the adversarial-gate evidence are **pinned to a SHA**. If your PR needs a rebase because the other loop merged into `develop` first, the rebase produces a new head — and both the green check and the gate evidence now refer to a commit that is no longer the head.
 
 ```sh
-git fetch origin && git rebase origin/train/elements-first
+git fetch origin && git rebase origin/develop
 git push --force-with-lease
 # the PR head changed → CI re-runs, and the gate MUST re-run
 ```
@@ -339,7 +339,7 @@ caution. Stop when nothing is both unassigned and unblocked, and report the stat
 
 ## What this loop must never do
 
-- **Push to `main`, open a PR against `main`, or merge the train into `main`.** The train lands once, by the operator. Merging mission branches into the train is permitted, under step 7's two conditions.
+- **Push to `main`, open an ordinary PR against `main`, or promote `develop` into `main`.** Production promotion is an operator act. Merging mission branches into `develop` is permitted under step 7's two conditions.
 - **Merge its own PR** without the full adversarial gate having run against the head SHA and its evidence posted on the PR.
 - **Write an ADR** outside #67.
 - **Hand-edit `kitty-specs/`.** Those artefacts desync runtime state (CLAUDE.md §7). The charter is different: `charter.md` is curated by hand and is the only home of project policy — but changing it is never part of a mission's diff.

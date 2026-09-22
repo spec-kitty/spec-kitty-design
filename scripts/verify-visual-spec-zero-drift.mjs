@@ -23,20 +23,20 @@
  *
  * Usage: node scripts/verify-visual-spec-zero-drift.mjs [baseRef]
  *   If `baseRef` is given, it is used literally (useful for a one-off historical check).
- *   If omitted, the base is computed as `git merge-base HEAD origin/train/elements-first` — the
+ *   If omitted, the base is computed as `git merge-base HEAD origin/develop` — the
  *   commit this branch actually forked from RIGHT NOW, recomputed fresh on every run. This is
  *   deliberately NOT a hardcoded historical SHA: a hardcoded base survives exactly until the
- *   branch is next rebased onto a moved train, at which point every OTHER change the rebase
+ *   branch is next rebased onto a moved integration line, at which point every OTHER change the rebase
  *   brings in (a sibling PR that also touches this file, adding whole new tests) reads as a
  *   "violation" too, because it is compared against a base that predates it. Diffing from the
  *   merge-base instead isolates exactly this branch's own contribution, no matter how many times
  *   it is rebased.
  *
- *   If `origin/train/elements-first` cannot be resolved (no such remote-tracking ref — e.g. a
+ *   If `origin/develop` cannot be resolved (no such remote-tracking ref — e.g. a
  *   shallow or main-only clone), this is a LOUD failure (exit 2), not a silent substitution. An
  *   earlier revision fell back to a hardcoded historical SHA (`38f7e6fa`) here, via a bare
  *   `catch { return FALLBACK_BASE }` with no notice printed at all. That SHA was a real commit —
- *   reachable from the train at the time, but ONLY through the mission branch that introduced
+ *   reachable from the integration line at the time, but ONLY through the mission branch that introduced
  *   this file, never through `main`. #362/#434 hit the identical shape one layer up (a workflow
  *   anchored to a commit only a soon-to-be-squash-merged branch carried) and it reddened CI for
  *   every PR the moment that branch was deleted, discovered only by an unrelated PR that happened
@@ -62,7 +62,7 @@ import { fileURLToPath } from 'node:url';
 
 const FILE = 'apps/storybook/src/tests/visual.spec.ts';
 const FLOOR_SHAPE = /test\.info\(\)\.config\.projects\.map/;
-const TRAIN_REF = 'origin/train/elements-first';
+const DEFAULT_BASE_REF = 'origin/develop';
 
 // #438 F9: execFileSync's default `stdio` INHERITS the child's stderr straight through to this
 // process's own stderr, IN ADDITION TO capturing it on `error.stderr` — measured, not assumed:
@@ -75,17 +75,17 @@ const TRAIN_REF = 'origin/train/elements-first';
 const PIPED = { stdio: ['pipe', 'pipe', 'pipe'] };
 
 /**
- * `git merge-base HEAD <TRAIN_REF>`. Throws — loudly, carrying the underlying git error — if
- * `TRAIN_REF` cannot be resolved, rather than silently substituting a hardcoded base. See the
+ * `git merge-base HEAD <DEFAULT_BASE_REF>`. Throws — loudly, carrying the underlying git error — if
+ * `DEFAULT_BASE_REF` cannot be resolved, rather than silently substituting a hardcoded base. See the
  * file header for why a fallback here is exactly the #362/#434 defect class and why it was
  * deleted rather than re-anchored to an immutable tag.
  */
 export function resolveDefaultBase() {
   try {
-    return execFileSync('git', ['merge-base', 'HEAD', TRAIN_REF], { encoding: 'utf8', ...PIPED }).trim();
+    return execFileSync('git', ['merge-base', 'HEAD', DEFAULT_BASE_REF], { encoding: 'utf8', ...PIPED }).trim();
   } catch (err) {
     throw new Error(
-      `cannot resolve default base: \`git merge-base HEAD ${TRAIN_REF}\` failed — ${String(err.message).trim()}. ` +
+      `cannot resolve default base: \`git merge-base HEAD ${DEFAULT_BASE_REF}\` failed — ${String(err.message).trim()}. ` +
         'Pass a base ref explicitly: node scripts/verify-visual-spec-zero-drift.mjs <baseRef>',
     );
   }
@@ -266,20 +266,20 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       }
     };
     try {
-      // A repo with NO `origin/train/elements-first` ref at all — a main-only or shallow clone,
+      // A repo with NO `origin/develop` ref at all — a main-only or shallow clone,
       // exactly the shape #362/#434 and this script's own docstring describe.
-      const noTrainRepo = join(scratch, 'no-train-ref');
-      newRepo(noTrainRepo);
-      writeFileSync(join(noTrainRepo, 'x.txt'), 'x\n');
-      git(noTrainRepo, ['add', '.']);
-      git(noTrainRepo, ['commit', '-q', '-m', 'init']);
+      const noDevelopRepo = join(scratch, 'no-develop-ref');
+      newRepo(noDevelopRepo);
+      writeFileSync(join(noDevelopRepo, 'x.txt'), 'x\n');
+      git(noDevelopRepo, ['add', '.']);
+      git(noDevelopRepo, ['commit', '-q', '-m', 'init']);
 
       subprocessProbe(
-        'no baseRef, unresolvable origin/train/elements-first -> LOUD exit 2, no silent fallback',
+        'no baseRef, unresolvable origin/develop -> LOUD exit 2, no silent fallback',
         'fail',
-        noTrainRepo,
+        noDevelopRepo,
         [],
-        ({ code, out }) => code === 2 && /cannot resolve default base/.test(out) && /origin\/train\/elements-first/.test(out),
+        ({ code, out }) => code === 2 && /cannot resolve default base/.test(out) && /origin\/develop/.test(out),
       );
 
       // #438 F4: a SEPARATE repo, with a REAL `visual.spec.ts` committed with identical content

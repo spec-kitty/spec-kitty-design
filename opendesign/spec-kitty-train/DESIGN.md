@@ -1,4 +1,4 @@
-# Spec Kitty — train/elements-first
+# Spec Kitty — develop
 > Surface: web
 
 > Category: Developer tools

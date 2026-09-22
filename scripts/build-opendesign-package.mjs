@@ -328,7 +328,7 @@ export function buildManifest(d) {
   return {
     schemaVersion: 'od-design-system-project/v1',
     id: BRAND_ID,
-    name: 'Spec Kitty — train/elements-first',
+    name: 'Spec Kitty — develop',
     category: 'Developer tools',
     // NO COMMIT SHA. A committed file cannot know the SHA of the commit that contains it; the last
     // package recorded one and was left pinned to a stale commit. The library version is the pin.
@@ -336,7 +336,7 @@ export function buildManifest(d) {
       `Authoritative Spec Kitty and Team Kitty visual language, generated from @spec-kitty/tokens ` +
       `${d.versions.tokens}, @spec-kitty/styles ${d.versions.styles} and @spec-kitty/elements ` +
       `${d.versions.elements}, with a static components fixture covering ${d.components.length} components.`,
-    source: { type: 'github', url: 'https://github.com/spec-kitty/spec-kitty-design', branch: 'train/elements-first' },
+    source: { type: 'github', url: 'https://github.com/spec-kitty/spec-kitty-design', branch: 'develop' },
     files: { design: 'DESIGN.md', tokens: 'tokens.css', components: 'components.html' },
     componentsManifest: 'components.manifest.json',
     usage: 'USAGE.md',
@@ -362,7 +362,7 @@ export function buildManifest(d) {
 
 export function buildMetadata() {
   return {
-    title: 'Spec Kitty — train/elements-first',
+    title: 'Spec Kitty — develop',
     category: 'Developer tools',
     surface: 'web',
     status: 'published',

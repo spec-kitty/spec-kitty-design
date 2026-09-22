@@ -75,7 +75,7 @@ export const ThemeToggleComposition: Story = {
     docs: {
       description: {
         story:
-          'Blocked on #323. Once #323 merges into `train/elements-first` and ships a stable public contract, the neutral placeholder button will be replaced by a real `<sk-theme-toggle class="sk-public-header__action">`. This family owns no theme state either way.',
+          'Blocked on #323. Once #323 merges into `develop` and ships a stable public contract, the neutral placeholder button will be replaced by a real `<sk-theme-toggle class="sk-public-header__action">`. This family owns no theme state either way.',
       },
     },
   },
