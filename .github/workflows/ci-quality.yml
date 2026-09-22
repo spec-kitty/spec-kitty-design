@@ -475,7 +475,19 @@ jobs:
         run: node scripts/check-commitlint-config.mjs
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
-        run: npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}
+        env:
+          PR_BASE_REF: ${{ github.base_ref }}
+          PR_HEAD_REF: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          # The production promotion is squash-merged, so its 2,000+ already-reviewed
+          # integration commits do not enter main individually. Lint the one commit
+          # subject that will enter main instead of re-linting historical develop.
+          if [ "$PR_BASE_REF" = "main" ] && [ "$PR_HEAD_REF" = "develop" ]; then
+            printf '%s\n' "$PR_TITLE" | npx commitlint
+          else
+            npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}
+          fi
       - name: "[ENFORCED] Fail if lint errors"
         if: always()
         run: |
