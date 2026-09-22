@@ -385,7 +385,7 @@ test.describe('sk-public-header source, markup, and distribution contract', () =
 
     const stories = readFileSync(PUBLIC_HEADER_STORIES, 'utf8');
     expect(stories).toMatch(/blocked on #323/i);
-    expect(stories).toMatch(/merges into `train\/elements-first`/);
+    expect(stories).toMatch(/merges into `develop`/);
     expect(stories).toMatch(/owns no theme state/i);
 
     const docs = readFileSync(COMPONENT_USAGE_DOC, 'utf8');
