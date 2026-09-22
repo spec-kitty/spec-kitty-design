@@ -20,7 +20,7 @@ on:
   # The mission-specific globs (`mission/webkit-deflake`, `kitty/mission-…-lane-*`) genuinely did
   # go dead at merge and are gone. But removing `push` entirely — which an earlier revision of this
   # file did — left the rig dispatchable by NOBODY: GitHub only offers `workflow_dispatch` once the
-  # workflow exists on the DEFAULT branch, and this PR targets `train/elements-first`, not `main`.
+  # workflow exists on the DEFAULT branch, while ordinary feature PRs target `develop`, not `main`.
   # So between this merge and the train landing, a `workflow_dispatch`-only rig is unrunnable.
   # Caught by the pre-merge squad's evidence lens.
   #

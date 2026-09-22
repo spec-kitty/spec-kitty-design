@@ -1,7 +1,7 @@
 # Elements-First Programme — Mission Briefs
 
 **Status:** ready to drive
-**Branch model:** all work happens on `train/elements-first`, a long-lived integration branch cut from `main`. Mission branches are cut from the train and merge back into it; the train lands on `main` once, at the end.
+**Branch model:** all work happens on `develop`, the integration and release-candidate branch. Mission branches are cut from `develop` and merge back into it; the operator promotes accepted releases to `main`.
 **Governing decisions:** the whole of [`decisions/`](decisions/), indexed with each record's current status in [the architecture README's ADR table](README.md#decisions-adrs). No range is written out here: `scripts/check-adr-index.mjs` holds that table to the directory in both directions, so the index cannot fall behind the record the way an enumeration in this line did (#193). Read the ones each brief names before writing a spec, and read the Status column with them: the README's *"What a Status obliges"* note states what `Accepted` and `Proposed` each require, under the #200 ruling. That note is where the rule is written; this line points at it rather than restating it.
 
 Every mission below has an intent, a scope boundary in both directions, dependencies, an expected work-package shape, and exit criteria that can be checked rather than asserted. Where a mission carries a residual unknown, it is named in the brief; none of them block starting.
@@ -15,9 +15,9 @@ The full loop procedure — selection, claiming, driving, and releasing the clai
 
 1. Take the lowest-numbered unassigned issue in epic #66 whose dependencies are closed.
 2. **Claim it before any other action** — assign yourself, verify you are the sole assignee, comment on the issue. Claiming is the concurrency guard, not bookkeeping.
-3. Cut `mission/<slug>` from `train/elements-first`.
+3. Cut `mission/<slug>` from `develop`.
 4. `spec-kitty specify` → `plan` → `tasks`, seeded from the issue body. Never hand-edit `kitty-specs/` (CLAUDE.md §7).
-5. PR into the train with `Refs #N` — a merge into the train closes nothing automatically.
+5. PR into `develop` with `Refs #N` — a merge outside the default branch closes nothing automatically.
 6. On success, comment the evidence and close. On blocked, comment why and **remove the assignee** so the issue does not look claimed forever.
 
 Charter gates still apply per component: a Storybook story including a `LightMode` variant, axe-core zero violations, visual diff against the reference set, token-only CSS.
@@ -28,14 +28,14 @@ The squad is **report-only** and never gates a mission — findings are triaged 
 
 **Blanket cadence does not port to a sixteen-mission programme.** Every point-cut of every mission is 60 deployments; at 3–4 lenses each that is roughly 200 delegate runs, and a single research-grade delegate pass in this programme measured 199k tokens. The cadence below is tiered by what a mission sets in motion rather than by ceremony, and costs about 29 deployments.
 
-**Pre-merge is not tiered.** Every PR into the train gets the **full gate — all four lenses — and its evidence posted as a PR comment before the merge.** Operator standing order, 2026-09-02. The tiering below governs only the *earlier* point-cuts, where the return on a squad varies by what the mission sets in motion.
+**Pre-merge is not tiered.** Every PR into `develop` gets the **full gate — all four lenses — and its evidence posted as a PR comment before the merge.** Operator standing order, amended 2026-09-22. The tiering below governs only the *earlier* point-cuts, where the return on a squad varies by what the mission sets in motion.
 
 | Tier | Missions | Earlier point-cuts | Pre-merge (every PR) |
 |---|---|---|---|
 | **A — mechanism-setting** | M4, M5, M8 | post-spec, post-plan, post-tasks · 4 lenses | **full · 4 lenses · evidence posted** |
 | **B — high blast radius** | M2, M3, M9, M14 | post-tasks · 3 lenses | **full · 4 lenses · evidence posted** |
 | **C — routine** | M6, M7, M10, M11–13, M15, M16 | none | **full · 4 lenses · evidence posted** |
-| **Programme** | the `train/elements-first` → `main` PR | — | **full · 4 lenses · evidence posted** |
+| **Programme** | the `develop` → `main` release PR | — | **full · 4 lenses · evidence posted** |
 
 ### The evidence comment
 
@@ -196,7 +196,7 @@ The binding evidence for M2 is instead: the moved source tree is byte-identical 
 
 **Depends on:** M4, **O5** — a hard CI gate must not contradict the charter. **Reads:** ADR-11.
 
-**Exit:** the suite runs on train PRs and is enforced in `gate`; red-first evidence for a deliberately broken `setFormValue` and a deliberately mis-fired event; CI stays inside its time envelope, and a budget for the suite is written down rather than assumed (the charter's three-minute figure covers only the Storybook build).
+**Exit:** the suite runs on integration-line PRs and is enforced in `gate`; red-first evidence for a deliberately broken `setFormValue` and a deliberately mis-fired event; CI stays inside its time envelope, and a budget for the suite is written down rather than assumed (the charter's three-minute figure covers only the Storybook build).
 
 ---
 
@@ -317,11 +317,11 @@ a generated string, not an authoring site.
 
 **In scope:** `release.yml` rebuilt for the new graph; provenance; SBOM; the integrity hash for the browser bundle; the single-version policy note; CHANGELOG; the semver ruling — nothing was ever installed, so 1.0.0 is still free.
 
-**This mission prepares the release; it does not perform it.** `release.yml` fires on `push: tags: ['v*.*.*']`, not on a merge. Tagging from the integration branch would publish 1.0.0 out of a state that has not been reviewed as a whole, so the tag is pushed **after the train lands on `main`, by the operator** — the same authority as the merge itself.
+**This mission prepares the release; it does not perform it.** `release.yml` fires on `push: tags: ['v*.*.*']`, not on a merge. Tagging from the integration branch would publish out of a state that has not been reviewed as a whole, so the tag is pushed **after `develop` is promoted to `main`, by the operator** — the same authority as the merge itself.
 
 **Consequence, stated plainly: no mission in this programme needs npm write access.** N1's remaining steps (GitHub org 2FA and a real dry run — the npm publish token and `NPM_TOKEN` are superseded, see above) gate the operator's release, not any mission's work. N1 is therefore not a hard prerequisite for this mission — only for the tag that follows it.
 
-**Exit:** `npm publish --dry-run` passes for every package in the new graph, proving the rebuilt pipeline end to end; a `file://` page loads the **locally built** classic-script bundle with no network; the integrity hash is generated and recorded; and the release runbook states the post-merge sequence — land the train, tag, workflow publishes.
+**Exit:** `npm publish --dry-run` passes for every package in the new graph, proving the rebuilt pipeline end to end; a `file://` page loads the **locally built** classic-script bundle with no network; the integrity hash is generated and recorded; and the release runbook states the post-merge sequence — promote `develop`, tag, workflow publishes.
 
 ---
 

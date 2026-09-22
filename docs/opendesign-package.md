@@ -4,6 +4,8 @@
 design system: the tokens, the fonts, and a **components fixture** that lets an OpenDesign generation
 emit real Spec Kitty components instead of approximating them. It is **generated** from the library by
 `scripts/build-opendesign-package.mjs` and committed, and CI fails any pull request that leaves it stale.
+The folder and brand id remain stable for existing OpenDesign installations; its source branch is
+now `develop`, the repository's integration line.
 
 It replaces the hand-maintained package that used to live in `spec-kitty/team-kitty-ux` under
 `open-design-systems/spec-kitty-train/`. That copy shipped tokens only and was pinned to `a9f385d`,
@@ -77,7 +79,7 @@ commit. After a train merge or a release:
 
 ```sh
 git -C <the mounted clone> fetch origin
-git -C <the mounted clone> checkout --detach origin/train/elements-first
+git -C <the mounted clone> checkout --detach origin/develop
 ```
 
 **`metadata.json` has two owners.** The generator writes it (`status: "published"`), and OpenDesign

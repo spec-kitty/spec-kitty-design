@@ -15,7 +15,10 @@ governance:
     dashboard_max_wps: 100
   branch_strategy:
     main_branch: main
-    rules: []
+    dev_branch: develop
+    rules:
+    - Ordinary mission, contributor, and dependency-update pull requests target develop.
+    - Only the operator promotes accepted releases from develop to main.
   charter:
     selected_paradigms: []
     selected_directives: []

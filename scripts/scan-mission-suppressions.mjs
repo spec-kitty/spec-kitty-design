@@ -497,7 +497,7 @@ function main() {
   if (!base) {
     console.error(
       'usage: node scripts/scan-mission-suppressions.mjs --base=<ref> [--target=<ref>] (or --selftest)\n' +
-        "  --base should name the mission's PR base (e.g. train/elements-first) so the diff " +
+        "  --base should name the mission's PR base (e.g. develop) so the diff " +
         'covers every WP\'s accumulated changes, not just one lane.',
     );
     process.exitCode = 1;

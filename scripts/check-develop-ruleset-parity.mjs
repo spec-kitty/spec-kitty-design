@@ -3,11 +3,9 @@
  * scripts/check-develop-ruleset-parity.mjs — full-parameter comparison between two live GitHub
  * rulesets and their committed artifacts: `develop` (REL1, #362, FR-001/NFR-004/SC-001;
  * data-model.md's DevelopRulesetArtifact, contracts/promotion-script.contract.md) and, since
- * F-E, `parity-anchor-tags-are-immutable` (the tag ruleset that protects
- * `refs/tags/parity-anchor/*` — see check-ci-quality-trigger-parity.mjs's F2). Before F-E the
- * latter was load-bearing (check-ci-quality-trigger-parity.mjs's whole anchor-tamper defense
- * depends on it), unrecorded as an artifact, and undrift-checked — exactly the state
- * `develop`'s own ruleset was in before this mission (FR-001) closed it.
+ * F-E, `parity-anchor-tags-are-immutable` (the retained historical tag ruleset protecting
+ * `refs/tags/parity-anchor/*`). The trigger-parity mechanism that originally consumed the tag
+ * was retired with the direct-`develop` cutover; the immutable historical ref remains checked.
  *
  * `diffRulesetParity(live, artifact, opts)` compares EVERY parameter at every nesting level,
  * ignoring only the eight named response-only fields GitHub's API adds to a response that
@@ -29,7 +27,7 @@
  *     forever.)
  *   node scripts/check-develop-ruleset-parity.mjs --check-parity-anchor-tags
  *     (id is NOT bootstrap-pending like develop's — F-E's ruleset already exists, id 22997584,
- *     recorded in docs/architecture/branch-model.md — so this has no dated floor and no
+ *     recorded in this file — so this has no dated floor and no
  *     unset-id notice path; a missing/unreachable ruleset here is simply an error.)
  *
  * **THE LESSON, THIRD TIME (F-E)**: a check that reads privileged state is only as strong as
@@ -57,13 +55,9 @@ const PARITY_ANCHOR_ARTIFACT_PATH = resolve(__dirname, '..', '.github', 'ruleset
 // recorded in docs/architecture/branch-model.md) — unlike DEVELOP_RULESET_ID below, this one
 // is not mid-bootstrap, so it is a plain constant rather than an env-driven, dated-floor value.
 const PARITY_ANCHOR_RULESET_ID = '22997584';
-// "Also" item (pre-merge squad, PR #429): env-driven, not a second hardcoded literal — the
-// one INTENTIONALLY hardcoded literal in this mission is `assertSingleRepoScope`'s security
-// invariant in scripts/promote-develop.mjs, which must stay literal (an env var there would
-// let the App-scope guard be satisfied by manipulating the environment, defeating its point).
 // This script is not a security boundary — it only fetches a ruleset for whatever repo the
-// job runs in — so it reads `GITHUB_REPOSITORY` the same way promote-develop.mjs's `cliRun`
-// does, falling back to the literal only for a bare local invocation with no env set.
+// job runs in — so it reads `GITHUB_REPOSITORY`, falling back to the literal only for a bare
+// local invocation with no environment set.
 const REPO = process.env.GITHUB_REPOSITORY || 'spec-kitty/spec-kitty-design';
 
 // M9 (pre-merge squad, PR #429): a dated floor. Before this, an unset DEVELOP_RULESET_ID made
@@ -326,7 +320,7 @@ function cliCheckParityAnchorTags() {
   console.log(`✅ the live parity-anchor-tags ruleset (id ${PARITY_ANCHOR_RULESET_ID}) matches the committed artifact.`);
 }
 
-// ── --selftest: floor-outside-the-table, same shape as promote-develop.mjs's (research.md R8) ──
+// ── --selftest: floor-outside-the-table (research.md R8) ──
 
 function baseArtifact() {
   return JSON.parse(readFileSync(ARTIFACT_PATH, 'utf8'));

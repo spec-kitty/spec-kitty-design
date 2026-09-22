@@ -1,13 +1,13 @@
 {
   "schemaVersion": "od-design-system-project/v1",
   "id": "spec-kitty-train",
-  "name": "Spec Kitty — train/elements-first",
+  "name": "Spec Kitty — develop",
   "category": "Developer tools",
   "description": "Authoritative Spec Kitty and Team Kitty visual language, generated from @spec-kitty/tokens 1.0.0, @spec-kitty/styles 1.0.0 and @spec-kitty/elements 1.0.0, with a static components fixture covering 34 components.",
   "source": {
     "type": "github",
     "url": "https://github.com/spec-kitty/spec-kitty-design",
-    "branch": "train/elements-first"
+    "branch": "develop"
   },
   "files": {
     "design": "DESIGN.md",
