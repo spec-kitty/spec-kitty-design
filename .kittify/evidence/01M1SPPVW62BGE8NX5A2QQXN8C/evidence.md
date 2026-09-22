@@ -1,0 +1,1 @@
+Pre-merge adversarial review of PR #187 @cde2fb8 (report-only, read-only). 3 MAJOR, 4 MINOR, 1 INFO; no BLOCKER. Verified: no new behaviour id minted; SC-004 charter still red-first; re-siting recorded in 4 places; all 85 mutations named-red in CI run 33991913077.

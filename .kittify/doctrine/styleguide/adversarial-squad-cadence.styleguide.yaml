@@ -1,0 +1,136 @@
+schema_version: "1.0"
+id: adversarial-squad-cadence
+title: Adversarial Squad Cadence
+scope: operations
+
+# PROJECT OVERRIDE of the packaged adversarial-squad-cadence styleguide.
+# The packaged artifact makes the squad "strong guidance, not a gate" and forbids
+# enforcement. In the elements-first programme the operator has ruled the squad IS
+# a gate, so this layer replaces the principles, patterns, anti_patterns and
+# quality_test fields. Fields not restated here (references, applies_to_languages,
+# structural_lint_config, tooling) are inherited from the packaged artifact by
+# field-level merge.
+#
+# patterns is restated rather than inherited because the packaged entries carry
+# "squad is advisory only" and "runs advisory — findings inform the tasks step, not
+# block it". Inheriting them left the merged artifact contradicting its own first
+# principle. The restatement keeps both planning point-cuts advisory (they still are)
+# and adds the pre-merge gate point-cut.
+
+principles:
+  - >
+    Run a bounded multi-profile adversarial squad at every pull request as a GATE.
+    A PR is not merged until the squad has reported. This project deliberately
+    overrides the packaged optional invariant; the override is scoped to this
+    repository and does not change the packaged artifact.
+  - >
+    Every dispatched lens must report before the merge decision is taken. A partial
+    squad is not a squad: merging on three of four lenses, or on a subset chosen after
+    the fact, does not satisfy the gate. If a lens cannot be dispatched, that is a HOLD
+    to be resolved, not a lens to be dropped.
+  - >
+    Squad evidence is pinned to the head SHA it was taken against. A push after the
+    squad reported invalidates that evidence; the affected lenses are re-run against
+    the new tip. A verdict that does not name a SHA, or names one that is no longer
+    the tip, does not satisfy the gate.
+  - >
+    Two passes per point-cut. Fold the confirmed findings from pass one, then re-run
+    the same lenses against the folded tip. Escalate to the operator only on a named
+    blocker or a finding that contradicts a governing document; a second pass that
+    lands no new confirmed findings closes the point-cut.
+  - >
+    Canonical trigger points for the squad cadence: post-spec (scope and prior-art check),
+    post-plan (brownfield foldable-issue and split-brain check), post-tasks (anti-laziness
+    and decomposition realism check), at mission sizing (effort and risk calibration), and
+    — added by this override — at every PR before merge.
+  - >
+    A squad bounded to 3-5 distinct profile perspectives is typical. More delegates is not
+    better — distinct lenses are. A 20-30 minute bounded squad is preferable to an unbounded
+    sprawl.
+  - >
+    This styleguide governs the cadence — the when and why of running a squad. The squad
+    playbook (profile selection, point-cut definitions, model-discipline rules, anti-patterns)
+    lives in adversarial-squad-deployment.procedure. Do not restate the playbook here;
+    reference it. Where that procedure asserts the squad is optional, this project override
+    and the project DIRECTIVE_046 override govern instead.
+  - >
+    The gate applies at the PRE-MERGE point-cut. The planning point-cuts (post-spec,
+    post-plan, post-tasks, mission sizing) remain advisory as in the packaged doctrine:
+    findings inform the next step, they do not block it. The patterns below describe those
+    advisory point-cuts and are deliberately unchanged in that respect.
+  - >
+    This styleguide folds experiment #2094 (multi-squad pre-flight cadence; closed on land
+    with a tracker comment referencing mission doctrine-catfooding-2196).
+
+patterns:
+  - name: Pre-merge gate squad
+    description: >
+      Before merging any pull request, dispatch a bounded squad over the aggregate diff.
+      This point-cut is a GATE: every dispatched lens must report before the merge decision,
+      and the recorded verdict names the head SHA it was taken against. Fold the confirmed
+      findings, then re-run the same lenses against the folded tip (two passes per
+      point-cut). Escalate to the operator only on a named blocker or a finding that
+      contradicts a governing document.
+    good_example: |
+      # Trigger: PR open, head SHA known
+      # Profiles: architect-alphonso (structure), reviewer-renata (overclaim/accuracy),
+      #           debugger-debbie (live evidence), randy-reducer (duplication/split-brain)
+      # Gate: dispatched == reported, and every verdict names the current head SHA
+      verdicts = dispatch_squad(sha=head_sha())
+      assert set(verdicts) == set(dispatched), "a lens has not reported — HOLD"
+      assert all(v.sha == head_sha() for v in verdicts.values()), "stale evidence — re-run"
+      # merge only after both assertions hold
+  - name: Post-tasks anti-laziness squad
+    description: >
+      After /spec-kitty.tasks and before claiming the first WP, dispatch a bounded squad to
+      audit the work-package decomposition for fakeable DoDs, undersized scope, and missing
+      coverage. Record convergent findings in the tasks document or as a pre-implementation
+      note. This is the highest-value planning point-cut: finding decomposition gaps before
+      implementation avoids costly mid-WP scope expansions. Advisory — it informs the next
+      step rather than blocking it.
+    good_example: |
+      # Trigger: tasks finalized, first WP not yet claimed
+      # Profiles: architect-alphonso (structure), debugger-debbie (live-evidence coverage),
+      #           paula-patterns (decomposition realism), randy-reducer (duplication/overlap)
+      # Sharp question: "Are the DoDs fakeable? Is any WP materially undersized?"
+      # Output: convergent findings recorded in tasks.md amendment section;
+      #         mission proceeds — this planning point-cut is advisory
+  - name: Post-plan brownfield squad
+    description: >
+      After /spec-kitty.plan, dispatch a focused squad to surface foldable issues,
+      split-brain surface risks, and deprecation debt the plan may have missed. Advisory —
+      findings inform the tasks step rather than blocking it.
+    good_example: |
+      # Trigger: plan.md complete, /spec-kitty.tasks not yet run
+      # Profiles: researcher-ryan (prior-art and related issues),
+      #           architect-alphonso (split-brain risk)
+      # Sharp question: "What has this plan missed that /spec-kitty.tasks should address?"
+      # Output: research.md or plan.md amendment; tasks step proceeds
+
+anti_patterns:
+  # The two gate anti-patterns (Merging on a partial squad, Stale-SHA evidence) are
+  # deliberately NOT restated here. They live in the project procedure override, and
+  # this styleguide's own "Playbook restatement" anti-pattern below forbids copying the
+  # procedure's anti-pattern list into another artifact. The gate mechanics are carried
+  # by principles 2 and 3 above. Restating anti_patterns at all is forced only by the
+  # shallow merge, which is how the packaged "Gate-hardwiring" entry gets removed.
+  - name: Playbook restatement
+    description: >
+      Copying the squad playbook (profile selection order, point-cut definitions,
+      anti-pattern list, model-discipline rules) from adversarial-squad-deployment.procedure
+      into this or any other artifact creates a split-brain authority.
+      Reference the procedure; do not restate it.
+    bad_example: |
+      # Bad: restating procedure steps inside cadence guidance
+      # "1. Select 3-4 profiles by lens. 2. Dispatch in parallel.
+      #  3. Require structured output. 4. Synthesize..."
+    good_example: |
+      # Good: cadence guidance references the procedure for execution details
+      # "For the squad execution playbook (profile selection, dispatch discipline,
+      #  synthesis, anti-patterns), see adversarial-squad-deployment.procedure."
+
+quality_test: >
+  Can a practitioner read this styleguide and immediately know (a) at which workflow
+  point-cuts a squad must run, (b) that in this project the squad is a merge gate and that
+  every dispatched lens must report against the current head SHA before merging, and
+  (c) where to find the execution playbook — without this styleguide restating the playbook?

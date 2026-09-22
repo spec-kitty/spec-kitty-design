@@ -1,0 +1,1 @@
+Pre-merge architecture lens on PR #186 @19601583d553c709f6e20080265f886c82b4468f: 0 BLOCKER, 5 MAJOR, 4 MINOR, 2 NIT. Light-DOM rule verified clean (no shadow root, no template, no sk-* element). Report-only; no files modified.

@@ -1,0 +1,292 @@
+{
+  "mission_slug": "repository-dossier-compact-navigation-shell-01M1Y3FY",
+  "mission_number": "254",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "The app shell provides one opt-in compact presentation axis that is absent by default.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-app-shell.test.ts; manifest and Vue/React type checks",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-08T02:27:25Z",
+      "notes": "Only presentation=compact is recognized; property omission and native attribute removal both restore undefined and retain the legacy path."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Absent-axis consumers retain the existing slots, parts, three-column layout, and 720px legacy reflow.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-app-shell.test.ts; apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:58:54Z",
+      "notes": "The two compact regions are inert additions and default desktop/narrow behavior remains unchanged."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Unknown presentation values warn once and fail open to the legacy layout.",
+      "proof_type": "automated_test",
+      "evidence": "unknown-presentation and native-removal behavior tests in fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-08T02:27:25Z",
+      "notes": "Unknown strings still warn and fail open; native omission does not emit an unknown-null warning. Legacy personal, context, and content regions remain visible."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Pre-upgrade presentation, open, and property-only trigger assignments survive definition.",
+      "proof_type": "automated_test",
+      "evidence": "[SC-010] pre-upgrade/reflection and native-attribute-removal fixtures plus generated React/Vue type tests",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-08T02:27:25Z",
+      "notes": "presentation/open reflect; declarative presentation authoring upgrades; removed presentation normalizes to undefined; compactTrigger never serializes."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Compact mode exposes a consumer-authored compact-header without duplicating main.",
+      "proof_type": "automated_test",
+      "evidence": "element slot-order tests and compact Storybook axe/landmark test",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:58:54Z",
+      "notes": "Exactly one main remains in the shell shadow tree."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Compact mode exposes a consumer-authored native compact-navigation region.",
+      "proof_type": "automated_test",
+      "evidence": "element projection tests and Chromium/Firefox compact stories",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:58:54Z",
+      "notes": "The shell adds no navigation landmark or route behavior."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Compact placement is inclusive through an app-shell content inline size of 860px; 861px is noncompact.",
+      "proof_type": "automated_test",
+      "evidence": "[SC-017] element tests and 390/768/860/861 Playwright cases",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:58:54Z",
+      "notes": "CSS and ResizeObserver use the same content-box coordinate."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Drawer rendering follows consumer-controlled open and the shell never mutates the value.",
+      "proof_type": "automated_test",
+      "evidence": "[SC-010] mutation-backed controlled-open tests",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:58:54Z",
+      "notes": "Escape emits intent; the consumer accepts or rejects it."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "The public contract keeps trigger, IDREF, target, expanded state, and accessible labels consumer-owned in one light-DOM root.",
+      "proof_type": "automated_test_and_documentation",
+      "evidence": "same-root/actual-slot tests; docs/design-system/using-components.md",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:58:54Z",
+      "notes": "False slot attributes, cross-shell targets, and cross-root targets are rejected."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Closed navigation is inert and absent from focus/accessibility order; open navigation follows native order.",
+      "proof_type": "automated_test",
+      "evidence": "[SC-012] element fixtures and Chromium/Firefox accessibility-tree tests",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-08T02:27:25Z",
+      "notes": "hidden, inert, aria-hidden, sequential focus, and focus release on a true-to-false controlled close are asserted together."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "One effectively-open Escape emits exactly one typed, bubbling, composed, non-cancelable dismissal; all other states emit none.",
+      "proof_type": "mutation_backed_test",
+      "evidence": "[SC-006]/[SC-007]/[SC-008] element fixtures and compact Playwright Escape coverage",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:58:54Z",
+      "notes": "Absent, unknown, noncompact, and controlled-closed cases emit zero."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Accepted dismissal renders closed before connected valid-trigger focus return; rejected intent cannot steal later focus.",
+      "proof_type": "mutation_backed_test",
+      "evidence": "[SC-012] accepted/rejected/disconnected/slot/root fixtures in the native and React browser layers",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-08T14:04:21Z",
+      "notes": "Review-cycle false-slot/cross-root and ordinary-close findings have dedicated regressions. Parent-head evidence shows a real stateful React 19 consumer scheduling a false-or-omitted controlled value that exactly one bounded microtask samples as effective falsiness; the component then awaits its Lit update before returning focus. The intent expires at that sample whether accepted or rejected, so a later route/state close cannot inherit it. Successor exact-SHA gates and independent approval remain pending."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Consumer route activation can close by changing open without shell routing or destination state.",
+      "proof_type": "automated_test",
+      "evidence": "native pointer/keyboard route-close Playwright story",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:58:54Z",
+      "notes": "Ordinary route close releases focus from newly hidden navigation without restoring compactTrigger."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Open compact navigation is viewport-bounded and owns vertical scrolling.",
+      "proof_type": "browser_test_and_visual_evidence",
+      "evidence": "short/tall/long-label Playwright cases and four headed UI-zoom captures",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:58:54Z",
+      "notes": "At 400%, Chromium measured 157/334 and Firefox 155/334 client/scroll height."
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Required widths and real 200%/400% browser UI zoom avoid page overflow and preserve long labels.",
+      "proof_type": "browser_test_and_visual_evidence",
+      "evidence": "38-case Chromium/Firefox suite; docs/architecture/validation/issue-254-compact-navigation/*.png",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-08T02:27:25Z",
+      "notes": "Headed XTEST zoom used exact DPR 2/4, exact 390 CSS viewport, and visualViewport.scale=1."
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Threshold resize preserves open while reconciling visibility, focus, accessibility exposure, and expanded claims.",
+      "proof_type": "automated_test",
+      "evidence": "bidirectional resize and compact-to-legacy focus-cleanup tests",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-08T02:27:25Z",
+      "notes": "Both header and drawer focus paths are covered."
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Default dark, LightMode, forced-colors, and reduced-motion modes preserve usable state and focus.",
+      "proof_type": "browser_test",
+      "evidence": "mode stories, token-surface comparison, forced-colors outline, reduced-motion timing assertions",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:58:54Z",
+      "notes": "The contract does not depend on hover, animation, color, or a glyph alone."
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Focused stories cover desktop, closed/open compact, widths, long labels, heights, and accessibility modes.",
+      "proof_type": "generated_ratchet_and_storybook",
+      "evidence": "packages/elements/src/app-shell/sk-app-shell.stories.ts; expected-stories.json; Storybook build",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:58:54Z",
+      "notes": "Includes the exact required LightMode story name."
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Behavior, accessibility, responsive, axe, and mutation coverage exercise every behavior-bearing branch.",
+      "proof_type": "automated_test_and_mutation",
+      "evidence": "focused Vitest/Playwright, axe, full tests, cycle-4 isolated SC-010 proof, cycle-5/6 isolated arms, the complete 210-arm suite-selftest, and guard selftest",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-08T14:04:21Z",
+      "notes": "All 210 registered arms produced their named red from a 471-assertion green baseline with 128 registry pairs, 41 impacted sources, zero fallback, and no runner fault on the post-#264 diagnostic candidate. The immutable PR/issue evidence pins the mandatory replay to the final reviewed SHA after this tracked ledger is frozen."
+    },
+    {
+      "criterion_id": "FR-020",
+      "description": "Documentation publishes the complete public slot/property/event/part and consumer ownership contract.",
+      "proof_type": "documentation_review",
+      "evidence": "docs/design-system/using-components.md; custom-elements manifest docs; validation ledger",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:58:54Z",
+      "notes": "Threshold, focus timing, disconnected trigger, route ownership, and same-root IDREF obligations are explicit."
+    },
+    {
+      "criterion_id": "FR-021",
+      "description": "Behavior/mutation registries and CSS, manifest, React, Vue, ratchet, story, and size outputs are synchronized by generators.",
+      "proof_type": "generated_drift_checks",
+      "evidence": "CEM/React/Vue/CSS/markup regeneration and checks; post-#264 Node 24 no-cache elements build and authoritative size generation",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-08T14:04:21Z",
+      "notes": "Post-#264 source regeneration is clean. The nullable property-reset metadata derives the React wrapper from the manifest rather than hand-editing it, and Node 24 authoritative size generation records the resulting release bytes. Final check-mode hashes are recorded externally against the reviewed delivery SHA."
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "C-001",
+      "description": "The shell owns placement, rendered drawer visibility, scrolling, and dismissal intent; the consumer owns the open value, trigger, labels, navigation, routes, destination, and acceptance.",
+      "verification_method": "code_review_and_automated_test",
+      "verification_command": "git diff origin/train/elements-first...HEAD -- packages/elements/src/app-shell fixtures/elements-behaviour/src/sk-app-shell.test.ts apps/storybook/src/tests/sk-app-shell-compact-navigation.spec.ts",
+      "result": "confirmed",
+      "evidence": "Controlled-state and route-close tests plus independent Codex review show no shell mutation of open or application behavior.",
+      "scope": "sk-app-shell public contract"
+    },
+    {
+      "invariant_id": "C-002",
+      "description": "The delivery is rebased on the current train and regenerates overlapping shared artifacts.",
+      "verification_method": "git_and_generated_drift",
+      "verification_command": "git merge-base --is-ancestor origin/train/elements-first HEAD; run all generation and --check commands",
+      "result": "confirmed",
+      "evidence": "The delivery series is rebased directly onto fetched train a7844555 after #213, #256, #214, and #264; shared story ratchets were unioned and all derived artifacts regenerated from source.",
+      "scope": "delivery history and generated surfaces"
+    },
+    {
+      "invariant_id": "C-003",
+      "description": "Authored element source remains canonical and no app-shell markup module is invented.",
+      "verification_method": "generated_drift_check",
+      "verification_command": "node scripts/build-element-markup.mjs --check && node scripts/build-react-wrappers.mjs --check && node scripts/build-vue-types.mjs --check",
+      "result": "confirmed_absent",
+      "evidence": "Static-markup generation remains at ten existing components and creates no app-shell markup surface.",
+      "scope": "authored and generated component surfaces"
+    },
+    {
+      "invariant_id": "C-004",
+      "description": "No sk-personal-rail, sk-context-sidebar, sk-nav-pill, or unrelated shell default contract is changed.",
+      "verification_method": "diff_audit",
+      "verification_command": "git diff --name-only origin/train/elements-first...HEAD | rg 'packages/(elements|styles)/src/(personal-rail|context-sidebar|nav-pill)'",
+      "result": "confirmed_absent",
+      "evidence": "The forbidden component paths are absent from the delivery diff; legacy app-shell fixtures remain green.",
+      "scope": "existing component stability"
+    },
+    {
+      "invariant_id": "C-005",
+      "description": "No Team Kitty state, routes, discovery, polling, inference, persistence, breakpoint service, global store, or focus trap is added.",
+      "verification_method": "diff_review",
+      "verification_command": "git diff origin/train/elements-first...HEAD -- packages/elements/src/app-shell/sk-app-shell.ts",
+      "result": "confirmed_absent",
+      "evidence": "Element state is limited to presentation measurements and pending accepted-dismissal focus; no application imports or services exist.",
+      "scope": "packages/elements/src/app-shell/sk-app-shell.ts"
+    },
+    {
+      "invariant_id": "C-006",
+      "description": "No new shell, navigation product, rail, tree, desktop navigation, or Team Kitty-branded component is created.",
+      "verification_method": "diff_audit",
+      "verification_command": "git diff --diff-filter=A --name-only origin/train/elements-first...HEAD -- packages/elements/src packages/styles/src",
+      "result": "confirmed_absent",
+      "evidence": "The only new authored test surface exercises the existing sk-app-shell; no product component directory is added.",
+      "scope": "packages/elements/src and packages/styles/src"
+    },
+    {
+      "invariant_id": "C-007",
+      "description": "Public property, event, slot, and part names follow existing element and generation conventions.",
+      "verification_method": "manifest_type_and_ratchet_checks",
+      "verification_command": "node scripts/check-manifest-content.mjs && node scripts/check-part-ratchet.mjs && node scripts/typecheck-all.mjs",
+      "result": "confirmed",
+      "evidence": "Manifest, part ratchet, React/Vue types, and five-project typecheck pass for the documented names.",
+      "scope": "public API and generated contracts"
+    },
+    {
+      "invariant_id": "C-008",
+      "description": "Compact header and drawer do not duplicate main or invent a navigation landmark around consumer content.",
+      "verification_method": "accessibility_test",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-app-shell-compact-navigation.spec.ts --project=chromium --project=firefox",
+      "result": "confirmed",
+      "evidence": "Focused stories have one consumer navigation landmark, one main, and zero axe violations.",
+      "scope": "compact Storybook composition"
+    }
+  ]
+}

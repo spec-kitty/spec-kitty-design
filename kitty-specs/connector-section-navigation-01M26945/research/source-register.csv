@@ -1,0 +1,23 @@
+source_id,source_type,title,location,status,accessed_at
+SRC-001,github-issue,Connector section navigation (#337),https://github.com/spec-kitty/spec-kitty-design/issues/337,authoritative,2026-09-10
+SRC-002,github-issue,Epic #335 (Family 3 programme),https://github.com/spec-kitty/spec-kitty-design/issues/335,authoritative,2026-09-10
+SRC-003,github-issue,Issue 256 native context-navigation styles (closed precedent),https://github.com/spec-kitty/spec-kitty-design/issues/256,closed-precedent,2026-09-10
+SRC-004,kitty-specs,native-context-navigation-styles-01M1Y3MG mission (spec/plan/tasks/contract),kitty-specs/native-context-navigation-styles-01M1Y3MG/,closed-precedent,2026-09-10
+SRC-005,kitty-specs,work-explorer-segmented-choice-styles-01M20C9F mission (Terminology-section pattern; explicit non-goal),kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/spec.md,closed-precedent,2026-09-10
+SRC-006,repository-doc,ADR-9 Shadow DOM and the Styling API,docs/architecture/decisions/2026-09-02-9-shadow-dom-and-styling-api.md,authoritative,2026-09-10
+SRC-007,repository-doc,ADR-10 Distribution and Canonical Markup (incl. styles-only class ruling),docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md,authoritative,2026-09-10
+SRC-008,repository-doc,ADR-11 Verification Stack and Wrapper Generation,docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md,authoritative,2026-09-10
+SRC-009,repository-doc,Adding a component,docs/contributing/adding-a-component.md,authoritative,2026-09-10
+SRC-010,repository-doc,Running quality checks,docs/contributing/running-quality-checks.md,authoritative,2026-09-10
+SRC-011,repository-doc,Architecture README ADR index,docs/architecture/README.md,authoritative,2026-09-10
+SRC-012,repository-source,sk-nav-pill element (explicit non-goal boundary),packages/elements/src/nav-pill/,authoritative,2026-09-10
+SRC-013,repository-source,sk-context-nav styles-only family (direct precedent),packages/styles/src/context-nav/sk-context-nav.css,authoritative,2026-09-10
+SRC-014,repository-doc,sk-breadcrumbs usage doc (sibling native-nav precedent),docs/design-system/using-components.md,authoritative,2026-09-10
+SRC-015,repository-doc,commitlint scope enum,commitlint.config.cjs,authoritative,2026-09-10
+SRC-016,repository-doc,44px floor token rationale,packages/styles/src/confirm-dialog/sk-confirm-dialog.css,authoritative,2026-09-10
+SRC-017,programme-doc,Programme #335 shared briefing,/home/jeroennouws/dev/spec-kitty-design-missions/_program-335/BRIEF.md,authoritative,2026-09-10
+SRC-018,ux-evidence,Family 3 Connectors design contract,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/families/03-connectors/DESIGN.md,approved-evidence,2026-09-10
+SRC-019,ux-evidence,C6 installation-detail-dark screen (.detail-tabs source),/home/jeroennouws/dev/team-kitty-missions/ux_redesign/families/03-connectors/screens/C6-installation-detail-dark.html,approved-evidence,2026-09-10
+SRC-020,ux-evidence,C7 workspace-scope-dark screen (.detail-tabs repetition),/home/jeroennouws/dev/team-kitty-missions/ux_redesign/families/03-connectors/screens/C7-workspace-scope-dark.html,approved-evidence,2026-09-10
+SRC-021,ux-evidence,C8 project-routing-dark screen (.detail-tabs repetition),/home/jeroennouws/dev/team-kitty-missions/ux_redesign/families/03-connectors/screens/C8-project-routing-dark.html,approved-evidence,2026-09-10
+SRC-022,ux-evidence,C9a team-accounts-dark screen (.detail-tabs repetition),/home/jeroennouws/dev/team-kitty-missions/ux_redesign/families/03-connectors/screens/C9a-team-accounts-dark.html,approved-evidence,2026-09-10

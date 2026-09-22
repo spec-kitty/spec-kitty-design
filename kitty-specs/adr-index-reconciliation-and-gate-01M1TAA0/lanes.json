@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "mission_slug": "adr-index-reconciliation-and-gate-01M1TAA0",
+  "mission_id": "01M1TAA0ZJM65QE87PV4DE50Q2",
+  "mission_branch": "kitty/mission-adr-index-reconciliation-and-gate-01M1TAA0",
+  "target_branch": "mission/adr-index-reconciliation-and-gate",
+  "lanes": [
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        ".github/workflows/ci-quality.yml",
+        "docs/architecture/README.md",
+        "docs/architecture/elements-first-programme.md",
+        "scripts/check-adr-index.mjs"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T03:01:29.690603+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01"
+  ],
+  "planning_commit_sha": "a07feda24c37b14e7b0171d2f856392b479120bd"
+}

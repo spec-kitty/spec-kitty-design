@@ -1,0 +1,110 @@
+<!-- @spec-kitty/styles — sk-workflow-board (five-lane populated reference) -->
+<!-- This constrained reference genuinely overflows, so the consumer-authored
+     region/name/tabindex triad is present as one measured state. -->
+<div class="sk-workflow-board">
+  <h2 id="workflow-board-populated-title">Work Packages</h2>
+  <div
+    class="sk-workflow-board__scroller"
+    role="region"
+    aria-labelledby="workflow-board-populated-title"
+    tabindex="0"
+  >
+    <section
+      class="sk-workflow-lane"
+      aria-labelledby="workflow-board-populated-planned-title"
+    >
+      <header class="sk-workflow-lane__header">
+        <h3
+          class="sk-workflow-lane__title"
+          id="workflow-board-populated-planned-title"
+        >
+          Planned
+        </h3>
+        <span class="sk-workflow-lane__count" aria-label="2 work packages"
+          >2</span
+        >
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Define acceptance evidence</li>
+        <li>Map token dependencies</li>
+      </ol>
+    </section>
+    <section
+      class="sk-workflow-lane"
+      aria-labelledby="workflow-board-populated-doing-title"
+    >
+      <header class="sk-workflow-lane__header">
+        <h3
+          class="sk-workflow-lane__title"
+          id="workflow-board-populated-doing-title"
+        >
+          Doing
+        </h3>
+        <span class="sk-workflow-lane__count" aria-label="1 work package"
+          >1</span
+        >
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Author native fixtures</li>
+      </ol>
+    </section>
+    <section
+      class="sk-workflow-lane"
+      aria-labelledby="workflow-board-populated-review-title"
+    >
+      <header class="sk-workflow-lane__header">
+        <h3
+          class="sk-workflow-lane__title"
+          id="workflow-board-populated-review-title"
+        >
+          In review
+        </h3>
+        <span class="sk-workflow-lane__count" aria-label="2 work packages"
+          >2</span
+        >
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Check native list order</li>
+        <li>Inspect accessibility output</li>
+      </ol>
+    </section>
+    <section
+      class="sk-workflow-lane"
+      aria-labelledby="workflow-board-populated-approved-title"
+    >
+      <header class="sk-workflow-lane__header">
+        <h3
+          class="sk-workflow-lane__title"
+          id="workflow-board-populated-approved-title"
+        >
+          Approved
+        </h3>
+        <span class="sk-workflow-lane__count" aria-label="1 work package"
+          >1</span
+        >
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Confirm generated exports</li>
+      </ol>
+    </section>
+    <section
+      class="sk-workflow-lane"
+      aria-labelledby="workflow-board-populated-done-title"
+    >
+      <header class="sk-workflow-lane__header">
+        <h3
+          class="sk-workflow-lane__title"
+          id="workflow-board-populated-done-title"
+        >
+          Done
+        </h3>
+        <span class="sk-workflow-lane__count" aria-label="1 work package"
+          >1</span
+        >
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Record implementation research</li>
+      </ol>
+    </section>
+  </div>
+</div>

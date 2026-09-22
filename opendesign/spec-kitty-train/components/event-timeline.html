@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>event-timeline — Spec Kitty</title>
+    <meta name="description" content="event-timeline: 17 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: event-timeline — packages/styles/src/event-timeline/sk-event-timeline.css */
+/* @spec-kitty/styles — native ordered transition chronology */
+/* Ordering, wording, time, and marker meaning remain consumer-owned. */
+
+.sk-event-timeline {
+  box-sizing: border-box;
+  display: grid;
+  inline-size: 100%;
+  max-inline-size: calc(
+    var(--sk-space-12) + var(--sk-space-12) + var(--sk-space-12) +
+      var(--sk-space-12) + var(--sk-space-12)
+  );
+  margin: 0;
+  padding: 0;
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  list-style: none;
+}
+
+.sk-event-timeline__item {
+  position: relative;
+  display: grid;
+  min-inline-size: 0;
+  padding-block-end: var(--sk-space-6);
+  padding-inline-start: var(--sk-space-7);
+  overflow-wrap: anywhere;
+}
+
+.sk-event-timeline__item::before {
+  position: absolute;
+  inset-block-start: var(--sk-space-1);
+  inset-inline-start: var(--sk-space-1);
+  box-sizing: border-box;
+  inline-size: var(--sk-space-3);
+  block-size: var(--sk-space-3);
+  border: var(--sk-border-width-2) solid var(--sk-on-tint-sky);
+  border-radius: var(--sk-radius-pill);
+  background: var(--sk-surface-page);
+  content: "";
+}
+
+.sk-event-timeline__item:not(:last-child)::after {
+  position: absolute;
+  inset-block: var(--sk-space-4) 0;
+  inset-inline-start: calc(var(--sk-space-1) + var(--sk-space-2));
+  inline-size: var(--sk-border-width-1);
+  background: var(--sk-border-strong);
+  content: "";
+}
+
+.sk-event-timeline__summary {
+  margin: 0;
+  color: var(--sk-fg-default);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-event-timeline__metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sk-space-1) var(--sk-space-3);
+  min-inline-size: 0;
+  margin-block-start: var(--sk-space-1);
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-sm);
+}
+
+.sk-event-timeline__content {
+  min-inline-size: 0;
+  margin-block: var(--sk-space-2) 0;
+  color: var(--sk-fg-body);
+}
+
+.sk-event-timeline__marker {
+  justify-self: start;
+  margin-block-start: var(--sk-space-2);
+  color: var(--sk-on-tint-mint);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+}
+
+.sk-event-timeline--compact {
+  max-inline-size: calc(
+    var(--sk-space-12) + var(--sk-space-12) + var(--sk-space-12)
+  );
+  font-size: var(--sk-text-sm);
+}
+
+.sk-event-timeline--compact .sk-event-timeline__item {
+  grid-template-columns: minmax(0, 1fr);
+  padding-block-end: var(--sk-space-4);
+  padding-inline-start: var(--sk-space-5);
+}
+
+.sk-event-timeline--compact
+  .sk-event-timeline__item:has(> .sk-event-timeline__leading-marker) {
+  grid-template-columns: var(--sk-space-4) minmax(0, 1fr);
+  column-gap: var(--sk-space-2);
+}
+
+.sk-event-timeline--compact
+  .sk-event-timeline__item:has(> .sk-event-timeline__leading-marker)
+  > :not(.sk-event-timeline__leading-marker) {
+  grid-column: 2;
+}
+
+.sk-event-timeline--compact
+  .sk-event-timeline__item
+  > .sk-event-timeline__leading-marker {
+  display: grid;
+  grid-column: 1;
+  grid-row: 1;
+  place-items: center;
+  align-self: start;
+  box-sizing: border-box;
+  inline-size: var(--sk-space-4);
+  block-size: var(--sk-space-4);
+  border: var(--sk-border-width-2) solid var(--sk-on-tint-sky);
+  border-radius: var(--sk-radius-pill);
+  background: var(--sk-surface-page);
+  color: var(--sk-on-tint-sky);
+}
+
+.sk-event-timeline--compact
+  .sk-event-timeline__item
+  > .sk-event-timeline__leading-marker
+  > svg {
+  inline-size: var(--sk-space-3);
+  block-size: var(--sk-space-3);
+  fill: none;
+  stroke: currentColor;
+}
+
+.sk-event-timeline--compact
+  .sk-event-timeline__item:has(> .sk-event-timeline__leading-marker)::before {
+  display: none;
+}
+
+.sk-event-timeline--compact
+  .sk-event-timeline__item:has(> .sk-event-timeline__leading-marker):not(
+    :last-child
+  )::after {
+  inset-inline-start: calc(var(--sk-space-5) + var(--sk-space-2));
+}
+
+.sk-event-timeline--narrow {
+  max-inline-size: calc(var(--sk-space-12) + var(--sk-space-12));
+}
+
+@media (forced-colors: active) {
+  .sk-event-timeline__item::before {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+
+  .sk-event-timeline__item:not(:last-child)::after {
+    background: CanvasText;
+  }
+
+  .sk-event-timeline--compact
+    .sk-event-timeline__item
+    > .sk-event-timeline__leading-marker {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+}
+    </style>
+  </head>
+  <body>
+    <section id="event-timeline" data-od-component="event-timeline">
+      <h1>event-timeline</h1>
+      <figure data-od-variant="compact-default">
+        <figcaption>compact-default</figcaption>
+        <ol class="sk-event-timeline sk-event-timeline--compact">
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">1. Mission created</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Alex</span><time datetime="2026-09-08T07:00:00Z">07:00 UTC</time>
+            </p>
+            <p class="sk-event-timeline__content">
+              Consumer-supplied context remains attached to the event.
+            </p>
+            <span class="sk-event-timeline__marker">Verified by consumer</span>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">2. Plan recorded</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Sam</span><time datetime="2026-09-08T08:30:00Z">08:30 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">3. Implementation started</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Noor</span><time datetime="2026-09-08T10:15:00Z">10:15 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="compact-degraded">
+        <figcaption>compact-degraded</figcaption>
+        <ol class="sk-event-timeline sk-event-timeline--compact" style="filter: grayscale(1)">
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">1. Evidence observed</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Alex</span><time datetime="2026-09-08T15:20:00Z">15:20 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">2. Review recorded</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Sam</span><time datetime="2026-09-08T15:45:00Z">15:45 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="compact-forced-colors">
+        <figcaption>compact-forced-colors</figcaption>
+        <ol class="sk-event-timeline sk-event-timeline--compact">
+          <li class="sk-event-timeline__item">
+            <span class="sk-event-timeline__leading-marker" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8"></circle>
+              </svg>
+            </span>
+            <a class="sk-event-timeline__summary" href="#forced-colors-event"
+              >1. Linked transition</a
+            >
+            <p class="sk-event-timeline__metadata">
+              <span>Alex</span><time datetime="2026-09-08T16:10:00Z">16:10 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item" id="forced-colors-event">
+            <p class="sk-event-timeline__summary">2. Destination transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Noor</span><time datetime="2026-09-08T16:25:00Z">16:25 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="compact-leading-marker">
+        <figcaption>compact-leading-marker</figcaption>
+        <ol class="sk-event-timeline sk-event-timeline--compact">
+          <li class="sk-event-timeline__item">
+            <span class="sk-event-timeline__leading-marker" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <title>Decorative milestone</title>
+                <circle cx="12" cy="12" r="8"></circle>
+              </svg>
+            </span>
+            <p class="sk-event-timeline__summary">1. Evidence received</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Alex</span><span>Tone: observation</span
+              ><span>Trust: consumer verified</span
+              ><span>Freshness: observed 12 minutes ago</span
+              ><time datetime="2026-09-08T08:15:00Z">08:15 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">2. Review recorded</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Sam</span><time datetime="2026-09-08T09:30:00Z">09:30 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <span class="sk-event-timeline__leading-marker" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <title>Decorative completion</title>
+                <path d="m6 12 4 4 8-8"></path>
+              </svg>
+            </span>
+            <p class="sk-event-timeline__summary">3. Acceptance recorded</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Noor</span><time datetime="2026-09-08T10:45:00Z">10:45 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="compact-linked">
+        <figcaption>compact-linked</figcaption>
+        <ol class="sk-event-timeline sk-event-timeline--compact">
+          <li class="sk-event-timeline__item">
+            <a class="sk-event-timeline__summary" href="#linked-event"
+              >1. Review the recorded transition</a
+            >
+            <p class="sk-event-timeline__metadata">
+              <span>Sam</span><time datetime="2026-09-08T11:20:00Z">11:20 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item" id="linked-event">
+            <p class="sk-event-timeline__summary">2. Destination event</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Noor</span><time datetime="2026-09-08T11:45:00Z">11:45 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="compact-long-content">
+        <figcaption>compact-long-content</figcaption>
+        <ol class="sk-event-timeline sk-event-timeline--compact">
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">
+              1. A deliberately long consumer-authored transition summary remains
+              attached to its complete metadata even when the contextual column is
+              narrow and the browser zoom level increases
+            </p>
+            <p class="sk-event-timeline__metadata">
+              <span>Consumer-supplied actor with an exceptionally long display name</span
+              ><time datetime="2026-09-08T12:34:56Z"
+                >Consumer-formatted observation at 12:34:56 UTC</time
+              >
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">
+              2. The following supplied transition also wraps without changing order
+            </p>
+            <p class="sk-event-timeline__metadata">
+              <span>Another consumer-supplied actor</span
+              ><time datetime="2026-09-08T13:45:00Z"
+                >Consumer-formatted observation at 13:45 UTC</time
+              >
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="compact-narrow">
+        <figcaption>compact-narrow</figcaption>
+        <ol
+          class="sk-event-timeline sk-event-timeline--compact sk-event-timeline--narrow"
+        >
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">
+              1. A long supplied transition wraps inside the narrow contextual column
+            </p>
+            <p class="sk-event-timeline__metadata">
+              <span>Consumer-authored actor</span
+              ><time datetime="2026-09-08T14:10:00Z">14:10 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">2. Next transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Another actor</span
+              ><time datetime="2026-09-08T14:25:00Z">14:25 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="compact-one-event">
+        <figcaption>compact-one-event</figcaption>
+        <ol class="sk-event-timeline sk-event-timeline--compact">
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">1. Mission created</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Alex</span><time datetime="2026-09-08T07:00:00Z">07:00 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="compact-twenty-events">
+        <figcaption>compact-twenty-events</figcaption>
+        <ol class="sk-event-timeline sk-event-timeline--compact">
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">1. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 1</span><time datetime="2026-09-08T08:01:00Z">08:01 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">2. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 2</span><time datetime="2026-09-08T08:02:00Z">08:02 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">3. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 3</span><time datetime="2026-09-08T08:03:00Z">08:03 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">4. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 4</span><time datetime="2026-09-08T08:04:00Z">08:04 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">5. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 5</span><time datetime="2026-09-08T08:05:00Z">08:05 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">6. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 6</span><time datetime="2026-09-08T08:06:00Z">08:06 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">7. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 7</span><time datetime="2026-09-08T08:07:00Z">08:07 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">8. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 8</span><time datetime="2026-09-08T08:08:00Z">08:08 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">9. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 9</span><time datetime="2026-09-08T08:09:00Z">08:09 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">10. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 10</span><time datetime="2026-09-08T08:10:00Z">08:10 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">11. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 11</span><time datetime="2026-09-08T08:11:00Z">08:11 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">12. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 12</span><time datetime="2026-09-08T08:12:00Z">08:12 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">13. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 13</span><time datetime="2026-09-08T08:13:00Z">08:13 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">14. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 14</span><time datetime="2026-09-08T08:14:00Z">08:14 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">15. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 15</span><time datetime="2026-09-08T08:15:00Z">08:15 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">16. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 16</span><time datetime="2026-09-08T08:16:00Z">08:16 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">17. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 17</span><time datetime="2026-09-08T08:17:00Z">08:17 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">18. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 18</span><time datetime="2026-09-08T08:18:00Z">08:18 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">19. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 19</span><time datetime="2026-09-08T08:19:00Z">08:19 UTC</time></p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">20. Transition recorded</p>
+            <p class="sk-event-timeline__metadata"><span>Actor 20</span><time datetime="2026-09-08T08:20:00Z">08:20 UTC</time></p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="forced-colors">
+        <figcaption>forced-colors</figcaption>
+        <ol class="sk-event-timeline">
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">1. Started</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Alex</span><time datetime="2026-09-07T09:00:00Z">09:00 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">2. Completed</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Sam</span><time datetime="2026-09-07T10:00:00Z">10:00 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="long-transition">
+        <figcaption>long-transition</figcaption>
+        <ol class="sk-event-timeline">
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">
+              1. A deliberately long consumer-authored transition summary wraps without
+              moving its actor, timestamp, or supporting detail into another event
+            </p>
+            <p class="sk-event-timeline__metadata">
+              <span>Consumer-supplied actor with a long name</span
+              ><time datetime="2026-09-07T11:45:00Z"
+                >Consumer-formatted time at 11:45 UTC</time
+              >
+            </p>
+            <p class="sk-event-timeline__content">
+              Optional supporting content stays inside this list item.
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">2. Next transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Another actor</span
+              ><time datetime="2026-09-07T12:00:00Z">12:00 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="narrow">
+        <figcaption>narrow</figcaption>
+        <ol class="sk-event-timeline sk-event-timeline--narrow">
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">
+              1. A long transition wraps while its metadata remains attached to the same
+              native list item
+            </p>
+            <p class="sk-event-timeline__metadata">
+              <span>Consumer-authored actor</span
+              ><time datetime="2026-09-07T09:00:00Z">Consumer-formatted 09:00 UTC</time>
+            </p>
+            <p class="sk-event-timeline__content">
+              Supporting content also wraps without page-level overflow.
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">2. Next transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Another actor</span
+              ><time datetime="2026-09-07T10:00:00Z">10:00 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="one-event">
+        <figcaption>one-event</figcaption>
+        <ol class="sk-event-timeline">
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">1. Created</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Alex</span><time datetime="2026-09-07T09:00:00Z">09:00 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="twenty-events">
+        <figcaption>twenty-events</figcaption>
+        <ol class="sk-event-timeline">
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">1. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 1</span><time datetime="2026-09-07T09:01:00Z">09:01 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">2. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 2</span><time datetime="2026-09-07T09:02:00Z">09:02 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">3. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 3</span><time datetime="2026-09-07T09:03:00Z">09:03 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">4. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 4</span><time datetime="2026-09-07T09:04:00Z">09:04 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">5. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 5</span><time datetime="2026-09-07T09:05:00Z">09:05 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">6. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 6</span><time datetime="2026-09-07T09:06:00Z">09:06 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">7. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 7</span><time datetime="2026-09-07T09:07:00Z">09:07 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">8. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 8</span><time datetime="2026-09-07T09:08:00Z">09:08 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">9. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 9</span><time datetime="2026-09-07T09:09:00Z">09:09 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">10. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 10</span
+              ><time datetime="2026-09-07T09:10:00Z">09:10 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">11. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 11</span
+              ><time datetime="2026-09-07T09:11:00Z">09:11 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">12. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 12</span
+              ><time datetime="2026-09-07T09:12:00Z">09:12 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">13. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 13</span
+              ><time datetime="2026-09-07T09:13:00Z">09:13 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">14. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 14</span
+              ><time datetime="2026-09-07T09:14:00Z">09:14 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">15. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 15</span
+              ><time datetime="2026-09-07T09:15:00Z">09:15 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">16. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 16</span
+              ><time datetime="2026-09-07T09:16:00Z">09:16 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">17. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 17</span
+              ><time datetime="2026-09-07T09:17:00Z">09:17 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">18. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 18</span
+              ><time datetime="2026-09-07T09:18:00Z">09:18 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">19. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 19</span
+              ><time datetime="2026-09-07T09:19:00Z">09:19 UTC</time>
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">20. Transition</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Actor 20</span
+              ><time datetime="2026-09-07T09:20:00Z">09:20 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="two-events">
+        <figcaption>two-events</figcaption>
+        <ol class="sk-event-timeline">
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">1. Created</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Alex</span><time datetime="2026-09-07T09:00:00Z">09:00 UTC</time>
+            </p>
+            <p class="sk-event-timeline__content">
+              Initial context supplied by the consumer.
+            </p>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">2. Reviewed</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Sam</span><time datetime="2026-09-07T10:30:00Z">10:30 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+      <figure data-od-variant="unavailable-retention">
+        <figcaption>unavailable-retention</figcaption>
+        <section class="sk-empty-state" aria-labelledby="history-empty-heading">
+          <h2 class="sk-empty-state__heading" id="history-empty-heading">
+            History unavailable
+          </h2>
+          <p class="sk-empty-state__body">
+            The consumer supplies retention state and explanatory copy.
+          </p>
+        </section>
+      </figure>
+      <figure data-od-variant="verified-marker">
+        <figcaption>verified-marker</figcaption>
+        <ol class="sk-event-timeline">
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">1. Evidence recorded</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Alex</span><time datetime="2026-09-07T09:00:00Z">09:00 UTC</time>
+            </p>
+            <span class="sk-event-timeline__marker">Verified by consumer</span>
+          </li>
+          <li class="sk-event-timeline__item">
+            <p class="sk-event-timeline__summary">2. Evidence reviewed</p>
+            <p class="sk-event-timeline__metadata">
+              <span>Sam</span><time datetime="2026-09-07T10:30:00Z">10:30 UTC</time>
+            </p>
+          </li>
+        </ol>
+      </figure>
+    </section>
+  </body>
+</html>

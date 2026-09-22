@@ -9,12 +9,25 @@ import * as fs from 'fs';
  * build step, and that --sk-* custom properties resolve correctly in the browser.
  */
 test('tokens.css loads via file reference and --sk-color-yellow resolves (FR-012)', async ({ page, browserName }) => {
-  const tokensCssPath = path.resolve('packages/tokens/dist/tokens.css');
+  // Resolved out of storybook-static, NOT packages/tokens/dist.
+  //
+  // CI's playwright job downloads the storybook-static artifact and never builds, so
+  // packages/tokens/dist does not exist there — and this test's old `test.skip()`
+  // meant FR-012 had never actually run in CI since it was written. It passed locally,
+  // where dist happens to exist, and skipped in the only place that gates a merge.
+  // storybook:build now copies the stylesheet in via staticDirs, so the same bytes are
+  // present wherever the suite runs.
+  const tokensCssPath = path.resolve('apps/storybook/storybook-static/tokens-dist/tokens.css');
 
-  if (!fs.existsSync(tokensCssPath)) {
-    test.skip(); // dist/ not built yet — skip rather than fail
-    return;
-  }
+  // FAIL, do not skip. A missing artifact means the build wiring regressed, and
+  // reporting that as "skipped" inside an ENFORCED job is the certifying-absence
+  // failure this repo keeps shipping.
+  expect(
+    fs.existsSync(tokensCssPath),
+    `${tokensCssPath} is missing — storybook:build should have copied packages/tokens/dist ` +
+      `via staticDirs. FR-012 cannot be assessed without it, and skipping would report ` +
+      `green over an unassessed requirement.`,
+  ).toBe(true);
 
   // Create a minimal HTML page that loads tokens.css directly (simulates CDN link)
   const html = `<!DOCTYPE html>
@@ -51,17 +64,11 @@ test('Storybook loads and renders stub stories', async ({ page }) => {
   await expect(page).toHaveTitle(/Storybook/);
 });
 
-test('SK-stub Angular story renders', async ({ page }) => {
-  // Navigate directly to the story iframe for reliable component visibility checks
-  await page.goto('/iframe.html?id=primitives-skstub-angular--default&viewMode=story');
-  const stub = page.locator('.sk-stub').first();
-  await expect(stub).toBeVisible({ timeout: 20000 });
-});
-
 test('SK-stub HTML story iframe loads', async ({ page }) => {
   // Verify the HTML story iframe URL is accessible (the story page loads)
-  // Note: @storybook/html stories render in a separate framework context;
-  // component visibility is covered by the visual regression baseline.
+  // Component CONTENT is asserted by the axe gate (which fails a story whose host
+  // mounts nothing) and by the clipped visual baseline. This test deliberately
+  // asserts only that the story page is reachable and the root exists.
   const response = await page.goto('/iframe.html?id=primitives-skstub-html--default&viewMode=story');
   expect(response?.status()).toBeLessThan(400);
   await expect(page.locator('#storybook-root')).toBeAttached();

@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "mission_slug": "form-input-contrast-touch-target-contract-01M25STR",
+  "mission_id": "01M25STR64AQWSVVSBV15TWJR5",
+  "mission_branch": "kitty/mission-form-input-contrast-touch-target-contract-01M25STR",
+  "target_branch": "mission/form-input-contrast-touch-target-contract",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts",
+        "docs/design-system/changelog.md",
+        "packages/elements/src/form-input/sk-form-input.css.d.ts",
+        "packages/elements/src/form-input/sk-form-input.css.js",
+        "packages/styles/src/form-field/sk-form-field.css",
+        "packages/styles/src/form-input/sk-form-input.css",
+        "packages/tokens/dist/token-catalogue.json",
+        "packages/tokens/src/tokens.css",
+        "tests/node/form-input-border-target-size-parity.test.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T14:21:21.823870+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "3c120bbaf7aacfdbbbb9ea3d4e7381ab1792c775"
+}

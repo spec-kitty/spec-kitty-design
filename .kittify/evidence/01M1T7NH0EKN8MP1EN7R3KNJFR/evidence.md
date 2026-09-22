@@ -1,0 +1,1 @@
+Pre-merge architect lens on PR #194 head 8e3d54f: ADR-14 traced against sk-form-input.ts, sk-form-textarea.ts, form-control-base.ts, research.md R2/R9, ADR-8/9/10/11/13, issue #188/#193, run-prompt s4. 2 MAJOR, 6 MINOR, 3 INFO. Verdict: approve with changes.

@@ -1,0 +1,65 @@
+{
+  "rows": {
+    "#320": {
+      "evidence_ref": "#320 is referenced only as historical grounding for when the sk-button danger-secondary tone (this ADR's subject) landed -- 'landed by #320 under epic #319' in ADR-17, and 'widened by hand at #320' describing sk-button.ts's variant union in the same ADR and in WP01's task file. This mission neither changes nor closes #320: it is already merged into train/elements-first via PR #341 (base train/elements-first, merged commit 681c70f7a5232cdd80b25e596944d7153d84d84e; one of its many rebase commits is 99bb074b53090266c0969f555e838bba61517cd1, confirmed via gh pr view 341 --json commits). #320 remains OPEN on GitHub (verified via gh issue view 320) only because epic #319's children close at the operator's train->main landing, not main-branch merge -- PR #341 targeted train/elements-first, so its 'Closes #320' line does not auto-fire until that landing PR merges to main. Confirmed via gh pr view 341 and gh issue view 320, not asserted.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#341": {
+      "evidence_ref": "Pre-merge gate that raised #403 twice without disposition; cited as ADR-17's Technical Story context only. Not itself acted on by this mission.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#348": {
+      "evidence_ref": "Referenced in ADR-17's 'Related: #348' section as the same tone-set-is-not-first-class defect family (busy cue hardcoded to .sk-button--primary). Explicitly not fixed by this mission.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#403": {
+      "evidence_ref": "docs/architecture/decisions/2026-09-11-17-sk-button-tone-intensity-flattening.md (ADR-17, Status: Proposed), indexed in docs/architecture/README.md; node scripts/check-adr-index.mjs passes",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#420": {
+      "evidence_ref": "commitlint.config.cjs (3 new anchored exemptions) + scripts/check-commitlint-config.mjs; node scripts/check-commitlint-config.mjs passes, real messages proven ignored+valid, near-misses proven not-ignored (red-first verified)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

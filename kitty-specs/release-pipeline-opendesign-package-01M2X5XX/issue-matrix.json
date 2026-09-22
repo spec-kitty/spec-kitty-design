@@ -1,0 +1,53 @@
+{
+  "rows": {
+    "#361": {
+      "evidence_ref": "Epic stays open: this mission delivers its REL4 child (#396). The remaining work is owned by the epic's other open children: REL3 #364 and the REL1 bootstrap follow-through on #362; REL2 #363's work is on the train (ee324f84, #439) and closes with it at train -> main",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": "parent epic",
+      "source_file": "spec.md",
+      "title": "Epic: Release pipeline \u2014 dual-stream rc/prod publishing",
+      "verdict": "deferred-with-followup",
+      "wp": "WP02"
+    },
+    "#364": {
+      "evidence_ref": "spec.md Out of scope: making the npm packages public is REL3 (#364), which owns it",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": "sibling, out of scope",
+      "source_file": "spec.md",
+      "title": "[REL3] prod stream on GitHub Packages and registry routing",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#384": {
+      "evidence_ref": "Open epic, not touched: spec.md Out of scope lists overturning its token self-containment ruling (DKM0); the package ships the published tokens.css unchanged, so the ruling stands and #384 owns any change to it",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": "inherited decision",
+      "source_file": "spec.md",
+      "title": "Epic: doc-kitty migration \u2014 documentation primitives in the spec-kitty-design library",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#396": {
+      "evidence_ref": "PR #465 into train/elements-first (four-lens gate approved at 2c2e9ec5); research/consumability-proof.md; the issue closes at the train -> main landing",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": "this mission",
+      "source_file": "spec.md",
+      "title": "[REL4] OpenDesign design-system package \u2014 tokens + components fixture from library static forms",
+      "verdict": "fixed",
+      "wp": "WP01,WP02,WP03"
+    }
+  },
+  "schema_version": 1
+}

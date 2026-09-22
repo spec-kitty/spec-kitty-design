@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-05-03T09:33:03.341Z",
+  "generated_at": "2026-09-17T10:16:52.962Z",
   "generated_from": "packages/tokens/src/tokens.css",
   "categories": {
     "color": {
@@ -28,7 +28,10 @@
         "--sk-color-sage-deep",
         "--sk-color-sage-soft",
         "--sk-color-accent",
-        "--sk-color-accent-fg"
+        "--sk-color-accent-fg",
+        "--sk-color-data-series-primary",
+        "--sk-color-data-grid",
+        "--sk-color-data-baseline"
       ]
     },
     "surface": {
@@ -43,7 +46,23 @@
         "--sk-surface-tint-mint",
         "--sk-surface-tint-butter",
         "--sk-surface-tint-lilac",
-        "--sk-surface-tint-sky"
+        "--sk-surface-tint-sky",
+        "--sk-surface-tint-rose"
+      ]
+    },
+    "border": {
+      "prefix": "--sk-border-",
+      "tokens": [
+        "--sk-border-tint-sky",
+        "--sk-border-tint-lilac",
+        "--sk-border-default",
+        "--sk-border-strong",
+        "--sk-border-focus",
+        "--sk-border-control",
+        "--sk-border-control-invalid",
+        "--sk-border-width-1",
+        "--sk-border-width-2",
+        "--sk-border-width-4"
       ]
     },
     "on": {
@@ -52,7 +71,45 @@
         "--sk-on-tint-mint",
         "--sk-on-tint-butter",
         "--sk-on-tint-lilac",
-        "--sk-on-tint-sky"
+        "--sk-on-tint-sky",
+        "--sk-on-tint-rose",
+        "--sk-on-status-neutral",
+        "--sk-on-status-info",
+        "--sk-on-status-success",
+        "--sk-on-status-attention",
+        "--sk-on-status-danger",
+        "--sk-on-status-recovery"
+      ]
+    },
+    "chart": {
+      "prefix": "--sk-chart-",
+      "tokens": [
+        "--sk-chart-series-1",
+        "--sk-chart-series-2",
+        "--sk-chart-series-3",
+        "--sk-chart-series-4",
+        "--sk-chart-grid",
+        "--sk-chart-baseline",
+        "--sk-chart-gap",
+        "--sk-chart-gap-fill",
+        "--sk-chart-dash-1",
+        "--sk-chart-dash-2",
+        "--sk-chart-dash-3",
+        "--sk-chart-dash-4",
+        "--sk-chart-gap-dash",
+        "--sk-chart-stroke-width",
+        "--sk-chart-plot-block-size"
+      ]
+    },
+    "status": {
+      "prefix": "--sk-status-",
+      "tokens": [
+        "--sk-status-neutral",
+        "--sk-status-info",
+        "--sk-status-success",
+        "--sk-status-attention",
+        "--sk-status-danger",
+        "--sk-status-recovery"
       ]
     },
     "bg": {
@@ -70,17 +127,8 @@
         "--sk-fg-subtle",
         "--sk-fg-placeholder",
         "--sk-fg-on-primary",
-        "--sk-fg-on-card"
-      ]
-    },
-    "border": {
-      "prefix": "--sk-border-",
-      "tokens": [
-        "--sk-border-default",
-        "--sk-border-strong",
-        "--sk-border-focus",
-        "--sk-border-width-1",
-        "--sk-border-width-2"
+        "--sk-fg-on-card",
+        "--sk-fg-error"
       ]
     },
     "font": {
@@ -133,6 +181,18 @@
         "--sk-space-10",
         "--sk-space-11",
         "--sk-space-12"
+      ]
+    },
+    "layout": {
+      "prefix": "--sk-layout-",
+      "tokens": [
+        "--sk-layout-personal-rail-width",
+        "--sk-layout-context-sidebar-width",
+        "--sk-layout-workflow-lane-min-inline-size",
+        "--sk-layout-page-header-sticky-offset",
+        "--sk-layout-page-header-compact-height",
+        "--sk-layout-page-header-sticky-layer",
+        "--sk-layout-page-header-sticky-scroll-margin"
       ]
     },
     "radius": {

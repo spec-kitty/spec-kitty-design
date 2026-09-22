@@ -1,0 +1,101 @@
+{
+  "rows": {
+    "#153": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/153 \u2014 existing sk-button behavior/styles contract consumed by WP01.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#154": {
+      "evidence_ref": "Follow-up: #154 remains a separate existing issue; WP01 avoids its double-tab-stop failure mode without absorbing its scope.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#178": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/178 \u2014 stable polite status-region precedent reused by WP01.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#213": {
+      "evidence_ref": "Follow-up: #213 remains a separate Repository Dossier primitive mission and is not a dependency of #257.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#253": {
+      "evidence_ref": "Follow-up: #253 programme tracking epic remains owned by the programme orchestrator.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#255": {
+      "evidence_ref": "Follow-up: #255 downstream Repository Dossier integration mission remains separate.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#257": {
+      "evidence_ref": "commit:26a73d5bacaca5e2e3b0ab87f48ae67200fe80c7; independent Codex runtime review APPROVE",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#79": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/79 \u2014 existing native sk-button contract used by WP01.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    }
+  },
+  "schema_version": 1
+}

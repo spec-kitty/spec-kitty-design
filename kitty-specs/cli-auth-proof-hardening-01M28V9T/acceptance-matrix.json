@@ -1,0 +1,69 @@
+{
+  "mission_slug": "cli-auth-proof-hardening-01M28V9T",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/elements/src/patterns/cli-auth.stories.ts: patternStyles @media max-width changed 390px->480px with a comment recording the deliberate mirror of sk-boundary-page.css's breakpoint (commit b13f33b3, unchanged through subsequent rounds; confirmed present at HEAD 94fff053).",
+      "pass_fail": "pass",
+      "verified_by": "claude-implementer",
+      "verified_at": "2026-09-11T21:32:52.760838+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "Swept the five other named pattern families (plan.md Context): each declares no local width @media, or declares 720px/@container 720px, already agreeing with the 720px breakpoint baked into the public components they compose (sk-page-header.css, sk-context-sidebar.css, sk-personal-rail.css). Only cli-auth.stories.ts composed sk-boundary-page and diverged (FR-001). No second defect found; operator's no-more-deferrals directive satisfied because the sweep itself, not just the fix, is complete.",
+      "pass_fail": "pass",
+      "verified_by": "claude-implementer",
+      "verified_at": "2026-09-11T21:32:57.706125+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "sk-cli-auth-pattern.spec.ts's inventory arm replaced: the five-name regex denylist is gone. New test 'rendered DOM contains only known custom elements and owned/local sk- classes across the story's rendered lifetime (#418, runtime ground truth)' uses a MutationObserver-based runtime watch (pattern-composition-lib.mjs: startSkPrimitiveWatch/stopSkPrimitiveWatch) that walks the live rendered DOM (incl. shadow roots and same-origin iframes) and asserts every observed sk-tag/class is a known custom element (knownElementTags(), from the generated Custom Elements Manifest) or an owned class (ownedClasses()/tokensOwnedClasses()/BEM-block-root via isBemMemberOf()). An unlisted invented primitive can no longer silently pass a fixed enumeration; it fails by not matching any derived source of truth. Red-first proof executed for #418 across 7 reviewer rounds (see FR-006).",
+      "pass_fail": "pass",
+      "verified_by": "claude-implementer",
+      "verified_at": "2026-09-11T21:33:03.946453+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "packages/elements/custom-elements.json's provenance re-verified for real just now: 'npx nx run elements:analyze --skip-nx-cache' (cem analyze + normalise-manifest.mjs) followed by 'git diff --exit-code -- packages/elements/custom-elements.json' produced a clean diff -- the checked-in manifest is exactly what the generator produces, not hand-maintained. CI-gating confirmed by inspection of .github/workflows/ci-quality.yml's '[ENFORCED] Custom Elements Manifest is current' job and scripts/check-manifest-content.mjs's content-vacuity floor. This grounds knownElementTags() (FR-003/FR-005) in generated, CI-gated source of truth rather than an assumption.",
+      "pass_fail": "pass",
+      "verified_by": "claude-implementer",
+      "verified_at": "2026-09-11T21:33:19.680108+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "The derived tag/class enumeration lives in apps/storybook/src/tests/pattern-composition-lib.mjs as standalone exported primitives (classesIn, ownedClasses, tokensOwnedClasses, knownElementTags, bemBlockRoots, isBemMemberOf, startSkPrimitiveWatch/stopSkPrimitiveWatch, etc.), not embedded inline in one spec file. scripts/check-pattern-composition.mjs imports and re-exports the same primitives for its own CLI/gate use (and gained a run-as-CLI guard so it is safely importable). Other in-flight pattern missions can import from pattern-composition-lib.mjs directly instead of re-copying a denylist, so the fix holds for the whole pattern family line.",
+      "pass_fail": "pass",
+      "verified_by": "claude-implementer",
+      "verified_at": "2026-09-11T21:33:25.204172+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Red-first proof executed for real (not reasoned about) across 7 reviewer rounds of self-attack: a fabricated invented primitive (unlisted sk-tag/class, e.g. an sk-auth-panel-shaped element and unowned sk- classes) planted into rendered output was confirmed caught by the derived check before being reverted, each round. Documented self-attacks that were actually run and measured include: document.body-scope gap (documentElement-appended sibling), case-sensitive prefix bypass, shadow-root-before-append gap, canary forgeable via instance-shadowed classList.add, Set.prototype.has global patch defeating the canary, window.__skPrimitiveWatch decoy reassignment, and same-origin iframe invisibility (incl. nested iframe, iframe-in-shadow-root, shadow-root-in-iframe, iframe-appended-after-canary-read) -- each found a real gap, each was closed, and closure was re-attacked before being accepted. Four residual floors disclosed in pattern-composition-lib.mjs comments: mutation deferred past the 500ms observation window, mode:'closed' shadow roots (platform; zero customized built-ins repo-wide per grep), cross-origin iframes (platform, Same-Origin Policy), and a whole-page Node.prototype.appendChild patch that would have to faithfully relay real appends to avoid breaking the page. WP01 approved after 7 full reviewer passes with all findings closed.",
+      "pass_fail": "pass",
+      "verified_by": "claude-implementer",
+      "verified_at": "2026-09-11T21:33:33.340433+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}

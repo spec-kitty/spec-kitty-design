@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "mission_slug": "connector-radio-choice-group-01M2693Y",
+  "mission_id": "01M2693YSXSN1HD1DAQMAZ5WA2",
+  "mission_branch": "kitty/mission-connector-radio-choice-group-01M2693Y",
+  "target_branch": "mission/connector-radio-choice-group",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-radio-choice-group.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-radio-choice-group-*.png",
+        "docs/architecture/validation/issue-336-radio-choice-group-zoom/**",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "packages/styles/package.json",
+        "packages/styles/src/index.ts",
+        "packages/styles/src/radio-choice-group/**",
+        "suite-budget.json"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "tests",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T18:42:03.276246+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "8659e6683be944a5996364d6c80437af5fc047cd"
+}

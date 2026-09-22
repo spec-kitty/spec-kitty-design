@@ -1,0 +1,66 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>sk-app-shell — real custom element (shadow form)</title>
+<!--
+  THE SHADOW SIDE of the host-attribute-axis measurement.
+
+  This loads the REAL element from the Storybook-built bundle
+  (apps/storybook/storybook-static/elements-dist/elements.js, produced by
+  `npx nx run storybook:storybook:build --skip-nx-cache`), so the shadow form
+  measured here is the shipped element adopting its own shipped sheet — not a
+  re-creation. run.mjs additionally cross-checks these values against the real
+  Storybook story iframe, so this controlled page is shown to be faithful to
+  the harness the repo already uses.
+
+  Query params: ?presentation=compact|rail-preserving&width=<px>&compose=none|wider|narrower&outer=<px>
+-->
+<link rel="stylesheet" href="/packages/tokens/dist/tokens.css">
+<style>
+  html, body { margin: 0; padding: 0; }
+  #outer { }
+  #sizer { }
+</style>
+<div id="outer"><div id="sizer">
+  <sk-app-shell id="component" open>
+    <nav slot="personal-rail" aria-label="Product areas">P</nav>
+    <nav slot="context-sidebar" aria-label="Context">C</nav>
+    <div slot="compact-header">H</div>
+    <nav slot="compact-navigation" aria-label="Repository navigation">N</nav>
+    <div slot="page-header">PH</div>
+    <p>Main</p>
+  </sk-app-shell>
+</div></div>
+<script src="/apps/storybook/storybook-static/elements-dist/elements.js"></script>
+<script>
+  const q = new URLSearchParams(location.search);
+  const DEFAULT_WIDTH = 800;
+  const component = document.getElementById('component');
+  const presentation = q.get('presentation');
+  if (presentation) component.setAttribute('presentation', presentation);
+  const outer = document.getElementById('outer');
+  const sizer = document.getElementById('sizer');
+  // layout=block  : #sizer carries an explicit px width (the cycle-1 shape).
+  // layout=flex   : #outer is a 300px flex row and #sizer is display:contents, so the
+  //                 component itself is the flex ITEM. This is the layout that discriminates
+  //                 a wrapper carrying the complete :host declaration set from one carrying
+  //                 only container-type — size containment makes a width-less containing
+  //                 wrapper contribute zero to intrinsic sizing.
+  // layout=grid   : the same as a single 300px grid track, as a control.
+  const layout = q.get('layout') ?? 'block';
+  if (layout === 'flex') {
+    outer.style.display = 'flex';
+    outer.style.width = '300px';
+    sizer.style.display = 'contents';
+  } else if (layout === 'grid') {
+    outer.style.display = 'grid';
+    outer.style.gridTemplateColumns = '300px';
+    sizer.style.display = 'contents';
+  } else {
+    sizer.style.width = `${q.get('width') ?? DEFAULT_WIDTH}px`;
+    const compose = q.get('compose') ?? 'none';
+    if (compose !== 'none') {
+      outer.style.containerType = 'inline-size';
+      outer.style.width = `${q.get('outer')}px`;
+    }
+  }
+</script>

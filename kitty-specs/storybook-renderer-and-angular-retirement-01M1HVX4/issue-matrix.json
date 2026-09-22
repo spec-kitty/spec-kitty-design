@@ -1,0 +1,77 @@
+{
+  "rows": {
+    "#66": {
+      "evidence_ref": "Parent epic; this mission is one of its missions. Verdict enum has no parent/context value.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": null
+    },
+    "#69": {
+      "evidence_ref": "This mission's own issue (M3). PR #102.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#70": {
+      "evidence_ref": "Forward reference to M4, the next mission. Not touched by #69.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#85": {
+      "evidence_ref": "The packages/html-js -> packages/styles rename landed in 9255b2a before this mission; verified in-checkout and the stale paths in the issue body and ADR-13 corrected in plan.md.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP03"
+    },
+    "#91": {
+      "evidence_ref": "Axe HTTP repair landed in ce30b3e before this mission; verified still holding against a Vite build (74 stories, 0 render failures).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP02"
+    },
+    "#93": {
+      "evidence_ref": "Follow-up: #93 stays open. LightMode renders dark (:root[data-theme=light] cannot match a wrapper div); scoped OUT of this mission by operator decision DM-01M1HXC6WQC90NK940WN2BXR9K, so ADR-13 confirmation #3 is not claimed here.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP04"
+    }
+  },
+  "schema_version": 1
+}

@@ -16,7 +16,7 @@ Welcome. This guide helps you get oriented quickly.
 git clone https://github.com/stijn-dejongh/spec-kitty-design.git
 cd spec-kitty-design
 npm ci --ignore-scripts
-npx nx show projects   # should list: tokens, angular, html-js, storybook
+npx nx show projects   # should list: tokens, angular, styles, storybook
 npx nx run storybook:storybook   # opens at http://localhost:6006
 ```
 

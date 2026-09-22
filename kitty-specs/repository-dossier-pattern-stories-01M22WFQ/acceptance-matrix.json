@@ -1,0 +1,530 @@
+{
+  "mission_slug": "repository-dossier-pattern-stories-01M22WFQ",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "D1 proves the approved populated desktop composition through public components and native semantics",
+      "proof_type": "automated_test",
+      "evidence": "Focused Playwright D1 assertions cover public tags, native nav/list/link/code/time/progress structure, static tracker fallback, exact progress labels, and real Mission/document destinations; the D1 visual baseline was compared with the approved artifact.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Final tested SHA is recorded externally in the PR and issue evidence."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "D2 supplies closed and open compact-navigation stories at 390px",
+      "proof_type": "automated_test",
+      "evidence": "Chromium and Firefox prove controlled open state, inert/aria-hidden ownership, focus entry, Escape dismissal and restoration, exact 16px card gutters, row reflow, drawer containment, focus containment, and no horizontal overflow.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Storybook 10 globals.viewport selects the explicit 390 \u00d7 844 option."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "D4 preserves supplied cross-branch and merged facts without inference",
+      "proof_type": "automated_test",
+      "evidence": "Direct fixture and Playwright tests assert all five exact branch copies, merged #1017, main snapshot branch, and navigation containing only unmerged #1042/#998.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "The prior D4 omission/stale-navigation finding is closed."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "D5 exposes only terminal not-Spec-Kitty truth",
+      "proof_type": "automated_test",
+      "evidence": "Direct and rendered tests prove no snapshot, Missions, progress, repository documents, copy fields, or setup guidance; approved D5 comparison passes.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Mission spec/data model were corrected to match the approved no-setup state."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "D6 associates one supplied snapshot disagreement with one Mission",
+      "proof_type": "automated_test",
+      "evidence": "Direct fixture and rendered tests prove exactly one warning, scoped to #998, with affected SHA byte-equal to the repository snapshot SHA.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "No new status abstraction is published."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "D7 exposes stable busy/live meaning without unavailable facts or polling",
+      "proof_type": "automated_test",
+      "evidence": "A pre-navigation MutationObserver records exactly one empty-to-assigned notice transition; the public message property equals supplied fixture copy, aria-busy/polite semantics remain, and completed surfaces are absent in Chromium and Firefox.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Assignment uses updateComplete plus one microtask; no timers, animation dependency, or polling."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "D8 proves completed-empty truth without surrogate counts",
+      "proof_type": "automated_test",
+      "evidence": "Rendered and direct tests prove a real snapshot and setup guidance, zero Mission rows/progress/counts, and the identical SHA in git context and explicit empty result.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Approved D8 hierarchy and native empty-state composition were reviewed."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "LightMode is a token-system proof and does not claim deferred D3 approval",
+      "proof_type": "automated_test",
+      "evidence": "The LightMode story retains identical semantic content, applies the public sk-light class, changes authoritative surface tokens, passes axe, and has its own visual baseline.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "D3 remains explicitly deferred."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Exact values copy through sk-copy-field with honest result feedback",
+      "proof_type": "automated_test",
+      "evidence": "Chromium and Firefox click the public accessible controls, prove exact visible bytes reach Clipboard.writeText on success, and prove the stable result region reports only failure when copy and selection are unavailable.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "No private shadow-root interaction remains in the Dossier suite."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "The composition preserves native information and interaction semantics",
+      "proof_type": "automated_test",
+      "evidence": "Every story has one h1/main, native labelled navigation, lists, links, buttons, code, time, progress, headings, and landmarks; the corrected suite reruns every story in Chromium and Firefox and checks axe on each.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Current-link state appears only on anchors."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Every story derives repeated facts and omissions from recursively frozen fixtures",
+      "proof_type": "automated_test",
+      "evidence": "Extracted direct fixture suite passes 20/20, recursively inspects every reachable object, asserts state-specific presence/absence, D4 exact sets, merged/default-copy consistency, and safe/unsafe/absent tracker destinations, and produced named reds under isolated freeze/navigation/progress mutations.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "No ADR-11 ID was invented for this story fixture."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Display projection is deterministic, pure, and application-behavior free",
+      "proof_type": "automated_test",
+      "evidence": "Direct tests prove repeatability and that a mutable caller remains byte-equal and unfrozen; static tests reject fetch, timers, storage, routing, execution, current-time, random, private-root, and custom-element definitions.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Tracker links are emitted only for supplied parseable HTTP(S); missing/relative/malformed/unsafe inputs remain static."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Long opaque values remain exact and contained",
+      "proof_type": "automated_test",
+      "evidence": "LongData runs at 390px plus genuine 200%/400% Chromium and Firefox UI zoom; root, command and focus stay contained, document scrollWidth never exceeds clientWidth, and exact command bytes remain intact.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "See implementation-evidence.md for fixed-window DPR and geometry."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Boundary proof exercises the compact-navigation layout immediately at 860px and 861px",
+      "proof_type": "automated_test",
+      "evidence": "Dedicated 860px and 861px stories reuse the populated fixture. Chromium and Firefox assertions prove the inclusive compact seam, exposed/inert shell regions, 16px/24px local gutters, and zero page overflow. The existing 59/60/61 progress fixture remains supplemental evidence only.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "This closes the review finding that the earlier progress-only proof did not satisfy the issue's threshold-edge layout requirement."
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Storybook documents the Dossier as a composition pattern with explicit ownership boundaries",
+      "proof_type": "code_review",
+      "evidence": "Story docs and docs/design-system/using-components.md identify immutable application-supplied facts/destinations and library-owned presentation; built index discovers exactly 18 story exports and excludes helpers.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "No runtime Dossier component, wrapper, manifest entry, React wrapper, Vue type, or package export is created."
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "Required browser behavior passes in Chromium and Firefox on the reviewed SHA",
+      "proof_type": "automated_test",
+      "evidence": "The focused Playwright suite covers all 18 stories plus native drawer, navigation, tracker, link, and copy interactions in both required browser projects.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:54:11Z",
+      "notes": "The governance-inclusive commit is rerun before independent approval."
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Every required story has zero WCAG 2.1 AA violations",
+      "proof_type": "automated_test",
+      "evidence": "The focused Chromium/Firefox suite invokes axe for every one of the 18 Dossier story IDs. The non-vacuous repository gate declared 462 expected story IDs, then rendered and scanned all 571 Storybook stories with zero WCAG 2.1 AA violations after its 50-shape self-test passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:54:11Z",
+      "notes": "No accessibility exclusion was added."
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "Required 390px states preserve approved gutters, controls, and zero page overflow",
+      "proof_type": "automated_test",
+      "evidence": "D2 closed/open and LongData geometry assertions pin 16px gutters, contained drawer/copy controls, row reflow, and document scrollWidth <= clientWidth.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Both required browsers execute the checks."
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "200% and 400% zoom retain operation without page-level horizontal overflow",
+      "proof_type": "automated_test",
+      "evidence": "Viewport-equivalent and Chromium CSS stress checks pass; genuine fixed-window Chromium and Firefox UI zoom geometry is recorded in implementation-evidence.md.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Local code wrapping is allowed; page-level overflow is absent."
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "Forced colors and reduced motion preserve focus and state meaning",
+      "proof_type": "automated_test",
+      "evidence": "Focused media tests prove selected navigation has a physical boundary, status/warning text remains, and notice/marker animation is none under reduced motion.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Forced-color and reduced-motion stories remain separately ratcheted."
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "All seven approved dark states are reviewed individually and as a family",
+      "proof_type": "code_review",
+      "evidence": "The visual ledger records D1, D2, D4-D8 comparisons and a cross-screen verdict; all 18 focused Dossier baselines, including the three review additions, pass and were inspected.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Light and stress stories are system proofs, not new approved product screens."
+    },
+    {
+      "criterion_id": "NFR-007",
+      "description": "Behavior-bearing branches satisfy repository mutation coverage",
+      "proof_type": "automated_test",
+      "evidence": "Six targeted probes cover fixture freezing, caller purity, navigation, tracker protocol rejection/rendering, and progress inputs. The complete repository harness produced all 237 named reds against a green 548-assertion baseline in 937.3 seconds; all 10 harness guard self-checks passed in 67 seconds.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:54:11Z",
+      "notes": "The PR and child-issue closeout record the immutable reviewed SHA."
+    },
+    {
+      "criterion_id": "NFR-008",
+      "description": "Derived artifacts and distribution outputs remain generator-clean",
+      "proof_type": "automated_test",
+      "evidence": "The story ratchet intentionally moves from the rebased train's 444 IDs to 462 by adding exactly 18 Dossier IDs, and all 18 added baselines are Playwright-generated. Manifest, React-wrapper, styles-only barrel, Vue type/template, CSS-module, markup, part-ratchet, package graph, packed-Vue, size, and offline-load drift gates all pass.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:54:11Z",
+      "notes": "No generated artifact was accepted by hand."
+    },
+    {
+      "criterion_id": "NFR-009",
+      "description": "Default-dark and LightMode proofs pass visual and accessibility checks",
+      "proof_type": "automated_test",
+      "evidence": "The D1 and LightMode stories retain identical semantics, different authoritative surface tokens, zero focused axe violations, and passing visual baselines.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "LightMode uses the public sk-light class."
+    },
+    {
+      "criterion_id": "C-001",
+      "description": "Publish no new custom element, component, wrapper, manifest entry, or application API",
+      "proof_type": "automated_test",
+      "evidence": "The source guard rejects customElements.define and package exports; the fixture is excluded from library compilation and the story is absent from the package index.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Distribution gates provide final exact-SHA confirmation."
+    },
+    {
+      "criterion_id": "C-002",
+      "description": "Create none of the explicitly forbidden abstractions",
+      "proof_type": "automated_test",
+      "evidence": "Static source assertions reject sk-mission-row, sk-repository-dossier, truth/provenance bands, and native-list wrapper tags.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "The pattern remains Storybook-only composition."
+    },
+    {
+      "criterion_id": "C-003",
+      "description": "Reuse existing primitives instead of duplicating them",
+      "proof_type": "code_review",
+      "evidence": "The implementation composes public action-row, card, notice, status, pill, copy-field and native breadcrumb/facts/progress/empty-state families.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Tracker fallback is an existing pill or native anchor, not a new primitive."
+    },
+    {
+      "criterion_id": "C-004",
+      "description": "Compose documented public surfaces without private implementation reach",
+      "proof_type": "automated_test",
+      "evidence": "Source guards reject shadowRoot, renderRoot and getRootNode access; pattern code uses attributes, properties, events, slots, public parts, and native light DOM only.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Tests may locate open shadow-DOM controls but implementation never does."
+    },
+    {
+      "criterion_id": "C-005",
+      "description": "Preserve native navigation, lists, links, buttons, code, time, and progress",
+      "proof_type": "automated_test",
+      "evidence": "Every rendered state is checked for native structure; Tab/Shift+Tab and Enter/Space exercise the actual native controls in Chromium and Firefox.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Current navigation state occurs only on anchors."
+    },
+    {
+      "criterion_id": "C-006",
+      "description": "Introduce no Team Kitty routing, stores, discovery, polling, inference, time arithmetic, progress arithmetic, or command execution",
+      "proof_type": "automated_test",
+      "evidence": "Static guards reject network, timers, storage, routing/execution, Date.now/new Date, and random behavior; all destinations and formatted values come from fixtures.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Only story-local drawer state and component-owned copy behavior are mutable."
+    },
+    {
+      "criterion_id": "C-007",
+      "description": "Use immutable evidence and pure display selectors without claiming a backend contract",
+      "proof_type": "automated_test",
+      "evidence": "The direct suite recursively verifies every authored fixture is frozen and proves projection repeatability without freezing or mutating caller-owned input.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Documentation labels the fixture as demonstration input."
+    },
+    {
+      "criterion_id": "C-008",
+      "description": "Use current train tokens and component contracts as authority",
+      "proof_type": "code_review",
+      "evidence": "Pattern placement uses public --sk-* tokens and merged app-shell/action-row/copy/detail contracts; no raw visual design value or substitute contract was introduced.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "A final fetch/rebase precedes exact-SHA verification."
+    },
+    {
+      "criterion_id": "C-009",
+      "description": "Treat D1, D2, and D4-D8 as approved dark evidence and LightMode only as system proof",
+      "proof_type": "code_review",
+      "evidence": "Story naming, mission documents and visual ledger retain the approved-state boundary and explicitly state that LightMode does not approve deferred D3.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "No product state was inferred from the LightMode proof."
+    },
+    {
+      "criterion_id": "C-010",
+      "description": "Use merged public dependencies without temporary substitutes",
+      "proof_type": "code_review",
+      "evidence": "#212/#252, #213/#261, #254/#268, #256/#262 and #257/#290 are merged; the implementation consumes their train contracts directly.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Dependency state is rechecked before merge."
+    },
+    {
+      "criterion_id": "C-011",
+      "description": "Deliver the story-only boundary as one work package and one Refs #255 PR",
+      "proof_type": "code_review",
+      "evidence": "Mission tasking contains only WP01 and PR #297 is the single work-package PR; it targets train/elements-first and its body uses Refs #255.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; GitHub delivery evidence",
+      "verified_at": "2026-09-09T18:00:00Z",
+      "notes": "Delivery evidence: https://github.com/spec-kitty/spec-kitty-design/pull/297"
+    },
+    {
+      "criterion_id": "C-012",
+      "description": "Review, accept, and configure delivery only for train/elements-first",
+      "proof_type": "code_review",
+      "evidence": "Independent Codex reviews approved the implementation and final governance layout; PR #297 targets train/elements-first, and the Spec Kitty accept gate is run against that PR before merge.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T18:00:00Z",
+      "notes": "The actual train merge and issue/epic closeout are recorded after merge; no main-targeting delivery action occurred."
+    },
+    {
+      "criterion_id": "SC-001",
+      "description": "All required approved, resilience, tracker, and layout-threshold stories are exported",
+      "proof_type": "automated_test",
+      "evidence": "Built index equality and expected-stories.json pin exactly 18 Repository Dossier story IDs while excluding helper exports.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "The repository-wide story ratchet moves from the rebased train's 444 IDs to 462 by adding exactly 18 Dossier IDs."
+    },
+    {
+      "criterion_id": "SC-002",
+      "description": "Fixture consistency covers repeated facts and conditional omissions across approved states",
+      "proof_type": "automated_test",
+      "evidence": "The 20-case direct fixture suite and focused rendered-state assertions pin exact repeated values, omissions, tracker fallbacks, and immutable projections.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "D1 setup and breadcrumb copy are fixture-owned."
+    },
+    {
+      "criterion_id": "SC-003",
+      "description": "Chromium and Firefox pass drawer, link, tracker, and copy behavior",
+      "proof_type": "automated_test",
+      "evidence": "Focused Playwright uses real Tab/Shift+Tab, Enter, Space and Escape for open/close/focus return, document/Mission links, safe tracker activation and both copy controls.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "The consolidated candidate rerun completed before review."
+    },
+    {
+      "criterion_id": "SC-004",
+      "description": "Axe reports zero WCAG 2.1 AA violations for every required story",
+      "proof_type": "automated_test",
+      "evidence": "The focused suite invokes axe for all 18 story IDs in each required browser. The non-vacuous repository gate declared 462 expected story IDs, then rendered and scanned all 571 Storybook stories with zero WCAG 2.1 AA violations after its 50-shape self-test passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "No story is excluded from the loop."
+    },
+    {
+      "criterion_id": "SC-005",
+      "description": "Required dark and LightMode stories render through Storybook build and visual gates",
+      "proof_type": "automated_test",
+      "evidence": "Budgeted Storybook production build passes; all 18 focused Dossier visual cases pass including D1 and LightMode.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "The consolidated candidate rebuild and 18/18 focused visual rerun completed before review."
+    },
+    {
+      "criterion_id": "SC-006",
+      "description": "D2 and long data have zero page overflow and remain operable at 200%/400% zoom",
+      "proof_type": "automated_test",
+      "evidence": "390px, zoom-equivalent, CSS-stress, and genuine browser-UI zoom evidence all retain exact copy controls and scrollWidth <= clientWidth.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "See implementation-evidence.md."
+    },
+    {
+      "criterion_id": "SC-007",
+      "description": "Forced colors and reduced motion retain focus and non-color/non-motion meaning",
+      "proof_type": "automated_test",
+      "evidence": "Media-specific behavior and visual cases assert physical selected/focus boundaries, textual state, and disabled animations.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Focus outline geometry is also pinned in real keyboard sequences."
+    },
+    {
+      "criterion_id": "SC-008",
+      "description": "Mutation coverage passes for introduced behavior-bearing branches",
+      "proof_type": "automated_test",
+      "evidence": "The complete harness produced all 237 named reds against a green 548-assertion baseline in 937.3 seconds, and all 10 guard self-checks passed in 67 seconds; six focused Dossier probes also produced their exact expected red.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:54:11Z",
+      "notes": "The PR and child-issue closeout record the immutable reviewed SHA."
+    },
+    {
+      "criterion_id": "SC-009",
+      "description": "Generated, story-ratchet, package, and size outputs are verified clean",
+      "proof_type": "automated_test",
+      "evidence": "Manifest, React, Vue, CSS-module, styles-only barrel, markup, part, story-index, package graph, packed-type, size-report, and offline-load checks pass; the only derived changes are the intentional three-story ratchet and three Playwright baselines.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:54:11Z",
+      "notes": "The publish graph contains four coherent packages and all 29 elements upgrade offline with zero off-machine requests."
+    },
+    {
+      "criterion_id": "SC-010",
+      "description": "All repository quality, type, unit, Storybook, accessibility, visual, and local gates pass",
+      "proof_type": "automated_test",
+      "evidence": "Quality, five-project typecheck, 582 unit/behavior tests, the 15.3-second suite-time gate, Storybook build, focused C/F, 18 visual baselines, full C/F browser suite with four infrastructure-addressed reruns, all-story axe, generator, security, package, mutation, and guard-selftest gates pass.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:54:11Z",
+      "notes": "The governance-inclusive commit is rerun before independent approval."
+    },
+    {
+      "criterion_id": "SC-011",
+      "description": "Visual review records individual approved-state and cross-family correspondence",
+      "proof_type": "code_review",
+      "evidence": "implementation-evidence.md contains D1, D2, D4-D8 rows and a cross-screen verdict; the three new baselines were inspected with the full family.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Review additions preserve the approved hierarchy and truth distinctions."
+    },
+    {
+      "criterion_id": "SC-012",
+      "description": "Final diff contains no new component definition or Team Kitty application behavior",
+      "proof_type": "automated_test",
+      "evidence": "Static composition guards and diff review show only story fixtures/composition/tests/docs/ratchet/baselines/mission artifacts, with no runtime API or application integration.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T16:00:00Z",
+      "notes": "Final reviewer independently confirms the boundary."
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "A Repository Dossier story must never invent Team Kitty discovery, routing, polling, timestamps, truth inference, progress arithmetic, or command execution.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-repository-dossier-pattern.spec.ts --project=chromium --project=firefox --grep \"source is a Storybook-only public composition\"",
+      "result": "confirmed_absent",
+      "evidence": "The focused source-boundary check passed in Chromium and Firefox at 062729313eb89eb22b21c7cfa474757be864e5d4; independent Codex review found no runtime API or Team Kitty application behavior."
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "A terminal or pending repository state must never expose completed snapshot facts or actions.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-repository-dossier-pattern.spec.ts --project=chromium --project=firefox --grep \"D5, D7, and D8 keep terminal, pending, and completed-empty truth distinct\"",
+      "result": "confirmed_absent",
+      "evidence": "The D5/D7/D8 truth-distinction check passed in Chromium and Firefox at 062729313eb89eb22b21c7cfa474757be864e5d4."
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "A tracker label without a supplied safe HTTP(S) destination must remain static text.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-repository-dossier-pattern.spec.ts --project=chromium --project=firefox --grep \"safe tracker destinations are native links while unsafe and absent destinations stay static\"",
+      "result": "confirmed_absent",
+      "evidence": "The safe, unsafe, and absent tracker-destination check passed in Chromium and Firefox at 062729313eb89eb22b21c7cfa474757be864e5d4."
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "A merged Mission must not remain in the unmerged navigation shortcut list.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-repository-dossier-pattern.spec.ts --project=chromium --project=firefox --grep \"D4 presents supplied branch copies and merged fact without collapsing them\"",
+      "result": "confirmed_absent",
+      "evidence": "The D4 merged-state and navigation-omission check passed in Chromium and Firefox at 062729313eb89eb22b21c7cfa474757be864e5d4."
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "A visual baseline is not accepted until its individual approved-state comparison and cross-screen family review are recorded.",
+      "verification_method": "custom_command",
+      "verification_command": "rg -q \"Cross-screen family.*Pass\" kitty-specs/repository-dossier-pattern-stories-01M22WFQ/implementation-evidence.md",
+      "result": "confirmed_absent",
+      "evidence": "implementation-evidence.md records Pass for D1, D2, D4-D8 and the cross-screen family; two independent Codex reviewers approved the corrected runner-authoritative baseline family at 673ae070c1c8d8238f4aef986e321e33e452f347."
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "event_count": 21,
+  "last_event_id": "01M1JEQQR6N80PDB9997AARYQQ",
+  "materialized_at": "2026-09-03T01:39:34.790102+00:00",
+  "mission_number": "",
+  "mission_slug": "elements-package-foundation-01M1J7Q4",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 5,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 1
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 1,
+      "lane": "for_review",
+      "last_event_id": "01M1JBYA2MNQWZ0H58ZXPB81JE",
+      "last_transition_at": "2026-09-03T00:50:44.436994+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "T001-T003 complete and ticked in tasks/WP01-shadow-aware-gate.md. Forced because 'tasks mark-status' requires a monolithic kitty-specs/<mission>/tasks.md, which the v0.9.0+ split tasks/ layout this mission uses does not produce (tasks/README.md documents the split layout explicitly); move-task's subtask gate reads the same missing file, so it cannot be satisfied without force under this layout. CLI defect, not an incomplete WP."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer",
+      "shell_pid": 2330313,
+      "shell_pid_created_at": "1788396643.3"
+    },
+    "WP02": {
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 1,
+      "lane": "for_review",
+      "last_event_id": "01M1JEQQR6N80PDB9997AARYQQ",
+      "last_transition_at": "2026-09-03T01:39:34.790102+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "DoD evidenced except SC-007, which is left unticked with its reason recorded. Forced for the tasks.md CLI defect noted on WP01."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer",
+      "shell_pid": 2609229,
+      "shell_pid_created_at": "1788399573.68"
+    },
+    "WP03": {
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 1,
+      "lane": "for_review",
+      "last_event_id": "01M1JCG9PT8BYWM8RHM1NPFCFM",
+      "last_transition_at": "2026-09-03T01:00:33.882833+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "DoD fully evidenced; forced for the tasks.md CLI defect recorded on WP01."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer",
+      "shell_pid": 2405351,
+      "shell_pid_created_at": "1788397232.77"
+    },
+    "WP04": {
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "claude",
+      "force_count": 1,
+      "lane": "for_review",
+      "last_event_id": "01M1JCEJ0A2M3M0PMMJM0CP96Q",
+      "last_transition_at": "2026-09-03T00:59:36.842886+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "T011-T016 complete; forced for the tasks.md CLI defect recorded on WP01."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer",
+      "shell_pid": 2400579,
+      "shell_pid_created_at": "1788397175.65"
+    },
+    "WP05": {
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "claude",
+      "force_count": 1,
+      "lane": "for_review",
+      "last_event_id": "01M1JC1YC4ET9XD0GYMAJV150B",
+      "last_transition_at": "2026-09-03T00:52:43.524334+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "T015 moved to WP02/WP04 by the task file itself; T016 and T017 complete. Forced for the same CLI defect recorded on WP01: 'tasks mark-status' requires a monolithic tasks.md that the v0.9.0+ split tasks/ layout does not produce."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer",
+      "shell_pid": 2343282,
+      "shell_pid_created_at": "1788396762.41"
+    },
+    "WP06": {
+      "actor": "finalize-tasks",
+      "force_count": 0,
+      "lane": "planned",
+      "last_event_id": "01M1J9S9VXHDMYGBSHRGEVA84E",
+      "last_transition_at": "2026-09-03T00:13:03.229704+00:00"
+    }
+  }
+}

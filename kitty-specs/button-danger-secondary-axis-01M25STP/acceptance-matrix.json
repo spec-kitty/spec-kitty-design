@@ -1,0 +1,229 @@
+{
+  "mission_slug": "button-danger-secondary-axis-01M25STP",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts: 'the primary tone PAINTS, and the three tones are distinct' asserts Object.keys(BUTTON_VARIANTS).length===4 and per-tone computed-style distinctness; npm run test 617/617 green.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:45:45.970654+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "code_review",
+      "evidence": "git diff 4d6c5f2..07228ee -- packages/tokens/src/tokens.css: empty (zero new tokens). sk-button.css .sk-button--danger-secondary/:hover use only var(--sk-status-danger)/var(--sk-on-status-danger). npm run quality:stylelint: 0 errors.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:45:47.089641+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "code_review",
+      "evidence": "grep for --sk-border-default/--sk-border-strong in the new .sk-button--danger-secondary block: no matches at any state (rest/hover/active/forced-colors).",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:45:48.159207+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts: 'danger-secondary fills on hover and does not otherwise change its border or text colour' \u2014 passing (npm run test).",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:45:49.248260+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts: 'danger-secondary declares :active { transform: scale(0.97) }, scoped to itself only' \u2014 asserts secondary/ghost do NOT gain :active; passing.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:45:50.332953+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "code_review",
+      "evidence": "sk-button.css diff adds no new :focus-visible/:disabled rule; danger-secondary relies on the shared .sk-button:focus-visible/.sk-button:disabled. run-axe-storybook.js: elements-skbutton--danger-secondary-disabled and --danger-secondary-focus both axe-clean.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:01.835398+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "sk-button.ts declare variant union widened + JSDoc; node scripts/build-react-wrappers.mjs --check and node scripts/build-vue-types.mjs --check both exit 0; custom-elements.json variant type includes 'danger-secondary'.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:02.931237+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts: 'size is an axis independent of tone' extended assertions \u2014 danger-secondary at size=sm/icon match primary's padding/40px bounds; passing.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:04.074303+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "DangerSecondaryIcon/DangerSecondaryFocus stories (label='Deny') axe-clean per run-axe-storybook.js; #153 not reopened (confirmed via issue-matrix verdict deferred-with-followup).",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:05.151837+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts: 'danger-secondary has no new copy default anywhere in source (FR-017)' \u2014 buttonStaticHtml default stays 'Label', no deny/decline literal in sk-button.ts/markup.ts; passing.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:06.278860+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "code_review",
+      "evidence": "Full diff (6e89c92,40cc95f,b2a358c,07228ee) reviewed line-by-line: no state machine, confirmation-dialog composition, double-submit prevention, or request-lifecycle code anywhere.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:16.120707+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "node scripts/build-element-markup.mjs --check: exit 0. packages/styles/src/button/index.ts gained exactly one export, SkButtonDangerSecondaryHTML, generated from the BUTTON_VARIANTS entry; no hand-authored HTML diff.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:17.257011+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "manual_verification",
+      "evidence": "Personally reverted sk-button.css's forced-colors border-width to --sk-border-width-1, rebuilt Storybook, ran 'danger-secondary keeps a strictly wider border...' against a scratch Playwright config on port 6199: observed 'Expected: > 1, Received: 1'. Restored source; with the real block, the same test passes under chromium+firefox in the full playwright run.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:18.364019+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Verify FR-014 is satisfied",
+      "proof_type": "code_review",
+      "evidence": "grep -n 'content:|forced-color-adjust' packages/styles/src/button/sk-button.css: zero matches; the forced-colors block only sets border-width.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:19.528571+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Verify FR-015 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "sk-button.stories.ts: DangerSecondary/Small/DangerSecondaryIcon/DangerSecondaryFocus/DangerSecondaryDisabled/AllVariants/LightMode/ForcedColors all present; run-axe-storybook.js lists all as axe-clean; storybook build green.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:20.616594+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Verify FR-016 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts diff: expect(variants.length,...).toBe(3) -> toBe(4); npm run test: 617/617 passed, incl. this file's 20 tests.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:29.397469+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Verify FR-017 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts: 'danger-secondary has no new copy default anywhere in source (FR-017)' \u2014 passing (same test as FR-010).",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:30.492774+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Verify FR-018 is satisfied",
+      "proof_type": "manual_verification",
+      "evidence": "git diff 4d6c5f2..07228ee -- expected-parts.json expected-docs.json mutations.json behaviours.json: empty output (no changes). node scripts/check-part-ratchet.mjs: '140 declared part(s), all recorded in expected-parts.json.'",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:31.601306+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Verify FR-019 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Re-verified against current head 94d2cdb4 (prior evidence referenced pre-rebase SHAs that no longer exist after six train rebases). Axe half: node scripts/run-axe-storybook.js run fresh just now -- 'Zero WCAG 2.1 AA violations across all 685 rendered story/stories', including elements-skbutton--danger-secondary, -icon, -focus, -disabled, -busy, and components-button-html--danger-secondary, all individually confirmed green in the output. Visual half: the two committed baselines (apps/storybook/src/tests/visual.spec.ts-snapshots/sk-button-danger-secondary-{dark,light}-chromium-linux.png) are present on disk and still referenced by visual.spec.ts:2385/2410; confirmed via gh api that CI's visual-regression job (run 34552040054) reports conclusion=success at head_sha=94d2cdb423938d9bcb05f768fa166a814db7e613, the PR's exact current head.",
+      "pass_fail": "pass",
+      "verified_by": "programme-319-orchestrator",
+      "verified_at": "2026-09-11T02:14:20.398826+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-020",
+      "description": "Verify FR-020 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "node scripts/build-react-wrappers.mjs --check: '\u2705 up to date (63 file(s), 30 element(s)), two runs byte-identical.' node scripts/build-vue-types.mjs --check: '\u2705 vue.d.ts up to date (30 elements).'",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:32.685070+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-021",
+      "description": "Verify FR-021 is satisfied",
+      "proof_type": "code_review",
+      "evidence": "docs/design-system/using-components.md diff: fourth tone documented in the Buttons section with the reused-token boundary, the re-derived contrast table (matches my own independent measurement), the forced-colors mechanism, and a #155 pointer.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:33.787180+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-022",
+      "description": "Verify FR-022 is satisfied",
+      "proof_type": "manual_verification",
+      "evidence": "PR #341 body (https://github.com/spec-kitty/spec-kitty-design/pull/341) personally read at head 94d2cdb4: 'Epic #319 required its two Wave 1 children to agree one border-role and fix-altitude before either froze a token choice. The outcome, linked from #155: This mission introduces no token and touches no token file. #321 owns the single neutral control-boundary fix... #155 keeps .sk-button--secondary. Neither child repaints it, neither closes it.' PR body section 'Why this tone does not need #155's fix' records the same outcome with the re-measured --sk-border-strong 3:1 failure. Both halves of the criterion (comment on #155 + PR body record) now exist; PR did not exist at WP-review time, which was the only reason this was pending.",
+      "pass_fail": "pass",
+      "verified_by": "programme-319-orchestrator",
+      "verified_at": "2026-09-11T02:14:07.792015+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}

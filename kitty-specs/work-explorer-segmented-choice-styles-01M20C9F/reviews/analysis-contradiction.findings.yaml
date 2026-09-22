@@ -1,0 +1,58 @@
+schema: review-findings/v1
+complete: true
+phase: analysis
+lens_group: contradiction
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: ANALYSIS-CONTRADICTION-001
+    lens: Does the report's own recorded/machine-readable state agree with its own prose verdict?
+    severity: 3
+    title: analysis-report.md's own recorder-written frontmatter says verdict:unknown/0 findings while its body says READY with 2 advisory findings — the durable, machine-readable record never actually captured the body's conclusion
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/analysis-report.md:22-29 (frontmatter) — `verdict: unknown`, `issue_counts: {medium:, low:, high:, info:, critical:}` (all null), `findings: []`"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/analysis-report.md:40-42, 136-143, 147-149 (body) — 'Verdict: READY', a Findings table with two advisory entries (A-001, A-002), and 'Verdict (restated): READY.'"
+      - artifact: "/home/jeroennouws/dev/SK-missions/op-researcher-robbie-name/src/specify_cli/analysis_report.py:35-64, 337-374, 405-417 — the recorder computes `verdict`/`issue_counts` ONLY from a structured `analysis-findings/v1` YAML carrier the analyzing agent is required to emit in the submitted report body (`_split_carrier`, `parse_structured_findings`); when no such carrier is present (or it is not schema `analysis-findings/v1`), the write path falls back to `verdict: unknown` and null issue_counts (`# a legacy report with no carrier records as verdict: unknown`) — this is explicitly the fix for a documented prior defect (#1819: 'never from substring counting report prose')."
+      - artifact: "Sibling missions in the same repo tree, same tool version — `kitty-specs/team-overview-shell-elements-01M1S8R8/analysis-report.md`, `kitty-specs/work-package-detail-primitives-01M1XTPW/analysis-report.md`, `kitty-specs/work-package-view-pattern-stories-01M1YNPC/analysis-report.md`, `kitty-specs/team-overview-feed-elements-01M1S8T0/analysis-report.md` — all show `verdict: ready` and `critical: 0`/`high: 0`/etc. correctly populated in frontmatter, proving the carrier mechanism does work correctly when the analyzing agent supplies it."
+    claim: >
+      This mission's `analysis-report.md` was reviewed for internal contradiction between what it
+      records as its own machine-readable state and what its own prose concludes. Every specific
+      factual claim in the body that I spot-checked against the underlying repository (the
+      `expected-stories.json` total of 323 and absence of a `sk-segmented-choice` entry;
+      `stylelint.config.mjs`'s exact 7-keyword `ignoreValues` list; `charter.yaml`'s
+      `frontend-freddy`/`planner-priti` catalogue entries at the cited lines; ADR-10's five named
+      styles-only components; `sk-nav-pill.css`'s `--sk-bg-pill` usage vs. `sk-form-select.css`'s
+      genuine absence of it; `sk-transition-matrix.spec.ts`'s line 312 vs. 285 distinction; every
+      cited prior finding's resolution status in `tasks-verify.yaml`/`tasks-verify-2.yaml`/
+      `tasks-verify-3.yaml`/`tasks-order.findings.yaml`/`plan-post-research-verify-2.yaml`/
+      `plan-verify-2.yaml`/`plan-post-research-rulings-verify.yaml`; the current WP01 headings
+      T001/T002/T007/T012/T015/T016; `meta.json`/`lanes.json`'s topology, target branch, lane id,
+      and write_scope asymmetry; ADR-11's 11-item required-behaviours list; `acceptance-matrix.json`/
+      `issue-matrix.json`'s template-pending state) held up exactly as described. However, the one
+      claim the report does NOT verify against itself is whether its own conclusion was actually
+      captured in the artifact's durable, machine-consumable record. It was not: this repo's
+      `record-analysis` tooling derives `verdict`/`issue_counts`/`findings` in the frontmatter
+      exclusively from a structured `analysis-findings/v1` carrier the analyzing agent must emit in
+      the submitted body — precisely so that no downstream consumer ever has to (or is able to)
+      infer a verdict by reading prose. This report's frontmatter shows the no-carrier fallback state
+      (`verdict: unknown`, all-null counts, empty findings array) that the tool assigns when that
+      carrier is missing or invalid, while four sibling missions in the same repo correctly show
+      `verdict: ready` with populated zero-counts — proving the mechanism is available and normally
+      used. The practical effect: a human reading this file sees "READY" in the prose and would
+      reasonably act on it (as this review did), but any script, gate, or dashboard that reads the
+      frontmatter (the artifact's actual contract, and the reason the carrier mechanism exists at
+      all) would see this mission as `unknown` with zero recorded findings — not READY, and not
+      carrying the two advisory findings the prose itself lists. This is a real self-contradiction
+      internal to the artifact: its own header disagrees with its own body about what its own verdict
+      is, on the exact axis (verdict, not prose) the tooling was built to make authoritative.
+    remediation: >
+      Re-run `/spec-kitty.analyze` (or the equivalent `record-analysis` invocation) with the report
+      body's Findings table (A-001, A-002, both severity `advisory`/non-blocking) expressed as a
+      valid `analysis-findings/v1` YAML carrier at the top of the submitted body, so the recorder
+      computes and writes `verdict: ready` (or whatever the carrier's severities correctly yield —
+      advisory-only findings should still resolve to `ready` per the tool's `_BLOCKING_SEVERITIES`
+      being `{high, critical}` only) and a non-null, correctly-tallied `issue_counts`/`findings` list
+      into the frontmatter, matching the sibling missions' pattern. Until that is done, treat this
+      report's READY conclusion as established only by direct human reading of the prose, not as
+      durably recorded, and do not assume any automation gating on `analysis-report.md`'s frontmatter
+      will see it as ready.
+# End of findings.

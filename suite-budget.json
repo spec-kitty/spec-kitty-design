@@ -1,0 +1,431 @@
+{
+  "$comment": [
+    "The behaviour suite's CI time budget (#71, FR-013, NFR-001).",
+    "",
+    "The charter's Performance Benchmarks say 'Storybook CI build time under 3 minutes' and",
+    "contemplate no test suite at all - ADR-11's own Consequences say 'a new budget has to be",
+    "set rather than assumed'. This is that budget, ASSERTED rather than recorded: both jobs",
+    "fail above their ceiling, so neither number can go stale silently.",
+    "",
+    "There is deliberately NO `measuredSeconds` field. An earlier revision carried 5.6, which",
+    "was contradicted by the very run it cited (6.8s) and by head (11.9s) - a companion number",
+    "that nothing re-derives is the prose baseline this whole file argues against. The ceilings",
+    "are the record.",
+    "",
+    "TWO ceilings, because they measure different things and mixing them could not tell you",
+    "which had regressed. `ceilingSeconds` covers `npm run test` - both lanes, chromium and",
+    "webkit in CI. `selftestCeilingSeconds` covers scripts/suite-selftest.mjs, which proves a",
+    "complete full-suite baseline and runs every dependency-affected browser test per mutation.",
+    "That second key was",
+    "read by NOTHING until the second gate pass caught it: an inert key documented as an",
+    "enforced ceiling, in the file whose thesis is that stale prose goes unnoticed.",
+    "At #146 Vitest's unmutated dependency graph replaced the mutation-registry-derived filter.",
+    "Package barrels remain broad; graph errors and empty selections fail closed to the full suite,",
+    "and every run matches its affected SC assertion set. Exact-head CI run 34031816773 then proved",
+    "that filtering was active (29 sources, zero full-suite fallbacks) and every one of 128 mutations",
+    "produced its named red against a green 307-assertion baseline, but 923.9s exceeded 881.9s.",
+    "The operator authorized remediation on 2026-09-06. The ceiling is therefore recalibrated to",
+    "1405.5s using the repository's existing 1.5213x worst-observed-CI multiplier:",
+    "923.9 x (881.9 / 579.7) = 1405.5s. This retains 52.1% headroom over the new worst run.",
+    "The 568.6s workstation result is recorded only as a 62.5% CI/local variance observation; CI",
+    "remains authoritative. One CI observation does not prove the runner tail, so a future breach",
+    "must trigger investigation rather than another automatic raise.",
+    "",
+    "WHERE THIS BUDGET LIVES IS AN OPEN OPERATOR QUESTION. Amending the charter's Performance",
+    "Benchmarks may be the right home, but charter.md and charter.yaml contradict each other and",
+    "ADR-11's citation for how amendments happen does not check out - see the operator questions",
+    "on #71.",
+    "",
+    "adds the mutations rather than to the end of the mission — the ceiling asserts at the end of",
+    "EVERY run and is wired into CI, so it reds at whichever commit pushes the set over, not at a",
+    "tidy final measurement pass.",
+    "",
+    "is CHROMIUM-ONLY — the second browser affects `ceilingSeconds`, not this one. An earlier plan",
+    "draft conflated the two, which is precisely what the note above says the split exists to",
+    "prevent. Neither ceiling is raised: 79.5s of 180s, and the CI number is the one that binds.",
+    "",
+    "39 mutations — a lens caught the PR body quoting the local figure as though it were the",
+    "ceiling-relevant one. Neither ceiling raised; the margin is now thinner and the next mission",
+    "that adds mutations should expect to raise selftestCeilingSeconds rather than assume it fits.",
+    "",
+    "#74 MEASURED BOTH CEILINGS RATHER THAN ASSUMING THEM, and the numbers below are CI's, not a",
+    "workstation's — a lens caught an earlier revision of this paragraph quoting a local figure",
+    "and a stale head as though they were the binding one.",
+    "",
+    "  CI @ 75a7dd7  39 mutations / 62 tests  121.7s",
+    "  CI @ d34feaa  41 mutations / 80 tests  141.6s",
+    "",
+    "That is ~10s per added mutation, NOT the ~3s the raw mutation delta suggests, because",
+    "suite-selftest.mjs runs the WHOLE suite once per mutation — so adding tests and adding",
+    "MEASURED AGAIN at #126: 43 mutations / 83 browser tests -> 161.1s CI, 18.9s under the 180s ceiling. That is roughly five more mutations of headroom at the true marginal cost, NOT the \"roughly four\" this paragraph used to claim from the 41-mutation row.",
+    "",
+    "The harness spawns vitest with `CI: ''`, so it is chromium-only; the second browser affects",
+    "`ceilingSeconds` (npm run test), not this one. The two are kept separate so a regression can",
+    "be attributed.",
+    "",
+    "DELIBERATE, AND RECORDED HERE BECAUSE IT IS A TRADE-OFF: #74 added 18 tests and only 2",
+    "standing mutations. Thirteen more survivors were each proven red-first by hand during the",
+    "gate fold, but adding them to the standing set would cost ~130s and breach the ceiling. The",
+    "next mission to touch this file should raise selftestCeilingSeconds deliberately, with the",
+    "run that justifies it, rather than discover the breach.",
+    "",
+    "THE SLOPE, corrected. #74 recorded \"~10s per added mutation\" and #126 planned around it. That figure bundles two variables: the harness runs one FULL SUITE per mutation, so the two committed CI points (39 mut/62 tests -> 121.7s; 41/80 -> 141.6s) fit per-run ~= 1.90s + 0.0183s x tests. A mutation with no new tests costs ~3.4s; the 10s was a mutation PLUS nine tests. #126 predicted 151s on that fit and CI measured 161.1s, so the model under-predicts by ~7% — good enough to plan with, not good enough to quote.",
+    "NOT RAISED at #126, deliberately. Two mutations were added and the run still fits with 18.9s spare, so raising the ceiling would have been raising it from an arithmetic the run does not support — the defect this file records a lens catching twice. The next mission to add mutations should expect to raise it, and now has a real slope to do that from.",
+    "",
+    "TWO POINTS AT THE SAME COUNTS, 161.1s and 155.5s, both CI, both 43 mutations / 83 tests. That spread is runner variance, and it is recorded rather than averaged away: a single quoted figure is what this file exists to argue against. Plan against the SLOWER one.",
+    "RAISED AT #77, 180 -> 240, which is the deliberate raise the paragraph above told the next mission adding mutations to expect. The justifying run is the breach itself: CI @ a1a0623, 47 mutations / 91 browser tests, harness step 23:26:15Z -> 23:29:15Z — it ran to completion, every mutation produced its named red, and the ONLY failure was this ceiling. That is recorded as a measurement row with seconds 180 and a `ceilingBreach` flag, because the exact elapsed is known only to be marginally above 180: the script prints its own figure and CI truncated the log at the failure. THE ARITHMETIC, stated so it can be checked rather than trusted: the committed fit is per-run ~= 1.90s + 0.0183s x tests, so predicted(47, 91) = 167.6s against an actual of ~180 — the ~7% under-prediction this file already records, here measured at ~7.4%. predicted(49, 98) = 181.0s; scaled by the same factor, ~194s. Runner variance is ~3.6% at identical counts (161.1 vs 155.5 above), so ~202s is the number to plan against. 240 leaves ~19% headroom, which is roughly ten mutations at the true marginal cost. NOT SET TO ~205. A ceiling with no headroom converts ordinary runner variance into a red build on a tree nobody touched, and the next mission would spend its gate pass re-raising it. NO LOCAL FIGURE IS QUOTED AS THE BASIS. This mission's workstation run was 138.9s at 49/98, which is 30% under CI and is exactly the kind of number a lens has twice caught this file citing as though it were binding.",
+    "THE 240 ARITHMETIC WAS WRONG, and the very next CI run said so. The paragraph above predicted ~194s at 49 mutations and planned 240 around it. CI @ bcef5a3 measured 49 mutations / 100 browser tests at 128.5s — 34% under the prediction, and 52s FASTER than the a1a0623 run that breached 180s with TWO FEWER mutations. So the interpretation of that breach changes: it was not the mutation count crossing a threshold, it was a slow runner. Runner variance across these two adjacent runs is at least 180 -> 128.5, roughly 40% of the mean — an order of magnitude beyond the ~3.6% recorded above from the 161.1/155.5 pair, which was evidently a lucky pair rather than the spread. The per-run fit (1.90s + 0.0183s x tests) should not be used to plan a ceiling. It predicts a central tendency and the ceiling has to survive the tail. 240 STAYS, on the corrected basis: it is ~1.9x the fastest observed run at this count and ~1.33x the slowest observed run at any count, which is headroom for the variance actually measured rather than for the slope. A ceiling derived from the fit would have been ~205 and would red on a slow runner with nothing wrong. Recorded rather than quietly corrected, because a prediction contradicted by the next run is exactly the shape this file exists to catch, and it caught mine.",
+    "RAISED AGAIN AT #78, 240 -> 360, and this time the measurement came FIRST. A lens refused the PR body's '212.8s local vs 240s' as evidence — correctly, since this file says twice that a workstation figure is not ceiling-relevant — and asked for the CI number before merge. It is 231.7s at 54 mutations / 116 tests: 8.3s of headroom, not the comfortable margin the local figure implied. AND THE VARIANCE IS LARGER THAN ANY MODEL HERE. Adjacent CI runs: 128.5s at 49/100, 231.7s at 54/116. The work grew ~28% (mutations x tests) and the time grew ~80%. Whatever the per-run fit predicts, the spread between two runs five days apart is the number a ceiling has to survive, and this file's own conclusion says so. 360 is ~1.55x the slowest observed run at the current count. It is not derived from the fit, which under-predicts and describes a central tendency. #79 adds a third batch of components and should re-measure rather than assume this holds.",
+    "RAISED AT #77 PART 3, 360 -> 560, and for once the marginal cost is measured rather than fitted. Three CI runs on ONE DAY, same runner class, backfilled below: 64 mut/144 tests -> 300.6s, 67/154 -> 319.1s, 70/160 -> 368.1s. Two of those three rows were owed by earlier missions and never written — #79 was told in this file to re-measure and did not, so the 360 ceiling stood on #78's 54-mutation figure while the standing set grew to 67 unobserved. That is the defect this file exists to catch, committed against this file's own instruction, by me.",
+    "WHY 560 AND NOT 480. 480 is 1.30x the slowest observed run and looks generous against a same-day cluster that spans only 300.6-368.1s. It is not, and this file already records why: the widest variance ever measured here is a1a0623 (>180s at 47/91) against bcef5a3 (128.5s at 49/100) — adjacent runs, MORE work in the faster one, ~40% apart. A 40%-slow runner at today's count is ~515s, which 480 would red with nothing wrong. 560 is 1.52x the slowest observed, consistent with the 1.55x basis #78 used, and survives the worst variance actually recorded. The tight same-day cluster is NOT evidence the fleet got more consistent; it is three samples, and this file has twice been wrong by treating a central tendency as a bound.",
+    "THE REAL PROBLEM IS NOT THE CEILING, and raising it is treating a symptom. suite-selftest.mjs runs the WHOLE suite once per mutation, so cost is O(mutations x tests) and BOTH factors grow every migration mission — which is why 6 mutations and 16 tests cost 67.5s here while the committed per-run fit predicts a fraction of that. The harness is now over six minutes and each mission has raised this number: 180 -> 240 -> 360 -> 560. The next raise should not happen; the harness should mutate against a filtered suite instead. Filed rather than fixed here, because changing what the harness runs changes what every red means and that is not a fold at the end of a component migration.",
+    "MEASURED AT #81 WITHOUT RAISING ANYTHING: 70 mutations / 166 tests -> 364s. The set grew by six tests and the time did not move outside variance (368.1s at 160 tests). Recorded because this file's standing instruction is to re-measure when the mutation set OR the test set grows, and a lens caught that #81 had grown the test set and written nothing down. Re-measuring and declining to raise is the outcome this instruction wants; silence is not.",
+    "RECHECKED AT #180's SECOND ROUND, NOT RAISED — the breach is explained, not fixed. CI @ 33996545427 (9dc04f2), 92 mutations / 233 tests, 579.7s: 19.7s over the 560s ceiling. Per-mutation cost: 6.234s (mean gap across all 92 timestamped results, stdev 0.088s — EVERY mutation in this run cost within 1.4% of the mean; there is no disproportionately slow arm, checked by measuring the gap between each of the 92 result lines individually, not inferred). Two things explain the total, neither of them a code defect: (1) CI-vs-local overhead — this mission's own local run was 381.9s/92 = 4.15s/mutation, so CI ran ~52% slower than the workstation, in line with the ~30-43% CI-vs-local gap #78 already recorded (\"this mission's workstation run was 138.9s at 49/98, which is 30% under CI\"), not a new phenomenon. (2) CI-to-CI variance — the immediately preceding CI row (cde2fb8, 85mut/224tests, 358.6s = 4.22s/mutation) is 33% CHEAPER per mutation than this run, almost exactly the ~40-46% swing already recorded between a1a0623 (>180s @ 47/91, ~3.83s/mutation) and bcef5a3 (128.5s @ 49/100, ~2.62s/mutation) — a RECURRENCE of already-documented runner variance at a different scale, not a new one. NOT RAISED because the file's own #77-part-3 note (PR #166, 75ca61e) already told this exact next mission not to: \"the next raise should not happen; the harness should mutate against a filtered suite instead.\" This mission's own growth (70->92 mutations, 169->233 tests over its lifetime) is precisely the growth that note anticipated. A ceiling raise here would be technically computable (roughly 1.5x this run's total, ~870-900s, matching the 1.52-1.55x buffer-over-worst-observed-run basis #77/#78 used) and would make this specific red go away, but it would be the FOURTH consecutive mission-by-mission raise (240->360->560->~900) the file's own standing note already flagged as the wrong move. Left for the operator: raise again on this basis, or invest in the filtered-suite harness redesign #77-part-3 (PR #166) filed instead of fixed.",
+    "RAISED AT #180, 560 -> 881.9s, OPERATOR OVERRIDE of the #77-part-3 note above (PR #166, 75ca61e) (which is NOT deleted or edited — it still stands, and its recommendation is DEFERRED, not rejected: the filtered-suite redesign remains the right fix; this raise buys time, it does not close it). This is the FOURTH consecutive raise (180 -> 240 -> 360 -> 560 -> 881.9), and that note said the next one should not happen — it did not happen on this loop's own authority. Ruled by the operator on 2026-09-06 in #187, recorded here so the next reader knows the decision was escalated rather than assumed, the same treatment ADR-10 got in #176. THE ARITHMETIC, same basis as the 360->560 raise (worst observed CI run x buffer, not a fit to the central tendency): that raise was 1.52x its own worst observed run (560 / 368.1 = 1.5213). Applied to THIS mission's worst observed run (579.7s, 9dc04f2, recorded above): 579.7 x 1.5213 = 881.9s. Not rounded to a clean number and back-filled — the multiplier is the SAME one already used once, applied to the new worst observation. WHY NOT A SMALLER RAISE: the finding that forced this is not the single breach, it is that at 92 mutations the suite STRADDLES a marginal ceiling — 4.22s/mutation on cde2fb8 and 6.30s/mutation on 9dc04f2 spans an expected-runtime range of roughly 390-580s against the OLD 560s ceiling, meaning the gate could pass or fail on ordinary runner variance alone with no code change either side. A gate that passes or fails on variance is worse than one that fails honestly, because it invites re-running until green rather than trusting the result. 881.9s puts the ceiling clearly ABOVE the observed 4.22-6.30s/mutation range at the current count (92 x 6.30 = 579.6, against 881.9 — 52% headroom over the WORST run seen, not the average), restoring a deterministic gate rather than a coin flip. THE PER-MUTATION SPREAD, recorded so the next mission can predict its own budget: 4.22-6.30s/mutation across two consecutive CI runs of the SAME suite (cde2fb8, 9dc04f2), while the spread WITHIN a single run is tight (stdev 0.088s on 9dc04f2's 92 results, 1.4% of the mean) — the variance is between RUNNERS, not between mutation arms. CI-VS-LOCAL, also recorded: this mission's own workstation run was 4.15s/mutation against CI's 6.30s/mutation on the same head, a ~52% gap, consistent with the ~30-43% gap #78 already recorded — a local green does not predict a CI green for this gate, budget from the CI figure, never the workstation one.",
+    "MEASURED AT #182, NOT RAISED. CI @ ddbfcc7 (run 34031680527), 111 mutations / 284 browser tests, 761.8s against the 881.9s ceiling — 6.863s/mutation, inside the 4.22-6.30s/mutation band #180 recorded only at its top end, and 86.4% of the ceiling. TWO THINGS ARE RECORDED RATHER THAN ACTED ON. (1) This row is partly owed by an earlier mission: the last measurement below is 92 mutations / 233 tests, and the set had already reached 109 / 270 on the train before #182 touched it, so no row was written for that growth — the same omission this file records #79 and #81 committing, and it is named here rather than quietly backfilled, because I did not run that mission and cannot attribute its figure. (2) The margin is thin against the variance this file itself documents: 120.1s of headroom is ~14%, and the widest CI-to-CI swing recorded here is ~40% (a1a0623 >180s at 47/91 against bcef5a3 128.5s at 49/100). A 40%-slow runner at this count is ~1066s and would breach. NOT RAISED HERE, deliberately and for a stated reason rather than an arithmetic one: the 560 -> 881.9 raise was an OPERATOR RULING (2026-09-06, #187) taken because the file's own #77-part-3 note (PR #166, 75ca61e) says the next raise should not happen on a loop's own authority and that the real fix is mutating against a filtered suite. A component mission adding two mutation arms is not the place to spend that ruling a second time. The operator's options are unchanged: raise again on the same worst-observed x 1.5213 basis (761.8 x 1.5213 = 1158.9s), or fund the filtered-suite redesign. CI-VS-LOCAL, for the next reader's budgeting: this mission's workstation run was 451.5s at the same 111/284, so CI ran ~69% slower — wider than the ~52% gap #180 measured and well outside the ~30-43% #78 recorded. Budget from the CI figure; the workstation one has now been wrong by a larger margin again.",
+    "AND THE VERY NEXT RUN FALSIFIED THE PARAGRAPH ABOVE, which is recorded rather than quietly edited because a prediction contradicted by the next run is the exact shape this file exists to catch — and it has now caught mine, as it caught the 240 arithmetic. Same PR, same 111 mutations / 284 tests, one rebase later: CI @ 6189027 (run 34032506923) measured 575.6s, against 761.8s at ddbfcc7. That is a 32% spread between two ADJACENT runs of an IDENTICAL set, 4.87 vs 6.86 s/mutation — no code changed between them but a rebase onto #203, which touches no test. So the '86.4% of the ceiling, ~14% headroom' figure above is a worst-observed point, not the level: the honest statement is 575.6-761.8s, 65-86% of the ceiling. The decision does not change and the reason strengthens: a ceiling must survive the tail, the tail here is 761.8s, and 881.9 clears it — while a ceiling fitted to the 575.6s run would red on the 761.8s one with nothing wrong. What this pair adds to the record is that the ~40% CI-to-CI variance this file documents from a1a0623/bcef5a3 was NOT an artefact of differing counts: it reproduces at identical counts, on the same day, on the same PR.",
+    "RAISED AT #148, 25 -> 40, from exact-head CI rather than a workstation result. PR #231 run 34064831840 at eabbb844 completed all 798 assertions across node, Chromium, and WebKit with zero skips in 28.0s; the only test-job failure was the old 25s ceiling. The last recorded ordinary-suite point was #146 at 647 assertions in 22.5s. Assertions therefore grew 23.3% and elapsed time grew 24.4%, with #148's own sk-bar-chart contract green in both browsers (15/15 each); that proportional change is suite growth, not a hung or isolated slow test. Two immediately preceding runs of the identical 798-assertion floor measured 23.6s at 18f16cdd (run 34063650759) and 23.5s at 3b42fa00 (run 34064628144), so the old ceiling had only about 6% headroom on ordinary runs and the 28.0s result demonstrates same-count runner variance rather than a reason to rerun until lucky. Forty seconds is 1.43x the measured worst run and leaves 30% of the ceiling as runner headroom. The distinct 1,405.5s mutation ceiling is unchanged and still requires its own final-head CI measurement.",
+    "#233's EVIDENCE, ADDED TO THE RAISE ABOVE RATHER THAN REPLACING IT. #148 moved the number and recorded its own basis; the operator ruled #233 separately on 2026-09-07 and asked for something #148's note does not carry, so it is completed here instead of re-argued. THE THREE MEASUREMENTS, all on code that did not change: run 34063224583 (7b446d7, a docs-only branch) measured 25.2s and FAILED the old 25s ceiling; the `gh run rerun --failed` of that SAME SHA measured 18s and passed; run 34064899152 (1d03584, one docs-only commit later) measured 22.9s. 762 of 762 assertions passed in the failing run — the red was the budget line alone, on a pull request that changed only Markdown. THE POINT IS THE SHAPE, NOT THE OUTLIER: 18 / 22.9 / 25.2 against a ceiling of 25 means the distribution STRADDLED it rather than sitting under it, so the same tree passed or failed on which runner it landed on. That is the difference between a gate red-ing honestly on correct code and one that invites re-running until green, and it is why #233 was ruled a raise rather than a re-roll. THE RULED FLOOR, for a reader checking the number: worst observed x the repository's own worst-observed multiplier, 1.5213 — the figure the 360 -> 560 raise established and the 560 -> 881.9 and 881.9 -> 1405.5 raises reused — gives 25.2 x 1.5213 = 38.3s. The committed 40 clears it, with 58.7% headroom over that 25.2s tail, so #148's raise satisfies #233's ruling and is left exactly as it stands.",
+    "THE COUNT AT #196/#204's HEAD, MEASURED, AND NOTHING RAISED FOR IT. The series: #146 at 647 assertions in 22.5s; #233's three runs at 762; #148 at 798 (eabbb844); the train tip 2bbbd7b at 800 in 26.2s (run 34070854754); and this mission's head ee1d5be at 802 in 23.2s against the 40s ceiling — node=34, chromium=384, webkit=384, 79 of 79 files, run 34071780742. The +2 is one browser test run on both engines, predicted as arithmetic over the train's 800 before the run and then confirmed by it rather than left as a claim. Recorded because the count moved four times inside one day and a reader cannot separate growth from variance without the series.",
+    "LOWERED AT #225, 1405.5 -> 1059.7s, THE FIRST TIME THIS NUMBER HAS GONE DOWN, and computed on this file's OWN ruled floor rather than a new basis: worst observed x 1.5213, the multiplier the 360 -> 560 raise established and the 560 -> 881.9 and 881.9 -> 1405.5 raises reused. 696.6 x 1.5213 = 1059.7. An intermediate revision of this mission committed 1250 on a substitute basis — a measured 1.56x cohort multiplier and a slow-end projection — and a review lens pointed out that 1250 is 1.417x its own worst-observed 882.0s and therefore does NOT clear the floor above, which is the shape #233 was ruled against. That is recorded rather than quietly replaced: the substitute basis was better evidenced and still wrong to adopt silently, and the answer was not to argue the rule but to make the suite cheap enough that the rule is comfortable. WHAT THE OPERATOR FUNDED, AND WHAT WAS ACTUALLY THERE. The ruling chose the filtered-suite redesign over a sixth raise. The filtered suite ALREADY EXISTED — e83ec64 landed it on 2026-09-06, the same day, and every row above from cde2fb8 onwards was measured with it active, each reporting `0 full-suite fallback(s)`. It was sound and INERT: 20 of the 23 elements-behaviour tests opened with a side-effect import of the @spec-kitty/elements barrel, so Vitest's dependency graph correctly reported that an element source reaches 30 of the 36 browser test files. The graph was not wrong; the imports were. THE TWO EDITS, and their measured effect on files selected per ELEMENT SOURCE (30.53 before): (1) each behaviour test imports the element modules it exercises rather than the barrel -> 15.77; (2) the six in-body `await import('@spec-kitty/elements')` calls that a first fold kept, on the stated grounds that they prove the class the barrel exports IS the registered constructor, were checked by a lens and do not — all six are [SC-010] late-upgrade tests that SUBCLASS the export and assert pre-upgrade property survival, and would pass if the barrel exported a different class with the same reflection behaviour. Deep-imported instead -> 10.23. Per ARM, weighted by arm count, 26.77 -> 8.63. The identity claim nothing in the repository actually makes is filed as #251 rather than smuggled into six ADR-11 behaviour files. THE COST MODEL, fitted per arm from GitHub job-log timestamps rather than assumed: seconds_per_arm = A + B x files_selected, with (A, B) measured at (2.10, 0.2325), (2.06, 0.2329), (1.89, 0.2201) and (2.17, 0.2450) across four CI runs at the intermediate selection, against (1.17, 0.170) on the fast runner class seen at 954.3s. The per-file term is the test execution itself — a behaviour file runs ~15 assertions in ~190ms standalone — so there is no fixed overhead left to trim and the ONLY lever is running fewer files. Before #225, files_selected for an element source was approximately the NUMBER OF ELEMENTS in the repository, making cost O(arms x elements) — quadratic in mission count, which is the shape that forced five raises. It is now O(arms). THAT, not the size of this drop, is what is supposed to end the sequence. THE FOUR MEASUREMENTS THE FLOOR IS COMPUTED FROM: 679.4s, 672.7s and 687.4s at b120855, and 696.6s at 08d0985 — four CI runs of the same 157-arm / 386-assertion set, all green with 10/10 on the guard step. 696.6 is the worst, and it is the run that validates the head carrying this number, which is why it is recorded rather than left out. PR #241's 165-arm set, MEASURED not guessed: its branch was merged into this one LOCALLY, for measurement only and never pushed, and the impact graph re-resolved over the result gives 9.58 files per arm once its own sk-time-series-chart.test.ts is converted — which the new gate now REQUIRES rather than suggests. That projects to 745s on the slowest of the four fitted models, 765s with setup, 72.2% of 1059.7 with 295s of headroom. On the fast class it is 462s. WHAT PROTECTS THIS NUMBER, which nothing did until a lens asked. The whole model rests on behaviour tests not importing the barrel, and that rule was PROSE in docs/contributing/adding-a-component.md — violated by the very next branch before the ink dried. It is now scripts/check-behaviour-fixture-imports.mjs, an [ENFORCED] step in lint-code with its own probe table and an end-to-end plant-and-detect arm, registered in check-gate-wiring.mjs so its CI lines cannot be deleted green. A documented rule that nothing re-derives is the defect class this file records against itself five times; this one is re-derived. WHAT DID NOT CHANGE, and should not be read as fixed: the runner spread. It is a property of the RUNNER, not of the arms and not of #238's lane instability. The mutation harness spawns Vitest with CI='' so it is chromium-only, while #238 is webkit-only in the separate behaviour-suite step; and across the four PR #241 runs every cohort scales by the same factor — heaviest-120 mean 6.38 -> 9.94 (1.56x), lightest-20 1.70 -> 2.81 (1.65x), median 6.27 -> 9.80 (1.56x) — with no hang, no completion retry and no outlier arm. Filtering cannot fix that. What it does is shrink the spread's ABSOLUTE size, because a 1.56x band around 4.3s per arm is narrower than the same band around 8.6s, which is why the 1.5213 floor is now comfortable where at 1276.4s it would have demanded 1941s. THE NEXT LEVER, measured and not taken: six fixtures/react-consumer files plus vue-interop.test.ts and registered-elements.test.ts remain in EVERY element arm because the generated React wrappers carry a literal `import(\"@spec-kitty/elements\")`. It is now the whole of the per-arm fixed block. Narrowing it to a per-element subpath changes the published package's export surface and what importing one wrapper registers, so it is a product decision — filed as #250 rather than taken here.",
+    "MEASURED AT #179 ON THE POST-#225 SELECTION, NOT RAISED, AND THE RULE ABOVE IS WHY. CI @ 57a0af7 (PR #241, run 34127252576 / job 101758720190), 165 mutations / 412 browser assertions, 767.3s against the 1059.7s ceiling — 72.4 percent of it, 292.4s of headroom, 4.65s per arm. 37 mutated sources resolved with zero full-suite fallbacks; the guard step passed 10/10 in 57.1s; the ordinary suite passed at 25.4s under its own 40s ceiling.\nTHIS RUN IS ABOVE THE WORST PRE-#179 OBSERVATION (696.6s) AND THAT DOES NOT DEMAND A RAISE — which is the rule #249 wrote into this file, applied here for the first time by a mission other than the one that wrote it. Only a run above the CEILING does, and this is 292.4s under. The increase is the eight arms this mission adds and its own test file joining the selection, which is the cost model working rather than drifting: #249 projected #241's 165 arms at 745s (765s with setup), 72.2 percent of the ceiling, from a LOCAL MERGE of this branch, and the exact-head CI figure came in at 767.3s, 72.4 percent. A projection and its measurement agreeing to 0.2 percentage points is the strongest evidence this file holds that the ceiling is now measuring the suite and not the runner — the property that five runs of an identical 165-arm set spanning 970.8-1514.3s against the old ceiling did not have.\n#179's OWN FOUR BREACH-ERA ROWS ARE NOT RESTORED. They measured a basis (the barrel-import selection) that no longer exists, against a ceiling that no longer exists, and #249 folded their evidence into the prose above where it belongs. Re-adding them would put four incomparable numbers beside a table whose whole point is that its rows share a basis.",
+    "#254 WP01 grows the rebased standing set from 171 to 184 mutations and the Chromium baseline from 437 to 453 assertions. The cycle-1 remediation adds three surgical arms for actual slot assignment, content-box observation, and presentation-change focus release, plus four authored browser-behaviour tests. The 40s ordinary-suite ceiling and 1059.7s mutation ceiling remain deliberately unchanged; the remediated ordinary suite measured 14.52s. A pre-rebase full mutation attempt exposed five app-shell collateral-classification defects (subsequently corrected) plus a transition-matrix arm timeout; its retry was externally interrupted with exit 130 after 37 clean arms, and the orchestrator owns the final-SHA full mutation run. CI remains the authority for adding a selftestMeasurements row; this entry does not launder an incomplete workstation run into a budget basis.",
+    "#254 FINAL-REVIEW FIX grows the refreshed standing set from 186 to 187 mutations and the Chromium mutation baseline from 460 to 461 assertions, covering ordinary controlled-close focus release and rejected-Escape-then-route-close in one named [SC-012] test. The app-shell focused Playwright matrix grows from the exact pre-fix 34/34 to 36/36 across Chromium and Firefox. The full local harness resolved 40 mutated sources with zero fallbacks and produced all 187 named reds in 564.5s, including the new arm without collateral; the 1059.7s ceiling remains unchanged. This local result is recorded without inventing a CI measurement row.",
+    "RAISED AFTER #270 EXPOSED AN INHERITED SAME-SET BREACH, 1059.7 -> 1649.8. #270 adds no behavior assertion, registry pair, mutation, or mutated source, so the paired CI observations measure runner variance rather than segmented-choice workload: #254 run 34267427722 completed the 210-mutation / 471-assertion / 41-source set in 1052.1s, while #270 run 34277267835 completed the identical set in 1084.5s and failed only the ceiling. Both had a green baseline, every named red, and zero full-suite fallbacks; no hang or collateral defect occurred. The 3.1% spread straddled a ceiling with only 0.7% headroom after #254, making pass/fail runner-dependent. The new ceiling applies the file's established floor to the new worst observation: 1084.5 x 1.5213 = 1649.8s. This is a primary-authorized Tier-C gate-maintenance correction recorded in #270's mission ruling; it changes no segmented-choice contract or test workload.",
+    "RAISED AT #358, ceilingSeconds 40 -> 66.9 — operator-authorized. #148/#233 set and confirmed 40s against a 798-762 test floor (eabbb844, run 34064831840); the count has since grown to 1234 tests across 95 files (node=34, browser chromium=600, browser webkit=600) — a 54.6% growth over #148's 798 that the ceiling was never re-measured against, the same omission this file's OTHER ceiling records #79, #81 and #182 committing. THREE CI RUNS, same 95-file/1234-test set, one calendar day: train push e3eeeb22a3a71b14ae37be72cc8095c7ad26b6ed (run 34515865024, job 103000990472) measured 38.5s; mission/boundary-page-styles at f931c24d6b2d0ce80a8340b4657703c8d7aaa012 (run 34518725545, job 103010599242) measured 44.0s and FAILED ONLY the 40s ceiling — Test Files 95 passed (95), Tests 1234 passed (1234), zero test failures, `Suite floor: 3 lane(s) all non-empty, 0 skipped`; the same branch's very next push, e42643a4914ce72b2d29311064e47960e64a6352 (run 34524178480, job 103029437448), measured 36.5s on the identical 95/1234 set. That is a 20.5% same-set spread (44.0 vs 36.5s) against the OLD ceiling's 3.9% margin (38.5s train run under a 40s ceiling) — ordinary runner variance straddling the line, the exact pass-or-fail-by-runner shape #233 and #270 already record for this file's other ceiling. THE ARITHMETIC, this file's own established method, unchanged from its first use at the 560 -> 881.9 raise and reused at 881.9 -> 1405.5 and 1059.7 -> 1649.8 for selftestCeilingSeconds: worst observed x 1.5213 = 44.0 x 1.5213 = 66.9372, recorded to one decimal as 66.9s, consistent with every prior raise in this file. selftestCeilingSeconds (1649.8) is UNCHANGED — it measures a different job (scripts/suite-selftest.mjs) on a different basis (#270's ruling), and this recalibration does not touch it.",
+    "REPLACED WITH AN ARM-COUNT-SCALED MODEL AT #419/#408 (WP mutation-harness-budget). selftestCeilingSeconds had been raised six times (180 -> 240 -> 360 -> 560 -> 881.9 -> 1405.5 -> 1649.8) and was breaching again, TWICE, on the SAME unchanged 272-mutation / 47-source corpus this file's own last raise (#270) was set from. EIGHT real CI runs on train/elements-first were measured for this mission, all identical inputs (impact graph: 47 source(s), 0 full-suite fallback(s) in every one): 1637.2s (34561511046), 1645.1s (34592445070), 1949.7s ceilingBreach (34595310707), 1346.6s (34606532461), 1645.5s (34618855795), 1690.0s ceilingBreach (34623594612), 1627.9s (34632185898), 1605.3s (34637284298) -- a 603s / 44.8% spread with TWO of eight breaching 1649.8s. #408 separately recorded the ceiling was last calibrated at 210 arms while the corpus had already reached 272, unrecalibrated. BOTH are instances of one structural defect: a FLAT ceiling cannot survive corpus growth (elapsed scales with arm count; the ceiling does not) and cannot absorb this file's own already-measured runner variance, so the SIXTH raise was rejected in favour of making the ceiling a function of arm count. THE MODEL: ceilingSeconds(armCount) = fixedSeconds + perArmSeconds x armCount, computed at runtime from mutations.length (scripts/lib/selftest-budget.mjs) instead of read as a constant. FITTED FROM THE HARNESS'S TWO REAL INVOCATIONS, not a guess: the --selftest guard self-check (10 arms) and the main run (272 arms) are the only two arm counts this repository has CI data for. Six real 10-arm runs from the same eight CI runs above (the two that breached the old ceiling never reached this step, since the job stops on the prior step's failure): 103.6s, 113.6s, 113.8s, 115.0s, 116.3s, 112.5s -- worst 116.3s. Solving fixedSeconds + perArmSeconds*10 = 116.3 and fixedSeconds + perArmSeconds*272 = 1949.7 (each bucket's OWN worst observation, not a mean) gives the unscaled fit fixedSeconds=46.32, perArmSeconds=6.998s/arm. Scaling BOTH terms by this file's established 1.5213 multiplier (the same one used at every raise since 360 -> 560) gives the committed fixedSeconds=70.5, perArmSeconds=10.65s/arm -- which, because the raw fit passes exactly through each bucket's worst observation, gives BOTH the 10-arm and the 272-arm invocation the identical 52.1% headroom over their own worst observation, rather than importing one invocation's shape into the other's budget. A single flat perArmSeconds solved only from the 272-arm data (~7.17s/arm at the worst observation, before the multiplier) would set the 10-arm ceiling to ~72s -- UNDER its own real 116.3s worst observation -- because the fixed baseline-suite-run cost this harness pays once, not per arm, is ~40% of the 10-arm run's total and does not scale down with armCount; the two-term model is what keeps the small guard-check invocation honest. AT CURRENT COUNTS this computes to 2967.3s at 272 arms (70.5 + 10.65*272) and 177.0s at 10 arms (70.5 + 10.65*10) -- both comfortably clearing every real observation above. STATED LIMITATION: this is a TWO-POINT extrapolation between exactly the two arm-count buckets this repository has measured, not a multi-count regression like the file-selection cost model recorded above (seconds_per_arm ~= A + B x files_selected, fit from per-arm CI job-log timestamps at several file-selection counts within ONE run). A future mission that changes the corpus by a large factor, or that can extract a third real arm-count data point, should re-fit rather than assume the line holds outside [10, 272]. WHAT THIS CATCHES AND DOES NOT, recorded because a gate that can never fail is worse than one that fails honestly: it catches a SYSTEMIC slowdown -- every arm or the fixed baseline step getting genuinely slower, e.g. a real perf regression in shared setup/teardown or a much larger average impact-graph selection -- proven with a synthetic 2x-worst-case unit test (tests/node/selftest-budget.test.ts) and, separately, a REAL executed run of `node scripts/suite-selftest.mjs --selftest` with a genuine artificial per-arm delay, which reds under this model and passes without the delay. It deliberately does NOT catch, because another mechanism already does: a single arm hanging is the existing per-mutation SUITE_TIMEOUT_MS / `timeout` verdict (unchanged by this mission) -- and a single arm that is merely somewhat slower, not hung, has to move the AVERAGE enough to matter, which is deliberate given #419's own evidence that individual-arm timing already varies without any arm being defective. ALSO RESOLVED BY THIS MISSION: #168's central technical claim (the harness runs the whole suite once per mutation, O(mutations x tests)) is STALE -- verified independently against all eight runs above, every one reporting zero full-suite fallbacks -- because PR #249 (closes #225, merged f9fd570e on 2026-09-07, three days after #168 was filed) made the dependency-graph filter this file already describes above actually effective. #168 carries no open technical content of its own once #225/#249 and this mission are accounted for; #408 is the same underlying defect as #419 with narrower evidence. selftestMeasurements below is KEPT, not replaced -- it is the record the new model was fit from and remains the reference for any future re-fit. THE FOURTEEN ROWS THIS FIT RESTS ON ARE APPENDED BELOW, structured (sha, mutations, tests, seconds), not left as prose here -- a review finding on this mission's own PR, correctly: every prior ceiling change in this file got structured rows, and leaving this fit's own inputs out of the array undercuts the claim two sentences up. Eight rows at 272 mutations (the main run) and six at 10 (the --selftest guard self-check, run ids and job ids in each note) -- the two runs whose main step breached the old ceiling never reached the guard-check step, since CI stops the job on the first failing step. One row (85318cc, the earliest of the eight) records 673 assertions against 677 everywhere else; the mutation count (272) and impact-graph source count (47, zero fallbacks) are unchanged, so this is ordinary suite growth elsewhere in the tree between that run and the next, not a corpus difference bearing on this ceiling -- recorded rather than smoothed over."
+  ],
+  "covers": "npm run test (both lanes, chromium + webkit in CI)",
+  "ceilingSeconds": 66.9,
+  "measuredOn": "ubuntu-latest, chromium + webkit, cold npm ci",
+  "runUrl": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/34518725545",
+  "sha": "f931c24d6b2d0ce80a8340b4657703c8d7aaa012",
+  "selftestBudget": {
+    "model": "fixedSeconds + perArmSeconds * armCount",
+    "fixedSeconds": 70.5,
+    "perArmSeconds": 10.65,
+    "multiplier": 1.5213,
+    "fittedFrom": {
+      "guardSelfCheckArmCount": 10,
+      "guardSelfCheckWorstSeconds": 116.3,
+      "guardSelfCheckWorstRunUrl": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/34632185898",
+      "mainArmCount": 272,
+      "mainWorstSeconds": 1949.7,
+      "mainWorstRunUrl": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/34595310707"
+    }
+  },
+  "selftestMeasurements": [
+    {
+      "sha": "d34feaa",
+      "mutations": 41,
+      "tests": 80,
+      "seconds": 141.6
+    },
+    {
+      "sha": "c2b9ce1",
+      "mutations": 43,
+      "tests": 83,
+      "seconds": 161.1
+    },
+    {
+      "sha": "de4e914",
+      "mutations": 43,
+      "tests": 83,
+      "seconds": 155.5
+    },
+    {
+      "sha": "a1a0623",
+      "mutations": 47,
+      "tests": 91,
+      "seconds": 180,
+      "ceilingBreach": true,
+      "note": "harness completed with all 47 reds; failed only the 180s ceiling. Elapsed known to be marginally >180 from the step's wall time."
+    },
+    {
+      "sha": "bcef5a3",
+      "mutations": 49,
+      "tests": 100,
+      "seconds": 128.5,
+      "note": "CI. Faster than the 47-mutation breach at a1a0623 despite two more mutations — the evidence that runner variance, not count, drove that breach."
+    },
+    {
+      "sha": "b253754",
+      "mutations": 54,
+      "tests": 116,
+      "seconds": 231.7,
+      "note": "CI. 8.3s under the 240s ceiling — the run that showed the ceiling was already nearly breached, not merely at risk for #79."
+    },
+    {
+      "sha": "4b98614",
+      "mutations": 64,
+      "tests": 144,
+      "seconds": 300.6,
+      "note": "CI, PR #140 (#79). BACKFILLED at #77 part 3 — this row should have been written by #79, which the paragraph above told to re-measure rather than assume 360 held. It did not, so the 360 ceiling stood on #78's 54-mutation measurement while the count grew to 64."
+    },
+    {
+      "sha": "a2fddad",
+      "mutations": 67,
+      "tests": 154,
+      "seconds": 319.1,
+      "note": "CI, PR #143 (#78 batch 3). Also backfilled at #77 part 3, same omission."
+    },
+    {
+      "sha": "35752ec",
+      "mutations": 70,
+      "tests": 160,
+      "seconds": 368.1,
+      "ceilingBreach": true,
+      "note": "CI, PR #166 (#77 part 3). Harness ran to completion: all 70 mutations produced their named red with a green baseline, and the ONLY failure was the 360s ceiling. The run that justifies the raise below."
+    },
+    {
+      "sha": "769baef",
+      "mutations": 70,
+      "tests": 169,
+      "seconds": 364,
+      "note": "CI, PR #170 (#81). The browser lane grew 160 -> 169 as the Vue consumer fixture landed and the four-lens fold added v-model, plain-`:` and @input assertions. Recorded because a lens noticed the row was missing — verbatim the omission this file records #79 committing — and then a SECOND lens noticed the first version of this row said 166, which was the parent commit's count, not the head's. NOT raised: 364s is 65% of the 560s ceiling, and the added tests moved the time less than runner variance."
+    },
+    {
+      "sha": "cde2fb8",
+      "mutations": 85,
+      "tests": 224,
+      "seconds": 358.6,
+      "note": "CI, PR #187 (#180, pre-merge gate pass 1). NOT raised: time FELL from 364s to 358.6s despite the set growing (70->85 mutations, 169->224 tests) — the debugger lens's own instruction was to record this measurement, not to raise the ceiling from it. 358.6s is 64% of the 560s ceiling."
+    },
+    {
+      "sha": "9dc04f2",
+      "mutations": 92,
+      "tests": 233,
+      "seconds": 579.7,
+      "ceilingBreach": true,
+      "note": "CI, PR #187 (#180, pre-merge gate pass 2), run 33996545427. All 92 mutations produced their named red with a green baseline; the ONLY failure was the 560s ceiling. Per-mutation cost 6.234s (mean gap, stdev 0.088s across all 92 results) — uniformly distributed, no slow arm. See the $comment entry above for the CI-vs-local and CI-to-CI variance analysis. NOT raised here — left for the operator per the #77-part-3 note (PR #166, 75ca61e) this mission's own growth has now reached."
+    },
+    {
+      "sha": "ddbfcc7",
+      "mutations": 111,
+      "tests": 284,
+      "seconds": 761.8,
+      "note": "CI, PR #207 (#182), run 34031680527. All 111 mutations produced their named red with a green baseline; the guard self-check took a further 28.3s. NOT raised — see the $comment entry above for why the decision is the operator's rather than this mission's, and for the thin-margin analysis."
+    },
+    {
+      "sha": "6189027",
+      "mutations": 111,
+      "tests": 284,
+      "seconds": 575.6,
+      "note": "CI, PR #207 (#182), run 34032506923 — the same head as ddbfcc7 rebased onto #203, with no test or mutation change. 32% faster than that run at an identical set; the pair is the file's first same-day, same-count variance measurement. Recorded as a PAIR with ddbfcc7 rather than replacing it: a single quoted figure is what this file argues against."
+    },
+    {
+      "sha": "28917cc",
+      "mutations": 128,
+      "tests": 307,
+      "seconds": 923.9,
+      "ceilingBreach": true,
+      "note": "CI, PR #206 (#146), run 34031816773 / job 101482679926. Green 307-assertion baseline with all 88 registry pairs present; 29 mutated sources resolved with zero full-suite fallbacks; all 128 mutations produced their named red with no collateral. The ONLY failure was the 881.9s ceiling. The ordinary behavior gate independently passed 647/647 in 22.5s under its 25s ceiling. Independent debugger-debbie Codex diagnosis found no hang or isolated slow arm and recommended the operator-authorized 1405.5s calibration."
+    },
+    {
+      "sha": "7a56e7e",
+      "mutations": 155,
+      "tests": 382,
+      "seconds": 1286,
+      "note": "CI, PR #231 (#148), run 34065216159 / job 101572668819. Exact candidate after the ordinary-suite recalibration: green 382-assertion Chromium baseline with all 109 registry pairs present; the impact graph resolved 35 mutated sources with zero full-suite fallbacks; all 155 mutations produced their named red with no collateral. The separate guard step passed 10/10 in 60.3s, and the ordinary node/Chromium/WebKit suite passed 798/798 with zero skips in 26.2s under its 40s ceiling. The 1,405.5s mutation ceiling is unchanged; this 1,286s result leaves 119.5s of measured headroom."
+    },
+    {
+      "sha": "ee1d5be",
+      "mutations": 157,
+      "tests": 384,
+      "seconds": 1276.4,
+      "note": "CI, PR #235 (#196/#204), run 34071780742 / job 101592547526. NOT RAISED, and recorded because this file's standing instruction is to re-measure whenever the mutation set OR the test set grows — the omission it records #79, #81 and #182 committing. This is the UNION set after the rebase onto #148: 157 arms (#148's 155 plus this mission's two SC-017 threshold arms; SC-016 re-keyed an existing arm rather than adding one), a green 384-assertion browser baseline across 111 registry pairs, 36 mutated sources resolved with zero full-suite fallbacks, and every arm producing its named red. 1276.4s is 90.8% of the 1405.5s ceiling — 129.1s of headroom, 8.13s per mutation. THE MARGIN IS THIN AND THE NEXT MISSION SHOULD EXPECT TO HIT IT: #148 measured 155 arms at 1338.8s on a slower runner, which is 66.7s of headroom for two arms fewer, so the spread between runners is already larger than what is left. selftestCeilingSeconds is NOT raised here — it is #225's, the #187 ruling still binds, and the real fix remains the filtered-suite redesign #77-part-3 filed instead of fixing."
+    },
+    {
+      "sha": "79c3cc2",
+      "mutations": 157,
+      "tests": 386,
+      "seconds": 844.3,
+      "note": "AT THE INTERMEDIATE SELECTION (15.77 files per element source), superseded by the b120855 rows below at 10.23 but kept because the cost model was fitted from these four runs. CI, PR #249 (#225), run 34101668195 / job 101677273183. THE FIRST MEASUREMENT AFTER THE FILTER STOPPED BEING INERT. Same 157 arms as ee1d5be above, same green browser baseline across 111 registry pairs, 36 mutated sources with zero full-suite fallbacks, every arm its named red with no collateral, and the separate guard step 10/10 in 54.9s. 844.3s against ee1d5be's 1276.4s for the identical arm set is a 33.9% fall, and the fitted per-arm model is 2.10 + 0.2325 x files_selected. Recorded as a PAIR with the row below, on the same head, for the reason ddbfcc7/6189027 was: a single quoted figure is what this file argues against."
+    },
+    {
+      "sha": "79c3cc2",
+      "mutations": 157,
+      "tests": 386,
+      "seconds": 839.8,
+      "note": "AT THE INTERMEDIATE SELECTION (15.77 files per element source), superseded by the b120855 rows below at 10.23 but kept because the cost model was fitted from these four runs. CI, PR #249 (#225), run 34101668195 rerun / job 101685458981 — the SAME head as the row above, re-run with no change. 839.8s against 844.3s is 0.5% apart, the tightest same-set pair in this file, and the fitted model is 2.06 + 0.2329 x files_selected against 2.10 + 0.2325. That is not evidence the runner spread has gone away: both runs drew the SLOW class (1-file arms at 2.18s and 2.21s), and the 954.3s/1487.5s pair above shows what the fast class does to the same work. It is evidence that the cost MODEL is stable, which is what a ceiling can be set from. The behaviour-suite step of the first attempt of this rerun failed with #238's exact signature — 70 of 79 files reported, zero tests failed, one error, and a 219,531-byte log truncated before the error text — on a SHA that had just passed 79/79. That is the ordinary suite, not the mutation harness, and it is recorded here because it is the second independent sighting of #238 and the first outside the PR that filed it."
+    },
+    {
+      "sha": "964a6b8",
+      "mutations": 157,
+      "tests": 386,
+      "seconds": 782.9,
+      "note": "AT THE INTERMEDIATE SELECTION (15.77 files per element source), superseded by the b120855 rows below at 10.23 but kept because the cost model was fitted from these four runs. CI, PR #249 (#225), run 34106202483 / job 101691828882 — the first run under a lowered ceiling, and the FASTEST of the four. 782.9s is 62.6% of the 1250s the ceiling finally settled at, and 6.8-7.3% faster than the two 79c3cc2 runs above at an identical arm and test set, which is the runner spread showing up again at a third of the amplitude it had at 30 files per arm. The guard step passed 10/10 in 51.5s and the ordinary suite 79/79 files in 22.7s. THE 165-ARM QUESTION, ANSWERED WITH MEASURED FILE COUNTS RATHER THAN A GUESS: PR #241's branch was merged into this one LOCALLY, for measurement only and never pushed — mutations.json and the whole elements-behaviour fixture merged without conflict — and the impact graph re-resolved over the resulting 165 arms gives 15.35 files per arm, projecting 933s on the slow class and 624s on the fast one. Under the four runs' own fitted models that set projects to 869s, 930s, 935s and 978s; the worst is 79.8% of 1250 once setup is added, so #241 fits. It fits BETTER if it converts its own new fixtures/elements-behaviour/src/sk-time-series-chart.test.ts, which still opens with a side-effect barrel import written before this mission: converting it takes the same 165 arms to 14.53 files per arm and 902s. That is a 31s saving on this rebase and a permanent one on every arm added after it."
+    },
+    {
+      "sha": "01b2cb8",
+      "mutations": 157,
+      "tests": 386,
+      "seconds": 882.0,
+      "note": "AT THE INTERMEDIATE SELECTION (15.77 files per element source), superseded by the b120855 rows below at 10.23 but kept because the cost model was fitted from these four runs. CI, PR #249 (#225), run on the branch rebased onto train/elements-first@5baff25 / job 101700476521. THE SLOWEST OF THE FOUR POST-#225 RUNS, and the reason the ceiling in this file says 1250 rather than the 1100 it briefly said: 882.0s against 782.9s at 964a6b8 is a 12.7% spread across four runs of an identical 157-arm set, and this run's own fitted model (2.17 + 0.2450 x files) projects PR #241's 165 arms to 978s. Recorded BEFORE it could become a breach rather than after, which is the one thing every raise above was written to stop having to say. All 157 named reds, no collateral, guards 10/10 in 56.8s, ordinary suite 79/79 files in 23.2s."
+    },
+    {
+      "sha": "b120855",
+      "mutations": 157,
+      "tests": 386,
+      "seconds": 679.4,
+      "note": "CI, PR #249 (#225), run 34119467072 / job 101733926149. THE FIRST RUN AT THE FINAL SELECTION, after the six late-upgrade arms stopped reaching the barrel: 10.23 files per element source and 8.63 per arm, against 30.53 and 26.77 before #225. 679.4s for the same 157 arms and 386 assertions that measured 1276.4s at ee1d5be — a 46.8% fall. All 157 named reds with no collateral, zero full-suite fallbacks, guards 10/10 in 52.4s."
+    },
+    {
+      "sha": "b120855",
+      "mutations": 157,
+      "tests": 386,
+      "seconds": 672.7,
+      "note": "CI, PR #249 (#225), run 34119467072 rerun / job 101738107560 — same head, no change. The FASTEST of the three."
+    },
+    {
+      "sha": "b120855",
+      "mutations": 157,
+      "tests": 386,
+      "seconds": 687.4,
+      "note": "CI, PR #249 (#225), run 34119467072 second rerun / job 101742264649 — same head, no change. THE WORST OF THE THREE, and therefore the number the committed ceiling is computed from: 687.4 x 1.5213 = 1045.7. The three span 2.2%, the tightest same-set cluster in this file, which is what a per-arm cost of ~4.3s does to a 1.56x runner band that used to sit on ~8.6s."
+    },
+    {
+      "sha": "08d0985",
+      "mutations": 157,
+      "tests": 386,
+      "seconds": 696.6,
+      "note": "CI, PR #249 (#225), job 101747235751 — the head that carries the ceiling below, recorded here rather than left out. It is the WORST of the four post-#225 runs at the final selection (679.4, 672.7, 687.4, 696.6), so the committed ceiling is computed from THIS row: 696.6 x 1.5213 = 1059.7. A first revision computed 1045.7 from 687.4 and was 1.3% short of the floor once this run landed, which is corrected here for the reason the paragraph above gives about 1250. NOTE FOR THE NEXT READER, because the regress is real and this file has not stated it before: the 1.5213 floor is applied to the worst observation available WHEN THE NUMBER IS SET, not re-derived per run — #180 set 881.9 from a 579.7s worst and then recorded 761.8s against it without recomputing. A later run above 696.6s does not by itself demand a raise; a later run above the CEILING does."
+    },
+    {
+      "sha": "57a0af7",
+      "mutations": 165,
+      "tests": 412,
+      "seconds": 767.3,
+      "note": "CI, PR #241 (#179), run 34127252576 / job 101758720190. The first post-#225 measurement from a mission other than #225's own: green 412-assertion Chromium baseline with all 118 registry pairs present, 37 mutated sources resolved with zero full-suite fallbacks, all 165 mutations producing their named red with no collateral. 72.4 percent of the 1059.7s ceiling against #249's 72.2 percent projection for this exact branch. NOT RAISED — above the worst prior observation, below the ceiling, which this file's own rule says is not a raise trigger."
+    },
+    {
+      "sha": "6ab9334",
+      "mutations": 166,
+      "tests": 417,
+      "seconds": 744.5,
+      "note": "CI, PR #260 (#259), run 34133326195 / job 101778414604. Recorded because this file's standing instruction is to re-measure whenever the mutation set OR the test set grows, and this mission grows both: 165 -> 166 arms (one SC-011 arm against the composition module) and 412 -> 417 assertions (five over the composed tree). Green 417-assertion Chromium baseline with all 119 registry pairs present, the impact graph resolving 38 mutated sources with zero full-suite fallbacks, and every arm producing its named red with no collateral. The separate guard step passed 10/10 in 56.1s and the ordinary suite in 24.7s under its 40s ceiling. NOT RAISED, and the arithmetic is worth stating because it cuts against the direction the set moved: 744.5s for 166 arms against 767.3s for 165 at 57a0af7 is FASTER with one more arm, which is the runner spread this file has measured at 2.2% within a head and 12.7% across four runs of an identical set. 744.5s is 70.3% of the 1059.7s ceiling, 315.2s of headroom. It IS above the 696.6s worst observation the ceiling was computed from, and this file's own rule for that case is explicit: a later run above the worst observation does not by itself demand a raise; a later run above the CEILING does."
+    },
+    {
+      "sha": "d5f1655",
+      "mutations": 166,
+      "tests": 417,
+      "seconds": 625.9,
+      "note": "CI, PR #260 (#259), run 34135115530 / job 101784257786 — the mission's FINAL head, recorded as a PAIR with the 6ab9334 row above rather than replacing it, for the reason ddbfcc7/6189027 and 79c3cc2 give: a single quoted figure is what this file argues against. Same 166 arms and 417 assertions; the two heads differ only by a gate's probe table and a comment correction, neither of which the harness runs. 625.9s against 744.5s is a 15.9 percent spread across two runs of an identical arm set on consecutive heads, consistent with the 12.7 percent this file already measured at 01b2cb8 and wider than the 2.2 percent same-head cluster at b120855. 625.9s is 59.1 percent of the 1059.7s ceiling — the largest headroom recorded since the ceiling was set — and it is BELOW the 696.6s worst observation that ceiling was computed from, so it does not move the raise question in either direction. Guards 10/10 in 48s; the ordinary suite 19.5s under its 40s ceiling. This row is added by a doc-only commit on top of the measured head, which is how every backfilled row above was written."
+    },
+    {
+      "sha": "c61c25e",
+      "mutations": 210,
+      "tests": 471,
+      "seconds": 1052.1,
+      "note": "CI, PR #268 (#254), run 34267427722 / job 102200209186. Green 471-assertion Chromium baseline with all 128 registry pairs present; 41 mutated sources resolved with zero full-suite fallbacks; all 210 mutations produced their named red. The separate guard step passed 10/10 in 69s. This left only 7.6s (0.7 percent) below the inherited 1059.7s ceiling and is recorded as the first half of the same-set pair that justified the next row's raise."
+    },
+    {
+      "sha": "831e6f3",
+      "mutations": 210,
+      "tests": 471,
+      "seconds": 1084.5,
+      "ceilingBreach": true,
+      "note": "CI, PR #285 (#270), run 34277267835 / job 102233547020. The identical 210-mutation / 471-assertion / 41-source set as c61c25e above: green baseline, all named reds, zero full-suite fallbacks, no hang, and no collateral defect. It failed only by exceeding the inherited ceiling by 24.8s. #270 adds no behavior or mutation workload; the 3.1 percent same-set runtime spread proves the old 0.7-percent margin was runner-dependent. Primary-authorized Tier-C calibration applies the established 1.5213 floor to this new worst observation: 1084.5 x 1.5213 = 1649.8s."
+    },
+    {
+      "sha": "85318cc",
+      "mutations": 272,
+      "tests": 673,
+      "seconds": 1637.2,
+      "note": "CI, train/elements-first, run 34561511046 / job 103145020953 (mission mutation-harness-budget, #419/#408). All 272 mutations produced their named red with a green 673-assertion baseline; 47 mutated sources resolved with zero full-suite fallbacks. This run's browser baseline is 673 assertions, 4 fewer than every other row in this set (677) -- mutations.json's count (272) and the impact graph's resolved source count (47, 0 full-suite fallbacks) are unchanged across all eight; the 673-vs-677 spread is ordinary same-day suite growth elsewhere in the tree between 04:15 and 11:06 UTC, not a corpus difference for this ceiling. One of the eight identical-corpus (272-arm, 47-source) measurements the selftestBudget model below is fit from."
+    },
+    {
+      "sha": "85318cc",
+      "mutations": 10,
+      "tests": 673,
+      "seconds": 113.8,
+      "note": "CI, train/elements-first, run 34561511046 / job 103145020953 (mission mutation-harness-budget, #419/#408). The --selftest GUARD SELF-CHECK step (10 entries in mutations.selftest.json, not the main 272-arm corpus above), with its own 673-assertion baseline. One of the six 10-arm measurements the selftestBudget model below is fit from; the two runs whose main step breached the old ceiling never reached this step, since CI stops the job on the prior failure."
+    },
+    {
+      "sha": "681c70f",
+      "mutations": 272,
+      "tests": 677,
+      "seconds": 1645.1,
+      "note": "CI, train/elements-first, run 34592445070 / job 103240595716 (mission mutation-harness-budget, #419/#408). All 272 mutations produced their named red with a green 677-assertion baseline; 47 mutated sources resolved with zero full-suite fallbacks. One of the eight identical-corpus (272-arm, 47-source) measurements the selftestBudget model below is fit from."
+    },
+    {
+      "sha": "681c70f",
+      "mutations": 10,
+      "tests": 677,
+      "seconds": 113.6,
+      "note": "CI, train/elements-first, run 34592445070 / job 103240595716 (mission mutation-harness-budget, #419/#408). The --selftest GUARD SELF-CHECK step (10 entries in mutations.selftest.json, not the main 272-arm corpus above), with its own 677-assertion baseline. One of the six 10-arm measurements the selftestBudget model below is fit from; the two runs whose main step breached the old ceiling never reached this step, since CI stops the job on the prior failure."
+    },
+    {
+      "sha": "0a232a0",
+      "mutations": 272,
+      "tests": 677,
+      "seconds": 1949.7,
+      "ceilingBreach": true,
+      "note": "CI, train/elements-first, run 34595310707 / job 103249588945 (mission mutation-harness-budget, #419/#408). All 272 mutations produced their named red with a green 677-assertion baseline; 47 mutated sources resolved with zero full-suite fallbacks. FAILED ONLY the inherited 1649.8s ceiling -- one of the two breaches #419 reports."
+    },
+    {
+      "sha": "1694819",
+      "mutations": 272,
+      "tests": 677,
+      "seconds": 1346.6,
+      "note": "CI, train/elements-first, run 34606532461 / job 103286210949 (mission mutation-harness-budget, #419/#408). All 272 mutations produced their named red with a green 677-assertion baseline; 47 mutated sources resolved with zero full-suite fallbacks. One of the eight identical-corpus (272-arm, 47-source) measurements the selftestBudget model below is fit from."
+    },
+    {
+      "sha": "1694819",
+      "mutations": 10,
+      "tests": 677,
+      "seconds": 103.6,
+      "note": "CI, train/elements-first, run 34606532461 / job 103286210949 (mission mutation-harness-budget, #419/#408). The --selftest GUARD SELF-CHECK step (10 entries in mutations.selftest.json, not the main 272-arm corpus above), with its own 677-assertion baseline. One of the six 10-arm measurements the selftestBudget model below is fit from; the two runs whose main step breached the old ceiling never reached this step, since CI stops the job on the prior failure."
+    },
+    {
+      "sha": "ac9a86c",
+      "mutations": 272,
+      "tests": 677,
+      "seconds": 1645.5,
+      "note": "CI, train/elements-first, run 34618855795 / job 103327476636 (mission mutation-harness-budget, #419/#408). All 272 mutations produced their named red with a green 677-assertion baseline; 47 mutated sources resolved with zero full-suite fallbacks. One of the eight identical-corpus (272-arm, 47-source) measurements the selftestBudget model below is fit from."
+    },
+    {
+      "sha": "ac9a86c",
+      "mutations": 10,
+      "tests": 677,
+      "seconds": 115.0,
+      "note": "CI, train/elements-first, run 34618855795 / job 103327476636 (mission mutation-harness-budget, #419/#408). The --selftest GUARD SELF-CHECK step (10 entries in mutations.selftest.json, not the main 272-arm corpus above), with its own 677-assertion baseline. One of the six 10-arm measurements the selftestBudget model below is fit from; the two runs whose main step breached the old ceiling never reached this step, since CI stops the job on the prior failure."
+    },
+    {
+      "sha": "38f7e6f",
+      "mutations": 272,
+      "tests": 677,
+      "seconds": 1690.0,
+      "ceilingBreach": true,
+      "note": "CI, train/elements-first, run 34623594612 / job 103343206946 (mission mutation-harness-budget, #419/#408). All 272 mutations produced their named red with a green 677-assertion baseline; 47 mutated sources resolved with zero full-suite fallbacks. FAILED ONLY the inherited 1649.8s ceiling -- one of the two breaches #419 reports."
+    },
+    {
+      "sha": "04565d5",
+      "mutations": 272,
+      "tests": 677,
+      "seconds": 1627.9,
+      "note": "CI, train/elements-first, run 34632185898 / job 103371473629 (mission mutation-harness-budget, #419/#408). All 272 mutations produced their named red with a green 677-assertion baseline; 47 mutated sources resolved with zero full-suite fallbacks. One of the eight identical-corpus (272-arm, 47-source) measurements the selftestBudget model below is fit from."
+    },
+    {
+      "sha": "04565d5",
+      "mutations": 10,
+      "tests": 677,
+      "seconds": 116.3,
+      "note": "CI, train/elements-first, run 34632185898 / job 103371473629 (mission mutation-harness-budget, #419/#408). The --selftest GUARD SELF-CHECK step (10 entries in mutations.selftest.json, not the main 272-arm corpus above), with its own 677-assertion baseline. One of the six 10-arm measurements the selftestBudget model below is fit from; the two runs whose main step breached the old ceiling never reached this step, since CI stops the job on the prior failure."
+    },
+    {
+      "sha": "9c269b3",
+      "mutations": 272,
+      "tests": 677,
+      "seconds": 1605.3,
+      "note": "CI, train/elements-first, run 34637284298 / job 103388168231 (mission mutation-harness-budget, #419/#408). All 272 mutations produced their named red with a green 677-assertion baseline; 47 mutated sources resolved with zero full-suite fallbacks. One of the eight identical-corpus (272-arm, 47-source) measurements the selftestBudget model below is fit from."
+    },
+    {
+      "sha": "9c269b3",
+      "mutations": 10,
+      "tests": 677,
+      "seconds": 112.5,
+      "note": "CI, train/elements-first, run 34637284298 / job 103388168231 (mission mutation-harness-budget, #419/#408). The --selftest GUARD SELF-CHECK step (10 entries in mutations.selftest.json, not the main 272-arm corpus above), with its own 677-assertion baseline. One of the six 10-arm measurements the selftestBudget model below is fit from; the two runs whose main step breached the old ceiling never reached this step, since CI stops the job on the prior failure."
+    }
+  ]
+}

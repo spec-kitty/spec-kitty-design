@@ -1,0 +1,7 @@
+# review-findings/v1 — canonical format for lens-session and fresh-sweep output.
+schema: review-findings/v1
+complete: true
+phase: plan
+lens_group: fit
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings: []

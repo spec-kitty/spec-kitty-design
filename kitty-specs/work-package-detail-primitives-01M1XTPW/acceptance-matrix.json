@@ -1,0 +1,441 @@
+{
+  "mission_slug": "work-package-detail-primitives-01M1XTPW",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Native breadcrumbs use consumer-authored <nav aria-label=\"Breadcrumb\"><ol><li><a> markup and retain aria-current=\"page\" on the terminal link.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts: native nav/ol/li/link current-page semantics; Chromium 225/225, Firefox 216/216 applicable, WebKit 216/216 applicable on rebased tree",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:46:39.511608+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Breadcrumb separators remain decorative, accessible labels stay complete, narrow overflow is locally contained, and keyboard focus remains visible.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures; long-label local-scroll, focus ring, and sibling non-overlap assertions",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:26.535578+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "The .sk-prose class styles native headings, paragraphs, lists, links, inline code, and <pre><code> at a readable measure without changing heading levels.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures; native prose heading/list/link/code semantics and measure assertions",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:27.573201+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Wide data composes .sk-data-table and absent prompts compose .sk-empty-state; Markdown parsing, sanitization, syntax highlighting, and copy behavior stay outside the library.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures; data-table and empty-state composition assertions plus styles-only source inventory",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:28.647824+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "The .sk-event-timeline class styles native ordered-list events with consumer-authored summaries, actor/time metadata, optional support content, and supplied markers while preserving chronology.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures; exact per-li summary/actor/time tuple binding and ordered chronology assertions",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:29.670554+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Timeline order, transition text, trust tier, and time render verbatim with no sorting, fetching, pagination, verification, tone inference, or clock reads.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures; exact consumer order and verbatim authored tuple evidence; no timeline behavior code",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:30.666019+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Chronological entries use .sk-event-timeline while dense multi-column operations remain .sk-data-table.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures; timeline and data-table remain distinct consumer compositions",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:31.672175+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "sk-check-bullet exposes reflected state \"complete\" or \"pending\", with omission preserving the existing complete presentation.",
+      "proof_type": "automated_test",
+      "evidence": "Exact rebased code head ce70435: pinned Ubuntu CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/34150260478 and local reproduction passed 85/85 files, 922/922 tests (node 34, Chromium 444, WebKit 444); local and CI mutation harness passed 173/173 named-red arms with green baseline; all 10 mutation guard probes passed. Reflected complete/pending state and omitted-state compatibility are directly asserted.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:42.456900+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Complete and pending states are announced through hidden text while icons remain decorative, without aria-checked, toggle events, or interactive behavior.",
+      "proof_type": "automated_test",
+      "evidence": "Exact rebased code head ce70435: pinned Ubuntu CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/34150260478 and local reproduction passed 85/85 files, 922/922 tests (node 34, Chromium 444, WebKit 444); local and CI mutation harness passed 173/173 named-red arms with green baseline; all 10 mutation guard probes passed. Hidden state text, decorative icons, passive native-list semantics, and absence of aria-checked/tabindex/toggle events are directly asserted.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:44.143113+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "The default check-bullet icon derives from state while consumer icon overrides remain decorative and backward compatible.",
+      "proof_type": "automated_test",
+      "evidence": "Exact rebased code head ce70435: pinned Ubuntu CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/34150260478 and local reproduction passed 85/85 files, 922/922 tests (node 34, Chromium 444, WebKit 444); local and CI mutation harness passed 173/173 named-red arms with green baseline; all 10 mutation guard probes passed. State-derived default markers and decorative consumer icon override compatibility are directly asserted.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:45.587921+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Styles and element stories cover all required states with browser behavior, accessibility-tree, mutation, wrapper-typing, and visual evidence.",
+      "proof_type": "automated_test",
+      "evidence": "Exact rebased code head ce70435: CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/34150260478 passed behavior 922/922, mutation 173/173, guard probes 10/10, Playwright 654 passed + 18 policy skips, axe 394/394, visual regression 86/86 including all 12 new #213 baselines, generated-wrapper/type/lint/Storybook/release gates; actual desktop zoom evidence https://github.com/spec-kitty/spec-kitty-design/pull/261#issuecomment-5574411575.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:47.014004+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Documentation defines native structures, timeline-versus-table use, sanitizer/heading/event-order ownership, token dependencies, and check state.",
+      "proof_type": "code_review",
+      "evidence": "docs/design-system/using-components.md and docs/design-system/changelog.md reviewed against #213: native breadcrumb/prose/timeline recipes, timeline-versus-table, prompt/event/check-state ownership, token dependencies, and non-goals are documented without release claims.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:48.484161+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "Every shipped story has zero WCAG 2.1 AA axe violations; tests assert current breadcrumb, ordered-list count/order, decorative connectors, check-state text, and focusable links.",
+      "proof_type": "automated_test",
+      "evidence": "Exact rebased code head ce70435: CI a11y job in https://github.com/spec-kitty/spec-kitty-design/actions/runs/34150260478 passed zero WCAG 2.1 AA violations across 394/394 rendered stories; #213 semantic suite proves current breadcrumb, ordered list counts/order, decorative connectors, announced check state, and independently focusable links.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:49.899009+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Narrow and zoom scenarios have no page-level horizontal overflow; only documented breadcrumb, code, and table regions scroll locally.",
+      "proof_type": "automated_test",
+      "evidence": "Exact rebased code head ce70435 actual Chrome desktop UI zoom evidence https://github.com/spec-kitty/spec-kitty-design/pull/261#issuecomment-5574411575 passed 8/8 100%/200% captures: fixed 1200px physical width, CSS viewport 1200\u2192600, DPR 1\u21922, no document overflow; breadcrumb/code overflow remained local. Narrow browser assertions are green across Chromium/Firefox/WebKit.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:51.328401+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "New and changed story sets support default dark and functional LightMode, with computed-style evidence of a relevant theme difference.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures; LightMode computed-style deltas and real wrapper assertions",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:37.854525+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "Forced-colors evidence preserves visible boundaries/focus and decorative distinctions; introduced transitions have targeted reduced-motion rules and no inert motion guards.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures; active forced-colors focus/separator/timeline/code evidence; motion and CSS hygiene gates green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:38.921353+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "Twenty-event timelines and fifty-item checklists retain semantics, metadata attachment, console cleanliness, and page containment.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures; 20-event exact tuples and 50-item passive list semantics/containment",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:39.937805+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "Styles barrels, CSS modules, manifest, React wrappers, Vue declarations, ratchets, and size report regenerate without drift or unstaged output.",
+      "proof_type": "automated_test",
+      "evidence": "element markup/CSS, manifest, React, Vue, parts, entries, behavior-import, adopted-CSS, CSS-hygiene, release-graph, packed-types, offline, and size drift gates green with clean generated tree",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:41.000697+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "NFR-007",
+      "description": "Applicable Chromium, Firefox, and WebKit checks pass for semantics, focus, overflow, and check-bullet state.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:42.033304+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "NFR-008",
+      "description": "Focused and full tests, mutation self-test, type checks, lint, Storybook, axe, visual regression, and npm run quality:all pass without weakened gates.",
+      "proof_type": "automated_test",
+      "evidence": "Exact rebased code head ce70435: full CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/34150260478 is green across release, security, lint/type/generated drift, behavior 922/922, mutation 173/173, guard probes 10/10, Storybook, axe 394/394, Playwright 654 passed +18 policy skips, Lighthouse, and visual regression 86/86. Local npm run quality:all and pinned-Ubuntu reproductions are green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:52.756635+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "C-001",
+      "description": "Layer direction remains tokens to styles to elements to generated wrappers, and design values come from authoritative --sk-* tokens.",
+      "proof_type": "code_review",
+      "evidence": "Latest authoritative train base 830fd3705b24bcf0db234a5693efec54300f94f5..code head ce70435e68901fd25b967e0972b4327f7024ee34 reviewed against #213 scope and ADR-9/10/11; repository boundary, token, generated-artifact, package, and source-inventory gates passed. Layer direction remains tokens\u2192styles\u2192elements\u2192generated wrappers and authored design values resolve through governed --sk-* tokens.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:54.141030+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "C-002",
+      "description": "Breadcrumbs, prose, prompt markup, structured tables, and timeline remain consumer-authored light DOM without a shadow wrapper severing native relationships.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures; native light-DOM nav/list/prose/table/timeline relationships asserted",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:44.167901+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "C-003",
+      "description": "Generated files are regenerated rather than manually edited; sk-check-bullet retains one authored markup source and one CSS source.",
+      "proof_type": "automated_test",
+      "evidence": "element markup/CSS, manifest, React, Vue, parts, entries, behavior-import, adopted-CSS, CSS-hygiene, release-graph, packed-types, offline, and size drift gates green with clean generated tree; one authored check-bullet markup module and CSS source",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:45.188353+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "C-004",
+      "description": "Routing, fetching, timers, retention, event order, trust inference, progress arithmetic, claim expiry, Markdown parsing, sanitization, and Team Kitty vocabulary remain outside the library.",
+      "proof_type": "code_review",
+      "evidence": "Latest authoritative train base 830fd3705b24bcf0db234a5693efec54300f94f5..code head ce70435e68901fd25b967e0972b4327f7024ee34 reviewed against #213 scope and ADR-9/10/11; repository boundary, token, generated-artifact, package, and source-inventory gates passed. Routing, fetching, timers, retention, event order, trust inference, progress arithmetic, claim expiry, Markdown/sanitization, and Team Kitty vocabulary remain outside reusable source.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:55.504451+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "C-005",
+      "description": "No sk-work-package-card, stateful Kanban/checklist, execution panel, metadata panel, or full-page Work Package element is added.",
+      "proof_type": "code_review",
+      "evidence": "Latest authoritative train base 830fd3705b24bcf0db234a5693efec54300f94f5..code head ce70435e68901fd25b967e0972b4327f7024ee34 reviewed against #213 scope and ADR-9/10/11; repository boundary, token, generated-artifact, package, and source-inventory gates passed. No Work Package aggregate, stateful Kanban/checklist, execution/metadata panel, or full-page element was introduced.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:56.926031+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "C-006",
+      "description": "Existing #177 card-tone and #178 notice ownership are composed rather than duplicated.",
+      "proof_type": "code_review",
+      "evidence": "Latest authoritative train base 830fd3705b24bcf0db234a5693efec54300f94f5..code head ce70435e68901fd25b967e0972b4327f7024ee34 reviewed against #213 scope and ADR-9/10/11; repository boundary, token, generated-artifact, package, and source-inventory gates passed. Existing sk-card, sk-notice, .sk-empty-state, and .sk-data-table ownership is composed rather than duplicated.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:58.239428+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "C-007",
+      "description": "Omitted check-bullet state remains visually and semantically complete and existing icon overrides remain decorative.",
+      "proof_type": "automated_test",
+      "evidence": "Exact rebased code head ce70435: pinned Ubuntu CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/34150260478 and local reproduction passed 85/85 files, 922/922 tests (node 34, Chromium 444, WebKit 444); local and CI mutation harness passed 173/173 named-red arms with green baseline; all 10 mutation guard probes passed. Omitted and invalid state retain the complete presentation; baseline line-height and icon margin are preserved byte-for-byte and icon overrides remain decorative.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:32:59.666837+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "C-008",
+      "description": "Changes remain within #213 and necessary generated, test, documentation, and evidence surfaces.",
+      "proof_type": "code_review",
+      "evidence": "Latest authoritative train base 830fd3705b24bcf0db234a5693efec54300f94f5..code head ce70435e68901fd25b967e0972b4327f7024ee34 reviewed against #213 scope and ADR-9/10/11; repository boundary, token, generated-artifact, package, and source-inventory gates passed. Diff contains only #213 implementation, tests, documentation, generated artifacts, mission state, and evidence surfaces.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:33:01.027178+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "SC-001",
+      "description": "Public stories cover breadcrumb depths 1/3/6; prose prompt/long-code/table/absent/narrow; timeline 1/2/20/unavailable/narrow; checklist complete/pending/mixed/long/empty/50.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures; required breadcrumb/prose/timeline/checklist story matrix asserted",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:51.449540+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "SC-002",
+      "description": "Tests prove current breadcrumb, exact ordered-list counts/order, decorative separators/connectors, announced state text, and independent link focus.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts; rebased local exact-policy runs: Chromium 225/225, Firefox 216 applicable + 9 engine skips, WebKit 216 applicable + 9 engine skips; zero failures; current page, exact list counts/order/tuples, decorative content, state text, real Tab focus",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:52.523060+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "SC-003",
+      "description": "Check-bullet tests prove omitted/complete/pending/invalid, icon override, reflected property, pre-upgrade assignment, and a registered red mutation.",
+      "proof_type": "automated_test",
+      "evidence": "Exact rebased code head ce70435: pinned Ubuntu CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/34150260478 and local reproduction passed 85/85 files, 922/922 tests (node 34, Chromium 444, WebKit 444); local and CI mutation harness passed 173/173 named-red arms with green baseline; all 10 mutation guard probes passed. Check-bullet omitted/complete/pending/invalid, icon override, reflected property, pre-upgrade assignment, and registered SC-010/SC-013 red mutations are directly proved.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:33:02.457326+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "SC-004",
+      "description": "Generated React types accept only complete or pending state and reject unsupported values without hand edits under packages/react/src.",
+      "proof_type": "automated_test",
+      "evidence": "element markup/CSS, manifest, React, Vue, parts, entries, behavior-import, adopted-CSS, CSS-hygiene, release-graph, packed-types, offline, and size drift gates green with clean generated tree; generated React state union compile-time positive and @ts-expect-error negative proof",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T17:47:54.700999+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "SC-005",
+      "description": "Dark, LightMode, forced-colors, keyboard-focus, zoom, and narrow scenarios have zero axe violations and no page-level horizontal overflow.",
+      "proof_type": "visual_regression",
+      "evidence": "Exact rebased code head ce70435: CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/34150260478 passed axe 394/394 and visual 86/86 including 12 inspected #213 dark/light/narrow/long/scale baselines; forced-colors and keyboard-focus observables pass in Chromium; actual 100%/200% desktop zoom passed 8/8 with no page overflow at https://github.com/spec-kitty/spec-kitty-design/pull/261#issuecomment-5574411575.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:33:03.935065+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "SC-006",
+      "description": "Full regeneration, focused/full tests, lint/type checks, mutation, Storybook, axe, Playwright/visual, and quality:all pass at the final rebased PR head.",
+      "proof_type": "automated_test",
+      "evidence": "Exact rebased code head ce70435: CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/34150260478 passed every enforced job and aggregate gate: regeneration/drift, lint/type, release/security, behavior 922/922, mutation 173/173 plus 10/10 guard probes, Storybook, axe 394/394, full Playwright, Lighthouse, and visual 86/86. Local quality:all and pinned-Ubuntu checks passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:33:05.421353+00:00",
+      "notes": null
+    },
+    {
+      "criterion_id": "SC-007",
+      "description": "Documentation covers native recipes, timeline/table selection, event/prompt ownership, check-state semantics, and token dependencies without application-owned behavior or Team Kitty vocabulary in library code.",
+      "proof_type": "code_review",
+      "evidence": "docs/design-system/using-components.md and docs/design-system/changelog.md reviewed against #213: native recipes, timeline/table selection, consumer-owned event/prompt data, passive check-state semantics, and token dependencies are accurate; reusable library source contains no application-owned behavior or Team Kitty vocabulary.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T18:33:06.774883+00:00",
+      "notes": null
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "No custom Work Package aggregate, stateful checklist/Kanban, execution panel, metadata panel, or full-page element is introduced.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts --project=chromium --grep \"three surfaces stay styles-only\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts:46:7 \u203a work package detail source and distribution boundaries \u203a the three surface"
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "Breadcrumb, prose, and timeline helpers do not generate or wrap consumer content, reorder events, or infer trust/time.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts --project=chromium --grep \"keeps exact consumer order and count|three surfaces stay styles-only\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 4 tests using 4 workers\n\n\n\n\n\n\n\n[1/4] [chromium] \u203a apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts:396:9 \u203a timeline native order and attached metadata \u203a twenty-events keeps e"
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "Check-bullet exposes no aria-checked, control role, toggle event, or other interactive checkbox behavior.",
+      "verification_method": "custom_command",
+      "verification_command": "CI=1 npx playwright test apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts --project=chromium --grep \"preserve passive list semantics\" --workers=1",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\u00b7\n  1 passed (3.0s)"
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "Omitted and invalid check-bullet state do not break or drift from the backward-compatible complete presentation.",
+      "verification_method": "custom_command",
+      "verification_command": "npx vitest run --project browser --browser.api.port=6355 --browser.api.strictPort",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: RUN  v4.1.11 /home/jeroennouws/dev/team-kitty-missions/design-213-wp208-213-0907a\n\n \u2713 |browser (chromium)| fixtures/react-consumer/src/wrappers.test.tsx (6 tests) 125ms\n \u2713 |browser (chromium)| fixture"
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "No raw design values, token fallbacks, forced-colors opt-out, or inert motion guard enters the authored element CSS.",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/check-element-css-hygiene.mjs && node scripts/check-adopted-css-boundaries.mjs && node scripts/check-story-theme-wrapper.mjs",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 Adopted CSS hygiene: 28 element(s), 29 sheet(s), 452 rule(s) \u2014 no simulated states, no undefined-token fallbacks, no new raw line-height.\n\u2705 No cross-root selectors: 28 of 28 element(s) checked, 30 a"
+    },
+    {
+      "invariant_id": "NI-006",
+      "description": "No generated manifest, CSS, React, or Vue artifact drifts from its authoritative authored source.",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/build-element-markup.mjs --check && node scripts/build-elements-css.mjs --check && node scripts/build-react-wrappers.mjs --check && node scripts/build-vue-types.mjs --check && node scripts/check-manifest-content.mjs",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 Generated markup is up to date (10 component(s)).\n\u2705 Generated CSS modules are up to date (28 component(s)).\n\u2705 packages/react/src is up to date (59 file(s), 28 element(s)), and two runs are byte-iden"
+    },
+    {
+      "invariant_id": "NI-007",
+      "description": "No Markdown parser, sanitizer, syntax highlighter, clipboard behavior, fetch, timer, routing, pagination, or progress calculation is introduced.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts --project=chromium --grep \"three surfaces stay styles-only\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts:46:7 \u203a work package detail source and distribution boundaries \u203a the three surface"
+    },
+    {
+      "invariant_id": "NI-008",
+      "description": "No #177 card-tone or #178 notice ownership is duplicated by #213 implementation.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts --project=chromium --grep \"three surfaces stay styles-only\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts:46:7 \u203a work package detail source and distribution boundaries \u203a the three surface"
+    },
+    {
+      "invariant_id": "NI-009",
+      "description": "New authored detail CSS and check-bullet changes add no raw design values or token fallbacks; the two pinned legacy check-bullet defaults remain byte-compatible under the hygiene allowlist.",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/check-component-token-literals.mjs packages/styles/src/breadcrumbs/sk-breadcrumbs.css packages/styles/src/prose/sk-prose.css packages/styles/src/event-timeline/sk-event-timeline.css && node scripts/check-element-css-hygiene.mjs && node scripts/check-adopted-css-boundaries.mjs && npm run quality:stylelint",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 3 explicit component stylesheet(s) use tokens for all governed values.\n\u2705 Adopted CSS hygiene: 28 element(s), 29 sheet(s), 452 rule(s) \u2014 no simulated states, no undefined-token fallbacks, no new raw "
+    },
+    {
+      "invariant_id": "NI-010",
+      "description": "Reusable style and element source contains no Team Kitty or TKW application vocabulary.",
+      "verification_method": "grep_absence",
+      "verification_command": "Team Kitty|TKW[0-9]",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "packages/styles/src packages/elements/src"
+    }
+  ]
+}

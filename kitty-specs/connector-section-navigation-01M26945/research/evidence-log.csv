@@ -1,0 +1,31 @@
+evidence_id,source_id,finding,decision_or_requirement
+EV-001,SRC-001,"Binding instruction: styles-only .sk-section-nav family, no custom element registered, no tab roles used",R-001;FR-001;C-002
+EV-002,SRC-001,"Consumers own nav label, anchor labels/destinations, order, permission-gated presence, and aria-current; the library infers no route or current state",R-002;FR-002;C-001;C-009;C-010
+EV-003,SRC-001,"Links keep native open-in-new-tab, copy-link, modified-click, visited, and browser-history behavior",R-006;FR-003
+EV-004,SRC-001,"Rest, hover, active, focus-visible, and current-location styling are clear without color alone",R-004;FR-004
+EV-005,SRC-001,"The strip fits its contents when possible and owns local horizontal overflow when constrained; never causes document-level overflow",R-003;FR-005
+EV-006,SRC-001,"Focused links scroll into view without clipping their focus indicator",R-003;FR-006
+EV-007,SRC-001,"Long labels, two/three/many routes, one route, no current route, and permission-supplied subsets remain valid; no reserved space for omitted routes",FR-007;FR-008;C-011
+EV-008,SRC-001,"Logical properties support RTL; narrow targets meet the 44px floor",R-005;FR-009;FR-010
+EV-009,SRC-001,"Forced colors preserves current-location and focus distinction; reduced motion removes any owned transition",R-004;FR-011;FR-012
+EV-010,SRC-001,"All user-visible strings are consumer supplied and translatable under #286",FR-013;C-013
+EV-011,SRC-001,"Tests must assert absence of tablist/tab roles and arrow-key scripting",FR-014;C-002;C-004
+EV-012,SRC-001,"Accessibility-tree checks: one named landmark, native links, exactly the supplied current-location state",FR-015
+EV-013,SRC-001,"Keyboard/pointer checks for source-order Tab traversal and native link behavior; axe and visual regression",FR-016
+EV-014,SRC-001,"HTML exemplars, Storybook stories, usage docs, ratchets, generated module/barrel through repository tooling; generated output never hand-edited",FR-017;FR-018
+EV-015,SRC-001,"Non-goals: router; tab widget; tabs/panels relationship; roving tabindex/arrow-key model; responsive drawer; context/sidebar nav; primary/global nav; breadcrumbs; route discovery; permission logic; hidden-route placeholders; counters/badges; copy defaults",C-001;C-002;C-003;C-004;C-005;C-006;C-007;C-008;C-009;C-010;C-011;C-012;C-013
+EV-016,SRC-001,"No predecessor beyond tokens/styles; may run parallel with TKC1/#280/#320; TKC3 consumes after merge; reuse #254/#274 for shell dismissal, this issue owns only the in-content strip",Dependencies section (not FR-convertible scheduling guidance)
+EV-017,SRC-001,"Family 3 ready for Lynn but not Lynn-approved; operator authorized proceeding ahead of Lynn's verdict for the 2026-09-15 deadline; Team Kitty keeps routing/permission/page-selection/copy/i18n",Dependencies/Governance note (not a spec requirement); FR-002;C-001;C-009;C-010;C-013
+EV-018,SRC-018,"Keep tabs native links and current-location semantics; candidate-specific anatomy must not retain inert public class hooks when the public stylesheet is not embedded",R-001;SC-006
+EV-019,SRC-019,".detail-tabs local CSS: flex row, overflow-x:auto local scroll, aria-current=page bottom-border+font-weight cue, hover/active states, forced-colors and reduced-motion blocks",R-001;R-003;R-004;FR-004;FR-005;FR-011;FR-012
+EV-020,SRC-020,"C7 repeats the identical .detail-tabs block verbatim on a sibling installation route (Workspace scope)",R-001 (repetition evidence)
+EV-021,SRC-021,"C8 repeats the identical .detail-tabs block verbatim on a sibling installation route (Project routing)",R-001 (repetition evidence)
+EV-022,SRC-022,"C9a repeats the same .detail-tabs shape (minified) on a sibling installation route (Team accounts)",R-001 (repetition evidence)
+EV-023,SRC-012,"sk-nav-pill is a pill-shaped primary navigation element with drawer behaviour -- explicit non-goal boundary",C-007
+EV-024,SRC-013,".sk-context-nav is the closest prior styles-only native nav precedent: aria-current selector shape, forced-colors border/outline recolor pattern, generated barrel via build-styles-only-markup.mjs",R-001;R-002;R-004;C-006
+EV-025,SRC-014,".sk-breadcrumbs is a second native nav/ol/a styles-only sibling precedent, also excluded as a non-goal (ancestor path, not sibling routes)",C-008
+EV-026,SRC-005,"work-explorer-segmented-choice-styles-01M20C9F's Terminology section establishes the pattern of citing the issue's own explicit instruction as the binding no-custom-element source rather than over-claiming ADR-10 class membership",R-001 (methodology precedent)
+EV-027,SRC-007,"ADR-10's styles-only-class ruling names five components (sk-facts, sk-disclosure, sk-data-table, sk-empty-state, sk-skip-link) for structural native-semantics reasons; this family is not claimed as a sixth member of that literal list",R-001 (scoping note)
+EV-028,SRC-009,"Forced-colors recipe: background/box-shadow do not survive forced-colors: active; border/outline recolor automatically -- use outline for focus rings",R-004;FR-011
+EV-029,SRC-016,"--sk-space-9 (3rem/48px) is documented in this repo as the closest token at or above the 44px NFR-001 floor",R-005;FR-010
+EV-030,SRC-015,"docs (unscoped) and chore (unscoped) are valid commitlint choices for kitty-specs commits; specs is not a valid scope",Commit-process note (plan.md verification ladder)

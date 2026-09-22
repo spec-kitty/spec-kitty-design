@@ -1,0 +1,13 @@
+{
+  "wp_id": "WP01",
+  "captured_at": "2026-09-07T07:26:14Z",
+  "base_branch": "mission/compact-work-item-extensions",
+  "base_commit": "205aa5db839635ab45141f7b3c6bd56db2517ce5",
+  "test_runner": "pytest",
+  "total": 0,
+  "passed": 0,
+  "failed": 0,
+  "skipped": 0,
+  "failures": [],
+  "source_identity": "GateCoverageScopeSource/junit_xml"
+}

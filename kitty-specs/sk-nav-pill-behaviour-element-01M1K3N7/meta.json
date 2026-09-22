@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-03T07:45:12.197565+00:00",
+  "flattened": false,
+  "friendly_name": "sk nav pill behaviour element",
+  "mission_id": "01M1K3N7050XPF40HYPAXKV1T5",
+  "mission_number": null,
+  "mission_slug": "sk-nav-pill-behaviour-element-01M1K3N7",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances sk nav pill behaviour element on mission/sk-nav-pill-behaviour-element so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "sk nav pill behaviour element",
+  "slug": "sk-nav-pill-behaviour-element-01M1K3N7",
+  "target_branch": "mission/sk-nav-pill-behaviour-element",
+  "topology": "single_branch"
+}

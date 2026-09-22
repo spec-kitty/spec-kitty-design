@@ -1,0 +1,56 @@
+{
+  "construct_kind": "slotted-child-rule",
+  "component": "sk-entity-marker",
+  "supplements": "outcomes.declared.json",
+  "declared_before_running": true,
+  "declaration_note": "Committed in its own commit before the probe was extended or re-run. outcomes.declared.json is left byte-identical, INCLUDING the mislabelled O6 \u2014 the erratum below corrects the record without rewriting a pre-declaration after seeing its result.",
+  "errata_against_cycle_1": [
+    {
+      "outcome": "O5",
+      "cycle_1_label": "a competing page-level document rule `img { object-fit: contain }` of equal specificity present",
+      "correction": "\"of equal specificity\" was written against `::slotted(img)` and is loose even there (`::slotted(img)` is (0,0,2); a bare `img` is (0,0,1)). Against the side that matters \u2014 the STATIC rewrite `.sk-entity-marker__content > img` at (0,1,1) \u2014 the bare `img` rule plainly LOSES. O5's measured result is unaffected and its conclusion stands; only the label was wrong. Cycle-1 review did not catch this one; it is corrected here for the same reason O6 is.",
+      "what_the_new_outcomes_do": "The three regimes are named explicitly in `competing_rule_regimes` below, so no outcome in this construct kind describes a specificity relationship without stating both sides of it."
+    },
+    {
+      "outcome": "O6",
+      "cycle_1_label": "the same competing rule at HIGHER specificity `.page-scope img { object-fit: contain }`",
+      "correction": "`.page-scope img` is (0,1,1). The library's static rewrite `.sk-entity-marker__content > img` is ALSO (0,1,1). They TIE; the consumer does not outbid. O6's cycle-1 result (both forms compute `contain`) was therefore decided by document ORDER \u2014 exemplar.html appends the consumer rule last \u2014 and not by specificity, and the cycle-1 conclusion drawn from it (\"the static form yields only when the page outbids it\") does not follow from it.",
+      "what_the_new_outcomes_do": "O7-O10 separate the three regimes the cycle-1 set conflated \u2014 consumer LOSES on specificity, consumer TIES, consumer genuinely OUTBIDS \u2014 and vary stylesheet order within each, so the tie's order-dependence is measured rather than inferred."
+    }
+  ],
+  "why_these_outcomes_exist": {
+    "MEDIUM-1": "#304 is told to freeze the authoring instruction this measurement produces. The cycle-1 instruction says a static consumer must 'outbid this rule on specificity' but never states where the boundary is, and scoping with one wrapper class \u2014 the most ordinary thing a consumer does \u2014 lands exactly on the tie, where behaviour depends on sheet order the consumer often does not control."
+  },
+  "competing_rule_regimes": {
+    "weak": "img { object-fit: contain } \u2014 (0,0,1), loses on specificity to the static rewrite",
+    "tie": ".page-scope img { object-fit: contain } \u2014 (0,1,1), ties the static rewrite",
+    "strong": ".page-scope.theme img { object-fit: contain } \u2014 (0,2,1), genuinely outbids the static rewrite"
+  },
+  "pass_bar": "Unchanged from cycle 1, applied to the combined set. Note the cycle-1 verdict for this construct kind is already shadow-only on O5 alone; these outcomes exist to make the SHIPPED AUTHORING INSTRUCTION correct, not to reopen the verdict.",
+  "declared_outcomes": [
+    {
+      "id": "O7",
+      "description": "img object-fit \u2014 consumer rule LOSES on specificity (weak), consumer sheet FIRST in document order",
+      "viewport_or_state": "default marker + weak competing rule, order=first"
+    },
+    {
+      "id": "O8",
+      "description": "img object-fit \u2014 consumer rule TIES (tie), consumer sheet FIRST in document order",
+      "viewport_or_state": "default marker + tie competing rule, order=first"
+    },
+    {
+      "id": "O9",
+      "description": "img object-fit \u2014 consumer rule genuinely OUTBIDS (strong), consumer sheet LAST",
+      "viewport_or_state": "default marker + strong competing rule, order=last"
+    },
+    {
+      "id": "O10",
+      "description": "img object-fit \u2014 consumer rule genuinely OUTBIDS (strong), consumer sheet FIRST",
+      "viewport_or_state": "default marker + strong competing rule, order=first"
+    }
+  ],
+  "engines": [
+    "chromium",
+    "firefox"
+  ]
+}

@@ -1,0 +1,26 @@
+<!-- @spec-kitty/styles — sk-boundary-page (forced-colors story fixture) -->
+<!-- Full anatomy — mark, composed status pill, body, action-group, footnote — so the
+     forced-colors visual baseline and Playwright assertion exercise every part at once
+     (spec FR-011). -->
+<main id="main">
+  <div class="sk-boundary-page sk-boundary-page__stage">
+    <div class="sk-boundary-page__card">
+      <div class="sk-boundary-page__mark">
+        <sk-entity-marker size="lg" shape="circle" border="true">FC</sk-entity-marker>
+      </div>
+      <h1 class="sk-boundary-page__title">
+        Team disabled
+        <span class="sk-pill-tag sk-pill-tag--status-danger">Disabled</span>
+      </h1>
+      <p class="sk-boundary-page__body">
+        This Team is no longer active. Existing members keep read access to prior exports.
+      </p>
+      <div class="sk-boundary-page__action-group">
+        <a href="#sign-in">Back to sign in</a>
+      </div>
+      <p class="sk-boundary-page__footnote">
+        Reach out to your Team's owner if you think this is unexpected.
+      </p>
+    </div>
+  </div>
+</main>

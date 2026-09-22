@@ -1,0 +1,96 @@
+schema: review-findings/v1
+phase: plan-post-research
+round: rulings-verify
+mission: work-explorer-segmented-choice-styles-01M20C9F
+head: 2254362a6a17dee9f535c11384f9dcaba614f5ff
+results:
+  - ruling: PLAN-FRESH2-001
+    status: APPLIED-CORRECTLY
+    notes: >
+      plan.md's IC-04 "Sequencing/depends-on" block (lines ~366-378) now states the full,
+      explicit, five-step CI-authoritative procedure: (1) author the test() blocks' assertions
+      only once IC-01's distinguishing declarations and IC-03's forced-colors block have landed
+      and the LIVE block is green ("against the CSS's final, fully-differentiated, shipped
+      state, not the scaffold pass"); (2) explicitly "do NOT run --update-snapshots locally and
+      do NOT locally capture the baseline PNGs", citing the font-rasterization/clipped-box-
+      dimension divergence and the stub component's 312x38-local-vs-336x34-CI precedent; (3)
+      push the reviewed PR head so CI runs and produces the visual-regression-diffs artifact;
+      (4) pull the required baseline PNGs from that artifact and commit exactly those
+      CI-produced files, never a locally-rendered substitute; (5) rerun the applicable
+      checks/review at the new exact head rather than treating the earlier review as still
+      covering it. This resolves the original ambiguity the finding flagged (round 1's "first-
+      run"/"whatever DOM/CSS state exists ... becomes the committed baseline" language, which
+      read as a local-capture instruction next to the other two blocks' explicit local command
+      sequences). Verified both cited sources live: docs/contributing/adding-a-component.md §8
+      ("Adding a component" > "8. Visual baseline", lines 391-394) reads "Baselines are
+      CI-authoritative — local font metrics differ. Take them from the visual-regression-diffs
+      artifact rather than from a local run." — matching plan.md's citation. And
+      apps/storybook/src/tests/visual.spec.ts lines 27-31 read (verbatim, confirmed by direct
+      read): "BASELINES ARE CI-AUTHORITATIVE. These PNGs were shot on the ubuntu-latest runner,
+      not locally: font rasterization differs and clipping makes the component's box size part
+      of the assertion, so a locally-shot baseline fails CI on dimensions alone (312x38 local vs
+      336x34 CI for the stub). Refresh them from the visual-regression-diffs artifact of a CI
+      run, never with a local --update-snapshots." — an exact match to what plan.md quotes and
+      paraphrases. No leftover local-capture-reading language remains in the section.
+
+  - ruling: PLAN-FRESH2-002
+    status: APPLIED-CORRECTLY
+    notes: >
+      IC-04's Sequencing/depends-on opening sentence now reads "Two test.describe blocks (in
+      the new spec file sk-segmented-choice.spec.ts) plus one separate append (to the existing
+      visual.spec.ts) — three dependency sets." — matching the remediation's suggested wording
+      almost exactly and no longer using the ambiguous "Three blocks, three dependency sets"
+      framing round 2 had introduced. The rest of the paragraph is internally consistent with
+      this vocabulary throughout: the source-contract block and the LIVE block are each called
+      "block" (matching IC-04's Purpose section, which defines exactly two test.describe blocks
+      inside the new file), and the third item is consistently called "the separate append" /
+      "this append" / "the THIRD dependency set" — and the text now explicitly disclaims the
+      earlier ambiguity by name: "not a third test.describe block inside
+      sk-segmented-choice.spec.ts." No leftover "three blocks" phrasing remains anywhere in
+      IC-04 that would conflate the visual.spec.ts append with a third test.describe block.
+
+  - ruling: PLAN-FRESH2-003
+    status: APPLIED-CORRECTLY
+    notes: >
+      The Project Structure > Source Code section now states one explicit legend, once,
+      immediately before the tree (lines ~134-137): "Legend (applies to every entry in the tree
+      below): AUTHORED = new content written by this WP, whether the file itself is brand-new or
+      pre-existing — this covers both files created for the first time and pre-existing files
+      gaining new content in this WP. GENERATED = produced by tooling, never hand-edited." All
+      three pre-existing, edited files in the tree are now labelled consistently under this one
+      legend: visual.spec.ts is "AUTHORED — new test() blocks appended for sk-segmented-choice
+      (FR-012/SC-007)" (no longer "EXISTING"), using-components.md is "AUTHORED — new section
+      (FR-011)", and expected-stories.json is "AUTHORED — new byElement entry + total bump
+      (FR-013)". No third undefined category ("EXISTING") remains anywhere in the tree.
+
+  - ruling: research-fold-accuracy
+    status: APPLIED-CORRECTLY
+    notes: >
+      Re-read research.md (479 lines) and data-model.md (139 lines) in full against plan.md's
+      "Documentation (this mission)" section's description of them. research.md is confirmed
+      structured as exactly ten researched questions (Q1 at line 34 through Q10 at line 343)
+      plus a "## Discrepancies found" section (line 394) plus an "## Additional precedent
+      checks" section — matching plan.md's "ten researched questions (Q1-Q10) plus a
+      Discrepancies-found section" claim. Each per-question summary plan.md gives matches the
+      corresponding research.md content: Q1's styles-only-on-issue-instruction-not-ADR-10-
+      structural-rationale finding, Q2's "7 files, 10 stories" form-select precedent and
+      disclosure-directory-shape confirmation, Q3's --sk-bg-pill token-choice finding (both
+      --sk-bg-pill and --sk-surface-pill exist; --sk-bg-pill is correct on semantic-pairing/
+      direct-precedent grounds via sk-nav-pill.css, not because the sibling token is absent —
+      and plan.md's own IC-01 text was independently verified to already attribute --sk-bg-pill
+      to sk-nav-pill.css alone, matching Q3's own discrepancy note that sk-form-select.css does
+      not actually use this token family), Q4's forced-colors longhand-color technique and the
+      GrayText/stylelint.config.mjs ignoreValues finding, and Q5's line-number verification
+      (context-nav:813 and bar-chart:257 correct as cited; transition-matrix's positive-delta
+      test confirmed at :312, not the stale :285 spec.md cites, matching plan.md's own prior
+      Technical Context correction). Q6-Q10 (expected-stories.json total=323, ADR-11's 11
+      required-behaviours items genuinely inapplicable, the demo-page zero-hit grep, the
+      pre-merge-not-tiered/Tier-C confirmation, and issue #270/#269's verbatim-match
+      confirmation) all match plan.md's compressed summary of them. data-model.md's own content
+      (three entities: Segmented-choice group, Segmented-choice item, Consumer-owned application
+      state) matches spec.md's Key Entities section (three entities, same names and boundaries)
+      and Application-ownership section exactly, and data-model.md's own "Traceability" section
+      states in its own words the identical claim plan.md makes about it ("adds no requirement
+      beyond what spec.md's Key Entities section ... and Application ownership section ...
+      already state"). No contradiction, misquotation, or invented decision beyond what
+      research.md/spec.md already establish was found in plan.md's Documentation section.

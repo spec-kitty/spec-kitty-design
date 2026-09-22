@@ -1,0 +1,300 @@
+#!/usr/bin/env node
+/**
+ * Record distribution artifact sizes on all three bases (NFR-001).
+ *
+ * WHY A SCRIPT AND NOT A PR-BODY TABLE
+ *
+ * A baseline that lives in a PR body is not inheritable — #71, #72 and #82 all need
+ * to know whether their component made the bundle bigger, and they cannot diff prose.
+ * An earlier draft of this WP also recorded MINIFIED figures labelled "raw" and
+ * concluded from them that ADR-10's numbers were wrong; they were not, the basis was
+ * simply missing. Emitting all three columns from one command makes that class of
+ * mistake visible instead of arguable.
+ *
+ * Usage: node scripts/measure-elements-sizes.mjs [--check]
+ */
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { readFileSync, writeFileSync, existsSync, statSync, globSync } from 'node:fs';
+import { basename } from 'node:path';
+import { gzipSync } from 'node:zlib';
+
+const ARTIFACTS = [
+  { name: 'ESM  (dist/index.js)', path: 'packages/elements/dist/index.js', note: '`lit` external' },
+  { name: 'IIFE (dist/elements.js)', path: 'packages/elements/dist/elements.js', note: 'runtime bundled' },
+];
+
+const check = process.argv.includes('--check');
+const OUT = 'packages/elements/SIZES.md';
+// KiB, stated explicitly. The WP prompt's own table mixes bases within one row
+// ("IIFE raw 24.0 KB" is 24073/1000; "minified 15.9 KB" is 16264/1024), which is
+// how a 0.5 KB phantom discrepancy appears between two correct measurements.
+const kb = (n) => `${(n / 1024).toFixed(1)} KiB`;
+/** Whole KiB, for compressor output only — see the note at the artifact table below. */
+const wholeKb = (n) => `${Math.round(n / 1024)} KiB`;
+
+/**
+ * The SRI hash for the classic-script bundle (#80, FR-005), recorded HERE rather than in a second
+ * file. It began life as a separate `INTEGRITY.json` and three lenses objected to that for
+ * three different reasons that all point the same way: it duplicated the byte count this file
+ * already records, it added a second drift gate over the same artifact, and it was absent from
+ * `docs/contributing/adding-a-component.md`'s regeneration list — so the next component PR would
+ * have followed that checklist exactly and reddened CI with no documented remedy.
+ *
+ * One generated record, already checklisted, already `--check`ed.
+ */
+const ALGO = 'sha384'; // the SRI default
+const sri = (path) => `${ALGO}-${createHash(ALGO).update(readFileSync(path)).digest('base64')}`;
+
+/**
+ * NFR-004 — install size per publishable package, from a real `npm pack`.
+ *
+ * An earlier revision met this by printing the figures in a CI log and arguing that a committed
+ * record would churn. A lens pointed out the contradiction — this very file IS a committed,
+ * generated size record with a `--check`, and the argument was made in the same commit that
+ * adopted the pattern for the SRI hash. A log line is not a record; it expires. That was right.
+ *
+ * BUT PACKED SIZE IS NOT RECORDABLE, and CI proved it on the first run after the record was
+ * committed. `packed` is the size of the GZIPPED tarball, so it depends on the zlib build and
+ * compression level of whichever machine runs `npm pack`:
+ *
+ *     committed (workstation)  @spec-kitty/tokens  3812.1 KiB
+ *     generated (CI)           @spec-kitty/tokens  3827.7 KiB
+ *
+ * — a 0.4% delta on identical inputs. `unpacked` and `files` were byte-identical across the same
+ * two runs, and so was every artifact figure above, which is what isolates the cause to
+ * compression rather than to content.
+ *
+ * So the record holds what is deterministic: file count and unpacked size. Packed size is
+ * REPORTED on every run and deliberately not committed — committing it would red the build on any
+ * machine whose zlib differs, on a tree nobody touched, which is the churn the earlier revision
+ * feared and the wrong half of the argument to concede.
+ */
+const PACKAGES = JSON.parse(
+  execFileSync('node', ['scripts/release-graph.mjs', '--json'], { encoding: 'utf8' }),
+).publishable.map((p) => {
+  const out = execFileSync('npm', ['pack', '--dry-run', '--json'], {
+    cwd: `packages/${p.dir}`, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  const e = JSON.parse(out)[0];
+  return { name: p.name, files: e.entryCount, packed: e.size, unpacked: e.unpackedSize };
+});
+if (PACKAGES.length === 0) {
+  console.error('measure-elements-sizes: the publishable set is empty — refusing to record nothing');
+  process.exit(1);
+}
+
+for (const a of ARTIFACTS) {
+  if (!existsSync(a.path)) {
+    console.error(`measure-elements-sizes: missing ${a.path} — run: npx nx run elements:build`);
+    process.exit(1);
+  }
+  a.raw = statSync(a.path).size;
+  // Minify ONCE and reuse the buffer. Minifying twice is not just two wasted npx
+  // spawns per artifact on every PR — it means `minified` and `min+gzip` would be
+  // computed from two different byte streams, which is a basis mismatch inside the
+  // script written to prevent basis mismatches.
+  const minified = execFileSync('npx', ['esbuild', a.path, '--minify'], { encoding: 'buffer' });
+  a.min = minified.length;
+  a.gzip = gzipSync(readFileSync(a.path)).length;
+  a.mingzip = gzipSync(minified).length;
+}
+
+// Derived, not hardcoded. This block previously said "Component measured: sk-stub" and
+// "sk-card has no element yet... re-measure them in #72" — and #72 is the mission that built
+// sk-card, regenerated this file, and left the prose asserting the opposite of what shipped.
+const COMPONENTS = globSync('packages/elements/src/*/sk-*.ts', {})
+  .filter((f) => /^sk-[a-z0-9-]+\.ts$/.test(basename(f)))
+  .map((f) => basename(f).replace(/\.ts$/, ''))
+  .sort();
+
+const body = `# Distribution artifact sizes
+
+<!-- GENERATED by scripts/measure-elements-sizes.mjs — DO NOT EDIT BY HAND.
+     Regenerate: npx nx run elements:build && node scripts/measure-elements-sizes.mjs -->
+
+Components in these artifacts: ${COMPONENTS.join(', ')}.
+
+| artifact | raw | minified | min+gzip | notes |
+|---|---:|---:|---:|---|
+${ARTIFACTS.map((a) => `| \`${a.name}\` | ${kb(a.raw)} | ${kb(a.min)} | ${wholeKb(a.mingzip)} | ${a.note} |`).join('\n')}
+
+## Subresource Integrity — the classic-script bundle (FR-005)
+
+For a CDN load of \`dist/elements.js\`, pin what the browser executes:
+
+\`\`\`
+integrity="${sri('packages/elements/dist/elements.js')}"
+\`\`\`
+
+Derived from the built artifact on every run and re-derived by \`--check\`, so it cannot be
+transcribed or go stale silently. It changes with every build of the bundle — a hash copied from
+another version will be refused by the browser, which is the point.
+
+NOTE ON REPRODUCIBILITY, because a lens measured it: esbuild writes module-path comments into the
+bundle, so a checkout whose \`node_modules\` resolves through a different path (a symlink, a pnpm
+store, a bind mount) produces a different byte count and therefore a different hash. The figure
+here is CI's. Anyone re-deriving it locally must match CI's layout; this is a limit of the build,
+not of the hash.
+
+## Published package sizes (NFR-004)
+
+What a consumer downloads, from a real \`npm pack\` of each package in the derived publishable set.
+
+| package | files | unpacked |
+|---|---:|---:|
+${PACKAGES.map((p) => `| \`${p.name}\` | ${p.files} | ${kb(p.unpacked)} |`).join('\n')}
+
+PACKED SIZE IS DELIBERATELY NOT IN THIS TABLE. It is the size of the gzipped tarball and therefore
+depends on the zlib build of the machine that runs \`npm pack\` — a workstation and CI measured
+3812.1 KiB and 3827.7 KiB for the same \`@spec-kitty/tokens\` contents, while \`files\` and
+\`unpacked\` were identical. Committing it would red the build on a tree nobody touched. It is
+printed by \`scripts/check-release-graph.mjs\` on every run instead, where a figure that moves with
+the environment does no harm.
+
+## The basis matters — read this before comparing against an ADR
+
+ADR-10 §2 quotes "~3.2 KB" ESM and "~26 KB" IIFE; ADR-8 quotes a "~6 KB Lit runtime".
+Those look contradictory and are not: **they are different bases, and partly a
+different component.** ADR-10's SP-3 spike measured \`sk-card\`, not \`sk-stub\`.
+
+- ADR-10 §2's two figures are **unminified raw on \`sk-card\` ALONE** (3.7 / 26.6 KB).
+- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures ${wholeKb(ARTIFACTS[1].mingzip)}
+  min+gzip — which does NOT corroborate it and is not meant to. That figure was a per-component
+  Lit-runtime estimate; this artifact carries the runtime plus every component in the package,
+  so the two are different bases and the gap grows with each component added. An earlier
+  revision kept the word "corroborated" through an edit that changed the number, which is the
+  stale-prose shape this whole section argues against. Note the basis: that artifact now
+  carries ${COMPONENTS.length} component(s) (${COMPONENTS.join(', ')}), which is why the figure
+  rose from the 7.7 KiB recorded when it held \`sk-stub\` alone. The component list is derived;
+  an earlier version of this sentence hardcoded the mission number that added the second one,
+  which was wrong by the time a third arrived.
+
+The \`sk-card\` figures ADR-10 §2 rests on were inherited from the WP04 prompt when sk-card
+had no element. #72 built it — but the table above is now a MULTI-component total, so it is
+**less** directly comparable to ADR-10 §2's per-component numbers than the single-component
+figure it replaced, not more. Comparing them needs a per-component build; #81 owns the cost
+measurement that produces one. Stating the basis is this section's whole point.
+
+What this script *does* establish is the shape of the relationship: the runtime is a
+runtime cost MEASURED AT THIS BUILD (${kb(ARTIFACTS[1].raw - ARTIFACTS[0].raw)} of the IIFE is Lit, since the
+ESM artifact holds the same element with \`lit\` external) and the per-component cost
+tracks its CSS. A batch mission adding a component should expect the IIFE to grow by
+roughly that component's CSS, not by a fixed per-component overhead.
+
+An earlier draft of this work package recorded the **minified** figures under a "raw"
+heading and concluded ADR-10 was wrong. It was not. Always state the basis — and the
+unit: every figure in this file is KiB (1024). The WP prompt recorded the IIFE as
+"24.0 KB" where this file would have read 23.5 KiB — **24073 bytes either way**.
+Those two numbers are pinned historical values on purpose. An earlier revision of this
+paragraph interpolated the CURRENT raw size into that comparison, so once the artifact
+grew it asserted that ${ARTIFACTS[1].raw} bytes are "24.0 KB" — false by a factor of
+five, in the one paragraph whose whole lesson is to state the basis and the unit. A lens
+caught it.
+
+## Raw output of the measuring command
+
+\`\`\`
+$ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
+${ARTIFACTS.map(
+  (a) =>
+    `${a.path}\n  raw       ${String(a.raw).padStart(7)} bytes  (${kb(a.raw)})\n` +
+    `  minified  ${String(a.min).padStart(7)} bytes  (${kb(a.min)})\n` +
+    // GZIP IS ROUNDED TO WHOLE KiB, and that took two attempts.
+    //
+    // `zlib.gzipSync` output depends on the zlib version compiled into Node, so the byte count
+    // is NOT reproducible across machines — while `--check` asserts byte-equality of this whole
+    // file. It first failed at 11884 bytes against 11882 committed, with raw and minified
+    // IDENTICAL (47825 / 70265): the bundle had not changed at all, only the compressor's
+    // framing. Reporting tenths of a KiB was the first fix and it was insufficient — a
+    // different artifact then failed at 12.0 vs 12.1 KiB, because a small byte delta can still
+    // straddle a 0.1 KiB boundary.
+    //
+    // Whole KiB needs ~512 bytes of drift to move, which a compressor version does not produce.
+    // The figures that matter for spotting a real regression — raw and minified — are
+    // deterministic esbuild output and keep their exact byte counts.
+    `  gzip      ${wholeKb(a.gzip).padStart(9)}\n` +
+    `  min+gzip  ${wholeKb(a.mingzip).padStart(9)}`,
+).join('\n')}
+\`\`\`
+`;
+
+// REGRESSION GUARD (#317): a decimal-precision compressed figure snuck into the ADR-8
+// corroboration paragraph (`kb(ARTIFACTS[1].mingzip)` where the rest of the file uses
+// `wholeKb()` for anything gzip-derived) and it was NOT caught by `--check`, because
+// `--check` only proves this run's generated body matches what was committed — it says
+// nothing about whether that body is itself well-formed. That line passed `--check` on
+// every machine that generated it and only broke on the machine that generated it next,
+// because gzip output is not reproducible across zlib builds (see the note above `wholeKb`).
+//
+// `kb()` always renders one decimal place before "KiB" (e.g. "36.1 KiB") and `wholeKb()`
+// never does (e.g. "36 KiB"), so a bare `body.includes(kb(a.mingzip))` rules out a wholeKb()
+// rendering colliding by construction. It does NOT rule out a coincidental collision with a
+// REPRODUCIBLE figure — raw, minified, or unpacked — that this file also renders via `kb()`
+// at one decimal place. If `kb(a.gzip)` happened to equal the rendering of some package's
+// `unpacked` size, a bare substring match would red a perfectly correct tree (#332 names this
+// exact shape — a coincidental string match — in another gate in this repo).
+//
+// So this only flags a decimal-precision compressed figure whose string is NOT ALSO the
+// legitimate `kb()` rendering of a reproducible quantity the file reports elsewhere: every
+// artifact's raw and minified size, every package's unpacked size, and the raw runtime-cost
+// delta used in the ADR-8 section (`ARTIFACTS[1].raw - ARTIFACTS[0].raw`) — the complete set
+// of things this file legitimately renders through `kb()`. This closes the coincidental-string
+// false positive while still catching the real defect, because the guard's failure mode is
+// symmetric with its success: the ONLY way a compressed figure's decimal string can now go
+// unflagged is if a reproducible figure renders to that exact same string in this exact build,
+// at which point the compressed figure is textually indistinguishable from a legitimate one and
+// no purely textual check — this one included — can tell them apart. Author discipline (use
+// `wholeKb()` for anything derived from `a.gzip`/`a.mingzip`) remains the actual control; this
+// is a best-effort net under it, not a proof.
+const reproducibleDecimalForms = new Set([
+  ...ARTIFACTS.flatMap((a) => [kb(a.raw), kb(a.min)]),
+  ...PACKAGES.map((p) => kb(p.unpacked)),
+  kb(ARTIFACTS[1].raw - ARTIFACTS[0].raw),
+]);
+for (const a of ARTIFACTS) {
+  for (const [label, value] of [['gzip', a.gzip], ['min+gzip', a.mingzip]]) {
+    const decimalForm = kb(value);
+    if (body.includes(decimalForm) && !reproducibleDecimalForms.has(decimalForm)) {
+      console.error(
+        `measure-elements-sizes: generated body embeds "${decimalForm}" — a decimal-precision ` +
+          `${label} figure for ${a.name}. Compressed sizes are not reproducible across machines; ` +
+          `use wholeKb(), not kb(), for anything derived from a.gzip or a.mingzip. See #317.`,
+      );
+      process.exit(1);
+    }
+  }
+}
+
+if (check) {
+  const current = existsSync(OUT) ? readFileSync(OUT, 'utf8') : null;
+  if (current !== body) {
+    // SAY WHAT DIFFERS. This printed "is stale" and nothing else, and when it fired on CI
+    // while passing on a clean local build — same commit, same lockfile, same step order —
+    // there was no way to tell whether the bundle had genuinely changed size or the generated
+    // prose had drifted. A gate that reports a mismatch without showing it makes the next
+    // person guess, which is the failure mode this repo keeps closing elsewhere.
+    console.error(`❌ ${OUT} is stale. Run: node scripts/measure-elements-sizes.mjs`);
+    const a = (current ?? '').split('\n');
+    const b = body.split('\n');
+    console.error('   committed → generated:');
+    let shown = 0;
+    for (let i = 0; i < Math.max(a.length, b.length) && shown < 12; i += 1) {
+      if (a[i] !== b[i]) {
+        console.error(`   line ${i + 1}:`);
+        console.error(`     - ${a[i] ?? '(absent)'}`);
+        console.error(`     + ${b[i] ?? '(absent)'}`);
+        shown += 1;
+      }
+    }
+    for (const art of ARTIFACTS) {
+      const raw = statSync(art.path).size;
+      console.error(`   ${art.path}: ${raw} bytes raw`);
+    }
+    process.exit(1);
+  }
+  console.log(`✅ ${OUT} is up to date.`);
+} else {
+  writeFileSync(OUT, body);
+  console.log(`measure-elements-sizes: wrote ${OUT}`);
+}

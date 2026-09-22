@@ -1,0 +1,29 @@
+{
+  "accept_commit": "80cda558e3ec1374af3e4651fffe08fe465860e2",
+  "acceptance_history": [
+    {
+      "accept_commit": "80cda558e3ec1374af3e4651fffe08fe465860e2",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-10T14:07:49.964666+00:00",
+      "accepted_by": "jeroennouws",
+      "accepted_from_commit": "80193d090fe7bff87b4154f094f5db39208a8ff4"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-10T14:07:49.964666+00:00",
+  "accepted_by": "jeroennouws",
+  "accepted_from_commit": "80193d090fe7bff87b4154f094f5db39208a8ff4",
+  "created_at": "2026-09-10T11:56:12.359978+00:00",
+  "flattened": false,
+  "friendly_name": "action row static form",
+  "mission_id": "01M25JSV67WH7GDDAX0J8T3X01",
+  "mission_number": null,
+  "mission_slug": "action-row-static-form-01M25JSV",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances action row static form on mission/action-row-static-form so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "action row static form",
+  "slug": "action-row-static-form-01M25JSV",
+  "status_phase": "1",
+  "target_branch": "mission/action-row-static-form",
+  "topology": "single_branch"
+}

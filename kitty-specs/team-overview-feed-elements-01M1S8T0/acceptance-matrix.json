@@ -1,0 +1,548 @@
+{
+  "mission_slug": "team-overview-feed-elements-01M1S8T0",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pending",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Manifest/source inspection finds exactly the four new tags sk-section-header, sk-action-row, sk-status-indicator and sk-entity-marker, and finds no sk-section-list.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-001.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:47:53.664429+00:00",
+      "notes": "WP01/WP02 implement; WP03 verifies the aggregate set."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "CEM and browser fixtures expose section-header slots eyebrow, title, description, metadata and action with no undocumented content channel.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-002.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:47:55.446135+00:00",
+      "notes": "WP01 owns implementation and proof."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "A consumer h1\u2013h6 remains the accessible heading, while section-header creates no heading tag or heading role of its own.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-003.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:47:57.388325+00:00",
+      "notes": "WP01 browser role and shadow-DOM inspection."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Changing consumer count/loading/action content only changes projection; section-header source contains no count derivation, loading state or action handler.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-004.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:47:59.231713+00:00",
+      "notes": "WP01 behavior plus WP03 scope scan."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Action-row browser fixture observes marker \u2192 title \u2192 reference \u2192 tags \u2192 metadata/controls scan order for supplied content.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-005.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:01.022246+00:00",
+      "notes": "WP02 owns implementation and proof."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "CEM/browser fixtures expose only marker, title, reference, tags, metadata and controls slots; component source contains no WP, mission or repository vocabulary.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-006.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:02.867832+00:00",
+      "notes": "WP02 behavior plus WP03 scope scan."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Activation leaves selected unchanged; consumer reassignment controls it; stable row root carries aria-current=true only when selected in both selectable and non-selectable branches and never exposes selection/toggle ARIA.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-007.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:04.606817+00:00",
+      "notes": "WP02 real-browser proof."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "External listener receives exact detail {id}, bubbles/composed true and cancelable false; after preventDefault(), actual dispatch returns true, defaultPrevented is false and no default application action occurs.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-008.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:06.533136+00:00",
+      "notes": "WP02 composite browser contract; not a flag-only assertion."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Real pointer, Enter and Space each yield one event; two repeated Enter/Space keydowns still yield one because only repeat keydowns are prevented, while initial and unrelated keys remain native.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-009.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:08.313229+00:00",
+      "notes": "WP02 Chromium/browser interaction proof; synthetic-only keydown is insufficient."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Native link, native button and landed sk-button trailing controls each activate themselves and produce zero row-activation events.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-010.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:10.119462+00:00",
+      "notes": "WP02 real-browser proof."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Real-browser and visual-state fixtures distinguish rest, hover, focus-visible, pressed and controlled selected states; non-selectable/invalid-ID rows have no focus target, pointer cursor or activation affordance.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-011.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:11.973166+00:00",
+      "notes": "WP02 functional proof; authoritative PNG approval is wrap-up owned."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Status-indicator accepts exactly neutral/info/success/attention/danger/recovery; unknown input degrades to neutral while preserving visible content.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-012.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:13.727931+00:00",
+      "notes": "WP01 owns behavior and status-tone late-upgrade mutation."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Every tone fixture retains visible consumer status text and no component code derives a status label from tone or domain data.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-013.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:15.550796+00:00",
+      "notes": "WP01 behavior plus WP03 source scan."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Entity-marker preserves supplied icon/initial/short-mark content exactly and source inspection finds no fetch, identity lookup or initials generation.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-014.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:17.336270+00:00",
+      "notes": "WP01 owns behavior and proof."
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Non-empty trimmed label yields the supplied accessible name; absent/whitespace label yields a decorative hidden marker with no unnamed image role.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-015.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:19.197421+00:00",
+      "notes": "WP01 owns behavior and entity-label late-upgrade mutation."
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Browser roles expose consumer ul/list and li/listitem relationships; none of the four element templates contains ul/li or list/listitem roles.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-016.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:21.053314+00:00",
+      "notes": "WP02 native-list proof; WP03 aggregate absence scan."
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Aggregate source scan finds no feed collection, ordering, freshness, clock/timer, route/navigation, store, fetch or active-row ownership in the four elements.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-017.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:22.828858+00:00",
+      "notes": "WP03 owns aggregate scope audit."
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Two consumer li entries with identical supplied content render as two distinct rows with neither deduplication nor suppression.",
+      "proof_type": "automated_test",
+      "evidence": "WP01/WP02 approved implementation through 421c4caa9da0440be197a39c9a817b3a89c8e841; WP03 aggregate generated/source checks at 276b696d4574358ae621aa7e7ec62b844032e4ca confirm FR-018.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:24.621784+00:00",
+      "notes": "WP02 native-list fixture."
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Re-generated CEM, React wrappers and Vue declarations contain all four tags; React callback type is CustomEvent<{id:string}> and rejects nonexistent detail fields.",
+      "proof_type": "automated_test",
+      "evidence": "HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca: no-cache CEM analysis, React/Vue generation and drift checks; React runtime 1/1 plus all 5 typecheck projects passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:27.026287+00:00",
+      "notes": "WP03 owns generated-consumer closure."
+    },
+    {
+      "criterion_id": "FR-020",
+      "description": "Story ratchet and Storybook contain every planned default/dark, LightMode, narrow and long-content case; approved Linux Chromium baselines later pass the explicit visual command.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "WP01/WP02 author cases; authoritative visual acceptance is wrap-up owned."
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "Gate selftest passes and axe reports zero WCAG 2.1 AA violations for every required new story without skipped or non-rendered stories.",
+      "proof_type": "automated_test",
+      "evidence": "HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca: gate selftest 24/24 and axe 177/177 rendered with zero WCAG 2.1 AA violations.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:15:22.344023+00:00",
+      "notes": "WP03 runs node scripts/gate-selftest.mjs then axe; PR CI confirms."
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Measured normal text is at least 4.5:1 and large text/interactive graphics at least 3:1 where applicable; every status meaning is also visible text.",
+      "proof_type": "automated_test",
+      "evidence": "HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca: approved component contrast/text fixtures, 278/278 suite, and axe 177/177 zero violations.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:15:23.888031+00:00",
+      "notes": "WP01/WP02 theme fixtures plus WP03 axe/visual gate."
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "At 320 CSS pixels the long action-row fixture reports no horizontal viewport overflow, bounding-box overlap or clipped focus indicator.",
+      "proof_type": "automated_test",
+      "evidence": "Approved WP02 browser behavior at 421c4caa9da0440be197a39c9a817b3a89c8e841 plus WP03 React runtime evidence at 276b696d4574358ae621aa7e7ec62b844032e4ca confirms NFR-003.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:28.895767+00:00",
+      "notes": "WP02 browser geometry assertions."
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "For pointer/Enter/Space, document and React listeners each receive one exact {id} event; composite prevention probe observes dispatch true/defaultPrevented false/no default action.",
+      "proof_type": "automated_test",
+      "evidence": "Approved WP02 browser behavior at 421c4caa9da0440be197a39c9a817b3a89c8e841 plus WP03 React runtime evidence at 276b696d4574358ae621aa7e7ec62b844032e4ca confirms NFR-004.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:30.626085+00:00",
+      "notes": "WP02 element browser proof plus WP03 React proof."
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "Before and after each activation, selected equals the last consumer-supplied value; only a consumer reassignment changes visual/aria-current state.",
+      "proof_type": "automated_test",
+      "evidence": "Approved WP02 browser behavior at 421c4caa9da0440be197a39c9a817b3a89c8e841 plus WP03 React runtime evidence at 276b696d4574358ae621aa7e7ec62b844032e4ca confirms NFR-005.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:32.443348+00:00",
+      "notes": "WP02 controlled-state proof."
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "Stylelint/token audit finds zero raw color, spacing, typography, radius, shadow or motion values outside canonical token sources in new component CSS.",
+      "proof_type": "automated_test",
+      "evidence": "HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca: complete generation/drift, quality/type/style hygiene, release/packed/offline, and aggregate scope checks passed for NFR-006.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:34.290779+00:00",
+      "notes": "Each implementation WP checks; WP03 repeats aggregate quality gate."
+    },
+    {
+      "criterion_id": "NFR-007",
+      "description": "CSS modules, CEM, React wrappers, Vue declarations, entries and SIZES regenerate cleanly on final head; timestamped token catalogue is either untouched or generated exactly once and semantically reviewed.",
+      "proof_type": "automated_test",
+      "evidence": "HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca: complete generation/drift, quality/type/style hygiene, release/packed/offline, and aggregate scope checks passed for NFR-007.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:36.126078+00:00",
+      "notes": "WP03 and post-consolidation wrap-up own generated drift."
+    },
+    {
+      "criterion_id": "NFR-008",
+      "description": "behaviours.json and mutations.json declare 19 attributable non-inert mission arms, and suite-selftest plus suite-selftest --selftest pass with no surviving required arm.",
+      "proof_type": "automated_test",
+      "evidence": "HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca: 98/98 standing mutations (19 attributable to #146) produced named red with a 246-test green baseline in 449s; 8/8 harness guard selftests passed in 25.7s.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:15:25.503799+00:00",
+      "notes": "11 WP01 + 7 WP02 + 1 WP03 mutations."
+    },
+    {
+      "criterion_id": "NFR-009",
+      "description": "CI records the Storybook build completing in strictly less than 180 seconds on the exact accepted PR head.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "External PR CI evidence; WP03 cannot mark pass."
+    },
+    {
+      "criterion_id": "NFR-010",
+      "description": "Repository scan of the four authored element sources finds zero router, store, fetch, Date.now, setInterval or setTimeout ownership.",
+      "proof_type": "automated_test",
+      "evidence": "HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca: complete generation/drift, quality/type/style hygiene, release/packed/offline, and aggregate scope checks passed for NFR-010.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:37.982666+00:00",
+      "notes": "WP03 aggregate scope audit."
+    },
+    {
+      "criterion_id": "C-001",
+      "description": "Diff leaves #79 sk-button/sk-pill-tag authored sources unchanged and consumer stories use their landed contracts rather than copies.",
+      "proof_type": "manual_review",
+      "evidence": "Aggregate base-diff/source audit through HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca confirms C-001; only the four #146 component directories and bounded generated/consumer/evidence surfaces changed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:40.541145+00:00",
+      "notes": "WP03 base-diff audit."
+    },
+    {
+      "criterion_id": "C-002",
+      "description": "Authored component-source additions are confined to section-header, action-row, status-indicator and entity-marker directories.",
+      "proof_type": "manual_review",
+      "evidence": "Aggregate base-diff/source audit through HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca confirms C-002; only the four #146 component directories and bounded generated/consumer/evidence surfaces changed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:42.438224+00:00",
+      "notes": "WP03 base-diff audit."
+    },
+    {
+      "criterion_id": "C-003",
+      "description": "Base-diff and source scans find no section-list tag/directory, shadow-owned ul/li, role=list or role=listitem.",
+      "proof_type": "automated_test",
+      "evidence": "HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca: topology, generator drift, manifest/entry, dependency and source-absence gates confirm C-003.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:44.236688+00:00",
+      "notes": "WP02 browser proof plus WP03 absence scan."
+    },
+    {
+      "criterion_id": "C-004",
+      "description": "All public values remain consumer-controlled; elements only project data and emit activation intent, with no state transition or destination ownership.",
+      "proof_type": "manual_review",
+      "evidence": "Aggregate base-diff/source audit through HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca confirms C-004; only the four #146 component directories and bounded generated/consumer/evidence surfaces changed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:46.194142+00:00",
+      "notes": "WP02 behavior and independent aggregate review."
+    },
+    {
+      "criterion_id": "C-005",
+      "description": "Base diff changes no token source/catalogue unless an approved held-train refresh requires one; any such timestamped catalogue is generated once and semantically reviewed.",
+      "proof_type": "manual_review",
+      "evidence": "Aggregate base-diff/source audit through HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca confirms C-005; only the four #146 component directories and bounded generated/consumer/evidence surfaces changed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:48.079363+00:00",
+      "notes": "WP03/wrap-up token audit."
+    },
+    {
+      "criterion_id": "C-006",
+      "description": "Each component has one authored CSS file and one Lit template, no static .html/.markup.ts form, and every committed derived artifact passes its generator check.",
+      "proof_type": "automated_test",
+      "evidence": "HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca: topology, generator drift, manifest/entry, dependency and source-absence gates confirm C-006.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:49.970428+00:00",
+      "notes": "WP03 complete generated-artifact gate."
+    },
+    {
+      "criterion_id": "C-007",
+      "description": "Independent review confirms implementation follows ADR-9/10/11 and the landed #76 adding-a-component recipe; all applicable enforced gates pass.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "WP reviews plus Tier-C exact-head lenses."
+    },
+    {
+      "criterion_id": "C-008",
+      "description": "Range diff contains no package dependency or package-lock change.",
+      "proof_type": "automated_test",
+      "evidence": "HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca: topology, generator drift, manifest/entry, dependency and source-absence gates confirm C-008.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:52.012331+00:00",
+      "notes": "WP03 base-diff audit."
+    },
+    {
+      "criterion_id": "C-009",
+      "description": "lanes.json contains one serial lane ordered WP01 \u2192 WP02 \u2192 WP03; no parallel writer can touch shared registries/generated outputs.",
+      "proof_type": "automated_test",
+      "evidence": "HEAD 276b696d4574358ae621aa7e7ec62b844032e4ca: topology, generator drift, manifest/entry, dependency and source-absence gates confirm C-009.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-05T23:48:53.775173+00:00",
+      "notes": "Task finalization and topology validation."
+    },
+    {
+      "criterion_id": "C-010",
+      "description": "Exactly one PR targets train/elements-first, uses Refs #146 (not a closing keyword), and no WP-specific PR exists; after its verified train merge, orchestrator wrap-up closes #146 and leaves parent/deferred/sibling issues open.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "External wrap-up evidence; WP03 cannot mark pass."
+    },
+    {
+      "criterion_id": "C-011",
+      "description": "After WPs approve, wrap-up records one train SHA, rebases target before Spec Kitty consolidation and never afterward; any later train advance produces BLOCKED, not a local rebaseline claim.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "External SK-179 sequence; WP03 hands off only."
+    },
+    {
+      "criterion_id": "C-012",
+      "description": "Three profile-loaded Codex lenses, acceptance attestation or explicit SK-178 waiver, and maintainer approval all name the exact final SHA; any push invalidates them.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "External exact-head gate; acceptance writer must not mutate the attested head."
+    },
+    {
+      "criterion_id": "C-013",
+      "description": "Git/PR/release audit shows the mission merges only to train/elements-first after operator authorization and performs no main push/merge, publish or deploy.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "External wrap-up guard."
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-01",
+      "description": "No sk-section-list, shadow ul/li, role=list or role=listitem is introduced.",
+      "verification_method": "custom_command",
+      "verification_command": "cd /home/jeroennouws/dev/team-kitty-missions/design-146/.worktrees/team-overview-feed-elements-01M1S8T0-lane-a && test -f packages/elements/src/action-row/sk-action-row.ts && ! rg -n -i 'sk-section-list|<ul|<li|role=.*(list|listitem)' packages/elements/src/section-header/sk-section-header.ts packages/elements/src/action-row/sk-action-row.ts packages/elements/src/status-indicator/sk-status-indicator.ts packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: ",
+      "owner": "WP03 aggregate scope audit"
+    },
+    {
+      "invariant_id": "NI-02",
+      "description": "No component derives feed ordering/freshness, status vocabulary, initials, time, selection, navigation or other application behavior.",
+      "verification_method": "custom_command",
+      "verification_command": "cd /home/jeroennouws/dev/team-kitty-missions/design-146/.worktrees/team-overview-feed-elements-01M1S8T0-lane-a && test -f packages/elements/src/action-row/sk-action-row.ts && ! rg -n -i 'Date\\.now|setInterval|setTimeout|fetch\\(|active-row|statusLabel|derive.*(status|initial)|from .*router|from .*store' packages/elements/src/section-header/sk-section-header.ts packages/elements/src/action-row/sk-action-row.ts packages/elements/src/status-indicator/sk-status-indicator.ts packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: ",
+      "owner": "WP03 aggregate scope audit"
+    },
+    {
+      "invariant_id": "NI-03",
+      "description": "No selected state is exposed as aria-selected/aria-pressed or checkbox/switch semantics; only controlled aria-current=true is allowed on the stable row root.",
+      "verification_method": "custom_command",
+      "verification_command": "cd /home/jeroennouws/dev/team-kitty-missions/design-146/.worktrees/team-overview-feed-elements-01M1S8T0-lane-a && test -f packages/elements/src/action-row/sk-action-row.ts && ! rg -n -i 'aria-selected|aria-pressed|role=.*(checkbox|switch)' packages/elements/src/action-row/sk-action-row.ts",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: ",
+      "owner": "WP02 browser proof"
+    },
+    {
+      "invariant_id": "NI-04",
+      "description": "No non-repeat Enter/Space keydown is canceled and no custom keyboard activation path duplicates the native click.",
+      "verification_method": "custom_command",
+      "verification_command": "cd /home/jeroennouws/dev/team-kitty-missions/design-146/.worktrees/team-overview-feed-elements-01M1S8T0-lane-a && rg -q 'if \\(!event\\.repeat \\|\\|' packages/elements/src/action-row/sk-action-row.ts && rg -F -c 'event.preventDefault();' packages/elements/src/action-row/sk-action-row.ts | rg -qx '1' && ! rg -n '@keyup|\\.click\\(' packages/elements/src/action-row/sk-action-row.ts && rg -F -q 'repeat: true, defaultPrevented: true' apps/storybook/src/tests/elements-load.spec.ts",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: ",
+      "owner": "WP02 real-browser repeat proof"
+    },
+    {
+      "invariant_id": "NI-05",
+      "description": "No SC-009 claim or preventable default action is invented for the binding non-cancelable event.",
+      "verification_method": "custom_command",
+      "verification_command": "cd /home/jeroennouws/dev/team-kitty-missions/design-146/.worktrees/team-overview-feed-elements-01M1S8T0-lane-a && jq -e '[.behaviours[] | select(.id==\"SC-009\") | .subjects[] | select(.name==\"sk-action-row\")] | length == 0' behaviours.json >/dev/null && rg -F -q 'cancelable: false' packages/elements/src/action-row/sk-action-row.ts && ! rg -F -n 'cancelable: true' packages/elements/src/action-row/sk-action-row.ts",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: ",
+      "owner": "WP02 composite event proof"
+    },
+    {
+      "invariant_id": "NI-06",
+      "description": "No static markup form, second authored markup source, raw design value, new token or dependency is introduced.",
+      "verification_method": "custom_command",
+      "verification_command": "cd /home/jeroennouws/dev/team-kitty-missions/design-146/.worktrees/team-overview-feed-elements-01M1S8T0-lane-a && test ! -e packages/elements/src/section-header/sk-section-header.markup.ts && test ! -e packages/elements/src/action-row/sk-action-row.markup.ts && test ! -e packages/elements/src/status-indicator/sk-status-indicator.markup.ts && test ! -e packages/elements/src/entity-marker/sk-entity-marker.markup.ts && node scripts/check-element-css-hygiene.mjs && git diff --quiet origin/train/elements-first...HEAD -- package.json package-lock.json packages/tokens",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 Adopted CSS hygiene: 19 element(s), 20 sheet(s), 231 rule(s) \u2014 no simulated states, no undefined-token fallbacks.",
+      "owner": "WP03 aggregate/generator gate"
+    },
+    {
+      "invariant_id": "NI-07",
+      "description": "No generated CEM/React/Vue/CSS/size output is hand-edited and no timestamped token catalogue is used as byte-determinism evidence.",
+      "verification_method": "custom_command",
+      "verification_command": "cd /home/jeroennouws/dev/team-kitty-missions/design-146/.worktrees/team-overview-feed-elements-01M1S8T0-lane-a && node scripts/build-elements-css.mjs --check && node scripts/build-element-markup.mjs --check && npx nx run elements:analyze --skip-nx-cache && git diff --quiet -- packages/elements/custom-elements.json && node scripts/build-react-wrappers.mjs --check && node scripts/build-vue-types.mjs --check && node scripts/measure-elements-sizes.mjs --check",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 Generated CSS modules are up to date (19 component(s)).\n\u2705 Generated markup is up to date (10 component(s)).\n\n NX   Running target analyze for project elements and 1 task it depends on:\n\n\n\n> nx run e",
+      "owner": "WP03 and wrap-up generation"
+    },
+    {
+      "invariant_id": "NI-08",
+      "description": "No local screenshot or pre-baseline expected-red run is treated as approved visual evidence.",
+      "verification_method": "custom_command",
+      "verification_command": "cd /home/jeroennouws/dev/team-kitty-missions/design-146/.worktrees/team-overview-feed-elements-01M1S8T0-lane-a && git diff --quiet origin/train/elements-first...HEAD -- '*.png' && ! git ls-files --others --exclude-standard -- '*.png' | rg -q .",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: ",
+      "owner": "Wrap-up Linux Chromium visual gate"
+    },
+    {
+      "invariant_id": "NI-09",
+      "description": "No shared-output reconciliation occurs on stale independent #145/#146 train tips.",
+      "verification_method": "custom_command",
+      "verification_command": "cd /home/jeroennouws/dev/team-kitty-missions/design-146 && test -n \"$SK179_HELD_TRAIN_SHA\" && test \"$SK179_HELD_TRAIN_SHA\" = \"$(git merge-base HEAD origin/train/elements-first)\" && node scripts/build-elements-css.mjs --check && node scripts/build-element-markup.mjs --check && node scripts/build-react-wrappers.mjs --check && node scripts/build-vue-types.mjs --check",
+      "result": "pending",
+      "evidence": null,
+      "owner": "SK-179 wrap-up hold"
+    },
+    {
+      "invariant_id": "NI-10",
+      "description": "No post-consolidation rebase/rebaseline is attempted after the held train SHA advances; the required state is BLOCKED.",
+      "verification_method": "custom_command",
+      "verification_command": "cd /home/jeroennouws/dev/team-kitty-missions/design-146 && test -n \"$SK179_HELD_TRAIN_SHA\" && test \"$(git rev-parse origin/train/elements-first)\" = \"$SK179_HELD_TRAIN_SHA\"",
+      "result": "pending",
+      "evidence": null,
+      "owner": "SK-179 wrap-up hold"
+    },
+    {
+      "invariant_id": "NI-11",
+      "description": "No acceptance-writer commit is attached to reviews of its parent SHA; SK-178 requires same-head attestation or an explicit exact-SHA waiver.",
+      "verification_method": "custom_command",
+      "verification_command": "cd /home/jeroennouws/dev/team-kitty-missions/design-146 && test -n \"$SK_REVIEWED_SHA\" && test -n \"$SK_ACCEPTANCE_SHA\" && test \"$SK_REVIEWED_SHA\" = \"$(git rev-parse HEAD)\" && test \"$SK_ACCEPTANCE_SHA\" = \"$SK_REVIEWED_SHA\"",
+      "result": "pending",
+      "evidence": null,
+      "owner": "External acceptance wrap-up"
+    },
+    {
+      "invariant_id": "NI-12",
+      "description": "No PR uses a closing keyword and no WP worker closes an issue; orchestrator closes only #146 after verified train merge, with no main push/merge, package publish or deployment.",
+      "verification_method": "custom_command",
+      "verification_command": "cd /home/jeroennouws/dev/team-kitty-missions/design-146 && test \"$(git branch --show-current)\" = \"mission/team-overview-feed-elements\" && gh pr view --json baseRefName,body | jq -e \".baseRefName == \\\"train/elements-first\\\" and (.body | test(\\\"(?i)(closes|fixes|resolves)[[:space:]]+#146\\\") | not)\" >/dev/null && gh issue view 146 --json state | jq -e \".state == \\\"OPEN\\\"\" >/dev/null",
+      "result": "pending",
+      "evidence": null,
+      "owner": "Mission wrap-up"
+    }
+  ]
+}

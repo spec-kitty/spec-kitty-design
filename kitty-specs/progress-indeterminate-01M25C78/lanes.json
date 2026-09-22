@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "mission_slug": "progress-indeterminate-01M25C78",
+  "mission_id": "01M25C78YWHRQE5NMW05BCXY1X",
+  "mission_branch": "kitty/mission-progress-indeterminate-01M25C78",
+  "target_branch": "mission/progress-indeterminate",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-progress.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "docs/design-system/using-components.md",
+        "packages/styles/src/progress/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "tests",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T10:20:11.098589+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "d82901997c054c9aab9bb6705dcd2a6300b98e0d"
+}

@@ -1,0 +1,125 @@
+{
+  "rows": {
+    "#176": {
+      "evidence_ref": "Existing disclosure component #176 is reused by consumers; WP01 preserves it and the frozen-surface/no-op checks pass at 07e9574.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#178": {
+      "evidence_ref": "Research verified notice contract issue #178 was already landed; WP01 does not alter that frozen surface at 07e9574.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#209": {
+      "evidence_ref": "Existing workflow-board contract #209 remains authoritative and unchanged; frozen-surface/no-op checks pass at 07e9574.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#211": {
+      "evidence_ref": "Existing select contract #211 remains authoritative and unchanged; no duplicate select surface was added at 07e9574.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#212": {
+      "evidence_ref": "Research verified action-row presentation issue #212 was already landed; WP01 does not alter that frozen surface at 07e9574.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#270": {
+      "evidence_ref": "Existing segmented-choice contract #270 remains authoritative and unchanged; no duplicate segmented-choice surface was added at 07e9574.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#272": {
+      "evidence_ref": "Open follow-up issue #272 owns the action-row route extension; research records it as explicitly irrelevant to and outside #277.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#276": {
+      "evidence_ref": "Epic #276 remains open for its separate child mission #278 after this #277 component mission.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#277": {
+      "evidence_ref": "WP01 implementation and independent cycle-2 review passed at 07e95743784d1d8a9dab5abfdbfcbbad23d4c31c.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#278": {
+      "evidence_ref": "Follow-up issue #278 owns the Mission Kanban K1-K6 pattern stories after #277 lands.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,1 @@
+Pre-merge report-only review of PR #192 at 242e71e: extracted MAPPED_PROPS (17 rows) from the installed bundle, ran build-react-wrappers.mjs --check (green), read loadReactPropRenameMap + per-element comparison, cross-checked ADR-11's prop-name invariant section. 5 LOW findings, no blockers. Read-only honored.

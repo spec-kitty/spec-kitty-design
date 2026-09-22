@@ -1,0 +1,43 @@
+schema: review-findings/v1
+complete: true
+phase: tasks
+lens_group: order
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: TASKS-ORDER-001
+    lens: Internal task order / Storybook-rebuild dependency correctness
+    severity: 3
+    title: "The binding \"Execution order\" overview misattributes which task performs the second Storybook rebuild, contradicting T010-T013's own headers and bodies"
+    evidence:
+      - artifact: "tasks/WP01-segmented-choice-styles.md § Execution order, item 6 (line 141): \"T010-T012 — land the remaining CSS: FR-003 distinguishing declarations, forced-colors block (IC-03), 44px narrow-viewport treatment.\""
+      - artifact: "tasks/WP01-segmented-choice-styles.md § Execution order, item 7 (line 143): \"T013 — rebuild Storybook again (static-serving constraint — the first rebuild does not cover CSS landed afterward) and re-run the live Playwright block until green.\""
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T010 (line 293), § T011 (line 304): the two tasks that actually land CSS (distinguishing declarations + 44px rule, then the forced-colors block)."
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T012 (line 318): \"Rebuild Storybook and re-run the live Playwright block to GREEN (IC-04's second rebuild)\" — body: \"Run npx nx run storybook:storybook:build again, then re-run npx playwright test ... (both test.describe blocks) and confirm every assertion from T001 and T006-T009 is GREEN.\""
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T013 (line 327): \"(folded into T012; kept as a distinct checkpoint) Confirm T001's source-contract block is still green\" — body only re-runs the Chromium-only source-contract block; it contains no `storybook:storybook:build` invocation and does not re-run the live block."
+    claim: >
+      The Execution-order overview is explicitly labelled "binding — do not reorder" and instructs the
+      reader to "Read it once before starting; the subtasks below are numbered in this order" — it is
+      meant to be the authoritative sequencing summary. But its item 6 groups T010, T011 AND T012
+      together as "land the remaining CSS", when T012's actual, separately-numbered task performs no CSS
+      authoring at all — it is exclusively the second Storybook rebuild + live-block re-run to GREEN
+      (its own header literally names this "IC-04's second rebuild"). Item 7 then attributes "rebuild
+      Storybook again ... and re-run the live Playwright block until green" to T013, but T013's real body
+      only re-confirms the narrower Chromium-only source-contract block (no page.goto, no rebuild
+      command) — it explicitly says it is "folded into T012" precisely because T012 already did the
+      rebuild-and-rerun-to-GREEN work the summary credits to T013. An implementer who works from the
+      overview's division of labour rather than each task's own body could conclude the mandatory second
+      `npx nx run storybook:storybook:build` belongs to a task (T013) that never actually issues it,
+      while treating T012 as CSS-only work that needs no rebuild — reproducing, at the overview level,
+      the exact "second rebuild goes unstated where it's needed" shape that PLAN-SEQ-001 was raised
+      against at the plan layer. The per-task bodies (T010/T011/T012/T013) are individually correct and
+      complete, which bounds the practical risk (T018's later full gate sweep would also rebuild before
+      the final Playwright run and could catch a skipped intermediate rebuild before push), but the
+      binding overview itself is wrong about which numbered task performs the rebuild.
+    remediation: >
+      Correct Execution-order items 6 and 7 to match the actual task bodies: split item 6 into
+      "T010-T011 — land the remaining CSS: FR-003 distinguishing declarations + 44px narrow-viewport
+      treatment (T010), forced-colors block (T011)" and replace item 7 with "T012 — rebuild Storybook
+      again (static-serving constraint — the first rebuild does not cover CSS landed afterward) and
+      re-run the live Playwright block until green; T013 is a narrower, folded-in re-check of only the
+      source-contract block." This keeps the overview's own numbering aligned with what T012 and T013
+      each actually do, so a reader who trusts the summary alone still lands on the correct rebuild step.

@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "mission_slug": "card-status-tone-axis-01M1VJNY",
+  "mission_id": "01M1VJNYKXT301VHNNSFYGA9J6",
+  "mission_branch": "kitty/mission-card-status-tone-axis-01M1VJNY",
+  "target_branch": "mission/card-status-tone-axis",
+  "lanes": [
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01",
+        "WP02"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "expected-docs.json",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/sk-card.test.ts",
+        "mutations.json",
+        "packages/elements/src/card/sk-card.css.d.ts",
+        "packages/elements/src/card/sk-card.css.js",
+        "packages/elements/src/card/sk-card.markup.ts",
+        "packages/elements/src/card/sk-card.stories.ts",
+        "packages/elements/src/card/sk-card.ts",
+        "packages/elements/src/index.ts",
+        "packages/elements/src/status-indicator/sk-status-indicator.ts",
+        "packages/react/type-tests/wrappers.type-test.tsx",
+        "packages/styles/src/card/index.ts",
+        "packages/styles/src/card/sk-card-html.stories.ts",
+        "packages/styles/src/card/sk-card.css",
+        "packages/styles/src/card/sk-card.html",
+        "packages/tokens/dist/token-catalogue.json",
+        "packages/tokens/src/tokens.css"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T14:47:59.851294+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01",
+    "WP02"
+  ],
+  "planning_commit_sha": "59999c240a311d908f6ea4d3ff3079989b7611f0"
+}

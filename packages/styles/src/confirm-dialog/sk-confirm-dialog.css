@@ -1,0 +1,174 @@
+/* sk-confirm-dialog — a bounded, consumer-copy confirmation over the native <dialog> (#308).
+ *
+ * NO THEME SELECTOR ANYWHERE. `:root[data-theme="light"] .sk-confirm-dialog` and
+ * `.sk-light .sk-confirm-dialog` both cross the shadow boundary and are therefore INERT once
+ * this sheet is adopted (ADR-9 §3). Light-mode variance lives entirely in tokens, which
+ * inherit through the boundary where a selector does not.
+ *
+ * NO CONTAINER-TYPE ON THE HOST. #301 (the static-form/host-authorability question this
+ * component's FR-016 explicitly defers) is specifically about whether a host-owned
+ * `container-type` is part of this component's future static contract. This file therefore
+ * declares no breakpoint of any kind — narrow-width and 200% zoom are handled with fluid
+ * sizing (`min()`/logical units), not a documented threshold — so this component claims no
+ * ADR-11 SC-017 (responsive threshold) subject. See research.md's "open questions carried
+ * into tasks", item 3.
+ *
+ * THE CONFIRM/CANCEL CONTROLS COMPOSE `.sk-button` (imported by the element as a second
+ * adopted sheet, foreign sheet first — see sk-confirm-dialog.ts). This file styles ONLY the
+ * dialog's own surface, layout and the parts it owns; it never redeclares a `.sk-button*`
+ * rule, which would be an ownership violation `check-adopted-css-boundaries.mjs` polices.
+ */
+
+:host {
+  /* The visible box here is the native <dialog>, which the platform promotes to the top
+     layer on showModal() regardless of the host's own display — so the host itself never
+     needs to contribute a layout box. `contents` keeps a closed, undisplayed dialog from
+     occupying any space of its own in the light DOM. */
+  display: contents;
+}
+
+/* SCOPED TO [open], and this is load-bearing, not decorative. Native `<dialog>` is hidden by
+   the UA stylesheet's `dialog:not([open]) { display: none }`, and normal-origin author CSS
+   beats UA-origin CSS regardless of specificity — an unconditional `display: flex` here would
+   therefore override the UA's own hiding rule and leave a closed dialog rendered as a real,
+   positioned, non-modal box in normal flow, before first use and after every close (native
+   `close()` clears the `open` attribute; it does not remove or hide anything itself). Measured
+   directly: with this qualifier removed, a mounted-but-never-opened element reports
+   `getComputedStyle(dialog).display === 'flex'` and a real bounding box, and the SAME box
+   persists after `close()`.
+
+   The WHOLE ruleset is scoped, not just `display`, because every other declaration here
+   (border, background, padding, sizing, the entrance animation) is meaningless on a box that
+   isn't displayed — there is nothing to leak by scoping the lot together, and doing so is one
+   rule to read rather than a `display` exception plus a separately-tracked "everything else"
+   rule. This matches the house convention of state-scoping under an attribute selector
+   (`sk-disclosure.css`'s `.sk-disclosure[open] > …`, `sk-nav-pill-drawer.css`'s
+   `:host([open]) …`) rather than the CSS-relies-on-the-UA-default shape used elsewhere in this
+   file (`:host` deliberately declares no `[open]`-qualified state of its own, since `display:
+   contents` is correct in both the open and closed case). */
+.sk-confirm-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-sizing: border-box;
+  padding: 0;
+  /* No `margin` declared here: the UA stylesheet already centers a modal <dialog> with
+     `margin: auto`, and `auto` is not a token-expressible value `declaration-strict-value`
+     would accept from this file — the platform default is both correct and the only
+     compliant choice. */
+  border-style: solid;
+  border-width: var(--sk-border-width-1);
+  border-color: var(--sk-border-default);
+  border-radius: var(--sk-radius-lg);
+  background: var(--sk-surface-card);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  box-shadow: var(--sk-shadow-elev);
+
+  /* Fluid width: comfortable reading measure on a wide viewport, never wider than the
+     viewport itself on a narrow one. The UA stylesheet's own
+     `max-height: calc(100% - 6em)` continues to bound the block size; this rule only adds
+     the flex column layout so the header/body/actions regions can divide that height. */
+  inline-size: min(92vw, 28rem);
+  max-block-size: calc(100% - var(--sk-space-8));
+
+  /* ENTRANCE. A confirmation dialog appears in response to an explicit user action, so it
+     has a genuine entrance to animate — the same reasoning sk-notice.css records for its own
+     one-step fade-and-rise. Cancelled wholesale under reduced motion below; nothing about
+     comprehending the dialog depends on this having played. */
+  animation-name: sk-confirm-dialog-enter;
+  animation-duration: var(--sk-motion-duration-fast);
+  animation-timing-function: var(--sk-motion-ease-out);
+}
+
+@keyframes sk-confirm-dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--sk-space-2));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* THE BACKDROP. `background` here is a plain token reference (passes
+   `declaration-strict-value`); the translucency comes from `opacity`, a property the rule
+   does not police at all, so no raw rgba()/hex literal is needed to dim the page behind an
+   open dialog. `::backdrop` is generated by the platform only for a dialog actually promoted
+   to the top layer, so it is inherently inert while closed regardless of the qualifier — the
+   `[open]` here is for uniformity with the rest of this file's open-only rules, not because it
+   changes behaviour. */
+.sk-confirm-dialog[open]::backdrop {
+  background: var(--sk-fg-default);
+  opacity: 0.5;
+}
+
+/* REDUCED MOTION. Scoped to the exact selector and the exact property this component
+   animates — never a wildcard over the component's own subtree, per the recipe. This is the
+   only animation the component declares, and the dialog is fully readable with it
+   cancelled. */
+@media (prefers-reduced-motion: reduce) {
+  .sk-confirm-dialog[open] {
+    animation-name: none;
+  }
+}
+
+/* FORCED COLORS. `background` flattens to `Canvas` under forced-colors (measured elsewhere
+   in this repo, see sk-notice.css), so the chromatic/box-shadow cues above contribute
+   nothing there and the boundary has to come from `border`, which the platform remaps
+   automatically. This block steps the border up to a doubled, explicit width so the surface
+   stays visually distinct from the page even once the backdrop's own dimming is flattened
+   away by the same mechanism. */
+@media (forced-colors: active) {
+  .sk-confirm-dialog[open] {
+    border-width: calc(var(--sk-border-width-1) * 2);
+    box-shadow: none;
+  }
+}
+
+.sk-confirm-dialog__title {
+  margin: 0;
+  padding: var(--sk-space-5) var(--sk-space-5) var(--sk-space-3);
+  font-size: var(--sk-text-lg);
+  font-weight: var(--sk-weight-semibold);
+  color: inherit;
+}
+
+/* THE BODY SCROLLS; THE ACTIONS NEVER DO (FR-010). `.sk-confirm-dialog` is the flex column;
+   this region is the one flexible item in it (`min-block-size: 0` is required for a flex
+   item to be allowed to shrink below its content's height and actually scroll rather than
+   overflow the column), and `.sk-confirm-dialog__actions` below is a fixed, non-shrinking
+   sibling that this scroll can never cover. */
+.sk-confirm-dialog__body {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  padding: 0 var(--sk-space-5) var(--sk-space-5);
+  color: var(--sk-fg-body);
+}
+
+.sk-confirm-dialog__actions {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--sk-space-3);
+  padding: var(--sk-space-4) var(--sk-space-5);
+  border-block-start-style: solid;
+  border-block-start-width: var(--sk-border-width-1);
+  border-block-start-color: var(--sk-border-default);
+}
+
+/* NFR-001: every interactive control here is at least 44x44px. `.sk-button` does not
+   guarantee that on its own (its `sm` size is deliberately smaller), so this component pins
+   its own minimums on the two controls it renders, regardless of which `.sk-button` size
+   modifier (if any) the consumer's classes end up carrying. */
+.sk-confirm-dialog__confirm,
+.sk-confirm-dialog__cancel {
+  /* --sk-space-9 is 3rem/48px — the closest token at or above the 44px NFR-001 floor. */
+  min-inline-size: var(--sk-space-9);
+  min-block-size: var(--sk-space-9);
+}

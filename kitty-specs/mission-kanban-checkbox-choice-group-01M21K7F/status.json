@@ -1,0 +1,58 @@
+{
+  "event_count": 12,
+  "last_event_id": "01M220C2XF6Q6BPJMMEHVTANVG",
+  "materialized_at": "2026-09-09T02:36:23.855804+00:00",
+  "mission_number": "9",
+  "mission_slug": "mission-kanban-checkbox-choice-group-01M21K7F",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 1,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "merge",
+      "agent": "codex",
+      "agent_profile": "reviewer-renata",
+      "agent_profile_version": "1.0",
+      "force_count": 1,
+      "lane": "done",
+      "last_event_id": "01M220C2XF6Q6BPJMMEHVTANVG",
+      "last_transition_at": "2026-09-09T02:36:23.855804+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Ready for review: native styles-only checkbox choice group, 12 stories, cross-engine, axe, visual, and genuine 200%-zoom evidence",
+        "Cycle 1 fixed: Noble baselines regenerated and inspected; authoritative exact visual command 8/8; cross-engine and axe gate evidence refreshed",
+        "Independent cycle-2 review passed at 07e9574: pinned Playwright v1.62.1 Noble targeted visuals 8/8; disposable forced regeneration produced 8/8 byte-identical baselines; Chromium/Firefox/WebKit component contract suite 69 passed, 12 intentional skips, 0 failures; diff from rejected head is validation evidence only, with no unrelated implementation or snapshot changes. Exact seven selectors, native fieldset/legend/label/checkbox form semantics, styles-only/token-only surfaces, stories/LightMode, narrow/long/200%-zoom/focus/forced-colors/AX/axe evidence, documentation, and frozen generated/public surfaces remain covered. All anti-pattern checks pass."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-277/kitty-specs/mission-kanban-checkbox-choice-group-01M21K7F/tasks/WP01-native-checkbox-choice-group-styles-and-conformance-evidence/review-cycle-2.md",
+        "reference": "review-cycle://mission-kanban-checkbox-choice-group-01M21K7F/WP01-native-checkbox-choice-group-styles-and-conformance-evidence/review-cycle-2.md",
+        "reviewer": "codex",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 540213,
+      "shell_pid_created_at": "1788907205.91",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done"
+      }
+    }
+  }
+}

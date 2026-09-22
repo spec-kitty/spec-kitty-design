@@ -1,0 +1,509 @@
+{
+  "head": "7ffaae1033e032dafd1e42255a97392e8a80456d",
+  "tree": "6aac6defb52c3fcfdff47b3932cd981f8c2f5b17",
+  "method": "X11 XTEST Ctrl+0 then five Ctrl+Shift+= browser UI chords",
+  "levels": {
+    "k2": {
+      "before-100": {
+        "head": "7ffaae1033e032dafd1e42255a97392e8a80456d",
+        "tree": "6aac6defb52c3fcfdff47b3932cd981f8c2f5b17",
+        "capturedAt": "2026-09-09T16:23:20.457Z",
+        "story": {
+          "type": "story",
+          "subtype": "story",
+          "id": "patterns-mission-kanban--k-2-narrow-contained",
+          "name": "K 2 Narrow Contained",
+          "title": "Patterns/Mission Kanban",
+          "importPath": "./packages/elements/src/patterns/mission-kanban.stories.ts",
+          "tags": [
+            "dev",
+            "test",
+            "manifest",
+            "autodocs",
+            "play-fn"
+          ],
+          "exportName": "K2NarrowContained",
+          "url": "http://127.0.0.1:6178/iframe.html?id=patterns-mission-kanban--k-2-narrow-contained&viewMode=story"
+        },
+        "state": "k2",
+        "phase": "before-100",
+        "browserVersion": "151.0.7922.34",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+        "observation": {
+          "window": {
+            "innerWidth": 1199,
+            "innerHeight": 656,
+            "outerWidth": 1199,
+            "outerHeight": 799,
+            "devicePixelRatio": 1,
+            "screenWidth": 1200,
+            "screenHeight": 800,
+            "visualViewportWidth": 1184,
+            "visualViewportHeight": 656,
+            "visualViewportScale": 1
+          },
+          "document": {
+            "clientWidth": 1184,
+            "clientHeight": 656,
+            "scrollWidth": 1184,
+            "scrollHeight": 1592,
+            "scrollY": 467
+          },
+          "pattern": {
+            "left": 0,
+            "right": 1184,
+            "width": 1184,
+            "compact": true,
+            "long": false
+          },
+          "scroller": {
+            "left": 312,
+            "right": 1168,
+            "width": 856,
+            "clientWidth": 856,
+            "scrollWidth": 1172,
+            "scrollLeft": 316,
+            "role": "region",
+            "ariaLabel": "Work package Kanban",
+            "tabIndex": "0"
+          },
+          "lanes": [
+            {
+              "id": "planned",
+              "width": 220
+            },
+            {
+              "id": "doing",
+              "width": 220
+            },
+            {
+              "id": "for_review",
+              "width": 220
+            },
+            {
+              "id": "approved",
+              "width": 220
+            },
+            {
+              "id": "done",
+              "width": 220
+            }
+          ],
+          "focus": {
+            "id": "WP15",
+            "tagName": "A",
+            "href": "/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP15/",
+            "focused": true,
+            "left": 962,
+            "right": 1146,
+            "top": 453.875,
+            "bottom": 568.875,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineOffset": "-2px",
+            "outlineExtent": 0
+          },
+          "longLabelPresent": null
+        },
+        "checks": {
+          "expectedDevicePixelRatio": true,
+          "noPinchOrPageScaleEmulation": true,
+          "fixedPhysicalBrowserWidth": true,
+          "noHorizontalDocumentOverflow": true,
+          "localBoardOverflow": true,
+          "completeOverflowSemantics": true,
+          "nativeRouteFocused": true,
+          "visibleFocus": true,
+          "focusContainedByScroller": true,
+          "focusVisibleInViewport": true,
+          "suppliedLongContentPreserved": true
+        },
+        "consoleErrors": [],
+        "pageErrors": [],
+        "passed": true,
+        "failedChecks": [],
+        "desktopScreenshot": {
+          "filename": "k2-before-100-desktop.png",
+          "sha256": "7627211d34b8e9818ab962f6f6e69cf6d0b32887f6e256b89e18e0bca9badb12"
+        }
+      },
+      "after-200": {
+        "head": "7ffaae1033e032dafd1e42255a97392e8a80456d",
+        "tree": "6aac6defb52c3fcfdff47b3932cd981f8c2f5b17",
+        "capturedAt": "2026-09-09T16:23:24.636Z",
+        "story": {
+          "type": "story",
+          "subtype": "story",
+          "id": "patterns-mission-kanban--k-2-narrow-contained",
+          "name": "K 2 Narrow Contained",
+          "title": "Patterns/Mission Kanban",
+          "importPath": "./packages/elements/src/patterns/mission-kanban.stories.ts",
+          "tags": [
+            "dev",
+            "test",
+            "manifest",
+            "autodocs",
+            "play-fn"
+          ],
+          "exportName": "K2NarrowContained",
+          "url": "http://127.0.0.1:6178/iframe.html?id=patterns-mission-kanban--k-2-narrow-contained&viewMode=story"
+        },
+        "state": "k2",
+        "phase": "after-200",
+        "browserVersion": "151.0.7922.34",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+        "observation": {
+          "window": {
+            "innerWidth": 599,
+            "innerHeight": 328,
+            "outerWidth": 1199,
+            "outerHeight": 799,
+            "devicePixelRatio": 2,
+            "screenWidth": 1200,
+            "screenHeight": 800,
+            "visualViewportWidth": 592,
+            "visualViewportHeight": 328,
+            "visualViewportScale": 1
+          },
+          "document": {
+            "clientWidth": 592,
+            "clientHeight": 328,
+            "scrollWidth": 592,
+            "scrollHeight": 1679,
+            "scrollY": 807
+          },
+          "pattern": {
+            "left": 0,
+            "right": 592,
+            "width": 592,
+            "compact": true,
+            "long": false
+          },
+          "scroller": {
+            "left": 16,
+            "right": 576,
+            "width": 560,
+            "clientWidth": 560,
+            "scrollWidth": 1172,
+            "scrollLeft": 612,
+            "role": "region",
+            "ariaLabel": "Work package Kanban",
+            "tabIndex": "0"
+          },
+          "lanes": [
+            {
+              "id": "planned",
+              "width": 220
+            },
+            {
+              "id": "doing",
+              "width": 220
+            },
+            {
+              "id": "for_review",
+              "width": 220
+            },
+            {
+              "id": "approved",
+              "width": 220
+            },
+            {
+              "id": "done",
+              "width": 220
+            }
+          ],
+          "focus": {
+            "id": "WP15",
+            "tagName": "A",
+            "href": "/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP15/",
+            "focused": true,
+            "left": 370,
+            "right": 554,
+            "top": 214.375,
+            "bottom": 327.875,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineOffset": "-2px",
+            "outlineExtent": 0
+          },
+          "longLabelPresent": null
+        },
+        "checks": {
+          "expectedDevicePixelRatio": true,
+          "noPinchOrPageScaleEmulation": true,
+          "fixedPhysicalBrowserWidth": true,
+          "noHorizontalDocumentOverflow": true,
+          "localBoardOverflow": true,
+          "completeOverflowSemantics": true,
+          "nativeRouteFocused": true,
+          "visibleFocus": true,
+          "focusContainedByScroller": true,
+          "focusVisibleInViewport": true,
+          "suppliedLongContentPreserved": true,
+          "cssViewportHalved": true,
+          "outerWidthUnchanged": true,
+          "dprDoubled": true
+        },
+        "consoleErrors": [],
+        "pageErrors": [],
+        "passed": true,
+        "failedChecks": [],
+        "desktopScreenshot": {
+          "filename": "k2-after-200-desktop.png",
+          "sha256": "fd5692a4b98be2c67f89420609e15abaca817e20b96c66b3c5af437f86ec03cc"
+        }
+      }
+    },
+    "long": {
+      "before-100": {
+        "head": "7ffaae1033e032dafd1e42255a97392e8a80456d",
+        "tree": "6aac6defb52c3fcfdff47b3932cd981f8c2f5b17",
+        "capturedAt": "2026-09-09T16:23:26.884Z",
+        "story": {
+          "type": "story",
+          "subtype": "story",
+          "id": "patterns-mission-kanban--long-content",
+          "name": "Long Content",
+          "title": "Patterns/Mission Kanban",
+          "importPath": "./packages/elements/src/patterns/mission-kanban.stories.ts",
+          "tags": [
+            "dev",
+            "test",
+            "manifest",
+            "autodocs",
+            "play-fn"
+          ],
+          "exportName": "LongContent",
+          "url": "http://127.0.0.1:6178/iframe.html?id=patterns-mission-kanban--long-content&viewMode=story"
+        },
+        "state": "long",
+        "phase": "before-100",
+        "browserVersion": "151.0.7922.34",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+        "observation": {
+          "window": {
+            "innerWidth": 1199,
+            "innerHeight": 656,
+            "outerWidth": 1199,
+            "outerHeight": 799,
+            "devicePixelRatio": 1,
+            "screenWidth": 1200,
+            "screenHeight": 800,
+            "visualViewportWidth": 1184,
+            "visualViewportHeight": 656,
+            "visualViewportScale": 1
+          },
+          "document": {
+            "clientWidth": 1184,
+            "clientHeight": 656,
+            "scrollWidth": 1184,
+            "scrollHeight": 1663,
+            "scrollY": 538
+          },
+          "pattern": {
+            "left": 0,
+            "right": 1184,
+            "width": 1184,
+            "compact": true,
+            "long": true
+          },
+          "scroller": {
+            "left": 312,
+            "right": 1012,
+            "width": 700,
+            "clientWidth": 700,
+            "scrollWidth": 1172,
+            "scrollLeft": 472,
+            "role": "region",
+            "ariaLabel": "Work package Kanban",
+            "tabIndex": "0"
+          },
+          "lanes": [
+            {
+              "id": "planned",
+              "width": 220
+            },
+            {
+              "id": "doing",
+              "width": 220
+            },
+            {
+              "id": "for_review",
+              "width": 220
+            },
+            {
+              "id": "approved",
+              "width": 220
+            },
+            {
+              "id": "done",
+              "width": 220
+            }
+          ],
+          "focus": {
+            "id": "WP15",
+            "tagName": "A",
+            "href": "/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP15/",
+            "focused": true,
+            "left": 806,
+            "right": 990,
+            "top": 453.875,
+            "bottom": 568.875,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineOffset": "-2px",
+            "outlineExtent": 0
+          },
+          "longLabelPresent": true
+        },
+        "checks": {
+          "expectedDevicePixelRatio": true,
+          "noPinchOrPageScaleEmulation": true,
+          "fixedPhysicalBrowserWidth": true,
+          "noHorizontalDocumentOverflow": true,
+          "localBoardOverflow": true,
+          "completeOverflowSemantics": true,
+          "nativeRouteFocused": true,
+          "visibleFocus": true,
+          "focusContainedByScroller": true,
+          "focusVisibleInViewport": true,
+          "suppliedLongContentPreserved": true
+        },
+        "consoleErrors": [],
+        "pageErrors": [],
+        "passed": true,
+        "failedChecks": [],
+        "desktopScreenshot": {
+          "filename": "long-before-100-desktop.png",
+          "sha256": "dbce78631ad5015239252e5a84a5ab17c65c790d595b3161d83e640e6dd3c3d1"
+        }
+      },
+      "after-200": {
+        "head": "7ffaae1033e032dafd1e42255a97392e8a80456d",
+        "tree": "6aac6defb52c3fcfdff47b3932cd981f8c2f5b17",
+        "capturedAt": "2026-09-09T16:23:30.748Z",
+        "story": {
+          "type": "story",
+          "subtype": "story",
+          "id": "patterns-mission-kanban--long-content",
+          "name": "Long Content",
+          "title": "Patterns/Mission Kanban",
+          "importPath": "./packages/elements/src/patterns/mission-kanban.stories.ts",
+          "tags": [
+            "dev",
+            "test",
+            "manifest",
+            "autodocs",
+            "play-fn"
+          ],
+          "exportName": "LongContent",
+          "url": "http://127.0.0.1:6178/iframe.html?id=patterns-mission-kanban--long-content&viewMode=story"
+        },
+        "state": "long",
+        "phase": "after-200",
+        "browserVersion": "151.0.7922.34",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+        "observation": {
+          "window": {
+            "innerWidth": 599,
+            "innerHeight": 328,
+            "outerWidth": 1199,
+            "outerHeight": 799,
+            "devicePixelRatio": 2,
+            "screenWidth": 1200,
+            "screenHeight": 800,
+            "visualViewportWidth": 592,
+            "visualViewportHeight": 328,
+            "visualViewportScale": 1
+          },
+          "document": {
+            "clientWidth": 592,
+            "clientHeight": 328,
+            "scrollWidth": 592,
+            "scrollHeight": 1831,
+            "scrollY": 887.5
+          },
+          "pattern": {
+            "left": 0,
+            "right": 592,
+            "width": 592,
+            "compact": true,
+            "long": true
+          },
+          "scroller": {
+            "left": 16,
+            "right": 576,
+            "width": 560,
+            "clientWidth": 560,
+            "scrollWidth": 1172,
+            "scrollLeft": 612,
+            "role": "region",
+            "ariaLabel": "Work package Kanban",
+            "tabIndex": "0"
+          },
+          "lanes": [
+            {
+              "id": "planned",
+              "width": 220
+            },
+            {
+              "id": "doing",
+              "width": 220
+            },
+            {
+              "id": "for_review",
+              "width": 220
+            },
+            {
+              "id": "approved",
+              "width": 220
+            },
+            {
+              "id": "done",
+              "width": 220
+            }
+          ],
+          "focus": {
+            "id": "WP15",
+            "tagName": "A",
+            "href": "/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP15/",
+            "focused": true,
+            "left": 370,
+            "right": 554,
+            "top": 214.375,
+            "bottom": 327.875,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineOffset": "-2px",
+            "outlineExtent": 0
+          },
+          "longLabelPresent": true
+        },
+        "checks": {
+          "expectedDevicePixelRatio": true,
+          "noPinchOrPageScaleEmulation": true,
+          "fixedPhysicalBrowserWidth": true,
+          "noHorizontalDocumentOverflow": true,
+          "localBoardOverflow": true,
+          "completeOverflowSemantics": true,
+          "nativeRouteFocused": true,
+          "visibleFocus": true,
+          "focusContainedByScroller": true,
+          "focusVisibleInViewport": true,
+          "suppliedLongContentPreserved": true,
+          "cssViewportHalved": true,
+          "outerWidthUnchanged": true,
+          "dprDoubled": true
+        },
+        "consoleErrors": [],
+        "pageErrors": [],
+        "passed": true,
+        "failedChecks": [],
+        "desktopScreenshot": {
+          "filename": "long-after-200-desktop.png",
+          "sha256": "66aee2a4df24b59ce0a8966b099937e4e4b90ed62ef432591254923ce65a6c7a"
+        }
+      }
+    }
+  }
+}

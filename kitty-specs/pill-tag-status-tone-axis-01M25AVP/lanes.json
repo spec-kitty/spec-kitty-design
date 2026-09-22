@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "mission_slug": "pill-tag-status-tone-axis-01M25AVP",
+  "mission_id": "01M25AVP4TARBQN358EKAXD9W4",
+  "mission_branch": "kitty/mission-pill-tag-status-tone-axis-01M25AVP",
+  "target_branch": "mission/pill-tag-status-tone-axis",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/elements-load.spec.ts",
+        "behaviours.json",
+        "docs/design-system/using-components.md",
+        "expected-docs.json",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/sk-pill-tag.test.ts",
+        "mutations.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/pill-tag/sk-pill-tag.css.d.ts",
+        "packages/elements/src/pill-tag/sk-pill-tag.css.js",
+        "packages/elements/src/pill-tag/sk-pill-tag.markup.ts",
+        "packages/elements/src/pill-tag/sk-pill-tag.stories.ts",
+        "packages/elements/src/pill-tag/sk-pill-tag.ts",
+        "packages/elements/vue.d.ts",
+        "packages/react/src/**",
+        "packages/styles/src/pill-tag/index.ts",
+        "packages/styles/src/pill-tag/sk-pill-tag.css",
+        "packages/styles/src/pill-tag/sk-pill-tag.html",
+        "packages/styles/src/pill-tag/sk-pill-tag.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T09:50:34.647766+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "94481087cb2319eb0d15459a210b23d8008f9511"
+}

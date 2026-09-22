@@ -1,0 +1,20 @@
+id,type,reference,notes
+S-001,github_issue,spec-kitty/spec-kitty-design#308,primary source brief for this mission
+S-002,github_issue,spec-kitty/spec-kitty-design#300,epic - shared constraints across all eight children
+S-003,github_issue,spec-kitty/spec-kitty-design#286,open - no-literal-text-in-render gate; binding cross-cutting constraint
+S-004,github_issue,spec-kitty/spec-kitty-design#301,open - static-form-of-element-backed-CSS decision; FR-016 deferral target
+S-005,github_issue,spec-kitty/spec-kitty-design#178,closed - sk-notice; closest structural precedent (behavior-owning element, no static form, unmarked test convention)
+S-006,github_issue,spec-kitty/spec-kitty-design#257,closed - sk-copy-field; contrasted precedent for custom-event-vs-native-event choice
+S-007,github_issue,spec-kitty/spec-kitty-design#135,open - display-gate precedent cited for "process rules recur without a gate" argument
+S-008,repo_doc,docs/contributing/adding-a-component.md,the authoritative component-authoring recipe
+S-009,repo_doc,docs/architecture/decisions/2026-09-02-9-shadow-dom-and-styling-api.md,ADR-9
+S-010,repo_doc,docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md,ADR-10
+S-011,repo_doc,docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md,ADR-11
+S-012,repo_file,packages/elements/src/notice/sk-notice.ts,pattern element for a behavior-owning, static-form-free component
+S-013,repo_file,behaviours.json,behavior-id registry and precedent notes (sk-notice, sk-copy-field entries)
+S-014,repo_file,expected-parts.json,parts ratchet - shrink-only
+S-015,repo_file,expected-docs.json,docs ratchet - exact equality
+S-016,repo_file,scripts/check-release-graph.mjs,release-path gate; checkSubpathCoverage
+S-017,repo_file,scripts/check-component-token-literals.mjs,confirmed unrelated to copy-text literals (CSS design-value literals only)
+S-018,repo_file,packages/styles/package.json,exports map - hand-maintained subpath registry
+S-019,external,MDN Web Docs - HTMLDialogElement / <dialog> element,platform behavior for showModal(), close event, returnValue, Escape/cancel event ordering

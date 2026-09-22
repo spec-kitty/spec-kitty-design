@@ -1,0 +1,1155 @@
+{
+  "construct_kind": "host-container-type",
+  "component": "sk-action-row",
+  "generated_at": "2026-09-10T01:00:02.990Z",
+  "train_ref_note": "Run on mission/static-form-of-element-backed-css, branched from train/elements-first@2b59c8c.",
+  "shadow_form_source": "packages/elements/src/action-row/sk-action-row.ts, rendered from the Storybook build via shadow.html, cross-checked against Storybook story elements-skactionrow--default",
+  "static_exemplar_source": "kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/host-container-type/exemplar.html (throwaway; links the export-map-resolved built CSS)",
+  "real_package_consumption": {
+    "specifier": "@spec-kitty/styles/action-row/sk-action-row.css",
+    "resolved_to": "/home/jeroennouws/dev/spec-kitty-design-missions/301/packages/styles/dist/action-row/sk-action-row.css",
+    "how": "Node's own export-map resolution via import.meta.resolve, served to the browser by harness.mjs on /pkg/<specifier>"
+  },
+  "declared_outcome_sources": [
+    "outcomes.declared.json",
+    "outcomes.declared.cycle-2.json"
+  ],
+  "declared_outcome_count": 20,
+  "static_exemplar_variants": {
+    "A-collapsed": "A",
+    "B-wrapper": "B",
+    "B-abbrev": "Babbrev"
+  },
+  "engines": [
+    "chromium",
+    "firefox"
+  ],
+  "per_engine": {
+    "chromium": {
+      "rendered_shape": {
+        "shadow": {
+          "S1": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S2": {
+            "row_width": 500,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S3": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S4": {
+            "row_width": 700,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S5": {
+            "row_width": 2,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S6": {
+            "row_width": 300,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S7": {
+            "row_width": 400,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S8": {
+            "row_width": 401,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          }
+        },
+        "A-collapsed": {
+          "S1": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S2": {
+            "row_width": 500,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S3": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S4": {
+            "row_width": 700,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S5": {
+            "row_width": 2,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S6": {
+            "row_width": 300,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S7": {
+            "row_width": 400,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S8": {
+            "row_width": 401,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          }
+        },
+        "B-wrapper": {
+          "S1": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S2": {
+            "row_width": 500,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S3": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S4": {
+            "row_width": 700,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S5": {
+            "row_width": 2,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S6": {
+            "row_width": 300,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S7": {
+            "row_width": 400,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S8": {
+            "row_width": 401,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          }
+        },
+        "B-abbrev": {
+          "S1": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S2": {
+            "row_width": 500,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S3": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S4": {
+            "row_width": 700,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S5": {
+            "row_width": 2,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S6": {
+            "row_width": 300,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S7": {
+            "row_width": 400,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S8": {
+            "row_width": 401,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          }
+        }
+      },
+      "fidelity_crosscheck": {
+        "story_id": "elements-skactionrow--default",
+        "story": {
+          "row_width": 960,
+          "flex_wrap": "nowrap",
+          "trigger_grid_template_areas": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\""
+        },
+        "controlled_shadow_page": {
+          "row_width": 960,
+          "flex_wrap": "nowrap",
+          "trigger_grid_template_areas": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\""
+        },
+        "faithful": true
+      },
+      "observed_outcomes": [
+        {
+          "id": "O1",
+          "description": ".sk-action-row flex-wrap",
+          "viewport_or_state": "host box 360px (below the 400px @container breakpoint)",
+          "shadow_form_value": "wrap",
+          "static_exemplar_value": {
+            "A-collapsed": "nowrap",
+            "B-wrapper": "wrap",
+            "B-abbrev": "wrap"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O2",
+          "description": ".sk-action-row flex-wrap",
+          "viewport_or_state": "host box 500px (above 400px)",
+          "shadow_form_value": "nowrap",
+          "static_exemplar_value": {
+            "A-collapsed": "nowrap",
+            "B-wrapper": "nowrap",
+            "B-abbrev": "nowrap"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O3",
+          "description": ".sk-action-row__trigger grid-template-columns",
+          "viewport_or_state": "host box 360px",
+          "shadow_form_value": "26.5156px 299.484px",
+          "static_exemplar_value": {
+            "A-collapsed": "26.5156px 0px",
+            "B-wrapper": "26.5156px 299.484px",
+            "B-abbrev": "26.5156px 299.484px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O4",
+          "description": ".sk-action-row__trigger grid-template-columns",
+          "viewport_or_state": "host box 500px",
+          "shadow_form_value": "26.5156px 328.703px 58.7812px",
+          "static_exemplar_value": {
+            "A-collapsed": "26.5156px 328.703px 58.7812px",
+            "B-wrapper": "26.5156px 328.703px 58.7812px",
+            "B-abbrev": "26.5156px 328.703px 58.7812px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O5",
+          "description": ".sk-action-row__trigger grid-template-areas",
+          "viewport_or_state": "host box 360px",
+          "shadow_form_value": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-wrapper": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-abbrev": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O6",
+          "description": ".sk-action-row__trigger grid-template-areas",
+          "viewport_or_state": "host box 500px",
+          "shadow_form_value": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+            "B-wrapper": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+            "B-abbrev": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O7",
+          "description": ".sk-action-row__metadata justify-self",
+          "viewport_or_state": "host box 360px",
+          "shadow_form_value": "start",
+          "static_exemplar_value": {
+            "A-collapsed": "start",
+            "B-wrapper": "start",
+            "B-abbrev": "start"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O8",
+          "description": ".sk-action-row__metadata justify-self",
+          "viewport_or_state": "host box 500px",
+          "shadow_form_value": "end",
+          "static_exemplar_value": {
+            "A-collapsed": "end",
+            "B-wrapper": "end",
+            "B-abbrev": "end"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O9",
+          "description": ".sk-action-row__controls width",
+          "viewport_or_state": "host box 360px",
+          "shadow_form_value": "358px",
+          "static_exemplar_value": {
+            "A-collapsed": "358px",
+            "B-wrapper": "358px",
+            "B-abbrev": "358px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O10",
+          "description": ".sk-action-row flex-wrap (COMPOSED: outer ancestor container-type:inline-size at 1200px, component box 360px)",
+          "viewport_or_state": "composed-outer-wider",
+          "shadow_form_value": "wrap",
+          "static_exemplar_value": {
+            "A-collapsed": "nowrap",
+            "B-wrapper": "wrap",
+            "B-abbrev": "wrap"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O11",
+          "description": ".sk-action-row__trigger grid-template-areas (COMPOSED: outer 1200px, component 360px)",
+          "viewport_or_state": "composed-outer-wider",
+          "shadow_form_value": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-wrapper": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-abbrev": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O12",
+          "description": ".sk-action-row flex-wrap (COMPOSED: outer ancestor container-type:inline-size at 320px, component box 700px)",
+          "viewport_or_state": "composed-outer-narrower",
+          "shadow_form_value": "nowrap",
+          "static_exemplar_value": {
+            "A-collapsed": "wrap",
+            "B-wrapper": "nowrap",
+            "B-abbrev": "nowrap"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O13",
+          "description": ".sk-action-row__trigger grid-template-areas (COMPOSED: outer 320px, component 700px)",
+          "viewport_or_state": "composed-outer-narrower",
+          "shadow_form_value": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+            "B-wrapper": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+            "B-abbrev": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O14",
+          "description": ".sk-action-row width (HIGH-1: component as an item of a 300px flex row)",
+          "viewport_or_state": "flex parent 300px",
+          "shadow_form_value": "0px",
+          "static_exemplar_value": {
+            "A-collapsed": "0px",
+            "B-wrapper": "0px",
+            "B-abbrev": "0px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O15",
+          "description": ".sk-action-row__trigger grid-template-areas (HIGH-1: component as an item of a 300px flex row)",
+          "viewport_or_state": "flex parent 300px",
+          "shadow_form_value": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-wrapper": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-abbrev": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O16",
+          "description": ".sk-action-row width (HIGH-1 control: 300px grid track)",
+          "viewport_or_state": "grid parent, single 300px track",
+          "shadow_form_value": "298px",
+          "static_exemplar_value": {
+            "A-collapsed": "298px",
+            "B-wrapper": "298px",
+            "B-abbrev": "298px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O17",
+          "description": ".sk-action-row flex-wrap (MEDIUM-2: exactly AT the inclusive 400px breakpoint)",
+          "viewport_or_state": "row 400px",
+          "shadow_form_value": "wrap",
+          "static_exemplar_value": {
+            "A-collapsed": "nowrap",
+            "B-wrapper": "wrap",
+            "B-abbrev": "wrap"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O18",
+          "description": ".sk-action-row__trigger grid-template-areas (MEDIUM-2: exactly at 400px)",
+          "viewport_or_state": "row 400px",
+          "shadow_form_value": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-wrapper": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-abbrev": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O19",
+          "description": ".sk-action-row flex-wrap (MEDIUM-2: one pixel above the breakpoint)",
+          "viewport_or_state": "row 401px",
+          "shadow_form_value": "nowrap",
+          "static_exemplar_value": {
+            "A-collapsed": "nowrap",
+            "B-wrapper": "nowrap",
+            "B-abbrev": "nowrap"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O20",
+          "description": ".sk-action-row__trigger grid-template-areas (MEDIUM-2: one pixel above the breakpoint)",
+          "viewport_or_state": "row 401px",
+          "shadow_form_value": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-wrapper": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+            "B-abbrev": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        }
+      ]
+    },
+    "firefox": {
+      "rendered_shape": {
+        "shadow": {
+          "S1": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S2": {
+            "row_width": 500,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S3": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S4": {
+            "row_width": 700,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S5": {
+            "row_width": 2,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S6": {
+            "row_width": 300,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S7": {
+            "row_width": 400,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S8": {
+            "row_width": 401,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          }
+        },
+        "A-collapsed": {
+          "S1": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S2": {
+            "row_width": 500,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S3": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S4": {
+            "row_width": 700,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S5": {
+            "row_width": 2,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S6": {
+            "row_width": 300,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S7": {
+            "row_width": 400,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S8": {
+            "row_width": 401,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          }
+        },
+        "B-wrapper": {
+          "S1": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S2": {
+            "row_width": 500,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S3": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S4": {
+            "row_width": 700,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S5": {
+            "row_width": 2,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S6": {
+            "row_width": 300,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S7": {
+            "row_width": 400,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S8": {
+            "row_width": 401,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          }
+        },
+        "B-abbrev": {
+          "S1": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S2": {
+            "row_width": 500,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S3": {
+            "row_width": 360,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S4": {
+            "row_width": 700,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S5": {
+            "row_width": 2,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S6": {
+            "row_width": 300,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S7": {
+            "row_width": 400,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          },
+          "S8": {
+            "row_width": 401,
+            "trigger_tag": "div",
+            "hidden_projection_wrappers": []
+          }
+        }
+      },
+      "fidelity_crosscheck": {
+        "story_id": "elements-skactionrow--default",
+        "story": {
+          "row_width": 960,
+          "flex_wrap": "nowrap",
+          "trigger_grid_template_areas": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\""
+        },
+        "controlled_shadow_page": {
+          "row_width": 960,
+          "flex_wrap": "nowrap",
+          "trigger_grid_template_areas": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\""
+        },
+        "faithful": true
+      },
+      "observed_outcomes": [
+        {
+          "id": "O1",
+          "description": ".sk-action-row flex-wrap",
+          "viewport_or_state": "host box 360px (below the 400px @container breakpoint)",
+          "shadow_form_value": "wrap",
+          "static_exemplar_value": {
+            "A-collapsed": "nowrap",
+            "B-wrapper": "wrap",
+            "B-abbrev": "wrap"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O2",
+          "description": ".sk-action-row flex-wrap",
+          "viewport_or_state": "host box 500px (above 400px)",
+          "shadow_form_value": "nowrap",
+          "static_exemplar_value": {
+            "A-collapsed": "nowrap",
+            "B-wrapper": "nowrap",
+            "B-abbrev": "nowrap"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O3",
+          "description": ".sk-action-row__trigger grid-template-columns",
+          "viewport_or_state": "host box 360px",
+          "shadow_form_value": "26.5167px 299.483px",
+          "static_exemplar_value": {
+            "A-collapsed": "26.5167px 0px",
+            "B-wrapper": "26.5167px 299.483px",
+            "B-abbrev": "26.5167px 299.483px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O4",
+          "description": ".sk-action-row__trigger grid-template-columns",
+          "viewport_or_state": "host box 500px",
+          "shadow_form_value": "26.5167px 332.967px 58.7833px",
+          "static_exemplar_value": {
+            "A-collapsed": "26.5167px 332.967px 58.7833px",
+            "B-wrapper": "26.5167px 332.967px 58.7833px",
+            "B-abbrev": "26.5167px 332.967px 58.7833px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O5",
+          "description": ".sk-action-row__trigger grid-template-areas",
+          "viewport_or_state": "host box 360px",
+          "shadow_form_value": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-wrapper": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-abbrev": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O6",
+          "description": ".sk-action-row__trigger grid-template-areas",
+          "viewport_or_state": "host box 500px",
+          "shadow_form_value": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+            "B-wrapper": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+            "B-abbrev": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O7",
+          "description": ".sk-action-row__metadata justify-self",
+          "viewport_or_state": "host box 360px",
+          "shadow_form_value": "start",
+          "static_exemplar_value": {
+            "A-collapsed": "start",
+            "B-wrapper": "start",
+            "B-abbrev": "start"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O8",
+          "description": ".sk-action-row__metadata justify-self",
+          "viewport_or_state": "host box 500px",
+          "shadow_form_value": "end",
+          "static_exemplar_value": {
+            "A-collapsed": "end",
+            "B-wrapper": "end",
+            "B-abbrev": "end"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O9",
+          "description": ".sk-action-row__controls width",
+          "viewport_or_state": "host box 360px",
+          "shadow_form_value": "358px",
+          "static_exemplar_value": {
+            "A-collapsed": "358px",
+            "B-wrapper": "358px",
+            "B-abbrev": "358px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O10",
+          "description": ".sk-action-row flex-wrap (COMPOSED: outer ancestor container-type:inline-size at 1200px, component box 360px)",
+          "viewport_or_state": "composed-outer-wider",
+          "shadow_form_value": "wrap",
+          "static_exemplar_value": {
+            "A-collapsed": "nowrap",
+            "B-wrapper": "wrap",
+            "B-abbrev": "wrap"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O11",
+          "description": ".sk-action-row__trigger grid-template-areas (COMPOSED: outer 1200px, component 360px)",
+          "viewport_or_state": "composed-outer-wider",
+          "shadow_form_value": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-wrapper": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-abbrev": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O12",
+          "description": ".sk-action-row flex-wrap (COMPOSED: outer ancestor container-type:inline-size at 320px, component box 700px)",
+          "viewport_or_state": "composed-outer-narrower",
+          "shadow_form_value": "nowrap",
+          "static_exemplar_value": {
+            "A-collapsed": "wrap",
+            "B-wrapper": "nowrap",
+            "B-abbrev": "nowrap"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O13",
+          "description": ".sk-action-row__trigger grid-template-areas (COMPOSED: outer 320px, component 700px)",
+          "viewport_or_state": "composed-outer-narrower",
+          "shadow_form_value": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+            "B-wrapper": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+            "B-abbrev": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O14",
+          "description": ".sk-action-row width (HIGH-1: component as an item of a 300px flex row)",
+          "viewport_or_state": "flex parent 300px",
+          "shadow_form_value": "0px",
+          "static_exemplar_value": {
+            "A-collapsed": "0px",
+            "B-wrapper": "0px",
+            "B-abbrev": "0px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O15",
+          "description": ".sk-action-row__trigger grid-template-areas (HIGH-1: component as an item of a 300px flex row)",
+          "viewport_or_state": "flex parent 300px",
+          "shadow_form_value": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-wrapper": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-abbrev": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O16",
+          "description": ".sk-action-row width (HIGH-1 control: 300px grid track)",
+          "viewport_or_state": "grid parent, single 300px track",
+          "shadow_form_value": "298px",
+          "static_exemplar_value": {
+            "A-collapsed": "298px",
+            "B-wrapper": "298px",
+            "B-abbrev": "298px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O17",
+          "description": ".sk-action-row flex-wrap (MEDIUM-2: exactly AT the inclusive 400px breakpoint)",
+          "viewport_or_state": "row 400px",
+          "shadow_form_value": "wrap",
+          "static_exemplar_value": {
+            "A-collapsed": "nowrap",
+            "B-wrapper": "wrap",
+            "B-abbrev": "wrap"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O18",
+          "description": ".sk-action-row__trigger grid-template-areas (MEDIUM-2: exactly at 400px)",
+          "viewport_or_state": "row 400px",
+          "shadow_form_value": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-wrapper": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-abbrev": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O19",
+          "description": ".sk-action-row flex-wrap (MEDIUM-2: one pixel above the breakpoint)",
+          "viewport_or_state": "row 401px",
+          "shadow_form_value": "nowrap",
+          "static_exemplar_value": {
+            "A-collapsed": "nowrap",
+            "B-wrapper": "nowrap",
+            "B-abbrev": "nowrap"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O20",
+          "description": ".sk-action-row__trigger grid-template-areas (MEDIUM-2: one pixel above the breakpoint)",
+          "viewport_or_state": "row 401px",
+          "shadow_form_value": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+          "static_exemplar_value": {
+            "A-collapsed": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\"",
+            "B-wrapper": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+            "B-abbrev": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\""
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        }
+      ]
+    }
+  },
+  "variant_passes_every_declared_outcome": {
+    "A-collapsed": false,
+    "B-wrapper": true,
+    "B-abbrev": true
+  },
+  "declared_outcome_failures": {
+    "A-collapsed": [
+      {
+        "engine": "chromium",
+        "id": "O1",
+        "description": ".sk-action-row flex-wrap",
+        "viewport_or_state": "host box 360px (below the 400px @container breakpoint)",
+        "shadow_form_value": "wrap",
+        "static_exemplar_value": "nowrap"
+      },
+      {
+        "engine": "chromium",
+        "id": "O3",
+        "description": ".sk-action-row__trigger grid-template-columns",
+        "viewport_or_state": "host box 360px",
+        "shadow_form_value": "26.5156px 299.484px",
+        "static_exemplar_value": "26.5156px 0px"
+      },
+      {
+        "engine": "chromium",
+        "id": "O10",
+        "description": ".sk-action-row flex-wrap (COMPOSED: outer ancestor container-type:inline-size at 1200px, component box 360px)",
+        "viewport_or_state": "composed-outer-wider",
+        "shadow_form_value": "wrap",
+        "static_exemplar_value": "nowrap"
+      },
+      {
+        "engine": "chromium",
+        "id": "O12",
+        "description": ".sk-action-row flex-wrap (COMPOSED: outer ancestor container-type:inline-size at 320px, component box 700px)",
+        "viewport_or_state": "composed-outer-narrower",
+        "shadow_form_value": "nowrap",
+        "static_exemplar_value": "wrap"
+      },
+      {
+        "engine": "chromium",
+        "id": "O17",
+        "description": ".sk-action-row flex-wrap (MEDIUM-2: exactly AT the inclusive 400px breakpoint)",
+        "viewport_or_state": "row 400px",
+        "shadow_form_value": "wrap",
+        "static_exemplar_value": "nowrap"
+      },
+      {
+        "engine": "chromium",
+        "id": "O20",
+        "description": ".sk-action-row__trigger grid-template-areas (MEDIUM-2: one pixel above the breakpoint)",
+        "viewport_or_state": "row 401px",
+        "shadow_form_value": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+        "static_exemplar_value": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\""
+      },
+      {
+        "engine": "firefox",
+        "id": "O1",
+        "description": ".sk-action-row flex-wrap",
+        "viewport_or_state": "host box 360px (below the 400px @container breakpoint)",
+        "shadow_form_value": "wrap",
+        "static_exemplar_value": "nowrap"
+      },
+      {
+        "engine": "firefox",
+        "id": "O3",
+        "description": ".sk-action-row__trigger grid-template-columns",
+        "viewport_or_state": "host box 360px",
+        "shadow_form_value": "26.5167px 299.483px",
+        "static_exemplar_value": "26.5167px 0px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O10",
+        "description": ".sk-action-row flex-wrap (COMPOSED: outer ancestor container-type:inline-size at 1200px, component box 360px)",
+        "viewport_or_state": "composed-outer-wider",
+        "shadow_form_value": "wrap",
+        "static_exemplar_value": "nowrap"
+      },
+      {
+        "engine": "firefox",
+        "id": "O12",
+        "description": ".sk-action-row flex-wrap (COMPOSED: outer ancestor container-type:inline-size at 320px, component box 700px)",
+        "viewport_or_state": "composed-outer-narrower",
+        "shadow_form_value": "nowrap",
+        "static_exemplar_value": "wrap"
+      },
+      {
+        "engine": "firefox",
+        "id": "O17",
+        "description": ".sk-action-row flex-wrap (MEDIUM-2: exactly AT the inclusive 400px breakpoint)",
+        "viewport_or_state": "row 400px",
+        "shadow_form_value": "wrap",
+        "static_exemplar_value": "nowrap"
+      },
+      {
+        "engine": "firefox",
+        "id": "O20",
+        "description": ".sk-action-row__trigger grid-template-areas (MEDIUM-2: one pixel above the breakpoint)",
+        "viewport_or_state": "row 401px",
+        "shadow_form_value": "\"marker title metadata\" \"marker reference metadata\" \"marker tags metadata\" \"supporting supporting supporting\"",
+        "static_exemplar_value": "\"marker title\" \"marker reference\" \"marker tags\" \"metadata metadata\" \"supporting supporting\""
+      }
+    ],
+    "B-wrapper": [],
+    "B-abbrev": []
+  },
+  "composed_case_tested": true,
+  "verdict_for_this_construct_kind": "generated-static-form",
+  "passing_static_exemplar_variant": "B-wrapper"
+}

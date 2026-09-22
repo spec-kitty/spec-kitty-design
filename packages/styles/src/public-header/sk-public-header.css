@@ -1,0 +1,183 @@
+/* @spec-kitty/styles — native light-DOM public header presentation (#353) */
+/* Consumers own identity, routes, labels, action presence, current state, and theme state. */
+
+.sk-public-header {
+  box-sizing: border-box;
+  inline-size: 100%;
+  color: var(--sk-fg-body);
+  background: var(--sk-surface-page);
+  border-block-end-color: var(--sk-border-default);
+  border-block-end-style: solid;
+  border-block-end-width: var(--sk-border-width-1);
+  font-family: var(--sk-font-sans);
+}
+
+.sk-public-header__inner {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  min-inline-size: 0;
+  min-block-size: var(--sk-space-10);
+  gap: var(--sk-space-4);
+  padding-block: var(--sk-space-3);
+  padding-inline: var(--sk-space-4);
+}
+
+.sk-public-header__brand {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: var(--sk-space-9);
+  margin-inline-end: auto;
+  gap: var(--sk-space-3);
+  color: var(--sk-fg-default);
+  font-size: var(--sk-text-xl);
+  font-weight: var(--sk-weight-semibold);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.sk-public-header__brand:link,
+.sk-public-header__brand:visited {
+  color: var(--sk-fg-default);
+}
+
+.sk-public-header__brand-context {
+  min-inline-size: 0;
+  padding-inline-start: var(--sk-space-4);
+  color: var(--sk-fg-muted);
+  border-inline-start-color: var(--sk-border-strong);
+  border-inline-start-style: solid;
+  border-inline-start-width: var(--sk-border-width-1);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-normal);
+  overflow-wrap: anywhere;
+}
+
+.sk-public-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin-inline-start: auto;
+  gap: var(--sk-space-3);
+}
+
+.sk-public-header__action {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--sk-space-9);
+  max-inline-size: 100%;
+  min-block-size: var(--sk-space-9);
+  border-block-end-style: solid;
+  border-block-end-width: var(--sk-border-width-1);
+  overflow-wrap: anywhere;
+}
+
+/* COMPOSITION NORMALISATION, deliberately one class more specific than the rule above.
+   These six properties are the ones a composed control also declares — `.sk-button`,
+   `.sk-button--ghost` and `.sk-button--secondary` each set colour, background, border colour,
+   font and text-decoration at (0,1,0). At (0,1,0) this family tied with them and the winner was
+   whichever stylesheet the consumer's bundler happened to place last, which is not a contract.
+   Worse, it resolved INCONSISTENTLY within one row: an <a> was rescued by the :link rule below
+   while an adjacent <button> was not, so the two rendered at different foregrounds in the very
+   fixture that exists to prove mixed controls compose as one row.
+   Scoping to the block class makes the slot's normalisation win by specificity, in any bundle
+   order, for every element type — without this sheet naming `.sk-button`, which C-007 forbids. */
+.sk-public-header .sk-public-header__action {
+  color: inherit;
+  background: transparent;
+  border-block-end-color: transparent;
+  font-family: var(--sk-font-sans);
+  font-weight: var(--sk-weight-normal);
+  text-decoration: none;
+}
+
+.sk-public-header .sk-public-header__action:link,
+.sk-public-header .sk-public-header__action:visited {
+  color: inherit;
+}
+
+/* THE STATES NEED THE SAME SCOPING, and the first revision of this fix missed them.
+   `.sk-button--ghost:hover { color }` and `.sk-button--secondary:hover { border-color }` are
+   themselves (0,2,0) — equal to the resting rule above, so order decided again. And it decided
+   ASYMMETRICALLY for the same reason as before: an <a> stays inherited because the `:link` rule
+   is (0,3,0) and still matches while hovered, while an adjacent <button> does not match `:link`
+   at all and took the control's hover colour. That is the exact defect the resting fix was
+   written to remove, surviving one pseudo-class deeper. At (0,3,0) these win outright.
+   Deliberately BEFORE the `[aria-current]` rule, which is also (0,3,0): the current-route cue
+   must still beat a hover, and equal specificity is resolved by order. */
+.sk-public-header .sk-public-header__action:hover,
+.sk-public-header .sk-public-header__action:active,
+.sk-public-header .sk-public-header__action:focus-visible {
+  color: inherit;
+  border-block-end-color: transparent;
+}
+
+.sk-public-header__action:hover {
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-thickness: var(--sk-border-width-1);
+  text-underline-offset: var(--sk-space-1);
+}
+
+.sk-public-header__action:active {
+  text-decoration-line: underline;
+  text-decoration-style: double;
+  text-decoration-thickness: var(--sk-border-width-2);
+}
+
+.sk-public-header__brand:focus-visible,
+.sk-public-header__action:focus-visible {
+  outline-color: var(--sk-border-focus);
+  outline-style: solid;
+  outline-width: var(--sk-border-width-2);
+  outline-offset: var(--sk-border-width-1);
+}
+
+/* SCOPED like the rules above, and for a reason the fold created: `:link` is now (0,3,0), which
+   TIED this rule at (0,3,0) and left the current-route cue decided by source order alone. No test
+   reads the current action's text colour — `nonColourCue` excludes colour deliberately — so a
+   future "group the link rules together" tidy-up would have dropped `--sk-fg-default` from the
+   current route with the whole suite green. At (0,4,0) it is specificity-decided again. */
+.sk-public-header .sk-public-header__action[aria-current]:not([aria-current="false"]) {
+  color: var(--sk-fg-default);
+  border-block-end-color: var(--sk-color-accent);
+  border-block-end-style: solid;
+  border-block-end-width: var(--sk-border-width-4);
+  font-weight: var(--sk-weight-semibold);
+}
+
+/* NO `ButtonText` DECLARATIONS HERE, and their absence is measured rather than assumed.
+   An earlier revision set `border-block-end-color: ButtonText` on the band and
+   `border-inline-start-color: ButtonText` on the brand divider. A probe added to
+   `sk-public-header.spec.ts` resolved both `ButtonText` and `CanvasText` to rgb(0,0,0) under
+   Chromium's forced-colors emulation, so the UA's own remap — which recolours a border with zero
+   author CSS — already produced the identical result. `sk-card.css:202-211` records the #218
+   ruling for exactly this shape: a block that restates what the UA computes anyway reads as the
+   mechanism while doing none of the work, and the next author widens it believing the edge
+   depends on it. `Highlight` stays because it IS a different colour and therefore does real
+   work; the spec asserts that difference so a future palette collapse turns this red. */
+@media (forced-colors: active) {
+  /* MUST match the scoping of the rule it overrides. A media query adds no specificity, so once
+     the base current-route rule became (0,4,0) an unscoped (0,3,0) override here would have lost
+     and the current cue would have kept `--sk-color-accent` under forced colours instead of
+     `Highlight`. */
+  .sk-public-header .sk-public-header__action[aria-current]:not([aria-current="false"]) {
+    border-block-end-color: Highlight;
+  }
+
+  .sk-public-header__brand:focus-visible,
+  .sk-public-header__action:focus-visible {
+    outline-color: Highlight;
+  }
+}

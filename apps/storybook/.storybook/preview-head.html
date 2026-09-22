@@ -1,0 +1,37 @@
+<!--
+  The preview canvas had no background of its own, so every dark-theme story was
+  composited on the browser default (white). preview.ts used to declare a
+  `backgrounds` parameter defaulting to sk-dark; it never did anything.
+
+  The reason is an API shape, not a missing addon: backgrounds ships in Storybook
+  core (storybook@10 exports ./backgrounds, and withBackgroundAndGrid lives in the
+  core preview runtime), but the decorator reads `parameters.backgrounds.options`
+  as a record plus a selection from `globals.backgrounds.value`. The config was the
+  Storybook 8 shape — `default` plus a `values` array — so `options` fell back to
+  the built-in defaults, `globals.backgrounds` was undefined, and no background was
+  ever applied. Installing an addon would have changed nothing.
+
+  The consequence was not cosmetic: the axe gate measured dark-theme foreground
+  colours against #ffffff and reported 9 colour-contrast violations that cannot
+  occur in any real consumer. See #90.
+
+  Driving it from the token here rather than from parameters is deliberate — it is
+  one source of truth. --sk-surface-page is the canonical page surface.
+
+  A note on the light theme, because an earlier version of this comment got it
+  wrong: tokens.css anchors the light override on `:root[data-theme="light"],
+  .sk-light`. :root matches only <html>, and no element in the repo carries
+  class="sk-light" — so the <div data-theme="light"> wrappers the LightMode
+  stories use match neither selector and inherit the dark tokens. Those stories
+  render dark. That is not caused by this file and is not fixed here; see #93.
+-->
+<style>
+  body {
+    background: var(--sk-surface-page, #0D0E11);
+    /* Deliberately no `color`. Nothing this design system ships gives a consumer
+       a body foreground rule — tokens.css declares variables only — so a component
+       that does not set its own colour really does inherit UA black. Setting it
+       here would hide that from the gate: measured, an inheriting component goes
+       from a 1.08:1 violation to clean purely because of the preview. */
+  }
+</style>

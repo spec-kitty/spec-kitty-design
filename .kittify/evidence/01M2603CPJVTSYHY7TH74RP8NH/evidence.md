@@ -1,0 +1,1 @@
+Opened to backfill agent/model dispatch metadata onto WP01's approved transition, but its mission identity did not bind to button-danger-secondary-axis-01M25STP (recorded=None); resolved the metadata gap instead via 'move-task --to approved --agent claude --force' (same-lane re-emit).

@@ -1,0 +1,97 @@
+schema: review-findings/v1
+complete: true
+phase: plan
+lens_group: fresh
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: PLAN-FRESH2-001
+    lens: consistency
+    severity: 4
+    title: IC-04's new "first-run" visual-baseline sequencing reads as local capture, contradicting this plan's own "CI-authoritative, not a local run" rule
+    evidence:
+      - artifact: "plan.md § IC-04 — Sequencing/depends-on (added in b91cc43)"
+      - artifact: "plan.md:41 (Technical Context, Testing) — \"visual-regression baselines (CI-authoritative)\""
+      - artifact: "plan.md:380 (Gate enumeration) — \"CI `visual-regression-diffs` artifact ... CI-authoritative, not a local run\""
+      - artifact: "spec.md:240 FR-012 — \"CI-authoritative visual baselines\""
+      - code: "apps/storybook/src/tests/visual.spec.ts:26-29 — \"BASELINES ARE CI-AUTHORITATIVE. These PNGs were shot on the ubuntu-latest runner, not locally ... Refresh them from the visual-regression-diffs artifact of a CI run, never with a local --update-snapshots.\""
+    claim: >
+      The third dependency set b91cc43 added to IC-04 instructs implementers to "Author and
+      first-run these blocks LAST" and reasons that "a first-run `toHaveScreenshot()` has no prior
+      baseline to diff against, so whatever DOM/CSS state exists the moment it first runs becomes
+      the committed baseline." Read next to the two other blocks in the same bullet — both of which
+      give explicit local command sequences ("run `npx nx run storybook:storybook:build`", "write and
+      run the Playwright spec's live-block ... against that minimal pass") — this reads as an
+      instruction to locally execute the new visual.spec.ts test() blocks to generate and commit the
+      baseline PNGs. That is exactly the workflow the file being edited explicitly forbids in its own
+      header comment (never use a local `--update-snapshots`; baselines must come from the CI
+      `visual-regression-diffs` artifact on the ubuntu-latest runner, because local font rasterization
+      and clipped-box dimensions differ from CI's, as the stub component's own 312x38-local-vs-336x34-
+      CI precedent shows) — a rule this very plan repeats verbatim twice elsewhere (Technical Context,
+      Gate enumeration) and that spec.md's FR-012 binds ("CI-authoritative visual baselines"). The new
+      sequencing text never mentions triggering CI or pulling the artifact, so an implementer following
+      it literally would produce baseline PNGs that CI immediately rejects on dimension/rendering
+      mismatch — the exact failure mode #69/#88's fix (quoted in visual.spec.ts's header) was written to
+      prevent.
+    remediation: >
+      Rewrite the third dependency set's "Author and first-run these blocks LAST" step to say
+      explicitly: author the test() blocks last (after IC-01/IC-03's CSS is final and the LIVE block is
+      green), then push and let CI shoot the baselines, then pull the PNGs from the
+      `visual-regression-diffs` artifact and commit those — never generate or commit a locally-run
+      screenshot, matching visual.spec.ts's own header comment and the plan's existing
+      "CI-authoritative, not a local run" language.
+
+  - id: PLAN-FRESH2-002
+    lens: consistency
+    severity: 3
+    title: "\"Three blocks, three dependency sets\" conflates two different Playwright mechanisms in two different files under one label the prose itself doesn't apply consistently"
+    evidence:
+      - artifact: "plan.md § IC-04 — Purpose: \"structured in two test.describe blocks matching the sk-form-select.spec.ts shape: (a) ... and (b) ...\""
+      - artifact: "plan.md § IC-04 — Visual-regression baseline authoring bullet: \"Add test() blocks to apps/storybook/src/tests/visual.spec.ts\""
+      - artifact: "plan.md § IC-04 — Sequencing/depends-on opening sentence (b91cc43): \"Three blocks, three dependency sets.\""
+    claim: >
+      IC-04's Purpose section defines exactly two `test.describe` blocks, both inside the new file
+      `sk-segmented-choice.spec.ts` — the source-contract block and the LIVE block — and separately
+      describes the visual-regression work as `test()` blocks appended to a different, pre-existing
+      file (`visual.spec.ts`) using a different Playwright pattern (no `test.describe`, per that file's
+      own flat `test(...)` structure). Round 1's Sequencing text correctly said "Two blocks, two
+      dependency sets" naming only the two `test.describe` blocks. Round 2's edit changes the opening
+      count to "Three blocks, three dependency sets" but the elaboration never actually calls the third
+      item "the third block" — it says "The THIRD dependency set governs the visual-regression baseline
+      bullet above," carefully avoiding "block" for item 3 even though the sentence that introduces it
+      promised "three blocks." This is round 2 bolting a structurally different concern (append to an
+      existing, differently-shaped file) onto a taxonomy ("block") that round 1 established to mean
+      specifically "a `test.describe` block inside the new spec file," without adjusting the taxonomy to
+      fit. An implementer skimming only the opening sentence could reasonably expect a third
+      `test.describe` block inside `sk-segmented-choice.spec.ts`, which is not what either the Purpose
+      section or the Affected-surfaces bullet (which lists `visual.spec.ts` as a separate file) actually
+      describes.
+    remediation: >
+      Reword the opening sentence to distinguish the two `test.describe` blocks inside
+      `sk-segmented-choice.spec.ts` from the separate `visual.spec.ts` append, e.g. "Two `test.describe`
+      blocks plus one separate append, three dependency sets" (or similar), so the count in the topic
+      sentence matches the vocabulary used throughout the rest of IC-04.
+
+  - id: PLAN-FRESH2-003
+    lens: consistency
+    severity: 2
+    title: Project Structure tree labels visual.spec.ts "EXISTING" while two other pre-existing, similarly-edited files in the same tree are labelled "AUTHORED"
+    evidence:
+      - artifact: "plan.md § Project Structure — Source Code tree (b91cc43): \"visual.spec.ts  # EXISTING — new test() blocks appended for sk-segmented-choice (FR-012/SC-007)\""
+      - artifact: "plan.md § Project Structure — Source Code tree: \"docs/design-system/using-components.md  # AUTHORED — new section (FR-011)\""
+      - artifact: "plan.md § Project Structure — Source Code tree: \"expected-stories.json  # AUTHORED — new byElement entry + total bump (FR-013)\""
+    claim: >
+      Every other pre-existing file in the same tree that receives new content in this WP
+      (`using-components.md`, `expected-stories.json`) is labelled "AUTHORED — new <thing>", using
+      "AUTHORED" to mean "the new content within this file is authored by this WP," regardless of
+      whether the file itself is new or pre-existing. `visual.spec.ts` is also a pre-existing file
+      receiving new content (new `test()` blocks) in this same WP, but b91cc43 labels it "EXISTING"
+      instead — a label used nowhere else in this tree and not part of the legend the other entries
+      establish (AUTHORED / GENERATED). This reads as a third, undefined category rather than a
+      deliberate distinction, and could be misread as "no edit is needed here" (contradicting the
+      "new test() blocks appended" text on the same line) rather than "existing file, edited."
+    remediation: >
+      Either relabel `visual.spec.ts` as "AUTHORED — new test() blocks appended" to match the
+      convention already used for `using-components.md` and `expected-stories.json`, or, if a
+      three-way AUTHORED/GENERATED/EXISTING-edited legend is intended, state that legend explicitly
+      once (e.g. in the tree's intro sentence) and apply it consistently to all three edited-existing-file
+      entries.

@@ -1,0 +1,149 @@
+{
+  "rows": {
+    "#146": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/146 \u2014 established the single-authored tone-vocabulary-as-leaf pattern sk-card consumes; this mission's status-tones.ts import follows it unchanged",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#177": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/177 \u2014 sk-card status-tone precedent (tokens, brand-vs-status precedence rule) reused by this mission, already landed on train",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#212": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/212 \u2014 prior decision confirming sk-card[status] ownership of card anatomy, rejecting a separate sk-avatar; informs this mission's scope only",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#216": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/216 \u2014 made status-tones.ts importable by a markup module evaluated in bare Node and added the generator's leaf-import enforcement; sk-pill-tag.markup.ts relies on that landed capability",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#286": {
+      "evidence_ref": "Follow-up: #286 (repo-wide no-user-visible-literal-in-render() gate) remains a separate deliverable; C-011/FR-011 explicitly state this mission does not build it",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#300": {
+      "evidence_ref": "Follow-up: #300 is the Family-4 component-gap epic; this mission (#302) closes one gap (G1) under it but does not close the epic",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#301": {
+      "evidence_ref": "ADR-15 (docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md) is #301's ruling and has landed on train, unblocking this mission's static freeze",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#302": {
+      "evidence_ref": "commit:0b13017 (feat(elements): add sk-pill-tag operational status-tone axis), docs:87ded56; independent reviewer APPROVE",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#308": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/308 \u2014 confirm-dialog absent-state HIGH, already fixed there; this mission's absent-state test (verified by mutation) follows its lesson but is not itself #308's fix",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#314": {
+      "evidence_ref": "Follow-up: #314 owns the sk-pill-tag::part(tag)/sk-metric composition gap; C-005/C-006/FR-009 explicitly keep this mission from claiming or building that parity",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#79": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/79 \u2014 prior primitives batch (eyebrow-as-shape modelling, on-tint contrast fix for the four brand variants); this mission builds its status axis on that already-landed base",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#93": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/93 \u2014 established that a LightMode story must wrap in class=sk-light, not the inert data-theme=light; this mission's LightMode story follows the fixed pattern (verified directly in sk-pill-tag.stories.ts)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    }
+  },
+  "schema_version": 1
+}

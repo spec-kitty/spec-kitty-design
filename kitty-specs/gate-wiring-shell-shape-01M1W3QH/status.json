@@ -1,0 +1,102 @@
+{
+  "event_count": 23,
+  "last_event_id": "01M1W4WKWB9JD692V8421VH0R1",
+  "materialized_at": "2026-09-06T19:59:53.227535+00:00",
+  "mission_number": "",
+  "mission_slug": "gate-wiring-shell-shape-01M1W3QH",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 3,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 3,
+      "lane": "done",
+      "last_event_id": "01M1W4WEZGCQDSK1T13VN2WKPJ",
+      "last_transition_at": "2026-09-06T19:59:48.208490+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Implemented and self-reviewed by the mission implementer; evidence in the PR body.",
+        "Implemented and self-reviewed by the mission implementer; evidence in the PR body."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/work/ef-fixups-1788723272/kitty-specs/gate-wiring-shell-shape-01M1W3QH/tasks/WP01-gate-wiring-shell-shape/review-cycle-1.md",
+        "reference": "review-cycle://gate-wiring-shell-shape-01M1W3QH/WP01-gate-wiring-shell-shape/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done"
+      }
+    },
+    "WP02": {
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 2,
+      "lane": "done",
+      "last_event_id": "01M1W4WHF8DYBDSYH3QKH3C743",
+      "last_transition_at": "2026-09-06T19:59:50.760573+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Implemented and self-reviewed by the mission implementer; evidence in the PR body.",
+        "Implemented and self-reviewed by the mission implementer; evidence in the PR body."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/work/ef-fixups-1788723272/kitty-specs/gate-wiring-shell-shape-01M1W3QH/tasks/WP02-card-forced-colors/review-cycle-1.md",
+        "reference": "review-cycle://gate-wiring-shell-shape-01M1W3QH/WP02-card-forced-colors/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "subtasks": {
+        "T005": "done",
+        "T006": "done",
+        "T007": "done"
+      }
+    },
+    "WP03": {
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 2,
+      "lane": "done",
+      "last_event_id": "01M1W4WKWB9JD692V8421VH0R1",
+      "last_transition_at": "2026-09-06T19:59:53.227535+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Implemented and self-reviewed by the mission implementer; evidence in the PR body.",
+        "Implemented and self-reviewed by the mission implementer; evidence in the PR body."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/work/ef-fixups-1788723272/kitty-specs/gate-wiring-shell-shape-01M1W3QH/tasks/WP03-adr-pointer-and-issue-matrix/review-cycle-1.md",
+        "reference": "review-cycle://gate-wiring-shell-shape-01M1W3QH/WP03-adr-pointer-and-issue-matrix/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "subtasks": {
+        "T008": "done",
+        "T009": "done"
+      }
+    }
+  }
+}

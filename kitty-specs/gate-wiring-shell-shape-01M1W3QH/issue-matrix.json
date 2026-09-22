@@ -1,0 +1,89 @@
+{
+  "rows": {
+    "#177": {
+      "evidence_ref": "Referenced, not delivered: the card status axis shipped before this mission. Its surface was verified while closing #218 - CARD_STATUSES, the six .sk-card--status-* rules and the 4px inline-start step are all present and now asserted under forced colors.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP02"
+    },
+    "#201": {
+      "evidence_ref": "docs/architecture/sad-lite.md header row points at the gated ADR table; sixth instance filed as #226",
+      "fr": "FR-006",
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-005",
+      "scope": "in-scope",
+      "source_file": "spec.md",
+      "title": "sad-lite.md's \"Related ADRs: ADR-001 through ADR-005\" is a fifth hand-written ADR enumeration",
+      "verdict": "fixed",
+      "wp": "WP03"
+    },
+    "#202": {
+      "evidence_ref": "scripts/check-gate-wiring.mjs gatingConditionals/disjunctsOf; four defeats re-run by scripts/check-gate-wiring-defeats.mjs",
+      "fr": "FR-001, FR-002",
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001, SC-003",
+      "scope": "in-scope",
+      "source_file": "spec.md",
+      "title": "check-gate-wiring.mjs matches strict gate clauses as text, so a shell conjunct defeats the gate",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#205": {
+      "evidence_ref": "scripts/check-gate-wiring.mjs swallows(); three defeats re-run by scripts/check-gate-wiring-defeats.mjs",
+      "fr": "FR-003",
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-002, SC-003",
+      "scope": "in-scope",
+      "source_file": "spec.md",
+      "title": "[ci] check-gate-wiring's neutered() uses an enumerated swallow list - || /bin/true and set +e both pass",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#218": {
+      "evidence_ref": "apps/storybook/src/tests/elements-load.spec.ts forced-colors case, red-first against two CSS mutations; inert media block removed",
+      "fr": "FR-004, FR-005",
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-004",
+      "scope": "in-scope",
+      "source_file": "spec.md",
+      "title": "[storybook] sk-card's ForcedColors story is byte-identical to AllStatuses and asserts nothing",
+      "verdict": "fixed",
+      "wp": "WP02"
+    },
+    "#221": {
+      "evidence_ref": "kitty-specs/card-status-tone-axis-01M1VJNY/issue-matrix.json filled and pruned; scraping behaviour reproduced on this mission's own matrix",
+      "fr": "FR-007",
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-006",
+      "scope": "in-scope",
+      "source_file": "spec.md",
+      "title": "[doctrine] issue-matrix.json ships unfilled and scrapes a referenced-only issue into a row",
+      "verdict": "fixed",
+      "wp": "WP03"
+    },
+    "#225": {
+      "evidence_ref": "Referenced, not delivered: #225 carries the operator ruling that funds the filtered-suite redesign. C-003 holds the suite-time ceiling at 881.9s and this mission does not raise it.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

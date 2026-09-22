@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "mission_slug": "flow-health-transition-matrix-01M1PGNJ",
+  "mission_id": "01M1PGNJFZ7DFXV4HXJ417N5GT",
+  "mission_branch": "kitty/mission-flow-health-transition-matrix-01M1PGNJ",
+  "target_branch": "mission/flow-health-transition-matrix",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01",
+        "WP02",
+        "WP03"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-transition-matrix.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/*transition-matrix*.png",
+        "behaviours.json",
+        "docs/design-system/changelog.md",
+        "docs/design-system/using-components.md",
+        "docs/design-system/using-react.md",
+        "expected-docs.json",
+        "expected-parts.json",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+        "fixtures/react-consumer/src/sk-transition-matrix.test.tsx",
+        "fixtures/react-consumer/src/wrappers.test.tsx",
+        "mutations.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/elements.ts",
+        "packages/elements/src/index.ts",
+        "packages/elements/src/transition-matrix/**",
+        "packages/react/.wrapper-floor",
+        "packages/react/src/SkTransitionMatrix.d.ts",
+        "packages/react/src/SkTransitionMatrix.js",
+        "packages/react/src/index.d.ts",
+        "packages/react/src/index.js",
+        "packages/react/src/react-utils.js",
+        "packages/react/type-tests/wrappers.type-test.tsx",
+        "packages/styles/src/transition-matrix/**",
+        "scripts/build-react-wrappers.mjs",
+        "scripts/check-manifest-content.mjs",
+        "scripts/normalise-manifest.mjs",
+        "suite-budget.json",
+        "tests/node/react-wrappers.test.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tracker-integration",
+        "workspace"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-04T17:58:39.669153+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "c06be2f265e7b1d9e542b426b4a5a8e8b5d237ee",
+  "collapse_report": {
+    "events": [
+      {
+        "wp_a": "WP01",
+        "wp_b": "WP02",
+        "rule": "write_scope_overlap",
+        "evidence": "overlapping globs: 'scripts/normalise-manifest.mjs' vs 'scripts/normalise-manifest.mjs', 'scripts/build-react-wrappers.mjs' vs 'scripts/build-react-wrappers.mjs', 'scripts/check-manifest-content.mjs' vs 'scripts/check-manifest-content.mjs', 'tests/node/react-wrappers.test.ts' vs 'tests/node/react-wrappers.test.ts', 'fixtures/react-consumer/src/wrappers.test.tsx' vs 'fixtures/react-consumer/src/wrappers.test.tsx', 'expected-docs.json' vs 'expected-docs.json'; WP02 depends on WP01"
+      },
+      {
+        "wp_a": "WP02",
+        "wp_b": "WP03",
+        "rule": "write_scope_overlap",
+        "evidence": "overlapping globs: 'behaviours.json' vs 'behaviours.json', 'mutations.json' vs 'mutations.json'; WP03 depends on WP02"
+      }
+    ],
+    "total_merges": 2,
+    "independent_wps_collapsed": 0,
+    "by_rule": {
+      "write_scope_overlap": 2
+    }
+  }
+}

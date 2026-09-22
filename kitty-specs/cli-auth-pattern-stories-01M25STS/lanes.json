@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "mission_slug": "cli-auth-pattern-stories-01M25STS",
+  "mission_id": "01M25STSPYKK818YW9K7VA8T48",
+  "mission_branch": "kitty/mission-cli-auth-pattern-stories-01M25STS",
+  "target_branch": "mission/cli-auth-pattern-stories",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-cli-auth-pattern.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-*.png",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "packages/elements/src/patterns/cli-auth.fixture.ts",
+        "packages/elements/src/patterns/cli-auth.stories.ts",
+        "tests/node/cli-auth-no-literal.test.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tests"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T14:14:21.230894+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "58de1c97ad1f1e64d966e3e3253fe347b771a936"
+}

@@ -1,0 +1,21 @@
+id,type,reference,notes
+S-001,github_issue,spec-kitty/spec-kitty-design#303,primary source brief for this mission
+S-002,github_issue,spec-kitty/spec-kitty-design#300,epic - shared constraints, dependency map, excluded/already-owned work table
+S-003,github_issue,spec-kitty/spec-kitty-design#302,closed/merged - sk-pill-tag status-tone axis, one of two composed dependencies
+S-004,github_issue,spec-kitty/spec-kitty-design#304,closed/merged - sk-entity-marker size/border/image axis, one of two composed dependencies
+S-005,github_issue,spec-kitty/spec-kitty-design#301,closed/merged - static-form-of-element-backed-CSS decision (ADR-15's own issue)
+S-006,github_issue,spec-kitty/spec-kitty-design#286,open - no-literal-text-in-render gate; binding cross-cutting constraint, no repo-wide gate to be built here
+S-007,github_issue,spec-kitty/spec-kitty-design#314,open - cross-sheet ::part() static-form decision; explicitly not decided by this mission
+S-008,github_issue,team-kitty-saas#1281 (different repo),non-design-repo issue - non-enumerating boundary copy; must stay expressible, never conflated with a design-repo number
+S-009,repo_doc,docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md,ADR-15 - full read
+S-010,repo_doc,docs/contributing/adding-a-component.md,the authoritative component-authoring recipe, including the ADR-15 :host/container-type/::slotted() guidance table
+S-011,repo_doc,CLAUDE.md,repo hard rules - tokens-first, BEM, commit scopes, LightMode story requirement
+S-012,repo_file,packages/styles/src/pill-tag/sk-pill-tag.css,shipped source of the composed status-tone axis (#302) - read in full
+S-013,repo_file,packages/styles/src/entity-marker/sk-entity-marker.css,shipped source of the composed size/border/image axis (#304) - read in full
+S-014,repo_file,packages/styles/src/empty-state/,styles-only precedent for optional-content anatomy and with/without exemplar HTML
+S-015,repo_file,packages/styles/src/progress/,styles-only precedent for the file shape (css, generated html, html.stories.ts, index.ts) a component with no custom element takes
+S-016,repo_file,apps/storybook/src/tests/sk-empty-state-inline.spec.ts,precedent test for asserting an absent/empty state explicitly, including the 'synthesizes no fallback' pattern
+S-017,repo_file,apps/storybook/src/tests/visual.spec.ts,visual-baseline test file - hand-curated, CI-authoritative baselines, naming convention for snapshot files
+S-018,repo_file,kitty-specs/entity-marker-size-border-image-axis-01M25AVQ/,sibling mission (#304) - spec.md/research.md/data-model.md format precedent, and its own 'Downstream Contract for #303' section
+S-019,repo_file,kitty-specs/pill-tag-status-tone-axis-01M25AVP/,sibling mission (#302) - composed-dependency precedent
+S-020,repo_file,docs/contributing/adding-a-component.md#forced-colors-and-reduced-motion-baselines,forced-colors/reduced-motion authoring rules (border survives, background/box-shadow do not; generated-content alt-text rule)

@@ -1,0 +1,67 @@
+/* @spec-kitty/styles — native workflow-lane presentation (#209) */
+/*
+ * Apply the block to a native named <section>, the title to its native
+ * heading, and the list to an <ol> whose work items are direct <li> children.
+ * Item content, ordering, counts, empty copy, status, and tone stay consumer
+ * owned; this stylesheet deliberately has no workflow-item selector.
+ */
+
+.sk-workflow-lane {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: var(--sk-layout-workflow-lane-min-inline-size);
+  max-inline-size: 100%;
+  min-block-size: 0;
+  gap: var(--sk-space-4);
+  padding: var(--sk-space-4);
+  color: var(--sk-fg-body);
+  background: var(--sk-surface-card);
+  border-width: var(--sk-border-width-1);
+  border-style: solid;
+  border-color: var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  font-family: var(--sk-font-sans);
+  overflow-wrap: anywhere;
+}
+
+.sk-workflow-lane__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-inline-size: 0;
+  gap: var(--sk-space-3);
+}
+
+.sk-workflow-lane__title {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  margin: 0;
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.sk-workflow-lane__count {
+  flex: 0 0 auto;
+  padding: var(--sk-space-1) var(--sk-space-2);
+  color: var(--sk-fg-body);
+  background: var(--sk-surface-pill);
+  border-radius: var(--sk-radius-pill);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  font-weight: var(--sk-weight-medium);
+  white-space: nowrap;
+}
+
+.sk-workflow-lane__list {
+  min-inline-size: 0;
+  margin: 0;
+  padding-inline-start: var(--sk-space-6);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  overflow-wrap: anywhere;
+}

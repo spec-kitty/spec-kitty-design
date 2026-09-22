@@ -1,10 +1,33 @@
+# EVERY JOB IN THIS WORKFLOW CARRIES A timeout-minutes, and none did before #81.
+#
+# A Vue fixture added in that mission hung the behaviour suite under webkit. GitHub's default job
+# timeout is 360 MINUTES, so the run consumed six hours of runner time before it was cancelled —
+# and the cancellation looked like a failure with no diagnosis in it ("The operation was
+# canceled"). A hang is not a rare event in a workflow that drives four browsers; the cost of one
+# should be minutes, not hours, and the log should end at the step that hung.
+#
+# SCOPE, corrected by a lens: `docs-diagrams.yml` already carried one, so "none did" was true of
+# this workflow and not of the repo. `pr-preview.yml`, `release.yml` and `storybook-deploy.yml` now
+# carry them too — pr-preview builds Storybook and deploys, the same long-running class, and runs
+# on every PR. Nothing yet ENFORCES the property, so a new job still inherits 360 minutes; that is
+# filed rather than fixed here.
+#
+# The numbers are ceilings, not targets, and generous on purpose. Measured on recent runs of this
+# workflow, `test` — the slowest job — takes 6-10 minutes, and every other job is under 2. A lens
+# checked the figure this comment originally asserted (~15 minutes) against the API and it was
+# wrong; the ceilings below leave 4x to 45x headroom on real durations, so none of them can red a
+# healthy run. What they bound is a hang.
+
 name: CI Quality
 
 on:
+  # `develop` is the integration and release-candidate line. Mission and contributor
+  # PRs target it directly; `main` remains the production line.
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   push:
-    branches: [main]
+    branches: [main, develop]
+  workflow_dispatch: {}
   schedule:
     # FR-041: nightly CVE audit on main branch
     # Offset from top of hour to avoid busy scheduling window (matches SK pattern)
@@ -22,6 +45,7 @@ jobs:
   # ── Path filter ──────────────────────────────────────────────────────────────
   changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       tokens:     ${{ steps.filter.outputs.tokens }}
       components: ${{ steps.filter.outputs.components }}
@@ -37,9 +61,55 @@ jobs:
             tokens:
               - 'packages/tokens/**'
             components:
-              - 'packages/angular/**'
-              - 'packages/html-js/**'
+              - 'expected-stories.json'   # the story ratchet run-axe-storybook.js enforces
+              - 'expected-parts.json'      # the ::part() ratchet
+              - 'behaviours.json'          # the behaviour registry the floor reporter reads
+              - 'mutations.json'
+              - 'mutations.selftest.json'
+              - 'suite-budget.json'
+              - 'tsconfig.base.json'
+              # `packages/**`, not a hand-written list of two. storybook:build's own
+              # inputs already glob `packages/*/src/**/*` and `packages/*/package.json`
+              # — every package is load-bearing for this job — so enumerating two of
+              # them here is the same allow-list defect one dimension over: a new
+              # packages/<anything>/ matches no filter, storybook-build skips, and
+              # a11y/visual/playwright skip on `needs` with the gate accepting all
+              # four as legitimate. The nx input set is the honest spec.
+              - 'packages/**'
               - 'apps/storybook/**'
+              # The demo pages are part of this surface: storybook-build is what
+              # runs assemble-demo-dist.sh, so a PR editing a demo asset path
+              # must not skip it.
+              - 'apps/demo/**'
+              # The consumability fixture. It carries an ENFORCED SC-008 assertion and
+              # is a declared input AND staticDir of storybook:build — yet a PR
+              # touching only fixtures/** would have skipped storybook-build, a11y,
+              # playwright, visual-regression and lighthouse, all recorded as
+              # legitimately skipped. Fifth occurrence of this class in this filter:
+              # scripts/** after #90, ci-quality.yml after #94, then
+              # playwright.config.ts/nx.json/package.json after #94. A sixth entry is
+              # not the fix — inverting this filter to deny-by-default is. Filed as
+              # #108; deliberately not attempted here, because it changes which jobs
+              # run for every PR in the repo and deserves its own blast radius.
+              - 'fixtures/**'
+              # The gates' own runners live here. Without this,
+              # run-axe-storybook.js could be edited without the a11y gate
+              # running — which is exactly how four defects reached the train
+              # unnoticed, and why that gate had never run green (#90). It also
+              # covers assemble-demo-dist.sh, which storybook-build runs.
+              - 'scripts/**'
+              # And this file, which wires those gates together. Adding
+              # scripts/** without it left the sibling hole open: a PR editing
+              # the gate definitions themselves ran no storybook gate at all
+              # (#94).
+              - '.github/workflows/ci-quality.yml'
+              # ...and the config those gates run on. scripts/** covered the
+              # runners and ci-quality.yml the wiring; these drive the jobs
+              # themselves, and an edit to any of them was invisible (#94).
+              - 'playwright.config.ts'
+              - 'nx.json'
+              - 'package.json'
+              - 'package-lock.json'
             docs:
               - 'docs/**'
               - '*.md'
@@ -53,6 +123,7 @@ jobs:
   # ── Security ─────────────────────────────────────────────────────────────────
   security:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     if: github.event_name != 'schedule' || github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
@@ -67,6 +138,7 @@ jobs:
   # ── Workflow pin check ───────────────────────────────────────────────────────
   workflow-pin-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - name: "[ENFORCED] Check all Actions are SHA-pinned (FR-043)"
@@ -75,6 +147,7 @@ jobs:
   # ── Code lint ────────────────────────────────────────────────────────────────
   lint-code:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       eslint_failures: ${{ steps.eslint.outputs.has_failures }}
       stylelint_failures: ${{ steps.stylelint.outputs.has_failures }}
@@ -108,9 +181,313 @@ jobs:
           fi
       - name: "[ENFORCED] HTMLHint (FR-019)"
         run: npm run quality:htmlhint
+      # packages/elements was the only TypeScript package in the repo with NO type
+      # checking of any kind: esbuild neither typechecks nor emits declarations, the
+      # eslint config is not type-aware, and until the CSS pipeline emitted a sibling
+      # .d.ts, `tsc` could not even resolve `import sheet from './sk-stub.css.js'`.
+      # It is the base layer for forty components. Found by the pre-merge squad.
+      # Includes the vite-consumer fixture, whose scope:fixture depConstraint would
+      # otherwise never be evaluated — nx affected --target=lint is the only ESLint
+      # invocation in CI, and the fixture had no lint target.
+      # DERIVED, not named. This step ran `nx run elements:typecheck` — one project by name —
+      # while a SECOND project (elements-behaviour-fixture) declared the same target and was
+      # never invoked. Its typecheck was red on a green pipeline. scripts/typecheck-all.mjs
+      # enumerates every project with the target and refuses an empty set.
+      - name: "[ENFORCED] Typecheck every project that declares it (ADR-8)"
+        run: node scripts/typecheck-all.mjs
+      - name: "[ENFORCED] No CSS in elements source (FR-009, ADR-10 §1)"
+        run: node scripts/check-no-css-in-source.mjs
+      # #75. Generated React wrappers, same committed-artifact contract as the CSS and markup
+      # generators — with the union of their two halves, because those two do NOT agree:
+      # build-element-markup.mjs refuses an empty set and build-elements-css.mjs reports green
+      # over one (#123); build-elements-css.mjs sweeps orphans and build-element-markup.mjs
+      # does not. Both halves are load-bearing and a lens proved each independently.
+      - name: "[ENFORCED] Generated React wrappers are current (FR-002, FR-003, SC-301)"
+        run: node scripts/build-react-wrappers.mjs --check
+      - name: "[ENFORCED] The wrapper gate's own probe table (SC-311, SC-312)"
+        run: node scripts/build-react-wrappers.mjs --selftest
+      # #141. form-field is deliberately styles-only, so build-element-markup.mjs (which reads a
+      # .markup.ts under packages/elements) cannot generate its barrel. Without this the barrel was
+      # hand-written beside the .html files — two authored sources, and three exports had no file.
+      - name: "[ENFORCED] Styles-only barrels are generated (#141, ADR-10 §3)"
+        run: node scripts/build-styles-only-markup.mjs --check
+      # #81. Same generated-artifact contract as the CSS, markup and React generators.
+      - name: "[ENFORCED] Generated Vue types are current (#81, ADR-8 confirmation #4)"
+        run: node scripts/build-vue-types.mjs --check
+      # The types are only worth anything inside a TEMPLATE, which only Volar compiles. The first
+      # version of the generator emitted bare props objects: they type-checked under tsc and gave a
+      # template nothing, and no gate here could see it.
+      - name: "[ENFORCED] Vue types reach a real SFC (#81)"
+        run: node scripts/check-vue-template-types.mjs
+      - name: "[ENFORCED] Generated CSS modules are current (ADR-10 generated-artifact contract)"
+        run: node scripts/build-elements-css.mjs --check
+      # #323. The committed parser-time bootstrap is bundled from the same DOM-free resolver the
+      # element imports. Its check pins generated bytes; its selftest proves missing and drifted
+      # output actually red instead of trusting a healthy-tree pass.
+      - name: "[ENFORCED] Generated pre-paint theme bootstrap is current (#323)"
+        run: node scripts/build-theme-bootstrap.mjs --check
+      - name: "[ENFORCED] Theme-bootstrap drift gate self-check (#323)"
+        run: node scripts/build-theme-bootstrap.mjs --selftest
+      # REL2 (#363). The rc publish path runs this bump on every push to `develop`, and that path
+      # is never exercised by a pull request — the same blindness that let three hand-written
+      # package lists drift apart in release.yml. Its probe table runs HERE so the logic is
+      # exercised pre-merge, including the peer-range post-condition: measured, `1.1.0-rc.1` does
+      # not satisfy `^1.0.0`, so a version-only bump would publish an rc set that cannot resolve
+      # itself.
+      - name: "[ENFORCED] Prerelease bump's own probe table (#363, FR-003, FR-010, FR-011)"
+        run: node scripts/bump-prerelease.mjs --selftest
+      # The publish REFUSAL now lives in executed code rather than in a regex over workflow YAML:
+      # three review passes each defeated a text-matching guard on the inline publish loop, the last
+      # by reassigning `TAG=latest` after the input-derived line while satisfying all three rules at
+      # once. This table is the evidence that the refusal actually refuses — `latest` is permitted
+      # only when GITHUB_REF_TYPE is `tag`, which a branch push cannot produce.
+      - name: "[ENFORCED] Publish refusal's own probe table (#363, FR-009)"
+        run: node scripts/publish-derived-set.mjs --selftest
+      # REL4 (#396). The OpenDesign package is generated from the library and committed, so it can
+      # only go stale if nothing checks it — which is exactly how the last one ended up pinned to a
+      # commit 168 lines behind. The vendored OpenDesign reference is verified against upstream's
+      # sha256 before anything uses it, the package is regenerated in memory and diffed byte for
+      # byte, and both scripts run their own probe tables so a check that stopped seeing is caught.
+      - name: "[ENFORCED] Vendored OpenDesign reference matches its recorded upstream digests (#396, FR-006)"
+        run: node scripts/opendesign-reference.mjs
+      - name: "[ENFORCED] OpenDesign reference loader's own probe table (#396)"
+        run: node scripts/opendesign-reference.mjs --selftest
+      - name: "[ENFORCED] OpenDesign package is current with the library (#396, FR-009)"
+        run: node scripts/build-opendesign-package.mjs --check
+      - name: "[ENFORCED] OpenDesign package generator's own probe table (#396, FR-010)"
+        run: node scripts/build-opendesign-package.mjs --selftest
+      # The published token build derives the no-JS System/light media fallback from the one
+      # authored light block. Generate then compare in this clean job, and probe the missing,
+      # duplicate and stale forms independently.
+      - name: "[ENFORCED] Generated no-JS token fallback is deterministic (#323)"
+        run: |
+          node scripts/build-tokens-css.mjs
+          node scripts/build-tokens-css.mjs --check
+      - name: "[ENFORCED] No-JS token fallback gate self-check (#323)"
+        run: node scripts/build-tokens-css.mjs --selftest
+      # ADR-9 Confirmation #1, which the ADR requires by name and no mission had landed.
+      # #72 paid for its absence: sk-card.css carried two selectors that were INERT once the
+      # sheet was adopted — the themed ancestor sits outside the shadow root — with no error
+      # and no warning, and a LightMode story rendering dark styling. Note the check is
+      # stricter than ADR-9's four-token enumeration, deliberately: that enumeration catches
+      # only half of #72's actual defect (`.sk-light .sk-card--blue` is not in it).
+      # TWO steps, and the second is the one ADR-9 actually asks for: "a lint rule rejects
+      # :root, html, body and :host-context() … WITH A RED-FIRST TEST". The probes existed only
+      # as prose in the script's docstring and in a PR body, which is how three holes survived
+      # review of a file whose entire subject is holes surviving review — a mixed :is() list, a
+      # forbidden token inside :is(), and a bare type selector naming the host all passed.
+      - name: "[ENFORCED] Cross-root selector gate self-check (ADR-9 Confirmation #1)"
+        run: node scripts/check-adopted-css-boundaries.mjs --selftest
+      - name: "[ENFORCED] Adopted CSS stays inside the element root (ADR-9 Confirmation #1)"
+        run: node scripts/check-adopted-css-boundaries.mjs
+      # Two things stylelint cannot see: a class that SIMULATES a state the browser owns
+      # (`.is-focused`, which the static sheets needed for a screenshot and which lies to the
+      # a11y tree), and a `var()` fallback naming a token that exists nowhere — a hardcoded
+      # number wearing a token's clothes, on a property stylelint's strict-value list omits.
+      # Parsed with postcss, not grepped: the first version of this check was a grep that
+      # matched the comment explaining why the thing was excluded.
+      - name: "[ENFORCED] Adopted CSS hygiene (SK-D01)"
+        run: node scripts/check-element-css-hygiene.mjs
+      # #259, the last open exit criterion of epic #183: "a composition fixture demonstrates that
+      # the patterns can be assembled from public surfaces WITHOUT private shadow-root
+      # reach-through or duplicated component CSS". Two falsifiable claims, and before this gate
+      # NEITHER was covered. The cross-root gate two steps up was assumed to cover the first and
+      # does not reach a pattern fixture: four cross-root selectors planted into
+      # team-overview.stories.ts left it printing the identical green line at the identical 451
+      # rules. stylelint globs packages/**/*.css, so an inline <style> inside a .ts is never
+      # parsed at all. The two also point in opposite directions — ADR-9 asks whether an
+      # element's own sheet reaches OUT, this asks whether a consumer reaches IN.
+      # TWO steps, the selftest first, for the reason every gate above states: a probe table that
+      # stops running is a gate whose defeated forms quietly reopen. This one additionally
+      # carries an end-to-end arm that plants violations into a COPY OF THE REAL patterns
+      # directory, because "the glob reaches the fixtures that exist" is precisely the assumption
+      # that turned out to be false of the gate this one supplements.
+      - name: "[ENFORCED] Pattern-composition gate self-check (#183 exit criterion, #259)"
+        run: node scripts/check-pattern-composition.mjs --selftest
+      - name: "[ENFORCED] Pattern fixtures compose from public surfaces only (#183, #259)"
+        run: node scripts/check-pattern-composition.mjs
+      # The IIFE entry was a hand-maintained list of side-effect imports. #73 added an element
+      # to index.ts and not to it, and everything stayed green — the test lane resolves the
+      # package to index.ts, the analyzer reads source, Storybook has its own module graph.
+      # Only the deployed demo went quiet, and a Playwright failure found it.
+      # Same reason as the CSS gate's self-check one step up: this gate's commit message
+      # claimed six probed forms and a lens falsified two of them within the hour. A probe
+      # table nobody can run is not a probe table.
+      - name: "[ENFORCED] Distribution-entry gate self-check (ADR-10 §2)"
+        run: node scripts/check-elements-entries.mjs --selftest
+      - name: "[ENFORCED] Every element reaches both distribution entries (ADR-10 §2)"
+        run: node scripts/check-elements-entries.mjs
+      # The manifest is a generated artifact under ADR-10's contract, and ADR-11
+      # generates the React wrapper FROM it — a manifest that drifts from source
+      # propagates into generated code two missions from now. The analyzer's own
+      # plugin (packages/elements/custom-elements-manifest.config.mjs) additionally
+      # exits non-zero if any definition is named `tag`, which is what the guarded
+      # define() helper produces if it ever stops being excluded. Verified by
+      # removing the exclusion: cem exits 1 and writes no manifest.
+      # Two assertions, because `git diff --exit-code` alone proves only EQUALITY.
+      # Delete the `@element sk-stub` JSDoc, regenerate, commit: the manifest is
+      # internally consistent, the diff is clean, CI is green, and ADR-11's wrapper
+      # generator two missions from now receives a manifest describing no element at
+      # all. define.ts says "do not remove either without replacing the other" and
+      # only the negative half was asserted.
+      - name: "[ENFORCED] Custom Elements Manifest is current (FR-006, SC-004)"
+        run: |
+          npx nx run elements:analyze
+          git diff --exit-code -- packages/elements/custom-elements.json \
+            || { echo "::error::custom-elements.json is stale. Run: npx nx run elements:analyze"; exit 1; }
+          node scripts/check-manifest-content.mjs
+          node scripts/check-manifest-content.mjs --selftest
+      # C-007's anti-vacuity guard. The manifest declares 0 cssParts today, so SC-013's
+      # "derived expected list" is a green assertion over nothing — this makes it
+      # impossible for that list to GROW without a test landing in the same PR.
+      # ADR-10 §3: the element's template is the sole AUTHORED markup source, and the static
+      # .html plus the template-literal catalogue are generated from it. Criterion 3 is "no
+      # component markup is AUTHORED twice" — generated artifacts are exempt and required to
+      # be regenerable, which is what this enforces.
+      - name: "[ENFORCED] Generated markup is current (ADR-10 §3)"
+        run: node scripts/build-element-markup.mjs --check
+      - name: "[ENFORCED] ::part() ratchet (C-007, SC-013)"
+        run: node scripts/check-part-ratchet.mjs
+      # #309/#310, ADR-15 kinds 1 and 2. The generator's own rewrite table runs BEFORE the drift
+      # check, for the reason every other pair in this job records: a generator observed green on
+      # a healthy tree has demonstrated nothing about what its rewrite refuses, and this one
+      # refuses four `:host(...)` spellings whose wrong rewrite is SILENT — the class simply never
+      # matches and the rule vanishes.
+      - name: "[ENFORCED] Static-form rewrite probe table (#309, ADR-15 §1)"
+        run: node scripts/build-static-form-css.mjs --selftest
+      - name: "[ENFORCED] Generated light-DOM static forms are current (#309, ADR-15 kinds 1 and 2)"
+        run: node scripts/build-static-form-css.mjs --check
+      # The SHAPE half of #310. The rendered half needs a browser and a real build, so it lives in
+      # `release-gate`; this arm is what catches a wrapper that exists and is missing declarations,
+      # and `container-type` landing on a class the sheet's own `@container` block also styles.
+      - name: "[ENFORCED] Static form is a wrapper carrying the whole `:host` set (#310, ADR-15)"
+        run: node scripts/check-static-form-equivalence.mjs --static
+      # #77. Two stories shipped `<div data-theme="light">`, which activates nothing — the
+      # token package anchors light on `:root[data-theme="light"], .sk-light` and `:root` only
+      # matches <html>, so both rendered the DARK palette on a light ground with every gate
+      # green. The rule was already written in three documents and the class had still recurred
+      # across ten story files; a gate closes it, a note defers it.
+      #
+      # Repo-wide, with a shrink-only COUNT in expected-inert-theme-wrappers.json — currently
+      # 10, all in packages/styles. An earlier revision of this comment described a
+      # packages/elements scope widened by each batch mission; that model was shown to have
+      # already failed (sk-stub and sk-nav-pill are migrated elements whose styles-layer
+      # stories still offend), and the comment outlived the rewrite because the workflow file
+      # was not in that commit's diff. To retire an offender, fix it and LOWER the count.
+      # #225. `selftestCeilingSeconds` is derived from how few test files each mutation arm
+      # runs, and that number holds only while the behaviour fixture imports element modules
+      # rather than the package barrel. One barrel import puts its file back into every element
+      # arm. The rule was prose in docs/contributing/adding-a-component.md and was violated by
+      # the very next branch (PR #241) before the ink dried, which is why it is a gate.
+      - name: "[ENFORCED] Fixture-import gate self-test (#225)"
+        run: node scripts/check-behaviour-fixture-imports.mjs --selftest
+      - name: "[ENFORCED] The behaviour fixture imports elements, not the barrel (#225)"
+        run: node scripts/check-behaviour-fixture-imports.mjs
+      - name: "[ENFORCED] Light-mode story gate self-test (#93)"
+        run: node scripts/check-story-theme-wrapper.mjs --selftest
+      - name: "[ENFORCED] Light-mode stories activate light mode (#93)"
+        run: node scripts/check-story-theme-wrapper.mjs
+      # Asserts the gate below actually gates the test job. A push-and-revert of a broken
+      # workflow would produce a CI-run URL in a commit message — the transcript NFR-002
+      # rejects — and would not protect against the regression that will actually happen:
+      # a later PR adding `test_ok=...` to the skipped-tolerance block.
+      - name: "[ENFORCED] Gate wiring checker self-test (FR-014, NFR-009)"
+        run: node scripts/check-gate-wiring.mjs --selftest
+      - name: "[ENFORCED] The gate actually gates the test and Storybook jobs (FR-014, NFR-009)"
+        run: node scripts/check-gate-wiring.mjs
+      # The wiring checker's own probe table (#202, #205). Same rationale as the CSS, entry,
+      # manifest, wrapper, release and ADR-index gates' `--selftest` steps one level up: the
+      # checker above was defeated twice by edits that still read as correct, and both defeats
+      # were recorded only as prose in an issue. This re-runs all eight against a copy of this
+      # file, plus a control that requires the unmodified workflow to pass, so a checker that
+      # reds on everything cannot satisfy a table of red expectations.
+      - name: "[ENFORCED] The wiring checker's defeat table (#202, #205)"
+        run: node scripts/check-gate-wiring-defeats.mjs
+      # The ADR index, held to the directory it indexes (#193). Seven of fifteen records
+      # were unindexed when this landed, including the three the elements-first programme
+      # cites most. It lives in `lint-code` rather than behind the `changes` filter on
+      # purpose: this job carries no `if:` and no path guard, so it is the one place a
+      # docs-only PR is certain to run — and a gate that never triggers is the same
+      # empty-set defect the script itself refuses, wearing a different hat.
+      - name: "[ENFORCED] ADR index gate self-test (#193)"
+        run: node scripts/check-adr-index.mjs --selftest
+      - name: "[ENFORCED] Every ADR has an index row, and every row an ADR (#193)"
+        run: node scripts/check-adr-index.mjs
+      # The two LLM context surfaces, held to carrying NO hand-maintained ADR index (#197).
+      # `llms.txt` linked 3 of 15 records and called them "All Accepted" while five were
+      # Proposed and one Complete; `llms-full.txt` carried three ADR range expressions and a
+      # set-wide status claim, and referenced 14 of 15. Neither was gated by anything. Same
+      # placement rationale as the #193 pair above: `lint-code` carries no `if:` and no path
+      # guard, so a docs-only PR is certain to run it.
+      - name: "[ENFORCED] LLM ADR-surface gate self-test (#197)"
+        run: node scripts/check-llms-adr-surface.mjs --selftest
+      - name: "[ENFORCED] llms.txt and llms-full.txt carry no hand-maintained ADR index (#197)"
+        run: node scripts/check-llms-adr-surface.mjs
+      # A multi-screenshot test may not use the hard `toHaveScreenshot` form for any of its
+      # calls (#367). The hard form throws on failure, so a failing screenshot aborts the test
+      # and every LATER screenshot in it never runs — never produces a baseline, never appears
+      # in the `unexpected` count, never lands in the visual-regression-diffs artifact a
+      # harvester reads from. This cost one missed baseline outright on PR #339. `lint-code`
+      # carries no `if:` and no path guard, so a change to a spec file with a single screenshot
+      # today is still caught the moment it grows a second one.
+      - name: "[ENFORCED] Visual screenshot softness gate self-test (#367)"
+        run: node scripts/check-visual-screenshot-softness.mjs --selftest
+      - name: "[ENFORCED] Multi-screenshot tests use expect.soft throughout (#367)"
+        run: node scripts/check-visual-screenshot-softness.mjs
+      # #456. A commit on PR #457 spliced a snippet in before almost every fence line of
+      # using-components.md, 143 copies. 140 labelled opener lines (70 of the file's own example
+      # labels and 70 of the snippets' own ```js labels) became code content, since a closer cannot
+      # carry an info string, fusing examples with stray snippets; one bare opener closed an injected
+      # block, so a token formula rendered as a bulleted list.
+      # All 15 jobs went green: nothing here parsed Markdown, and the specs that read that file
+      # assert substrings are PRESENT, which an insertion cannot break. The gate parses with
+      # commonmark.js (the CommonMark reference implementation) and, for Storybook *.mdx, with the
+      # MDX grammar Storybook compiles with (micromark + mdxjs), all exact-pinned devDependencies,
+      # over every tracked *.md, llms*.txt and *.mdx, except the frozen kitty-specs/ records.
+      - name: "[ENFORCED] Markdown fence gate self-test, with per-rule mutation proof (#456)"
+        run: node scripts/check-markdown-fences.mjs --selftest
+      - name: "[ENFORCED] No swallowed fence openers, no unterminated code blocks (#456)"
+        run: node scripts/check-markdown-fences.mjs
+      # After the gate, so a Storybook loader breakage cannot stop the job before the PR has its fence
+      # verdict. Storybook's own MDX parse must match the pinned parser's on every .mdx page.
+      - name: "[ENFORCED] Pinned MDX parser matches Storybook's own parse (#456)"
+        run: node scripts/check-markdown-fences.mjs --drift-sentinel
+      # #438 F3: this probe table (NI-001/visual-evidence-gate-integrity) had red-then-green
+      # coverage of a real defect but no CI caller at all — the shell half of the same fold had
+      # both. It needs no train ref and no built artifacts, so wiring it here is free; the real,
+      # non-selftest check stays a manual/one-off verification command (see its own file header)
+      # since it depends on which branch a caller actually wants "before" to mean.
+      - name: "[ENFORCED] NI-001 visual-spec zero-drift gate's own probe table (#438)"
+        run: node scripts/verify-visual-spec-zero-drift.mjs --selftest
+      # REL1 (#362). The develop ruleset parity checker's own probe table (T004/IC-04) — a
+      # same-fixture and a different-fixture case are both required, same floor-outside-the-
+      # table shape.
+      - name: "[ENFORCED] develop ruleset parity checker self-test (REL1, #362)"
+        run: node scripts/check-develop-ruleset-parity.mjs --selftest
+      # Split from the commitlint step below (design issue 453). These were two commands under
+      # one [ENFORCED] name, so deleting the probe-table line left the step running, passing, and
+      # no longer bounding the ~20 ignore regexes in commitlint.config.cjs — with nothing able to
+      # notice: `lint-code` is outside check-gate-wiring's whole-job audit by design, so
+      # REQUIRED_LINT is the only mechanism, and an `if:`-carrying step cannot be registered there.
+      # The probe table has no pull-request dependency — it loads the config and asserts — so it
+      # runs unconditionally and IS registered. The comparison below genuinely needs PR refs.
+      - name: "[ENFORCED] commitlint config probes (FR-020)"
+        run: node scripts/check-commitlint-config.mjs
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
-        run: npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}
+        env:
+          PR_BASE_REF: ${{ github.base_ref }}
+          PR_HEAD_REF: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          # The production promotion is squash-merged, so its 2,000+ already-reviewed
+          # integration commits do not enter main individually. Lint the one commit
+          # subject that will enter main instead of re-linting historical develop.
+          if [ "$PR_BASE_REF" = "main" ] && [ "$PR_HEAD_REF" = "develop" ]; then
+            printf '%s\n' "$PR_TITLE" | npx commitlint
+          else
+            npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}
+          fi
       - name: "[ENFORCED] Fail if lint errors"
         if: always()
         run: |
@@ -129,6 +506,7 @@ jobs:
   # ── Storybook build ──────────────────────────────────────────────────────────
   storybook-build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [changes]
     if: needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true'
     steps:
@@ -136,8 +514,26 @@ jobs:
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci --ignore-scripts
-      - name: "[ENFORCED] Storybook build (NFR-003 < 3 min)"
-        run: npx nx run storybook:storybook:build
+      - name: "[ENFORCED] Storybook build (NFR-009 <= 180 s)"
+        run: node scripts/build-storybook-with-budget.mjs
+      # Runs before the upload so the artifact the downstream jobs consume matches
+      # what the deploy actually publishes — the demo pages included. That is what
+      # lets nav-pill-behaviour.spec.ts drive the package's runtime JS through the
+      # real consumer path. It also runs the same script the deploy runs, so the sed
+      # rewrite, the asset mirroring and the reference-resolution check are exercised
+      # on every PR instead of only on push to main.
+      # Runs in THIS job because it needs packages/elements/dist, which only exists
+      # after a build — dist/ is gitignored, so lint-code cannot check it. NFR-001's
+      # baseline is inheritable by #71/#72/#82 only if it stays current.
+      - name: "[ENFORCED] Artifact sizes are current (NFR-001)"
+        run: node scripts/measure-elements-sizes.mjs --check
+      - name: "[ENFORCED] Demo surface assembles and every asset reference resolves"
+        run: |
+          set -euo pipefail
+          PROJECTS="$(node scripts/release-graph.mjs --projects)"
+          [ -n "$PROJECTS" ] || { echo "::error::empty build set"; exit 1; }
+          npx nx run-many --target=build --projects="$PROJECTS"
+          bash scripts/assemble-demo-dist.sh apps/storybook/storybook-static
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         with:
           name: storybook-static
@@ -147,6 +543,7 @@ jobs:
   # ── Accessibility gate ────────────────────────────────────────────────────
   a11y:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [storybook-build]
     if: needs.storybook-build.result == 'success'
     steps:
@@ -156,12 +553,22 @@ jobs:
       - run: npm ci --ignore-scripts
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # actions/download-artifact v8.0.1
         with: { name: storybook-static, path: apps/storybook/storybook-static }
+      - run: npx playwright install chromium
+      # Runs BEFORE the gate it guards. The gate's own output ("76 stories, zero
+      # violations") reads identically whether it assessed 76 stories or nothing
+      # at all -- this repo has shipped three separate variants of the latter. The
+      # self-test drives the gate's render assertion against twelve fixture shapes,
+      # six of which MUST be rejected, so a traversal that stops crossing shadow
+      # boundaries fails here instead of going quietly green below (#70, SC-005).
+      - name: "[ENFORCED] a11y gate self-test (SC-005)"
+        run: node scripts/gate-selftest.mjs
       - name: "[ENFORCED] axe WCAG 2.1 AA gate (FR-021)"
-        run: npx playwright install chromium && node scripts/run-axe-storybook.js
+        run: node scripts/run-axe-storybook.js
 
   # ── Visual regression ──────────────────────────────────────────────────────
   visual-regression:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [storybook-build]
     if: needs.storybook-build.result == 'success'
     steps:
@@ -179,6 +586,8 @@ jobs:
       # the matrix is filed as follow-up work.
       - run: npx playwright install --with-deps
       - name: "[ENFORCED] Visual regression (FR-024)"
+        env:
+          PW_INCLUDE_VISUAL: '1'
         run: npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         if: failure()
@@ -189,6 +598,7 @@ jobs:
   # ── Cross-browser smoke ────────────────────────────────────────────────────
   playwright:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [storybook-build]
     if: needs.storybook-build.result == 'success'
     steps:
@@ -199,12 +609,66 @@ jobs:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # actions/download-artifact v8.0.1
         with: { name: storybook-static, path: apps/storybook/storybook-static }
       - run: npx playwright install --with-deps
-      - name: "[ENFORCED] Cross-browser smoke (FR-023)"
-        run: npx playwright test apps/storybook/src/tests/smoke.spec.ts
+      # Runs the whole testDir, NOT a list of named files. The list was the standing
+      # hazard: an unlisted spec in apps/storybook/src/tests/ silently never executed,
+      # and twelve batch missions will each want to add one. Two comments in the tree
+      # warned about it; a comment is not a gate. visual.spec.ts is excluded via
+      # testIgnore in playwright.config.ts because visual-regression owns it.
+      #
+      # Covers smoke (FR-023), nav-pill runtime behaviour, and elements-load
+      # (SC-001 file://, SRI over HTTP, SC-003 duplicate registration, SC-008 Vite
+      # consumer, ADR-10 Confirmation #1 against the built artifacts).
+      - name: "[ENFORCED] Playwright suite (FR-023, FR-003, FR-004, FR-005)"
+        run: npx playwright test
+
+  # ── Behaviour suite (ADR-11) ───────────────────────────────────────────────
+  # UNCONDITIONAL — no `if:`. FR-003: `nx affected --target=test` prints "No tasks were
+  # run" and EXITS 0, so a job wired to it is green forever if the target is misnamed or
+  # the affected computation misses. The gate therefore also tests this job STRICTLY:
+  # 'skipped' is never legitimate for a job that always runs.
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci --ignore-scripts
+      # Explicit: `--ignore-scripts` everywhere means nothing downloads browsers
+      # implicitly. Both engines — engine difference is ADR-11's strongest driver, and
+      # webkit CANNOT launch on the project workstation (Fedora, Ubuntu-targeted libs), so
+      # CI is the only place these behaviours meet WebKit at all.
+      - run: npx playwright install --with-deps chromium webkit
+      # Order is deliberate (#358): the two mutation-harness steps run BEFORE the timing
+      # assertion. GitHub Actions skips every later step once one fails (short of
+      # `continue-on-error`, forbidden here — see below), and this repo has already
+      # measured a ~20% same-set timing spread against a single-digit-percent margin (see
+      # suite-budget.json) — a ceiling breach is ordinary noise, not a rare event. With
+      # the timing check first, that noise silently cost the job its only two
+      # mutation-adequacy gates on every breach: a timing regression read as "the mutation
+      # harness didn't run" rather than what it actually was.
+      #
+      # `if: always()` on the mutation steps was tried first and rejected: it also works
+      # (the job conclusion is still `failure` if ANY step fails — `if:` only controls
+      # whether a LATER step is attempted), but scripts/check-gate-wiring.mjs refuses any
+      # `if:` on an [ENFORCED] step on principle, having been defeated twice before (#202,
+      # #205) by edits that read as correct. A reorder needs no exemption from that rule
+      # and closes the same hole. The timing check must still fail the job — it is not
+      # made non-blocking, only moved to run last so its failure cannot skip anything.
+      #
+      # Re-derives every red-first claim in the suite. Without it, "demonstrated to fail
+      # before it passes" is a paste in a commit message.
+      - name: "[ENFORCED] Mutation harness — red-first is re-derived (NFR-002)"
+        run: node scripts/suite-selftest.mjs
+      - name: "[ENFORCED] Mutation harness guards are themselves exercised"
+        run: node scripts/suite-selftest.mjs --selftest
+      - name: "[ENFORCED] Behaviour suite (ADR-11 required behaviours)"
+        run: node scripts/measure-suite-time.mjs
 
   # ── Lighthouse (advisory) ──────────────────────────────────────────────────
   lighthouse:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [storybook-build]
     if: needs.storybook-build.result == 'success'
     continue-on-error: true   # advisory only
@@ -226,30 +690,173 @@ jobs:
           node -e "const r=require('./lighthouse-report.json'); for (const [k,v] of Object.entries(r.categories)) console.log(k+': '+Math.round(v.score*100))" || true
 
   # ── Merge gate ──────────────────────────────────────────────────────────────
+  # #80. release.yml triggers on `push: tags: ['v*.*.*']` and nothing else, so no pull request
+  # had ever executed it. The `cp packages/html-js/src/nav-pill/sk-nav-pill.js` step #73 removed
+  # would have hard-failed the next release and was found by a lens READING the file; three
+  # hand-written package lists drifted apart in that workflow for the same reason. This job is the
+  # thing that runs.
+  #
+  # DELIBERATELY UNCONDITIONAL — no `if:`, and not behind the `changes` filter. A packaging-only
+  # PR (a `files` array, an `exports` map, a `private` flag) is precisely the PR this gate exists
+  # for, and a filtered job would skip on it. `storybook-build` legitimately skips when no
+  # component changed; this must not.
+  #
+  # It builds rather than reusing another job's artifact because `npm pack` resolves `exports`
+  # against real files and `dist/` is gitignored.
+  release-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # fetch-depth: 0 (#435): the token-breaking-change check below needs the FULL history and
+      # tags to resolve `git describe --tags --abbrev=0` and `git show <tag>:<path>` against — a
+      # shallow (depth-1) checkout has neither, so it would only ever exercise the "no tags
+      # reachable" branch and never the comparison itself.
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci --ignore-scripts
+      # The probes FIRST. A gate observed green on a healthy tree has demonstrated nothing about
+      # what it can see, and this one asserts tarball contents that are easy to get vacuously right.
+      - name: "[ENFORCED] The release gate can see its own failures (SC-003)"
+        run: node scripts/check-release-graph.mjs --selftest
+      # #438 F11: the breaking-change check below trusts that the COMMITTED catalogue reflects
+      # the committed `tokens.css` — nothing verified that before this. Without it, the gate
+      # compares committed-to-committed rather than source-to-source, and a hand-edited or stale
+      # catalogue could hide (or fabricate) a "breaking change" that a fresh build would not show.
+      # Placed BEFORE the breaking-change check itself so that check's CURRENT side is trustworthy
+      # by the time it runs — that ordering is WHY it is here, not a history dependency: unlike
+      # the breaking-change check below, this one reads only the current checkout's `tokens.css`
+      # and committed catalogue, needs no tag/ref resolution, and does not depend on this job's
+      # `fetch-depth: 0`.
+      # #438 pass 2, finding A: the probe table FIRST, same convention as every other gate in this
+      # job (see the comment at the top of this job) — its comparison had zero probes and its own
+      # neutered-comparison mutant survived silently until a lens found it by mutation testing.
+      - name: "[ENFORCED] Token catalogue drift gate's own probe table (#438 pass 2, finding A)"
+        run: node scripts/generate-token-catalogue.js --selftest
+      - name: "[ENFORCED] Token catalogue matches a fresh build from tokens.css (#438 F11)"
+        run: node scripts/generate-token-catalogue.js --check
+      # FR-015 (#435). Placed here, not in `lint-code`: this is a RELEASE-time gate over the
+      # committed `packages/tokens/dist/token-catalogue.json` against the previous release tag —
+      # the same "guards a release" scope every other check in this job carries, and it needs
+      # `release-gate`'s full-history checkout above to resolve a tag at all. It was previously
+      # wired to nothing (`grep -rn` across `.github/workflows/` and `package.json` found no
+      # caller), so a genuinely breaking token rename could ship without ever failing anything —
+      # dead weight for a check FR-015 requires. The probe table runs FIRST, same convention as
+      # every other gate in this job.
+      - name: "[ENFORCED] Token breaking-change gate's own probe table (FR-015, #435)"
+        run: bash scripts/check-token-breaking-changes.sh --selftest
+      - name: "[ENFORCED] No breaking token renames since the previous release (FR-015, ADR-003)"
+        run: bash scripts/check-token-breaking-changes.sh
+      - name: Build the publishable graph
+        run: |
+          set -euo pipefail
+          PROJECTS="$(node scripts/release-graph.mjs --projects)"
+          [ -n "$PROJECTS" ] || { echo "::error::empty build set"; exit 1; }
+          npx nx run-many --target=build --projects="$PROJECTS"
+      - name: "[ENFORCED] Release graph is coherent (FR-003, FR-004, SC-001, SC-002, SC-004, SC-010)"
+        run: node scripts/check-release-graph.mjs
+      - name: "[ENFORCED] Packed Vue declarations compile without workspace paths (#149)"
+        run: node scripts/check-vue-packed-types.mjs
+      - name: "[ENFORCED] Sizes and the SRI hash match the built artifacts (FR-005, SC-007, NFR-004)"
+        run: node scripts/measure-elements-sizes.mjs --check
+      - run: npx playwright install chromium firefox
+      # #310's RENDERED half, in this job because it needs the real built artifacts this job
+      # already produces: the shadow side is `packages/elements/dist/elements.js` (ADR-10 §2's
+      # self-contained classic script) and the static side is resolved through
+      # `@spec-kitty/styles`'s own export map, so what a probe page links is literally what an
+      # installed consumer links.
+      #
+      # The PROBE TABLE FIRST, like the release graph's above. It renders four deliberately broken
+      # static forms — the collapsed transform, the abbreviated wrapper, a `display: contents`
+      # wrapper, and #375's `:where()` candidate — and asserts each is rejected or accepted as
+      # recorded. A gate that has only ever seen the correct form has demonstrated nothing.
+      - name: "[ENFORCED] The static-form gate's red-first probe table (#310, #375)"
+        run: node scripts/check-static-form-equivalence.mjs --selftest
+      - name: "[ENFORCED] Generated static form renders equal to the shadow form (#310, ADR-15)"
+        run: node scripts/check-static-form-equivalence.mjs
+      # The probe BEFORE the check. The graph has no network dependency at all now, so this
+      # probe's green is indistinguishable from a probe that cannot see — --selftest plants a page
+      # that does reach off-machine and requires the probe to red on it. See the script's header
+      # for the accident this was originally written to survive.
+      - name: "[ENFORCED] The offline probe can see an off-machine request (SC-006)"
+        run: node scripts/check-offline-load.mjs --selftest
+      - name: "[ENFORCED] file:// load with zero network (NFR-002, SC-006)"
+        run: node scripts/check-offline-load.mjs
+
   gate:
     runs-on: ubuntu-latest
-    needs: [security, workflow-pin-check, lint-code, a11y, visual-regression, playwright]
+    timeout-minutes: 10
+    needs: [changes, security, workflow-pin-check, lint-code, storybook-build, a11y, visual-regression, playwright, test, release-gate]
     if: always()
     steps:
       - name: "[ENFORCED] All hard gates must pass (FR-026)"
         run: |
+          echo "changes: ${{ needs.changes.result }} (tokens=${{ needs.changes.outputs.tokens }} components=${{ needs.changes.outputs.components }})"
           echo "security: ${{ needs.security.result }}"
           echo "workflow-pin-check: ${{ needs.workflow-pin-check.result }}"
           echo "lint-code: ${{ needs.lint-code.result }}"
+          echo "storybook-build: ${{ needs.storybook-build.result }}"
           echo "a11y: ${{ needs.a11y.result }}"
           echo "visual-regression: ${{ needs.visual-regression.result }}"
           echo "playwright: ${{ needs.playwright.result }}"
+          echo "test: ${{ needs.test.result }}"
+          echo "release-gate: ${{ needs.release-gate.result }}"
           # a11y / visual-regression / playwright are skipped when storybook-build is skipped (no component changes)
+          # storybook-build carries [ENFORCED] steps of its own (the Storybook
+          # build and the demo-surface assembly check). Until it was added to
+          # needs, a failure there skipped a11y / visual-regression / playwright,
+          # and 'skipped' is accepted below - so those enforced steps could not
+          # block a merge. It is legitimately skipped when no component changed.
+          #
+          # `changes` is tested STRICTLY (never 'skipped') because every other
+          # gate hangs off its outputs. If it fails, storybook-build skips for
+          # unmet needs, the three downstream jobs skip on their result guards,
+          # and all four are then accepted below - the same green-by-skip shape,
+          # one level up. It runs unconditionally, so 'skipped' is never
+          # legitimate for it (#94).
+          sb_ok="${{ needs.storybook-build.result }}"
           a11y_ok="${{ needs.a11y.result }}"
           vr_ok="${{ needs.visual-regression.result }}"
           pw_ok="${{ needs.playwright.result }}"
           # Treat 'skipped' as acceptable (no components changed, gates not applicable)
+          if [ "$sb_ok"   != "success" ] && [ "$sb_ok"   != "skipped" ]; then sb_ok="fail"; fi
           if [ "$a11y_ok" != "success" ] && [ "$a11y_ok" != "skipped" ]; then a11y_ok="fail"; fi
           if [ "$vr_ok"   != "success" ] && [ "$vr_ok"   != "skipped" ]; then vr_ok="fail"; fi
           if [ "$pw_ok"   != "success" ] && [ "$pw_ok"   != "skipped" ]; then pw_ok="fail"; fi
-          if [ "${{ needs.security.result }}"          != "success" ] || \
+
+          # 'skipped' is only acceptable for the REASON it exists: nothing
+          # relevant changed. Accepting it unconditionally was the same
+          # green-by-skip defect one level down - a PR editing this file could
+          # set `if: false` on a11y, get 'skipped', and pass. The filter outputs
+          # make the tolerance conditional on data rather than asserted in a
+          # comment, and they are reachable here only because `changes` is now
+          # in `needs` (#94).
+          relevant="${{ needs.changes.outputs.tokens }}${{ needs.changes.outputs.components }}"
+          case "$relevant" in
+            *true*)
+              if [ "$sb_ok"   = "skipped" ]; then sb_ok="fail";   echo "storybook-build skipped despite relevant changes"; fi
+              if [ "$a11y_ok" = "skipped" ]; then a11y_ok="fail"; echo "a11y skipped despite relevant changes"; fi
+              if [ "$vr_ok"   = "skipped" ]; then vr_ok="fail";   echo "visual-regression skipped despite relevant changes"; fi
+              if [ "$pw_ok"   = "skipped" ]; then pw_ok="fail";   echo "playwright skipped despite relevant changes"; fi
+              ;;
+          esac
+          # `test` is tested STRICTLY, like `changes`, and deliberately has NO entry in
+          # the skipped-tolerance block above. It runs unconditionally, so 'skipped' is
+          # never legitimate for it — without this, a PR setting `if: false` on the test
+          # job would get 'skipped' and pass, which is the bypass the comment above
+          # records having closed once already for a11y.
+          # `release-gate` joins `changes` and `test` in the STRICT list, with no entry in the
+          # skipped-tolerance block. It has no `if:` and is not behind the `changes` filter, so
+          # 'skipped' is never legitimate for it — and a packaging-only PR is exactly the shape
+          # where a tolerated skip would matter most (#80).
+          if [ "${{ needs.changes.result }}"           != "success" ] || \
+             [ "${{ needs.test.result }}"              != "success" ] || \
+             [ "${{ needs.release-gate.result }}"      != "success" ] || \
+             [ "${{ needs.security.result }}"          != "success" ] || \
              [ "${{ needs.workflow-pin-check.result }}" != "success" ] || \
              [ "${{ needs.lint-code.result }}"          != "success" ] || \
+             [ "$sb_ok"   = "fail" ] || \
              [ "$a11y_ok" = "fail" ] || \
              [ "$vr_ok"   = "fail" ] || \
              [ "$pw_ok"   = "fail" ]; then
@@ -258,9 +865,49 @@ jobs:
           fi
           echo "All hard gates passed."
 
+  # ── develop ruleset parity (REL1, #362, FR-001/NFR-004/SC-001) ─────────────────
+  #
+  # check-develop-ruleset-parity.mjs --check compares the live develop ruleset against the
+  # committed artifact (research.md R25) on the EXISTING nightly schedule (FR-041's own cron,
+  # `17 2 * * *`) and on every push to develop — a scheduled/push job, never manual-only, so
+  # drift is caught without anyone having to remember to run it. `permissions: { contents:
+  # read }` only — no ruleset-specific permission exists to request, and this is a read-only
+  # comparison.
+  #
+  # DELIBERATELY reuses the one existing cron rather than adding a second (research.md R25,
+  # revised): a second `schedule` entry re-triggers the ENTIRE workflow a second time daily —
+  # every job in this file without its own event-specific guard (workflow-pin-check, lint-code,
+  # storybook-build, test, release-gate, gate, and even security, whose own guard only checks
+  # `github.ref`, not which cron fired) would then run twice a day instead of once, just to
+  # serve a sub-second comparison. Not worth it — one cron, shared, this job's own `if:` is
+  # what scopes it, not a second trigger entry.
+  #
+  # The scheduled arm reads the workflow from the default branch (`main`); the push arm checks
+  # every merged change on `develop` immediately.
+  develop-ruleset-parity:
+    if: >-
+      github.event_name == 'schedule' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/develop')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+      - name: "[ENFORCED] develop ruleset parity check (FR-001, NFR-004, SC-001)"
+        env:
+          DEVELOP_RULESET_ID: ${{ vars.DEVELOP_RULESET_ID }}
+          # research.md R25: the default GITHUB_TOKEN has been sufficient for read-only ruleset
+          # access on this public repo in this mission's own prior investigation — confirmed
+          # empirically against a real scheduled/push run rather than assumed (a residual, named
+          # in branch-model.md, not glossed over as certain).
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-develop-ruleset-parity.mjs --check
+
   # ── Lint feedback ────────────────────────────────────────────────────────────
   lint-feedback:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: lint-code
     if: >-
       always() && github.event_name == 'pull_request' &&

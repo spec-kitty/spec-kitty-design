@@ -1,0 +1,13 @@
+evidence_id,source_id,finding,decision_or_requirement,confidence
+EV-001,SRC-001,"Unavailable destinations remain native non-anchor list content with no URL role focusability or interaction affordance.","FR-001;FR-003;C-002",high
+EV-002,SRC-001,"Visible annotation is optional and consumer supplied; all-unavailable catalogues may truthfully have no current item.","FR-002;FR-005;C-003",high
+EV-003,SRC-001,"An unavailable parent has no implied or hidden child list while available parents retain native children.","FR-004;FR-006;C-004",high
+EV-004,SRC-002,"The dependency landed as a styles-only .sk-context-nav contract and existing available/current/nested link behavior must remain unchanged.","FR-004;C-001;C-006",high
+EV-005,SRC-003,"The fetched train contains .sk-context-nav at PR #262's merge commit.","dependency gate for #264",high
+EV-006,SRC-004,"Native light-DOM relationships are the correct surface and no custom-element host should be interposed.","C-001;C-002",high
+EV-007,SRC-005,"Authored HTML fixtures are the source and TypeScript markup barrels are generated rather than edited.","FR-008;FR-010",high
+EV-008,SRC-006,"Absence of interaction is verified in real browsers; element manifest and wrapper outputs remain frozen for a styles-only extension.","NFR-001;NFR-002;NFR-006",high
+EV-009,SRC-007,"Every public story needs a real LightMode variant and the full generation quality Storybook axe browser visual package matrix.","NFR-004;NFR-007",high
+EV-010,SRC-008,"Existing label flex and logical-property anatomy can be extended with two disjoint BEM selectors and current tokens.","FR-001;FR-002;NFR-005",high
+EV-011,SRC-009,"The approved family requires mixed unavailable entries and complete long label/annotation containment at 240px and 390px.","FR-007;FR-008;NFR-003",high
+EV-012,SRC-010,"Any rebase or content push invalidates exact-head visual and review evidence and requires regeneration/reverification.","NFR-007;SC-005",high

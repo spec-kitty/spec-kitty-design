@@ -1,0 +1,59 @@
+name: Publish rc
+
+# REL2 (#363, epic #361). The rc half of the dual-stream pipeline — now a THIN CALLER.
+#
+# The publish payload lives in `publish-packages.yml`, once, shared with the prod stream. This file
+# contributes only what genuinely differs: the trigger, the registry, the dist-tag, and the fact
+# that rc bumps a prerelease while prod publishes what is committed.
+#
+# WHY THE RESHAPE. As a standalone workflow this file duplicated the entire resolve -> build ->
+# verify -> publish spine, dropped five gates the prod path enforces (including the ADR-005 dist
+# contents audit), and sat outside `check-release-graph.mjs`, whose payload assertions key on a
+# single named job in a single named file. Measured at the time: deleting the publish step, or
+# dropping `--tag rc`, left every gate in the repository green.
+#
+# `develop` does not yet track the train automatically — REL1's promotion App is pending — so
+# `develop` is advanced by an explicit push, and that push is this trigger. That limits how OFTEN
+# this runs, not whether it is correct.
+on:
+  push:
+    branches: [develop]
+
+concurrency:
+  group: publish-rc-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  rc:
+    uses: ./.github/workflows/publish-packages.yml
+    # THIS IS A CEILING, NOT A FILTER — the correction that mattered most in review, and it lives
+    # here because THIS is the block GitHub reads: a job-level `permissions:` overrides the
+    # workflow-level one, and an earlier revision attached this same explanation to a
+    # workflow-level block that job `rc` ignored entirely. A reducer lens caught that the obvious
+    # tidy-up — deleting the duplicate block — would have deleted the argument with it.
+    #
+    # An earlier revision declared `contents: write` in the PAYLOAD, believing this smaller block
+    # would narrow it back down. It does the opposite: a called workflow declaring ABOVE what its
+    # caller grants fails workflow VALIDATION and the run never starts ("the nested job is
+    # requesting 'contents: write', but is only allowed 'contents: read'"). The rc stream could not
+    # have run at all. The payload now declares exactly what these two lines permit, and
+    # check-release-graph.mjs asserts BOTH directions — it parses the payload's own block rather
+    # than comparing against a constant, because four review lenses each restored `contents: write`
+    # in the payload and watched every gate stay green.
+    permissions:
+      contents: read
+      packages: write
+    with:
+      registry: 'https://npm.pkg.github.com'
+      # MANDATORY. Omitting it makes npm write `latest`, and the first publish of a package with no
+      # existing versions would claim the prod channel from the rc stream — irreversible.
+      dist-tag: rc
+      # rc derives its next version from the registry, because nothing commits the bump back to
+      # `develop`: without this every run recomputes the same version and publish #2 dies on
+      # EPUBLISHCONFLICT.
+      bump: true
+    # NO `secrets: inherit`. The payload uses only `secrets.GITHUB_TOKEN`, which a called workflow
+    # receives without inheriting anything. `inherit` additionally handed this job the repository's
+    # GitHub App private key — into a job that runs `npm publish` and `npx cyclonedx` over
+    # third-party code. If the payload ever needs a named secret, declare it under the payload's
+    # `on.workflow_call.secrets:` and pass that one by name.

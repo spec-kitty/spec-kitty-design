@@ -1,0 +1,36 @@
+{
+  "accept_commit": "bf2e80133885099ea34183914140e21a0e43f82d",
+  "acceptance_history": [
+    {
+      "accept_commit": "c143e21b55a07c7417de862aca7b781c3c04928d",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-10T11:03:37.147467+00:00",
+      "accepted_by": "jeroennouws",
+      "accepted_from_commit": "ce26c0036b5c199f1718c1f20c5866732c5a272a"
+    },
+    {
+      "accept_commit": "bf2e80133885099ea34183914140e21a0e43f82d",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-10T13:34:58.065802+00:00",
+      "accepted_by": "jeroennouws",
+      "accepted_from_commit": "3e382417dc3f465aaaccf0603d6905d010f22ed4"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-10T13:34:58.065802+00:00",
+  "accepted_by": "jeroennouws",
+  "accepted_from_commit": "3e382417dc3f465aaaccf0603d6905d010f22ed4",
+  "created_at": "2026-09-10T09:37:25.887243+00:00",
+  "flattened": false,
+  "friendly_name": "entity marker size border image axis",
+  "mission_id": "01M25AVQVYHFVMGW8SSAY53PG0",
+  "mission_number": null,
+  "mission_slug": "entity-marker-size-border-image-axis-01M25AVQ",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances entity marker size border image axis on mission/entity-marker-size-border-image-axis so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "entity marker size border image axis",
+  "slug": "entity-marker-size-border-image-axis-01M25AVQ",
+  "status_phase": "1",
+  "target_branch": "mission/entity-marker-size-border-image-axis",
+  "topology": "single_branch"
+}

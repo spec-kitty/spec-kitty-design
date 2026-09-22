@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>radio-choice-group — Spec Kitty</title>
+    <meta name="description" content="radio-choice-group: 8 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: radio-choice-group — packages/styles/src/radio-choice-group/sk-radio-choice-group.css */
+/* @spec-kitty/styles — native radio-choice-group presentation (#336) */
+/* Structural pass: the browser still owns exactly-one selection, constraint validation
+   (including `required`), arrow-key roving, tab order, activation, submission, and reset via the
+   shared `name` attribute. This sheet styles native :checked/:disabled/:required/:invalid state; it
+   never maintains or infers selection with script. Anatomy is coordinated with the sibling
+   .sk-checkbox-choice-group (#277) where behavior matches, and diverges where radio semantics
+   (exactly-one, arrow-key roving, required/invalid) require it — see the contract's distinction
+   table. No transition/animation is declared anywhere in this file, so reduced-motion has nothing
+   to disable (NFR-010). */
+
+.sk-radio-choice-group {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sk-radio-choice-group__legend {
+  max-inline-size: 100%;
+  padding: 0;
+  overflow-wrap: anywhere;
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-semibold);
+  text-align: start;
+}
+
+.sk-radio-choice-group__options {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(
+      min(100%, calc(var(--sk-space-12) + var(--sk-space-12))),
+      1fr
+    )
+  );
+  gap: var(--sk-space-2);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin-block-start: var(--sk-space-3);
+}
+
+.sk-radio-choice-group__choice {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: auto minmax(min-content, 2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--sk-space-2);
+  /* --sk-space-9 is 3rem/48px — the same token sk-confirm-dialog.css documents as the closest
+     token at or above the 44px NFR-009 interactive-target floor. Pinned on this family's own
+     `__choice` class, over the full label, never on a shared element's internals. */
+  min-block-size: var(--sk-space-9);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  padding: var(--sk-space-2);
+  color: var(--sk-fg-body);
+  background: var(--sk-surface-card);
+  border-color: var(--sk-border-default);
+  border-style: solid;
+  border-width: var(--sk-border-width-1);
+  border-radius: var(--sk-radius-sm);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-normal);
+  text-align: start;
+}
+
+.sk-radio-choice-group__control {
+  inline-size: var(--sk-space-4);
+  block-size: var(--sk-space-4);
+  margin: 0;
+  scroll-margin-block: var(--sk-space-6);
+  accent-color: var(--sk-color-yellow);
+}
+
+.sk-radio-choice-group__label {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+}
+
+.sk-radio-choice-group__secondary-value {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+  color: var(--sk-fg-muted);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  text-align: end;
+}
+
+.sk-radio-choice-group__choice:has(
+  .sk-radio-choice-group__control:not(:disabled)
+) {
+  cursor: pointer;
+}
+
+.sk-radio-choice-group__choice:has(
+  .sk-radio-choice-group__control:checked
+) {
+  background: var(--sk-bg-pill);
+  border-color: var(--sk-border-strong);
+  border-style: double;
+  border-width: var(--sk-border-width-2);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-radio-choice-group__choice:has(
+    .sk-radio-choice-group__control:not(:disabled)
+  ):hover {
+  background: var(--sk-bg-pill);
+  border-style: dashed;
+  font-weight: var(--sk-weight-medium);
+}
+
+.sk-radio-choice-group__choice:has(
+    .sk-radio-choice-group__control:not(:disabled)
+  ):active {
+  background: var(--sk-surface-muted);
+  border-style: solid;
+  border-width: var(--sk-border-width-2);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-radio-choice-group__choice:has(
+  .sk-radio-choice-group__control:focus-visible
+) {
+  border-color: var(--sk-border-focus);
+  border-style: dashed;
+  border-width: var(--sk-border-width-2);
+  font-weight: var(--sk-weight-medium);
+}
+
+.sk-radio-choice-group__control:focus-visible {
+  outline-color: var(--sk-border-focus);
+  outline-style: solid;
+  outline-width: var(--sk-border-width-2);
+  outline-offset: calc(var(--sk-border-width-2) * -1);
+}
+
+.sk-radio-choice-group__choice:has(
+  .sk-radio-choice-group__control:disabled
+) {
+  color: var(--sk-fg-muted);
+  border-style: dotted;
+  cursor: not-allowed;
+}
+
+.sk-radio-choice-group__control:disabled {
+  cursor: not-allowed;
+}
+
+/* Required/invalid is a GROUP-level native constraint-validation state: every radio in a required
+   group reports `:invalid` until any one of them is checked (see data-model.md's state-transition
+   table). The cue lives on the legend, distinct from any per-choice checked/hover/active/disabled
+   cue above, so it stays honest even when disabled/checked choice-level cues are also present. */
+.sk-radio-choice-group:has(
+  .sk-radio-choice-group__control:required:invalid
+) .sk-radio-choice-group__legend {
+  padding-block-end: var(--sk-space-2);
+  color: var(--sk-color-red);
+  border-block-end-color: var(--sk-color-red);
+  border-block-end-style: solid;
+  border-block-end-width: var(--sk-border-width-2);
+  /* No font-weight declaration here: `.sk-radio-choice-group__legend` already sets
+     `font-weight: var(--sk-weight-semibold)` unconditionally, so repeating it here was a no-op. */
+}
+
+@media (forced-colors: active) {
+  .sk-radio-choice-group__choice:has(
+    .sk-radio-choice-group__control:checked
+  ) {
+    border-block-end-color: Highlight;
+    border-block-end-style: double;
+    border-block-end-width: var(--sk-border-width-4);
+  }
+
+  .sk-radio-choice-group__control:focus-visible {
+    outline-color: Highlight;
+    outline-width: var(--sk-border-width-4);
+    outline-offset: calc(var(--sk-border-width-4) * -1);
+  }
+
+  .sk-radio-choice-group__choice:has(
+    .sk-radio-choice-group__control:disabled
+  ) {
+    border-block-end-color: GrayText;
+    border-block-end-style: dotted;
+    border-block-end-width: var(--sk-border-width-4);
+  }
+
+  .sk-radio-choice-group:has(
+    .sk-radio-choice-group__control:required:invalid
+  ) .sk-radio-choice-group__legend {
+    border-block-end-color: LinkText;
+    border-block-end-style: solid;
+    border-block-end-width: var(--sk-border-width-4);
+  }
+}
+    </style>
+  </head>
+  <body>
+    <section id="radio-choice-group" data-od-component="radio-choice-group">
+      <h1>radio-choice-group</h1>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <fieldset class="sk-radio-choice-group">
+          <legend class="sk-radio-choice-group__legend">Connect a workspace</legend>
+          <div class="sk-radio-choice-group__options">
+            <label class="sk-radio-choice-group__choice" for="sk-radio-workspace-acme"><input id="sk-radio-workspace-acme" class="sk-radio-choice-group__control" type="radio" name="workspace" value="acme" checked><span class="sk-radio-choice-group__label">Acme</span><span class="sk-radio-choice-group__secondary-value">acme</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-workspace-acme-platform"><input id="sk-radio-workspace-acme-platform" class="sk-radio-choice-group__control" type="radio" name="workspace" value="acme-platform"><span class="sk-radio-choice-group__label">Acme / Platform</span><span class="sk-radio-choice-group__secondary-value">acme/platform</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-workspace-northwind"><input id="sk-radio-workspace-northwind" class="sk-radio-choice-group__control" type="radio" name="workspace" value="northwind"><span class="sk-radio-choice-group__label">Northwind</span><span class="sk-radio-choice-group__secondary-value">northwind</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-workspace-northwind-labs"><input id="sk-radio-workspace-northwind-labs" class="sk-radio-choice-group__control" type="radio" name="workspace" value="northwind-labs"><span class="sk-radio-choice-group__label">Northwind / Labs</span><span class="sk-radio-choice-group__secondary-value">northwind/labs</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-workspace-orbital"><input id="sk-radio-workspace-orbital" class="sk-radio-choice-group__control" type="radio" name="workspace" value="orbital"><span class="sk-radio-choice-group__label">Orbital</span></label>
+          </div>
+        </fieldset>
+      </figure>
+      <figure data-od-variant="disabled-group">
+        <figcaption>disabled-group</figcaption>
+        <fieldset class="sk-radio-choice-group">
+          <legend class="sk-radio-choice-group__legend">Connect a workspace</legend>
+          <div class="sk-radio-choice-group__options">
+            <label class="sk-radio-choice-group__choice" for="sk-radio-disabled-group-acme"><input id="sk-radio-disabled-group-acme" class="sk-radio-choice-group__control" type="radio" name="workspace_disabled_group" value="acme" checked disabled><span class="sk-radio-choice-group__label">Acme</span><span class="sk-radio-choice-group__secondary-value">acme</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-disabled-group-acme-platform"><input id="sk-radio-disabled-group-acme-platform" class="sk-radio-choice-group__control" type="radio" name="workspace_disabled_group" value="acme-platform" disabled><span class="sk-radio-choice-group__label">Acme / Platform</span><span class="sk-radio-choice-group__secondary-value">acme/platform</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-disabled-group-northwind"><input id="sk-radio-disabled-group-northwind" class="sk-radio-choice-group__control" type="radio" name="workspace_disabled_group" value="northwind" disabled><span class="sk-radio-choice-group__label">Northwind</span><span class="sk-radio-choice-group__secondary-value">northwind</span></label>
+          </div>
+        </fieldset>
+      </figure>
+      <figure data-od-variant="disabled">
+        <figcaption>disabled</figcaption>
+        <fieldset class="sk-radio-choice-group">
+          <legend class="sk-radio-choice-group__legend">Connect a workspace</legend>
+          <div class="sk-radio-choice-group__options">
+            <label class="sk-radio-choice-group__choice" for="sk-radio-disabled-acme"><input id="sk-radio-disabled-acme" class="sk-radio-choice-group__control" type="radio" name="workspace_disabled" value="acme" checked disabled><span class="sk-radio-choice-group__label">Acme</span><span class="sk-radio-choice-group__secondary-value">acme</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-disabled-acme-platform"><input id="sk-radio-disabled-acme-platform" class="sk-radio-choice-group__control" type="radio" name="workspace_disabled" value="acme-platform"><span class="sk-radio-choice-group__label">Acme / Platform</span><span class="sk-radio-choice-group__secondary-value">acme/platform</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-disabled-northwind"><input id="sk-radio-disabled-northwind" class="sk-radio-choice-group__control" type="radio" name="workspace_disabled" value="northwind" disabled><span class="sk-radio-choice-group__label">Northwind</span><span class="sk-radio-choice-group__secondary-value">northwind</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-disabled-northwind-labs"><input id="sk-radio-disabled-northwind-labs" class="sk-radio-choice-group__control" type="radio" name="workspace_disabled" value="northwind-labs"><span class="sk-radio-choice-group__label">Northwind / Labs</span><span class="sk-radio-choice-group__secondary-value">northwind/labs</span></label>
+          </div>
+        </fieldset>
+      </figure>
+      <figure data-od-variant="long">
+        <figcaption>long</figcaption>
+        <fieldset class="sk-radio-choice-group">
+          <legend class="sk-radio-choice-group__legend">Choose the workspace that should receive every future connector installation from this project</legend>
+          <div class="sk-radio-choice-group__options">
+            <label class="sk-radio-choice-group__choice" for="sk-radio-long-acme"><input id="sk-radio-long-acme" class="sk-radio-choice-group__control" type="radio" name="workspace_long" value="acme-platform-engineering" checked><span class="sk-radio-choice-group__label">Acme / Platform Engineering / Shared Infrastructure Tooling</span><span class="sk-radio-choice-group__secondary-value">acme/platform-engineering/shared-infrastructure-tooling</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-long-northwind"><input id="sk-radio-long-northwind" class="sk-radio-choice-group__control" type="radio" name="workspace_long" value="northwind-data-platform-research"><span class="sk-radio-choice-group__label">Northwind / Data Platform / Research and Applied Modelling</span><span class="sk-radio-choice-group__secondary-value">northwind/data-platform/research-and-applied-modelling</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-long-orbital"><input id="sk-radio-long-orbital" class="sk-radio-choice-group__control" type="radio" name="workspace_long" value="orbital"><span class="sk-radio-choice-group__label">Orbital</span></label>
+          </div>
+        </fieldset>
+      </figure>
+      <figure data-od-variant="none">
+        <figcaption>none</figcaption>
+        <fieldset class="sk-radio-choice-group">
+          <legend class="sk-radio-choice-group__legend">Choose a delivery region</legend>
+          <div class="sk-radio-choice-group__options">
+            <label class="sk-radio-choice-group__choice" for="sk-radio-region-us-east"><input id="sk-radio-region-us-east" class="sk-radio-choice-group__control" type="radio" name="region" value="us-east"><span class="sk-radio-choice-group__label">US East</span><span class="sk-radio-choice-group__secondary-value">us-east-1</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-region-eu-west"><input id="sk-radio-region-eu-west" class="sk-radio-choice-group__control" type="radio" name="region" value="eu-west"><span class="sk-radio-choice-group__label">EU West</span><span class="sk-radio-choice-group__secondary-value">eu-west-1</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-region-local"><input id="sk-radio-region-local" class="sk-radio-choice-group__control" type="radio" name="region" value="local"><span class="sk-radio-choice-group__label">Local only</span></label>
+          </div>
+        </fieldset>
+      </figure>
+      <figure data-od-variant="one">
+        <figcaption>one</figcaption>
+        <fieldset class="sk-radio-choice-group">
+          <legend class="sk-radio-choice-group__legend">Connect a workspace</legend>
+          <div class="sk-radio-choice-group__options">
+            <label class="sk-radio-choice-group__choice" for="sk-radio-one-acme"><input id="sk-radio-one-acme" class="sk-radio-choice-group__control" type="radio" name="workspace_one" value="acme"><span class="sk-radio-choice-group__label">Acme</span><span class="sk-radio-choice-group__secondary-value">acme</span></label>
+          </div>
+        </fieldset>
+      </figure>
+      <figure data-od-variant="required-invalid">
+        <figcaption>required-invalid</figcaption>
+        <fieldset class="sk-radio-choice-group">
+          <legend class="sk-radio-choice-group__legend">Connect a workspace</legend>
+          <div class="sk-radio-choice-group__options">
+            <label class="sk-radio-choice-group__choice" for="sk-radio-required-acme"><input id="sk-radio-required-acme" class="sk-radio-choice-group__control" type="radio" name="workspace_required" value="acme" required><span class="sk-radio-choice-group__label">Acme</span><span class="sk-radio-choice-group__secondary-value">acme</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-required-acme-platform"><input id="sk-radio-required-acme-platform" class="sk-radio-choice-group__control" type="radio" name="workspace_required" value="acme-platform" required><span class="sk-radio-choice-group__label">Acme / Platform</span><span class="sk-radio-choice-group__secondary-value">acme/platform</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-required-northwind"><input id="sk-radio-required-northwind" class="sk-radio-choice-group__control" type="radio" name="workspace_required" value="northwind" required><span class="sk-radio-choice-group__label">Northwind</span><span class="sk-radio-choice-group__secondary-value">northwind</span></label>
+          </div>
+        </fieldset>
+      </figure>
+      <figure data-od-variant="two">
+        <figcaption>two</figcaption>
+        <fieldset class="sk-radio-choice-group">
+          <legend class="sk-radio-choice-group__legend">Connect a workspace</legend>
+          <div class="sk-radio-choice-group__options">
+            <label class="sk-radio-choice-group__choice" for="sk-radio-two-acme"><input id="sk-radio-two-acme" class="sk-radio-choice-group__control" type="radio" name="workspace_two" value="acme" checked required><span class="sk-radio-choice-group__label">Acme</span><span class="sk-radio-choice-group__secondary-value">acme</span></label>
+            <label class="sk-radio-choice-group__choice" for="sk-radio-two-acme-platform"><input id="sk-radio-two-acme-platform" class="sk-radio-choice-group__control" type="radio" name="workspace_two" value="acme-platform" required><span class="sk-radio-choice-group__label">Acme / Platform</span><span class="sk-radio-choice-group__secondary-value">acme/platform</span></label>
+          </div>
+        </fieldset>
+      </figure>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+evidence_id,source_id,finding,mission_implication,checked_at
+E-001,S-001,"Issue #323 requires exactly system/light/dark, root data-theme and color-scheme, persistence, live system changes, pre-paint bootstrap, accessible textual control, forced-colors, and Factory-pattern proof.","Binding functional scope and acceptance contract.",2026-09-10
+E-002,S-002,"Factory Dashboard #14 remains open and explicitly depends on design-system #323.","Consumer wiring, auth, routes, refresh, and Factory vocabulary remain out of scope.",2026-09-10
+E-003,S-003,"#93 remains open; current ratchet records two inert nested LightMode wrappers.","Prove #323 root resolution but do not claim repository-wide #93 completion.",2026-09-10
+E-004,S-004,"The current token sheet provides dark defaults and light overrides on :root[data-theme=light] and .sk-light.","Consume existing themes; add no palette or color tokens.",2026-09-10
+E-005,S-005,"Operational-status pattern composes public surfaces and is policed by check-pattern-composition.mjs.","Use this Factory-pattern lineage and avoid private shadow-root reach-through or copied component CSS.",2026-09-10
+E-006,S-006,"Current demo toggles are two-state post-body scripts without persistence, system lifecycle, cleanup, color-scheme, or pre-paint behavior.","They are legacy evidence, not a reusable resolver authority.",2026-09-10
+E-007,S-007,"Component recipe requires authored element/CSS/markup sources plus generated manifest, wrappers, static forms, barrels, docs/parts/story ratchets, behaviors, and mutations.","Plan and WP DoD must enumerate generator and ADR-11 gates.",2026-09-10
+E-008,S-008,"Open PR #325 fixes global story totals embedded in unrelated component specs.","Do not absorb; rebase before acceptance and classify base-only failures truthfully if still open.",2026-09-10

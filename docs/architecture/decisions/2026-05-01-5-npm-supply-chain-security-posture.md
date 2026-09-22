@@ -53,10 +53,10 @@ This ADR records the agreed security posture as a set of explicit controls and a
 
 | Control | Mechanism | Spec ref |
 |---|---|---|
-| npm Provenance | `npm publish --provenance` in GitHub Actions release workflow; links package to source commit and CI build | FR-044 |
+| npm Provenance | **SUPERSEDED 2026-09-13, mechanism only — the control stands.** Was `npm publish --provenance`. The release path moved to GitHub Packages, where npm provenance is unsupported, so the flag was removed. The linkage between package and source commit is preserved by GitHub artifact attestations (`actions/attest-build-provenance`), scoped in #364 item 3 under the operator amendment of 2026-09-11 on #361. This row records the change rather than rewriting the decision's history. | FR-044 |
 | SBOM | `@cyclonedx/cyclonedx-npm` generates CycloneDX JSON SBOM; published as GitHub Release artifact | FR-045 |
 | Package contents audit | `npm pack --dry-run` before publish; verify no secrets, source maps, or dev files included | Release workflow |
-| 2FA enforcement | 2FA required on `@spec-kitty` npm account for all publish operations | Operational policy |
+| 2FA enforcement | **AMENDED 2026-09-13 — the account changed, the control stands.** Was 2FA on the `@spec-kitty` npm account. Publishing moved to GitHub Packages, so the credential is the workflow's `GITHUB_TOKEN` and the account to protect is the GitHub org. No npm account participates in publishing. | Operational policy |
 
 ### Dependency governance policy (encoded in charter)
 
@@ -75,7 +75,7 @@ The following risks are explicitly accepted with mitigations noted. This accepta
 | Malicious `postinstall` in a transitive dev-tool dependency (Storybook, Playwright) | Dev tools are not published to consumers; blast radius is contributor workstations only | `--ignore-scripts` in CI; Dependabot for updates |
 | Zero-day CVE between nightly scan runs | npm audit has inherent lag; new CVEs are not retroactively detected on installed versions | Nightly scheduled audit; Dependabot security alerts |
 | Compromised GitHub Actions from a SHA that was malicious at creation | SHA pinning prevents redirected tags but not a SHA whose underlying content was always malicious | Using only widely audited official Actions (`actions/`, `astral-sh/`) |
-| npm account takeover of `@spec-kitty` scope | Requires bypassing npm 2FA | 2FA enforcement; provenance attestation provides post-hoc detection |
+| Takeover of the publishing identity | **AMENDED 2026-09-13**: the identity is now the GitHub org, not an npm account. Requires bypassing GitHub org 2FA. | Org 2FA; artifact attestations (#364) provide post-hoc detection, replacing npm provenance |
 | Angular LTS expiry creating unpatched CVEs in `@spec-kitty/angular` | LTS versions stop receiving security patches | Charter requires upgrade initiation no later than 3 months before LTS expiry |
 
 ### Pre-flight requirement

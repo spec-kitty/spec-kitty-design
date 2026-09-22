@@ -1,0 +1,59 @@
+{
+  "event_count": 10,
+  "last_event_id": "01M25RBDCB2XG4N5W18DP7Y1KT",
+  "materialized_at": "2026-09-10T13:33:10.923368+00:00",
+  "mission_number": "",
+  "mission_slug": "action-row-static-form-01M25JSV",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 1,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "user",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 1,
+      "lane": "approved",
+      "last_event_id": "01M25RBDCB2XG4N5W18DP7Y1KT",
+      "last_transition_at": "2026-09-10T13:33:10.923368+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Re-review (cycle 2) after fix for review-cycle-1's MEDIUM.\n\nThe docs.md `.sk-action-row-host` claim is now true, not just retracted: the test imports\n`docs/design-system/using-components.md` raw and runs its fenced block through the SAME\n`hostHostBlockDeclarations()` comparator already used for the sheet and the local constant\n(fixtures/elements-behaviour/src/sk-action-row.test.ts:922, commit c3e720b). Verified myself:\nmutated using-components.md's block (dropped `min-width: 0`) — test reds at the new\n`expect(docs).toEqual(documented)` assertion with a clean 2-vs-3-declaration diff; reverted —\n40/40 green. All three copies (sheet, test-local constant, docs.md) are now compared against the\nsame `documented` value by the same function — confirmed by reading the diff, not just the claim.\n\nSpot-checked rather than re-running everything already cleared last cycle (anti-drift pin vs the\nsheet, reflow parity, sibling-not-descendant, the four absent-state assertions, hostile-href\nescaping, and axe all held under mutation testing in cycle 1 and are unaffected — this round only\ntouched the test file):\n- `git diff <prior-HEAD>..HEAD --stat` — only `sk-action-row.test.ts` plus mission bookkeeping\n  (status.events.jsonl/status.json, WP01-static-action-row.md Activity Log addition, this\n  review-cycle record) changed. No CSS, markup.ts, stories.ts, custom-elements.json, or SIZES.md\n  touched.\n- `node scripts/typecheck-all.mjs` — passes cleanly (5/5 projects); the new `?raw` import of a\n  `.md` file resolves via the existing generic `declare module '*?raw'` in `types/raw-imports.d.ts`\n  (same mechanism the file's own `sk-action-row.css?raw` import already used).\n- `commitlint --from <c>~1 --to <c>` — exit 0 on both new commits (c3e720b, 3832991), no warnings.\n- `check-manifest-content.mjs` / `check-part-ratchet.mjs` — still green, zero diff.\n- `git status --porcelain` — clean.\n\nThe WP01-static-action-row.md Activity Log addition (frontmatter-vs-actual story-path rationale)\nis a pure append after the frozen T001-T011 content (diff is +4/-0 lines) — the frozen plan itself\nis untouched.\n\nNo HIGH or MEDIUM stands. Approved."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/307/kitty-specs/action-row-static-form-01M25JSV/tasks/WP01-static-action-row/review-cycle-2.md",
+        "reference": "review-cycle://action-row-static-form-01M25JSV/WP01-static-action-row/review-cycle-2.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done",
+        "T009": "done",
+        "T010": "done",
+        "T011": "done"
+      }
+    }
+  }
+}

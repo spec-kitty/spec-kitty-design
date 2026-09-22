@@ -1,0 +1,16 @@
+schema: review-verify/v1
+complete: true
+phase: tasks
+results:
+  - id: TASKS-DECOMP-001
+    status: resolved
+    reason: T019 (renumbered) now reads as ordinary implementer work — "the implementer, after T018's final push, opens the built Storybook..." — matching the native-form-select T004 precedent's actor-free framing, with no separate "squad" actor performing a numbered subtask; the squad's own separate pre-merge review of T019's evidence remains intact in Definition of done (lines 462-465).
+  - id: TASKS-DECOMP-002
+    status: resolved
+    reason: The old redundant T013 (re-verification folded into T012) is gone as a separate numbered subtask; a full T0xx sweep shows a contiguous, gap-free, duplicate-free T001-T019 in both the frontmatter subtasks list and the body headings, with the old T020 (manual zoom) renumbered down into the vacated T013->...->T019 slot.
+  - id: TASKS-ORDER-001
+    status: resolved
+    reason: Execution-order items 6-7 now read "T010-T011 — land the remaining CSS ... (T010), forced-colors block (T011)" and "T012 — rebuild Storybook again ... and re-run the live Playwright block until green ... (IC-04's second rebuild)", correctly attributing the rebuild to T012 (whose header and body are in fact the rebuild), with T013 (item 8) correctly described as the visual-regression baseline task, not a rebuild.
+  - id: TASKS-COVER-001
+    status: resolved
+    reason: FR-001 now appears on T002's and T015's headings with bodies that substantively deliver it (T002's exemplars are consumer-authored buttons with pressed/disabled entirely supplied by the consumer; T015 documents the consumer-owned-contract ownership boundary verbatim); FR-002 appears on T001/T012/T016 headings whose bodies are the no-custom-element/no-owned-semantics grep checks; FR-004 appears on T007's heading whose body asserts native-disabled tab-order/activation exclusion — all three are earned by body substance, not decorative tags.

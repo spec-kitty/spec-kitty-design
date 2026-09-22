@@ -6,20 +6,42 @@
     "storybook": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node_modules/.bin/ng run storybook:storybook",
+        "command": "storybook dev --config-dir apps/storybook/.storybook --port 6006",
         "forwardAllArgs": false
       },
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "storybook:build": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/apps/storybook/storybook-static"],
+      "outputs": [
+        "{workspaceRoot}/apps/storybook/storybook-static"
+      ],
       "options": {
-        "command": "node_modules/.bin/ng run storybook:build-storybook",
+        "command": "storybook build --config-dir apps/storybook/.storybook --output-dir apps/storybook/storybook-static",
         "forwardAllArgs": false
       },
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build",
+        "vite-consumer-fixture:build"
+      ],
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{workspaceRoot}/packages/*/src/**/*",
+        "{workspaceRoot}/packages/*/assets/**/*",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/package-lock.json",
+        "{workspaceRoot}/tsconfig.base.json",
+        "{workspaceRoot}/packages/*/package.json",
+        "{workspaceRoot}/packages/elements/dist/**/*",
+        "{workspaceRoot}/fixtures/vite-consumer/dist/**/*",
+        "{workspaceRoot}/packages/tokens/dist/**/*"
+      ]
     }
   },
-  "tags": ["scope:storybook", "type:app"]
+  "tags": [
+    "scope:storybook",
+    "type:app"
+  ]
 }

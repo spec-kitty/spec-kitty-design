@@ -1,3 +1,0 @@
-export const SkSectionBannerNeutralHTML = `<div class="sk-section-banner sk-section-banner--neutral"><span class="sk-section-banner__dot" aria-hidden="true">●</span><span class="sk-section-banner__label">VERSION 1.X — FIRST STABLE RELEASE</span></div>`;
-export const SkSectionBannerPurpleHTML = `<div class="sk-section-banner sk-section-banner--purple"><span class="sk-section-banner__dot" aria-hidden="true">●</span><span class="sk-section-banner__label">VERSION 2.X — EVENT ARCHITECTURE &amp; SKILLS</span></div>`;
-export const SkSectionBannerGreenHTML = `<div class="sk-section-banner sk-section-banner--green"><span class="sk-section-banner__dot" aria-hidden="true">●</span><span class="sk-section-banner__label">VERSION 3.X — STABLE RELEASE</span></div>`;

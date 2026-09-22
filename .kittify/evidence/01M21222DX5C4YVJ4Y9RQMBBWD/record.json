@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M21222DX5C4YVJ4Y9RQMBBWD",
+  "completed_at": "2026-09-08T17:54:31.672890+00:00",
+  "outcome": "done",
+  "closed_by": "agent",
+  "evidence_ref": "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/analysis-report.md"
+}

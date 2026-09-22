@@ -1,5 +1,0 @@
-src/
-*.spec.ts
-*.stories.ts
-*.map
-node_modules/

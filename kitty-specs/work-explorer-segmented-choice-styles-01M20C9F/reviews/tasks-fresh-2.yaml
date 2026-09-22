@@ -1,0 +1,43 @@
+schema: review-findings/v1
+complete: true
+phase: tasks
+lens_group: fresh
+round: 2
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: TASKS-FRESH2-001
+    lens: fresh sweep round 2
+    severity: 3
+    title: "Reassigning the zoom validation to the squad leaves the zoom README's frontmatter ownership pointed at the implementer, now contradicting plan.md's own Project Structure tree"
+    evidence:
+      - artifact: "tasks/WP01-segmented-choice-styles.md frontmatter § create_intent (line 81): \"docs/architecture/validation/issue-270-segmented-choice-zoom/README.md\""
+      - artifact: "tasks/WP01-segmented-choice-styles.md frontmatter § owned_files (line 92): \"docs/architecture/validation/issue-270-segmented-choice-zoom/**\", under role: implementer (line 93)"
+      - artifact: "tasks/WP01-segmented-choice-styles.md § Definition of done (lines 451-466): \"Manual 200%-zoom validation (NFR-003, SC-005) is a Tier-C pre-merge squad gate item, run by the squad after T018's final push — NOT an implementer subtask\""
+      - artifact: "plan.md § Source Code (repository root) Project Structure tree (lines 144-169): lists sk-segmented-choice.css, the 9 .html exemplars, index.ts, the stories file, the two Playwright spec files, using-components.md, and expected-stories.json as this WP's AUTHORED/GENERATED artifacts — the zoom README does not appear anywhere in that tree"
+    claim: >
+      Before this fix round, T019's body said "the implementer... opens the built Storybook... Write
+      the results to a new docs/architecture/validation/issue-270-segmented-choice-zoom/README.md" —
+      consistent with the frontmatter's create_intent/owned_files listing that README under this WP
+      (role: implementer). This round correctly moved the zoom-validation actor from "implementer" to
+      "the Tier-C pre-merge squad" (matching plan.md's IC-04 Risks narrative and Gate Enumeration table,
+      which both say the squad runs it, not the implementer), and repeats three times that it is "NOT
+      an implementer subtask." But the frontmatter's create_intent and owned_files lists were not
+      updated to match: they still name the zoom README as a file this WP (role: implementer) creates
+      and owns. This is now a genuine three-way inconsistency introduced by this round: (1) plan.md's
+      own Project Structure/Source Code tree — which the Goal section names as authoritative on
+      procedural disagreement — does not include the zoom README among this WP's authored files at all;
+      (2) the WP body now explicitly disclaims implementer responsibility for it; (3) the frontmatter
+      still claims it under this WP's create_intent/owned_files. An implementer following the body
+      literally will never create this file, yet WP-scope tooling checking create_intent/owned_files
+      would expect it to appear as part of this WP's own commits — and no subtask or DoD bullet
+      explains how/when the squad's output actually lands as a committed file on this WP's branch
+      (T018's two-head procedure and plan.md's Delivery contract describe only the initial push plus
+      one baseline-PNG commit, with no third commit step for this README).
+    remediation: >
+      Either (a) remove docs/architecture/validation/issue-270-segmented-choice-zoom/README.md from
+      this WP's create_intent and owned_files lists (matching plan.md's Project Structure tree, which
+      already omits it) and add a note in the Definition of done clarifying that the file is committed
+      out-of-band by the squad (or by an operator on the squad's behalf) rather than by this WP's own
+      commit history, or (b) if the intent is that the file still lands via a commit on this WP's PR
+      branch, add an explicit step (in Execution order / T018 / Definition of done) naming who performs
+      that commit and when, so create_intent/owned_files and the body agree on a concrete mechanism.

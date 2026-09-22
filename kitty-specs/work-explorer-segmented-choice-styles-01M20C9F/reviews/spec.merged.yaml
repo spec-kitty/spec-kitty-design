@@ -1,0 +1,225 @@
+schema: review-findings/v1
+complete: true
+phase: spec
+mission: work-explorer-segmented-choice-styles-01M20C9F
+note: >
+  Mechanical merge of spec-gov.findings.yaml, spec-arch.findings.yaml, spec-complete.findings.yaml
+  by the orchestrator (R2, bookkeeping only). No findings dropped or altered; no duplicates found
+  (checked pairwise for same artifact-section/file:line + substantially same claim). Original ids
+  preserved, not renumbered.
+findings:
+  - id: SPEC-GOV-001
+    lens_group: gov
+    lens: "Directive (DIRECTIVE_010 — spec fidelity to the issue)"
+    severity: 4
+    title: "C-005 claims the issue gives no breakpoint number for the W4 narrow/wrapping story, but the issue's own Evidence section states one (1024px)"
+    evidence:
+      - artifact: "spec.md § C-005: \"The exact pixel value of the 'narrow/wrapping' story's viewport is an implementation decision for the plan/WP, not fixed here ... consistent with the issue's own framing of 'the approved W4 narrow layout' as an evidence artifact rather than a number handed to the CSS.\""
+      - artifact: "GitHub issue #270 body, Evidence section: \"W4 requires the group to remain operable when the toolbar wraps at 1024px; W9 and W10 retain it in a truthful disabled state.\" (verified via `gh issue view 270 --repo spec-kitty/spec-kitty-design`)"
+    claim: >
+      C-005 asserts, as its stated rationale for leaving the narrow/wrapping viewport width
+      unspecified, that the issue frames "the approved W4 narrow layout" only as "an evidence
+      artifact rather than a number handed to the CSS." That is factually wrong: the issue's own
+      Evidence section names a concrete number, "wraps at 1024px." Neither this number, nor any
+      acknowledgment that the issue supplies one, appears anywhere in spec.md. If the plan/WP takes
+      C-005 at face value and picks an arbitrary narrow-story width instead of 1024px, the resulting
+      story will not represent "the approved W4 narrow layout" the issue actually describes, and
+      TKX6 (#275), which composes this component into the real Work Explorer page at W4's real
+      width, would then need rework to reconcile a mismatched breakpoint.
+    remediation: >
+      Correct C-005 to either (a) fix the narrow/wrapping story's viewport at 1024px, citing the
+      issue's Evidence section as the source, since the issue already supplies the number and this
+      is not new scope invention, or (b) if 1024px is deliberately being left open pending a plan-
+      phase decision, say so explicitly and drop the false claim that the issue supplies no number.
+
+  - id: SPEC-GOV-002
+    lens_group: gov
+    lens: "Mission-derived (one-WP/one-PR/Tier-C squad-cadence fidelity)"
+    severity: 3
+    title: "C-009 cites 'the charter's Review Policy' for the Tier-C classification, but docs/architecture/elements-first-programme.md — the document that policy names as the tiering record — does not classify this mission at all"
+    evidence:
+      - artifact: "spec.md § C-009: \"Per the issue's stated 'Squad tier: C — pre-merge' and the charter's Review Policy ... no earlier point-cut (post-spec/post-plan/post-tasks) is required by this mission's declared tier.\""
+      - code: ".kittify/charter/charter.md, Review Policy section: \"Earlier point-cuts are tiered by mission risk and recorded in docs/architecture/elements-first-programme.md\""
+      - code: "docs/architecture/elements-first-programme.md — Tier table lists only M1-M16 (epic #66 programme); grep for \"269|270|Work Explorer|TKX\" returns zero matches"
+    claim: >
+      This mission's "Tier C" designation has exactly one actual source (the issue's self-declared
+      "Squad tier: C — pre-merge" line), not the two C-009 implies. Not fatal — the issue is binding
+      and sufficient on its own — but citing "the charter's Review Policy" as a second, independent
+      confirmation overstates traceability: a future reader checking the tiering document per the
+      charter's own recording mechanism will find nothing there for this mission.
+    remediation: >
+      Reword C-009 to name the issue's tier line as the sole binding source, and note explicitly
+      that docs/architecture/elements-first-programme.md does not classify this mission (it covers
+      only the epic #66 M1-M16 programme).
+
+  - id: SPEC-GOV-003
+    lens_group: gov
+    lens: "Mission-derived (one-WP/one-PR/Tier-C squad-cadence fidelity)"
+    severity: 1
+    title: "C-009 does not clarify that the spec-phase adversarial review this file is part of is an optional, non-gating enrichment pass rather than a tier-mandated earlier point-cut"
+    evidence:
+      - artifact: "spec.md § C-009: \"no earlier point-cut (post-spec/post-plan/post-tasks) is required by this mission's declared tier.\""
+      - artifact: "This review itself is a post-spec squad pass running against a mission C-009 says needs no post-spec squad."
+    claim: >
+      Not a real contradiction (earlier point-cuts are report-only and never gate a mission per the
+      charter and the adversarial-squad skill), but the spec does not say this anywhere, leaving a
+      reader of C-009 alone to reconcile the apparent tension unaided.
+    remediation: >
+      Add one clause to C-009 noting that a spec-phase (or plan/tasks-phase) adversarial pass may
+      still run as an optional, report-only enrichment without contradicting the Tier-C "no earlier
+      point-cut required" conclusion.
+
+  - id: SPEC-GOV-004
+    lens_group: gov
+    lens: "Terminology (styles-only per ADR-10)"
+    severity: 3
+    title: "Terminology section's ADR-10 precedent list overclaims: the cited components' styles-only rationale does not obviously extend to a segmented-choice button group, and sk-form-select is not even part of ADR-10's own documented class list"
+    evidence:
+      - artifact: "spec.md Terminology section: \"'Styles-only' means ... Verified against the repo's own precedent (`sk-form-select`, `sk-disclosure`, `sk-facts`, `sk-data-table`, `sk-empty-state`, `sk-skip-link`) rather than assumed\""
+      - code: "docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md:84-105 — the class-level ruling covers only broken DOM parent/child chains, cross-shadow-root ID reference failure, a skip-link's document-scoped href, and <details>'s UA-owned state"
+      - code: "docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md — grep for \"form-select\" returns zero matches"
+    claim: >
+      ADR-10's actual "styles-only class" ruling is narrow and does not describe a segmented-choice
+      button group (plain buttons have no structural relationship a wrapper custom element would
+      sever). The spec presents six components, including sk-form-select (never mentioned by ADR-10
+      at all), as verified precedent, when the actual binding reason is simpler: issue #270 itself
+      instructs "Do not register a custom element." A future sibling mission could misread this spec
+      as precedent for stretching ADR-10's narrow ruling to cover components that merely prefer not
+      to own behaviour.
+    remediation: >
+      Separate the two justifications: (1) issue #270's explicit instruction is the actual binding
+      source for C-001; (2) if ADR-10 precedent is cited at all, note honestly that segmented-choice
+      does not fit ADR-10's structural-semantics rationale the way the five #176 components do, and
+      drop sk-form-select from the list unless a separate documented rationale is cited.
+
+  - id: SPEC-ARCH-001
+    lens_group: arch
+    lens: "forced-colors mechanism correctness (mission-derived)"
+    severity: 4
+    title: "Third forced-colors trap (stylelint blind to border/outline shorthand) is named but not closed by any testable requirement, and C-004's cited precedent doesn't demonstrate the fix"
+    evidence:
+      - artifact: "spec.md § NFR-004 and User Story 4 scenario 4 (\"following the documented traps in docs/contributing/adding-a-component.md\")"
+      - artifact: "spec.md § C-004: \"reusing existing pill/surface/border-focus families where they already cover the visual need (per the readiness investigation's confirmed precedent in sk-nav-pill.css and sk-form-select.css)\""
+      - code: "docs/contributing/adding-a-component.md, Forced-colors section: stylelint's declaration-strict-value does not police border/outline shorthand at all; use LONGHAND -color properties; sk-skip-link.css and sk-data-table.css use this pattern"
+      - code: "packages/styles/src/nav-pill/sk-nav-pill.css:45,53 — shorthand border/outline, ZERO forced-colors block"
+      - code: "packages/styles/src/form-select/sk-form-select.css — longhand border-color/outline-color but also ZERO forced-colors block"
+      - code: "stylelint.config.mjs:22-23 — declaration-strict-value list confirms shorthand border/outline are genuinely unpoliced"
+    claim: >
+      No FR, NFR or Constraint requires the segmented-choice CSS to use longhand -color properties
+      for its selected/focus-visible declarations inside a forced-colors override, so nothing makes
+      this a testable acceptance bar — a WP author could ship a shorthand-authored forced-colors
+      override with a hardcoded non-token color and every declared gate would pass it. C-004's own
+      "confirmed precedent" citation points at two files that, verified by grep, contain zero
+      forced-colors blocks between them — neither demonstrates the longhand technique the recipe
+      requires. The real worked examples the recipe names (sk-skip-link.css, sk-data-table.css) are
+      absent from C-004's citation entirely.
+    remediation: >
+      Add a new Constraint (or extend C-004) requiring that any forced-colors override in
+      sk-segmented-choice.css use LONGHAND -color properties, matching sk-skip-link.css and
+      sk-data-table.css. Repoint C-004's precedent citation: keep sk-nav-pill.css/sk-form-select.css
+      for base-state token reuse only, and add sk-skip-link.css/sk-data-table.css as the specific
+      precedent for the forced-colors override technique.
+
+  - id: SPEC-ARCH-002
+    lens_group: arch
+    lens: "forced-colors mechanism correctness (mission-derived)"
+    severity: 3
+    title: "Recipe's second forced-colors trap (forced-color-adjust:none freezing an authored color) is never restated, despite the spec citing 'the documented traps' as full authority"
+    evidence:
+      - artifact: "spec.md § NFR-004, User Story 4 scenario 4 — restates only the background/box-shadow-vs-border/outline mechanism"
+      - artifact: "spec.md § FR-003 — non-colour-only requirement does not rule out a background-drawn icon/glyph as the cue"
+      - code: "docs/contributing/adding-a-component.md, Forced-colors section: forced-color-adjust: none freezes an authored color, measured invisible in one probe"
+      - code: "packages/styles/src/disclosure/sk-disclosure.css:1-17 and packages/styles/src/data-table/sk-data-table.css:201-257 — working in-repo precedent, neither cited by the spec"
+    claim: >
+      Only one of the recipe's three forced-colors traps is restated in NFR-004, even though the
+      spec cites "the documented traps" (plural) as authority. FR-003's non-colour cue could
+      plausibly be a background-drawn icon/glyph, exactly the affordance shape the recipe's second
+      trap warns about.
+    remediation: >
+      Add a sentence to NFR-004 (or a new constraint) stating that a background-drawn icon/glyph
+      selected-state cue must not use forced-color-adjust: none to force it to survive forced-colors
+      mode; prefer a border/outline- or content-drawn cue, citing sk-disclosure.css/sk-data-table.css.
+
+  - id: SPEC-ARCH-003
+    lens_group: arch
+    lens: "token contract"
+    severity: 2
+    title: "C-004/FR-015's generic 'pill/surface' token-family language is ambiguous between two same-valued, differently-named tokens"
+    evidence:
+      - artifact: "spec.md § C-004 and § FR-015: generic \"pill/surface/border/focus token families\" phrasing"
+      - code: "packages/tokens/src/tokens.css:42 — --sk-surface-pill: #212830 (Dark Surfaces block)"
+      - code: "packages/tokens/src/tokens.css:181 — --sk-bg-pill: #212830 (Pill/Chip Background block) — identical value, different name"
+      - code: "packages/styles/src/nav-pill/sk-nav-pill.css:8 — the cited precedent uses --sk-bg-pill, not --sk-surface-pill"
+    claim: >
+      tokens.css carries two tokens for the same pill background value under two different names.
+      C-004/FR-015 name the "pill/surface" family generically without picking one, so a WP author
+      has no spec-level guidance on which to reuse, and could pick either.
+    remediation: >
+      Name the specific token in C-004/FR-015 — --sk-bg-pill, matching the sk-nav-pill.css precedent
+      already cited — rather than the generic "pill/surface" phrasing.
+
+  - id: SPEC-COMPLETE-001
+    lens_group: complete
+    lens: "testability"
+    severity: 4
+    title: "Hover and active states named by FR-003 have no story, browser assertion, or visual baseline anywhere in the spec's own verification apparatus"
+    evidence:
+      - artifact: "spec.md § FR-003: \"selected, hover, active, focus-visible and disabled states to each be distinguishable by more than colour\""
+      - artifact: "spec.md § User Story 1 Acceptance Scenario 2: hover AC, but the story's own Independent Test names only the selected-state/axe assertion"
+      - artifact: "spec.md § FR-006 (13 required stories) — none is a hover or active-state story"
+      - artifact: "spec.md § FR-007/FR-008/FR-009 — neither hover nor active named in any of the three"
+      - artifact: "spec.md § SC-003 and FR-012/SC-007 visual-baseline state list — hover and active absent from both"
+    claim: >
+      FR-003 and issue #270's public/library contract line name five states that must be non-colour-
+      only distinguishable. Three of five (selected, focus-visible, disabled) are backed by a named
+      story, a Playwright assertion, and a visual baseline. Hover and active appear only once, in
+      prose, and are never wired to any concrete verification mechanism — nothing in the spec's own
+      acceptance apparatus would catch a colour-only or absent hover/active state.
+    remediation: >
+      Either (a) add hover and active to the FR-009/SC-003 Playwright assertion (Playwright's
+      .hover() + computed-style diff is an established pattern in this repo — see
+      apps/storybook/src/tests/sk-context-nav.spec.ts:813, sk-transition-matrix.spec.ts:285,
+      sk-bar-chart.spec.ts:257) and add them to FR-012/SC-007's baseline list; or (b) if hover/active
+      verification is judged out of this mission's bar, say so explicitly rather than leaving FR-003's
+      claim silently unbacked.
+
+  - id: SPEC-COMPLETE-002
+    lens_group: complete
+    lens: "ratchet-count-testability"
+    severity: 3
+    title: "FR-013 does not carry forward expected-stories.json's own documented pitfall — the autodocs-generated --docs entry must be excluded from the count and from byElement, and nothing in the spec says so"
+    evidence:
+      - artifact: "spec.md § FR-013: \"entry added to expected-stories.json naming every FR-006 story id, with total bumped by exactly the number of stories added\""
+      - artifact: "spec.md § SC-008: \"total is bumped by exactly the number of new story ids added (13, unless the plan phase determines a different exact split)\""
+      - code: "expected-stories.json:22 — the --docs entry Storybook generates from the autodocs tag is not listed: it is a generated page, not a story"
+      - code: "expected-stories.json:36-42 — every prior entry's commit note states an exact bump with no docs entry counted"
+    claim: >
+      Every existing styles-only component's stories file uses tags: ['autodocs'], which makes
+      Storybook's built index.json emit an additional docs entry beyond named stories.
+      expected-stories.json's own $comment flags this as a corrected-for trap. FR-013/SC-008 don't
+      repeat this exclusion, so a WP author deriving the ratchet entry mechanically from Storybook's
+      built index risks over-counting to 14 or listing a spurious --docs id.
+    remediation: >
+      Add one clause to FR-013 stating explicitly that the Storybook-generated --docs page entry is
+      excluded from both total and byElement.sk-segmented-choice, matching every existing entry in
+      expected-stories.json.
+
+  - id: SPEC-COMPLETE-003
+    lens_group: complete
+    lens: "ratchet-count-testability"
+    severity: 2
+    title: "Spec never commits sk-segmented-choice to a Storybook title-taxonomy root, which determines the literal prefix of all 13 ratchet story ids"
+    evidence:
+      - artifact: "spec.md § FR-013: \"a new sk-segmented-choice (or equivalent story-prefix) entry\" — the parenthetical concedes the prefix is not fixed"
+      - artifact: "spec.md § Terminology — cites six styles-only precedents, all Primitives/ or Form/ titled, none Components/"
+      - code: "expected-stories.json:250-261 (sk-form-select, title 'Form/SkFormSelect (HTML)') and :177-183 (sk-disclosure, title 'Primitives/SkDisclosure (HTML)') — story ids are literally derived from the Storybook title"
+      - artifact: "CLAUDE.md § 6: \"Title taxonomy — pick the closest existing root: Components/, Form/, Navigation/, Primitives/, Tags/, Tokens/.\""
+    claim: >
+      An interactive button-group control is at least as plausible a fit for Components/ as for
+      Primitives/, but the spec never states which root this component belongs under, even though
+      the ratchet's story ids are mechanically derived from the Storybook title string. FR-013's
+      "(or equivalent story-prefix)" hedge acknowledges but does not resolve this.
+    remediation: >
+      State the intended Storybook title root explicitly in the spec (e.g. "titled
+      Components/SkSegmentedChoice (HTML)") — or, if genuinely deferred to the plan phase, say so
+      explicitly rather than leaving it implicit in a parenthetical hedge.

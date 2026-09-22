@@ -1,0 +1,79 @@
+schema: review-findings/v1
+complete: true
+phase: spec-research
+mission: work-explorer-segmented-choice-styles-01M20C9F
+lens: architecture
+findings:
+  - id: SPEC-RESEARCH-ARCH-001
+    lens: architecture
+    severity: 5
+    title: "research.md Q3 falsely claims --sk-surface-pill does not exist in tokens.css, undermining the FR-015/C-004 token-choice decision it was written to confirm — and contradicts an already-recorded spec-phase finding"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research.md:104-107 (Q3 Rationale): \"No `--sk-surface-pill` token was found in `packages/tokens/src/tokens.css` during this check — the FR-015 warning against inventing that name appears to guard against a token that either never existed or was already rejected, not one this research found live in the tree.\""
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research.md:109-111 (Q3 Alternatives considered): \"`--sk-surface-pill` (rejected — not found in the token catalogue; FR-015 names it as the wrong choice to avoid).\""
+      - artifact: "packages/tokens/src/tokens.css:42 — `--sk-surface-pill: #212830; /* off-gray — nav pill, chips, hover row */` (Dark Surfaces block)"
+      - artifact: "packages/tokens/src/tokens.css:391 — `--sk-surface-pill: #ECE7D8; /* off-cream — nav pill rail, chips */` (light-theme override)"
+      - artifact: "packages/tokens/dist/token-catalogue.json:44 — `--sk-surface-pill` is present in the generated catalogue (the exact artifact Q3 says it checked)"
+      - artifact: "grep across packages/styles/src/*/*.css shows `--sk-surface-pill` used in 7 shipping components (bar-chart, action-row, workflow-lane, context-nav (x2), transition-matrix (x3), time-series-chart (x2)), versus `--sk-bg-pill` used in only 2 (nav-pill, pill-tag) — i.e. `--sk-surface-pill` is the *more* precedented token in the tree today, not an absent one"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/reviews/spec-arch.findings.yaml, finding SPEC-ARCH-003 (already-recorded, prior spec-phase review): correctly identifies both `--sk-surface-pill:42` and `--sk-bg-pill:181` as live, same-valued (`#212830`), differently-named tokens and flags the ambiguity — the exact fact this research question was purportedly re-verifying"
+    claim: >
+      research.md's Q3 exists specifically to confirm FR-015/C-004's claim that `--sk-bg-pill` is
+      the correct token and that `--sk-surface-pill` is a name to avoid. Its stated method is a
+      direct check against `packages/tokens/src/tokens.css`, and its conclusion is that
+      `--sk-surface-pill` "was not found" there and is therefore either nonexistent or already
+      rejected. This is factually false: `--sk-surface-pill` is declared twice in
+      `packages/tokens/src/tokens.css` (dark-mode value at line 42, light-mode override at line
+      391), both with the identical hex value `--sk-bg-pill` carries in each theme, is present in
+      the generated token catalogue stylelint actually enforces against, and is in active use by
+      seven shipping components in `packages/styles/src/` — more than the two components that use
+      `--sk-bg-pill`. This is not a marginal miss: this exact fact was already surfaced by the
+      spec-phase adversarial squad in `reviews/spec-arch.findings.yaml` (SPEC-ARCH-003), which
+      correctly names both tokens, their identical values, and the resulting ambiguity that C-004/
+      FR-015's generic "pill/surface … families" language does not resolve. research.md's stated
+      purpose is to "independently re-verify" every claim "against the live repository tree,"
+      explicitly "not copied from plan.md's own text" — yet it reaches a conclusion on the exact
+      question the prior spec-phase review already answered correctly, and gets it wrong. A future
+      reader trusting Q3's "Confirmed" verdict would believe the `--sk-surface-pill` alternative was
+      searched for and ruled genuinely absent, when in fact it is the more commonly used of the two
+      tokens in the codebase today.
+    remediation: >
+      Correct research.md Q3: `--sk-surface-pill` exists (tokens.css:42,391; catalogue:44) with the
+      identical value to `--sk-bg-pill` in both themes, and is used by more components than
+      `--sk-bg-pill` is. Reframe the decision as a genuine choice between two same-valued,
+      differently-named live tokens rather than a choice between one live token and one
+      nonexistent/rejected name. Cross-reference `reviews/spec-arch.findings.yaml`'s SPEC-ARCH-003,
+      which already flagged this ambiguity at the spec phase and recommended C-004/FR-015 name the
+      specific token (`--sk-bg-pill`, matching the `sk-nav-pill.css` precedent) rather than the
+      generic "pill/surface … families" phrasing — research.md should have surfaced, not
+      contradicted, that existing finding. Re-run the evidence-log verification pass for any other
+      research.md conclusion built on an unlogged negative claim (a "not found" assertion with no
+      corresponding EV-### row), since this is the second such case in this document (see
+      SPEC-RESEARCH-ARCH-002).
+
+  - id: SPEC-RESEARCH-ARCH-002
+    lens: architecture
+    severity: 2
+    title: "evidence-log.csv EV-017 cites the wrong line numbers for the stylelint policed-property array and mislabels the ignoreValues literal entries as 'the file's own rationale comment'"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research/evidence-log.csv:18 (EV-017): \"stylelint.config.mjs,\\\"line 20 (policed property array: ['/color/', 'background', 'background-color', 'font-family', 'padding', 'margin', 'border-radius']); lines 26-33 (file's own rationale comment)\\\",yes\""
+      - artifact: "stylelint.config.mjs:20 — actual content is a comment (\"// Enforce usage of --sk-* CSS custom property tokens instead of hardcoded values.\"), not the policed-property array"
+      - artifact: "stylelint.config.mjs:23 — the actual policed-property array declaration: `['/color/', 'background', 'background-color', 'font-family', 'padding', 'margin', 'border-radius'],`"
+      - artifact: "stylelint.config.mjs:26-34 — actual content is the literal `ignoreValues` entries (`'/^var\\\\(--sk-/'`, `'transparent'`, `'inherit'`, `'initial'`, `'unset'`, `'none'`, `'currentColor'`, `'0'`), not prose — the rationale comment explaining the unpoliced-shorthand concern is at stylelint.config.mjs:35-51, not 26-33"
+    claim: >
+      EV-017 is marked `verified: yes` and exists specifically to pin down, by line number, where
+      stylelint.config.mjs states the policed-property list and the rationale for the
+      longhand-`-color` requirement (the evidence C-010/NFR-004 depend on). Both line citations in
+      the row are off: "line 20" points at a one-line comment header, not the array, which actually
+      starts at line 23; and "lines 26-33" is described as "the file's own rationale comment" but
+      those lines are literal `ignoreValues` string entries — the actual prose comment stating the
+      unpoliced-shorthand rationale spans roughly lines 35-51. The underlying substantive claim
+      (that `border`/`outline` shorthand is unpoliced by `declaration-strict-value`, motivating
+      C-010's longhand requirement) is true and independently confirmed by direct inspection, so this
+      is a citation-precision defect rather than a false substantive claim — but it is exactly the
+      kind of line-number drift this evidence log's stated purpose (checkable, re-verifiable
+      citations) exists to prevent, and it is marked "yes" without qualification.
+    remediation: >
+      Correct EV-017's `source_line_or_section` to "line 23 (policed-property array); lines 35-51
+      (rationale comment on the unpoliced shorthand, e.g. lines 38-41 for the specific claim)".
+      research.md's own Q4 prose (which cites the broader, correct range "stylelint.config.mjs lines
+      17-59") is unaffected and needs no change — only the more specific evidence-log row.

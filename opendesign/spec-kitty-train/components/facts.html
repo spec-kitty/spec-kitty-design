@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>facts — Spec Kitty</title>
+    <meta name="description" content="facts: 5 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: facts — packages/styles/src/facts/sk-facts.css */
+/* @spec-kitty/styles — sk-facts shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+
+/* ------------------------------------------------------------------ */
+/* Facts — stacked (default)                                           */
+/* ------------------------------------------------------------------ */
+
+.sk-facts {
+  margin: 0;
+}
+
+.sk-facts__term {
+  margin: 0;
+  margin-block-start: var(--sk-space-4);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+  color: var(--sk-fg-muted);
+}
+
+.sk-facts__term:first-of-type {
+  margin-block-start: 0;
+}
+
+.sk-facts__value {
+  margin: 0;
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  color: var(--sk-fg-default);
+}
+
+/* ------------------------------------------------------------------ */
+/* Facts — two-column modifier                                         */
+/* ------------------------------------------------------------------ */
+
+.sk-facts--two-col {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: var(--sk-space-4);
+  row-gap: var(--sk-space-2);
+  align-items: baseline;
+}
+
+.sk-facts--two-col .sk-facts__term,
+.sk-facts--two-col .sk-facts__value {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Facts — compact density modifier                                    */
+/* ------------------------------------------------------------------ */
+
+.sk-facts--compact .sk-facts__term {
+  margin-block-start: var(--sk-space-1);
+}
+
+.sk-facts--compact .sk-facts__term:first-of-type {
+  margin-block-start: 0;
+}
+
+.sk-facts--compact.sk-facts--two-col {
+  row-gap: var(--sk-space-1);
+  column-gap: var(--sk-space-2);
+}
+    </style>
+  </head>
+  <body>
+    <section id="facts" data-od-component="facts">
+      <h1>facts</h1>
+      <figure data-od-variant="compact">
+        <figcaption>compact</figcaption>
+        <dl class="sk-facts sk-facts--compact">
+          <dt class="sk-facts__term">Status</dt>
+          <dd class="sk-facts__value">Running</dd>
+          <dt class="sk-facts__term">Owner</dt>
+          <dd class="sk-facts__value">Ada Lovelace</dd>
+          <dt class="sk-facts__term">Region</dt>
+          <dd class="sk-facts__value">us-east-1</dd>
+        </dl>
+      </figure>
+      <figure data-od-variant="empty-value">
+        <figcaption>empty-value</figcaption>
+        <dl class="sk-facts sk-facts--two-col">
+          <dt class="sk-facts__term">Status</dt>
+          <dd class="sk-facts__value">Running</dd>
+          <dt class="sk-facts__term">Notes</dt>
+          <dd class="sk-facts__value"></dd>
+        </dl>
+      </figure>
+      <figure data-od-variant="long-value">
+        <figcaption>long-value</figcaption>
+        <dl class="sk-facts sk-facts--two-col">
+          <dt class="sk-facts__term">Deployment strategy and rollback policy</dt>
+          <dd class="sk-facts__value">Blue-green with automatic rollback if the error rate exceeds 1% within the first ten minutes after a release, or if any readiness probe fails for more than three consecutive checks.</dd>
+          <dt class="sk-facts__term">Owner</dt>
+          <dd class="sk-facts__value">Ada Lovelace</dd>
+        </dl>
+      </figure>
+      <figure data-od-variant="two-col">
+        <figcaption>two-col</figcaption>
+        <dl class="sk-facts sk-facts--two-col">
+          <dt class="sk-facts__term">Status</dt>
+          <dd class="sk-facts__value">Running</dd>
+          <dt class="sk-facts__term">Owner</dt>
+          <dd class="sk-facts__value">Ada Lovelace</dd>
+          <dt class="sk-facts__term">Region</dt>
+          <dd class="sk-facts__value">us-east-1</dd>
+        </dl>
+      </figure>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <dl class="sk-facts">
+          <dt class="sk-facts__term">Status</dt>
+          <dd class="sk-facts__value">Running</dd>
+          <dt class="sk-facts__term">Owner</dt>
+          <dd class="sk-facts__value">Ada Lovelace</dd>
+          <dt class="sk-facts__term">Region</dt>
+          <dd class="sk-facts__value">us-east-1</dd>
+        </dl>
+      </figure>
+    </section>
+  </body>
+</html>

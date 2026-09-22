@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M214YR9G6GQ6YJV6AEQ78E3Z",
+  "completed_at": "2026-09-08T19:37:10.237097+00:00",
+  "outcome": "done",
+  "closed_by": "agent",
+  "evidence_ref": "/home/jeroennouws/dev/team-kitty-missions/design-270/.worktrees/work-explorer-segmented-choice-styles-01M20C9F-lane-a/kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/reviews/implementation.ruling.md"
+}

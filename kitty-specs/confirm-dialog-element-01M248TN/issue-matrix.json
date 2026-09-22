@@ -1,0 +1,125 @@
+{
+  "rows": {
+    "#1432": {
+      "evidence_ref": "Team Kitty SaaS issue #1432 (a different repo, not spec-kitty-design) blocks whole-Team deletion upstream. FR-014 only requires that no story/exemplar/test in this mission demonstrate whole-Team deletion as an available flow (verified clean by grep in review-cycle-1 and re-verified in cycle-2); #1432's own resolution is owned by the Team Kitty SaaS repo, not this WP.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#161": {
+      "evidence_ref": "Open, pre-existing issue #161 (the package root exports['.'] entry is broken/unreachable) is explicitly named in research.md and WP01's own task file as 'not this WP's to fix' \u2014 WP01 only adds the new ./confirm-dialog/* subpath entry, verified independent of #161's defect by check-release-graph.mjs.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#178": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/178 \u2014 precedent cited by FR-018 for registering sk-confirm-dialog's unmarked zero-literal test the same way sk-notice's unmarked re-announcement test is registered, without minting a new ADR-11 id. #178 itself is not touched by this WP; the precedent it established is already settled/merged and correctly reused here.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#257": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/257 (sk-copy-field) \u2014 closed; cited in research.md/WP01 tasks as a contrasted precedent for the event-vs-native-close decision. Not touched by this WP.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#286": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/286 remains open \u2014 it proposes a repo-wide 'no literal text in render()' gate, which is explicitly NOT this WP's deliverable per FR-018's own docstring. WP01 satisfies the current requirement (zero English/user-visible literals ship while #286 is open, FR-001/FR-017) via a component-scoped test only, and does not close or generalize #286; follow-up remains owned by #286 itself.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#300": {
+      "evidence_ref": "Epic #300 (Family 4 component-gap audit) is this mission's parent epic (gap G7); epic-level tracking and closure remain owned by the epic itself, not by this single WP. WP01 satisfies epic #300's shared constraint 4 (no Team/membership/invitation/session domain model, FR-015).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#301": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/301 (epic #300's TKT1/G0 static-form-of-element-backed-CSS decision) is open and unresolved; FR-016/SC-006 require this WP to record the static-twin question as explicitly deferred to #301's ruling rather than inventing an answer, which the component's published documentation does. #301 itself is not this WP's to resolve.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#308": {
+      "evidence_ref": "spec-kitty/spec-kitty-design#308 is this mission's own source issue; WP01 is the mission's only work package and is now independently re-reviewed and approved (cycle-2), implementing FR-001..FR-018 end to end.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#73": {
+      "evidence_ref": "research.md cites '#72 and #73 both declined it' as settled precedent that a component's markup module is optional (glob-derived generator work set); sk-confirm-dialog correctly follows the same declined-markup-module shape for its interactive-only form. Not touched by this WP.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#93": {
+      "evidence_ref": "Settled precedent cited in WP01's Storybook task: data-theme=\"light\" activates nothing on a wrapper (#93); sk-confirm-dialog's LightMode story correctly uses class=\"sk-light\" instead, verified by a real computed-style assertion (confirmed clean in review-cycle-1 and re-confirmed in cycle-2). Not touched by this WP.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

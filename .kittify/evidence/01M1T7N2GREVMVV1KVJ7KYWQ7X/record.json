@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M1T7N2GREVMVV1KVJ7KYWQ7X",
+  "completed_at": "2026-09-06T02:13:17.616707+00:00",
+  "outcome": "done",
+  "closed_by": "agent",
+  "evidence_ref": "Pre-merge report-only review of PR #192 at 242e71e: extracted MAPPED_PROPS (17 rows) from the installed bundle, ran build-react-wrappers.mjs --check (green), read loadReactPropRenameMap + per-element comparison, cross-checked ADR-11's prop-name invariant section. 5 LOW findings, no blockers. Read-only honored."
+}

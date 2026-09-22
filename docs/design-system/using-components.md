@@ -1,12 +1,976 @@
 # Using components
 
-The Spec Kitty component libraries ship in two flavours: `@spec-kitty/angular` for Angular applications and `@spec-kitty/html-js` for framework-agnostic HTML projects. Both require `@spec-kitty/tokens`.
+The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
+so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
+
+**Migration is in progress.** Thirty-one elements exist today: `sk-action-row`, `sk-app-shell`,
+`sk-bar-chart`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-confirm-dialog`, `sk-context-sidebar`, `sk-copy-field`, `sk-entity-marker`,
+`sk-evidence-chain`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`, `sk-metric`,
+`sk-nav-pill`, `sk-notice`, `sk-page-header`, `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`,
+`sk-section-banner`, `sk-section-header`, `sk-site-footer`, `sk-status-indicator`, `sk-stub`, `sk-theme-toggle`,
+`sk-time-series-chart`, and `sk-transition-matrix`.
+Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
+(#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, (#210) `progress`, and
+(#209) `workflow-board` and `workflow-lane`, (#211) `form-select`, and (#213) `breadcrumbs`,
+`prose`, and `event-timeline`, plus (#277) `checkbox-choice-group`. See
+ADR-10, *form-field is deliberately styles-only* and *Styles-only components are a class, not a
+fixed exception count*. These families ship classes applied to real semantic HTML the consumer authors
+— `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>`, `<section>`, `<ol>`, `<select>`,
+and native `<fieldset>`/`<legend>`/`<label>`/checkbox relationships
+— and no `sk-*` custom element wraps any of them: light-DOM native semantics such as list, table, and
+label associations are exactly what a wrapper element would break.
+Segmented choice is separately styles-only by #270: its accessibly named native button group,
+supplied `aria-pressed` values, selection, exclusivity, and activation all remain consumer-owned.
+Composite sections below such as Hero
+and Callout are CSS-only *patterns* rather than packages, and are not part of that package list. Each
+section below says which it is, because the difference decides how you use it.
+
+Because a custom element needs no wrapper, every framework can use the migrated ones directly. A
+generated React wrapper exists for JSX typing and typed refs — see
+[Using the elements from React](./using-react.md) for what it does and does not buy, measured.
+
+## Theme preference
+
+`sk-theme-toggle` exposes exactly three preferences: `system`, `light`, and `dark`. `system` is
+the default and resolves the operating-system `prefers-color-scheme`; Light and Dark are manual
+overrides. All three values, including `system`, persist under the single namespaced
+`localStorage` key `spec-kitty-theme`. The resolved value is always `light` or `dark` and is
+applied to both `document.documentElement.dataset.theme` and the root `color-scheme` style.
+
+Prevent a wrong-theme first paint by copying the complete generated classic-script asset from
+`@spec-kitty/elements/theme-bootstrap.js` byte-for-byte into the marked inline script. It must be
+the first theme-affecting item in `<head>`, before every stylesheet link. Do not transcribe its
+storage key or resolver into an application-owned snippet; the artifact is generated from the
+same DOM-free contract imported by the element.
+
+```html
+<head>
+  <script data-sk-theme-bootstrap>
+    /* Paste the exact contents of @spec-kitty/elements/theme-bootstrap.js here. */
+  </script>
+  <link rel="stylesheet" href="/node_modules/@spec-kitty/tokens/dist/tokens.css">
+</head>
+```
+
+The control's visible group and option labels are consumer-supplied so applications can localize
+them. Supply every label; if one is blank or missing, the element deliberately renders no
+interactive controls rather than shipping fallback copy or an unnamed partial choice.
+
+```html
+<sk-theme-toggle
+  label="Theme preference"
+  system-label="Use system setting"
+  light-label="Light"
+  dark-label="Dark"
+></sk-theme-toggle>
+<script src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+```
+
+This is a native labelled radio group, not a binary switch. The browser supplies single-choice
+arrow-key behavior and exposes the checked option programmatically; visible option text keeps the
+state understandable without color. In forced-colors mode the same radios remain operable and the
+preference still persists, while authored palette colors defer to the user's system colors.
+
+Every `sk-theme-toggle` connected to one document shows one shared preference. A choice on any
+control selects it on every connected control, persists once, and resolves one root theme; while
+that preference is System exactly one live `prefers-color-scheme` listener exists, and none
+exists in Light or Dark, so a second control can never apply the operating system over a manual
+choice. A control connecting while another remains connected always adopts that live,
+sibling-synchronized preference — including a choice that could not be persisted because storage
+is denied — unless it was given an explicit `preference` before connecting, which then becomes
+every control's preference.
+
+The last control to disconnect releases the listener but keeps the preference in memory, together
+with the stored value the page last read or saved. A control that connects later, after every
+other control has briefly disconnected (an SPA remounting a header during navigation, for
+example), re-reads storage at that moment — never the value it read when it was created — and
+adopts what it reads only if that differs from the remembered value, as on a genuinely fresh page
+or after a same-tab write from other code. Otherwise the page's own preference resumes, so a
+choice survives the gap even when storage refused to save it (a full quota, some private modes)
+or cannot be read at all. One consequence is deliberate: a same-tab write of exactly the value
+the page last read or saved looks like no write, so it does not replace a choice that could not
+be saved. Coordination is per document only; there is no cross-tab synchronization.
+
+Most applications should omit the `preference` attribute and property entirely. The element
+already resolves the stored preference (or System) on its own, matching the pre-paint bootstrap,
+so supplying `preference` is an explicit *initial* override — appropriate only when a consumer
+intentionally seeds a first-visit choice — and it does not itself persist that override to
+storage, so an authored value that disagrees with the stored one can produce a bootstrap-to-
+upgrade theme change. A user's selection is saved once, after its `sk-theme-change` event has
+been dispatched: if a synchronous handler of that event reassigns `preference` — rejecting the
+choice — storage keeps the preference the page settled on, not the rejected one, so the next
+load restores what the user last saw.
+
+The `preference` property and attribute accept only `system`, `light`, and `dark`. Any other
+value assigned from JavaScript, or assigned directly to an already-upgraded element's property,
+becomes `system` immediately and is reflected back onto the attribute. A raw invalid string
+written directly onto a connected element's `preference` *attribute* — before or after it has
+rendered — is likewise corrected to `system` once the element next updates; it does not persist
+as the literal invalid string. In every case the value never leaves the group without a selected
+choice and never reaches the root.
+
+Degradation is deliberate:
+
+- Without JavaScript, the generated published token stylesheet follows
+  `prefers-color-scheme`; the unupgraded empty host exposes no inert buttons or radios. Manual
+  selection and persistence require enhancement. The component-authoring recipe makes static
+  markup optional when no truthful static control exists; generating radio markup here would
+  present an operable-looking choice that cannot change the root, so this element intentionally
+  has no generated static form.
+- If `localStorage` is unavailable or throws, root resolution and current-page selection still
+  work, but the choice cannot survive a reload.
+- If `matchMedia` is unavailable or throws, System safely resolves to Light and installs no live
+  listener. Manual Light and Dark remain available.
+
+This component owns only generic theme resolution. Factory Dashboard issue #14 still owns placing
+and integrating it in that application. Design-system issue #93 still owns the remaining
+repository-wide broken LightMode wrappers; this component's root-level proof does not claim those
+acceptance criteria.
+
+## Repository Dossier pattern
+
+The Storybook `Patterns/Repository Dossier` family demonstrates the approved repository route
+without publishing a page component. It composes the public shell, context, header, status, card,
+action-row, notice, pill, and copy-field elements with native `.sk-context-nav`,
+`.sk-breadcrumbs`, `.sk-facts`, `.sk-progress`, and `.sk-empty-state` families. Repositories,
+Missions, breadcrumb and document destinations, branch copies, progress inputs, timestamps, setup
+introduction and commands, and links remain native light-DOM content supplied by the consumer.
+
+Keep a repository view's repeated facts in one immutable fixture and project display presence from
+that supplied state. A completed view may have Missions or be empty; a repository that is not a
+Spec Kitty repository and a repository whose first view is still rendering are different states.
+A cross-branch Mission renders each supplied copy. A snapshot warning belongs only to the supplied
+affected Mission and repeats the exact affected commit. The consumer supplies each Work Package
+total and completion percent; the pattern formats the visible total and percent labels and maps the
+percent to native `<progress value>` with `max="100"`. It does not calculate repository progress or
+infer a tone/threshold. Branch names, commit identifiers, formatted pushed times, safe HTTP(S)
+tracker destinations, and copy-field values are displayed as supplied; an unsafe or absent tracker
+destination remains static text.
+
+At compact widths, use `sk-app-shell presentation="compact"` as a controlled drawer. The consumer
+supplies the trigger and native context navigation, keeps `open` and `aria-expanded` aligned,
+installs `compactTrigger`, moves focus into the open drawer, accepts `sk-app-shell-dismiss`, and
+owns routing after activation. The application also owns repository discovery, git access,
+polling, truth inference, timestamp formatting, persistence, progress arithmetic, and command
+execution. Use `sk-copy-field` only to copy an exact supplied value and report its real result.
+There is intentionally no `sk-repository-dossier`, `sk-mission-row`, truth-band, provenance-band,
+or native-list collection wrapper.
+
+## Mission Reading pattern
+
+The Storybook `Patterns/Mission Reading` family demonstrates Mission document routes without
+publishing a page component. It composes `sk-app-shell`, `sk-personal-rail`,
+`sk-context-sidebar`, `sk-page-header`, `sk-status-indicator`, `sk-pill-tag`,
+`sk-section-header`, `sk-card`, `sk-notice`, and `sk-grid` with the native light-DOM
+`.sk-context-nav`, `.sk-breadcrumbs`, `.sk-facts`, `.sk-prose`, `.sk-data-table`, and
+`.sk-empty-state` families. Native navigation, lists, links, `article`, `section`, code, and tables
+retain their own semantics.
+
+One deeply frozen Storybook fixture owns the repeated Mission, revision, catalogue, artifact,
+operation, observed-activity, and reported-presence values. Pure projectors select the reviewed
+route states; they perform no I/O or mutation. An available catalogue destination is a real anchor.
+An unavailable destination is visible static native content with an explicit text annotation—no
+`href`, role, handler, or tab stop—and receives no child list. Only supplied bounded collections
+render nested entries; Ops remains terminal.
+
+The compact shell is controlled composition. The consumer supplies the trigger and labelled drawer,
+keeps `open` and `aria-expanded` aligned, installs `compactTrigger`, accepts
+`sk-app-shell-dismiss`, and decides what route activation does. The application—not this pattern or
+the design system—owns routing, fetching, persistence, truth checking, pushed-time markers,
+Markdown parsing and sanitization, document actions, live polling, and every join between activity
+and presence data.
+
+## Work Explorer pattern
+
+The Storybook `Patterns/Work Explorer` W1–W10 family is application-pattern evidence, not a
+registered or published `sk-work-explorer` component. One deeply frozen 50-record fixture flows
+through pure filtering and lane/person/type grouping selectors into shared renderers. The three
+groupings retain the same Work Package object identities and source order; counts are derived from
+that fixture rather than authored as separate views.
+
+The renderers compose the rail-preserving `sk-app-shell`, native `.sk-segmented-choice` buttons,
+native `.sk-form-select` and input controls, native controlled `.sk-collection` sections/lists,
+flush `sk-action-row[href]` routes, and the compact native `.sk-event-timeline` with existing
+headers, cards, statuses, markers, tags, notices, and empty states. Consumers own pressed,
+expanded, hidden, filter, route, and shell-open state. A route row is a real anchor and must not
+contain another control.
+
+Verified Mission work, reported-live presence, and observed activity are independent supplied
+branches; neither presence nor activity is inferred or joined to a Work Package. The application
+owns data loading, routing, stores, polling, timers, sorting, relative-time formatting, trust
+verification, and any presence join. Summary, filter-bar, 70/30-to-stacked layout, and static
+loading-skeleton geometry are page-owned story CSS, not public design-system APIs. Empty, degraded,
+loading, and no-repository states must omit facts they have not received.
+
+## Work Package view patterns
+
+The Storybook `Patterns/Work Package Views` stories demonstrate the T10 overview and T11 detail
+routes without publishing a page component. Compose the overview from `sk-page-header`, native
+`.sk-progress`, native `.sk-form-select`, `.sk-workflow-board`/`.sk-workflow-lane`, and compact
+`sk-action-row` items. Compose detail from native `.sk-breadcrumbs`, `sk-page-header`, a direct
+native list of passive `sk-check-bullet` hosts, `.sk-prose`, a base `sk-card` containing
+`.sk-facts`, and a native `.sk-event-timeline`.
+
+Keep one immutable application fixture and derive repeated totals from it. The lane identifier
+that means complete is application data, not design-system vocabulary. Likewise claims, stale
+advisories, actor/time strings, prompt HTML, event order, trust labels, lane selection, and notice
+announcement policy arrive already decided. Activation and select events are intent seams: the
+consumer updates routing or controlled selection if it chooses.
+
+The application still owns fetching, storage, mutable state, routing, lane changes, timers and
+claim expiry, relative-time formatting, prompt parsing or sanitization, event sorting or
+verification, trust inference, and integration with Team Kitty. Use `sk-notice` for a supplied
+snapshot/retention message that needs announcement semantics; do not create a local banner. There
+is intentionally no `sk-work-package-card`, Work Package page element, stateful Kanban component,
+checklist control, or execution panel.
+
+## CLI auth pattern
+
+The Storybook `Patterns/CLI Auth` family (spec-kitty/spec-kitty-design#329) demonstrates four
+canonical CLI/device-authorization states — code entry, review and decide, terminal
+success/denial, and terminal error — as composition and accessibility evidence, not a published
+page component and not a replica of all twelve Family 5 screens. Story 1 composes one native
+`<form>` with a labelled `sk-form-input` and one native `<button type="submit" class="sk-button
+sk-button--primary">`. Story 2 composes `sk-card`, native `.sk-facts`, one `sk-pill-tag` per
+supplied scope wrapped in a real `<ul>`/`<li>` list (the scopes are the security payload the
+user is consenting to, so they get list semantics the same way the client/account facts get a
+`<dl>` — `sk-pill-tag` itself is documented presentational, with no role or accessible-name
+contribution), and Approve/Deny as two native `<button type="submit">` inside one native
+`<form>` — Approve carries `class="sk-button sk-button--primary"`, Deny carries
+`class="sk-button sk-button--danger-secondary"` — DOM order Approve-then-Deny. Both actions also
+carry `name="decision"` with distinct `value`s (`"approve"`/`"deny"`), copied along with the
+class/DOM-order shape above: without them a consumer's real server-rendered submission cannot
+tell which action was pressed. Stories 3 and 4
+compose the public `sk-boundary-page` frame (`packages/styles/src/boundary-page/`, a styles-only
+pattern with no custom element): a consumer-owned `<main>` landmark around
+`.sk-boundary-page__stage` > `.sk-boundary-page__card` containing the heading
+(`<h1 class="sk-boundary-page__title">`), the required `.sk-boundary-page__body`, and the
+required `.sk-boundary-page__action-group` holding zero or one supplied `<a>` action — no local
+frame, stage, or "boundary" component was built in its place.
+
+**`<sk-button>` cannot submit an enclosing form.** Its shadow-root control hard-codes
+`type="button"` (a `<button>` inside a shadow root does not participate in an enclosing form's
+submission either way), so it can never be the primary/Approve/Deny action in a genuine
+native-form flow like this one. The supported shape for that case is a native
+`<button type="submit">` carrying the public `.sk-button`/`.sk-button--*` styles-layer classes
+directly — which is what all three form actions in this pattern do. `.sk-button` is a public
+surface in its own right (`packages/styles/src/button/sk-button.css`), not merely the element's
+internal implementation, so this stays within "public surfaces and native semantic HTML," not a
+fork. If a future revision gives `<sk-button>` real submit behavior, ADR-9 §4's `ElementInternals`
+research and `#74`'s form-association work are the documented route — until then, use the native
+`<button>` shape for anything that must submit a form.
+
+All four stories are now fully composed against their landed public surfaces: `#320`'s
+`.sk-button--danger-secondary` tone (Story 2's Deny), `#321`'s `--sk-border-control` contrast
+fix (Story 1's input boundary), and `#303`'s `sk-boundary-page` frame (Stories 3 and 4) all
+shipped to `train/elements-first` before this mission's IC-06 finalization pass, which consumed
+each one's real, shipped shape rather than an assumed class or attribute name.
+
+One deeply frozen fixture (`packages/elements/src/patterns/cli-auth.fixture.ts`) owns every
+label, description, fact, scope, status heading/body, and action value across all four stories —
+nothing is a component default. What the pattern does NOT own, and stays entirely the consuming
+application's: route/navigation, permission and session state, validation logic (the invalid
+code-entry story demonstrates the wiring — `aria-invalid`, an associated announced error — with a
+fixture-supplied message, not a real validation rule), form submission, confirmation, copy and
+localization, and terminal-state selection (choosing success vs. denied vs. error is the
+consumer's decision, not something this pattern infers). There is intentionally no `auth-card`,
+auth-shell, `scope-chip`, or `form-action-row` component, and no second boundary/stage frame.
+## Connectors pattern
+
+The Storybook `Patterns/Connectors` family demonstrates the approved Team Kitty Family 3 corpus —
+setup (C1), operating index (C2), provider authorization handoff (C3), GitHub App setup failure
+(C4), GitLab exactly-one group selection (C5), installation detail shell (C6), workspace scope
+(C7), project routing / admitted repositories (C8), team account links (C9a), and Slack channel
+selection (C9b) — without publishing a page, provider, or `sk-connectors` component. It composes
+`sk-page-header`, `sk-card[status]`, `sk-status-indicator`, `sk-notice`, `sk-button`,
+`sk-action-row` (its public `controls` slot), `sk-confirm-dialog` (`confirm-variant="danger-
+secondary"` for C8's hard-purge confirmation), native `.sk-radio-choice-group` (C5), native
+`.sk-section-nav` (C6-C9a's shared sub-navigation), native `.sk-form-select`/`.sk-form-field`
+(C9b), native `.sk-data-table` (C7/C8), and native `.sk-empty-state`/`.sk-facts` (stacked only —
+the grouped-reflow facts-grid extension tracked separately is not composed here).
+
+Keep one immutable fixture and derive every repeated fact, health value, count, ID, timestamp, and
+permission from it — never a second, separately-declared copy of the same number. A permission
+projection (admin vs. member) removes controls, never the shared facts underneath; the one
+documented exception is C2's relay-status notice and linked-account summary row, which are
+themselves admin-only facts (infrastructure/management surfaces), not controls stripped from a
+shared fact. `needs_reauth`/revoked health maps to the danger tone and exposes no recovery/
+reauthorization action anywhere — disconnect is teardown, not recovery. GitHub admission is
+automatic: there is no repository picker or "Admit selected" action. Slack stays outbound-only: no
+preview, readback, or delivery-test capability. Only GitLab exposes another-group connection and
+exactly-one group selection. `/discovery/` is represented only as a compatibility-redirect fact,
+never a browse link. A repository hard-purge blocks automatic readmission; no tombstone-lift action
+is invented. Every form is mutation-free evidence — method/action/fields match the source exactly,
+but submission is intercepted (`preventDefault()`) and never calls a Team Kitty route.
+
+The application owns provider SDK/API integration, OAuth/GitHub App/Nango/webhook/relay/polling
+behavior, permission and admission logic, mapping/purge/refresh state machines, routing, and all
+copy/i18n. There is intentionally no `sk-connectors`, provider component, or published Connectors
+page.
+
+## Account Front Door pattern
+
+The Storybook `Patterns/Account Front Door` family (#355, epic #352) demonstrates six approved
+Family 6 public/account compositions — landing, entry boundary, submitted validation, recovery
+sent, terminal (both inactive and closed-signup arms), published/unavailable legal, and email/
+password account maintenance — without publishing a page component or any new custom element. It
+composes `.sk-skip-link`, `.sk-public-header`, `sk-theme-toggle`, `sk-site-footer` (compact
+presentation), `.sk-boundary-page`, `.sk-form-field`/`.sk-input`, `.sk-radio-choice-group`,
+`.sk-button` (`--primary`/`--secondary`/`--ghost`/`--danger-secondary`), `sk-copy-field`,
+`sk-notice`, `.sk-prose`, `sk-app-shell`, `sk-page-header`, and `.sk-pill-tag`, plus `--sk-*`
+tokens. Every action inside `.sk-public-header__actions` carries `sk-public-header__action`, which
+is what carries its 48px floor; at zero actions the `<nav>` is omitted entirely. Compact footer
+links are bare `<a slot="compact-links">` carrying both `sk-site-footer__link` and
+`sk-site-footer__link--compact`. `sk-theme-toggle` writes `localStorage` and mutates
+`documentElement`'s theme, so every story in the family isolates that state via `beforeEach`.
+
+Thirteen named fixture states back the family; two are proven only in the fixture-behaviour suite
+and carry no story (a populated-providers arm and a closed-signup terminal arm), and one more
+(a cooldown arm) is published only through the `LongStrings` proof. Every fixture is recursively
+frozen and every projection is a pure presence/ordering decision — the consumer supplies signup
+fields, CSRF placeholder name, provider list, linked errors, recovery/refusal copy, terminal
+copy and route inventory, the legal document as an ordered block list, email addresses and their
+verification/primary facts, cooldown copy, and password-field facts. The pattern infers none of
+it.
+
+**What the pattern deliberately does not do.** It implements no routing, store, session, or
+navigation; no CSRF token generation (the hidden placeholder is rendered empty and is never
+populated); no client-side validation (a submitted-validation composition renders an
+already-invalid state, it does not compute one); no cooldown timing (a cooldown region is present
+only when the fixture supplies a cooldown fact, absent — not merely hidden — otherwise); no legal
+document publication or authoring (the `.sk-prose` region renders exactly the supplied ordered
+blocks); and no localisation (every string arrives from the fixture; the `LongStrings` proof
+substitutes longer versions of the same real strings, never invented text). It performs no network
+request and no successful-mutation theatre: every `<form>` carries the fixture's own `method`/
+`action`, and no submit handler exists inside the pattern. Recovery, reset, duplicate-account and
+terminal outcomes are rendered from fixture types that carry no existence-expressing field, so
+"does this account exist" is structurally unrepresentable, not merely untested. There is
+intentionally no `sk-error-summary`, `sk-auth-form`, `sk-auth-card`, or any auth/account/
+front-door/legal-page/recovery/MFA/email-row/social-provider/password-maintenance component.
+
+**Composition 3's error list is consumer semantics, not a component.** A `role="alert"
+tabindex="-1"` summary wraps a native `<ul>` of links to each invalid field; the summary alone
+carries `role="alert"` — the field-local `.sk-form-field__description` does not, so the two do not
+double-announce the same text.
+
+**Composition 6's three email actions are a pattern-local row, not `sk-action-row`.** P20's shape
+is a native `.sk-radio-choice-group` for address selection plus a flat row of three plain submit
+buttons that act on whichever address is selected; `sk-action-row`'s identity-row anatomy
+(`__marker`/`__title`/`__trigger`/`__controls`) does not fit a control with no identity and no
+trigger, so this family composes none. `Re-send Verification` composes `.sk-button
+.sk-button--secondary` bare, with no pattern-local border compensation — `.sk-button--secondary`'s
+border currently fails WCAG 1.4.11 (#155, open at time of writing). That is a pre-existing,
+library-owned defect; fixing it belongs to #155, and Epic #352 forbids reproducing Family 6's
+temporary `.front-door-secondary-action` border override as a library contract.
+
+## Application shell composition
+
+The shell elements supply layout and landmarks while the consumer supplies destinations, state,
+identity, headings, status copy, and actions. They do not know which route is active or whether a
+navigation surface is open.
+
+```html
+<sk-app-shell>
+  <sk-personal-rail slot="personal-rail" label="Product areas">
+    <a slot="primary" href="/work">Work</a>
+    <button slot="utilities" type="button">Notifications</button>
+    <a slot="account" href="/account">Account</a>
+    <button slot="logout" type="button">Log out</button>
+  </sk-personal-rail>
+
+  <sk-context-sidebar slot="context-sidebar" label="Project context">
+    <strong slot="header">Reference project</strong>
+    <nav aria-label="Project sections"><a href="/summary">Summary</a></nav>
+    <button slot="footer" type="button">Project settings</button>
+  </sk-context-sidebar>
+
+  <sk-page-header slot="page-header">
+    <span slot="eyebrow">Overview</span>
+    <h1 slot="title">Delivery summary</h1>
+    <p slot="supporting">Current evidence and recent activity.</p>
+    <span slot="sync">Last synchronized by the consumer</span>
+    <sk-button slot="actions" size="icon" label="Refresh evidence">↻</sk-button>
+  </sk-page-header>
+
+  <section aria-label="Delivery content">Consumer-owned page content.</section>
+</sk-app-shell>
+```
+
+`sk-app-shell` exposes the `personal-rail`, `context-sidebar`, `compact-header`,
+`compact-navigation`, and `page-header` named slots plus the default content slot. With
+`presentation` omitted, its legacy contract is unchanged: at desktop widths the columns are 56px,
+240px, and the remaining space, and the existing 720px container rule keeps every legacy region in
+document order. An unknown `presentation` warns and uses that legacy layout.
+
+The reflected `presentation` axis accepts `"compact"` or `"rail-preserving"`. Compact activates
+against the shell's own content-box inline size through 860 CSS px; 861px is noncompact, including
+when the viewport is wider than a constrained shell. Rail-preserving activates through an inclusive
+1100 CSS px on that same shell-relative, logical content-box coordinate; 1101px is wide. In its
+effective state the token-defined 56px personal rail remains, the context sidebar alone is removed,
+and content starts in the adjacent column. The existing compact header and controlled navigation
+are reused rather than replaced. At 390px this deliberately remains a rail-plus-content layout;
+it does not fall through to compact or infer an application route.
+
+The reflected `open` boolean is controlled: it projects consumer state but the shell never changes
+it on Escape, activation, resize, or a route change. The `compactTrigger` field is property-only
+(`HTMLElement | null`) and is never serialized. Its only purpose is accepted-Escape focus return.
+
+```html
+<sk-app-shell presentation="compact">
+  <div slot="compact-header">
+    <button type="button" aria-expanded="false" aria-controls="repo-navigation">Menu</button>
+    <strong>Repository</strong>
+  </div>
+  <nav slot="compact-navigation" id="repo-navigation" aria-label="Repository navigation">
+    <a href="/missions">Missions</a>
+  </nav>
+  <h1 slot="page-header">Missions</h1>
+  <section>Consumer-owned page content.</section>
+</sk-app-shell>
+<script type="module">
+  const shell = document.querySelector('sk-app-shell');
+  const trigger = shell.querySelector('button');
+  shell.compactTrigger = trigger;
+  const setOpen = (open) => {
+    shell.open = open;
+    trigger.setAttribute('aria-expanded', String(open));
+  };
+  trigger.addEventListener('click', () => setOpen(!shell.open));
+  shell.addEventListener('sk-app-shell-dismiss', () => setOpen(false));
+  shell.querySelector('#repo-navigation').addEventListener('click', (event) => {
+    if (event.target.closest('a')) setOpen(false); // route ownership stays here
+  });
+</script>
+```
+
+Use the same composition with `presentation="rail-preserving"` when the personal rail must remain
+available at intermediate widths. The trigger, navigation target, `open` value, dismissal listener,
+and route-close handler are identical; rail-preserving does not add a second drawer or focus seam.
+
+The trigger must be consumer-authored and actually assigned within this shell's `compact-header`
+slot. It may be the directly slotted control or a descendant of a directly slotted wrapper, as in
+the example; a `slot="compact-header"` attribute on a nested, unassigned control is not sufficient.
+The labelled navigation target follows the same rule for `compact-navigation`. Trigger and target
+must remain in the same light-DOM root; the consumer owns the target id, `aria-controls`,
+`aria-expanded`, accessible names, links, routes, destination, and whether dismissal is accepted.
+Do not point the IDREF at the shell's shadow wrapper or at content assigned to another shell. The
+shell adds neither a navigation landmark nor another `main`. It never chooses a presentation,
+route, current destination, trigger label, or open state for the application.
+
+The shell mirrors each inactive region onto its directly assigned light-DOM roots with `inert` and
+`aria-hidden="true"`, so engines cannot expose content through a CSS-hidden shadow wrapper. Personal
+and context roots are active in legacy or noncompact presentation. In effective compact mode both
+personal and context roots are suppressed; in effective rail-preserving mode personal remains
+active and context is suppressed. Compact-header roots are active in either effective opt-in mode,
+and compact-navigation roots are active only while the controlled drawer is effectively open. When
+a root becomes inactive, the shell snapshots its exact raw
+`inert` and `aria-hidden` attributes, including absence, an empty value, or `"false"`. It restores
+that snapshot when the root becomes active, moves out of an inactive slot, or the shell disconnects;
+it does not manufacture `aria-hidden="false"` or alter nested descendants. Consumers must author
+exposure attributes while the root is active. Writes made while the shell suppresses the root are
+unsupported and do not replace or persist over the saved snapshot. While open, compact navigation
+keeps native order inside a viewport-bounded internal scroller. Effectively open means that the
+selected presentation is effective at its boundary (`compact` through 860px or `rail-preserving`
+through 1100px) and controlled `open === true`.
+
+An effectively-open Escape emits exactly one `sk-app-shell-dismiss` with
+`detail: { reason: 'escape' }`, `bubbles: true`, `composed: true`, and `cancelable: false`; it never
+changes `open`. The shell samples acceptance once in the next microtask, after a consumer's
+current-dispatch state update has had its bounded opportunity to commit. A synchronously assigned
+native `false` and a framework-controlled false represented by omission are both effectively
+closed. The shell first renders the drawer closed and only then focuses a still-connected, valid
+`compactTrigger`. A missing, disconnected, falsely slotted, cross-root, or cross-shell trigger or
+controlled target grants no focus-return authority. Rejected dismissal expires at that sample,
+before a later task, so an unrelated route close never steals focus. Consumers should still author
+`open` as a boolean; the shell never mutates it. Route activation and destination remain entirely
+consumer-owned. A threshold or presentation transition releases focus only when it hides the
+navigation, without changing `open` or moving focus to the compact trigger; a transition between
+effective opt-in modes leaves the still-visible destination and its focus intact. Unknown values
+warn once per meaningful change and fail open to the legacy layout.
+
+The eight styling parts are `shell`, `personal`, `context`, `compact-header`,
+`compact-navigation`, `content`, `header`, and `main`.
+
+Use the reflected `label` attribute to name the `sk-personal-rail` navigation landmark and the
+`sk-context-sidebar` complementary landmark. A nonblank label is forwarded verbatim; a blank or
+missing one uses the generic fallback. The context sidebar does not create a navigation landmark,
+so supply a native labelled `<nav>` when its content is navigation. Keep account content in the
+personal rail's `account` slot, above `logout`; do not duplicate it in `primary`.
+
+`sk-page-header` preserves the consumer's heading level and treats `sync` copy as opaque text. It
+does not calculate relative time or schedule refreshes. Links and buttons slotted into any shell
+element remain the original native controls and keep their native events.
+
+### Page header density and stickiness
+
+`sk-page-header` has two reflected axes, and they are independent: a compact header need not
+stick, and a sticky header need not be compact.
+
+| attribute | values | what it changes |
+|---|---|---|
+| `density` | `compact`, or omitted | Padding, gaps and row direction. The same five slots resolve at either density — there is no second header to author. Any other value renders the default density and warns. |
+| `sticky` | present / absent | The header pins itself to the top of its scroll region. |
+
+```html
+<sk-page-header density="compact" sticky>
+  <span slot="eyebrow">Runs</span>
+  <h1 slot="title">Pipeline runs</h1>
+  <p slot="supporting">Latest evidence for this project.</p>
+  <span slot="sync">Updated 12 seconds ago</span>
+  <sk-button slot="actions" size="icon" label="Refresh runs">↻</sk-button>
+</sk-page-header>
+```
+
+At compact density the eyebrow, title, supporting copy and sync text share one row and truncate
+visually if they do not fit. Truncation is visual only — the DOM text is untouched, so assistive
+technology still reads the whole string. The actions region never shrinks: under horizontal
+pressure the metadata gives way first and the trailing control keeps its full box.
+
+**Stickiness is dropped below 720px of viewport width or 480px of viewport height.** The header
+returns to normal flow and stacks, and nothing is removed to make room — the title, the metadata
+and the actions are all still rendered and still reachable. A sticky header that consumes a third
+of a short viewport is worse than no sticky header.
+
+#### Keeping focused content out from behind the header
+
+A sticky header will otherwise cover a control the browser has just scrolled into view, which is a
+WCAG 2.4.11 failure. The header cannot reach your content to fix that, so it publishes the value
+for you to apply — you never compute an offset yourself. **Two declarations, and on WebKit a third
+piece; all three are stated in full further down and none of them is optional.**
+
+```css
+[data-scroller] {                 /* your scroll container */
+  scroll-padding-block-start: var(--sk-layout-page-header-sticky-scroll-margin);
+}
+```
+
+**Put the inset on the CONTAINER, not `scroll-margin` on each row.** One declaration replaces
+per-row margins, and setting both makes them **stack**: measured, a row landed ~160px down against
+a 66–71px header, roughly twice the needed inset. The same conclusion was reached independently on
+the inline axis for the section-nav surface (`packages/styles/src/section-nav/`), where per-link
+`scroll-margin-inline` was replaced by one `scroll-padding-inline` on its container.
+
+That token is **derived**, not restated:
+
+```
+--sk-layout-page-header-sticky-scroll-margin =
+    --sk-layout-page-header-sticky-offset      (where the header pins, default 0)
+  + --sk-layout-page-header-compact-height     (the compact header's MINIMUM block size, 3rem)
+  + --sk-space-7                               (2rem, absorbing content taller than that minimum)
+```
+
+The header's own `min-block-size` at compact density reads the same
+`--sk-layout-page-header-compact-height`, so retuning either input moves both the header and the
+scroll margin together.
+
+#### The default value covers one configuration — read this before you rely on it
+
+**`80px` is the right answer for `density="compact"` on a single row, which means the header
+itself wider than 720px. It is wrong everywhere else, and you override the token.** The name stays
+the one place the value lives; only its default is compact-specific.
+
+Measured in chromium against the shipped token sheet, one composition (eyebrow, title, supporting
+copy, sync text, one action), as the host's own height:
+
+| configuration | header width | short title | long title |
+|---|---:|---:|---:|
+| `density="compact" sticky` | 900px | **60px** | 60px |
+| `density="compact" sticky` | 400px | 96px | 96px |
+| `sticky` (default density) | 900px | 227px | 356px |
+| `sticky` (default density) | 400px | 275px | 533px |
+
+Against a published default of **80px**. Note that the compact figure is not the 3rem (48px)
+minimum: `--sk-layout-page-header-compact-height` is a *floor*, and the real height is whatever the
+slotted content needs above it — this catalogue's own sticky story measures 71px, because its sync
+slot also carries a status pill. That is what the `--sk-space-7` term absorbs, and it is why the
+term is 2rem rather than the 1rem it shipped with for one round.
+
+Two things follow, and the second is easy to miss:
+
+- **Default density needs your own number.** `sticky` without `density="compact"` is a supported
+  combination — the axes are orthogonal — and its height is entirely your slotted content. There
+  is no honest derived value for it, so this design system does not publish a second token that
+  would be a guess wearing a token's name. Set
+  `--sk-layout-page-header-sticky-scroll-margin` yourself, from your own header.
+- **A compact header can be stacked and sticky at the same time.** Stacking is a `@container`
+  query on the *header's own width*; dropping stickiness is a `@media` query on the *viewport's*.
+  They are deliberately different mechanisms — the header must reflow inside whatever column the
+  page gives it, while scrolling is a viewport concern — but it means a 400px header column inside
+  a 1400px viewport is **sticky and stacked at once**, at 96px against the 80px default. Note the
+  compact numbers above do not move with title length: at compact density the title is
+  `white-space: nowrap` with an ellipsis and cannot wrap, so the extra 32px is the metadata row
+  stacking under the text row, not a wrapped heading.
+
+```css
+/* Default density, or a header column narrower than 720px: your figure, one place. */
+.page-shell {
+  --sk-layout-page-header-sticky-scroll-margin: 18rem;
+}
+```
+
+**At compact density, prefer raising `--sk-layout-page-header-compact-height` instead.** It is
+both the header's `min-block-size` and the scroll margin's input, so setting it to your header's
+real height keeps the two consistent by construction — which is the whole reason the margin is
+derived rather than restated.
+
+The mechanism, so you can reason about it rather than trust it: focus scrolls an element into view
+only when it needs to. A row that is *already* inside the scroll port but sitting under the sticky
+header gives the browser no reason to scroll — so it stays hidden.
+
+**Chromium resolves that itself** and applies the inset: measured on the default-density story
+against a 214px header, at `0px` and `64px` the focused row stayed at y=88 entirely behind the
+header, and at `288px` it moved to y=288, clear.
+
+**WebKit does not**, and that is the part this contract used to get wrong — see the next section.
+
+The inset itself is one declaration on the container, given at the top of this section. It is
+**not** paired with a per-row `scroll-margin`: the two compose, and a row then lands about twice
+as far down as it needs to.
+
+### Under WebKit, CSS alone is not enough — you need the handler
+
+**`scroll-padding-block-start` is necessary and not sufficient.** Measured under WebKit (#456): focusing an occluded row does **not** scroll it clear. The
+discriminating evidence is run `35398759713` at `--repeat-each=30`, where **every** failure
+reported the scroll position after focus identical to the position before it
+(`focusMovedScroller=false`), and run `35399537534` at `--repeat-each=60`, where the container
+inset was **confirmed applied** at 80px and 288px and the failures continued.
+
+*(An earlier revision of this paragraph said "34 failures at `--repeat-each=60`". Both halves were
+wrong: those 34 come from two runs at `--repeat-each=30`, and neither carried the
+`focusMovedScroller` or `scrollPadding` fields, which did not exist yet. The claim was true of
+later runs and cited against earlier ones.)*
+
+**The properties are not the problem, and an earlier revision of this section said they were.**
+WebKit honours them exactly — to the sub-pixel — the moment a scroll is actually performed:
+`scrollIntoView({block:'start'})` aligns the scroll-margin box inside the scrollport inset by
+scroll-padding, and the probe landed at `0 + 80 + 80 = 160` (measured 160) and
+`−0.19 + 288 + 288 = 575.81` (measured 575.8125). What WebKit declines to do is **initiate** a
+focus-driven scroll for a row it considers already inside the scrollport. The inset was always
+correct; it simply never got a scroll to apply to. Chromium initiates that scroll itself, which is
+why none of this is visible there.
+
+An explicit scroll does work — measured under WebKit: compact `834 → 686`, default `974 → 410`,
+the row clearing the header in both. So the scroll container needs this **in addition to**
+`scroll-padding-block-start`, which the handler reads to know where the scrollport really starts —
+without that inset `portTop` collapses to the container's top edge and the handler never fires:
+
+```js
+scroller.addEventListener('focusin', (event) => {
+  const target = event.target;
+  if (!target || target === scroller || !target.getBoundingClientRect) return;
+  // The header is INSIDE the scroll container and has its own focusables (the trailing action).
+  // They sit above the inset by construction, so without this guard focusing one scrolls the
+  // container every time — in Chromium too.
+  if (target.closest('sk-page-header')) return;
+  const style = getComputedStyle(scroller);
+  const insetTop = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
+  const insetBottom = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
+  const port = scroller.getBoundingClientRect();
+  const box = target.getBoundingClientRect();
+  if (box.top < port.top + insetTop) target.scrollIntoView({ block: 'start' });
+  // Defensive and UNMEASURED: every measurement in this section is of the above-the-inset case.
+  // This branch covers a target below the scrollport, cannot make a clear row unclear, and is a
+  // no-op wherever the engine already scrolls.
+  else if (box.bottom > port.bottom - insetBottom) target.scrollIntoView({ block: 'end' });
+});
+```
+
+It fires only when the focused element falls outside the scrollport's declared insets, so it is
+inert on any focus that is already clear. **It is not inert in Chromium**, and an earlier revision
+of this page claimed it was "because the browser has already done the work by the time it runs" —
+backwards: `focus()` fires `focusin` and *then* scrolls, so this handler runs first and aligns to
+`start` where Chromium would have chosen `nearest`. That is why the `sk-page-header` guard above is
+load-bearing rather than defensive.
+
+**Why this is yours and not the element's**, for now: #145 ruled that `sk-page-header` observes no
+scrolling and owns no layout measurement, and that boundary is load-bearing elsewhere in this
+component's contract. That ruling predates the measurement above, and whether it should still hold
+given that WCAG 2.4.11 demonstrably cannot be met without layout-observing JS is **escalated as its
+own decision**. If it is relaxed, this snippet becomes the element's job and this section goes
+away.
+
+The element does not measure its own live box to close this gap, because observing layout is the
+class of behaviour it is deliberately barred from owning — the same boundary that keeps the timer
+out of it.
+
+Set `--sk-layout-page-header-sticky-offset` when something else already occupies the top of the
+scroll region, and `--sk-layout-page-header-sticky-layer` if the header must stack differently
+against your own positioned content.
+
+#### The scroll-container contract, stated once
+
+`sk-app-shell` owns page geometry; `sk-page-header` owns stickiness **within the region the shell
+gives it**. `position: sticky` resolves against the nearest scrolling ancestor, so the two have to
+agree on one thing and only one: **the element that scrolls must be an ancestor of the header, and
+the header must not be inside a separate scroll container from the content it sits above.** In the
+shell composition at the top of this page that is satisfied by the page scrolling; if you make the
+shell's main region its own scroll container, put the header inside that region rather than beside
+it. This paragraph is the only place that contract is written down, and it is written on the
+header because the header is what breaks when it is violated.
+
+#### What the header still does not do
+
+Everything #145 ruled out stays ruled out, and stickiness does not soften it. The header starts no
+timer, reads no clock, computes no relative age, polls nothing, observes no scrolling, and owns no
+"live" state. The freshness string and any live/paused indicator are slotted content, rendered
+verbatim; the consumer owns the timer that produces them.
+
+## Time series chart
+
+`sk-time-series-chart` draws a consumer-owned line chart over a **time** axis. It is not a widened
+bar chart and shares no source with one: it exists because a bar chart's model has no way to say
+"this interval has no observation", so an absent bar and a zero bar are the same picture.
+
+**A missing interval is a value.** A point's `value` may be `null`, which means *no observation in
+this interval*. The line **breaks** there, the interval is drawn as a gap, and the paired table
+reports it as `No data`. It is never interpolated across and never drawn to the baseline. Leading
+and trailing nulls keep their place, so the window you supplied is the window that renders.
+
+```js
+const chart = document.querySelector('sk-time-series-chart');
+chart.label = 'Throughput over time';
+chart.description = 'Requests per second, by hour, as collected';
+chart.gapThreshold = 3 * 60 * 60 * 1000;   // supplied, never inferred
+chart.series = Object.freeze([
+  Object.freeze({
+    id: 'throughput',
+    name: 'Throughput',
+    points: Object.freeze([
+      Object.freeze({ id: 'h0', at: 1767225600000, value: 40, displayValue: '40 req/s', label: '00:00', resolution: 'raw' }),
+      Object.freeze({ id: 'h1', at: 1767229200000, value: null, displayValue: 'unused', label: '01:00', resolution: 'raw' }),
+      Object.freeze({ id: 'h2', at: 1767232800000, value: 62, displayValue: '62 req/s', label: '02:00', resolution: 'hour' }),
+    ]),
+  }),
+]);
+chart.selectable = true;
+chart.selectedId = 'h0';
+chart.addEventListener('sk-time-series-chart-select', (event) => {
+  // A request, not an internal state change: selection stays consumer-controlled.
+  chart.selectedId = event.detail.pointId;
+});
+```
+
+`at` is used for **position only** — unequal spacing is therefore meaningful and visible.
+`displayValue` and `label` render verbatim; the element parses no formatted text, chooses no
+window, reads no clock, sets no timer, fetches nothing, and never downsamples, smooths or fits a
+trend. `resolution` is supplied per point; a maximal run of one resolution is a segment, an `hour`
+segment is drawn heavier with hollow markers, a rule marks the change, and the axis does not
+rescale across it.
+
+**Every value is published, always.** The paired table is in the DOM at all times, in source order,
+one row per point, carrying the series name, the label, the display string (or `No data`) and the
+row's resolution. Nothing is hover-only, and the table is also the narrow-viewport treatment: it
+scrolls rather than reflowing, and it takes the `role="region"`/`aria-label`/`tabindex="0"` triad
+only when it genuinely overflows. The SVG is `aria-hidden` and carries no accessible content.
+
+**Differentiation uses three channels, not one.** Series are told apart by ink
+(`--sk-chart-series-1..4`), by dash pattern (`--sk-chart-dash-1..4`) and by marker shape — circle,
+square, triangle, diamond, cycling after four. Ink is the channel that collapses under
+`forced-colors: active` and in greyscale; the other two are why the chart is still readable there,
+and why the gap is drawn with a dashed **stroke** rather than only a fill.
+
+A `gapThreshold` you supply, in the same unit as your timestamps, annotates any run at or beyond
+it with a visible note. Zero, negative and non-finite thresholds annotate nothing, and the element
+never infers one.
+
+The five attributes are `label`, `description`, `selectable`, `selected-id` and `gap-threshold`;
+`series` is the single property-only input, delivered as a property and never serialized.
+`sk-time-series-chart-select` carries a frozen `{ seriesId: string; pointId: string }` detail with
+`bubbles: true`, `composed: true`, and **`cancelable: true`**. Cancelling it suppresses the one
+default action the element owns — moving focus to the activated point — and nothing else; selection
+was never the element's to change. Point ids must be unique across the whole chart, because
+`selectedId` is a point id. An empty collection renders "No data to display"; malformed data fails
+closed as "Chart unavailable".
+
+The public parts are `chart`, `legend`, `series-name`, `plot`, `line`, `marker`, `gap`,
+`resolution-boundary`, `gap-notes`, `gap-note`, `scroller`, `table`, `row`, `value`, `point` and
+`empty-state`. `point` exists only when `selectable`; `gap-notes` and `gap-note` only when a
+threshold is supplied and met.
+
+
+## Bar chart
+
+`sk-bar-chart` projects a consumer-owned numeric series. Assign `series` as a JavaScript property;
+it is deliberately not an attribute and is never serialized. Every datum must have a unique,
+nonblank `id`, a nonblank `label`, a finite nonnegative numeric `value`, and a nonblank authored
+`displayValue`. An empty array renders “No data to display”; malformed data fails closed as “Chart
+unavailable”. The component does not fetch, aggregate, sort, localize, or format values.
+
+```js
+const chart = document.querySelector('sk-bar-chart');
+chart.label = 'Attributed return over time';
+chart.description = 'Last 30 days';
+chart.series = Object.freeze([
+  Object.freeze({ id: 'aug-11', label: 'Aug 11', value: 320, displayValue: '€320' }),
+  Object.freeze({ id: 'aug-18', label: 'Aug 18', value: 510, displayValue: '€510' }),
+]);
+chart.selectable = true;
+chart.selectedId = 'aug-18';
+chart.addEventListener('sk-bar-chart-select', (event) => {
+  // A request, not an internal state change: selection stays consumer-controlled.
+  chart.selectedId = event.detail.id;
+});
+```
+
+The four attributes are `label`, `description`, `selectable`, and `selected-id`; `series` is the
+single property-only input. `sk-bar-chart-select` carries readonly `{ id: string }` detail with
+`bubbles: true`, `composed: true`, and `cancelable: false`. It fires only from a valid selectable
+datum. The public parts are `chart`, `plot`, `item`, `bar`, `value`, `label`, and `empty-state`.
+
+The chart's closed token contract is `--sk-border-default`, `--sk-border-strong`,
+`--sk-border-focus`, `--sk-border-width-1`, `--sk-border-width-2`,
+`--sk-color-data-baseline`, `--sk-color-data-grid`, `--sk-color-data-series-primary`,
+`--sk-fg-body`, `--sk-fg-default`, `--sk-fg-muted`, `--sk-font-mono`, `--sk-font-sans`,
+`--sk-motion-duration-fast`, `--sk-motion-ease-out`, `--sk-radius-md`, `--sk-radius-sm`,
+`--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-5`, `--sk-space-6`,
+`--sk-space-10`, `--sk-surface-card`, `--sk-surface-muted`, `--sk-surface-pill`,
+`--sk-text-sm`, `--sk-text-xs`, and `--sk-weight-semibold`. Use the named parts for narrowly
+scoped consumer adjustments; internal class names are not API.
+
+## Transition matrix
+
+`sk-transition-matrix` presents aggregate moves by route and consumer-labelled time bucket. Assign
+the structured inputs as JavaScript properties; arrays are not serialized to attributes.
+
+```js
+const matrix = document.querySelector('sk-transition-matrix');
+matrix.columns = Object.freeze([
+  Object.freeze({ id: 'previous', label: 'Previous' }),
+  Object.freeze({ id: 'current', label: 'Current' }),
+]);
+matrix.routes = Object.freeze([
+  Object.freeze({
+    id: 'queued-active',
+    label: 'Queued to active',
+    tone: 'forward',
+    values: Object.freeze({ previous: 3, current: 5 }),
+  }),
+]);
+matrix.selectable = true;
+matrix.selectedRouteId = 'queued-active';
+matrix.addEventListener('sk-transition-matrix-select', (event) => {
+  // The event requests a change. The consumer remains the owner of selectedRouteId.
+  matrix.selectedRouteId = event.detail.routeId;
+});
+```
+
+The seven public properties are `columns`, `routes`, `selectedRouteId`, `selectable`,
+`windowLabel`, `description`, and `selectionHint`. The selection event bubbles across shadow
+boundaries and is non-cancelable because the element has no default selection action to prevent.
+The element derives move totals and bar ratios from supplied cells. It does not accept or calculate
+current inventory, fetch data, format dates, navigate, or update application state.
+
+## Metric and evidence chain
+
+`sk-metric` presents one consumer-supplied label and opaque display value as a native `<dl>`
+definition relationship. Its five attributes are `label`, `display-value`, `annotation`, `tone`,
+and `compact`; the element does not parse or calculate the displayed text. The optional tone is
+one of `neutral`, `info`, `success`, or `attention`. Its public parts are `metric`, `label`,
+`value`, `annotation`, and `empty-state`.
+
+`sk-evidence-chain` composes real `sk-metric` descendants as direct items of a native ordered
+list. Supply its only public field, `stages`, as a readonly JavaScript property:
+
+```js
+const chain = document.querySelector('sk-evidence-chain');
+chain.stages = Object.freeze([
+  Object.freeze({ id: 'received', label: 'Items received', displayValue: '128' }),
+  Object.freeze({
+    id: 'verified',
+    label: 'Items verified',
+    displayValue: '91%',
+    annotation: 'Sampled',
+    tone: 'success',
+  }),
+]);
+```
+
+The consumer owns identifiers, order, formatting, calculations, and domain meaning. The chain
+only projects the supplied values, adds decorative connectors, and fails invalid whole inputs
+closed. Its parts are `list`, `stage`, `connector`, and `empty-state`; a composed approved layout
+may wrap it in the existing `sk-grid` and `sk-card` elements, while annotated stages contain the
+real `sk-pill-tag` used by `sk-metric`.
+
+Neither component has a styles-layer static form. The chain's readonly structured data must use
+property assignment, which static HTML cannot preserve without inventing a serialization and
+parsing policy. Consumers needing no JavaScript should author the native `<dl>`/`<ol>` structures
+directly instead.
+
+## Workflow board and lanes
+
+`workflow-board` and `workflow-lane` are styles-only native-HTML families. Load both CSS files;
+there is deliberately no `<sk-workflow-board>` or `<sk-workflow-lane>` custom element.
+
+```html
+<link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/workflow-board/sk-workflow-board.css" />
+<link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/workflow-lane/sk-workflow-lane.css" />
+
+<div class="sk-workflow-board">
+  <h2 id="work-package-board-title">Work Packages</h2>
+  <div class="sk-workflow-board__scroller">
+    <section class="sk-workflow-lane" aria-labelledby="planned-title">
+      <header class="sk-workflow-lane__header">
+        <h3 class="sk-workflow-lane__title" id="planned-title">Planned</h3>
+        <span class="sk-workflow-lane__count" aria-label="2 work packages">2</span>
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Consumer-owned work package content</li>
+        <li>Another consumer-owned work package</li>
+      </ol>
+    </section>
+  </div>
+</div>
+```
+
+This one-lane example fits its scroller, so the overflow-only region, accessible name, and
+tab stop are all absent.
+
+The selector vocabulary is exactly `.sk-workflow-board`, `.sk-workflow-board__scroller`,
+`.sk-workflow-lane`, `.sk-workflow-lane__header`, `.sk-workflow-lane__title`,
+`.sk-workflow-lane__count`, and `.sk-workflow-lane__list`. Apply each lane block directly to a
+native `<section>` named by its own native `h2`–`h6`. Apply the list class to an `<ol>` and keep
+each work package as a direct `<li>` in source order; do not insert a wrapper or forge list roles.
+
+The count, wording, IDs, heading levels, lane/item order, item markup, tone, empty copy, and mobile
+selection are consumer-owned. Keep maintained counts equal to direct list-item cardinality. An
+empty lane still has an empty `<ol>`; place supplied empty treatment after it as a sibling, never
+as a fake list item. On a narrow route, render the one consumer-selected lane through the same
+seven selectors; the library stores no active lane and hides no peers.
+
+The scroller gets `role="region"`, exactly one accessible naming method, and `tabindex="0"`
+together only while it genuinely overflows. A fitting scroller omits all three. Dynamic consumers
+can synchronize that all-or-none state after relevant content or layout changes:
+
+```js
+function syncWorkflowScroller(scroller, labelledBy) {
+  const overflowing = scroller.scrollWidth > scroller.clientWidth;
+  if (overflowing) {
+    scroller.setAttribute('tabindex', '0');
+    scroller.setAttribute('role', 'region');
+    scroller.removeAttribute('aria-label');
+    scroller.setAttribute('aria-labelledby', labelledBy);
+  } else {
+    scroller.removeAttribute('tabindex');
+    scroller.removeAttribute('role');
+    scroller.removeAttribute('aria-label');
+    scroller.removeAttribute('aria-labelledby');
+  }
+}
+```
+
+That example is consumer code, not a package helper: choose when to re-run it from your own render
+and layout lifecycle. Do not add a library observer or resize handler. Presentation uses neutral
+tokens only: `--sk-layout-workflow-lane-min-inline-size`, `--sk-space-*`, `--sk-font-*`,
+`--sk-text-*`, `--sk-weight-*`, `--sk-surface-card`, `--sk-surface-pill`, `--sk-fg-body`,
+`--sk-fg-default`, `--sk-border-default`, `--sk-border-focus`, `--sk-border-width-*`, and
+`--sk-radius-*`. Lane names never choose a status tone.
 
 ## Installation
 
 ```bash
-npm install @spec-kitty/angular @spec-kitty/tokens    # Angular
-npm install @spec-kitty/html-js @spec-kitty/tokens    # plain HTML/JS
+npm install @spec-kitty/styles @spec-kitty/tokens     # the CSS, every component
+npm install @spec-kitty/elements @spec-kitty/tokens   # the migrated custom elements
+npm install @spec-kitty/react                         # optional: JSX typing for React
 ```
 
 > Note: these packages must be published to npm before the import paths below work in consumer projects. Until then, install from the local repository using `npm link` or a path dependency.
@@ -15,27 +979,70 @@ npm install @spec-kitty/html-js @spec-kitty/tokens    # plain HTML/JS
 
 ## Buttons
 
-Primary and secondary call-to-action buttons used to drive user actions.
+Primary, secondary, ghost, and danger-secondary call-to-action buttons used to drive user actions.
 
-**Angular:**
-
-```typescript
-import { SkButtonPrimaryComponent, SkButtonSecondaryComponent } from '@spec-kitty/angular';
-```
+**As a custom element** — `sk-button` is migrated, so it needs no wrapper:
 
 ```html
-<sk-button-primary>Get started</sk-button-primary>
-<sk-button-secondary>Learn more</sk-button-secondary>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+
+<sk-button variant="primary">Get started</sk-button>
+<sk-button variant="secondary">Learn more</sk-button>
+<sk-button variant="primary" size="sm">Book demo</sk-button>
+<sk-button variant="ghost" size="icon" label="Refresh evidence">↻</sk-button>
+<sk-button variant="danger-secondary">Deny</sk-button>
 ```
+
+**`danger-secondary`** composes the `secondary` tone's shape (transparent background at rest,
+bordered) with the danger role's own surface/foreground pair, `--sk-status-danger` /
+`--sk-on-status-danger` — the same pair `sk-status-indicator` and `sk-pill-tag`'s status axis
+already publish. It introduces **no new token**: binding under the programme's BORDER-ROLE-319
+ruling, this tone's own rules never reach for `--sk-border-default`/`--sk-border-strong`, the
+pair `.sk-button--secondary`'s own boundary uses and which #155 records as already failing WCAG
+1.4.11 — the composed `danger-secondary` + `busy` state is a separate, currently-open coverage
+gap in the busy axis's own cue styling, tracked apart from this tone.
+
+All six measured contrast pairs (three surfaces, two themes) clear the 3:1 control-boundary floor
+with wide margin. The figures are kept in one place — the `.sk-button--danger-secondary` header
+comment in `packages/styles/src/button/sk-button.css`, beside the declarations they justify —
+rather than restated here where nothing recomputes them; see #155 for the coordination record
+this measurement was posted against.
+
+Under `forced-colors: active`, `.sk-button--secondary` already gets an automatic border-colour
+remap (its border is unconditional and non-transparent), so `danger-secondary`'s identically
+bordered shape would otherwise remap to the same system colour and become indistinguishable from
+it. `danger-secondary` steps its `border-width` from 1px to `var(--sk-border-width-2)` inside
+that media query only — the same mechanism `sk-card`'s status axis and `sk-confirm-dialog`'s
+open state already use — rather than a content-drawn glyph, which was considered and rejected
+(see the mission's spec for the four reasons). At the default and `size="sm"` sizes (which set no
+`box-sizing`), this grows the button's total box by 1px per side in forced-colors mode only;
+`size="icon"`'s `box-sizing: border-box` absorbs the extra pixel with no box growth.
+
+Set `href` and it renders an anchor instead of a button, with the same class list — which is
+what the demo pages actually need, since every button-styled thing there is a link:
+
+```html
+<sk-button variant="primary" href="/docs">Read the docs</sk-button>
+```
+
+The visible label or glyph is slotted content. `size="icon"` creates a 40px square control and
+requires a nonblank `label`, which is forwarded to the real inner button or anchor as its
+accessible name. The glyph and its meaning remain consumer-owned. `disabled` reaches the real
+`<button>` and is deliberately ignored on the anchor form, because a disabled link is not a thing
+HTML has. Use `sk-button::part(button)` to reach the rendered `<button>` or `<a>`.
+
+The control lives in a shadow root, so it cannot submit an enclosing form. Use this element for
+actions and links rather than as an implicit form-submit button.
 
 **HTML:**
 
 ```html
-<button class="sk-btn sk-btn--primary">Get started</button>
-<button class="sk-btn sk-btn--secondary">Learn more</button>
+<button class="sk-button sk-button--primary">Get started</button>
+<button class="sk-button sk-button--secondary">Learn more</button>
+<button class="sk-button sk-button--danger-secondary">Deny</button>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-buttons--default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-button-html--default)
 
 ---
 
@@ -43,17 +1050,19 @@ import { SkButtonPrimaryComponent, SkButtonSecondaryComponent } from '@spec-kitt
 
 Top-level navigation bar with logo, pill nav links, theme toggle, and external link pills.
 
-**Angular:**
-
-```typescript
-import { SkNavComponent } from '@spec-kitty/angular';
-```
+**The pill sub-component is migrated**; the nav bar itself is CSS only.
 
 ```html
-<sk-nav [links]="navLinks" logoSrc="/assets/logo.png"></sk-nav>
+<sk-nav-pill label="Main">
+  <a href="#" class="sk-nav-pill__item">Docs</a>
+  <a href="#" class="sk-nav-pill__item">About</a>
+</sk-nav-pill>
 ```
 
-**HTML:**
+It fires `sk-nav-pill-toggle` before the open state changes, with
+`detail: { open: boolean }`. The event is cancelable — `preventDefault()` abandons the change.
+
+**As CSS (every consumer):**
 
 ```html
 <nav class="sk-nav">
@@ -65,7 +1074,277 @@ import { SkNavComponent } from '@spec-kitty/angular';
 </nav>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-navigation--default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/navigation-sknavpill-html--default)
+
+---
+
+## Native context navigation
+
+Use `sk-context-nav` for grouped and nested page destinations inside a context area. Import the
+tokens and the independently exported styles subpath:
+
+```css
+@import '@spec-kitty/tokens';
+@import '@spec-kitty/styles/context-nav/sk-context-nav.css';
+```
+
+Apply the classes directly to consumer-authored native light-DOM markup:
+
+```html
+<nav class="sk-context-nav" aria-label="Project context">
+  <section class="sk-context-nav__group" aria-labelledby="project-destinations">
+    <h2 class="sk-context-nav__heading" id="project-destinations">Destinations</h2>
+    <ul class="sk-context-nav__list">
+      <li class="sk-context-nav__item">
+        <a class="sk-context-nav__link" href="/overview" aria-current="page">
+          <svg class="sk-context-nav__icon" aria-hidden="true"><!-- decorative path --></svg>
+          <span class="sk-context-nav__label">Overview</span>
+        </a>
+        <ul class="sk-context-nav__children">
+          <li class="sk-context-nav__item">
+            <a class="sk-context-nav__link" href="/overview/history">
+              <span class="sk-context-nav__label">History</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="sk-context-nav__item">
+        <span class="sk-context-nav__unavailable" aria-disabled="true">
+          <span class="sk-context-nav__label">Reports</span>
+          <span class="sk-context-nav__annotation">Unavailable</span>
+        </span>
+      </li>
+    </ul>
+  </section>
+</nav>
+```
+
+The consumer owns every URL, label, group and child order, child count, and `aria-current` value.
+Only values other than `aria-current="false"` receive current presentation. Icons are also
+consumer-owned: decorative icons use `aria-hidden="true"`, while a link's accessible name comes
+from its text or another consumer-supplied accessible name.
+
+Empty copy uses `sk-context-nav__empty-copy`. If management or overflow navigation exists, author
+an ordinary native link with `sk-context-nav__overflow-link`; the styles infer neither condition.
+There is no JavaScript behavior, routing, selection logic, count limit, or generated content.
+
+For a known destination that cannot currently be reached, keep its native list item and replace the
+anchor with `span.sk-context-nav__unavailable[aria-disabled="true"]`. Never render a disabled anchor,
+remove an `href`, intercept a click, or add `role="button"` or `tabindex`. The unavailable span has no
+hover, active, pointer, focus, or activation contract. Only real available links may carry
+`aria-current`.
+
+An optional `sk-context-nav__annotation` contains visible wording supplied verbatim by the consumer,
+such as “Unavailable”; the stylesheet does not generate a reason or fallback. The dashed static row
+shape and native non-link semantics keep colour from being the only indication. If every destination
+is unavailable, author no current item. If a parent destination is unavailable, omit its child list;
+the styles never imply hidden or pending descendants.
+
+The consumer continues to own availability, annotations, URLs, order, count, current selection, and
+whether an available parent has a native child list. Long labels and annotations wrap in both LTR and
+RTL rather than being clipped.
+
+The stylesheet depends on these existing semantic tokens: `--sk-fg-body`, `--sk-fg-default`,
+`--sk-fg-muted`, `--sk-surface-muted`, `--sk-surface-pill`, `--sk-color-accent`,
+`--sk-border-strong`, `--sk-border-width-1`, `--sk-border-width-2`,
+`--sk-border-width-4`, `--sk-font-sans`, `--sk-text-xs`, `--sk-text-sm`,
+`--sk-weight-normal`, `--sk-weight-medium`, `--sk-weight-semibold`, `--sk-radius-sm`, and
+`--sk-space-1`, `--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-5`, and
+`--sk-space-9`.
+
+This remains styles-only under ADR-10 because native navigation, heading, list, list-item, and link
+relationships are already the correct public semantics. It composes in the content slot of
+`sk-context-sidebar`; consumer CSS does not reach through that element's shadow root, and the
+context-navigation family does not widen the sidebar element.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/navigation-skcontextnav-html--default)
+
+---
+
+## Public header
+
+Use `sk-public-header` for the public-facing brand and route actions above an anonymous or account
+front-door page. The consumer authors the semantic light-DOM structure and supplies every string,
+URL, action, authentication decision, current-route value, and theme-state mechanism. Note the one
+place that ownership is narrower than it sounds: the consumer owns the brand's *content and
+destination*, while its typography — type scale, weight and colour — is library-owned and expected
+to be overridden if you ship a wordmark image or a different brand scale. The brand slot is styled,
+not blank:
+
+```css
+@import '@spec-kitty/tokens';
+@import '@spec-kitty/styles/public-header/sk-public-header.css';
+```
+
+```html
+<header class="sk-public-header">
+  <div class="sk-public-header__inner">
+    <a class="sk-public-header__brand" href="/">
+      Your brand<span class="sk-public-header__brand-context">Workspace</span>
+    </a>
+    <nav class="sk-public-header__actions" aria-label="Account">
+      <a class="sk-public-header__action" href="/sign-in">Sign in</a>
+      <a class="sk-public-header__action" href="/start">Start free</a>
+    </nav>
+  </div>
+</header>
+```
+
+The six anatomy classes have fixed semantic homes:
+
+| Class | Consumer-authored element |
+|---|---|
+| `sk-public-header` | the required native `<header>` root |
+| `sk-public-header__inner` | the required inner `<div>` flex row |
+| `sk-public-header__brand` | the required brand/home `<a href>` |
+| `sk-public-header__brand-context` | an optional `<span>` inside the brand anchor |
+| `sk-public-header__actions` | an optional, labelled `<nav>`; omit it entirely when there are no actions |
+| `sk-public-header__action` | every action `<a>`, `<button>`, or composed control inside that navigation region |
+
+Three consumer obligations preserve the accessibility contract. When actions exist, the
+`sk-public-header__actions` navigation must have a non-empty `aria-label` (or another non-empty
+accessible name). Render exactly one `sk-public-header` per document so the native `banner`
+landmark stays singular. Apply `sk-public-header__action` to every action-region child, alongside
+any control classes it already carries. Every action must carry `sk-public-header__action` so it
+receives the family's target-size floor.
+With zero actions, omit the `<nav>` instead of rendering an empty landmark.
+
+**The action slot normalises the controls placed in it, and that supersession is intentional.**
+The action slot sets `color: inherit`, a transparent background, a transparent **block-end** border (its other three edges are the composed control's own), the family font, and a
+hover underline, so anchors, native buttons and composed controls read as one row rather than as
+three different affordances. A composed `sk-button` variant's own colour — `sk-button--ghost`'s
+`--sk-fg-muted`, for instance — is deliberately overridden inside the header. Those six
+declarations are scoped as `.sk-public-header .sk-public-header__action`, one class more specific
+than a control class, and the `:hover`/`:active`/`:focus-visible` colour and block-end-border
+resets are scoped one deeper still — a control's own `--ghost:hover { color }` is itself two
+classes, so without that the resting state was order-independent while the hover was not, and
+resolved differently for an `<a>` than for a `<button>`. With both, the normalisation wins **in
+any stylesheet order and for every element type, at rest and in every interactive state**; you do
+not have to sequence your `@import`s to get a consistent row. If you want a composed
+control to keep its own colour, give it your own class rather than removing
+`sk-public-header__action` — that class is what carries the target-size floor.
+
+**A composed custom element must size its own interior.** `sk-public-header__action` constrains the
+*host box* only; it cannot reach through a shadow root. A document-tree declaration does beat a
+shadow-tree `:host` rule, so the floor is never inert on the host — but if the element's internal
+control does not fill its host, the extra height becomes non-interactive padding around a smaller
+real target. The obligation is simply that the element's interior control fill its
+host box — whatever its own `:host` display happens to be, since a document-tree declaration
+outranks a shadow-tree `:host` rule either way. It belongs to the composed element, and #323
+carries it for `sk-theme-toggle`.
+
+The consumer supplies `aria-current` on the current route; values other than
+`aria-current="false"` receive both stronger weight and a logical border, so colour alone never
+carries the current-location meaning. The row and action group wrap continuously without a
+breakpoint, CSS reordering, text hiding, or route inference. The inner row supplies the minimum
+inline gutter but deliberately does not impose the consumer's page-width container.
+
+The future `sk-theme-toggle` composition is blocked on #323. What ships now is a neutral native
+button proving that the action slot accepts mixed controls. Once #323 merges into
+`train/elements-first` with a stable public contract, consumers can place the real control on
+`sk-public-header__action`; this family will still own no theme state or persistence.
+
+This family is deliberately styles-only under ADR-10's `form-field`-shaped recorded-decision
+reasoning: issue #353 explicitly scopes it to consumer-owned native markup. It does not claim the
+general native-relationship rationale used by tables, lists, or same-root references. Nearby
+families remain separate: `sk-app-shell` owns authenticated application chrome,
+`sk-page-header` owns the content heading, `sk-nav-pill` owns primary-navigation presentation,
+and `sk-skip-link` owns the keyboard skip affordance.
+
+The stylesheet depends on these existing semantic tokens: `--sk-border-default`,
+`--sk-border-focus`, `--sk-border-strong`, `--sk-border-width-1`, `--sk-border-width-2`,
+`--sk-border-width-4`, `--sk-color-accent`, `--sk-fg-body`, `--sk-fg-default`,
+`--sk-fg-muted`, `--sk-font-sans`, `--sk-space-1`, `--sk-space-3`,
+`--sk-space-4`, `--sk-space-9`, `--sk-space-10`, `--sk-surface-page`, `--sk-text-sm`,
+`--sk-text-xl`, `--sk-weight-normal`, and `--sk-weight-semibold`.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/navigation-skpublicheader-html--default)
+
+---
+
+## Section navigation
+
+Use `sk-section-nav` for a horizontal strip of sibling, same-level route links inside one detail
+surface — e.g. two or three sibling sections of a single record. It is **not** `sk-context-nav`
+(grouped/nested sidebar navigation), `sk-nav-pill` (a pill-shaped primary destination switcher with
+drawer behaviour), `.sk-breadcrumbs` (an ancestor path), or `.sk-segmented-choice` (a controlled
+exclusive button group with no navigation semantics at all). Import the tokens and the
+independently exported styles subpath:
+
+```css
+@import '@spec-kitty/tokens';
+@import '@spec-kitty/styles/section-nav/sk-section-nav.css';
+```
+
+Apply the classes directly to a consumer-authored, labelled native `<nav>` and its native `<a>`
+children:
+
+```html
+<nav class="sk-section-nav" aria-label="Section navigation">
+  <a class="sk-section-nav__link" href="/overview">Overview</a>
+  <a class="sk-section-nav__link" href="/members" aria-current="page">Members</a>
+  <a class="sk-section-nav__link" href="/settings">Settings</a>
+</nav>
+```
+
+A permission-filtered subset renders as fewer links, in the consumer's own order — the family
+reserves no gap, placeholder, or affordance for a route the consumer chose not to render:
+
+```html
+<nav class="sk-section-nav" aria-label="Section navigation">
+  <a class="sk-section-nav__link" href="/overview" aria-current="page">Overview</a>
+  <a class="sk-section-nav__link" href="/members">Members</a>
+</nav>
+```
+
+The consumer owns the nav's accessible label, every link's `href` and text, link order, which links
+are present at all (permission filtering happens entirely in the consuming application), and the
+`aria-current` value on at most one link (or none, for "no current route"). Only a link whose
+`aria-current` is present and not `"false"` receives current-location presentation. There is no
+router, URL matching, route-discovery, counter, badge, or generated copy anywhere in this family.
+
+Every native anchor behaviour keeps working exactly as the browser already provides: modified-click
+(Ctrl/Cmd/Shift/middle), copy-link, open-in-new-tab, `:visited` history, and ordinary back/forward
+navigation. The family attaches no listener capable of intercepting default anchor activation. It
+neutralises visited colouring on purpose — both `:link` and `:visited` resolve to `color: inherit`
+— rather than leaving it merely unforced; a consumer who wants a distinct visited style overrides a
+`(0,2,0)`-specificity selector to get it.
+
+The strip fits its content inline when the content fits its available space. When constrained, the
+strip itself — never the document — becomes the horizontal-scroll container; a link that receives
+keyboard focus scrolls fully into view inside that container without its focus outline being
+clipped. Long, unbroken labels remain fully available rather than wrapping or being clipped, even
+inside a narrow (~320px) host. The family has no way to scroll the *current* route into view at
+initial paint — that would require JavaScript it does not own — so when the strip is constrained,
+the consumer scrolls the `aria-current` link into view itself (e.g.
+`link.scrollIntoView({ inline: 'nearest' })` once it renders); the family reserves
+`scroll-padding-inline` on the strip itself for exactly that call.
+
+Rest, hover, active, focus-visible, and current-location presentations are each distinguishable by
+more than colour: hover adds an underline, active and current add a `border-block-end` change, and
+current also increases font weight. Under `forced-colors: active`, the current-location border and
+the focus outline both recolor via `border`/`outline`, never `background`. Every link's interactive
+target meets a 44×44 CSS-pixel floor via `--sk-space-9`, never an un-tokened literal. All spacing,
+alignment, and the current-location border use CSS logical properties, so the strip mirrors
+correctly under `dir="rtl"`.
+
+This is deliberately **not** a tab widget: no `role="tablist"`, `role="tab"`, `role="tabpanel"`,
+`aria-controls`, or `aria-selected` appears anywhere in the family, there is no roving `tabindex`,
+and there is no arrow-key keyboard model or other JavaScript behaviour — no `sk-section-nav` custom
+element is registered. Sequential Tab traversal reaches every link exactly once, in the consumer's
+own DOM order, using the browser's native anchor tab order.
+
+The stylesheet depends on these existing semantic tokens: `--sk-border-strong`,
+`--sk-border-width-1`, `--sk-border-width-2`, `--sk-border-width-4`, `--sk-color-accent`,
+`--sk-fg-body`, `--sk-fg-default`, `--sk-font-sans`, `--sk-space-1`, `--sk-space-2`, `--sk-space-4`,
+`--sk-space-9`, `--sk-surface-muted`, `--sk-text-sm`, `--sk-weight-normal`, and
+`--sk-weight-semibold`.
+
+This remains styles-only under ADR-10's "Styles-only components are a class, not a fixed exception
+count" section because native `nav`/`a` navigation semantics are already the correct public API — a
+custom element would add nothing a consumer cannot already express.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/navigation-sksectionnav-html--default)
 
 ---
 
@@ -73,25 +1352,289 @@ import { SkNavComponent } from '@spec-kitty/angular';
 
 Pill-shaped tags used to label and categorise content inline.
 
-**Angular:**
-
-```typescript
-import { SkPillTagComponent, SkEyebrowPillComponent } from '@spec-kitty/angular';
-```
+**As a custom element** — `sk-pill-tag` is migrated, so it needs no wrapper:
 
 ```html
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+
 <sk-pill-tag>Design system</sk-pill-tag>
-<sk-eyebrow-pill>New</sk-eyebrow-pill>
+<sk-pill-tag variant="green">Shipped</sk-pill-tag>
+<sk-pill-tag shape="eyebrow">New</sk-pill-tag>
 ```
+
+`variant` (colour) and `shape` (the eyebrow form) are independent axes and compose. The label
+is slotted content. Use `sk-pill-tag::part(tag)` to reach the pill itself.
+
+### The operational status axis
+
+`status` is a **third**, independent axis (#302): `variant` is the brand/decorative one, `shape`
+is size, and `status` is operational. It accepts the same six tones `sk-status-indicator` and
+`sk-card`'s own `status` axis do — `neutral`, `info`, `success`, `attention`, `danger`,
+`recovery` — because there is one tone vocabulary in this library, not one per component.
+
+```html
+<sk-pill-tag status="success">Active</sk-pill-tag>
+<sk-pill-tag status="danger">Revoked</sk-pill-tag>
+```
+
+**Brand and status may both be set, and the rendering is precedence, not co-existence.** While a
+`status` is present it **supersedes** the brand variant's surface and ink entirely —
+`variant="purple" status="danger"` and `status="danger"` render identically — because
+`.sk-pill-tag--<variant>` and each `.sk-pill-tag--status-<tone>` rule both set exactly
+`background` and `color`, at equal specificity, with the status rule authored after the variant
+rules in the stylesheet. Set `variant` for how the tag looks when it has no operational state to
+report; do not expect it to tint one that does. `shape="eyebrow"` composes with either axis
+without conflict — it sets only padding, radius and font-size, which neither colour axis touches.
+
+**You supply the tone.** The tag holds no domain mapping: it will not decide that a label
+containing "revoked" means `danger`, and an unrecognised value renders the base tag and warns
+rather than throwing. `status=""` (present but empty) is treated as absent, with no warning —
+the same rule `sk-card`'s `status` attribute uses.
+
+**The tone is not the message.** The pill paints a surface and an ink colour; the meaning belongs
+to the slotted text. There is no role and no accessible-name contribution from this axis — it is
+decoration, exactly as `sk-card`'s equivalent axis documents.
+
+The static path carries the same axis as `.sk-pill-tag--status-<tone>`, generated into
+`@spec-kitty/styles` as `SkPillTagStatus<Tone>HTML`. **This mission makes no claim** that the
+static pill composes into `sk-metric`'s `::part(tag)` annotation (`packages/styles/src/metric/sk-metric.css`)
+equivalently to the element form — that gap is real and is tracked separately (#314), not solved
+here.
 
 **HTML:**
 
 ```html
 <span class="sk-pill-tag">Design system</span>
-<span class="sk-eyebrow-pill">New</span>
+<span class="sk-pill-tag sk-pill-tag--eyebrow">New</span>
+<span class="sk-pill-tag sk-pill-tag--status-success">Active</span>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-tags--default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skpilltag-html--default)
+
+---
+
+## Check bullets
+
+Ticked list items, for feature and requirement lists.
+
+**As a custom element** — `sk-check-bullet` is migrated, so it needs no wrapper:
+
+```html
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+
+<ul role="list">
+  <sk-check-bullet>Requirements captured up front</sk-check-bullet>
+  <sk-check-bullet state="pending">Independent review pending</sk-check-bullet>
+  <sk-check-bullet state="complete" icon="★">Decisions live with the feature</sk-check-bullet>
+</ul>
+```
+
+Keep `role="list"` on the `<ul>`. The element sets `role="listitem"` on itself, because a
+custom element between a `<ul>` and its content is not a list item — that half is the element's
+job. The `role="list"` is needed for a different reason: `list-style: none` makes several
+browsers drop the list semantics entirely, and these styles remove the bullets. An earlier
+revision of this paragraph claimed the `<ul>`'s role had to be "restated for the pairing to
+survive", which is not how ARIA works — a `<ul>` already maps to `role=list`. A lens caught it. The tick is `aria-hidden` — the slotted
+text is the accessible content — and `icon` replaces it. Two parts: `bullet` (the row) and
+`icon` (the tick).
+
+`state` is either `complete` or `pending`; omitting it keeps the backward-compatible complete
+presentation. Each row includes visually hidden “Complete” or “Pending” text, so state is not
+communicated by the decorative glyph or colour alone. This remains a passive list item, not a
+checkbox, switch, task editor, or progress calculation: the consumer owns state and any action
+that changes it.
+
+**HTML:**
+
+```html
+<li class="sk-check-bullet">
+  <span class="sk-check-bullet__icon" aria-hidden="true">✓</span>
+  <span class="sk-check-bullet__state">Complete</span>
+  Requirements captured up front
+</li>
+<li class="sk-check-bullet sk-check-bullet--pending">
+  <span class="sk-check-bullet__icon" aria-hidden="true">○</span>
+  <span class="sk-check-bullet__state">Pending</span>
+  Independent review pending
+</li>
+```
+
+Its `--sk-*` dependencies are `--sk-space-3`, `--sk-fg-default`, `--sk-fg-muted`,
+`--sk-font-sans`, `--sk-text-base`, `--sk-on-tint-mint`, `--sk-weight-bold`,
+`--sk-weight-extrabold`, and `--sk-border-width-1`. The pre-existing line height and icon
+alignment declarations remain unchanged rather than becoming new public tokens.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skcheckbullet-html--default)
+
+---
+
+## Breadcrumbs
+
+Breadcrumbs are native navigation and ordered-list markup styled by `.sk-breadcrumbs`; there is
+no `sk-breadcrumbs` custom element.
+
+```html
+<nav class="sk-breadcrumbs" aria-label="Breadcrumb">
+  <ol class="sk-breadcrumbs__list">
+    <li class="sk-breadcrumbs__item">
+      <a class="sk-breadcrumbs__link" href="/repositories">Repositories</a>
+    </li>
+    <li class="sk-breadcrumbs__item">
+      <a class="sk-breadcrumbs__link" href="/repositories/example">Example</a>
+    </li>
+    <li class="sk-breadcrumbs__item">
+      <a class="sk-breadcrumbs__link" href="/repositories/example/detail" aria-current="page">Detail</a>
+    </li>
+  </ol>
+</nav>
+```
+
+The consumer owns destinations, labels, route matching, and which one link carries
+`aria-current="page"`. Keep the native `nav > ol > li > a` structure. Add
+`.sk-breadcrumbs--narrow` when composing into a narrow column; the list then contains its own
+horizontal overflow without shortening accessible link text.
+
+Its exact token dependencies are `--sk-fg-muted`, `--sk-fg-subtle`, `--sk-fg-default`,
+`--sk-font-sans`, `--sk-text-sm`, `--sk-weight-semibold`, `--sk-space-1`, `--sk-space-2`,
+`--sk-space-4`, `--sk-space-12`, `--sk-radius-sm`, `--sk-border-width-2`, and
+`--sk-border-focus`.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skbreadcrumbs-html--default)
+
+---
+
+## Prose
+
+`.sk-prose` styles native consumer-authored headings, paragraphs, lists, links, code, and tables.
+It does not parse Markdown, sanitize HTML, choose heading levels, or manufacture missing content.
+
+```html
+<article class="sk-prose">
+  <h2>Implementation prompt</h2>
+  <p>Keep the supplied structure intact.</p>
+  <ul><li>Preserve native semantics.</li></ul>
+  <pre role="region" aria-label="Command" tabindex="0"><code>spec-kitty next</code></pre>
+</article>
+```
+
+Give a genuinely overflowing code region a distinct accessible name and keyboard focus as shown.
+For multi-column values, compose the existing `.sk-data-table` and its scroller inside the prose
+instead of treating the values as paragraphs. When prose is absent, render the passive
+`.sk-empty-state` recipe; use `sk-notice` only when a change must be announced. The consumer owns
+that distinction as well as parsing, sanitization, heading hierarchy, and copy.
+
+Its exact token dependencies are `--sk-fg-body`, `--sk-fg-default`, `--sk-color-accent`,
+`--sk-surface-muted`, `--sk-border-default`, `--sk-border-focus`, `--sk-border-width-1`,
+`--sk-border-width-2`, `--sk-font-sans`, `--sk-font-display`, `--sk-font-mono`,
+`--sk-text-base`, `--sk-text-sm`, `--sk-text-xl`, `--sk-text-2xl`,
+`--sk-weight-semibold`, `--sk-radius-sm`, `--sk-radius-md`, `--sk-space-1`, `--sk-space-2`,
+`--sk-space-3`, `--sk-space-4`, `--sk-space-5`, `--sk-space-7`, and `--sk-space-12`.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skprose-html--prompt)
+
+---
+
+## Event timeline
+
+Use `.sk-event-timeline` on a native ordered list when entries form a chronology. The consumer
+supplies and orders every event, actor, timestamp, display string, detail, and trust marker.
+
+```html
+<ol class="sk-event-timeline">
+  <li class="sk-event-timeline__item">
+    <p class="sk-event-timeline__summary">1. Evidence recorded</p>
+    <p class="sk-event-timeline__metadata">
+      <span>Reviewer name</span><time datetime="2026-09-07T09:00:00Z">09:00 UTC</time>
+    </p>
+    <p class="sk-event-timeline__content">Optional supporting content.</p>
+    <span class="sk-event-timeline__marker">Verified by consumer</span>
+  </li>
+</ol>
+```
+
+Add `.sk-event-timeline--compact` to the same `<ol>` for a denser presentation. The modifier
+reduces only the timeline's measure, spacing, and typography; it does not change the native list,
+its supplied values, or its source order. A compact item may begin with the optional decorative
+leading-marker element:
+
+```html
+<ol class="sk-event-timeline sk-event-timeline--compact">
+  <li class="sk-event-timeline__item">
+    <span class="sk-event-timeline__leading-marker" aria-hidden="true">
+      <!-- Consumer-supplied decorative icon or glyph. -->
+    </span>
+    <p class="sk-event-timeline__summary">1. Evidence recorded</p>
+    <p class="sk-event-timeline__metadata">
+      <span>Reviewer name</span><time datetime="2026-09-07T09:00:00Z">09:00 UTC</time>
+    </p>
+  </li>
+</ol>
+```
+
+Keep `aria-hidden="true"` on every leading marker, and never make that marker the sole carrier of
+event meaning. The visible summary remains the required meaning-bearing content.
+
+The class family neither sorts events nor reads clocks, formats time, infers trust, or applies
+retention rules. Use `.sk-data-table` instead when values are comparable rows and columns rather
+than a sequence. If history is unavailable, render passive `.sk-empty-state` markup; an announced
+`sk-notice` is a separate consumer decision. The compact form, like the default form, never
+announces updates or creates a live region. `.sk-event-timeline--narrow` constrains the same native
+structure without detaching metadata from its owning `<li>`.
+
+Its exact token dependencies are `--sk-fg-body`, `--sk-fg-default`, `--sk-fg-muted`,
+`--sk-on-tint-sky`, `--sk-on-tint-mint`, `--sk-surface-page`, `--sk-border-strong`,
+`--sk-border-width-1`, `--sk-border-width-2`, `--sk-font-sans`, `--sk-text-base`,
+`--sk-text-sm`, `--sk-weight-medium`, `--sk-weight-semibold`, `--sk-radius-pill`,
+`--sk-space-1`, `--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-5`, `--sk-space-6`,
+`--sk-space-7`, and `--sk-space-12`.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skeventtimeline-html--default)
+
+---
+
+## Site footer
+
+A brand column, link columns and a legal line, in a grid that collapses to one column.
+
+**As a custom element** — `sk-site-footer` is migrated, so it needs no wrapper:
+
+```html
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+<link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/site-footer/sk-site-footer.css" />
+
+<sk-site-footer
+  wordmark="Your Brand"
+  tagline="One sentence on what you do."
+  headingone="Product"
+  headingtwo="Connect"
+  legal="© 2026 Your Company."
+>
+  <li slot="column-one"><a href="#" class="sk-site-footer__link">Platform</a></li>
+  <li slot="column-two"><a href="#" class="sk-site-footer__link">Contact</a></li>
+</sk-site-footer>
+```
+
+**Text is a property; only the link items are slotted.** The element owns the grid, both `<nav>`s,
+the headings, the `<ul>`s, the divider and the legal line — so `<ul>`/`<li>` semantics stay intact
+and your `<li>` lands directly inside the element's own list.
+
+**The stylesheet link is needed for the link colour**, and only for that: everything else is a
+shadow node the element styles itself, and your `<li>` is reachable via `::slotted(li)` because it
+is directly assigned. The `<a>` inside it is one level deeper, so it takes its colour from the
+same sheet loaded in your document. Without it those links fall back to the browser's default
+blue, which fails contrast on the dark theme.
+
+Omit `legal` and the divider above it is not rendered either.
+
+Use `sk-site-footer::part(grid)` for a column layout outside the provided `1.5fr 1fr 1fr`.
+
+**HTML:**
+
+```html
+<footer class="sk-site-footer">…</footer>
+```
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-sitefooter-html--default)
 
 ---
 
@@ -99,25 +1642,360 @@ import { SkPillTagComponent, SkEyebrowPillComponent } from '@spec-kitty/angular'
 
 Eyebrow labels and section banners used to introduce sections and add visual hierarchy.
 
-**Angular:**
-
-```typescript
-import { SkEyebrowComponent, SkSectionBannerComponent } from '@spec-kitty/angular';
-```
+**As a custom element** — `sk-section-banner` is migrated, so it needs no wrapper:
 
 ```html
-<sk-eyebrow>Getting started</sk-eyebrow>
-<sk-section-banner>What's new</sk-section-banner>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+
+<sk-section-banner variant="purple">Version 2.x — event architecture</sk-section-banner>
 ```
+
+The label is slotted content, not a property: a banner's text belongs to your page. Omit
+`variant` and you get the neutral banner — the base class paints no background of its own, so
+there is no "plain" form to fall back to.
 
 **HTML:**
 
 ```html
 <span class="sk-eyebrow">Getting started</span>
-<div class="sk-section-banner">What's new</div>
+<div class="sk-section-banner sk-section-banner--neutral">
+  <span class="sk-section-banner__dot" aria-hidden="true">●</span>
+  <span class="sk-section-banner__label">What's new</span>
+</div>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-content-markers--default)
+The variant class is required — `.sk-section-banner` alone sets no colour. This markup is
+generated; copy it from `packages/styles/src/section-banner/sk-section-banner.html` rather than
+retyping it.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-sksectionbanner-html--default)
+
+---
+
+## Operational feed primitives
+
+Four controlled/presentational elements provide the reusable heading, row, status, and visual-marker
+pieces of an operational feed. `sk-section-header`, `sk-status-indicator` and `sk-entity-marker`
+have no static HTML form: their contracts are defined by consumer slot composition and a live
+row-intent event, so a string builder would create a second projection vocabulary.
+`sk-action-row` is the exception — see "Action row static form" below for its two-element wrapper.
+
+```html
+<sk-section-header>
+  <span slot="eyebrow">Recent activity</span>
+  <h2 slot="title">Repository activity</h2>
+  <p slot="description">What needs attention now.</p>
+  <span slot="metadata">3 repositories</span>
+  <sk-button slot="action" variant="ghost" size="sm">View all</sk-button>
+</sk-section-header>
+
+<ul>
+  <li>
+    <sk-action-row row-id="activity-17" selectable selected layout="card">
+      <sk-entity-marker slot="marker" label="Mia" size="sm" shape="circle">
+        <img src="/people/mia.webp" alt="">
+      </sk-entity-marker>
+      <strong slot="title">team-landing-pivots</strong>
+      <code slot="reference">spec-kitty/e2e-team-landing</code>
+      <sk-status-indicator slot="tags" tone="success" pulsing>
+        <span slot="marker">●</span>
+        Live claim
+      </sk-status-indicator>
+      <time slot="metadata">2 hours ago</time>
+      <span slot="supporting">Claimed by Mia · supplied by the application</span>
+      <sk-button slot="controls" size="sm">Inspect</sk-button>
+    </sk-action-row>
+  </li>
+</ul>
+
+<script type="module">
+  document.querySelector('sk-action-row').addEventListener('sk-action-row-activate', (event) => {
+    console.log(event.detail.id);
+  });
+</script>
+```
+
+The consumer owns the native heading and chooses its level; `sk-section-header` never generates a
+heading. The consumer also owns all `ul > li` markup. None of these elements creates a list or
+assigns list roles.
+
+`sk-action-row` is activatable only when `selectable` is present and `row-id` contains non-whitespace
+content. Its internal primary trigger is then a real `button`; projected `controls` remain siblings,
+so native links, buttons, and `sk-button` keep their own behavior. Pointer, Enter, and Space
+activation emit one `sk-action-row-activate` with exact `{ id }`, `bubbles: true`, `composed: true`,
+and `cancelable: false`. The element owns no navigation or other default action. `selected` remains
+a consumer-controlled input and is exposed only as `aria-current="true"` on the stable row surface.
+
+A non-whitespace `href` switches the primary trigger to a real native anchor. The supplied value is
+reflected and passed to `href` without parsing or route construction; the browser continues to own
+Enter, modified-click, context-menu, focus, and destination behavior. Route mode takes precedence
+if `selectable` is also present and emits no `sk-action-row-activate`. In route mode, `selected`
+means the anchor carries `aria-current="page"` while the row surface carries no `aria-current`.
+An absent, empty, or whitespace-only `href` falls back to the existing button/static rules.
+
+Set `presentation="flush"` independently of route/button/static mode when the surrounding container
+owns the resting surface. Flush removes the row background, border, and radius while preserving
+padding, slots, controls, responsive anatomy, and the primary trigger's focus treatment. A selected
+non-route flush row retains the selected surface and still has no border. An unknown, empty, or
+removed `presentation` value fails open to the existing bordered presentation.
+
+```html
+<sk-action-row href="/missions/272" presentation="flush" selected>
+  <strong slot="title">Native route destination</strong>
+  <code slot="reference">spec-kitty/spec-kitty-design</code>
+  <time slot="metadata">2 hours ago</time>
+  <button slot="controls" type="button">Pin</button>
+</sk-action-row>
+```
+
+`layout="card"` reflows that same trigger, content and controls into a compact vertical
+presentation; it does not create a semantic card or a status axis. The optional `supporting` slot is
+a passive, full-width secondary line in either layout and is externally targetable through
+`::part(supporting)`. Controls still belong in `controls`, not in `supporting`.
+
+`sk-status-indicator` accepts `neutral`, `info`, `success`, `attention`, `danger`, or `recovery` as
+presentation tones. Visible status copy is always consumer-authored, and the component does not map
+domain words to colors. An unknown tone renders as neutral while preserving the supplied text.
+`pulsing` is an optional supplied presentation flag on the marker only: it adds no timer, heartbeat,
+claim-expiry rule, liveness inference or announcement. Keep visible consumer-authored text such as
+“Live claim”; motion is never the meaning carrier.
+
+`sk-entity-marker` never fetches identity or generates initials. Supply the exact icon, initials,
+or short mark to render. A non-empty `label` makes the mark meaningful and names it; an absent or
+whitespace-only label makes it decorative and hides it from assistive technology. `size="sm"` and
+`shape="circle"` are independent: either may be omitted or used alone. A directly slotted image is
+contained and cover-cropped inside every size/shape combination. For a meaningful image, put the
+single name on the host and keep the consumer-owned image decorative:
+
+```html
+<sk-entity-marker label="Mia" size="sm" shape="circle">
+  <img src="/people/mia.webp" alt="">
+</sk-entity-marker>
+```
+
+The component never rewrites `alt`. A nonempty image `alt` beside a nonempty host `label` is a
+consumer error because it introduces a duplicate name. Consumers own image bytes, alternate-text
+choice, initials, identity lookup and any trust or liveness interpretation.
+
+---
+
+### Action row static form
+
+`sk-action-row` is the one element in "Operational feed primitives" that has a server-rendered
+static form (#307), because ADR-15 ruled a static equivalent must exist for it: the shadow
+element's `:host { container-type: inline-size; }` reflow rule is otherwise unreachable outside a
+shadow root, and Family 4's Django-rendered workspace/invitation/ledger rows need it without
+JavaScript.
+
+**The static form is always the TWO-ELEMENT WRAPPER — never a single-element collapse.** An
+element is never its own container-query container, so `.sk-action-row-host` must be a real,
+separate ancestor of `.sk-action-row`:
+
+```html
+<div class="sk-action-row-host">
+  <div class="sk-action-row">
+    <a class="sk-action-row__trigger" href="/missions/272" aria-labelledby="sk-action-row-title">
+      <span class="sk-action-row__marker"><!-- optional mark --></span>
+      <span id="sk-action-row-title" class="sk-action-row__title">team-landing-pivots</span>
+      <span class="sk-action-row__reference">spec-kitty/e2e-team-landing</span>
+      <span class="sk-action-row__tags"><!-- optional tags --></span>
+      <span class="sk-action-row__metadata">2 hours ago</span>
+      <span class="sk-action-row__supporting"><!-- optional supporting line --></span>
+    </a>
+    <div class="sk-action-row__controls">
+      <button type="button">Pin</button>
+    </div>
+  </div>
+</div>
+```
+
+`title` is the only mandatory part. Every other scan-content part (`marker`, `reference`, `tags`,
+`metadata`, `supporting`) and the whole `.sk-action-row__controls` region is entirely OMITTED from
+the markup — never rendered as an empty wrapper — when no content is supplied for it, because
+there is no `slotchange` script to hide it after the fact. `.sk-action-row__controls` is always a
+SIBLING of the trigger, never its descendant (#272) — nesting it inside the `<a>`/`<div>` trigger
+is invalid, activation-breaking HTML.
+
+There are only two trigger shapes: a real `<a href>` in route mode, or a non-interactive
+`<div class="sk-action-row__trigger sk-action-row__trigger--static">` otherwise. There is
+deliberately **no** static `<button>` trigger — the shadow form's selectable-button mode requires
+a `sk-action-row-activate` listener the static page does not have, and promising that shape here
+would freeze an activation contract the static form cannot keep.
+
+`aria-current` follows the shadow form exactly: present with the correct value
+(`aria-current="true"` on `.sk-action-row` in non-route mode, `aria-current="page"` on the anchor
+in route mode) when the row is current, and **entirely absent** — never `aria-current="false"` —
+when it is not. `.sk-action-row--flush` and `.sk-action-row--card` are the same optional modifier
+classes the shadow element reflects from its `presentation`/`layout` attributes.
+
+**The wrapper's CSS now SHIPS, generated (#309), and a static consumer links it instead of
+`sk-action-row.css`:**
+
+```html
+<link rel="stylesheet" href="@spec-kitty/styles/action-row/static/sk-action-row.static.css">
+```
+
+That file is the whole sheet with `:host` rewritten onto `.sk-action-row-host`, in the same source
+order — so link it **instead of** `sk-action-row.css`, never in addition to it, or every
+declaration arrives twice at two different weights. The rule it emits is:
+
+```css
+.sk-action-row-host {
+  display: block;
+  min-width: 0;
+  container-type: inline-size;
+}
+```
+
+The copy above is pinned against the generated file by
+`fixtures/elements-behaviour/src/sk-action-row.test.ts`, so this page and the package cannot
+silently diverge. Do **not** move `container-type` onto `.sk-action-row` itself — measured in
+`ADR-15`, that collapse makes the row's own `@container (max-width: 400px)` reflow rule silently
+stop firing.
+
+**One thing the static form does NOT reproduce, and it is a ruled limit rather than a defect
+(ADR-15's 2026-09-11 amendment, #375).** `:host` declarations sit in the element's inner tree, so
+*any* document rule matching `<sk-action-row>` beats them at any weight in any order. On
+`.sk-action-row-host` they are ordinary document declarations. Measured, chromium and firefox
+identical: `sk-action-row { display: flex }` at (0,0,1) **beats** the element's `:host`, and the
+identical `div { display: flex }` at the same (0,0,1) **loses** to `.sk-action-row-host`. To
+override a wrapper declaration you need specificity **strictly higher** than the generated rule
+declaring it — `.sk-action-row-host` is (0,1,0), a `.sk-x-host.sk-x-host--<axis>` modifier rule is
+(0,2,0) — or the same specificity in a **later** stylesheet, which your bundler may decide rather
+than you. `scripts/check-static-form-equivalence.mjs` holds the two forms equal under no consumer
+pressure and pins this divergence by verdict; the generated file's own header states the boundary
+for each component.
+
+Generate this markup with `actionRowStaticHtml(opts, content)` from
+`@spec-kitty/elements`'s `sk-action-row.markup.ts` (or copy the generated
+`packages/styles/src/action-row/sk-action-row.html` exemplar) rather than hand-authoring the
+wrapper shape a second time — see `docs/contributing/adding-a-component.md` for the full
+generator contract.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skactionrow-html--default)
+
+---
+
+## Notices
+
+`sk-notice` is a block-level status message about a page or a region of it — the surface a build
+failure, a degraded queue or a "connection lost, retrying" strip belongs on. It is **not** a toast:
+it has no positioning, no stacking, no queueing, no auto-dismiss timer and no portal. The consumer
+decides where it appears and whether it exists at all.
+
+```html
+<sk-notice tone="danger" announce="assertive" dismissible
+           dismiss-label="Dismiss the deploy failure notice">
+  <h3 slot="heading">Deploy failed</h3>
+  <p>Three of twelve targets rejected the release bundle.</p>
+  <sk-button slot="actions">Retry the deploy</sk-button>
+</sk-notice>
+
+<script type="module">
+  const notice = document.querySelector('sk-notice');
+
+  // A message that CHANGES is announced again. Set the property; do not rebuild the element.
+  notice.message = 'Retrying in 2 seconds';
+
+  notice.addEventListener('sk-notice-dismiss', (event) => {
+    // The element did NOT remove itself. This is yours to decide.
+    notice.remove();
+  });
+</script>
+```
+
+**Announcement is an explicit property, not a side effect of tone.** `announce` takes `off` (the
+default), `polite` or `assertive`. A `danger` notice with `announce="off"` is silent; a `neutral`
+one with `announce="assertive"` interrupts. Nothing about the tone decides it, and a notice that is
+never announced is still perfectly usable as a static message — that is what `off` is for.
+
+**A changed message is announced again.** `message` is a reactive property, so assigning a new
+value re-renders the live region's text and the change is announced. This is the one thing to get
+right: the repository's own `sk-form-input` records the opposite failure twice, where the announced
+text changed and nothing re-rendered, leaving `role="alert"` silent and `aria-describedby` pointing
+at text that was no longer true.
+
+**One caveat, and it is the consumer's to handle.** The live region is created with its role at the
+element's first render, ahead of any message you assign afterwards. If you build a notice with
+`message` already set and insert it in one step, the region and its content enter the DOM together,
+which assistive technology does not reliably announce. **Insert the notice first, then assign
+`message`.** The element cannot close this itself without deferring its own first paint behind a
+timer, which is exactly the toast behaviour it is defined not to have.
+
+Since #228 that ordering helps but no longer produces an *empty* region when you slot a heading:
+the heading is inside the region, so the region is born holding it. The message still arrives as a
+mutation to a node that already existed, which is the part that matters.
+
+**The heading level is yours, and the heading is announced.** Slot a native heading; the element
+generates none, the same rule `sk-section-header` follows. It renders **inside** the live region and
+first within it, so `<h3 slot="heading">Deploy failed</h3>` with `message="Retrying in 5s"` is heard
+as "Deploy failed. Retrying in 5s" rather than the detail alone. Slot the body as `message` or as
+real markup — the default slot renders inside the live region too, so multi-paragraph content is
+announced.
+
+Both live-region roles the element renders — `role="status"` for `polite`, `role="alert"` for
+`assertive` — are implicitly `aria-atomic="true"`, so **the whole region is re-read on every
+change**, heading included. A notice that updates a countdown repeats its headline on every tick.
+If you want a headline that is seen and never heard, put it outside the notice.
+
+**If you style `::part(body)`, that box grew.** Since #228 it encloses the heading rather than
+starting below it — measured at 600px with a heading, a message and actions, it moves from
+`top 32px, height 22px` to `top 0, height 54px`. The notice's own layout is unchanged, but a
+background, padding, border or `border-radius` on `::part(body)` now frames the headline too.
+`::part()` cannot be followed by a combinator into the shadow tree, so there is no way to re-exclude
+the heading from inside: move the decoration to `::part(notice)` or `::part(content)`, or compensate
+on `::part(heading)`.
+
+**Dismissal is controlled.** `dismissible` renders a real `<button>` with a required accessible name
+(`dismiss-label`, defaulting to "Dismiss notice"). Activating it emits one `sk-notice-dismiss` with
+`{ tone }`, `bubbles: true`, `composed: true` and `cancelable: true`. **The element never removes
+itself** in either branch. What `preventDefault()` cancels is the element's own focus move — nothing
+else, because nothing else is the element's to do.
+
+**Focus lands on the notice host** after a dismissal that is not cancelled; the element gives itself
+`tabindex="-1"` for that purpose unless you supplied your own `tabindex`. The reason is that the
+dismiss button is inside the shadow root and is the node most likely to stop existing the moment
+your handler runs — leaving focus there drops it to `<body>` as soon as you remove the notice. The
+host is still in the document while your handler runs, so you have a defined place to redirect from.
+If you remove the notice, move focus somewhere deliberate yourself.
+
+**Tone is never the only carrier of meaning.** Each tone brings a marker glyph and a widened
+inline-start edge as well as a surface colour, and the message text is yours and carries the meaning
+for assistive technology. The six tones are the same vocabulary `sk-status-indicator` and
+`sk-card[status]` use, over the same `--sk-status-*` / `--sk-on-status-*` tokens — there is one
+scale, not three. An unknown tone renders as `neutral` and warns, keeping the message visible.
+
+A notice **may slot an `sk-status-indicator`**; an indicator never becomes a notice. They differ in
+every axis but the tone vocabulary: an indicator is inline, passive and lives inside a row, while a
+notice is block, optionally announced, and owns a region.
+
+---
+
+## Layout
+
+A responsive grid for card listings and reference pages. Bounded on purpose: two, three or four
+columns, all collapsing to one below 720px.
+
+**As a custom element** — `sk-grid` is migrated, so it needs no wrapper:
+
+```html
+<sk-grid variant="cols-3" gap="6">
+  <sk-card>…</sk-card>
+  <sk-card>…</sk-card>
+  <sk-card>…</sk-card>
+</sk-grid>
+```
+
+Need a layout outside that set? Use `sk-grid::part(grid)` rather than asking for another
+variant — the part exists for exactly that.
+
+**HTML:**
+
+```html
+<div class="sk-grid sk-grid--cols-3 sk-grid--gap-6">
+  <article class="sk-card">…</article>
+</div>
+```
 
 ---
 
@@ -125,21 +2003,62 @@ import { SkEyebrowComponent, SkSectionBannerComponent } from '@spec-kitty/angula
 
 Surface containers for grouping related content, used in feature grids, blog listings, and comparison layouts.
 
-**Angular:**
-
-```typescript
-import { SkCardComponent } from '@spec-kitty/angular';
-```
+**As a custom element** — migrated, so it needs no wrapper:
 
 ```html
-<sk-card>
-  <sk-eyebrow>Feature</sk-eyebrow>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+
+<sk-card variant="blue">
   <h3>Structured requirements</h3>
   <p>Developers spend time building, not being blocked on finalized requirements.</p>
 </sk-card>
 ```
 
-**HTML:**
+`variant` accepts `blue` or `purple`; omit it for the default surface. `inset` swaps the surface
+token for a card nested inside another.
+
+### The operational status axis
+
+`status` is a **second** axis: `variant` is the brand/decorative one, `status` is the operational
+one, and a card may carry both. It accepts the same six tones `sk-status-indicator` does —
+`neutral`, `info`, `success`, `attention`, `danger`, `recovery` — because there is one tone
+vocabulary in this library, not one per component.
+
+**The two axes are orthogonal as inputs and precedence in rendering.** Both may be set, both
+reflect, neither errors — but while a `status` is present the operational tone **supersedes** the
+brand variant's surface and edge entirely, so `variant="blue" status="danger"` and
+`status="danger"` render identically. Set `variant` for how the card looks when it has no
+operational state to report; do not expect it to tint one that does.
+
+**You supply the tone.** The card holds no domain mapping: it will not decide that a string
+containing "failed" means `danger`, and an unrecognised value renders the base card and warns
+rather than throwing.
+
+**The tone is not the message.** The card paints a surface and an edge; the meaning belongs to the
+text you slot in. A status card is a composition, and there is deliberately no `sk-status-card`
+element — the `<dl>` and `<details>` below must stay in light DOM, which a wrapper's shadow root
+would break (see ADR-10's styles-only ruling and #92):
+
+```html
+<sk-card status="danger">
+  <sk-status-indicator tone="danger"><span slot="marker">●</span>Delivery blocked</sk-status-indicator>
+
+  <dl class="sk-facts sk-facts--two-col">
+    <dt class="sk-facts__term">Owner</dt><dd class="sk-facts__value">Ada Lovelace</dd>
+    <dt class="sk-facts__term">Region</dt><dd class="sk-facts__value">us-east-1</dd>
+  </dl>
+
+  <details class="sk-disclosure">
+    <summary class="sk-disclosure__summary">Detail</summary>
+    <div class="sk-disclosure__body"><p>Consumer-supplied.</p></div>
+  </details>
+</sk-card>
+```
+
+The static path carries the same axis as `.sk-card--status-<tone>`, generated into
+`@spec-kitty/styles` as `SkCardStatus<Tone>HTML`.
+
+**As CSS (every consumer):**
 
 ```html
 <div class="sk-card">
@@ -149,7 +2068,7 @@ import { SkCardComponent } from '@spec-kitty/angular';
 </div>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-cards--default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-card--default)
 
 ---
 
@@ -157,26 +2076,244 @@ import { SkCardComponent } from '@spec-kitty/angular';
 
 Labelled text inputs, selects, and validation states for data-entry surfaces.
 
-**Angular:**
+> **This section was wrong.** It documented an Angular `SkInputFieldComponent` and
+> `.sk-field` / `.sk-field__label` / `.sk-field__input` classes — none of which have ever
+> existed in this repository, and the Angular package was deleted in #102. Corrected in #74.
 
-```typescript
-import { SkInputFieldComponent } from '@spec-kitty/angular';
-```
-
-```html
-<sk-input-field label="Your name" placeholder="Jane Smith"></sk-input-field>
-```
-
-**HTML:**
+**Custom element** (`@spec-kitty/elements` — the supported form):
 
 ```html
-<div class="sk-field">
-  <label class="sk-field__label" for="name">Your name</label>
-  <input class="sk-field__input" id="name" type="text" placeholder="Jane Smith">
+<sk-form-input
+  name="fullName"
+  label="Your name"
+  placeholder="Jane Smith"
+  description="As it should appear on your invoice."
+></sk-form-input>
+
+<sk-form-textarea name="goal" label="What are you trying to ship?" rows="4"></sk-form-textarea>
+```
+
+The element owns its own label, description and validation message, and participates in a
+native `<form>`: put it inside one, give it a `name`, and its value arrives in `FormData`.
+
+**Why the label is a property and not a `<label>` you write.** ADR-9 §4 built four arrangements
+as real elements and ran axe over each. A consumer-supplied `<label>` pointing at a control
+inside the element's shadow root **fails** — axe resolves `aria-labelledby` from the attribute
+and scopes ID lookups to `getRootNode()`, so no cross-root reference resolves, and labelling the
+*host* does not label the inner control. The same applies to `description`, which reaches the
+control through `aria-describedby`. Both are therefore properties. There is no `for`/`id` pair
+to get wrong, because there is none.
+
+**There is no `<sk-form-field>` wrapper element**, for the same reason: its three accessible
+responsibilities — label, description, error region — all cross a root boundary. What a wrapper
+would have contributed is `display: flex; flex-direction: column; gap`, which the CSS-only
+`.sk-form-field` class already provides:
+
+```html
+<div class="sk-form-field">
+  <sk-form-input name="email" label="Email address"></sk-form-input>
 </div>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-form-fields--default)
+**CSS-only** (`@spec-kitty/styles`, no JavaScript — unchanged and still published):
+
+```html
+<div class="sk-form-field">
+  <label class="sk-form-field__label" for="name">Your name</label>
+  <input class="sk-input" id="name" type="text" placeholder="Jane Smith">
+</div>
+```
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/elements-skforminput--default)
+
+---
+
+## Native form select
+
+Use the styles-only form-select primitive directly on a native light-DOM `<select>`. Compose it
+with the existing form-field label and description classes so the browser retains option,
+keyboard, validation, reset and form-submission behaviour:
+
+```html
+<div class="sk-form-field">
+  <label class="sk-form-field__label" for="lane">Lane</label>
+  <select class="sk-form-select" id="lane" name="lane" aria-describedby="lane-help">
+    <option value="planned">Planned</option>
+    <option value="review">For review</option>
+    <option value="done">Done</option>
+  </select>
+  <span class="sk-form-field__description" id="lane-help">Choose the Work Package lane.</span>
+</div>
+```
+
+Add `.sk-form-select--compact` alongside `.sk-form-select` for dense filter bars. These are the
+only public form-select classes; there is no `<sk-form-select>` custom element or JavaScript
+wrapper. Native light DOM keeps the label association and `option`/`optgroup` semantics in the
+same root, and preserves the platform indicator and interaction model.
+
+This closed selector is intentionally different from #180's datalist input: a datalist permits
+unmatched free text, while a native select can submit only its authored option set. Consumers own
+the options and selected value, listen for `change`, and own application filtering or lane state.
+
+Import the CSS independently from `@spec-kitty/styles/form-select/sk-form-select.css`; generated
+fixture markup remains available from the root `@spec-kitty/styles` TypeScript export.
+
+---
+
+## Checkbox choice group
+
+Apply the styles-only checkbox choice group family to native light-DOM form markup. A real
+`fieldset` and `legend` name the group, and every real `label` contains its visible native checkbox,
+label text, and optional metadata:
+
+```html
+<fieldset class="sk-checkbox-choice-group">
+  <legend class="sk-checkbox-choice-group__legend">Notification topics</legend>
+  <div class="sk-checkbox-choice-group__options">
+    <label class="sk-checkbox-choice-group__choice">
+      <input
+        class="sk-checkbox-choice-group__control"
+        type="checkbox"
+        name="topic"
+        value="releases"
+      />
+      <span class="sk-checkbox-choice-group__label">Releases</span>
+      <span class="sk-checkbox-choice-group__metadata">6</span>
+    </label>
+  </div>
+</fieldset>
+```
+
+The exact public selectors are `.sk-checkbox-choice-group`,
+`.sk-checkbox-choice-group__legend`, `.sk-checkbox-choice-group__options`,
+`.sk-checkbox-choice-group__choice`, `.sk-checkbox-choice-group__control`,
+`.sk-checkbox-choice-group__label`, and `.sk-checkbox-choice-group__metadata`. Metadata is optional
+ordinary text; zero has no implicit disabled or availability meaning. The intrinsic options grid
+adapts to its container and reaches one column when narrow, while long legends, labels, and metadata
+wrap inside their own boxes.
+
+The browser owns focus, Space and label activation, checkedness mechanics, native disabled
+behavior, form submission, and reset. Consumers own names, values, order, labels, checked and
+disabled state, metadata and counts, lane vocabulary, filtering, Apply/Clear behavior, persistence,
+and query parameters. This family provides no custom element, JavaScript, validation API,
+disclosure, or custom checkbox glyph.
+
+Import the CSS from
+`@spec-kitty/styles/checkbox-choice-group/sk-checkbox-choice-group.css`; generated fixture markup is
+available from the root TypeScript export. The stylesheet depends on `--sk-bg-pill`,
+`--sk-border-default`, `--sk-border-focus`, `--sk-border-strong`, `--sk-border-width-1`,
+`--sk-border-width-2`, `--sk-border-width-4`, `--sk-color-yellow`, `--sk-fg-body`,
+`--sk-fg-default`, `--sk-fg-muted`, `--sk-font-mono`, `--sk-font-sans`, `--sk-radius-sm`,
+`--sk-space-1`, `--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-6`, `--sk-space-8`,
+`--sk-space-12`, `--sk-surface-card`, `--sk-surface-muted`, `--sk-text-base`, `--sk-text-sm`,
+`--sk-text-xs`, `--sk-weight-medium`, `--sk-weight-normal`, and `--sk-weight-semibold`.
+
+---
+
+## Radio choice group
+
+Apply the styles-only radio choice group family to native light-DOM form markup — the
+exactly-one-of-many counterpart to the checkbox choice group above (#336, coordinated with #277). A
+real `fieldset` and `legend` name the group, and every real `label` contains its visible native
+radio, primary label text, and an optional secondary machine value. Every radio in the group shares
+one `name`, which is what makes the browser — not this library — enforce exactly-one selection:
+
+```html
+<fieldset class="sk-radio-choice-group">
+  <legend class="sk-radio-choice-group__legend">Connect a workspace</legend>
+  <div class="sk-radio-choice-group__options">
+    <label class="sk-radio-choice-group__choice">
+      <input
+        class="sk-radio-choice-group__control"
+        type="radio"
+        name="workspace"
+        value="acme"
+        checked
+        required
+      />
+      <span class="sk-radio-choice-group__label">Acme</span>
+      <span class="sk-radio-choice-group__secondary-value">acme</span>
+    </label>
+    <label class="sk-radio-choice-group__choice">
+      <input
+        class="sk-radio-choice-group__control"
+        type="radio"
+        name="workspace"
+        value="acme-platform"
+        required
+      />
+      <span class="sk-radio-choice-group__label">Acme / Platform</span>
+      <span class="sk-radio-choice-group__secondary-value">acme/platform</span>
+    </label>
+  </div>
+</fieldset>
+```
+
+The exact public selectors are `.sk-radio-choice-group`, `.sk-radio-choice-group__legend`,
+`.sk-radio-choice-group__options`, `.sk-radio-choice-group__choice`,
+`.sk-radio-choice-group__control`, `.sk-radio-choice-group__label`, and
+`.sk-radio-choice-group__secondary-value`. The secondary machine value (e.g. an opaque path or
+identifier) is OPTIONAL ordinary text per choice; its absence causes no implicit selection,
+disabling, or validation-state change. The intrinsic options grid adapts to its container and
+reaches one column when narrow, while long legends, primary labels, and secondary values wrap
+inside their own choice without overlapping siblings. Every choice's full visible label is the
+pointer/touch target and computes at least 44px in the narrow-floor dimension
+(`--sk-space-9`, the token `sk-confirm-dialog.css` already documents as the closest token at or
+above that floor). The layout uses logical properties throughout, so it mirrors correctly in a
+right-to-left (`dir="rtl"`) document with no horizontal overflow.
+
+The browser owns exactly-one selection (via the shared `name`), focus, arrow-key roving selection,
+Space and label activation, native constraint validation (including the `required` case — a
+`required` group with nothing checked is a valid, honestly-styled state, not an error this library
+suppresses), form submission, and reset. This family styles the native `:invalid`/`:required`
+state; it never generates, owns, or overrides validation-message copy. Consumers own the group
+name, every visible label and secondary value, order, checked/default-checked/disabled/required
+state, submission and reset handling, routing, selection effects, request handling, validation
+messages, and all translatable copy/i18n (#286). This family provides no custom element,
+JavaScript, selection store, or custom radio glyph — the native radio glyph remains visible, and
+`accent-color` is the only sanctioned native-appearance customization.
+
+`.sk-radio-choice-group` and `.sk-checkbox-choice-group` (#277) deliberately share BEM shape
+(root/legend/options/choice/control/label plus one optional content slot) but remain two distinct,
+non-aliased public contracts: the checkbox family permits zero-to-many checked choices and carries
+no `required`/invalid contract, while the radio family is browser-enforced exactly-one and adds
+native required/invalid presentation. No shared class name implies the other family's cardinality
+or validation behavior.
+
+Import the CSS from `@spec-kitty/styles/radio-choice-group/sk-radio-choice-group.css`; generated
+fixture markup is available from the root TypeScript export. The stylesheet depends on
+`--sk-bg-pill`, `--sk-border-default`, `--sk-border-focus`, `--sk-border-strong`,
+`--sk-border-width-1`, `--sk-border-width-2`, `--sk-border-width-4`, `--sk-color-red`,
+`--sk-color-yellow`, `--sk-fg-body`, `--sk-fg-default`, `--sk-fg-muted`, `--sk-font-mono`,
+`--sk-font-sans`, `--sk-radius-sm`, `--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-6`,
+`--sk-space-9`, `--sk-space-12`, `--sk-surface-card`, `--sk-surface-muted`, `--sk-text-base`,
+`--sk-text-sm`, `--sk-text-xs`, `--sk-weight-medium`, `--sk-weight-normal`, and
+`--sk-weight-semibold`.
+
+---
+
+## Segmented choice
+
+Apply `sk-segmented-choice` to an accessibly named native group and
+`sk-segmented-choice__item` to each direct native button. The supplied `aria-pressed` value is the
+source of truth for the selected presentation:
+
+```html
+<div class="sk-segmented-choice" role="group" aria-label="View options">
+  <button class="sk-segmented-choice__item" type="button" aria-pressed="true">Overview</button>
+  <button class="sk-segmented-choice__item" type="button" aria-pressed="false">Activity</button>
+  <button class="sk-segmented-choice__item" type="button" aria-pressed="false">Details</button>
+</div>
+```
+
+The CSS does not set or toggle `aria-pressed`, manage focus, validate that selection is exclusive,
+or attach activation handlers. Consumers own the group and item labels, item order, pressed and
+disabled values, event handlers, and any selection rules. These classes do not create tabs, radios,
+or a custom element; native button keyboard and disabled behavior remain browser-owned.
+
+Import the CSS from
+`@spec-kitty/styles/segmented-choice/sk-segmented-choice.css`; generated fixture markup is available
+from the component barrel.
 
 ---
 
@@ -184,23 +2321,9 @@ import { SkInputFieldComponent } from '@spec-kitty/angular';
 
 Full-width hero block with eyebrow, headline, lead copy, checkmark bullet list, and call-to-action buttons.
 
-**Angular:**
+**CSS only — not yet migrated.**
 
-```typescript
-import { SkHeroComponent } from '@spec-kitty/angular';
-```
-
-```html
-<sk-hero
-  eyebrow="Open-source"
-  headline="Bring structure to AI-assisted delivery"
-  [bullets]="['Spec -> Plan -> Implement', 'No requirement drift', 'Works with any AI coding tool']">
-  <sk-button-primary slot="cta-primary">Get started</sk-button-primary>
-  <sk-button-secondary slot="cta-secondary">View on GitHub</sk-button-secondary>
-</sk-hero>
-```
-
-**HTML:**
+**As CSS (every consumer):**
 
 ```html
 <section class="sk-hero">
@@ -213,34 +2336,19 @@ import { SkHeroComponent } from '@spec-kitty/angular';
     <li>Works with any AI coding tool</li>
   </ul>
   <div class="sk-hero__ctas">
-    <button class="sk-btn sk-btn--primary">Get started</button>
-    <button class="sk-btn sk-btn--secondary">View on GitHub</button>
+    <button class="sk-button sk-button--primary">Get started</button>
+    <button class="sk-button sk-button--secondary">View on GitHub</button>
   </div>
 </section>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-hero--default)
+_No Storybook entry: this is a CSS-only pattern with no story._
 
 ---
 
 ## Callout
 
 Two-column callout block used for "why/who" benefit statements with bullet lists.
-
-**Angular:**
-
-```typescript
-import { SkCalloutComponent } from '@spec-kitty/angular';
-```
-
-```html
-<sk-callout
-  leftHeading="Why teams use it"
-  [leftBullets]="['Catches requirement drift before code is written', 'Works alongside existing AI tools']"
-  rightHeading="Who it is for"
-  [rightBullets]="['Engineering leads', 'Product managers', 'AI coding tool users']">
-</sk-callout>
-```
 
 **HTML:**
 
@@ -264,7 +2372,255 @@ import { SkCalloutComponent } from '@spec-kitty/angular';
 </div>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-callout--default)
+_No Storybook entry: this is a CSS-only pattern with no story._
+
+---
+
+## Facts
+
+Key/value pairs — status fields, metadata, run details — as a real `<dl>`, never ad-hoc `div`
+pairs whose label→value association is visual only.
+
+**CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
+
+```html
+<dl class="sk-facts">
+  <dt class="sk-facts__term">Status</dt>
+  <dd class="sk-facts__value">Running</dd>
+  <dt class="sk-facts__term">Owner</dt>
+  <dd class="sk-facts__value">Ada Lovelace</dd>
+</dl>
+```
+
+`.sk-facts--two-col` lays term/value side by side instead of stacked; `.sk-facts--compact`
+tightens the spacing. Values render verbatim — no truncation, no formatting, no count derivation.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skfacts-html--default)
+
+---
+
+## Disclosure
+
+Collapsible content — release notes, expandable detail — as a real `<details>`/`<summary>`,
+never a button plus a `hidden` div re-implementing `aria-expanded` by hand.
+
+**CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
+
+```html
+<details class="sk-disclosure">
+  <summary class="sk-disclosure__summary">What changed in this release?</summary>
+  <div class="sk-disclosure__body">
+    <p>Three bug fixes and one performance improvement.</p>
+  </div>
+</details>
+```
+
+The `open` attribute is entirely the consumer's — the platform owns open/closed state and the
+class family only styles it. The marker is a `content`-drawn glyph with its accessible-name
+contribution suppressed (`content: '▸' / '';`), never the sole affordance for state.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skdisclosure-html--closed)
+
+---
+
+## Collection
+
+The CSS-only collection surface styles consumer-authored native markup: a `<section>` named by a
+real heading, a real `<button aria-expanded aria-controls>`, its controlled body, a native
+`<ul>` or `<ol>` with `<li>` children, and an optional bounded footer/action region. There is no
+`sk-collection` custom element or shadow root. Use the generated collection exemplars and
+`sk-collection.css` from `@spec-kitty/styles` as the shipped contract.
+
+The consumer owns the controlled state. It keeps `aria-expanded` and `aria-controls` accurate,
+applies or removes native `hidden` on the controlled body, supplies counts and contents, and
+decides how expansion changes. The library provides styles only; it never changes DOM,
+attributes, focus, content, or selection.
+
+This differs deliberately from `.sk-disclosure`: a disclosure's `<details open>` state is native
+and user-agent-owned, while a collection's `aria-expanded`/`hidden` pair is entirely
+consumer-owned. Do not extend `.sk-disclosure` or substitute its `<details>/<summary>` contract
+for a controlled collection.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skcollection-html--default)
+
+---
+
+## Data table
+
+Tabular data — run/job lists — as a real `<table>` with `<caption>` and `<th scope>`, with one
+documented narrow-width treatment that never reflows cells.
+
+**CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
+
+```html
+<div class="sk-data-table__scroller">
+  <table class="sk-data-table">
+    <caption>Recent builds</caption>
+    <thead>
+      <tr><th scope="col">Build</th><th scope="col">Status</th><th scope="col">Cost</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>#1042</td><td>Passed</td><td class="sk-data-table__cell--numeric">$0.42</td></tr>
+    </tbody>
+  </table>
+</div>
+```
+
+`.sk-data-table__scroller` is part of the markup contract, not an optional narrow-width extra —
+all three authored exemplars carry it. Without it there is no `overflow-x`, and
+`.sk-data-table--sticky-header` has no scrolling ancestor to pin against, so the modifier does
+nothing.
+
+At a narrow width, add a labelled, keyboard-scrollable region to that same wrapper instead of
+reflowing cells — block-reflow drops header association and is explicitly rejected:
+
+```html
+<div class="sk-data-table__scroller" role="region" aria-label="Recent builds, narrow view" tabindex="0">
+  <table class="sk-data-table">…</table>
+</div>
+```
+
+Only give the scroller `role="region"`/`tabindex="0"` when it genuinely overflows — on a table
+that already fits, that triad is a dead tab stop and a duplicate landmark of `<caption>`; the
+accessible name must also be distinct from `<caption>`'s own text ("narrow view", not "Recent
+builds" again — a duplicate name is itself a defect). If you constrain a wide table's height or
+width yourself (e.g. `max-height` for a long list), and that constraint makes the scroller
+genuinely scrollable where it wasn't before, add the triad at that point — a scrollable region
+with no way to reach it by keyboard is a real accessibility defect, not a style choice.
+`.sk-data-table--sticky-header` pins the header row while the body scrolls
+(requires the scroller above as its scrolling ancestor). This mission is tone-free by epic ruling
+— no status/tone row colouring; that waits on a semantic status-token axis that doesn't exist yet.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skdatatable-html--default)
+
+---
+
+## Progress
+
+Determinate completion — a mission's work-package count, a build's percent complete — as a real
+`<progress>` with a plain light-DOM `label[for]`/`progress[id]` pair, never a hand-rolled `div`
+whose fraction is expressed only as an inline `width` style.
+
+**CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #210):
+
+```html
+<div class="sk-progress">
+  <label class="sk-progress__label" for="mission-progress">5 of 8 Work Packages done</label>
+  <progress class="sk-progress__bar" id="mission-progress" value="5" max="8">63%</progress>
+  <span class="sk-progress__meta">63%</span>
+</div>
+```
+
+The consumer supplies `value`, `max`, the label text, and the visible `sk-progress__meta` text —
+all four are consumer-authored and the library performs no arithmetic on any of them. The native
+`for`/`id` pair is the sole label association mechanism; no fixture carries `aria-label`,
+`aria-labelledby`, or `role`. The role (`progressbar`) and the exposed value/min/max are derived by
+the browser from the `<progress>` element's own `value`/`max` attributes (min is implicitly `0`),
+the same way any other native `<progress>` element's accessibility is computed — restyling it for
+this design's visual language does not change that.
+
+Two layout modifiers change CSS only — the same three children, in the same order, in both:
+
+- `sk-progress--compact` — an inline arrangement for placing the indicator beside other compact
+  metadata.
+- `sk-progress--narrow` — a stacked arrangement whose bar fills the available width, for narrow
+  columns.
+
+The maintained fixture set covers five determinate states (zero, a worked 5-of-8 example, complete,
+a large total, and a long label) plus both modifiers — see
+[ADR-10](../architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md)'s
+styles-only class ruling for why no `sk-progress` element exists. Negative values or a `value`
+exceeding `max` are consumer validation, not a concern this component's CSS or markup enforces.
+
+**Indeterminate** (#306) — unknown-duration activity, the same markup shape, one modifier:
+
+```html
+<div class="sk-progress sk-progress--indeterminate">
+  <label class="sk-progress__label" for="sync-progress">Syncing your changes</label>
+  <progress class="sk-progress__bar" id="sync-progress"></progress>
+</div>
+```
+
+`sk-progress--indeterminate` is a root-class modifier, orthogonal to `--compact`/`--narrow` (all
+three combine freely). The only markup change from the determinate contract is that `<progress>`
+carries **no `value` attribute at all** — never an empty string, never an out-of-range value relied
+on for parse-failure behaviour. `sk-progress__meta` becomes optional for this state (its absence is
+a supported, tested state); when supplied, its text must never read as a percentage (there is no
+percentage to state) — a short status word like "Syncing…" is the intended use. No ARIA is added:
+the native, valueless `<progress>` plus the existing `for`/`id` label pair remains the sole
+accessibility mechanism.
+
+The activity look is an authored, `--sk-motion-*`-token-driven animation (a sweeping gradient), not
+a reliance on any browser's own default indeterminate paint — this keeps rendering consistent across
+Chromium, Firefox, and WebKit, and lets `prefers-reduced-motion: reduce` genuinely stop it. Under
+reduced motion the animation stops but the track stays visibly present at a fixed, partial frame —
+never fully empty, never fully full, so it is never mistaken for the Zero or Complete determinate
+states. This family does not share its activity cue with `sk-button`'s own busy-state affordance —
+see `kitty-specs/progress-indeterminate-01M25C78/spec.md`'s "Cross-Mission Decision: TKT5/TKT6
+Activity Cue" section for the ruling.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skprogress-html--default)
+
+---
+
+## Empty state
+
+A shared "nothing here yet" treatment — heading, supporting copy, one optional action — replacing
+inconsistent per-page empty panels.
+
+**CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
+
+```html
+<div class="sk-empty-state">
+  <h3 class="sk-empty-state__heading">No runs yet</h3>
+  <p class="sk-empty-state__body">Trigger a run to see its status and logs here.</p>
+  <div class="sk-empty-state__action">
+    <button type="button">Start a run</button>
+  </div>
+</div>
+```
+
+The primitive supplies no copy of its own and no icon — heading, body and the action are entirely
+the consumer's.
+
+For an already-labelled lane that needs one compact structural message rather than the full
+heading/body/action stack, use the passive inline modifier on native light DOM:
+
+```html
+<p class="sk-empty-state sk-empty-state--inline">Nothing here</p>
+```
+
+“Inline” does not mean forced onto one physical line: complete consumer-supplied copy wraps at
+narrow widths. The modifier adds no fallback, heading, action, `role`, live region or status
+semantics. Use `sk-notice` for an announced block-level message; do not turn an empty lane into a
+notice merely to reuse its visuals. The inline modifier's exact token dependencies are
+`--sk-fg-muted`, `--sk-font-sans`, `--sk-space-3`, `--sk-space-4`, and `--sk-text-sm`.
+Consumers retain ownership of the copy and application data.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skemptystate-html--with-action)
+
+---
+
+## Skip link
+
+A real, off-screen-until-focused skip link targeting the page's primary content, so a keyboard
+user is not forced to tab through the full navigation rail on every page.
+
+**CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
+
+```html
+<a href="#main" class="sk-skip-link">Skip to main content</a>
+…
+<main id="main">…</main>
+```
+
+Off-screen technique is `clip-path`, never a bare `transform` — `<a>` is inline by default and
+`transform` does not apply to non-replaced inline boxes, so a transform-only skip link does not
+move at all. Give it a real, high `z-index` and never place it inside an ancestor with
+`transform`/`filter`/`will-change` (breaks its `position: fixed` containment) or one with a higher
+`z-index` in a sibling stacking context (clamps it underneath, even once focused).
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skskiplink-html--unfocused)
 
 ---
 

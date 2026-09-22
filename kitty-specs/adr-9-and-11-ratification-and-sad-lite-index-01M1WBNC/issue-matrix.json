@@ -1,0 +1,101 @@
+{
+  "rows": {
+    "#176": {
+      "evidence_ref": "e9d07d9",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Cited only as the precedent #189 followed. Nothing in ADR-10 is edited.",
+      "source_file": "spec.md",
+      "title": "[adr] ADR-10 styles-only class-level ruling",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#189": {
+      "evidence_ref": "e9d07d9",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Cited, not worked. Its authorship authorization survives ADR-11's status change intact in all three places that record it; only its subsection-level ratification is subsumed by #200.",
+      "source_file": "spec.md",
+      "title": "[adr] ADR-11 wrapper prop-name invariant",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#197": {
+      "evidence_ref": "e9d07d9",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Cited as precedent, and verified: llms.txt and llms-full.txt report no ADR statuses, so neither needed an edit here. check-llms-adr-surface.mjs green.",
+      "source_file": "spec.md",
+      "title": "[docs] LLM surfaces carry no hand-maintained ADR index",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#199": {
+      "evidence_ref": "e9d07d9",
+      "fr": "FR-006,FR-007",
+      "nfr": "NFR-002",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "",
+      "scope": "Cited, not closed. The \"only Accepted records bind\" sentence #199 withdrew is reintroduced by FR-006 \u2014 written fresh and citing #200 alone, never restored from the withdrawn text. #199 itself is untouched by this mission.",
+      "source_file": "spec.md",
+      "title": "[docs] llms.txt and llms-full.txt ADR surfaces",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#200": {
+      "evidence_ref": "e9d07d9",
+      "fr": "FR-001,FR-002,FR-003,FR-004,FR-006,FR-007,FR-008,FR-009,FR-014,FR-015",
+      "nfr": "NFR-001,NFR-002",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001,SC-002,SC-003,SC-006",
+      "scope": "Worked. Both records moved to Accepted; every surface stating either status moved in the same commit.",
+      "source_file": "spec.md",
+      "title": "[docs] Operator ruling \u2014 ratify ADR-9 and ADR-11",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#201": {
+      "evidence_ref": "754ea03",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Cited as precedent for the same move in the same file; line 10 was already fixed and is not re-edited.",
+      "source_file": "spec.md",
+      "title": "[docs] sad-lite.md:10 Related ADRs row is a fifth hand-written ADR enumeration",
+      "verdict": "verified-already-fixed",
+      "wp": "WP02"
+    },
+    "#226": {
+      "evidence_ref": "754ea03",
+      "fr": "FR-010,FR-011,FR-012,FR-013",
+      "nfr": "NFR-001",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-004,SC-005",
+      "scope": "Worked. Option 1 taken: the table is removed and section 7 points at the gated index.",
+      "source_file": "spec.md",
+      "title": "[docs] sad-lite.md section 7 is a sixth hand-written ADR index",
+      "verdict": "fixed",
+      "wp": "WP02"
+    },
+    "#67": {
+      "evidence_ref": "e9d07d9",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Cited only as the \"ADRs are written only in #67\" rule the #189 and #176 overrides depart from. Closed; not worked here.",
+      "source_file": "spec.md",
+      "title": "[adr] The mission ADRs are written in",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

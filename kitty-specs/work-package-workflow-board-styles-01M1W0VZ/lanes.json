@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "mission_slug": "work-package-workflow-board-styles-01M1W0VZ",
+  "mission_id": "01M1W0VZ4WFQ55GNJYBA6GP5EN",
+  "mission_branch": "kitty/mission-work-package-workflow-board-styles-01M1W0VZ",
+  "target_branch": "mission/work-package-workflow-board-styles",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-workflow-board.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-workflow-board-*.png",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "packages/styles/package.json",
+        "packages/styles/src/index.ts",
+        "packages/styles/src/workflow-board/**",
+        "packages/styles/src/workflow-lane/**",
+        "packages/tokens/dist/token-catalogue.json",
+        "packages/tokens/src/tokens.css"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "dashboard",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T19:54:38.852954+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "33ab2ae864e6583be400f7833cf121a0b75cfb10"
+}

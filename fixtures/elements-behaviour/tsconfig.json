@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["vitest/globals", "@vitest/browser/matchers"],
+    "experimentalDecorators": true,
+    "moduleResolution": "bundler",
+    "module": "ESNext"
+  },
+  "include": ["src/**/*.ts", "../../types/**/*.d.ts"]
+}

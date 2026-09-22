@@ -1,0 +1,39 @@
+schema: review-findings/v1
+complete: true
+phase: tasks
+lens_group: cover
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: TASKS-COVER-001
+    lens: Every FR and AC traceable to at least one task
+    severity: 3
+    title: FR-001 (and, more weakly, FR-002/FR-004) are declared requirement_refs but never cited against a concrete subtask in the WP body
+    evidence:
+      - artifact: "tasks/WP01-segmented-choice-styles.md frontmatter, requirement_refs (lines 6-7, 9)"
+      - artifact: "tasks/WP01-segmented-choice-styles.md line 118 (\"Full binding requirements: spec.md FR-001..FR-016...\")"
+      - code: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/tasks/WP01-segmented-choice-styles.md — grep 'FR-001' returns only the frontmatter list entry and the generic line-118 range statement; no T001-T020 heading or body sentence cites FR-001 against a concrete step"
+      - artifact: "spec.md FR-001 (\"Consumer-owned public contract\") and FR-002 (\"No custom element, no owned semantics beyond styling\") and FR-004 (\"Native disabled, not aria-disabled alone\")"
+    claim: >
+      Every other FR/NFR/C id in the WP's requirement_refs list is cited in at least one T00x
+      heading or body sentence tying it to a concrete step (e.g. FR-003 -> T008, FR-013 -> T015,
+      NFR-006 -> T003). FR-001 is the sole exception: it never appears anywhere in the body text
+      of T001-T020, only in the frontmatter list and the boilerplate "Full binding requirements"
+      line — the WP never states which task(s) discharge it. In substance the work is plausibly
+      covered elsewhere (T002's consumer-authored exemplars; T016's ownership-boundary doc
+      section which literally restates spec.md's Application-ownership boundary that underlies
+      FR-001), but nothing in the WP file says so, so a reviewer checking "is FR-001 discharged"
+      has to reconstruct the mapping themselves rather than verify it. The same weaker pattern
+      applies to FR-002 (its substance is carried by tasks tagged only C-001 — T001/T013/T017 —
+      never FR-002 itself) and FR-004 (its substance — native disabled excluded from tab order —
+      is carried by T007, tagged only FR-008). FR-008's own spec.md text ("so that the
+      truthfulness claims in FR-004 are measured") makes the FR-004 link inferable for that one,
+      but FR-001 has no such cross-reference anywhere to lean on.
+    remediation: >
+      Add an explicit FR-001 tag to whichever task(s) the implementer intends to carry it (e.g.
+      append "FR-001" to T002's heading, since the exemplars are where "consumer supplies label/
+      order/pressed-value/disabled/handler" becomes concrete, and/or to T016's heading, since the
+      ownership-boundary doc section is FR-001's most direct artifact). Also add "FR-002" to
+      T001/T013/T017's headings alongside their existing C-001 tags, and "FR-004" to T007's
+      heading alongside FR-008, so every declared requirement_ref is traceable to a task by
+      inspection rather than by inference.
+# End of findings.

@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M1SPPFM8BSCP8ZBH8PA5H8CR",
+  "completed_at": "2026-09-05T21:24:45.810901+00:00",
+  "outcome": "done",
+  "closed_by": "agent",
+  "evidence_ref": "Pre-merge adversarial probe of PR #187 @cde2fb8: built the element with esbuild and ran 9 targeted Chromium probes (attribute-removal, type-interaction, timing, readonly, message, datalist, real-keyboard badInput, React-19 wrapper path, declarative markup). 4 HIGH defects reproduced with native-input control comparisons; 2 verified one-line fixes; datalist seams all clean."
+}

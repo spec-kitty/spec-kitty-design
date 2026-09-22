@@ -1,0 +1,21 @@
+{
+  "captured": "2026-09-19, after run 4, GET /api/design-systems/user:spec-kitty-train-rel4 (token not recorded)",
+  "note": "packageInfo.manifest is present only because the copy's manifest id equals its folder name; with the package's own id it is discarded (index.ts:4104).",
+  "packageInfo.manifest.id": "spec-kitty-train-rel4",
+  "packageInfo.manifest.usage": "USAGE.md",
+  "packageInfo.manifest.preview.pages.length": 35,
+  "packageInfo.manifest.preview.pages[0..2]": [
+    {
+      "path": "components.html",
+      "title": "All 34 components (large: read components/<name>.html instead)"
+    },
+    {
+      "path": "components/action-row.html",
+      "title": "action-row"
+    },
+    {
+      "path": "components/blog-card.html",
+      "title": "blog-card"
+    }
+  ]
+}

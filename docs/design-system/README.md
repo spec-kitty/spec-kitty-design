@@ -9,12 +9,13 @@ for teams building Spec Kitty-branded interfaces.
 |---|---|---|
 | `@spec-kitty/tokens` | CSS custom properties, brand fonts, brand assets | `npm install @spec-kitty/tokens` |
 | `@spec-kitty/angular` | Angular component library | `npm install @spec-kitty/angular @spec-kitty/tokens` |
-| `@spec-kitty/html-js` | Framework-agnostic HTML primitives | `npm install @spec-kitty/html-js @spec-kitty/tokens` |
+| `@spec-kitty/styles` | Framework-agnostic HTML primitives | `npm install @spec-kitty/styles @spec-kitty/tokens` |
 
 ## Guides
 
 - [Using tokens](using-tokens.md) — install, load, and apply `--sk-*` custom properties
 - [Using components](using-components.md) — import and render each component category
+- [Using the elements from React](using-react.md) — the generated wrappers, and what they do and do not buy over React 19 natively
 - [Brand guidelines](brand-guidelines.md) — voice, colour, typography, iconography
 - [Changelog](changelog.md) — design system release history
 

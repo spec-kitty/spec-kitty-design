@@ -1,0 +1,128 @@
+{
+  "event_count": 28,
+  "last_event_id": "01M1YJXQ64C2ZJRFASSKEXPPJB",
+  "materialized_at": "2026-09-07T18:43:38.308620+00:00",
+  "mission_number": "",
+  "mission_slug": "work-package-detail-primitives-01M1XTPW",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 3,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "codex",
+      "agent": "codex",
+      "agent_profile": "reviewer-renata",
+      "agent_profile_version": "1.0",
+      "assignee": "wp208-213-0907a",
+      "force_count": 1,
+      "lane": "approved",
+      "last_event_id": "01M1Y79G019EF1TNF4F4ZG1KWS",
+      "last_transition_at": "2026-09-07T15:20:21.249361+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Tier B post-tasks gate approved at 2870156437ff1dff2c99b410adbf71881dec5201; implementing directly in authorized fresh primary clone without worktree.",
+        "WP01 implementation at 90225e557f8415423ca7eae604666e14ced923c6; focused Chromium, Firefox, WebKit, axe, build, quality, token, generator, theme and release checks green.",
+        "Independent reviewer-renata Codex review approved exact head 340aa67408432716fbd81449985921e770e79a10 after six findings were folded and cross-browser focused evidence reran green.",
+        "Reopened from WP03 visual evidence; add direct sibling non-overlap proof and preserve contained horizontal scrolling.",
+        "Reopened WP01 collision regression folded; exact committed head and fresh focused, cross-browser, quality, build, axe, token, boundary, hygiene, theme, generation and release evidence are ready for independent reviewer-renata Codex re-review.",
+        "Independent reviewer-renata APPROVE at exact clean head 706cad059cb0eeb4fce16e08abd336b1ed74ecf1 (tree 6bce34f531883071f564ae24b4d45e9779b6dd26): flex:none prevents flex-item collapse; rendered regression proves link/item containment, sibling non-overlap, local overflow, and no page overflow; native semantics, focus, themes, forced colors, and public defaults remain intact."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "reference": "review-cycle://work-package-detail-primitives-01M1XTPW/WP01-styles-only-detail-primitives/review-cycle-3.md",
+        "reviewer": "reviewer-renata",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done"
+      }
+    },
+    "WP02": {
+      "actor": "codex",
+      "agent": "codex",
+      "agent_profile": "reviewer-renata",
+      "agent_profile_version": "1.0",
+      "assignee": "wp208-213-0907a",
+      "force_count": 1,
+      "lane": "approved",
+      "last_event_id": "01M1Y4RM4X72F4P9NXNRP41M8D",
+      "last_transition_at": "2026-09-07T14:36:11.293649+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "WP01 independently approved at 340aa67408432716fbd81449985921e770e79a10; starting serialized WP02 in the authorized fresh primary clone.",
+        "Implementation commit fe600f46: 427/427 tests, quality:all, generator checks, 359/359 axe, active dark/light and forced-colors probes, and mutation selftests are green; ready for independent Codex review.",
+        "Folding reviewer-renata HIGH finding from review cycle 1 by restoring the exact backward-compatible base line-height and icon offset plus the matching existing hygiene allowlist entry.",
+        "Review cycle 1 HIGH finding folded: baseline line-height 1.55 and icon margin-top 0.1em plus their pre-existing hygiene allowance are restored exactly. Exact diff from approved WP01 changes neither declaration. Fresh 427/427 tests, quality:all, generators, hygiene, Storybook, and 359-story axe are green.",
+        "Independent reviewer-renata APPROVE at exact e85c704feae64a0fa992147316325656d88c9bb9 after byte-for-byte restoration of default complete layout declarations and hygiene allowlist; all WP02 contract and fresh gates remain satisfied."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "reference": "review-cycle://work-package-detail-primitives-01M1XTPW/WP02-check-bullet-state/review-cycle-2.md",
+        "reviewer": "reviewer-renata",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
+      "subtasks": {
+        "T007": "done",
+        "T008": "done",
+        "T009": "done",
+        "T010": "done",
+        "T011": "done",
+        "T012": "done"
+      }
+    },
+    "WP03": {
+      "actor": "user",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "wp208-213-0907a",
+      "force_count": 0,
+      "lane": "approved",
+      "last_event_id": "01M1YJXQ64C2ZJRFASSKEXPPJB",
+      "last_transition_at": "2026-09-07T18:43:38.308620+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "WP01 and WP02 independently approved; starting final serialized integration, catalogue, visual, zoom, and acceptance package in the authorized primary clone.",
+        "Exact code head ce70435 passed full CI run 34150260478, 922 behavior assertions, 173 mutations, 10 guard probes, 394 axe stories, 86 visuals, full Playwright, quality gates, and actual desktop zoom; acceptance matrix is 35/35 pass with 10/10 negative invariants.",
+        "Independent reviewer-renata APPROVE at exact clean e1c753811a1bf2a4b0a844416933c3c69313c607 tree 0c89a1d0587237155a65e1e6bd56d6cf1f9df5b9: no findings; 35/35 criteria, 10/10 negative invariants, generated/type/mutation/browser/axe/visual/zoom evidence substantive; zero legacy PNG changes."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "reference": "review-cycle://work-package-detail-primitives-01M1XTPW/WP03-integrated-evidence/review-cycle-1.md",
+        "reviewer": "reviewer-renata",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "subtasks": {
+        "T013": "done",
+        "T014": "done",
+        "T015": "done",
+        "T016": "done",
+        "T017": "done",
+        "T018": "done"
+      }
+    }
+  }
+}

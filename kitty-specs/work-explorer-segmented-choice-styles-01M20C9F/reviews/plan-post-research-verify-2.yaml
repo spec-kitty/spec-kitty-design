@@ -1,0 +1,141 @@
+schema: review-findings/v1
+phase: plan-post-research
+round: verify-2
+mission: work-explorer-segmented-choice-styles-01M20C9F
+head: 88c84163c7b735767a033f839f9d1b099feb2aee
+results:
+  - id: PLAN-POST-RESEARCH-FIT-001
+    status: RESOLVED
+    notes: >
+      Independently re-verified `sk-context-nav.css` lines 197-198 (`color: GrayText;
+      border-inline-start-color: GrayText;`) and confirmed `GrayText` is already present in
+      `stylelint.config.mjs`'s `ignoreValues` (line 56, alongside Canvas/CanvasText/Highlight/
+      HighlightText/ButtonText/LinkText). The fix (commit 88c8416) took a blended remediation
+      path: IC-03's Purpose bullet now names the disabled-state indicator explicitly alongside
+      selected/focus-visible, cites User Story 4 AC4's binding "all three" text against NFR-004's
+      narrower framing, and names `sk-context-nav.css`'s `GrayText` technique as the concrete
+      precedent (closer to remediation option (b)); IC-04's Purpose bullet gained a matching
+      forced-colors-emulation assertion covering all three states (satisfying the "corresponding
+      IC-04 assertion" half of option (a)). IC-03's Sequencing/depends-on and Risks were updated
+      consistently ("selected/focus/disabled cues" in the red-first description). Cross-checked:
+      the fix does NOT edit spec.md's C-010, whose own enumerated keyword list (Highlight,
+      CanvasText, ButtonText, LinkText, Canvas, HighlightText) still omits GrayText — this is
+      consistent with plan.md's stated policy of not relitigating spec.md, and the Documentation
+      section's Q4 paragraph transparently flags this exact gap ("already present in
+      stylelint.config.mjs's ignoreValues allowlist, which C-010 does not itself enumerate") rather
+      than silently asserting C-010 compliance. This is a disclosed, reasoned residual (the
+      technical gate — stylelint's ignoreValues — already permits GrayText; only spec.md's C-010
+      prose, out of plan.md's mandate, lags) rather than a silent new contradiction. No dangling
+      reference or broken table found near this edit.
+  - id: PLAN-POST-RESEARCH-FIT-002
+    status: RESOLVED
+    notes: >
+      Independently re-read research.md's Discrepancies-found section (lines 394-457, items 1-4)
+      and confirmed the new plan.md paragraph (lines 127-138) correctly and precisely names
+      "Discrepancy #2/EV-030" (C-006 scope wording) and "Discrepancy #3/EV-033" (C-004
+      sk-form-select.css mis-citation) by research.md's own numbering — matching the two items
+      the refute-1 rationale identified as genuinely uncovered. Discrepancy #1 (spec.md FR-009's
+      stale `:285` citation) is not re-stated in this new paragraph, but was already independently
+      addressed in the same Documentation section's pre-existing Q5 sentence ("confirming plan.md's
+      own prior correction of spec.md's stale `:285` citation") and in the Technical Context
+      section (line 36-38) — research.md's own item 1 text explicitly says this "is not a new
+      discrepancy, it is corroboration of one plan.md already flagged," so the new paragraph's
+      "also names two items" framing is accurate, not an undercount. Verified independently via git
+      log that the 9 most recent commits use `docs(kitty-specs)`/`fix(kitty-specs)` scope, and via
+      grep that `sk-form-select.css` contains zero `--sk-bg-pill` references — both match the new
+      paragraph's claims exactly. No contradiction with the Gate enumeration's Commitlint row,
+      which was also updated in the same commit to cross-reference this discrepancy note
+      consistently.
+  - id: PLAN-POST-RESEARCH-FIT-003
+    status: RESOLVED
+    notes: >
+      Confirmed IC-03's heading now reads exactly "### IC-03 — Forced-colors CSS" (line 294),
+      dropping the "accessible-name-boundary" fragment as remediation proposed verbatim. Grepped
+      the full file for "accessible-name-boundary" (zero hits) and every remaining "IC-03"
+      reference (lines 112, 114, 272, 328, 347-348, 375, 381, 392, 438, 535, 558) — all read
+      correctly against the new heading with no dangling or stale cross-reference to the dropped
+      fragment. IC-03's body (Purpose/Relevant requirements/Affected surfaces/
+      Sequencing/Risks) still contains no accessible-name/role/aria-label content, so the rename
+      now accurately matches the section's actual scope.
+  - id: PLAN-POST-RESEARCH-SEQ-001
+    status: RESOLVED
+    notes: >
+      Independently re-confirmed `playwright.config.ts`'s `webServer.command` is
+      `npx http-server apps/storybook/storybook-static --port 6006 --silent` (static, no
+      rebuild/watch mechanism) — unchanged fact, matches the original finding. Diffed commit
+      88c8416 directly: the explicit second-rebuild sentence ("Storybook must be rebuilt AGAIN
+      (`npx nx run storybook:storybook:build`) before re-running the Playwright spec... not
+      satisfied by the single rebuild already named above") was added ONLY to IC-04's
+      Sequencing/depends-on paragraph, naming both "IC-01's remaining declarations" and "IC-03's
+      forced-colors block" explicitly within that one sentence — it was NOT literally duplicated
+      into IC-01's or IC-03's own Sequencing/depends-on text (those sections' prose is otherwise
+      unchanged aside from a minor "selected/focus" → "selected/focus/disabled" wording update in
+      IC-03). This diverges from the remediation's literal instruction to insert the sentence "in
+      each of IC-01's, IC-03's, and IC-04's" narratives. However, both IC-01's and IC-03's
+      Sequencing/depends-on text already carry (pre-existing, unchanged by this fix) an explicit
+      cross-reference — "(see IC-04's Sequencing/depends-on for the full static-Storybook
+      rationale)" — so a reader following that pre-existing pointer now lands on the newly-added,
+      unambiguous second-rebuild statement that explicitly names both ICs by number. This
+      functionally closes the completeness gap the refute-1 verdict identified (itself already
+      downgraded to severity 3 with the caveat that an implementer was "very likely to infer" the
+      constraint without restatement) via a consolidated single source of truth rather than
+      triplication. No new inconsistency introduced; the "single rebuild already named above"
+      phrase correctly refers back to the first rebuild named earlier in the same IC-04 paragraph.
+  - id: PLAN-POST-RESEARCH-SEQ-002
+    status: RESOLVED
+    notes: >
+      Independently re-confirmed `.github/workflows/ci-quality.yml` lines 453-480: the
+      `visual-regression` job is `[ENFORCED]` (line 472 comment/step name), runs
+      `PW_INCLUDE_VISUAL: '1'` (lines 473-475), and `visual-regression-diffs` uploads only
+      `if: failure()` (lines 476-480) — matching the finding's claims exactly. Diffed commit
+      88c8416: the Gate enumeration's "Visual-regression baselines" row and the Delivery
+      contract's "Squad tier" bullet were BOTH updated, exactly as the remediation prescribed. The
+      Gate row now states the ENFORCED job "is expected to FAIL on the WP's first push, by
+      design," names the "SECOND head" requirement, cross-references "IC-04's 5-step procedure"
+      and "the Delivery contract's Squad-tier bullet." The Delivery contract's Squad-tier bullet
+      now states the PR "is expected to need at least one additional commit," cross-references
+      "IC-04's 5-step procedure" and "the Gate enumeration's 'Visual-regression baselines' row,"
+      and states the squad's SC-011 evidence-post "must target that FINAL head." The two
+      cross-references are mutually consistent (one says "post-baseline head," the other "FINAL
+      head, the one that includes the committed baselines" — same referent, no contradiction). No
+      dangling reference found.
+  - id: PLAN-POST-RESEARCH-VERIFY-001
+    status: RESOLVED
+    notes: >
+      Independently re-read both `docs/architecture/validation/issue-211-form-select-zoom/README.md`
+      and `issue-213-work-package-detail-zoom/README.md` in full: both confirm the X11/XTEST manual
+      procedure text plan.md now cites verbatim ("X11/XTEST sent Ctrl+0, then Ctrl+Shift+= five
+      times through Chrome's real desktop UI," "No CSS zoom, viewport resize, device-scale
+      override, CDP emulation, or pinch/page-scale emulation was used," SHA-256 digest tables, "The
+      pre-merge gate reruns/repeats this same procedure after the final push"). Confirmed via grep
+      that no `apps/storybook/src/tests/*.spec.ts` file contains "zoom" (case-insensitive) —
+      matching the finding and plan.md's own claim. Diffed commit 88c8416: IC-04's Risks paragraph
+      was rewritten to split the 44px (NFR-002, automated) and 200%-zoom (NFR-003/SC-005, manual)
+      claims apart, name the manual-validation path explicitly (issue #211/#213 precedent, X11/XTEST
+      technique, a new `docs/architecture/validation/issue-270-segmented-choice-zoom/README.md`
+      target file, "run by the Tier-C pre-merge squad after the final push"), and a new "Manual
+      200%-zoom validation" row was added to the Gate enumeration's Applicable table naming the
+      same file/technique/responsible-party/timing and mapping to NFR-003/SC-005. This satisfies
+      remediation option (b) in substance — the artifact path, technique, precedent, and
+      who/when are all named — though it is placed inside IC-04's Risks bullet and the Gate
+      enumeration row rather than as a distinct numbered IC-07 task; given the plan explicitly
+      treats all ICs as "internal concerns within one WP's sequencing" rather than formal gated
+      steps, this placement is a reasonable, non-buried treatment (it is also independently
+      surfaced as its own Gate-enumeration row, which is the section reviewers/CI checklists
+      actually consult). No contradiction with the Technical Context section, which still
+      correctly omits an automated zoom mechanism claim.
+  - id: PLAN-POST-RESEARCH-VERIFY-002
+    status: RESOLVED
+    notes: >
+      Independently re-confirmed `.github/workflows/ci-quality.yml` lines 472-480 (the
+      `visual-regression` job body) and `playwright.config.ts` line 11
+      (`testIgnore: process.env['PW_INCLUDE_VISUAL'] ? [] : ['**/visual.spec.ts']`). Diffed commit
+      88c8416: the Gate enumeration's "Visual-regression baselines" row now reads "CI
+      `visual-regression` job — `PW_INCLUDE_VISUAL=1 npx playwright test
+      apps/storybook/src/tests/visual.spec.ts --project=chromium` (`visual.spec.ts` is excluded
+      from every other Playwright invocation via `playwright.config.ts`'s `testIgnore` unless this
+      env var is set); artifact `visual-regression-diffs` uploaded only `if: failure()`" — matching
+      the remediation's proposed text almost verbatim, and matching the live `ci-quality.yml`/
+      `playwright.config.ts` facts exactly. No other Gate enumeration row was disturbed by this
+      edit; the table's column alignment and remaining rows read cleanly.
+new_findings: []

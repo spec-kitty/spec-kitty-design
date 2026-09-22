@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M1SE7ZFT3NX0810EV1DHNECA",
+  "completed_at": "2026-09-05T18:54:03.455370+00:00",
+  "outcome": "done",
+  "closed_by": "agent",
+  "evidence_ref": "Post-tasks adversarial review (debugger-debbie lens) of form-input-constraints-and-datalist-01M1S94Y. 12 findings, 5 CRITICAL/HIGH, all empirically verified with headless chromium+firefox probes against a Lit build of the WP01-prescribed implementation. Headlines: (1) willUpdate runs before render so validate() reads the PREVIOUS render's inner input -- the prescribed merge under-reports and a real form submit carries pattern-violating data (measured: form.checkValidity()===true, FormData a=123,b1=123,b2=123); (2) ElementInternals.setValidity(flags,'') throws TypeError in chromium AND firefox, so the prescribed 'no host-authored message for a UA flag' rule kills the element on mount and drops it from FormData entirely; (3) a form-associated custom element carrying a reflected readonly ATTRIBUTE is barred by the UA itself (willValidate false, checkValidity true) -- so FR-003's own setValidity({}) branch is unobservable, reproducing the SC-005 non-reflection collateral the repo already measured; (4) SC-016..SC-022 are already allocated by the elements-verification-harness mission and tests/node/config-contract.test.ts asserts behaviours.json equals ADR-11's 14-id list exactly, so T008's id plan is a red node lane; (5) formResetCallback leaves stale validity (field permanently invalid after reset, or throws). Verdict: BLOCK -- plan and tasks would ship the exact regression the mission exists to prevent."
+}
