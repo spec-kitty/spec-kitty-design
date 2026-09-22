@@ -121,6 +121,13 @@ test('the static form escapes caller strings, and refuses a thumbnail with no al
     new DOMParser().parseFromString(amp, 'text/html').querySelector('img')!.getAttribute('src'),
   ).toBe('/i?a=1&b=2');
 
+  const hostileContent = blogCardStaticHtml({}, '<img src=x onerror=alert(1)>');
+  const hostileDocument = new DOMParser().parseFromString(hostileContent, 'text/html');
+  expect(hostileDocument.querySelector('.sk-blog-card__content img')).toBeNull();
+  expect(hostileDocument.querySelector('.sk-blog-card__content')?.textContent).toBe(
+    '<img src=x onerror=alert(1)>',
+  );
+
   // AUTHORING PATH THROWS, render path warns — the split every other markup module keeps, and
   // the one this component had neither half of. `alt=""` is not a missing label: it positively
   // asserts the image is decorative, so a screen reader skips it.

@@ -360,6 +360,13 @@ test('the static ANCHOR branch renders, and href cannot break out of the attribu
   expect(
     new DOMParser().parseFromString(amp, 'text/html').querySelector('a')!.getAttribute('href'),
   ).toBe('/s?a=1&b=2');
+
+  const hostileContent = buttonStaticHtml({}, '<img src=x onerror=alert(1)>');
+  const hostileDocument = new DOMParser().parseFromString(hostileContent, 'text/html');
+  expect(hostileDocument.querySelector('img')).toBeNull();
+  expect(hostileDocument.querySelector('button')?.textContent).toBe(
+    '<img src=x onerror=alert(1)>',
+  );
 });
 
 test('the primary tone PAINTS, and the four tones are distinct', async () => {

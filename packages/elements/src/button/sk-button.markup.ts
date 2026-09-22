@@ -92,15 +92,10 @@ export interface ButtonStaticOptions {
 // would otherwise close the attribute and emit an event handler into committed markup. Asserted
 // by parsing in sk-button.test.ts, not by substring — see the note there.
 //
-// WHAT THIS DOES NOT CLOSE, stated because an earlier revision of this comment claimed a wider
-// audit than it had performed and two lenses called it:
-//   * `content` (below) is also caller-supplied and is deliberately left RAW. It lands in
-//     element-content position, where callers legitimately pass markup fragments — the ribbon
-//     and icon options in sibling modules do the same. In-repo callers only ever pass plain
-//     text. It is a latent issue, not a live one, and escaping it would break the fragment use.
-//   * The `javascript:` SCHEME survives escaping intact — `href="javascript:alert(1)"` reaches
-//     script execution without ever breaking out of the attribute. Escaping is not a URL
-//     allowlist. Filed as #159.
+// `content` is caller-supplied too, and is escaped for element-content position below. The
+// `javascript:` SCHEME still survives attribute escaping intact — `href="javascript:alert(1)"`
+// reaches script execution without ever breaking out of the attribute. Escaping is not a URL
+// allowlist. Filed as #159.
 //
 // Local rather than shared — but no longer BECAUSE it must be. The generator evaluated this
 // module from a `data:` URL until #216, so it could import nothing; it now evaluates from a real
@@ -146,9 +141,10 @@ export function buttonStaticHtml(opts: ButtonStaticOptions = {}, content = 'Labe
   }
   const cls = buttonClasses(variant, size, busy);
   const labelAttribute = validLabel === undefined ? '' : ` aria-label="${attr(validLabel)}"`;
+  const safeContent = attr(content);
   return href == null
-    ? `<button class="${cls}" type="button"${labelAttribute}>${content}</button>`
-    : `<a class="${cls}" href="${attr(href)}"${labelAttribute}>${content}</a>`;
+    ? `<button class="${cls}" type="button"${labelAttribute}>${safeContent}</button>`
+    : `<a class="${cls}" href="${attr(href)}"${labelAttribute}>${safeContent}</a>`;
 }
 
 // DECLARED, NOT DERIVED — and the previous revision's "DERIVED so the two tables cannot

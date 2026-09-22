@@ -135,7 +135,8 @@ export const POINTER_PATH = INDEX_FILE;
  * the directory, and naming a directory is not indexing its contents.
  */
 export function extractRecordRefs(lines) {
-  const re = new RegExp(`${DECISIONS_DIR.replace(/\//g, '\\/')}\\/([A-Za-z0-9._~+-]+\\.md)`, 'g');
+  const escapedDecisionsDir = DECISIONS_DIR.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`${escapedDecisionsDir}/([A-Za-z0-9._~+-]+\\.md)`, 'g');
   const refs = [];
   (lines ?? []).forEach((line, i) => {
     for (const m of String(line).matchAll(re)) refs.push({ file: m[1], line: i + 1, text: String(line).trim() });
