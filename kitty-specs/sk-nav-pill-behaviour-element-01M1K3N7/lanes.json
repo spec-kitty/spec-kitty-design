@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "mission_slug": "sk-nav-pill-behaviour-element-01M1K3N7",
+  "mission_id": "01M1K3N7050XPF40HYPAXKV1T5",
+  "mission_branch": "kitty/mission-sk-nav-pill-behaviour-element-01M1K3N7",
+  "target_branch": "mission/sk-nav-pill-behaviour-element",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "packages/styles/src/nav-pill/sk-nav-pill-drawer.css",
+        "scripts/build-elements-css.mjs"
+      ],
+      "predicted_surfaces": [
+        "app-shell",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "packages/elements/src/index.ts",
+        "packages/elements/src/nav-pill/sk-nav-pill.stories.ts",
+        "packages/elements/src/nav-pill/sk-nav-pill.ts"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering",
+        "dashboard"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+        "mutations.json",
+        "scripts/floor-reporter.mjs"
+      ],
+      "predicted_surfaces": [
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-d",
+      "wp_ids": [
+        "WP04"
+      ],
+      "write_scope": [
+        "apps/demo/dashboard-demo.html",
+        "packages/styles/README.md",
+        "packages/styles/src/index.ts",
+        "packages/styles/src/nav-pill/index.ts",
+        "packages/styles/src/nav-pill/sk-nav-pill.d.ts",
+        "packages/styles/src/nav-pill/sk-nav-pill.js",
+        "packages/styles/src/nav-pill/sk-nav-pill.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "dashboard"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-03T07:52:58.307893+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "f9e58ce2e2dd82d159e5a0fd7dc58077b830baef"
+}

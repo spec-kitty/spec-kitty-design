@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-06T14:41:40.478013+00:00",
+  "flattened": false,
+  "friendly_name": "card status tone axis",
+  "mission_id": "01M1VJNYKXT301VHNNSFYGA9J6",
+  "mission_number": null,
+  "mission_slug": "card-status-tone-axis-01M1VJNY",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances card status tone axis on mission/card-status-tone-axis so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "card status tone axis",
+  "slug": "card-status-tone-axis-01M1VJNY",
+  "target_branch": "mission/card-status-tone-axis",
+  "topology": "single_branch"
+}

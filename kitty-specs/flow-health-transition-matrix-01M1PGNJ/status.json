@@ -1,0 +1,122 @@
+{
+  "event_count": 51,
+  "last_event_id": "01M1QKPWS60WSKYJ6HX4TA48SQ",
+  "materialized_at": "2026-09-05T01:42:42.214990+00:00",
+  "mission_number": "",
+  "mission_slug": "flow-health-transition-matrix-01M1PGNJ",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 3,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "merge",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 3,
+      "lane": "done",
+      "last_event_id": "01M1QKPVN50MXSANWM4T7754GX",
+      "last_transition_at": "2026-09-05T01:42:41.061588+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Ready for review: AST-derived property-only manifest/docs/React seam with immutable empty-array reset and red/green coverage",
+        "Ready for re-review at 1e8f1e8aadc57f5897c07216574b1380074109f8. Durable red-green mutation details are recorded in WP01 history at 2026-09-04T19:52:08Z. Generated synthetic browser runtime, computed decorator fail-closed probe, full 145-test suite, typecheck, quality, drift, determinism, exact six-file ownership, and production byte stability are green.",
+        "Cycle 2 blockers fixed at 93879b4; fail-closed static/decorator probes and all focused/full gates green.",
+        "Cycle 3 blocker fixed at b7a20a9. Shared literal-only validation now covers computed decorators; direct attribute/state probes, deliberate bypass mutation, focused and full gates, and production byte stability are recorded in WP01 history.",
+        "Review passed at b7a20a96ab3f7a3f436ace41bc05b58f3488b073 with reviewer-renata: shared literal-only computed-decorator validation rejects unresolved attribute and state options with source locations and byte-stable failure; generated browser identity/reset path and durable red evidence verified; wrapper/content selftests 24/24 and 14/14, focused Node 17/17, browser 6/6, typecheck 4/4, quality, full 151/151, double regeneration, stable production CEM/React bytes, exact six-file scope. Anti-pattern checks 1-8 pass; no contracts artifact. WP02/WP03 remain serial downstream in lane-a and must consume this approved head."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-149/kitty-specs/flow-health-transition-matrix-01M1PGNJ/tasks/WP01-generic-property-only-manifest-react-pipeline/review-cycle-4.md",
+        "reference": "review-cycle://flow-health-transition-matrix-01M1PGNJ/WP01-generic-property-only-manifest-react-pipeline/review-cycle-4.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done"
+      }
+    },
+    "WP02": {
+      "actor": "merge",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 3,
+      "lane": "done",
+      "last_event_id": "01M1QKPW754NYVPM75RV3371PE",
+      "last_transition_at": "2026-09-05T01:42:41.637764+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "WP02 closeout at 05daf38b4c3343eb43a3cddd3cb8c24d41b7dc43: runnable local gates green, including deterministic generation, focused browser 28/28, full suite 179/179, main mutation baseline 150 with 62 named reds in 197.2s, quality, Storybook build 8.3s, axe 127/127 with zero violations, and Chromium/Firefox acceptance 20/20. Explicitly deferred and not claimed passed: Fedora WebKit runtime libraries, local guard-4 selftest hang with bounded 12-minute exit 124, and nine CI-authoritative visual baselines. After WP03 approval, mission wrap-up must rebase/regenerate and final exact-head CI must pass the exact guard selftest, unqualified Playwright including WebKit, all nine CI-sourced baselines, mutation budget, Storybook timing, squad, and maintainer-approval obligations.",
+        "Review cycle 1 fixes complete at lane HEAD 3659c3f with functional commit 24d8c9c and generated size commit 3659c3f. All required non-registry mutation arms are durably recorded red/restored/green; local generator, drift, type, quality, 179-test, 62-mutation, Storybook, 127-story axe, and Chromium+Firefox 22-test gates pass. Exact NI-09 selects tests and passes Chromium+Firefox. Explicit final-CI obligations not claimed passed: WebKit host libraries, suite-selftest guard-4 selftest hang, and nine CI-authoritative visual baselines after WP03. No rebase, PR, push, or WP03 action.",
+        "Cycle-2 FR-016 paint-order defect fixed and mutation-proven at lane HEAD 9128db6; complete local component gates green, with approved WebKit, guard-4 selftest, and nine CI-baseline obligations explicitly deferred to final exact-head CI.",
+        "Cycle-3 raw stacking violation replaced by mutation-proven structural paint ownership at lane commit 60a44a3; full local WP02 component gates green, with approved WebKit, guard-4 selftest, and nine CI-baseline obligations explicitly deferred.",
+        "Review cycle 4 passed at lane SHA 60a44a359ca88daedf38ffd6f9965cfc6606a52f: raw z-index removed; structural sticky paint protection and non-vacuous seven-owner/four-state 390x844 regression proof pass Chromium and Firefox; deliberate track-position mutation is non-inert and restored; prior theme, semantics, NI-09, mutation-record, controlled API, scope, generated-artifact, a11y, quality, type and test blockers remain closed. Shared lane coordination is preserved. Local WebKit, suite-selftest --selftest guard-4, nine CI-authoritative baselines, post-WP03 rebase/PR/exact-head CI/squad/maintainer approval remain explicit downstream obligations and are not claimed green."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-149/kitty-specs/flow-health-transition-matrix-01M1PGNJ/tasks/WP02-complete-controlled-transition-matrix-and-release-evidence/review-cycle-4.md",
+        "reference": "review-cycle://flow-health-transition-matrix-01M1PGNJ/WP02-complete-controlled-transition-matrix-and-release-evidence/review-cycle-4.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17",
+      "subtasks": {
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done",
+        "T009": "done",
+        "T010": "done",
+        "T011": "done"
+      }
+    },
+    "WP03": {
+      "actor": "merge",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 0,
+      "lane": "done",
+      "last_event_id": "01M1QKPWS60WSKYJ6HX4TA48SQ",
+      "last_transition_at": "2026-09-05T01:42:42.214990+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Ready for independent review at ca04c501bf: real generated-wrapper identity/update/removal/event and no-any type evidence; 64/64 mutations in 196.9s; 181/181 tests; guard selftest 8/8; generation/type/quality/Storybook/axe and Chromium+Firefox green. WebKit host libraries and nine CI-authoritative baselines remain explicit final-CI obligations.",
+        "Review passed at ca04c503671f1d2730383e87a07ae0b2e8b78deb: dedicated public-wrapper React subject is a genuine browser custom-element upgrade proof with identity, rerender, fresh frozen removal reset, no-attribute, and one typed sentinel event coverage; all seven props and required negative types are no-any; exactly React ADR SC-006 and SC-010 pairs have unique non-inert sandbox mutations. Independent gates pass: React 2/2, typecheck 4/4, full Vitest 181/181, mutation baseline 152 and 64/64 named reds in 197.2s, guard selftest 8/8 in 61s, wrapper drift and 25 probes, quality, manifest/entries/parts/adopted-sheet/size, Chromium+Firefox 22/22, commitlint and diff. No generated wrapper/generator/budget/excluded edit; suite budget byte-identical; no contracts artifact. WP anti-pattern checks 1-8 pass. Shared registry ownership is explicitly serial-coordinated. WebKit, nine CI baselines, post-WP03 rebase/regeneration, final exact-head CI, squad and maintainer approval remain downstream and are not claimed green."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-149/kitty-specs/flow-health-transition-matrix-01M1PGNJ/tasks/WP03-react-and-final-verification-closure/review-cycle-1.md",
+        "reference": "review-cycle://flow-health-transition-matrix-01M1PGNJ/WP03-react-and-final-verification-closure/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17",
+      "subtasks": {
+        "T012": "done"
+      }
+    }
+  }
+}

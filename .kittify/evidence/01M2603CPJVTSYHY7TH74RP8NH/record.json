@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M2603CPJVTSYHY7TH74RP8NH",
+  "completed_at": "2026-09-10T15:51:03.060873+00:00",
+  "outcome": "abandoned",
+  "closed_by": "agent",
+  "evidence_ref": "Opened to backfill agent/model dispatch metadata onto WP01's approved transition, but its mission identity did not bind to button-danger-secondary-axis-01M25STP (recorded=None); resolved the metadata gap instead via 'move-task --to approved --agent claude --force' (same-lane re-emit)."
+}

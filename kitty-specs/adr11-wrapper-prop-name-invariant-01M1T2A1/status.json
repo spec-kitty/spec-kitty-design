@@ -1,0 +1,49 @@
+{
+  "event_count": 7,
+  "last_event_id": "01M1T2XEAF6ET2QZR43PZ8448V",
+  "materialized_at": "2026-09-06T00:46:54.287956+00:00",
+  "mission_number": "",
+  "mission_slug": "adr11-wrapper-prop-name-invariant-01M1T2A1",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 1,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "claude",
+      "force_count": 0,
+      "lane": "done",
+      "last_event_id": "01M1T2XEAF6ET2QZR43PZ8448V",
+      "last_transition_at": "2026-09-06T00:46:54.287956+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Self-reviewed: verified all 6 FRs and 5 SCs against the shipped script and the installed dependency's real MAPPED_PROPS table; single-agent docs mission, no separate reviewer seat dispatched."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/work/ef-189-1788654828/kitty-specs/adr11-wrapper-prop-name-invariant-01M1T2A1/tasks/WP01-amend-adr11-wrapper-prop-name-invariant/review-cycle-1.md",
+        "reference": "review-cycle://adr11-wrapper-prop-name-invariant-01M1T2A1/WP01-amend-adr11-wrapper-prop-name-invariant/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done"
+      }
+    }
+  }
+}

@@ -1,7 +1,6 @@
-import type { StorybookConfig } from '@storybook/angular';
+import type { StorybookConfig } from '@storybook/web-components-vite';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import type { Configuration } from 'webpack';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,33 +11,43 @@ const config: StorybookConfig = {
     '../src/**/*.mdx',
   ],
   addons: ['@storybook/addon-docs', '@storybook/addon-a11y'],
-  framework: { name: '@storybook/angular', options: {} },
+  framework: { name: '@storybook/web-components-vite', options: {} },
   docs: { defaultName: 'Docs' },
   staticDirs: [
     {
       from: path.resolve(__dirname, '../../../packages/tokens/assets'),
       to: '/tokens-assets',
     },
+    // The built distribution artifacts (ADR-10 §2), served so elements-load.spec.ts
+    // can fetch them over HTTP. playwright.config.ts's webServer serves ONLY
+    // storybook-static, so without these entries the spec has no HTTP origin to
+    // load the IIFE from — and the SRI half of SC-001 cannot be exercised at all
+    // from file://.
+    //
+    // These are build OUTPUTS, so `storybook:build` declares an explicit
+    // dependsOn/inputs pair on them in apps/storybook/project.json. Do not remove
+    // either: this repo has already shipped a Storybook build cached on inputs that
+    // excluded its own stories.
+    {
+      from: path.resolve(__dirname, '../../../packages/elements/dist'),
+      to: '/elements-dist',
+    },
+    // The built tokens stylesheet. smoke.spec.ts's FR-012 test consumes it through a
+    // plain file:// reference, and it used to resolve packages/tokens/dist directly —
+    // which does not exist in CI's playwright job, because that job downloads
+    // storybook-static and never builds. The test therefore SKIPPED on every CI run
+    // since it was written, silently, while the job reported green.
+    {
+      from: path.resolve(__dirname, '../../../packages/tokens/dist'),
+      to: '/tokens-dist',
+    },
+    // The Vite consumer's built app (FR-003 / SC-008). Building it proves the ESM
+    // artifact is bundlable; only loading it proves the element actually upgrades.
+    {
+      from: path.resolve(__dirname, '../../../fixtures/vite-consumer/dist'),
+      to: '/vite-consumer',
+    },
   ],
-  webpackFinal: async (webpackConfig: Configuration) => {
-    const rules = webpackConfig.module?.rules ?? [];
-    const htmlJsPath = path.resolve(__dirname, '../../../packages/html-js');
-    const tokensPath = path.resolve(__dirname, '../../../packages/tokens');
-    // Allow direct CSS imports (ES module style) from html-js stories and tokens preview.
-    // Angular component CSS files (packages/angular) go through the Angular pipeline — do NOT include them here.
-    rules.push({
-      test: /\.css$/,
-      use: [
-        'style-loader',
-        { loader: 'css-loader', options: { sourceMap: false, url: false, import: false } },
-      ],
-      include: [htmlJsPath, tokensPath],
-    });
-    if (webpackConfig.module) {
-      webpackConfig.module.rules = rules;
-    }
-    return webpackConfig;
-  },
 };
 
 export default config;

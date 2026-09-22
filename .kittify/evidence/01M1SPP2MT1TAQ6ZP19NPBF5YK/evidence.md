@@ -1,0 +1,1 @@
+Pass-1 architect lens over PR #187 @ cde2fb8: 3 MAJOR (probe/control type-value sync ordering, badInput stuck-invalid, submitted-vs-validated value), 1 MAJOR design-record drift (research R2 x2 + plan IC-02 still record superseded 'sync the rendered control' design), plus MINOR/NIT on the rename-map seam, FR-007 deferral siting, and ADR forks. Verdict: CHANGES REQUESTED.

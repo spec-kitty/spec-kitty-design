@@ -1,0 +1,16 @@
+{
+  "created_at": "2026-09-07T14:13:58.791701+00:00",
+  "flattened": false,
+  "friendly_name": "repository dossier compact navigation shell",
+  "mission_id": "01M1Y3FYW7J7N68YBKKYVR079X",
+  "mission_number": null,
+  "mission_slug": "repository-dossier-compact-navigation-shell-01M1Y3FY",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances repository dossier compact navigation shell on train/elements-first so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "repository dossier compact navigation shell",
+  "slug": "repository-dossier-compact-navigation-shell-01M1Y3FY",
+  "target_branch": "train/elements-first",
+  "topology": "lanes",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-07T15:26:57.590539+00:00"
+}

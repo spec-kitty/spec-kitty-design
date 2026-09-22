@@ -1,0 +1,1 @@
+Pre-merge architect lens on PR #190 (a4d69c3): ADR-11 amendment reviewed against scripts/build-react-wrappers.mjs, the installed @wc-toolkit/react-wrappers@1.2.7 MAPPED_PROPS table (17 entries verified), packages/elements/custom-elements.json, ADR-10's override precedent, and sk-form-input.contract.md. 8 findings, no blockers.

@@ -1,0 +1,139 @@
+{
+  "mission_slug": "entity-marker-size-border-image-axis-01M25AVQ",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/entity-marker/sk-entity-marker.css (.sk-entity-marker--lg, --sk-space-9); apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts 'keeps size and shape independent across the full 2x2 matrix'; reviewer review-cycle-1.md 585/585 tests",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:02:56.113901+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts:118 'omitted axes preserve the current default square geometry'; apps/storybook/src/tests/visual.spec.ts:487-496 unchanged sk-entity-marker-meaningful.png/decorative.png baselines (SC-001, zero diffs)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:02:57.131549+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts:129 'size and shape compose as two independent presentation axes'; apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts axis-matrix test confirms radius increases for circle at both sm/default sizes independent of width",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:02:58.178078+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts:171 '[FR-004] the border modifier does not change the outer box'; apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts '[FR-004] the border modifier does not change the outer box (real Storybook render)' and 'at every named size and shape' \u2014 deterministic getBoundingClientRect() equality asserted, reviewer reproduced Playwright 15/15",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:05.694237+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "manual_inspection",
+      "evidence": "packages/styles/src/entity-marker/sk-entity-marker.css .sk-entity-marker--bordered uses only --sk-border-width-1 and --sk-border-default (existing token family); no raw hex/rgba/px; border-color kept as longhand per declaration-strict-value convention",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:06.705420+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts:479 '[FR-006] the border stays visible and distinguishing under forced-colors'; CSS comment documents reliance on browser's automatic border-color forced-colors remap (no author @media block needed), consistent with sk-notice.css's established pattern",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:07.732211+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/entity-marker/sk-entity-marker.css ::slotted(img) rule is byte-identical to train (git diff shows zero changes to this rule or its header comment); apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts 'uses one host-owned name and cover-crops portrait and landscape images' confirms object-fit:cover, contained, clipped across shapes",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:17.186408+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "manual_inspection",
+      "evidence": "packages/styles/src/entity-marker/sk-entity-marker.css header comment (unchanged, byte-identical vs train) states shadow-only classification per ADR-15, the static-consumer rewrite, and C-005 (no equality-gated static API for this axis) is respected \u2014 no CI check added asserting shadow-vs-static cascade-position equality",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:18.192408+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "manual_inspection",
+      "evidence": "CSS header comment states the tie boundary generically ('strictly higher specificity than the shipped rewrite...ties resolve to last-stylesheet-wins...shadow form yields unconditionally'), unchanged/byte-identical vs train; reviewer review-cycle-1.md: 'no transcribed specificity tuple invalidated'; SC-004 tuple appears only inside the CSS comment itself, per spec.md/tasks/WP01 quoting it solely as the prohibition being described, not as a newly-asserted mission finding",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:19.218160+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts:96 '[FR-010] the accessible-naming contract is a pure function of label, unaffected by size, shape, or border'; sk-entity-marker.ts render() derives role/aria-label/aria-hidden solely from trimmed label, independent of size/shape/border",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:29.141138+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts:228 'unknown values warn and fail open on only their own axis without losing content', with explicit [FR-011] block asserting an invalid border value falls open to unbordered without disturbing size/shape/content; sk-entity-marker.ts entityMarkerBorder() warns via console.warn and returns undefined on invalid input, independent of entityMarkerSize/entityMarkerShape",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:30.190775+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "manual_inspection",
+      "evidence": "packages/elements/src/entity-marker/sk-entity-marker.ts render(): the only interpolated content is the class-name string built from size/shape/border attribute state; no new user-visible string literal introduced",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:31.268959+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "expected-docs.json (entity-marker attrs 3->4, total 121->122), expected-stories.json (+5 additive stories, total 472->477), mutations.json (+SC-010 border arm, byte-identical to shipped source), sk-entity-marker.stories.ts (+50 lines); expected-parts.json/behaviours.json unchanged (no new parts/behaviour ids needed); reviewer review-cycle-1.md: manifest 122/29, part-ratchet 134, all gates green",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:32.306320+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}

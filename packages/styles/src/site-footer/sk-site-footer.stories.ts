@@ -1,0 +1,60 @@
+import './sk-site-footer.css';
+import type { Meta, StoryObj } from '@storybook/web-components';
+import { SkSiteFooterHTML, SkSiteFooterCompactHTML } from './index';
+
+/**
+ * <sk-site-footer> — the STATIC form, generated from the element's markup module (ADR-10 §3).
+ *
+ * This file used to import a hand-written `index.ts` that built the markup inline and computed
+ * `new Date().getFullYear()` at module load. Both are gone: the markup is authored once in
+ * `packages/elements/src/site-footer/sk-site-footer.markup.ts`, and the placeholder carries no
+ * year at all — `© YYYY` — because a generated artifact whose bytes depend on the wall clock
+ * stops matching a fresh generation on 1 January (ADR-11 item 9), and a PINNED year would only
+ * move the staleness into what a consumer reads in 2028.
+ */
+const meta: Meta = {
+  title: 'Components/SiteFooter (HTML)',
+  tags: ['autodocs'],
+  parameters: { a11y: { disable: false }, layout: 'fullscreen' },
+};
+export default meta;
+type Story = StoryObj;
+
+export const Default: Story = { render: () => SkSiteFooterHTML };
+
+/**
+ * `class="sk-light"`, NOT `data-theme="light"`.
+ *
+ * The attribute form activates nothing: tokens anchor light on
+ * `:root[data-theme="light"], .sk-light`, and `:root` matches only `<html>` (#93). This story
+ * carried the inert form, so it had been rendering the DARK palette on a light background and
+ * the a11y gate never saw the light pairing. Retiring the same wrapper exposed four failing
+ * pill-tag variants and a 1.73:1 check-bullet tick in the two preceding batches — measured here
+ * before assuming otherwise, and this component's inks pass because it uses semantic `--sk-fg-*`
+ * tokens rather than raw `--sk-color-*` palette values.
+ */
+export const LightMode: Story = {
+  parameters: { backgrounds: { default: 'sk-light' }, layout: 'fullscreen' },
+  render: () => `
+    <div class="sk-light" style="background: var(--sk-surface-page); display: block; width: 100%;">
+      ${SkSiteFooterHTML}
+    </div>
+  `,
+};
+
+/**
+ * [FR-008] The compact presentation's static form — no JavaScript required. Generated from
+ * `SITE_FOOTER_AXES.Compact` (#354): the same markup module the element renders from, so the
+ * two paths cannot diverge.
+ */
+export const Compact: Story = { render: () => SkSiteFooterCompactHTML };
+
+/** [C-004] `class="sk-light"`, NOT `data-theme="light"`, on the static compact form. */
+export const CompactLightMode: Story = {
+  parameters: { backgrounds: { default: 'sk-light' }, layout: 'fullscreen' },
+  render: () => `
+    <div class="sk-light" style="background: var(--sk-surface-page); display: block; width: 100%;">
+      ${SkSiteFooterCompactHTML}
+    </div>
+  `,
+};

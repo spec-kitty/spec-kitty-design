@@ -1,0 +1,34 @@
+schema: wp-verdict/v1
+complete: true
+wp: WP01
+cycle: 1
+mission: work-package-native-progress-styles-01M1VKQ8
+verdict: approved
+gates_observed:
+  tsc: pass
+  tests: pass
+  coverage: pass
+feedback:
+  - id: WP01-C1-001
+    severity: 1
+    claim: >-
+      acceptance-matrix.json's FR-011 note attributes LightMode's "genuinely
+      different computed styling" property to "WP01 T005's computed-style-
+      difference assertion between Default and LightMode"
+      (kitty-specs/work-package-native-progress-styles-01M1VKQ8/acceptance-matrix.json,
+      FR-011 entry), but no such assertion exists in
+      apps/storybook/src/tests/sk-progress.spec.ts or sk-progress-html.stories.ts
+      (packages/styles/src/progress/sk-progress-html.stories.ts:60-68) — verified
+      by grep, no getComputedStyle/LightMode check present.
+    evidence: >-
+      grep for "LightMode"/"computed" across sk-progress.spec.ts and
+      sk-progress-html.stories.ts finds no computed-style comparison; the
+      property is instead covered by three distinct, non-identical committed
+      visual baselines (sk-progress-html-{default-dark,light,forced-colors}-
+      chromium-linux.png, confirmed via md5sum — all three differ), which is a
+      real but different test mechanism than the plan specified.
+    remediation: >-
+      Either add the getComputedStyle-based Default-vs-LightMode assertion T005
+      step 4 and the Review Guidance called for, or correct the acceptance-
+      matrix note to cite the visual-baseline set as FR-011's actual evidence
+      mechanism.

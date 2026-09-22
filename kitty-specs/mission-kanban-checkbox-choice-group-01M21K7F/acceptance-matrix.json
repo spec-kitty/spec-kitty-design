@@ -1,0 +1,169 @@
+{
+  "mission_slug": "mission-kanban-checkbox-choice-group-01M21K7F",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts; packages/styles/src/checkbox-choice-group/",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:30.481812+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts; packages/styles/src/checkbox-choice-group/",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:32.206129+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts; packages/styles/src/checkbox-choice-group/",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:33.872171+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts; docs/architecture/validation/issue-277-checkbox-choice-group-zoom/README.md",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:35.594249+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts; docs/architecture/validation/issue-277-checkbox-choice-group-zoom/README.md",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:37.282360+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts; docs/architecture/validation/issue-277-checkbox-choice-group-zoom/README.md",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:39.192926+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts; docs/architecture/validation/issue-277-checkbox-choice-group-zoom/README.md",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:41.196712+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts; docs/architecture/validation/issue-277-checkbox-choice-group-zoom/README.md",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:43.929634+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/checkbox-choice-group/sk-checkbox-choice-group-html.stories.ts; generated barrel check; expected-stories.json",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:46.043090+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/checkbox-choice-group/sk-checkbox-choice-group-html.stories.ts; generated barrel check; expected-stories.json",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:47.953790+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "69 cross-engine checks; axe 468/468 zero violations; docs/architecture/validation/issue-277-checkbox-choice-group-zoom/README.md; 8/8 Noble visuals",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:49.700489+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "69 cross-engine checks; axe 468/468 zero violations; docs/architecture/validation/issue-277-checkbox-choice-group-zoom/README.md; 8/8 Noble visuals",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:51.358974+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "69 cross-engine checks; axe 468/468 zero violations; docs/architecture/validation/issue-277-checkbox-choice-group-zoom/README.md; 8/8 Noble visuals",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:53.134023+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Verify FR-014 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "69 cross-engine checks; axe 468/468 zero violations; docs/architecture/validation/issue-277-checkbox-choice-group-zoom/README.md; 8/8 Noble visuals",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:54.768388+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Verify FR-015 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "docs/design-system/using-components.md; K3DetailedLaneFilters Storybook composition; component contract tests",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:56.486493+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Verify FR-016 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "docs/design-system/using-components.md; K3DetailedLaneFilters Storybook composition; component contract tests",
+      "pass_fail": "pass",
+      "verified_by": "codex acceptance",
+      "verified_at": "2026-09-09T02:30:58.225851+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}

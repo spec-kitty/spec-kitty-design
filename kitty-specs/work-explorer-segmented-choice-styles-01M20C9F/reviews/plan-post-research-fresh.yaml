@@ -1,0 +1,99 @@
+schema: review-findings/v1
+complete: true
+phase: plan-post-research
+lens_group: fresh
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: PLAN-POST-RESEARCH-FRESH-001
+    lens: fresh
+    severity: 2
+    title: "spec.md FR-009 still cites the stale, wrong-test sk-transition-matrix.spec.ts:285 line"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/spec.md:237 (FR-009 row)"
+      - artifact: "apps/storybook/src/tests/sk-transition-matrix.spec.ts:265 (test 'non-selectable selected data has zero interaction residue', the negative/invariance test) and :285 (await row.hover(); inside that test)"
+      - artifact: "apps/storybook/src/tests/sk-transition-matrix.spec.ts:312 (test 'selectable rows expose positive hover, keyboard focus-visible, and active or pressed deltas', the correct positive-delta test) and :326 (await row.hover(); inside that test)"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/plan.md:36-39 (Technical Context already flags the spec.md citation as stale and uses :312 instead)"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research.md Discrepancies-found item 1, and evidence-log.csv EV-009/EV-010"
+    claim: >
+      Independently re-verified against the live tree at HEAD (88c84163c7b735767a033f839f9d1b099feb2aee):
+      spec.md's FR-009 text still names "sk-transition-matrix.spec.ts:285's await row.hover() /
+      style-delta comparison" as one of the three worked precedents for the positive
+      hover/active computed-style-delta pattern this mission's Playwright spec must follow. Line
+      285 is real code, but it sits inside 'non-selectable selected data has zero interaction
+      residue' (starting line 265) — a test that asserts hover produces NO style delta on a
+      non-selectable row, the exact opposite of the pattern FR-009 is citing it for. The correct
+      citation is line 312 (test start) / line 326 (the hover() call), inside 'selectable rows
+      expose positive hover, keyboard focus-visible, and active or pressed deltas'. plan.md's
+      Technical Context section already caught this and cites :312 instead, and research.md's own
+      Discrepancies-found section documents the same finding (EV-009/EV-010) — but by this
+      backfill's own stated scope boundary, neither research.md nor plan.md corrects spec.md's
+      text itself. The error therefore persists, unfixed, in the mission's binding requirement at
+      HEAD: a reader of spec.md alone (rather than plan.md's corrected Technical Context) would be
+      pointed at the wrong test as the FR-009 precedent. Practical implementation risk is low
+      because plan.md's IC-04 already carries the correct citation and an implementer following
+      the plan (the actual execution document) will use :312/:326, not spec.md's stale :285 — this
+      is a citation-accuracy defect in the binding contract text, not a sequencing or scope defect.
+    remediation: >
+      A later phase (spec amendment, as research.md itself recommends) should correct spec.md's
+      FR-009 to cite "sk-transition-matrix.spec.ts:312's await row.hover() (test: 'selectable rows
+      expose positive hover, keyboard focus-visible, and active or pressed deltas')" in place of
+      the current ":285" citation, so the binding requirement text and plan.md's Technical Context
+      agree without requiring a reader to cross-reference the plan's correction note.
+
+  - id: PLAN-POST-RESEARCH-FRESH-002
+    lens: fresh
+    severity: 2
+    title: "spec.md C-004 still cites sk-form-select.css as a joint precedent for --sk-bg-pill, which the file does not demonstrate"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/spec.md:264 (C-004 row: 'matching the base-state precedent in sk-nav-pill.css and sk-form-select.css')"
+      - artifact: "packages/styles/src/form-select/sk-form-select.css (grep for 'sk-bg-pill' and 'sk-surface-pill' returns zero matches, confirmed live at HEAD)"
+      - artifact: "packages/styles/src/nav-pill/sk-nav-pill.css:39,44,50,129,134,143 (six occurrences of background: var(--sk-bg-pill) — the only file that actually demonstrates the pattern)"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research.md Discrepancies-found item 3, and evidence-log.csv EV-033"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/plan.md IC-01 (Token choice paragraph cites only sk-nav-pill.css, correctly sidestepping the spec.md error)"
+    claim: >
+      Independently re-verified: spec.md's C-004 constraint text reads "Base-state colours use
+      --sk-bg-pill ... matching the base-state precedent in sk-nav-pill.css and sk-form-select.css"
+      — naming both files as joint precedent for the same --sk-bg-pill claim. Grepping
+      sk-form-select.css directly (confirmed at HEAD) shows zero references to --sk-bg-pill or its
+      sibling --sk-surface-pill anywhere in the file; its actual base-state tokens are
+      --sk-surface-input, --sk-border-default, --sk-border-focus, --sk-border-width-1/2,
+      --sk-radius-sm and --sk-color-red — a disjoint token set. Only sk-nav-pill.css demonstrates
+      the --sk-bg-pill active-fill pattern. research.md's own Discrepancies-found section already
+      flags this (item 3/EV-033) and plan.md's IC-01 section correctly cites only sk-nav-pill.css
+      in practice, so the error has no practical implementation consequence — but spec.md's binding
+      Constraints table text itself remains factually wrong at HEAD, unresolved despite the
+      multiple review rounds this mission has already been through.
+    remediation: >
+      A later phase should reword spec.md's C-004 to attribute --sk-bg-pill to sk-nav-pill.css
+      alone, and (if desired) separately note that sk-form-select.css exemplifies the general
+      "border/focus token family" reuse pattern rather than implying it also demonstrates
+      --sk-bg-pill.
+
+  - id: PLAN-POST-RESEARCH-FRESH-003
+    lens: fresh
+    severity: 1
+    title: "C-006's unqualified 'all commits in this mission use the styles scope' remains imprecise against this mission's own commit history"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/spec.md C-006 row ('All commits in this mission use the styles conventional-commit scope, matching the package actually changed')"
+      - artifact: "git log: b91cc43 'fix(kitty-specs): fold plan fresh-sweep findings for work-explorer-segmented-choice-styles (#270)', d78c0d3 'fix(kitty-specs): fold plan review findings ... (#270)', d9a231d 'docs(kitty-specs): author plan ... (#270)' — all on this mission's own design-phase history, all scoped kitty-specs, none matching commitlint.config.cjs's scope-enum or its ULID-suffix-anchored exemption patterns (verified: none of these three subjects contain a -01[A-Z0-9]{6,} suffix inside the parens, so the first exemption pattern's requirement is not met)"
+      - artifact: "commitlint.config.cjs:82-95 (scope-enum list — 'kitty-specs' absent) and :6-78 (exemption patterns, all anchored to a mission-ULID suffix these commits' bare 'kitty-specs' scope does not carry)"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research.md Discrepancies-found item 2, evidence-log.csv EV-030"
+    claim: >
+      Independently re-verified: this mission's own design-phase commits (spec-authoring,
+      plan-authoring/fold-in, and this research backfill's own commit) use a bare
+      docs(kitty-specs)/fix(kitty-specs) scope, confirmed absent from commitlint's scope-enum and
+      not covered by any exemption pattern (all of which require a mission-ULID suffix these
+      subjects do not carry). C-006's literal text ("all commits in this mission") is therefore
+      still not literally true of the mission as a whole at HEAD, only of the not-yet-created
+      implementation Work Package's future commits — the gap research.md's own Discrepancies
+      section already names and declines to fix, per its stated scope boundary. This is a
+      wording-precision gap, not a functional defect: the entity that actually needs C-006 to hold
+      (the upcoming implementation WP) is unaffected, since C-006's own rationale ("matching the
+      package actually changed") already targets that WP's own commits rather than this mission's
+      prior bookkeeping history. Flagged for completeness since it remains an unresolved,
+      independently-confirmable literal-vs-intended-scope mismatch in the binding contract.
+    remediation: >
+      A later phase could narrow C-006's wording to "All commits in this mission's implementation
+      Work Package use the styles scope" (or equivalent), removing the literal overreach onto the
+      mission's own already-completed design-phase bookkeeping commits, which is a distinct git
+      workflow this repo does not scope under package-name conventional-commit scopes.

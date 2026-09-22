@@ -1,0 +1,93 @@
+schema: review-findings/v1
+complete: true
+phase: plan-post-research
+lens_group: verify
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: PLAN-POST-RESEARCH-VERIFY-001
+    lens: test strategy concreteness
+    severity: 4
+    title: "IC-04's stated mechanism for NFR-003/SC-005's 200%-zoom check (a page.evaluate assertion 'following the pattern in sk-form-select.spec.ts') is not backed by any real automated precedent in this repo, and the cited file contains no zoom code at all"
+    evidence:
+      - artifact: "plan.md § IC-04 — Risks: \"The 44px measurement (NFR-002) and the 200%-zoom overflow check (NFR-003/SC-005) both need exact viewport control (page.setViewportSize) ... and the zoom check needs page.evaluate reading document.scrollingElement.scrollWidth vs document.documentElement.clientWidth at both 100% and 200%, following the pattern already used in sk-form-select.spec.ts's narrow/long-options geometry test.\""
+      - code: "apps/storybook/src/tests/sk-form-select.spec.ts:224-225, 324-325 — the only scrollWidth/clientWidth checks in that file measure narrow-viewport / long-options overflow (page.setViewportSize to a fixed CSS width), with zero code that puts the page into a 200%-zoomed state (grep for 'zoom' across apps/storybook/src/tests/*.spec.ts returns zero matches in every file, including this one)"
+      - artifact: "docs/architecture/validation/issue-211-form-select-zoom/README.md:8-16 — the repo's actual, only precedent for verifying 200% browser zoom: 'X11/XTEST sent Ctrl+0, then Ctrl+Shift+= five times through Chrome's real desktop UI ... No CSS zoom, viewport resize, device-scale override, CDP emulation, or pinch/page-scale emulation was used', recorded as SHA-256 screenshot digests in a validation README, 'after the final push' as part of a manual pre-merge procedure — not an automated Playwright assertion"
+      - artifact: "docs/architecture/validation/issue-213-work-package-detail-zoom/README.md:8-16 — the same manual X11-desktop procedure, confirming it is the established (if undocumented-as-doctrine) pattern for this exact NFR class, not a one-off"
+      - artifact: "grep across docs/contributing/adding-a-component.md, docs/architecture/adversarial-squad-gate.md, docs/architecture/quality-attribute-assessment.md, docs/architecture/sad-lite.md for 'zoom' — zero matches; the manual procedure is not codified anywhere as required doctrine this plan could cite as binding"
+    claim: >
+      spec.md's NFR-003 ("at both 100% and 200% browser zoom, document.scrollingElement.scrollWidth does
+      not exceed document.documentElement.clientWidth") and SC-005 ("At 200% zoom ... no document-level
+      horizontal scrollbar is introduced ... and no item clips its content or focus indicator") are both
+      binding, High-priority requirements this mission must verify. plan.md's IC-04 Risks section names a
+      single, specific mechanism for this: a Playwright `page.evaluate` reading the two DOM properties "at
+      both 100% and 200%," explicitly citing `sk-form-select.spec.ts`'s narrow/long-options geometry test as
+      the pattern to follow. Neither half of that claim holds up: (1) the cited file's scrollWidth/
+      clientWidth checks (lines 224-225, 324-325) measure a resized *viewport* (`page.setViewportSize`),
+      never an actual browser *zoom* state — there is no code anywhere in that file, or in any other
+      `*.spec.ts` file in the repo, that programmatically zooms a page to 200% (confirmed by a repo-wide
+      grep for "zoom" across every Playwright spec file, which returns zero hits); (2) the only real,
+      working precedent in this codebase for verifying 200%-zoom behaviour — used twice before, for issue
+      #211 (form-select) and issue #213 (Work Package detail primitives) — is a manual procedure: a human
+      operator sends real `Ctrl+Shift+=` keystrokes through Chrome's actual desktop UI via X11/XTEST,
+      explicitly *not* using CSS zoom, viewport resize, device-scale override, or CDP emulation (the
+      READMEs list all four as things that were deliberately NOT used, because none of them faithfully
+      reproduces what real browser zoom does to `devicePixelRatio`/`visualViewport.scale`), and records the
+      result as SHA-256 screenshot digests in a `docs/architecture/validation/issue-<N>-<slug>/README.md`
+      file as part of "the pre-merge gate['s]" evidence, run "after the final push." plan.md's IC-04 gives
+      no such task, names no such deliverable, and its Gate enumeration table has no row for it — the plan
+      instead asserts an automated `page.evaluate` technique that, per this repo's own two prior
+      instances of the identical verification problem, does not actually work (or at least has never been
+      attempted) as an automated CI check. Since NFR-004's own Chromium-primary framing elsewhere in this
+      plan already acknowledges that not every NFR here runs uniformly across engines, and since the
+      X11-based procedure is inherently non-headless and non-CI-automatable, this is not a small
+      wording gap: it is a real, currently-unfilled question of *how* SC-005/NFR-003 actually get verified
+      for this component — automated (and, if so, by what concrete mechanism, since none exists to copy),
+      or manual-evidence (and, if so, which IC produces the validation README and who runs the X11
+      procedure, since IC-04 as written assumes the check lives inside the new Playwright spec file).
+    remediation: >
+      Either (a) name a concrete, real automated technique for putting a Playwright page into an actual
+      200%-zoom state (e.g. a new browser context created with `deviceScaleFactor: 2` and a halved CSS
+      viewport, matching the real-zoom geometry the issue-211/213 READMEs measured — `1200x657` CSS at
+      100% became `600x328` at 200% with `devicePixelRatio` 1→2), verify that approach actually reproduces
+      the same `scrollWidth`/`clientWidth` behaviour a real X11 zoom does before committing the plan to it
+      (the READMEs explicitly warn that CSS zoom, viewport resize, and device-scale override were tried-
+      and-rejected substitutes for a real zoom, not confirmed-equivalent ones), and add it to IC-04 as a
+      named assertion; or (b) if the automated route is not viable, add an explicit IC task (or a bullet
+      inside IC-04/IC-06) that produces a `docs/architecture/validation/issue-270-segmented-choice-zoom/
+      README.md` evidence file via the same manual X11-desktop procedure used for #211/#213, name it in the
+      Gate enumeration table as the mechanism that actually discharges NFR-003/SC-005, and state who/when
+      (pre-merge squad, per the #211/#213 precedent's "reruns this same procedure after the final push")
+      runs it.
+
+  - id: PLAN-POST-RESEARCH-VERIFY-002
+    lens: test strategy concreteness
+    severity: 2
+    title: "Gate enumeration's 'Visual-regression baselines' row is the only Applicable-table row that names no actual command/job, omitting the PW_INCLUDE_VISUAL=1 gating that determines whether visual.spec.ts runs at all"
+    evidence:
+      - artifact: "plan.md § Gate enumeration (STEP 4), Applicable table — every other row's Command column names an exact command (e.g. 'npm run quality:stylelint', 'npx nx run storybook:storybook:build && node scripts/run-axe-storybook.js', 'npx playwright test apps/storybook/src/tests/sk-segmented-choice.spec.ts'); the 'Visual-regression baselines' row's Command column reads only 'CI `visual-regression-diffs` artifact (per docs/contributing/adding-a-component.md §8 — CI-authoritative, not a local run); depends on IC-04's...' — no command, no CI job name"
+      - code: ".github/workflows/ci-quality.yml — the 'visual-regression' job runs 'npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium' under 'env: PW_INCLUDE_VISUAL: \"1\"', and uploads the visual-regression-diffs artifact only 'if: failure()'"
+      - code: "playwright.config.ts:11 — \"testIgnore: process.env['PW_INCLUDE_VISUAL'] ? [] : ['**/visual.spec.ts']\" — visual.spec.ts is excluded from every other Playwright invocation (including the 'playwright' cross-browser smoke job and any plain local 'npx playwright test' run) unless PW_INCLUDE_VISUAL=1 is set"
+    claim: >
+      Every other row in the Gate enumeration's Applicable table names the exact command a reviewer or
+      implementer would run to reproduce that gate locally or recognize it in CI logs. The
+      'Visual-regression baselines' row is the sole exception: it names only the artifact
+      (`visual-regression-diffs`) and the doc section that describes the CI-authoritative rule, not the
+      job or command that produces it. This matters concretely here because `visual.spec.ts` is
+      deliberately excluded from the default `npx playwright test` invocation via `playwright.config.ts`'s
+      `testIgnore`, and only the `visual-regression` CI job (not the `playwright` cross-browser smoke job
+      IC-04's other Playwright spec runs under) sets `PW_INCLUDE_VISUAL=1` to opt back in. IC-04's 5-step
+      CI-authoritative procedure (push → CI runs → artifact produced → pull PNGs → commit) is otherwise
+      concrete, but neither it nor the Gate enumeration row identifies which CI job actually executes the
+      new `test()` blocks, or that the mechanism by which the diffs artifact gets produced is that job's
+      chromium-only run failing on first execution (no prior baseline to diff against) — an implementer or
+      reviewer checking "will my new test() blocks actually be exercised, and under what invocation" cannot
+      confirm this from plan.md alone without independently reading `ci-quality.yml` and
+      `playwright.config.ts`.
+    remediation: >
+      Add the exact command/job identification to the Gate enumeration row, e.g.: "CI `visual-regression`
+      job — `PW_INCLUDE_VISUAL=1 npx playwright test apps/storybook/src/tests/visual.spec.ts
+      --project=chromium` (excluded from the default `npx playwright test` run via `playwright.config.ts`'s
+      `testIgnore` unless this env var is set); artifact `visual-regression-diffs` uploaded only on job
+      failure, which is expected on the first push before a baseline exists." This also lets a reader
+      confirm the new test() blocks are wired into a real, running CI job rather than taking IC-04's prose
+      on faith.

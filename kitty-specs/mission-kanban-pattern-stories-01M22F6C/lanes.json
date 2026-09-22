@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "mission_slug": "mission-kanban-pattern-stories-01M22F6C",
+  "mission_id": "01M22F6C0G85RKMPPXPCV8BNR9",
+  "mission_branch": "kitty/mission-mission-kanban-pattern-stories-01M22F6C",
+  "target_branch": "train/elements-first",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/.storybook/preview.ts",
+        "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts",
+        "apps/storybook/src/tests/sk-mission-kanban-pattern.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-*.png",
+        "docs/architecture/validation/issue-278-mission-kanban-zoom/**",
+        "expected-stories.json",
+        "packages/elements/src/patterns/mission-kanban.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tracker-integration",
+        "workspace"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-09T16:08:59.658464+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "a9c005b60dfe0dfc4c3a55a89f7610f31434b8e5"
+}

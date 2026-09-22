@@ -1,0 +1,59 @@
+{
+  "mission_slug": "mutation-harness-budget-01M297AX",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "scripts/lib/selftest-budget.mjs computeSelftestCeilingSeconds(budget.selftestBudget, mutations.length); scripts/suite-selftest.mjs:65-68 wires it for both the main and --selftest runs. Real run: node scripts/suite-selftest.mjs --selftest -> 100.8s under the computed 177.0s ceiling (10 arms); tests/node/selftest-budget.test.ts 10/10 pass.",
+      "pass_fail": "pass",
+      "verified_by": "implementer",
+      "verified_at": "2026-09-11T22:46:07.796249+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "suite-budget.json#selftestBudget fit from 8 real 272-arm + 6 real 10-arm CI runs (train/elements-first, run ids 34561511046/34592445070/34595310707/34606532461/34618855795/34623594612/34632185898/34637284298), each bucket's worst observation x the file's established 1.5213 multiplier -> fixedSeconds=70.5, perArmSeconds=10.65. Reviewer independently re-derived the identical 70.5/10.65 by hand and verified all 14 cited timings against gh run view --log.",
+      "pass_fail": "pass",
+      "verified_by": "implementer",
+      "verified_at": "2026-09-11T22:46:08.901593+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "manual_verification",
+      "evidence": "Real executed proof: node scripts/suite-selftest.mjs --selftest with a temporary +12s per-arm delay failed at 198.4s over the 177.0s ceiling (reverted before commit); without the delay it passed at 100.8s/99.4s. Reviewer independently reproduced with its own 12s delay, failing at 213.7s over the same 177s ceiling.",
+      "pass_fail": "pass",
+      "verified_by": "implementer",
+      "verified_at": "2026-09-11T22:46:09.966652+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "manual_verification",
+      "evidence": "suite-budget.json $comment gained one appended entry (94 total, none deleted/edited) documenting the measurement, fit, and what the gate catches/does not; selftestMeasurements gained 14 structured rows (8x272-arm, 6x10-arm) with real run/job ids per reviewer finding 1.",
+      "pass_fail": "pass",
+      "verified_by": "implementer",
+      "verified_at": "2026-09-11T22:46:11.033440+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "manual_verification",
+      "evidence": "spec-kitty agent issue-verdict recorded for all rows: #419=in-mission (tracking issue), #408=in-mission (duplicate of #419, same structural defect), #168=verified-already-fixed (stale; #225/#249 f9fd570e made the dependency-graph filter effective, confirmed by reviewer against the real merge timestamp), plus spurious scraped refs #146/#225/#270=verified-already-fixed (historical context only).",
+      "pass_fail": "pass",
+      "verified_by": "implementer",
+      "verified_at": "2026-09-11T22:46:12.092158+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}

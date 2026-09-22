@@ -1,0 +1,65 @@
+{
+  "rows": {
+    "#125": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/125 (programme parent; #254 contributes the app-shell seam)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#135": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/135 remains separate host-display gate work; no scope absorption into #254",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#145": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/145 (closed prerequisite, reverified before implementation)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#253": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/253 (tracking epic; #254 is this mission)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#254": {
+      "evidence_ref": "all issue criteria pass on the post-#264 candidate; final exact-SHA four-lens review, Spec Kitty acceptance, replacement-head CI, and merge remain delivery gates",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

@@ -11,9 +11,6 @@
       "cache": true
     },
     "storybook:build": {
-      "dependsOn": [
-        "^build"
-      ],
       "cache": true
     },
     "test": {
@@ -21,11 +18,6 @@
     }
   },
   "defaultProject": "storybook",
-  "generators": {
-    "@nx/angular:component": {
-      "style": "css"
-    }
-  },
   "defaultBase": "main",
   "analytics": false
 }

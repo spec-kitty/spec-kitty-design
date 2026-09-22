@@ -1,0 +1,21 @@
+{
+  "construct_kind": "slotted-child-rule",
+  "component": "sk-entity-marker",
+  "declared_before_running": true,
+  "declaration_note": "Committed in its own commit before any run.mjs or result.json existed (spec FR-008, NFR-001).",
+  "static_exemplar_variants": {
+    "A-descendant": "::slotted(img) -> .sk-entity-marker__content > img, matching where the slot actually renders the assigned node in the flattened tree. (plan.md's shorthand said `.sk-entity-marker > img`; the slot is inside .sk-entity-marker__content, so the structurally faithful rewrite is used and the difference is recorded.)",
+    "B-paired-spelling": "The repo's own established #78 convention already shipped in sk-blog-card, sk-feature-card, sk-ribbon-card and sk-site-footer: ONE selector list serving both paths, `.sk-entity-marker__content > img, ::slotted(img) { ... }`. Measured as an alternative static exemplar for the same sheet."
+  },
+  "pass_bar": "Every declared outcome must be reproduced by some static exemplar variant against the export-map-resolved built CSS. No composed container case applies (no container-type in this sheet); the cascade outcome O5 is recorded either way it comes out, per contracts/measurement-contract.md section 3.",
+  "declared_outcomes": [
+    { "id": "O1", "description": "assigned/descendant img display", "viewport_or_state": "default marker, 64px viewport-independent box" },
+    { "id": "O2", "description": "assigned/descendant img inline-size (width)", "viewport_or_state": "default marker" },
+    { "id": "O3", "description": "assigned/descendant img block-size (height)", "viewport_or_state": "default marker" },
+    { "id": "O4", "description": "assigned/descendant img object-fit", "viewport_or_state": "default marker" },
+    { "id": "O5", "description": "assigned/descendant img object-fit WITH a competing page-level document rule `img { object-fit: contain }` of equal specificity present (cascade/origin probe)", "viewport_or_state": "default marker + competing document rule" },
+    { "id": "O6", "description": "assigned/descendant img object-fit with the same competing rule at HIGHER specificity `.page-scope img { object-fit: contain }`", "viewport_or_state": "default marker + competing higher-specificity document rule" }
+  ],
+  "engines": ["chromium", "firefox"],
+  "fidelity_crosscheck": "The controlled shadow page's O1-O4 values are additionally compared against the real Storybook story for sk-entity-marker rendered from the built Storybook."
+}

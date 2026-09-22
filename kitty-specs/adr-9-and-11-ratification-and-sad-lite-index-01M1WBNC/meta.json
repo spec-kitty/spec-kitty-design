@@ -1,0 +1,28 @@
+{
+  "created_at": "2026-09-06T21:58:16.786370+00:00",
+  "documentation_state": {
+    "coverage_percentage": 0.0,
+    "divio_types_selected": [],
+    "generators_configured": [
+      {
+        "config_path": "",
+        "language": "javascript",
+        "name": "jsdoc"
+      }
+    ],
+    "iteration_mode": "initial",
+    "last_audit_date": null,
+    "target_audience": "developers"
+  },
+  "flattened": false,
+  "friendly_name": "adr 9 and 11 ratification and sad lite index",
+  "mission_id": "01M1WBNCYHK6V8Q62C5THG4GV7",
+  "mission_number": null,
+  "mission_slug": "adr-9-and-11-ratification-and-sad-lite-index-01M1WBNC",
+  "mission_type": "documentation",
+  "purpose_context": "This mission advances adr 9 and 11 ratification and sad lite index on mission/adr-9-11-ratification so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "adr 9 and 11 ratification and sad lite index",
+  "slug": "adr-9-and-11-ratification-and-sad-lite-index-01M1WBNC",
+  "target_branch": "mission/adr-9-11-ratification",
+  "topology": "single_branch"
+}

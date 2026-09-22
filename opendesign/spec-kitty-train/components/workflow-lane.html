@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>workflow-lane — Spec Kitty</title>
+    <meta name="description" content="workflow-lane: 2 static form(s) and its CSS, from @spec-kitty/styles 1.0.0. Copy the &lt;style&gt; block and the markup verbatim; tokens.css is required and not repeated here." />
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+/* component: workflow-lane — packages/styles/src/workflow-lane/sk-workflow-lane.css */
+/* @spec-kitty/styles — native workflow-lane presentation (#209) */
+/*
+ * Apply the block to a native named <section>, the title to its native
+ * heading, and the list to an <ol> whose work items are direct <li> children.
+ * Item content, ordering, counts, empty copy, status, and tone stay consumer
+ * owned; this stylesheet deliberately has no workflow-item selector.
+ */
+
+.sk-workflow-lane {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: var(--sk-layout-workflow-lane-min-inline-size);
+  max-inline-size: 100%;
+  min-block-size: 0;
+  gap: var(--sk-space-4);
+  padding: var(--sk-space-4);
+  color: var(--sk-fg-body);
+  background: var(--sk-surface-card);
+  border-width: var(--sk-border-width-1);
+  border-style: solid;
+  border-color: var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  font-family: var(--sk-font-sans);
+  overflow-wrap: anywhere;
+}
+
+.sk-workflow-lane__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-inline-size: 0;
+  gap: var(--sk-space-3);
+}
+
+.sk-workflow-lane__title {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  margin: 0;
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.sk-workflow-lane__count {
+  flex: 0 0 auto;
+  padding: var(--sk-space-1) var(--sk-space-2);
+  color: var(--sk-fg-body);
+  background: var(--sk-surface-pill);
+  border-radius: var(--sk-radius-pill);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  font-weight: var(--sk-weight-medium);
+  white-space: nowrap;
+}
+
+.sk-workflow-lane__list {
+  min-inline-size: 0;
+  margin: 0;
+  padding-inline-start: var(--sk-space-6);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  overflow-wrap: anywhere;
+}
+    </style>
+  </head>
+  <body>
+    <section id="workflow-lane" data-od-component="workflow-lane">
+      <h1>workflow-lane</h1>
+      <figure data-od-variant="default">
+        <figcaption>default</figcaption>
+        <section class="sk-workflow-lane" aria-labelledby="workflow-lane-default-title">
+          <header class="sk-workflow-lane__header">
+            <h3 class="sk-workflow-lane__title" id="workflow-lane-default-title">
+              In review
+            </h3>
+            <span class="sk-workflow-lane__count" aria-label="2 work packages">2</span>
+          </header>
+          <ol class="sk-workflow-lane__list">
+            <li>Review public component contract</li>
+            <li>Verify browser evidence</li>
+          </ol>
+        </section>
+      </figure>
+      <figure data-od-variant="empty">
+        <figcaption>empty</figcaption>
+        <section class="sk-workflow-lane" aria-labelledby="workflow-lane-empty-title">
+          <header class="sk-workflow-lane__header">
+            <h3 class="sk-workflow-lane__title" id="workflow-lane-empty-title">
+              Approved
+            </h3>
+            <span class="sk-workflow-lane__count" aria-label="0 work packages">0</span>
+          </header>
+          <ol class="sk-workflow-lane__list"></ol>
+          <div class="sk-empty-state">
+            <h4 class="sk-empty-state__heading">Nothing approved yet</h4>
+            <p class="sk-empty-state__body">Approved work packages will appear here.</p>
+          </div>
+        </section>
+      </figure>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "mission_slug": "elements-first-authoring-recipe-01M1MMHE",
+  "mission_id": "01M1MMHE7WBQDATGR6TDE0JAA9",
+  "mission_branch": "kitty/mission-elements-first-authoring-recipe-01M1MMHE",
+  "target_branch": "mission/elements-first-authoring-recipe",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "docs/contributing/adding-a-component.md"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "llms-full.txt",
+        "llms.txt"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "docs/architecture/risk-register.md",
+        "docs/architecture/sad-lite.md",
+        "docs/architecture/system-context-canvas.md",
+        "docs/design-system/using-components.md"
+      ],
+      "predicted_surfaces": [
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-d",
+      "wp_ids": [
+        "WP04"
+      ],
+      "write_scope": [
+        "CLAUDE.md",
+        "skills/spec-kitty-design/SKILL.md"
+      ],
+      "predicted_surfaces": [],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-03T22:02:08.815571+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "24b0337c057aef7c4d1a53b32319a9c64c567a06"
+}

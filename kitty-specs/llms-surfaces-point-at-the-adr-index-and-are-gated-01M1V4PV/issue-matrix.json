@@ -1,0 +1,65 @@
+{
+  "rows": {
+    "#102": {
+      "evidence_ref": "kitty-specs/llms-surfaces-point-at-the-adr-index-and-are-gated-01M1V4PV/plan.md",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "reference-only",
+      "source_file": "spec.md",
+      "title": "Scraped from a narrative reference in this mission\u2019s own artifacts; not a defect this mission owns or reopens.",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#129": {
+      "evidence_ref": "scripts/check-gate-wiring.mjs",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "reference-only",
+      "source_file": "spec.md",
+      "title": "Cited only as prior art for registering a gate in check-gate-wiring.mjs REQUIRED_LINT with the gate itself. That pattern is followed, not changed.",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#193": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/199",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "reference-only",
+      "source_file": "spec.md",
+      "title": "Cited only as the mission this one follows: #193 made the README ADR table authoritative and gated it. Not reopened here; check-adr-index.mjs is unmodified and still green.",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#194": {
+      "evidence_ref": "docs/architecture/decisions/2026-09-06-14-detached-probe-validation-seam.md",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "reference-only",
+      "source_file": "spec.md",
+      "title": "Cited only as the mission that added ADR-14 and its README row. Verified present in the table; no action owed here beyond referencing the record from llms-full.txt.",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#197": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/203",
+      "fr": "FR-001..FR-016",
+      "nfr": "NFR-001..NFR-003",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001..SC-011",
+      "scope": "in-scope",
+      "source_file": "spec.md",
+      "title": "[docs] llms.txt and llms-full.txt are a third and fourth ADR index, both stale and ungated",
+      "verdict": "fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

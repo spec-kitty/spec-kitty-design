@@ -1,0 +1,150 @@
+schema_version: "1.0"
+id: adversarial-squad-deployment
+name: Adversarial Squad Deployment
+
+# PROJECT OVERRIDE of the packaged adversarial-squad-deployment procedure.
+#
+# The packaged procedure states the squad "does not gate it", that "the orchestrator
+# opts in; nothing forces the squad", and names "Hard-wiring the squad as a gate" as an
+# anti-pattern. In the elements-first programme the operator has ruled the squad IS a
+# gate. Because the project DIRECTIVE_046 override references THIS procedure by id, an
+# agent following that reference would otherwise be told the thing it was just ordered
+# to do is a named anti-pattern. This override removes that contradiction at the source.
+#
+# Changes in substance: purpose, entry_condition, anti_patterns, notes.
+# Restated verbatim only to satisfy the standalone validator: exit_condition, steps.
+# Genuinely inherited by field-level merge on artifact id: references.
+# Scoped to this repository; nothing upstream changes.
+
+purpose: >
+  Deploy a small, bounded set of profile-loaded subagents in parallel at high-leverage
+  review point-cuts so independent doctrine lenses converge on findings no single
+  reviewer would catch. Turns review from one perspective into a cheap adversarial
+  panel that resists laziness, accidental-pass, and single-lens blind spots. PROJECT
+  OVERRIDE: in this repository the squad is a merge GATE, not optional enrichment. It
+  is required at every pull request, every dispatched lens must report before the merge
+  decision is taken, and its evidence is pinned to the head SHA it was taken against.
+
+entry_condition: >
+  A work product has reached a review point-cut (post-spec, post-plan, post-tasks,
+  pre-merge, or an ad-hoc design / decision check) and an independent multi-lens
+  assessment would reduce the risk of a costly miss (split-brain design, fakeable
+  test, missed scope, security gap, duct-tape fix). PROJECT OVERRIDE: at the pre-merge
+  point-cut the orchestrator does not opt in — the squad is required, and a pull
+  request is not merged until every dispatched lens has reported against the current
+  head SHA. At the planning point-cuts (post-spec, post-plan, post-tasks) the squad
+  remains advisory, as in the packaged procedure.
+
+# exit_condition and steps below are VERBATIM copies of the packaged 3.2.6rc4
+# procedure. They are unchanged in substance and would be inherited at runtime,
+# but `spec-kitty doctrine validate` validates each file standalone and rejects
+# the artifact without them. Re-diff against the packaged file after a CLI upgrade.
+exit_condition: >
+  Each delegate has returned a structured verdict; the orchestrator has synthesized
+  them (and, on a consequential divergence, taken a second opinion or adjudicated from
+  the source); the confirmed, convergent findings are recorded and the decision or
+  remediation is grounded in them.
+steps:
+  - title: Choose the point-cut and the question
+    description: >
+      Identify where in the flow the squad runs — pre-spec investigation, post-planning
+      brownfield check, post-tasks anti-laziness pass, pre-merge architectural sweep, or
+      an ad-hoc decision. State one sharp question the squad must answer.
+    actor: agent
+  - title: Select profiles by lens (bounded)
+    description: >
+      Pick 3-4 distinct profiles whose lenses are complementary (e.g. architect for
+      structure, debugger for live-evidence and coverage, reviewer for anti-laziness,
+      reducer for duplication, patterns for decomposition). Scale up only for an explicit
+      audit / comprehensive ask. More delegates is not better — distinct lenses are.
+    actor: agent
+  - title: Dispatch in parallel, profile-LOADED
+    description: >
+      Dispatch the delegates concurrently. Each delegate FIRST runs
+      `spec-kitty agent profile show <id>` and
+      `spec-kitty charter context --action <action> --json`, then applies the resolved
+      initialization, boundaries, directives, and tactics and states which it applied.
+      Loading the profile — not merely naming a persona — is the point. Only a read-only
+      harness that cannot invoke the CLI may read
+      `packs/built-in/agent_profiles/<id>.agent.yaml`; that degraded fallback can
+      diverge because overlays, `specializes_from` lineage, and `enhances`/`overrides`
+      semantics are not applied. Each delegate is read-only unless its task is an
+      isolated implementation in its own worktree.
+    actor: agent
+  - title: Require structured, non-fakeable output
+    description: >
+      Every delegate returns findings as "[SEVERITY] file:line - issue - recommendation"
+      ending in a verdict, grounded in concrete cited evidence, with honest concession of
+      where its lens does NOT apply. A steelman that over-claims is weak; an adversary
+      that concedes nothing is noise.
+    actor: agent
+  - title: Match model tier to task difficulty
+    description: >
+      Use the stronger model tier for analytical and adversarial lenses and the lighter
+      tier for mechanical or tracker work. Do not burn the top tier on bookkeeping, and
+      do not put the weakest tier on the hardest adversarial lens.
+    actor: agent
+  - title: Synthesize, and get a second opinion on divergence
+    description: >
+      Aggregate the verdicts. Where delegates disagree on a consequential point, do not
+      average — adjudicate from the source, or dispatch one more focused second-opinion
+      delegate. Be critical of any delegate with a known bias (e.g. a reducer that
+      prefers symptomatic consolidation over a structural fix).
+    actor: agent
+    on_failure: >
+      If verdicts remain irreconcilable, escalate the decision to the human with the
+      competing positions laid out; do not silently pick one.
+  - title: Record the convergent evidence and act
+    description: >
+      Capture the confirmed findings and the decision they ground — in the artifact, a
+      findings document, or a memory. The squad's value is convergent evidence that
+      survived independent scrutiny, not a single opinion.
+    actor: agent
+
+anti_patterns:
+  - name: Persona without profile
+    description: Naming a persona without loading its agent profile — a persona label is not a lens.
+  - name: Unbounded squad
+    description: Dozens of delegates for a question that 3-4 distinct lenses would answer; more delegates is not better.
+  - name: Averaging divergent verdicts
+    description: Averaging conflicting verdicts instead of adjudicating from the source or taking a focused second opinion.
+  - name: Trusting a biased delegate
+    description: Accepting a delegate's prescription despite a known bias (e.g. a duct-tape-prone reducer) without a critical pass.
+  - name: Model-tier mismatch
+    description: Top-tier model on mechanical or tracker delegates, or a weak tier on the hardest adversarial lens.
+  - name: Merging on a partial squad
+    description: >
+      Taking the merge decision while a dispatched lens has not reported. Replaces the
+      packaged "Hard-wiring the squad as a gate" anti-pattern, which this project's
+      doctrine deliberately inverts at the pre-merge point-cut. In this programme a PR
+      was merged on three of four lenses and the fourth then found two further gate
+      holes, so the partial squad is the defect, not the gate.
+  - name: Stale-SHA evidence
+    description: >
+      Carrying a squad verdict across a push. The verdict then certifies a tree that is
+      not the tree being merged, which certifies absence rather than review. Re-run the
+      affected lenses against the new tip.
+
+notes: |
+  Point-cuts in the SDD flow. PROJECT OVERRIDE: the pre-merge point-cut is a GATE in
+  this repository; the planning point-cuts remain optional and charter- or
+  memory-activated, and none of them change the mission type or its guards:
+  - after /spec-kitty.specify  -> pre-spec investigation squad (scope, prior art, live repros)   [advisory]
+  - after /spec-kitty.plan     -> post-planning brownfield squad (foldable issues, split-brain)  [advisory]
+  - after /spec-kitty.tasks    -> post-tasks anti-laziness squad (fakeable DoDs, decomposition)  [advisory]
+  - before merge               -> architectural-gate / cross-base sweep                          [GATE]
+  - ad-hoc decision            -> proponent + adversaries + synthesizer (e.g. delete-vs-migrate) [advisory]
+
+  Invariants: bounded (3-4), profile-LOADED, structured output, model discipline,
+  live-evidence-grounded, second-opinion on divergence. Added by this override at the
+  pre-merge point-cut: every dispatched lens reports before the merge decision, and the
+  verdict names the head SHA it was taken against.
+
+  KNOWN UNREACHABLE SURFACE. The operational dispatch recipe lives in the authored
+  harness skill 'adversarial-squad', which is installed outside this repository (at
+  ~/.claude/skills/adversarial-squad/SKILL.md) and states "it never gates a mission"
+  and "do NOT wire it as a mandatory gate". A project doctrine layer cannot reach it,
+  and its description is injected into an agent's context automatically — so on that
+  path the packaged optional framing still wins. Agents in this repository take the
+  project doctrine as governing; the divergence is filed upstream rather than papered
+  over here.

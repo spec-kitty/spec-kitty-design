@@ -1,0 +1,145 @@
+/* @spec-kitty/styles — sk-form-input, the adopted sheet for <sk-form-input> */
+/* All values use --sk-* tokens only — no hardcoded values */
+
+/*
+ * SUPERSEDED BY #139 — read the note below with that in mind. #79 renamed `.sk-btn` and
+ * `.sk-tag` outright on the operator's ruling, on the basis the programme records at
+ * elements-first-programme.md under `M14 · elements-first-release`, and ADR-8:83 — nothing
+ * was ever installed, so 1.0.0 is
+ * still free and a rename breaks no consumer. The reasoning below was right when written and
+ * its premise is now retired; the rename of `.sk-input`/`.sk-textarea` is DEFERRED with an owner (see ADR-10, form-field is
+ * deliberately styles-only) rather than owned by #141, which is closed
+ * rather than inherit the additive workaround, which currently leaves them authored twice.
+ *
+ * ADDITIVE. `packages/styles/src/form-field/` is untouched and stays exactly as published:
+ * @spec-kitty/styles is public at 1.0.0, and removing `.sk-input` or the eight HTML string
+ * exports would be a semver-major on a live package. This file is a NEW path with NEW class
+ * names, so a consumer of 1.0.0 sees only an addition.
+ *
+ * WHY THE CLASS NAMES CHANGED. scripts/check-adopted-css-boundaries.mjs requires every rule's
+ * leftmost compound to belong to the element adopting it — a `.sk-<element>` class, `:host`,
+ * `::slotted(`, or a bare `slot`. `.sk-input` owns nothing under `sk-form-input`, so the
+ * original sheet is rejected 16 rules out of 16 under this element's name. That gate is the
+ * only mechanical check on ADR-9's cross-boundary rule, and making ownership configurable by
+ * the file being checked would gut it — so the sheet conforms rather than the gate relaxing.
+ *
+ * TWO THINGS FROM sk-form-field.css DELIBERATELY DID NOT COME ACROSS:
+ *
+ *   `.sk-input.is-focused` — a class that fakes a state the browser owns. The static markup
+ *   needed it to show a focus state in a screenshot; an element that can have real focus has
+ *   no business shipping a simulation of one, and it tells the accessibility tree something
+ *   untrue. There is no `is-focused` in this file, and WP01's DoD asserts that by grep.
+ *
+ *   `min-height: var(--sk-space-30, 120px)` (the textarea rule) — `--sk-space-30` is defined
+ *   nowhere in @spec-kitty/tokens; the scale runs --sk-space-1..12. The fallback was the only
+ *   live value, which makes it a hardcoded 120px wearing a token's clothes — and `min-height`
+ *   is not in stylelint's strict-value property list, so nothing objected. It is resolved
+ *   against a real token where it reappears (sk-form-textarea.css, WP03).
+ *
+ * #321 — `.sk-form-input__control`'s resting-state border moved from `--sk-border-default`
+ * (a hairline that fails WCAG 1.4.11's ≥3:1 non-text floor on every surface in both themes) to
+ * the new `--sk-border-control` role, and gained `min-block-size: var(--sk-space-9)` (the 44px
+ * NFR-001 target-size floor). `.sk-input` in sk-form-field.css carries the identical values,
+ * mechanically kept in sync by tests/node/form-input-border-target-size-parity.test.ts.
+ */
+
+/* ── The field wrapper, inside the shadow root ─────────────────────────── */
+
+:host {
+  display: block;
+}
+
+.sk-form-input {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-2);
+}
+
+.sk-form-input__label {
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+  color: var(--sk-fg-default);
+}
+
+/* ── The control ──────────────────────────────────────────────────────── */
+
+.sk-form-input__control {
+  width: 100%;
+  padding: var(--sk-space-3) var(--sk-space-4);
+  background: var(--sk-surface-input);
+  border: var(--sk-border-width-1) solid var(--sk-border-control);
+  border-radius: var(--sk-radius-sm);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  color: var(--sk-fg-default);
+  outline: none;
+  /* --sk-space-9 is 3rem/48px — the closest token at or above the 44px NFR-001 floor.
+     The 44px contract is already satisfied without this declaration, but pinning it to
+     an exact 48px is not free. The static twin of this rule (.sk-input,
+     sk-form-field.css) is measured, in a real composition (packages/elements/src/patterns/work-explorer.stories.ts,
+     not the isolated Storybook story its own comment once wrongly generalised from), at
+     a natural content-driven height of 45px — the padding/border/line-height sum here is
+     identical by construction (FR-006's parity test enforces it), so the same 45px vs
+     48px relationship applies to this shadow-DOM control's real line-height context, even
+     though no baseline of this control in a real composition yet exists to decode
+     pixel-by-pixel (see apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts
+     for the rendered proof this WP does carry). Where a real composition shares this
+     control's grid row with a sibling already at 47px the floor costs 1px; where the
+     control has its own row it costs the full 3px. Do not delete this declaration after
+     measuring some OTHER content's height and finding it already >=48px without it — see
+     sk-form-field.css's identical comment for the full account of that exact mistake.
+     tests/node/form-input-border-target-size-parity.test.ts and
+     apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts (FR-007, broken
+     as padding+floor together) both depend on it staying declared. */
+  min-block-size: var(--sk-space-9);
+  transition:
+    border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    box-shadow var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+  box-sizing: border-box;
+}
+
+.sk-form-input__control::placeholder {
+  color: var(--sk-fg-muted);
+}
+
+/* Real focus only. The static sheet paired this with `.is-focused`; see the header. */
+.sk-form-input__control:focus {
+  border-color: var(--sk-border-focus);
+  box-shadow: var(--sk-shadow-focus);
+}
+
+.sk-form-input__control[aria-invalid="true"] {
+  border-color: var(--sk-border-control-invalid);
+}
+
+.sk-form-input__control:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Description and error ────────────────────────────────────────────── */
+
+.sk-form-input__description {
+  font-size: var(--sk-text-xs);
+  color: var(--sk-fg-muted);
+}
+
+/*
+ * The error text is the control's accessible description, so it must live in the SAME shadow
+ * root as the control — ADR-9 §4 measured that a cross-root `aria-describedby` does not
+ * resolve, because axe reads the attribute and scopes ID lookups to getRootNode().
+ *
+ * `:host([invalid])` rather than a `--error` modifier on an ancestor: the invalid state is
+ * owned by ElementInternals, reflected to the host, and this is the only selector form that
+ * can see it from inside. A descendant selector on a themed or state-carrying ancestor would
+ * be inert once adopted — that is the #72 defect, and the gate above now refuses it.
+ */
+.sk-form-input__error {
+  font-size: var(--sk-text-xs);
+  color: var(--sk-fg-error);
+}
+
+:host(:not([invalid])) .sk-form-input__error {
+  display: none;
+}

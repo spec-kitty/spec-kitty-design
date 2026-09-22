@@ -1,0 +1,51 @@
+# R2 mechanical merge and evidence-based dedup of the three analysis lens files.
+schema: review-findings/v1
+complete: true
+phase: analysis
+lens_group: merged
+mission: work-explorer-segmented-choice-styles-01M20C9F
+source_files:
+  - reviews/analysis-contradiction.findings.yaml
+  - reviews/analysis-coverage.findings.yaml
+  - reviews/analysis-runtime.findings.yaml
+deduplicated:
+  - kept: ANALYSIS-RUNTIME-001
+    merged: ANALYSIS-CONTRADICTION-001
+    reason: Both cite the same old-report frontmatter/prose mismatch; the higher severity and fuller runtime evidence were retained.
+findings:
+  - id: ANALYSIS-COVERAGE-001
+    lens: Complete requirement and success-criterion coverage
+    severity: 3
+    title: The old report generalized from requirement_refs and spot checks instead of explicitly covering every FR/NFR/C and SC ID
+    evidence:
+      - artifact: "old analysis-report.md §4 asserted a complete mapping but omitted most identifiers and did not treat SC-001–SC-011 as a separate outcome layer"
+      - artifact: "spec.md Requirements and Success Criteria contain 43 distinct identifiers: 16 FR, 6 NFR, 10 C, and 11 SC"
+    claim: The old analysis prose did not visibly substantiate its full-coverage claim even though the underlying WP carried the requirements.
+    remediation: Add an explicit, individually checked mapping for all 43 identifiers and state that requirement_refs covers FR/NFR/C while SC traceability lives in the WP body.
+  - id: ANALYSIS-COVERAGE-002
+    lens: Prior review-trail verification
+    severity: 3
+    title: The old report claimed direct verification of tasks decomposition findings without showing evidence for TASKS-DECOMP-001 or TASKS-DECOMP-002
+    evidence:
+      - artifact: "reviews/tasks-decomp.findings.yaml contains TASKS-DECOMP-001 and TASKS-DECOMP-002"
+      - artifact: "old analysis-report.md named the decomp round only in its blanket final claim"
+    claim: The old report did not demonstrate the direct re-inspection it claimed for the decomposition round.
+    remediation: Name both findings and show how the current T001–T018 structure resolves each original concern.
+  - id: ANALYSIS-RUNTIME-001
+    lens: Machine-readable analysis readiness
+    severity: 4
+    title: The old generated header recorded verdict unknown and no findings while the prose said READY with two advisory findings
+    evidence:
+      - artifact: "old analysis-report.md frontmatter: verdict unknown, null issue counts, findings []"
+      - artifact: "old analysis-report.md body: READY and findings A-001/A-002"
+      - code: "specify_cli/analysis_report.py parse_structured_findings and write_analysis_report require an analysis-findings/v1 carrier"
+    claim: The old input omitted the structured carrier, leaving its durable verdict inconsistent with its prose.
+    remediation: Regenerate once from a valid carrier whose low-severity tally matches A-001/A-002 and whose computed verdict is ready.
+  - id: ANALYSIS-RUNTIME-002
+    lens: Current implementation-gate behavior
+    severity: 5
+    title: The old unknown verdict did not itself block implement dispatch
+    evidence:
+      - code: "check_analysis_report_current validates artifact type and input hashes, not verdict"
+    claim: This lens entry explicitly describes the absence of a live implementation-gate defect.
+    remediation: No mission change; any future verdict-enforcement hardening belongs to separate Spec Kitty scope.

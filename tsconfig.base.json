@@ -10,12 +10,28 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
+    // MUST be false. With target ES2022 and this flag unset, TypeScript (and esbuild,
+    // which follows it) defaults it TRUE and emits native class fields — which shadow
+    // Lit's reactive-property accessors and silently break property-before-upgrade.
+    // packages/elements/project.json builds the shipped artifact with a bare
+    // `esbuild --bundle` that resolves this file, so this is not a test-lane concern:
+    // it is the artifact's. Asserted by tests/node/config-contract.test.ts.
+    "useDefineForClassFields": false,
     "module": "ES2022",
     "lib": ["ES2022", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@spec-kitty/tokens": ["packages/tokens/src/index.ts"],
+      "@spec-kitty/styles": ["packages/styles/src/index.ts"],
+      "@spec-kitty/elements": ["packages/elements/src/index.ts"],
+      // Generated Vue declarations index property-only fields through the narrow published
+      // ./dist/* subpath so packed consumers do not pull in the broad root declaration. CI's
+      // source-only typecheck runs before dist exists, so mirror that public subpath onto source
+      // here. The packed-consumer gate deliberately uses no tsconfig and cannot see this alias.
+      "@spec-kitty/elements/dist/*": ["packages/elements/src/*"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

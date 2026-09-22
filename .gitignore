@@ -7,11 +7,14 @@ packages/*/dist/
 !packages/tokens/dist/
 packages/tokens/dist/*
 !packages/tokens/dist/token-catalogue.json
-# publishability (2026-09-01 pre-publish audit, planning session): npm pack respects
-# .gitignore for re-inclusion, so CI-built dist trees for the other two publishable
-# packages need explicit exceptions or `npm publish` ships config files with no code.
-!packages/angular/dist/
-!packages/html-js/dist/
+# The 2026-09-01 pre-publish audit briefly un-ignored the package build trees,
+# believing npm pack would otherwise ship config files with no code. Tested in M2
+# and that is not so: both packages pack byte-identically either way, because
+# `@spec-kitty/styles` is governed by its package.json `files` allowlist. The
+# exceptions bought nothing and let a stray `git add -A` commit compiled output,
+# so they were removed. `packages/tokens/dist/token-catalogue.json` above is the
+# one deliberate exception: it is a published artifact consumers fetch directly.
+
 .nx/cache
 .nx/workspace-data
 
@@ -46,6 +49,7 @@ npm-debug.log*
 .kittify/charter/metadata.yaml
 .kittify/charter/references.yaml
 .kittify/dossiers/
+.kittify/encoding-provenance/
 .kittify/events/
 .kittify/merge-state.json
 .kittify/missions/__pycache__/
@@ -59,11 +63,21 @@ apps/storybook/storybook-static/
 playwright-report/
 test-results/
 
-# Angular CLI cache
-.angular/
+# Spec Kitty machine-local runtime state (build ids, pending-commit queue)
+.kittify/sync-state.json
 
 # Storybook debug log (runtime artefact, not source)
 debug-storybook.log
 
 # Design reference working files (not distributed)
 tmp/
+
+# Vitest browser-mode failure artifacts. Six of these were committed by a red-first run and
+# nothing referenced them; the __screenshots__ DIRECTORY also matched a *.test.ts glob, which
+# is why check-part-ratchet.mjs needs its isFile() filter.
+.vitest-attachments/
+**/__screenshots__/
+
+# Spec Kitty lane worktrees (created by `agent action implement`); never committed.
+# Without this the untracked dir fails the CLI recorder with DIRTY_WORKTREE.
+.worktrees/

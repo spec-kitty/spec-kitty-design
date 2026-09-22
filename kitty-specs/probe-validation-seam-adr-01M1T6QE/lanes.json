@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "mission_slug": "probe-validation-seam-adr-01M1T6QE",
+  "mission_id": "01M1T6QEYRZAMFQ12KRKX946X8",
+  "mission_branch": "kitty/mission-probe-validation-seam-adr-01M1T6QE",
+  "target_branch": "mission/probe-validation-seam-adr",
+  "lanes": [
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "docs/architecture/decisions/2026-09-06-14-detached-probe-validation-seam.md"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T01:59:27.897494+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01"
+  ],
+  "planning_commit_sha": "c2eb4631129b4e1e2699f125aa8540cf521b8cf0"
+}

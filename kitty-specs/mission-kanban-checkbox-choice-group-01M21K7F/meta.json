@@ -1,0 +1,32 @@
+{
+  "accept_commit": "227871dff171eb804582908a7cf327223989d18d",
+  "acceptance_history": [
+    {
+      "accept_commit": "227871dff171eb804582908a7cf327223989d18d",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-09T02:31:06.893038+00:00",
+      "accepted_by": "codex",
+      "accepted_from_commit": "ae003d0c9c68563eb65de70d705f2f977bba2e5a"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-09T02:31:06.893038+00:00",
+  "accepted_by": "codex",
+  "accepted_from_commit": "ae003d0c9c68563eb65de70d705f2f977bba2e5a",
+  "baseline_merge_commit": "27f8275a36d171c5d9a76055c4f0f654b065c1cb",
+  "created_at": "2026-09-08T22:46:41.902660+00:00",
+  "flattened": false,
+  "friendly_name": "Mission Kanban checkbox choice group",
+  "mission_id": "01M21K7FZE31HR2DSZSER0NJ7E",
+  "mission_number": 9,
+  "mission_slug": "mission-kanban-checkbox-choice-group-01M21K7F",
+  "mission_type": "software-dev",
+  "purpose_context": "Provide token-driven presentation for real fieldset, legend, label, and checkbox semantics while leaving state, counts, filtering, persistence, and actions entirely consumer-owned; deliver issue #277 as one independently reviewed work package and one PR into train/elements-first.",
+  "purpose_tldr": "Add a native styles-only checkbox choice group for bounded multi-select filters.",
+  "slug": "mission-kanban-checkbox-choice-group-01M21K7F",
+  "status_phase": "1",
+  "target_branch": "train/elements-first",
+  "topology": "lanes",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-08T23:20:24.296043+00:00"
+}

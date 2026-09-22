@@ -1,0 +1,13 @@
+source_id,source_type,title,location,authority,accessed_at,scope
+SRC-001,tracker,"Issue #147: delivery-return-metric-elements",https://github.com/spec-kitty/spec-kitty-design/issues/147,binding,2026-09-06,"mission intent, public contracts, scenarios, exit criteria"
+SRC-002,tracker,"Epic #144: Team overview stateless dashboard elements",https://github.com/spec-kitty/spec-kitty-design/issues/144,binding,2026-09-06,"architecture boundary, ownership, reuse, merge coordination"
+SRC-003,tracker,"Issue #76: elements-first authoring recipe",https://github.com/spec-kitty/spec-kitty-design/issues/76,binding,2026-09-06,"authoring workflow origin and exit criteria"
+SRC-004,local-doc,"ADR-9: Shadow DOM and styling API",docs/architecture/decisions/2026-09-02-9-shadow-dom-and-styling-api.md,binding,2026-09-06,"shadow boundary, parts, accessibility ownership"
+SRC-005,local-doc,"ADR-10: Distribution and canonical markup",docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md,binding,2026-09-06,"authored/generated boundaries, conditional static form"
+SRC-006,local-doc,"ADR-11: Verification and generated wrappers",docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md,binding,2026-09-06,"required behaviors, property/wrapper verification"
+SRC-007,local-doc,"Adding a component",docs/contributing/adding-a-component.md,binding,2026-09-06,"current generator, ratchet, story, and gate recipe"
+SRC-008,source,"Structured-property precedent",packages/elements/src/transition-matrix/sk-transition-matrix.ts,informative,2026-09-06,"readonly structured inputs and fail-closed validation"
+SRC-009,source,"React wrapper generator",scripts/build-react-wrappers.mjs,binding,2026-09-06,"property-only typing and generation constraints"
+SRC-010,source,"Manifest normalizer",scripts/normalise-manifest.mjs,binding,2026-09-06,"ReadonlyArray and attribute:false classification"
+SRC-011,source,"Existing reusable elements",packages/elements/src,informative,2026-09-06,"sk-card, sk-grid, sk-pill-tag contracts"
+SRC-012,design,"Approved Team overview Stitch project",https://stitch.withgoogle.com/projects/10134542414402054345,binding,2026-09-06,"visual hierarchy and density; named screen in issues #144/#147"

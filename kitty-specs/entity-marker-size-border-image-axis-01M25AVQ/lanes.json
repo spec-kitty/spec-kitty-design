@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "mission_slug": "entity-marker-size-border-image-axis-01M25AVQ",
+  "mission_id": "01M25AVQVYHFVMGW8SSAY53PG0",
+  "mission_branch": "kitty/mission-entity-marker-size-border-image-axis-01M25AVQ",
+  "target_branch": "mission/entity-marker-size-border-image-axis",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "expected-docs.json",
+        "expected-parts.json",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+        "mutations.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/src/entity-marker/sk-entity-marker.stories.ts",
+        "packages/elements/src/entity-marker/sk-entity-marker.ts",
+        "packages/styles/src/entity-marker/sk-entity-marker.css"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tracker-integration",
+        "workspace"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T09:55:40.976662+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "e4d8bc0524680466e8d940cf3aa0af212023a5b2"
+}

@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-10T18:18:22.586020+00:00",
+  "flattened": false,
+  "friendly_name": "public header styles",
+  "mission_id": "01M268NKZSKF1KHHJ00Z09M5R2",
+  "mission_number": null,
+  "mission_slug": "public-header-styles-01M268NK",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances public header styles on mission/public-header-styles so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "public header styles",
+  "slug": "public-header-styles-01M268NK",
+  "target_branch": "mission/public-header-styles",
+  "topology": "single_branch"
+}

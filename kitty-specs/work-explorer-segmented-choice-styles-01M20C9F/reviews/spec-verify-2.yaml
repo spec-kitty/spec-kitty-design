@@ -1,0 +1,19 @@
+schema: review-verify/v1
+complete: true
+phase: spec
+results:
+  - id: SPEC-FRESH-001
+    status: resolved
+    reason: >-
+      Edge Cases bullet now cites "FR-006 story 10" for narrow/wrapping, matching FR-006's actual
+      list position (recounted - items 1-13 with narrow/wrapping at 10), and the other "FR-006
+      story N" cross-references (story 7 for no-item-selected, and C-005's story 10) are also both
+      correctly numbered.
+
+  - id: SPEC-FRESH-002
+    status: resolved
+    reason: >-
+      The Storybook-title-root bullet now explicitly states CLAUDE.md section 6 "only lists the
+      six root names and does not state an interactive-vs-passive split" and attributes that
+      split to the spec's own judgment/precedent instead, matching section 6's actual text (pick
+      the closest existing root; no interactive/passive rule).

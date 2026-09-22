@@ -1,0 +1,1 @@
+Pre-merge adversarial probe of PR #187 @cde2fb8: built the element with esbuild and ran 9 targeted Chromium probes (attribute-removal, type-interaction, timing, readonly, message, datalist, real-keyboard badInput, React-19 wrapper path, declarative markup). 4 HIGH defects reproduced with native-input control comparisons; 2 verified one-line fixes; datalist seams all clean.

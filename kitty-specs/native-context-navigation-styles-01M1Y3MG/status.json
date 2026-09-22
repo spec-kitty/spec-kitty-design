@@ -1,0 +1,63 @@
+{
+  "event_count": 14,
+  "last_event_id": "01M1YGHEZ96SDRXSKMV3WEE8W1",
+  "materialized_at": "2026-09-07T18:01:59.529277+00:00",
+  "mission_number": "",
+  "mission_slug": "native-context-navigation-styles-01M1Y3MG",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 1,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "user",
+      "agent": null,
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 5,
+      "lane": "for_review",
+      "last_event_id": "01M1YGHEZ96SDRXSKMV3WEE8W1",
+      "last_transition_at": "2026-09-07T18:01:59.529277+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Forced only past Spec Kitty false-positive lane contamination: local planning_base_branch diverged after mandatory live-train rebase, so inherited #212/#259 kitty-specs were reported as lane-authored; git diff mission branch e1eb07a4..lane showed no mission-artifact edits in implementation commits. Pre-review coverage adapter also unavailable (tests.architectural._gate_coverage import failure). Implementation complete on PR #262 head 01488ad6166fcca0c482f15862457fdaa146437f; independent Codex review follows.",
+        "Independent Codex review of exact PR head 01488ad6166 identified no product defect; delivery evidence and commit-history gates require remediation.",
+        "Rejected review cycle 1: normalize history, complete exact-head zoom and Tier-C evidence, publish frozen hashes and current verification matrix.",
+        "Codex remediation cycle 1: resolve strict test-lint concession before final evidence and normalization.",
+        "Remediation cycle 1 code complete at ccc82e9dd2738821e4dc29224e39a23866be307b. Force is limited to the previously documented live-train lane-contamination false positive and unavailable architectural coverage adapter; final exact-head delivery gates and independent Codex review remain mandatory.",
+        "Tier-C pass 1 debugger-debbie reviewed exact normalized SHA 244bead3 and found two HIGH cross-state contrast/specificity defects.",
+        "Rejected review cycle 2: use a theme-responsive focus/current accent and preserve a distinct active cue for current links, with Chromium/Firefox regressions.",
+        "Codex remediation cycle 2 for the two evidence-backed Tier-C cross-state findings at 244bead3.",
+        "Codex remediation cycle 2 complete at dca5a994f8f7a2feffe8d4e32e8dc902851ac09b. Red reproduced both blocking findings in Chromium and Firefox; exact-commit green is 62 passed/6 intentional skips, strict lint/token/generator/type checks pass. --force overrides the known false planning-ref branch divergence caused by live-train reconciliation: the lane is intentionally based directly on latest origin/train/elements-first, while kitty/mission-native-context-navigation-styles-01M1Y3MG contains inherited unrelated #212/#259 history and is not a valid rebase target."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/256/kitty-specs/native-context-navigation-styles-01M1Y3MG/tasks/WP01-native-context-navigation-contract/review-cycle-2.md",
+        "reference": "review-cycle://native-context-navigation-styles-01M1Y3MG/WP01-native-context-navigation-contract/review-cycle-2.md",
+        "reviewer": "user",
+        "verdict": "changes_requested"
+      },
+      "role": "implementer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done"
+      }
+    }
+  }
+}

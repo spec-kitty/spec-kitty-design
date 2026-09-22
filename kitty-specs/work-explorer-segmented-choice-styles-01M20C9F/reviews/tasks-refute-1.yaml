@@ -1,0 +1,17 @@
+schema: review-refute/v1
+complete: true
+phase: tasks
+batch: 1
+verdicts:
+  - id: TASKS-DECOMP-001
+    verdict: confirmed
+    reason: Frontmatter role is implementer and T020 is listed in subtasks (lines 41-61, 95), yet T020's own body (lines 435-437) names the actor as "a human operator (the Tier-C pre-merge squad, run after T019's final push)" while the DoD (lines 463-464) correctly keeps the squad's separate evidence-post out of the T001-T020 numbering, and the cited form-select precedent's equivalent T004 (lines 199-211) is ordinary implementer work with no separate actor named.
+  - id: TASKS-DECOMP-002
+    verdict: confirmed
+    reason: T012 (lines 318-325) already re-runs both test.describe blocks and confirms every assertion from T001 and T006-T009 GREEN, and T013's own heading (line 327) literally reads "(folded into T012; kept as a distinct checkpoint)", so T013 adds no independent verification.
+  - id: TASKS-ORDER-001
+    verdict: confirmed
+    reason: Execution-order item 6 (line 141) groups T010-T012 under "land the remaining CSS" even though T012's own heading (line 318) is "Rebuild Storybook and re-run the live Playwright block to GREEN", and item 7 (line 143) attributes "rebuild Storybook again... re-run the live Playwright block until green" to T013, whose actual body (lines 327-330) only re-runs the narrower Chromium-only source-contract block with no rebuild command.
+  - id: TASKS-COVER-001
+    verdict: confirmed
+    reason: Grepping the WP file confirms FR-001 (line 6) appears nowhere else but the frontmatter and the generic FR-001..FR-016 range statement (line 118), and FR-002/FR-004 (lines 7, 9) likewise never appear tagged against any T00x heading or body sentence anywhere in T001-T020.

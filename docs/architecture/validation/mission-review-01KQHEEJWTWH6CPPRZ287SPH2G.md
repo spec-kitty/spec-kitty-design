@@ -60,7 +60,7 @@ This is a greenfield infrastructure mission on a new frontend monorepo repositor
 | FR-012 | Token usable via CDN link / no build step | WP02 | `exports: {".": "./dist/tokens.css"}` enables CDN; untested in CI | PARTIAL | RISK-1 |
 | FR-013 | All packages published under shared scope | WP02 | `.npmrc`: `@spec-kitty:registry=https://registry.npmjs.org/` | ADEQUATE | — |
 | FR-014 | `--sk-*` as single token authority | WP02, WP05 | Stylelint `declaration-strict-value` enforces; tokens.css verified | ADEQUATE | — |
-| FR-015 | Breaking token name change detectable | WP02 | `token-catalogue.json` generated but no diff-against-tag CI check | PARTIAL | DRIFT-3 |
+| FR-015 | Breaking token name change detectable | WP02 | `token-catalogue.json` generated; `scripts/check-token-breaking-changes.sh` now wired into `ci-quality.yml`'s `release-gate` on every PR (#435, #438) | ADEQUATE | — (was DRIFT-3, resolved 2026-09-12) |
 | FR-016 | Every PR triggers CI | WP07 | `ci-quality.yml` triggers on `pull_request` | ADEQUATE | — |
 | FR-017 | Stylesheet convention gate | WP05 | `stylelint.config.mjs` configured and verified | ADEQUATE | — |
 | FR-018 | Script convention gate | WP05 | `eslint.config.mjs` with security plugin | ADEQUATE | — |
@@ -148,6 +148,8 @@ This is a greenfield infrastructure mission on a new frontend monorepo repositor
 **Analysis**: FR-015 was accepted into the delivery contract with `Proposed` status in the spec. The implementation delivers the token catalogue (the enumeration mechanism) but not the detection gate. The requirement says "detectable AND blocked" — the blocked part has no automated enforcement. The WP02 note deferred this to a manual review process but created no tracking artifact. Per spec, this is a delivery gap: FR-015 is PROPOSED but has no automated enforcement today.
 
 **Required fix**: Create a GitHub issue tracking `scripts/check-token-breaking-changes.sh` implementation. Until that script exists, publishers must manually diff the catalogue before a release. Document this in `docs/contributing/running-quality-checks.md`.
+
+**Resolved (2026-09-12, #435/#438)**: `scripts/check-token-breaking-changes.sh` exists and is now wired into `ci-quality.yml`'s `release-gate` job on every PR (it previously existed but had no CI caller anywhere — the same "detectable but not blocked" gap this drift item names, one level later). `scripts/generate-token-catalogue.js --check` (also wired into `release-gate`) closes the adjacent gap that nothing verified the committed catalogue matched a fresh build. `docs/contributing/running-quality-checks.md` reflects the automated status. FR-015 is no longer PARTIAL.
 
 ---
 
@@ -264,7 +266,7 @@ Neither of these blocks using the infrastructure for local development or CI val
 ### Open items (non-blocking, addressed in follow-up)
 
 1. **DRIFT-2**: Add ADR-007 documenting the Storybook 10.x version adoption decision.
-2. **DRIFT-3**: Create a GitHub issue and implement `scripts/check-token-breaking-changes.sh` (FR-015 enforcement gap).
+2. ~~**DRIFT-3**: Create a GitHub issue and implement `scripts/check-token-breaking-changes.sh` (FR-015 enforcement gap).~~ **Resolved 2026-09-12 (#435, #438)**: the script exists and is wired into `release-gate`; see the FR-015 row above and the DRIFT-3 section's own Resolved note.
 3. **RISK-1**: Add a CDN consumption smoke test to Playwright suite.
 4. **RISK-2**: Update visual baseline strategy for cross-platform contributors (macOS).
 5. **RISK-3**: Replace single-URL axe scan with per-story story-iterator approach.

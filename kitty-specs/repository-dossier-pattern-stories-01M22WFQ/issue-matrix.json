@@ -1,0 +1,173 @@
+{
+  "rows": {
+    "#150": {
+      "evidence_ref": "PR #242 merged to train/elements-first as 5baff259ea5c5e1276cb717722bb0c603302abf3; #255 reuses its public Storybook pattern conventions without absorbing Team Overview behavior.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged public prerequisite",
+      "source_file": "spec.md",
+      "title": "[TKO6] team-overview pattern story — approved composition and data-integrity fixture",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#210": {
+      "evidence_ref": "PR #222 merged to train/elements-first as 1f587b78f95601d140210802a46ef6b00286cccf; #255 composes the public native-progress styles and leaves arithmetic consumer-owned.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged public prerequisite",
+      "source_file": "spec.md",
+      "title": "[TKW2] native progress styles — accessible completion over real <progress>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#212": {
+      "evidence_ref": "PR #252 merged to train/elements-first as 97317e294b802cfbaeeeb61867c59cad6b3e0bc9; #255 composes the public sk-action-row supporting region without changing its contract.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged Repository Dossier prerequisite",
+      "source_file": "spec.md",
+      "title": "[TKW4] compact work-item extensions — card-layout action row, compact marker, activity pulse, inline empty state",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#213": {
+      "evidence_ref": "PR #261 merged to train/elements-first as f026d6939e0a6037b8b5ad04cc97d53e3e7eecec; #255 composes public breadcrumbs and related detail primitives.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged Repository Dossier prerequisite",
+      "source_file": "spec.md",
+      "title": "[TKW5] Work Package detail primitives — breadcrumbs, prose, event history, and read-only checklist state",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#252": {
+      "evidence_ref": "Merged dependency PR #252 supplies issue #212's public action-row supporting region at 97317e294b802cfbaeeeb61867c59cad6b3e0bc9.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged prerequisite PR",
+      "source_file": "spec.md",
+      "title": "[TKW4] Compact work-item extensions",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#253": {
+      "evidence_ref": "Tracking epic #253 remains open until this final #255 child merges; closeout will check #255 and close the epic with final train evidence.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "programme closeout follow-up",
+      "source_file": "spec.md",
+      "title": "Epic: Repository Dossier — reusable navigation, responsive shell, and copy-control surfaces",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#254": {
+      "evidence_ref": "PR #268 merged to train/elements-first as 86058d912313360d78cdbcf66cbc4b034389a7b4; #255 verifies the public compact-navigation seam at 390px and 860/861px.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged Repository Dossier prerequisite",
+      "source_file": "spec.md",
+      "title": "[TKD2] sk-app-shell compact-navigation seam — mobile top bar and controlled drawer",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#255": {
+      "evidence_ref": "WP01 implements the complete issue #255 story family; exact candidate ae96c08ece00f3a7007fda17cd831bcede662d41 passed local gates and two independent Codex reviews. PR/merge evidence follows at delivery.",
+      "fr": "FR-001-FR-015",
+      "nfr": "NFR-001-NFR-009",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001-SC-012",
+      "scope": "current mission",
+      "source_file": "spec.md",
+      "title": "[TKD4] Repository Dossier pattern stories — approved truth and responsive state fixtures",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#256": {
+      "evidence_ref": "PR #262 merged to train/elements-first as 57e1f466afd3ead40523aa3d25d86b85eda87bce; #255 composes its native grouped and nested context navigation.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged Repository Dossier prerequisite",
+      "source_file": "spec.md",
+      "title": "[TKD1] Native context-navigation styles — grouped and nested navigation inside sk-context-sidebar",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#257": {
+      "evidence_ref": "PR #290 merged to train/elements-first as 57d1b083a6799fc5ef7f2cff75493a7f64fd59a3; #255 delegates exact-value copying and honest result feedback to sk-copy-field.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged Repository Dossier prerequisite",
+      "source_file": "spec.md",
+      "title": "[TKD3] sk-copy-field — accessible copyable code/value control",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#261": {
+      "evidence_ref": "Merged dependency PR #261 supplies issue #213's public detail primitives at f026d6939e0a6037b8b5ad04cc97d53e3e7eecec.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged prerequisite PR",
+      "source_file": "spec.md",
+      "title": "Work Package detail primitives",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#262": {
+      "evidence_ref": "Merged prerequisite PR #262 delivers issue #256 at 57e1f466afd3ead40523aa3d25d86b85eda87bce.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged prerequisite PR",
+      "source_file": "spec.md",
+      "title": "feat(styles): add native context navigation",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#268": {
+      "evidence_ref": "Merged prerequisite PR #268 delivers issue #254 at 86058d912313360d78cdbcf66cbc4b034389a7b4.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged prerequisite PR",
+      "source_file": "spec.md",
+      "title": "feat(elements): add compact app-shell navigation seam",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#290": {
+      "evidence_ref": "Merged prerequisite PR #290 delivers issue #257 at 57d1b083a6799fc5ef7f2cff75493a7f64fd59a3.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged prerequisite PR",
+      "source_file": "spec.md",
+      "title": "feat(elements): add accessible copy field",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    }
+  },
+  "schema_version": 1
+}

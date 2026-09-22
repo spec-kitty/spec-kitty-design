@@ -1,0 +1,28 @@
+{
+  "construct_kind": "host-container-type",
+  "component": "sk-action-row",
+  "declared_before_running": true,
+  "declaration_note": "Committed in its own commit before any run.mjs or result.json existed (spec FR-008, NFR-001).",
+  "static_exemplar_variants": {
+    "A-collapsed": ":host { container-type: inline-size } -> .sk-action-row { container-type: inline-size } on the same element that the @container block styles. The literal candidate-(a) transform plan.md declares.",
+    "B-wrapper": ":host -> a separate wrapper element .sk-action-row-host carrying container-type, wrapping the unchanged .sk-action-row root."
+  },
+  "pass_bar": "Same bar as host-attribute-axis: every declared outcome, including both composed sub-cases, must be reproduced by some static exemplar variant against the export-map-resolved built CSS.",
+  "declared_outcomes": [
+    { "id": "O1", "description": ".sk-action-row flex-wrap", "viewport_or_state": "host box 360px (below the 400px @container breakpoint)" },
+    { "id": "O2", "description": ".sk-action-row flex-wrap", "viewport_or_state": "host box 500px (above 400px)" },
+    { "id": "O3", "description": ".sk-action-row__trigger grid-template-columns", "viewport_or_state": "host box 360px" },
+    { "id": "O4", "description": ".sk-action-row__trigger grid-template-columns", "viewport_or_state": "host box 500px" },
+    { "id": "O5", "description": ".sk-action-row__trigger grid-template-areas", "viewport_or_state": "host box 360px" },
+    { "id": "O6", "description": ".sk-action-row__trigger grid-template-areas", "viewport_or_state": "host box 500px" },
+    { "id": "O7", "description": ".sk-action-row__metadata justify-self", "viewport_or_state": "host box 360px" },
+    { "id": "O8", "description": ".sk-action-row__metadata justify-self", "viewport_or_state": "host box 500px" },
+    { "id": "O9", "description": ".sk-action-row__controls width", "viewport_or_state": "host box 360px" },
+    { "id": "O10", "description": ".sk-action-row flex-wrap (COMPOSED: outer ancestor container-type:inline-size at 1200px, component box 360px)", "viewport_or_state": "composed-outer-wider" },
+    { "id": "O11", "description": ".sk-action-row__trigger grid-template-areas (COMPOSED: outer 1200px, component 360px)", "viewport_or_state": "composed-outer-wider" },
+    { "id": "O12", "description": ".sk-action-row flex-wrap (COMPOSED: outer ancestor container-type:inline-size at 320px, component box 700px)", "viewport_or_state": "composed-outer-narrower" },
+    { "id": "O13", "description": ".sk-action-row__trigger grid-template-areas (COMPOSED: outer 320px, component 700px)", "viewport_or_state": "composed-outer-narrower" }
+  ],
+  "engines": ["chromium", "firefox"],
+  "fidelity_crosscheck": "The controlled shadow page's O1/O3 values are additionally compared against the real Storybook story elements-skactionrow--default rendered from the built Storybook."
+}

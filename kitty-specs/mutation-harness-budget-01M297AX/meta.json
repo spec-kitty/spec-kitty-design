@@ -1,0 +1,29 @@
+{
+  "accept_commit": "c64d81f87d3a6cff465bb4813c0c007246c01c47",
+  "acceptance_history": [
+    {
+      "accept_commit": "c64d81f87d3a6cff465bb4813c0c007246c01c47",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-11T22:47:17.850698+00:00",
+      "accepted_by": "jeroennouws",
+      "accepted_from_commit": "215fca894e29ecc842dba04293e10da133ba5566"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-11T22:47:17.850698+00:00",
+  "accepted_by": "jeroennouws",
+  "accepted_from_commit": "215fca894e29ecc842dba04293e10da133ba5566",
+  "created_at": "2026-09-11T21:52:46.136367+00:00",
+  "flattened": false,
+  "friendly_name": "mutation harness budget",
+  "mission_id": "01M297AX1Q7A8EDGK8SYAZ2NAC",
+  "mission_number": null,
+  "mission_slug": "mutation-harness-budget-01M297AX",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances mutation harness budget on mission/mutation-harness-budget so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "mutation harness budget",
+  "slug": "mutation-harness-budget-01M297AX",
+  "status_phase": "1",
+  "target_branch": "mission/mutation-harness-budget",
+  "topology": "single_branch"
+}

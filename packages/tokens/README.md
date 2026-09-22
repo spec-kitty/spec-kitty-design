@@ -112,7 +112,13 @@ Using a surface token without its paired foreground token is a contract violatio
 
 ## Light Mode
 
-Add `data-theme="light"` to `<html>` or wrap content in a `.sk-light` class to activate the light mode token overrides.
+With neither root preference attribute nor JavaScript, the built `dist/tokens.css` follows the
+operating-system `prefers-color-scheme`. Set `data-theme="light"` or `data-theme="dark"` on
+`<html>` for an explicit root preference; a nested `.sk-light` class remains available for bounded
+documentation examples. The System fallback is generated from the same authored light block, so
+there is no second palette to maintain. The repository's
+`docs/design-system/using-components.md#theme-preference` section documents the pre-paint
+bootstrap and `sk-theme-toggle` integration.
 
 ## Linting
 

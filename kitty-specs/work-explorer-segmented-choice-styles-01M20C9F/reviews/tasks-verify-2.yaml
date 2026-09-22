@@ -1,0 +1,21 @@
+schema: review-verify/v1
+complete: true
+phase: tasks
+round: 2
+results:
+  - id: TASKS-FRESH-001
+    status: resolved
+    reason: >
+      Commit 65f1220 reassigns the manual 200%-zoom validation to the Tier-C pre-merge squad
+      everywhere it is mentioned (Goal section line 118-119's tie-break note, Execution order
+      lines 130-133, T009's cross-reference lines 282-283, T018 step 6's evidence-post note, and
+      the Definition of done bullet at lines 451-466), removes it from the frontmatter subtasks
+      list (stops at T018, lines 41-59) and from the numbered Execution order sequence,
+      matching how the squad's evidence-post responsibility is already excluded, and a grep
+      sweep confirms T001-T018 has no gap/duplicate and no stray numbered T019 reference. The
+      Definition of done bullet retains the full procedural detail: X11/XTEST real zoom, the
+      explicit exclusion of CSS-zoom/viewport-resize/device-scale/CDP-emulation substitutes, the
+      README deliverable path, the scrollWidth/clientWidth plus SHA-256 digest requirement, and
+      the issue-211/213 precedent, now correctly attributed to the squad rather than the
+      implementer, agreeing with plan.md's IC-04 Risks bullet (line 422) and Gate Enumeration
+      table row (line 477).

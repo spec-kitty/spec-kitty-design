@@ -1,0 +1,24 @@
+# review-verify/v1 — canonical format for fix-verification output.
+schema: review-verify/v1
+complete: true             # flipped after the yaml self-check passed
+phase: plan
+results:
+  - id: PLAN-SEQ-001
+    status: resolved
+    reason: IC-04's Sequencing/depends-on now splits into the source-contract block (IC-02 only, genuinely red-first runnable) and the LIVE block (IC-02 AND IC-05 plus a Storybook rebuild), and IC-01/IC-03's red-first narratives now state the real order (IC-02 + minimal CSS + first-pass IC-05 + storybook:storybook:build before live-block assertions run red).
+
+  - id: PLAN-SEQ-002
+    status: resolved
+    reason: IC-02's Sequencing/depends-on line now reads "Feeds IC-01 ... and IC-04/IC-05", matching the parenthetical about "Storybook stories and the Playwright spec".
+
+  - id: PLAN-VERIFY-001
+    status: resolved
+    reason: IC-04 gains a concrete "Visual-regression baseline authoring (FR-012/SC-007)" bullet naming apps/storybook/src/tests/visual.spec.ts and listing all required states (selected, unselected, hover, active, disabled, focus, long content, dark, light, forced-colors) as blocks this WP must author, plus IC-04's Affected surfaces and the Gate-enumeration row now reference that dependency explicitly.
+
+  - id: PLAN-VERIFY-002
+    status: resolved
+    reason: FR-003 and a pressed/selected computed-style-delta assertion (border/font-weight/shape vs. an unpressed sibling, non-colour-only, mirroring sk-nav-pill's --active precedent) now appear in IC-04's Purpose bullet and Relevant requirements, and IC-01's red-first sequencing paragraph now explicitly includes this assertion alongside hover/active/focus/disabled.
+
+  - id: PLAN-VERIFY-003
+    status: resolved
+    reason: Both plan.md citations of sk-transition-matrix.spec.ts (Technical Context and IC-04) now point at line 312, verified against the actual file where line 265 is the invariance test ("non-selectable selected data has zero interaction residue") and line 312 is the positive-delta test ("selectable rows expose positive hover, keyboard focus-visible, and active or pressed deltas").

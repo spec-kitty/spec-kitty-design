@@ -1,0 +1,128 @@
+{
+  "mission_slug": "release-pipeline-develop-line-01M292E3",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pending",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "diff -u .github/rulesets/develop-ruleset.json contracts/develop-ruleset.json empty; check-develop-ruleset-parity.mjs --selftest 6/6",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T23:24:45.127536+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "node scripts/check-ci-quality-trigger-parity.mjs (NFR-002/SC-003 static parity check, exit 0)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T23:24:53.307688+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "node scripts/check-gate-wiring.mjs: develop covered on pull_request.branches and push.branches, exit 0",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T23:24:54.321434+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "security job's if: (github.event_name != 'schedule' || github.ref == 'refs/heads/main') is the only branch-scoped job if:, unaffected by REL1 (parsed-YAML diff confirms no other job if:/needs: regressed, node scripts/check-ci-quality-trigger-parity.mjs)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T23:24:55.312504+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "bash scripts/check-action-pins.sh exit 0, all new actions (create-github-app-token, checkout, setup-node) SHA-pinned",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T23:25:03.289293+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "docs/architecture/branch-model.md 'GitHub Packages visibility' section records the 2026-09-11 ruling verbatim",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T23:25:04.285562+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "Corrected (F10, gate pass 2): FR-007(e) (results in a normal push event) is design-evidenced, not automated-test-evidenced \u2014 a real push event triggering REL2's rc-publish workflow cannot be observed before this PR merges and develop exists. Deferred to SC-005's real, post-merge, ten-cycle observation (branch-model.md's queries), owned by REL2 (#363). FR-007(a)-(d),(f)-(h) remain covered by node scripts/promote-develop.mjs --selftest (22/22 probes) as previously recorded.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-12T00:24:29.980826+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "This is a process gate satisfied by the operator's own act, not by code in this PR: ci-quality.yml's promote-develop job needs:[gate] and runs no code until PROMOTE_DEVELOP_ENABLED is set post-merge; the operator's approval of the implemented PR itself (this mission's PR) is the satisfying event and has not happened yet at the time of this WP report",
+      "pass_fail": "pending",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T23:25:20.478697+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "docs/architecture/branch-model.md added (main/train/develop, promotion invariant, GITHUB_TOKEN reasoning, packaging ruling, observation queries); one cross-link line added in elements-first-run-prompt.md",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T23:25:21.460266+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "Corrected again (V6, gate pass 4): probes 20 AND 22 both reach runCycle (probe 22 was added in the same fold that first made this correction, F1's end-to-end sweep probe) - not only probe 20. Still manual_review, not automated_test: writeStepSummary() silently no-ops when GITHUB_STEP_SUMMARY is unset (true for every local/selftest invocation), so this remains a code-reading verification (runCycle calls writeStepSummary(renderDecisionSummary(decision)) unconditionally at entry) plus console.log(JSON.stringify(decision)) as a second, always-active channel, not an automated assertion of rendered content.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-12T00:49:37.901989+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "No ruleset bypass actor is ever introduced for develop (C-005)",
+      "verification_method": "grep_absence",
+      "verification_command": "bypass_mode",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": ".github/rulesets"
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "No production-reachable --input fixture-injection seam remains in the promotion/ruleset-parity CLIs (M9)",
+      "verification_method": "grep_absence",
+      "verification_command": "'--input'",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "scripts/promote-develop.mjs scripts/check-develop-ruleset-parity.mjs"
+    }
+  ]
+}

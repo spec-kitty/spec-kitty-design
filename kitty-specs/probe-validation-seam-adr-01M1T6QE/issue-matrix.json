@@ -1,0 +1,89 @@
+{
+  "rows": {
+    "#122": {
+      "evidence_ref": "Follow-up: #122 (shared form-control-base) is named in ADR-14's 'Open Questions' section as one of the readers who needs the sanctioned-pattern-or-not answer this mission deliberately does not give. Not touched by this mission.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#176": {
+      "evidence_ref": "Cited only as the ADR-10 operator-override precedent this mission's own override notice matches; ADR-10's #176 section already ratified and merged prior to this mission.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#179": {
+      "evidence_ref": "Follow-up: #179 (sk-time-series-chart) is named in ADR-14's 'Open Questions' section as one of the readers who needs the sanctioned-pattern-or-not answer this mission deliberately does not give. Not touched by this mission.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#180": {
+      "evidence_ref": "The mission that shipped the detached-probe mechanism this ADR records, and the three-pass development history (research.md R2) this ADR's restated-alternative section cites as evidence. Already merged prior to this mission; documented, not re-decided, here.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#187": {
+      "evidence_ref": "The mission whose pre-merge gate raised #188 in the first place (the current shipped mechanism, including the badInput real-control exception and the #onInput unconditional-revalidate fix, is #187's work, already on branch point 1405e75). Documented, not re-decided, here.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#188": {
+      "evidence_ref": "This mission's own issue. Commit adds a new ADR (ADR-14) recording the descriptive mechanism, the pre-fix failure, the #onInput regression/fix, and the restated R2 alternative -- but deliberately does NOT settle #188's two 'what an ADR should settle' architectural questions (sanctioned pattern for #179/#122; the probe/control/setFormValue invariant), which the ADR states as open questions for the operator instead. See ADR-14's 'Open Questions' section.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#189": {
+      "evidence_ref": "Cited only as the ADR-11 operator-override precedent this mission's own override notice matches; ADR-11's #189 section already ratified and merged prior to this mission (commit 1405e75, this mission's branch point).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

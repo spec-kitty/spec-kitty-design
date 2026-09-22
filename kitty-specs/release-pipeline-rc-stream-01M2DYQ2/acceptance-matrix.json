@@ -1,0 +1,130 @@
+{
+  "mission_slug": "release-pipeline-rc-stream-01M2DYQ2",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pending",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "A push to `develop` builds the buildable set and publishes every publishable package to npm.pkg.github.com",
+      "proof_type": "automated_test",
+      "evidence": "release-rc.yml delegates to publish-packages.yml, which resolves the set via release-graph.mjs --dirs and publishes each. Asserted by check-release-graph.mjs (job `publish`); deleting the publish step, the derivation, or the caller are each refused (probes: 'not publishing at all', 'no workflow delegating to the payload at all').",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Evidence recorded; pass_fail stays pending until the payload executes once for real \u2014 nothing in this mission's diff has ever run."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "The publishing job declares `packages: write` \u2014 without it GITHUB_TOKEN cannot publish at all",
+      "proof_type": "automated_test",
+      "evidence": "publish-packages.yml declares `contents: read` + `packages: write`; checkPublishingCallersDelegate asserts every caller GRANTS at least what the payload declares, because the caller's block is a ceiling and a shortfall fails validation before the run starts. Probes: 'a caller granting less than the payload declares', 'a caller with no permissions block at all'.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Evidence recorded; pass_fail stays pending until the payload executes once for real \u2014 nothing in this mission's diff has ever run."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Versions bump in lockstep across all four publishable packages to the same next prerelease",
+      "proof_type": "automated_test",
+      "evidence": "bump-prerelease.mjs planBump/planNext; 27 probes. Deleting the bump step, or its --from-registry, are each refused by check-release-graph.mjs.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Evidence recorded; pass_fail stays pending until the payload executes once for real \u2014 nothing in this mission's diff has ever run."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "package-lock.json is regenerated in the same change so the workspace lockfile never drifts",
+      "proof_type": "automated_test",
+      "evidence": "main() runs `npm install --package-lock-only` once after all manifests are written, captures the output, and refuses with npm's last 12 lines on failure rather than proceeding. Verified by a review lens end-to-end.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Evidence recorded; pass_fail stays pending until the payload executes once for real \u2014 nothing in this mission's diff has ever run."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "The root .npmrc scope mapping points at npm.pkg.github.com, not registry.npmjs.org",
+      "proof_type": "inspection",
+      "evidence": "`.npmrc` sets @spec-kitty:registry=https://npm.pkg.github.com. The caller's `registry` input is additionally pinned to that host by checkPublishingCallersDelegate (probe: 'a caller repointing the stream at npmjs.org') \u2014 non-emptiness alone had allowed the stream to be moved to npmjs with every gate green.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Evidence recorded; pass_fail stays pending until the payload executes once for real \u2014 nothing in this mission's diff has ever run."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Publishing refuses over an empty package set, reusing release-graph.mjs's fail-closed accessors",
+      "proof_type": "automated_test",
+      "evidence": "The resolve step captures PROJECTS/DIRS into variables and asserts each non-empty before use; the audit and publish loops re-assert. Probe: 'a graph accessor that returns an empty array instead of throwing'.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Evidence recorded; pass_fail stays pending until the payload executes once for real \u2014 nothing in this mission's diff has ever run."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "The rc publish never writes dist-tag `latest`",
+      "proof_type": "automated_test",
+      "evidence": "The refusal is no longer a set of regexes over workflow YAML \u2014 four review passes defeated that, most sharply by reassigning TAG=latest after the input-derived line while satisfying every rule. It now lives in scripts/publish-derived-set.mjs: `latest` requires GITHUB_REF_TYPE=tag AND GITHUB_REF starting refs/tags/, the decision is branded with a module-private Symbol that the executor demands, and 7 EFFECT probes spawn the script against a stub npm and count invocations \u2014 those cannot be satisfied by a bypassed main(), which is how the previous version failed. The workflow side asserts the step runs the script bare, forwards env.DIST_TAG from inputs.dist-tag, and that nothing else publishes or runs `npm dist-tag add`.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Evidence recorded; pass_fail stays pending until the payload executes once for real \u2014 nothing in this mission's diff has ever run."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "The bump rewrites intra-scope peer ranges to a prerelease-admitting form (^1.1.0-rc.0)",
+      "proof_type": "automated_test",
+      "evidence": "admittingRange(); measured on the real tree as 12 range rewrites across 9 manifests, including two consumers declaring a bare `*` \u2014 which excludes prereleases exactly as a caret does. Without this the four packages could not resolve each other.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Evidence recorded; pass_fail stays pending until the payload executes once for real \u2014 nothing in this mission's diff has ever run."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "The bump asserts as a post-condition that every intra-scope range is satisfied by the new version",
+      "proof_type": "automated_test",
+      "evidence": "unresolvedRanges() keys on the version ACTUALLY WRITTEN rather than the intended one, computed via semver rather than by inspecting strings; covered in the 27-probe table.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Evidence recorded; pass_fail stays pending until the payload executes once for real \u2014 nothing in this mission's diff has ever run."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "release.yml publishes to GitHub Packages with credentials that exist, and claims no provenance it cannot produce",
+      "proof_type": "inspection",
+      "evidence": "Operator decision 2026-09-13. registry-url -> npm.pkg.github.com; packages: write added (absent before, so prod would have 403'd); NODE_AUTH_TOKEN -> GITHUB_TOKEN (no NPM_TOKEN secret has ever existed, verified via gh secret list with a control); --provenance and id-token: write removed as unsupported on this registry. checkRegistryAuthorityAgrees now reads setup-node registry-url from every inline publisher, so a reintroduced mismatch reds at PR time. FR-044's control relocates to actions/attest-build-provenance under #364 scope item 3.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Pending until a tag release actually runs. This is the production path and it has never executed under this configuration."
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant": "The rc stream never writes dist-tag `latest`",
+      "why": "The first publish of a package with no existing versions would claim the prod channel, and that cannot be undone.",
+      "guarded_by": "scripts/publish-derived-set.mjs (branded decision + two agreeing ref signals, 27 decision probes + 7 effect probes); check-release-graph.mjs asserts the payload's sole route and refuses `npm dist-tag add`"
+    },
+    {
+      "invariant": "A failed publish halts the loop rather than continuing",
+      "why": "The set publishes in topological order; continuing past a failure ships dependents against a peer version that does not exist, permanently.",
+      "guarded_by": "scripts/publish-derived-set.mjs publishAll() \u2014 halts on a real failure rather than accumulating; the loop moved out of the workflow when the publish became a script"
+    },
+    {
+      "invariant": "The payload never declares a permission above what its caller grants",
+      "why": "A called workflow declaring above the caller's ceiling fails workflow validation and the run never starts.",
+      "guarded_by": "checkPublishingCallersDelegate ceiling check"
+    },
+    {
+      "invariant": "No gate reports green over an empty set",
+      "why": "Standing repo rule; a green line over zero inputs is a defect.",
+      "guarded_by": "non-empty assertions in the resolve/audit/publish steps, plus a positive floor on delegating callers"
+    }
+  ]
+}

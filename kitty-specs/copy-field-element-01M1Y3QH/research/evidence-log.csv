@@ -1,0 +1,11 @@
+evidence_id,source_id,finding,decision,requirement_area
+EV-001,SRC-001,"Displayed and copied text share one value; event excludes the value","Use one reactive value and an outcome-only frozen detail object",exactness/privacy
+EV-002,SRC-006,"sk-button owns native button presentation","Adopt its sheet/classes for one native copy button rather than inventing a button family",composition
+EV-003,SRC-007,"Accessible label and focus must reach the native control","Apply aria-label to the real button and keep the host out of sequential focus",accessibility
+EV-004,SRC-008,"A tabindex on a focusable wrapper creates duplicate tab stops","Expose no host tabindex and use only tabindex=-1 on the manual selection target",keyboard
+EV-005,SRC-009,"Live-region role/node stability is required before message changes","Render one permanent polite atomic status node per instance",announcement
+EV-006,SRC-010,"sk-prose explicitly excludes copy-button behavior","Keep actionable copy fields separate from prose styling",scope
+EV-007,SRC-011,"D1/D2/D4/D6/D8 repeat compact copy fields; D2 wraps on 390px","Publish a block box with wrapping value and adjacent/reflowing native action",visual/responsive
+EV-008,SRC-002,"Shadow components expose tokens and declared parts","Use token-only CSS and documented field/value/control/status parts",styling API
+EV-009,SRC-003,"JavaScript-dependent behavior has no truthful static form","Omit a static markup module and document the JS boundary",distribution
+EV-010,SRC-004,"Behavior-bearing elements require surgical red-first coverage","Register applicable ADR-11 behaviors and mutation arms",verification

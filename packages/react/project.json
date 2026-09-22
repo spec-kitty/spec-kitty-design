@@ -1,0 +1,47 @@
+{
+  "name": "react",
+  "projectType": "library",
+  "sourceRoot": "packages/react/src",
+  "targets": {
+    "wrappers": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/build-react-wrappers.mjs"
+      },
+      "inputs": [
+        "{workspaceRoot}/packages/elements/custom-elements.json",
+        "{workspaceRoot}/scripts/build-react-wrappers.mjs",
+        "{workspaceRoot}/packages/react/.wrapper-floor"
+      ],
+      "outputs": [
+        "{workspaceRoot}/packages/react/src",
+        "{workspaceRoot}/packages/react/.wrapper-floor"
+      ]
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p packages/react/tsconfig.json --noEmit"
+      },
+      "inputs": [
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/type-tests/**/*",
+        "{projectRoot}/tsconfig*.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": [
+          "packages/react/type-tests/**/*.tsx",
+          "packages/react/src/**/*.d.ts"
+        ]
+      }
+    }
+  },
+  "tags": [
+    "scope:react",
+    "type:publishable"
+  ]
+}

@@ -1,0 +1,2256 @@
+{
+  "$comment": [
+    "One entry per required behaviour (#71, FR-008). scripts/suite-selftest.mjs applies each",
+    "to a COPY of the repo, runs the suite, and asserts the NAMED test goes red.",
+    "",
+    "`arm` names which assertion of a multi-arm behaviour this mutation is expected to red.",
+    "SC-014 is identity AND zero-<style>; SC-015 is three arms. One mutation cannot red them",
+    "all while staying collateral-clean, which is why guard 7 is a superset relation and not",
+    "set equality.",
+    "TWO ENTRIES ARE DELIBERATELY NOT THE OBVIOUS FORM, and the spec pins both:",
+    "  SC-015 is NOT 'replace define with an empty function' — that unregisters sk-stub and",
+    "  reds every other elements-owned test, failing the collateral bound on the mission's own",
+    "  canonical mutation.",
+    "  SC-014 is NOT 'hand-author a new CSSStyleSheet()' — the generated module already exports",
+    "  exactly that and Lit adopts it by reference, so identity survives and the test stays",
+    "`subject` (#73) names the test FILE whose [id] must go red. Behaviour ids are no longer",
+    "unique across the suite — sk-nav-pill and the synthetic fixture both carry SC-006 — so an",
+    "id-only match would let a mutation red the fixture's test and be credited for the",
+    "element's. Guard 7 now compares (id, subject) pairs against behaviours.json's subjects.",
+    "#77 adds two for <sk-grid>, one per registry id it claims. Both mutate the ELEMENT rather than the test: dropping part=\"grid\" must red the [SC-013] test, and emptying `static styles` must red [SC-014]. Note the SC-014 arm empties the array rather than swapping in a fresh CSSStyleSheet the way sk-stub's does — sk-grid.test.ts asserts adoptedStyleSheets.length, so both spellings red it, and the empty form also proves the length arm is load-bearing.",
+    "#77 adds two more for <sk-section-banner>. The SC-013 arm drops a part= attribute from a node the test targets by name; note it picks the DOT rather than the outermost part, because the outermost one is also a node the test queries to prove the element rendered at all, so removing it would red the test for the wrong reason.",
+    "#77's pre-merge gate added a SECOND SC-014 arm per element. The first arm empties `static styles`, which reds the `adoptedStyleSheets.length` assertion FIRST — vitest aborts there, so the identity assertion on the next line was never shown to be load-bearing, in the behaviour whose id is literally about identity. Swapping in a fresh CSSStyleSheet keeps length at 1 and can only red the identity arm. Both spellings are kept: one proves the length assertion, the other proves the identity assertion, and neither alone proves both.",
+    "#78 adds SIX: three for <sk-feature-card> and three for <sk-ribbon-card>. the SC-013 arm drops the CHIP's part rather than the card's, because the card part is also the node several other tests query to prove the element rendered at all. Both SC-014 spellings are carried FOR BOTH, per #77's finding that emptying the array reds the LENGTH assertion first and never exercises the identity one. An earlier revision of this PR carried both for feature-card and only the identity arm for ribbon-card, while this sentence claimed otherwise — three pre-merge lenses caught the asymmetry between the rule and its application.",
+    "#79 adds nine: three per component. sk-button's SC-013 arm drops the part from the ANCHOR branch, and was SEMANTICALLY INERT when first written — the [SC-013] test mounted without href, so it rendered the button branch and never saw the mutation. The harness said so and the test now exercises both branches, which is what a part rendered by two code paths needs. The check-bullet SC-013 arm drops the ICON's part rather than the bullet's, because the bullet part is also the node other tests query to prove the element rendered.",
+    "#140's pre-merge fold added two regression tests and then REMOVED the two mutations written for them. That was the right call, recorded so it is not retried — but an earlier revision of this note got the REASON wrong, and a lens corrected it. The wrong reason was 'this file holds one entry per required behaviour', which is false of this very file: 64 mutations cover 14 applicable behaviours, 16 of them carrying SC-014 and 14 carrying SC-013. The constraints that actually forbid these two entries are (a) guard 7 in scripts/suite-selftest.mjs, which keys on the `${id}@${subject}` PAIR and rejects any mutation naming a pair behaviours.json does not declare, so a mutation for a non-ADR-11 behaviour cannot be added without extending behaviours.json; and (b) guard 4, which requires the test that goes red to carry a [SC-NNN] marker — which these two deliberately do not. Binding them to SC-014 therefore reported 'semantically inert', correctly, since SC-014 is about style adoption. Marking the tests [SC-014] would be mislabelling; minting new ids would extend ADR-11's behaviour set, which #67 owns.",
+    "The two arms' red-first was demonstrated by DIRECT PROBE instead, and the measured output is recorded here because an earlier revision pointed a future maintainer at failure output that had never been written down anywhere. Reverting sk-button.ts to `href === undefined` gives: \"removing href should revert to a <button>: expected 'A' to be 'BUTTON'\". Reverting the tick in sk-check-bullet.css to `--sk-color-green` gives: \"the tick in light mode is 1.73:1 (rgb(143, 203, 143) on rgb(248, 245, 236)) - AA needs 4.5\". Dropping `.sk-light` from the light selector in tokens.css trips the shared theme guard in fixtures/.../contrast.ts: \"the themes did not resolve different surfaces - dark=rgb(13, 14, 17), light=rgb(13, 14, 17)\".",
+    "#78 adds three for <sk-blog-card>, and two are specific to the composition ruling: dropping sk-card's sheet reds the two-sheet identity assertion (and is the realistic regression — someone 'tidying' an import), and SWAPPING THE ORDER reds it too. That arm guards a CONVENTION rather than a current behaviour: the two sheets contest zero declarations, so a swap changes no computed style and the arm reds the structural identity-at-index assertion. An earlier revision of this note said order 'decides whose rules win where the two sheets touch', which was not true when written — two lenses caught it. The arm is kept because the moment either sheet grows a declaration the other sets, the order is what decides it. Neither is expressible for any other component in the repo.",
+    "#78's gate asked for a fourth blog-card arm dropping one `::slotted(` branch, and it is deliberately NOT added, for the reason #140 recorded above: guard 7 keys on a declared (id, subject) pair and guard 4 requires the red test to carry a [SC-NNN] marker. The arm that asserts slotted reach is a regression test, not an ADR-11 required behaviour, so binding it to SC-013 or SC-014 would mislabel it and minting an id would extend ADR-11, which #67 owns. The coverage is real either way and is doubled: the fixture asserts a computed style off a slotted node AND that the hover rule survives parsing, and check-adopted-css-boundaries now rejects `::slotted(x):hover` outright with three committed probes.",
+    "#77 adds THREE for <sk-site-footer>. The SC-013 arm drops the DIVIDER's part rather than the footer's, because the footer part is also the node other tests query to prove the element rendered at all — the same reasoning check-bullet's arm records. Both SC-014 spellings are carried, per #77's own earlier finding: emptying the array reds the adoptedStyleSheets.length assertion FIRST and vitest aborts there, so the identity assertion on the next line is never shown to be load-bearing in the behaviour whose id is literally about identity. Swapping in a fresh CSSStyleSheet keeps length at 1 and can only red the identity arm.",
+    "#77's pass-2 gate asked for a FOURTH site-footer arm covering the conditional divider, and it was written, bound to SC-013, and then REMOVED — the harness correctly reported it 'semantically inert'. Forcing the divider to always render does not break SC-013, which is 'every declared part is targetable': the part is still present and still targetable. The conditionality is a regression guard, not an ADR-11 required behaviour, so it has no (id, subject) pair to bind to and guard 4 has no [SC-NNN]-marked test to red. Third time this programme has reached that boundary (#140, #143, here), and the answer is the same each time: the coverage is real — `the divider is drawn only when there is a legal line to divide` asserts absence, whitespace-only, and the property arriving later — it is simply held by a test rather than by the harness. Minting an id would extend ADR-11's behaviour set, which #67 owns.",
+    "#182 adds two for <sk-page-header>, one per axis, and both mutate the ELEMENT rather than the test. Each flips `reflect: true` to `reflect: false` on one of the two new reactive properties; the named [SC-010] test asserts the pre-upgrade value reaches the ATTRIBUTE, so each arm reds it on its own. The sticky arm is not merely a reflection check: the sticky geometry is expressed as `:host([sticky])` — it HAS to be on the host, because an inner box's containing block is the host and it cannot move inside it (measured) — so an unreflected `sticky` is a sticky axis that silently does nothing. NO THIRD ARM FOR THE REFLOW THRESHOLD, and that is a stated gap rather than an omission: guard 7 requires every mutation's (id, subject) pair to be declared in behaviours.json, and tests/node/config-contract.test.ts asserts that file's applicable id set equals ADR-11's list exactly. ADR-11 has no id for a responsive/threshold behaviour, so the drop blocks are covered by ordinary tests here and by apps/storybook/src/tests/sk-page-header-sticky.spec.ts, and the registry gap is filed as an issue rather than closed by mis-filing a layout assertion under a reflection id.",
+    "#146 WP01 adds ELEVEN arms: one part removal and two independent style-adoption arms for each of three primitives, plus one late-upgrade property-registration removal each for status tone and entity label. Section-header is slot-only and does not claim SC-010.",
+    "#146 WP02 adds SEVEN sk-action-row arms: duplicate dispatch, wrong detail, false bubbling/composed flags, pre-upgrade rowId registration loss, one non-root part removal, empty styles, and fresh-sheet identity. There is no cancellation arm because SC-009 is inapplicable.",
+    "#146 WP03 adds ONE generated react-action-row arm that removes the wrapper listener inside the harness copy. The four element subjects contribute 18 mission arms and this wrapper contributes the nineteenth.",
+    "#177 adds TWO for <sk-card>, one per id it now claims, and both mutate the ELEMENT rather than the test. The SC-013 arm replaces the status fail-open branch with a THROW — the exact regression sk-card.markup.ts records at length, and the only mutation in this file whose red is the ABSENCE of a part rather than a wrong value: Lit rejects updateComplete, render() returns no tree, and `[part=\"card\"]` is not in the shadow root to target. That is why the [SC-013] test mounts BOTH a plain and an unknown-status card; with only the plain one it would have stayed green through the throw, which is the certifying-absence class this harness exists to catch. The SC-010 arm flips reflect on `status`: the named test asserts the pre-upgrade value reaches the ATTRIBUTE, so an unreflected status is an axis that does nothing outside the shadow root, and no static consumer or CSS author can see it. NO ARM FOR THE VOCABULARY ASSERTION, deliberately: guard 7 keys on a declared (id, subject) pair and guard 4 requires the red test to carry an [SC-NNN] marker, and there is no ADR-11 id for 'two components share one enum'. Binding it to SC-013 or SC-010 would mislabel it and minting an id would extend ADR-11's behaviour set, which #67 owns. The coverage is real either way — the test compares Object.keys(CARD_STATUSES) to STATUS_TONES by value and order — it is simply held by a test rather than by the harness. Fourth time this programme has reached that boundary (#140, #143, #77, here); the answer has been the same each time.",
+    "#147 WP03 adds exactly two SC-013 arms, one per newly recorded subject. Each removes a non-root part from the authored element inside the harness copy and must red the existing all-parts fixture assertion without creating a new behaviour id or SC-014 pair. On the refreshed train after #177, total mutations move 132 -> 134.",
+    "#178 adds TWELVE arms for <sk-notice>, all mutating the ELEMENT. Three need their reason recorded.\nTWO SC-010 ARMS. The first flips `reflect` on `tone` — the ordinary property-before-upgrade arm. The SECOND deletes `message` from `static properties` and is the arm this mission exists for: it reproduces the defect sk-form-input.ts records twice. Measured red: `expected 'Retrying in 5s' to contain 'Retrying in 2s'` — a STALE MESSAGE. It also reds the UNMARKED re-announcement test, which costs nothing because isBehaviourTest keys on the [SC-NNN] marker, so an unmarked test is invisible to the collateral bound. That is how the announcement contract gets harness coverage without minting an id ADR-11 does not have.\nTHE FIRST expectCollateral IN THIS FILE, on the SC-012 arm. Deleting `this.focus()` reds [SC-012] AND the uncancelled contrast branch of [SC-009] — a property of the DESIGN, not of test hygiene: the element does not remove itself, so the only default action a cancelable dismiss can prevent is the focus move, which makes focus the one behaviour those two ids share. Guard 5 inverts on the flag and requires the collateral to occur, so it asserts rather than exempts. The [SC-012] assertion had to be moved INSIDE the shadow root first: CI measured the arm 'semantically inert' against the original `document.activeElement === element`, which holds whether or not focus moves, because focus on a node inside a shadow root already reports the host.\nSC-013 drops the CONTENT part, not the root `notice` part (the node other tests query to prove the element rendered) and not `marker` (which [SC-011] reads aria-hidden from). Both SC-014 spellings are carried, per #77's finding.",
+    "#216 KEEPS the vocabulary assertion this file's #177 note describes, and adds NO arm. The first revision of this entry said the assertion had been removed because a fork was \"no longer REPRESENTABLE\"; that was measurably false and a pre-merge reviewer falsified it in one edit. What #216 removed is one SHAPE of fork — two authored lists that can drift apart. CARD_STATUSES is now Object.fromEntries(STATUS_TONES.map(...)), so there is no second list. But the derivation is an EXPRESSION and nothing gates the expression: appending ['rogue','sk-card--status-rogue'] inside the fromEntries argument keeps the index-signature type, so the cast stays clean, typecheck-all passes for five projects, build-element-markup regenerates and WRITES SkCardStatusRogueHTML with a class in no stylesheet, and check-adopted-css-boundaries, check-element-css-hygiene, check-no-css-in-source, check-elements-entries, check-manifest-content, check-part-ratchet and htmlhint all stay green. The order-sensitive equality in fixtures/elements-behaviour/src/sk-card.test.ts is the only thing that reds, and it is verified to red on exactly that edit. Note the sibling BEM-family test CANNOT stand in for it: it derives its expectation from the key under test, so it is self-fulfilling for any key, 'rogue' included. So the boundary the #177 note named — a real claim with no ADR-11 id, the fourth time (#140, #143, #77, #177) — is UNCHANGED and still held by an ordinary test rather than by this harness. The count is unchanged for the same reason it was then: guard 7 keys on a declared (id, subject) pair and guard 4 requires an [SC-NNN] marker, and there is still no id for 'the expression that derives one component's map from another's vocabulary'.",
+    "#148 WP03 adds NINE bar-chart arms: seven element arms cover duplicate dispatch, exact detail, bubbling/composed flags, property-only series registration, label part exposure, and the independent stylesheet length and identity contracts; two React arms cover the generated listener and property bridge.",
+    "#196 AND #204 ADD TWO IDS AND THIS FILE IS WHERE THE COST SHOWS. THREE CHANGES, none of them additive-only.\n(1) SC-016 (delegate/rendered-control correspondence) is carried by the arm that was already here as SC-003 'probe type assigned before value' — RE-KEYED, not duplicated. ADR-14 calls that defect 'the clearest instance' of the two sources disagreeing, so it was always a correspondence arm; it was filed under SC-003 because no other id existed. SC-003 keeps eleven arms and its own tests, so nothing is left uncovered by the move.\n(2) The SC-013 arm 'constraint attribute reaches the inner control' is RE-SITED from `pattern=${nothing}` to `inputmode=${nothing}`. Measured, not assumed: dropping `pattern` from the rendered control reds the [SC-013] forwarding test AND the [SC-016] correspondence test, because with item 10 in force it IS a correspondence defect — the probe still holds the constraint the control lost. `inputmode` reaches no validity at all, so the arm reds the forwarding test alone. The [SC-013] test asserts six forwarded attributes and the arm drops one of them either way, and the `pattern` case is not left unwatched: it is measured red by the [SC-016] test.\nWHY NOT expectCollateral: it would have removed guard 5's blast-radius bound from three surgical arms (the merged-flag loop, the probe value sync, and this one) to make room for one new id. Naming both ids on the shared test does the same work without weakening anything, and `[SC-002][SC-003] a readonly control still submits` is the precedent for a dual-marked test in this very file.\n(3) SC-017 (responsive threshold) gets TWO arms, one per documented threshold, and both mutate the GENERATED packages/elements/src/page-header/sk-page-header.css.js. That is forced rather than chosen: the test job never builds, so an arm against the authored packages/styles/src/page-header/sk-page-header.css would be semantically inert — SC-010's arm against generated packages/react/src/SkTransitionMatrix.js is the precedent for mutating a generated artefact. The HEIGHT arm reds ONE test where the WIDTH arm reds two, and that asymmetry is the measurement #182 wrote two separate @media blocks to obtain: only the width threshold is reachable live at the lane's 414px viewport, so the height block is falsifiable only through the sheet-reading assertion, and joining the two conditions would make it unfalsifiable altogether.",
+    "#179 adds EIGHT sk-time-series-chart arms, all mutating the ELEMENT; total 157 -> 165 on the refreshed train after #235. Three need their reason recorded.\nTHE SC-013 ARM IS THE MISSION'S REQUIRED RED-FIRST GAP MUTATION. It rewrites `asSupplied`, the single named seam every part of the GRAPHIC reads the series through, to drop the null points — the textbook interpolation defect, and the exact change a maintainer makes when a broken line looks like a bug. The line then joins straight through and the `gap` part stops existing, so the named [SC-013] test reds on a part's ABSENCE. The published TABLE deliberately does not read through that seam, so the arm is confined to the drawing and cannot be laundered by the table still saying 'No data'. sk-card's #177 arm is the precedent for an absent-part red, and its note explains why the fixture must MOUNT the part: with a dense-only mount this test would stay green through the defect. Measured red-first before the PR opened, with zero MARKED collateral — the first draft also reddened [SC-010], and the [SC-010] assertion was moved rather than the arm weakened, because an arm that reds two marked behaviours cannot say which one it proves.\nTHE SC-009 ARM flips `cancelable` to false. The [SC-008] test deliberately does NOT assert cancelability — it asserts bubbles and composed — so this arm reds the behaviour that depends on the flag and nothing else marked. The unmarked controlled-selection test also reds, which costs nothing: isBehaviourTest keys on the [SC-NNN] marker.\nTHE SC-010 ARM comments out `series: { attribute: false }`. That is the property-only registration the React wrapper's first-render delivery depends on; without it the class field initializer wins over a value assigned before upgrade, and the named [SC-010] test reds on the series identity. NO NINTH ARM FOR THE PUBLISHED TABLE, and that is a stated gap: 'every value is present without hover or focus' is a real claim with no ADR-11 id, so it is held by an ordinary test rather than by this harness — the same boundary #140, #143, #77, #177 and #216 reached, with the same answer.",
+    "#213 adds TWO sk-check-bullet SC-010 arms. The reflected-property arm proves pending assigned before definition reaches the host attribute. The canonical-presentation arm forces every runtime state back to complete; the late-upgrade test then reds class, default glyph and accessible state text from one mutation without inventing a new behaviour id. Unmarked state tests may also red, but guard 5 remains bounded because they claim no unrelated ADR-11 id.",
+    "#254 makes sk-app-shell's three inherited arms explicit alongside THIRTEEN new compact-presentation arms, for SIXTEEN app-shell arms in total. Four declare measured collateral because the product contracts share the same effective-open and accepted-dismissal paths; guard 5 still inverts and requires that collateral. Removing the generated sheet (SC-014) also removes the compact visibility rule asserted by SC-012. Forcing the controlled open value false (SC-010) necessarily enters the accepted-close focus behavior asserted by SC-012. Dispatching a second dismissal (SC-006) invokes the consumer's close handler twice and disturbs the SC-012 accepted-focus sequence. Removing composed propagation (SC-008) also prevents the nearest-shell SC-006 ownership assertion from observing the dismissal outside the inner shadow root. These are source-level couplings, not broad exemptions; later review-cycle isolation below records three further shared-path arms.",
+    "#254 FINAL-REVIEW FIX adds one seventeenth app-shell arm, moving the refreshed standing set from 186 to 187. It removes only the new true-to-false controlled-close focus release. The named [SC-012] test covers both an ordinary close and rejected-Escape-then-route-close in one behavior test, so this arm reds that test without marked collateral while accepted Escape still restores its trigger through the separate pending-dismissal path.",
+    "#254 FINAL REVIEW-FIX CYCLE adds an eighteenth app-shell arm, moving the refreshed standing set from 187 to 188. It weakens only the removal half of the presentation converter back to Lit's default null result. The named [SC-010] test starts through attribute authoring and proves the public omitted property state, warning behavior, legacy visibility, compact hiding, and focus release; existing pre-upgrade property authoring still proves reflection in the other direction.",
+    "#254 POST-CI WEBKIT FIX adds THIRTEEN SC-012 app-shell arms, moving the refreshed standing set from 188 to 201. They cover synchronous reconnect, disconnect restoration, exact raw absent and present attribute restoration, all four effective-exposure decisions, the disconnected slot-event guard, and all four slotchange bindings. The implementation deliberately snapshots exposure attributes when a directly assigned root becomes inactive rather than observing consumer mutations: the named [SC-012] test proves a write made while suppressed cannot replace the saved pre-suppression values, and the consumer documentation states that ownership boundary.",
+    "#254 REVIEW-CYCLE 5 adds FIVE app-shell arms, moving the standing set from 201 to 206. Three SC-012 arms independently break original-snapshot inheritance, current-owner restoration, and active-destination release during cross-shell handoff. One SC-006 arm removes nearest-shell Escape claiming without stopping the original key event. One SC-017 arm changes only the compact logical container feature back to physical width; the pre-existing 860-to-859 CSS arm remains separate so logical-axis parity and inclusive-threshold semantics are independently falsifiable.",
+    "#254 REVIEW-CYCLE 6 adds FOUR arms, moving the standing set from 206 to 210: generated compactTrigger omission resets null; component acceptance waits one microtask for the current React commit; omitted React false is accepted as closed; and an ordinary omitted-false route close releases hidden focus. Each new arm is exact and omits expectCollateral.",
+    "#254 REVIEW-CYCLE 6 COLLATERAL ADJUDICATION records the reproduced exact-7aa outcomes without changing product behavior. The presentation-reflection, native controlled-close release, and compact-header exposure mutations all red the integrated React SC-012 fixture, so each declares required collateral. The old native subject stays green when the closed-render await is removed, while the React SC-012 fixture alone reds; that arm is therefore retargeted to react-app-shell without collateral.",
+    "#272 adds exactly THREE sk-action-row arms, moving the refreshed standing set from 210 to 213. Two SC-010 arms remove the new href and presentation registrations independently so the extended pre-upgrade test proves each public axis remains reactive and reflected. One SC-006 arm attaches the existing selectable request path to the route anchor; the mixed-state negative case then proves native route mode emits zero custom activation events. No SC-007/SC-008 route arms exist because an event with no dispatch has no independently falsifiable detail or propagation flags.",
+    "#257 CYCLE-2 COLLATERAL ADJUDICATION records the exact-e5202f4 outcome after the container-responsive SC-017 test was added. Both SC-014 stylesheet-adoption mutations necessarily remove or replace the local sheet that owns the @container rule, so the named SC-014 identity/length assertion and the SC-017 live-layout assertion red together. Each declares required collateral; guard 5 still inverts and will fail if the layout test ever stops proving that stylesheet dependency.",
+    "#257 POST-CI WEBKIT FIX adds one SC-012 arm, moving the refreshed standing set from 225 to 226. The old document Range/addRange fallback could not select a node inside WebKit's closed shadow root; the shadow-inclusive Selection.setBaseAndExtent path now owns the exact visible node and full child range. The named [SC-012] fixture asserts both endpoints, so collapsing the focus offset to zero reds that behaviour without marked collateral.",
+    "#274 adds TEN app-shell arms over the existing ADR-11 subjects and ids, moving the post-#257 standing set from 226 to 236, and retargets three #254 arms onto the expanded shared expressions they already own. Recognition, the TypeScript 1100 boundary, rail-specific personal/context/header exposure, the shared responsive-navigation derivation, the generated CSS logical/inclusive boundary, the rail-plus-content grid, and the rail-preserving forced-colors selector each have a unique source anchor. The existing presentation-focus, context-exposure, and header-exposure arms now mutate their shared responsive equivalents, so they continue guarding compact while also reaching the additive mode. The shared responsive-navigation derivation deliberately declares collateral: its red-first equivalent was the pre-implementation rail-preserving run, where the new SC-006, SC-012 and SC-017 assertions all failed together while every retained app-shell assertion stayed green. No new behavior id is minted for layout, forced colors, or the public TypeScript union; those remain assertions at their real browser/type surfaces under the existing responsive-threshold id.",
+    "#274 FINAL REVIEW CORRECTION retargets the existing #254 presentation-focus arm and adds one slot-reassignment focus-release arm, moving the integrated standing set from 236 to 237. The exposure-matrix implementation now releases focus explicitly from every assigned region that the destination hides, instead of relying on browser-specific inert/hidden behavior for non-navigation regions. Its SC-012 tests prove the navigation-retained case; personal, context, compact-header, and compact-navigation releases; and release before a reassigned destination root is suppressed. The existing compact-navigation/open arm now declares measured collateral: replacing controlled-open exposure with the compact-layout predicate made 16 tests in the same native app-shell fixture fail, and every failure carried SC-012 because slot reconciliation, lease transfer, controlled close, rail exposure, boundary transitions, and destination-hidden focus all consume that one exposure decision.",
+    "#308 adds six sk-confirm-dialog arms: SC-005 (focus does not return to the invoker), SC-006 (confirm fires a duplicate close), SC-007 (confirm loses its explicit outcome), SC-013 (the confirm part is renamed), SC-014 (neither adopted sheet is composed), and SC-015 (module registration stops preserving constructor identity). All six are demonstrated red-first against fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts.",
+    "Correction: the confirm-dialog focus-return arm (\"focus does not return to the invoker on close\") was filed under SC-005 (form association), matching behaviours.json's own now-corrected mislabeling. Re-keyed to SC-012 (focus and keyboard), the id its test is actually marked with.",
+    "#302 adds ONE for <sk-pill-tag>: the SC-010 arm flips `reflect` on `status`, mirroring sk-card's #177 SC-010 arm exactly. The named [SC-010] test asserts a pre-upgrade property assignment reaches the ATTRIBUTE, so an unreflected status is an axis that does nothing outside the shadow root and no static consumer or CSS author can see it. NO ARM FOR THE VOCABULARY ASSERTION, for the same reason #177's own note on this file records: guard 7 keys on a declared (id, subject) pair and there is no ADR-11 id for 'two components share one enum', so `Object.keys(PILL_TAG_STATUSES)` equals `STATUS_TONES` is held by an ordinary test rather than by this harness.",
+    "#302 updates the pre-existing SC-013 \"pill-tag part present\" arm's `from`/`to` strings: render() now calls `pillTagClasses(this.variant, this.shape, this.status)` with the new third argument, so the old two-argument literal no longer occurs in the source and the arm would apply nothing. The claim under test (the declared part survives) is unchanged.",
+    "#305 adds one sk-button SC-013 arm for the new busy-cue part, on the BUTTON branch specifically — the existing sk-button SC-013 arm already covers the ANCHOR branch (`part=\"button\"` there), so this one exercises the other branch rather than duplicating it. `from` is the exact rendered line including its 10-space indent, matched byte-for-byte against the shipped sk-button.ts; the mutation drops only the `part=\"busy-cue\"` attribute, leaving the class (and therefore the cue's own visibility/animation) untouched, so the arm reds specifically on the extended [SC-013] test's outside-targetability assertion rather than on any geometry or visibility assertion.",
+    "#323's pass-5 remediation adds six sk-theme-toggle arms. Four are SC-012 state tracking over the new document-scoped coordinator: one shared state per document (a per-control state reds sibling sync and single-listener ownership), sibling display of a manual choice, release of the one System listener in Light/Dark, and release on the last disconnect. The fifth is SC-012 too and mutates the DOM-free contract rather than the element: the dark colour-scheme query now lives only there, and the behaviour fixture's matchMedia fake is argument-sensitive, so a drifted query loses the dark System source. The sixth is SC-010: the preference setter normalizes invalid direct and pre-upgrade assignments to System, and removing that normalization reds the pre-upgrade case. The existing SC-010 arm's anchor gains `noAccessor: true` because the property now owns its accessor.",
+    "#323's pass-7 remediation RE-DERIVES one pass-6 arm and adds NINE sk-theme-toggle arms, all over existing (id, subject) pairs, moving the standing set from 263 to 272. The dormant coordinator now remembers the stored value it last read or saved and, on an empty-document connect, re-reads storage and adopts it only when it changed; otherwise the page's own preference resumes. Its `useOwn` line no longer exists, so 'a dormant document trusts storage over the last in-memory preference' is re-derived against the unreadable-storage guard in `#resume()` with the same claim. The new SC-012 arms cover each seam of that rule separately: readable storage is re-read at all; the changed-since comparison; an adopted read becomes the remembered value; a refused write is not remembered as saved; an empty document re-reads storage rather than the joining control's constructor-time value; an empty document re-queries matchMedia (the System-reconnect test now installs a FRESH media list, so reusing the first list reds it); a selection is saved after dispatch, as the value the page settled on; and the MODERN listener pair completeness check, which until now had no arm while the legacy pair did. The SC-010 arm removes the requested reflection that corrects an invalid attribute written onto an already-rendered control. The 'readable storage is re-read at all' arm first measured COLLATERAL on the [SC-006][SC-007][SC-008] event test: the per-test reset drove the dormant preference through that same storage path, so the mutation leaked one test's Dark into the next and the event test's click selected nothing. The reset now pins the preference by assignment before connect, which the storage path cannot affect, and the arm carries no expectCollateral."
+  ],
+  "mutations": [
+    {
+      "id": "SC-013",
+      "arm": "status fail-open keeps the card part targetable",
+      "file": "packages/elements/src/card/sk-card.markup.ts",
+      "from": "    console.warn(`sk-card: ${unknownStatusMessage(status)} — rendering the base card.`);\n    status = undefined;",
+      "to": "    throw new Error(unknownStatusMessage(status));",
+      "subject": "fixtures/elements-behaviour/src/sk-card.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "arm": "one theme-change event per native preference selection",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    this.dispatchEvent(themeChangeEvent);",
+      "to": "    this.dispatchEvent(themeChangeEvent); this.dispatchEvent(themeChangeEvent);",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-007",
+      "arm": "exact theme preference and resolved-theme detail",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "      detail: Object.freeze({ preference: this.preference, theme: this.#resolvedTheme() }),",
+      "to": "      detail: Object.freeze({ preference: 'system', theme: this.#resolvedTheme() }),",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-008",
+      "arm": "theme-change bubbles and crosses shadow boundaries as documented",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "      bubbles: true,\n      composed: true,",
+      "to": "      bubbles: false,\n      composed: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "status reflection",
+      "file": "packages/elements/src/card/sk-card.ts",
+      "from": "    status: { type: String, reflect: true },",
+      "to": "    status: { type: String, reflect: false },",
+      "subject": "fixtures/elements-behaviour/src/sk-card.test.ts"
+    },
+    {
+      "id": "SC-002",
+      "arm": "FormData entry",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "if (changed.has('value') || changed.has('disabled')) this.#syncFormValue();",
+      "to": "void changed;",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+    },
+    {
+      "id": "SC-003",
+      "arm": "validity message",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "{ customError: true }, 'value must not be \"invalid\"'",
+      "to": "{}, ''",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+    },
+    {
+      "id": "SC-004",
+      "arm": "reset restores",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "this.value = this.#initialValue;",
+      "to": "this.value = this.value;",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+    },
+    {
+      "id": "SC-005",
+      "arm": "disabled excluded",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "this.disabled ? null : this.value",
+      "to": "this.value",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "arm": "fires once",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "const proceed = this.dispatchEvent(event);",
+      "to": "this.dispatchEvent(event); const proceed = this.dispatchEvent(event);",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+    },
+    {
+      "id": "SC-007",
+      "arm": "detail shape",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "label: this.label,",
+      "to": "title: this.label,",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+    },
+    {
+      "id": "SC-008",
+      "arm": "composed",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "composed: true,",
+      "to": "composed: false,",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+    },
+    {
+      "id": "SC-009",
+      "arm": "preventDefault prevents",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "if (!proceed) this.open = !this.open;",
+      "to": "void proceed;",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "upgrade handling (non-reactive property)",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "this.#upgradeHint();",
+      "to": "void 0;",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+    },
+    {
+      "id": "SC-011",
+      "arm": "slot name",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "<slot name=\"panel\">",
+      "to": "<slot name=\"other\">",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "Escape closes",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "if (e.key === 'Escape' && this.open) {",
+      "to": "if (false) {",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+    },
+    {
+      "id": "SC-013",
+      "arm": "part present",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "<span part=\"label\">",
+      "to": "<span part=\"label-renamed\">",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "adopted sheet identity",
+      "file": "packages/elements/src/stub/sk-stub.ts",
+      "from": "static styles = [sheet];",
+      "to": "static styles = [new CSSStyleSheet()];",
+      "subject": "fixtures/elements-behaviour/src/sk-stub.test.ts"
+    },
+    {
+      "id": "SC-015",
+      "arm": "duplicate warns",
+      "file": "packages/elements/src/define.ts",
+      "from": "if (existing !== ctor) {",
+      "to": "if (false) {",
+      "subject": "fixtures/elements-behaviour/src/sk-stub.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "fires once (idempotence)",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (this.isOpen === next) return;",
+      "to": "    if (false as boolean) return;"
+    },
+    {
+      "id": "SC-007",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "detail shape",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "      detail: { open: next },",
+      "to": "      detail: { isOpen: next },"
+    },
+    {
+      "id": "SC-008",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "composed",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "      composed: true,",
+      "to": "      composed: false,"
+    },
+    {
+      "id": "SC-009",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "preventDefault prevents",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (!this.dispatchEvent(evt)) return;",
+      "to": "    this.dispatchEvent(evt);"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "upgrade reaches the reflected attribute",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    isOpen: { type: Boolean, reflect: true, attribute: 'open' },",
+      "to": "    isOpen: { type: Boolean, reflect: false, attribute: 'open' },"
+    },
+    {
+      "id": "SC-012",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "focus returns to the invoker",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "      if (target?.isConnected) target.focus();",
+      "to": "      void target;"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "declared part present",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "      <div part=\"items\" class=\"sk-nav-pill__items\" id=\"items\"><slot></slot></div>",
+      "to": "      <div class=\"sk-nav-pill__items\" id=\"items\"><slot></slot></div>"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-card.test.ts",
+      "arm": "card part present",
+      "file": "packages/elements/src/card/sk-card.ts",
+      "from": "<div part=\"card\" class=${cardClasses(this.variant, this.inset, this.status)}>",
+      "to": "<div class=${cardClasses(this.variant, this.inset, this.status)}>"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "toggle() closes",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (this.isOpen) this.close();\n    else this.open(invoker);",
+      "to": "    this.open(invoker);"
+    },
+    {
+      "id": "SC-009",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "dispatched before the change",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (!this.dispatchEvent(evt)) return;",
+      "to": "    this.isOpen = next;\n    if (!this.dispatchEvent(evt)) {\n      this.isOpen = !next;\n      return;\n    }"
+    },
+    {
+      "id": "SC-012",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "Escape does not consume the key when closed",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (!this.isOpen) return;\n    ke.preventDefault();",
+      "to": "    ke.preventDefault();"
+    },
+    {
+      "id": "SC-012",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "invoker resolved through the composed path",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    while (node?.shadowRoot?.activeElement) node = node.shadowRoot.activeElement;",
+      "to": "    void 0;"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "nav-pill adopts its sheet",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "the pill is a navigation landmark",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    return html`<nav\n      part=\"nav\"",
+      "to": "    return html`<div\n      part=\"nav\""
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "the hamburger keeps its accessible name",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "        aria-label=${this.isOpen ? 'Close navigation' : 'Open navigation'}",
+      "to": "        data-label=${this.isOpen ? 'Close navigation' : 'Open navigation'}"
+    },
+    {
+      "id": "SC-002",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "FormData entry tracks the property",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (changed.has('value') || changed.has('disabled')) this.syncFormValue();",
+      "to": "    void changed;"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "validity message reaches the a11y tree",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "      flags.valueMissing = true;\n      message = `${this.label || 'This field'} is required`;",
+      "to": "      void 0;"
+    },
+    {
+      "id": "SC-004",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "reset restores the seeded value",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    this.value = this.initialValue;",
+      "to": "    this.value = '';"
+    },
+    {
+      "id": "SC-005",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "disabled excluded by the element",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    this.internals.setFormValue(this.disabled ? null : this.value);",
+      "to": "    this.internals.setFormValue(this.value);"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "form-input parts present",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "        part=\"control\"",
+      "to": "        data-part=\"control\""
+    },
+    {
+      "id": "SC-002",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+      "arm": "FormData entry tracks the property",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
+      "from": "    if (changed.has('value') || changed.has('disabled')) this.syncFormValue();",
+      "to": "    void changed;"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+      "arm": "validity message reaches the a11y tree",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
+      "from": "      flags.valueMissing = true;\n      message = `${this.label || 'This field'} is required`;",
+      "to": "      void 0;"
+    },
+    {
+      "id": "SC-004",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+      "arm": "reset restores the seeded value",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
+      "from": "    this.value = this.initialValue;",
+      "to": "    this.value = '';"
+    },
+    {
+      "id": "SC-005",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+      "arm": "disabled excluded by the element",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
+      "from": "    this.internals.setFormValue(this.disabled ? null : this.value);",
+      "to": "    this.internals.setFormValue(this.value);"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+      "arm": "form-textarea parts present",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
+      "from": "        part=\"control\"",
+      "to": "        data-part=\"control\""
+    },
+    {
+      "id": "SC-005",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "the disabled PROPERTY route excludes",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (changed.has('value') || changed.has('disabled')) this.syncFormValue();",
+      "to": "    if (changed.has('value')) this.syncFormValue();"
+    },
+    {
+      "id": "SC-005",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+      "arm": "the disabled PROPERTY route excludes",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
+      "from": "    if (changed.has('value') || changed.has('disabled')) this.syncFormValue();",
+      "to": "    if (changed.has('value')) this.syncFormValue();"
+    },
+    {
+      "id": "SC-002",
+      "arm": "the wrapper stops passing `value` through to the element",
+      "file": "packages/react/src/SkFormInput.js",
+      "from": "      value: value,",
+      "to": "      value: undefined,",
+      "subject": "fixtures/react-consumer/src/wrappers.test.tsx"
+    },
+    {
+      "id": "SC-006",
+      "arm": "the wrapper stops subscribing to the element event",
+      "file": "packages/react/src/SkNavPill.js",
+      "from": "  useEventListener(ref, \"sk-nav-pill-toggle\", props.onSkNavPillToggle);",
+      "to": "  void props.onSkNavPillToggle;",
+      "subject": "fixtures/react-consumer/src/wrappers.test.tsx"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-grid.test.ts",
+      "arm": "grid part present",
+      "file": "packages/elements/src/grid/sk-grid.ts",
+      "from": "<div part=\"grid\" class=${gridClasses(this.variant, this.gap)}>",
+      "to": "<div class=${gridClasses(this.variant, this.gap)}>"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-grid.test.ts",
+      "arm": "grid adopts its generated sheet",
+      "file": "packages/elements/src/grid/sk-grid.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-section-banner.test.ts",
+      "arm": "section-banner dot part present",
+      "file": "packages/elements/src/section-banner/sk-section-banner.ts",
+      "from": "<span part=\"dot\" class=\"sk-section-banner__dot\" aria-hidden=\"true\">",
+      "to": "<span class=\"sk-section-banner__dot\" aria-hidden=\"true\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-section-banner.test.ts",
+      "arm": "section-banner adopts its generated sheet",
+      "file": "packages/elements/src/section-banner/sk-section-banner.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-grid.test.ts",
+      "arm": "grid adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/grid/sk-grid.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-section-banner.test.ts",
+      "arm": "section-banner adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/section-banner/sk-section-banner.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-feature-card.test.ts",
+      "arm": "feature-card chip part present",
+      "file": "packages/elements/src/feature-card/sk-feature-card.ts",
+      "from": "<div part=\"chip\" class=${featureCardChipClasses(this.accent)}>",
+      "to": "<div class=${featureCardChipClasses(this.accent)}>"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-feature-card.test.ts",
+      "arm": "feature-card adopts its generated sheet",
+      "file": "packages/elements/src/feature-card/sk-feature-card.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-feature-card.test.ts",
+      "arm": "feature-card adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/feature-card/sk-feature-card.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-ribbon-card.test.ts",
+      "arm": "ribbon-card content part present",
+      "file": "packages/elements/src/ribbon-card/sk-ribbon-card.ts",
+      "from": "<div part=\"content\" class=\"sk-ribbon-card__content\">",
+      "to": "<div class=\"sk-ribbon-card__content\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-ribbon-card.test.ts",
+      "arm": "ribbon-card adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/ribbon-card/sk-ribbon-card.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-ribbon-card.test.ts",
+      "arm": "ribbon-card adopts its generated sheet",
+      "file": "packages/elements/src/ribbon-card/sk-ribbon-card.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-button.test.ts",
+      "arm": "button part present",
+      "file": "packages/elements/src/button/sk-button.ts",
+      "from": "<a part=\"button\" class=${cls} href=${this.href} aria-label=${ifDefined(validLabel)}",
+      "to": "<a class=${cls} href=${this.href} aria-label=${ifDefined(validLabel)}"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-button.test.ts",
+      "arm": "busy-cue part present, BUTTON branch (#305)",
+      "file": "packages/elements/src/button/sk-button.ts",
+      "from": "          <span part=\"busy-cue\" class=\"sk-button__busy-cue\" aria-hidden=\"true\"></span>",
+      "to": "          <span class=\"sk-button__busy-cue\" aria-hidden=\"true\"></span>"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-button.test.ts",
+      "arm": "button adopts its generated sheet",
+      "file": "packages/elements/src/button/sk-button.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-button.test.ts",
+      "arm": "button adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/button/sk-button.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts",
+      "arm": "pill-tag part present",
+      "file": "packages/elements/src/pill-tag/sk-pill-tag.ts",
+      "from": "<span part=\"tag\" class=${pillTagClasses(this.variant, this.shape, this.status)}>",
+      "to": "<span class=${pillTagClasses(this.variant, this.shape, this.status)}>"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts",
+      "arm": "pill-tag adopts its generated sheet",
+      "file": "packages/elements/src/pill-tag/sk-pill-tag.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts",
+      "arm": "pill-tag adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/pill-tag/sk-pill-tag.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-check-bullet.test.ts",
+      "arm": "check-bullet state reflects after late upgrade",
+      "file": "packages/elements/src/check-bullet/sk-check-bullet.ts",
+      "from": "    state: { type: String, reflect: true },",
+      "to": "    state: { type: String, reflect: false },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-check-bullet.test.ts",
+      "arm": "canonical presentation lookup honors the requested state",
+      "file": "packages/elements/src/check-bullet/sk-check-bullet.markup.ts",
+      "from": "  const entry = Object.entries(CHECK_BULLET_PRESENTATIONS).find(([name]) => name === state);",
+      "to": "  const entry = Object.entries(CHECK_BULLET_PRESENTATIONS).find(([name]) => name !== state);"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-check-bullet.test.ts",
+      "arm": "check-bullet icon part present",
+      "file": "packages/elements/src/check-bullet/sk-check-bullet.ts",
+      "from": "part=\"icon\" class=\"sk-check-bullet__icon\"",
+      "to": "class=\"sk-check-bullet__icon\""
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-check-bullet.test.ts",
+      "arm": "check-bullet adopts its generated sheet",
+      "file": "packages/elements/src/check-bullet/sk-check-bullet.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-check-bullet.test.ts",
+      "arm": "check-bullet adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/check-bullet/sk-check-bullet.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-blog-card.test.ts",
+      "arm": "blog-card thumbnail part present",
+      "file": "packages/elements/src/blog-card/sk-blog-card.ts",
+      "from": "            part=\"thumbnail\"",
+      "to": "            data-part=\"thumbnail\""
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-blog-card.test.ts",
+      "arm": "blog-card drops sk-card's sheet",
+      "file": "packages/elements/src/blog-card/sk-blog-card.ts",
+      "from": "  static styles = [cardSheet, sheet];",
+      "to": "  static styles = [sheet];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-blog-card.test.ts",
+      "arm": "blog-card adopts the sheets in the WRONG ORDER",
+      "file": "packages/elements/src/blog-card/sk-blog-card.ts",
+      "from": "  static styles = [cardSheet, sheet];",
+      "to": "  static styles = [sheet, cardSheet];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-site-footer.test.ts",
+      "arm": "site-footer divider part present",
+      "file": "packages/elements/src/site-footer/sk-site-footer.ts",
+      "from": "<hr part=\"divider\"",
+      "to": "<hr data-part=\"divider\""
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-site-footer.test.ts",
+      "arm": "site-footer adopts its generated sheet",
+      "file": "packages/elements/src/site-footer/sk-site-footer.ts",
+      "from": "static styles = [sheet];",
+      "to": "static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-site-footer.test.ts",
+      "arm": "site-footer adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/site-footer/sk-site-footer.ts",
+      "from": "static styles = [sheet];",
+      "to": "static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "one event per route activation",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "    if (!event.defaultPrevented) this.#activate(routeId);",
+      "to": "    if (!event.defaultPrevented) { this.#activate(routeId); this.#activate(routeId); }"
+    },
+    {
+      "id": "SC-007",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "stable route id detail",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "      detail: { routeId }, bubbles: true, composed: true, cancelable: false,",
+      "to": "      detail: { routeId: '' }, bubbles: true, composed: true, cancelable: false,"
+    },
+    {
+      "id": "SC-008",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "bubbling and composed event flags",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "      detail: { routeId }, bubbles: true, composed: true, cancelable: false,",
+      "to": "      detail: { routeId }, bubbles: false, composed: false, cancelable: false,"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "pre-upgrade structured property preservation",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "    columns: { attribute: false },\n    routes: { attribute: false },",
+      "to": "    routes: { attribute: false },"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "group part remains targetable",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "<th part=\"group\" class=\"sk-transition-matrix__group\"",
+      "to": "<th class=\"sk-transition-matrix__group\""
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "transition matrix adopts one generated sheet",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "transition matrix adopts the named sheet by identity",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/react-consumer/src/sk-transition-matrix.test.tsx",
+      "arm": "transition matrix wrapper subscribes to the typed selection event",
+      "file": "packages/react/src/SkTransitionMatrix.js",
+      "from": "  useEventListener(\n    ref,\n    \"sk-transition-matrix-select\",\n    props.onSkTransitionMatrixSelect,\n  );",
+      "to": "  void props.onSkTransitionMatrixSelect;"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/react-consumer/src/sk-transition-matrix.test.tsx",
+      "arm": "transition matrix wrapper delivers and resets structured columns",
+      "file": "packages/react/src/SkTransitionMatrix.js",
+      "from": "  useProperties(ref, \"columns\", columns, () => Object.freeze([]));",
+      "to": "  void columns;"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts",
+      "arm": "personal rail reflects a pre-upgrade label",
+      "file": "packages/elements/src/personal-rail/sk-personal-rail.ts",
+      "from": "    label: { type: String, reflect: true },",
+      "to": "    label: { type: String, reflect: false },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-context-sidebar.test.ts",
+      "arm": "context sidebar reflects a pre-upgrade label",
+      "file": "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+      "from": "    label: { type: String, reflect: true },",
+      "to": "    label: { type: String, reflect: false },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-button.test.ts",
+      "arm": "icon button reflects a pre-upgrade label",
+      "file": "packages/elements/src/button/sk-button.ts",
+      "from": "    label: { type: String, reflect: true },",
+      "to": "    label: { type: String, reflect: false },"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "arm": "app shell header part remains targetable",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        <div part=\"header\" class=\"sk-app-shell__header\">",
+      "to": "        <div class=\"sk-app-shell__header\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "arm": "app shell adopts its generated sheet",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "arm": "app shell adopts the sheet by identity",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = (() => { const clone = new CSSStyleSheet(); clone.replaceSync(Array.from(sheet.cssRules, (rule) => rule.cssText).join('\\n')); return [clone]; })();"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts",
+      "arm": "personal rail primary part remains targetable",
+      "file": "packages/elements/src/personal-rail/sk-personal-rail.ts",
+      "from": "      <div part=\"primary\" class=\"sk-personal-rail__primary\">",
+      "to": "      <div class=\"sk-personal-rail__primary\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts",
+      "arm": "personal rail adopts its generated sheet",
+      "file": "packages/elements/src/personal-rail/sk-personal-rail.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts",
+      "arm": "personal rail adopts the sheet by identity",
+      "file": "packages/elements/src/personal-rail/sk-personal-rail.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-context-sidebar.test.ts",
+      "arm": "context sidebar footer part remains targetable",
+      "file": "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+      "from": "      <div part=\"footer\" class=\"sk-context-sidebar__footer\">",
+      "to": "      <div class=\"sk-context-sidebar__footer\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-context-sidebar.test.ts",
+      "arm": "context sidebar adopts its generated sheet",
+      "file": "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-context-sidebar.test.ts",
+      "arm": "context sidebar adopts the sheet by identity",
+      "file": "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+      "arm": "page header supporting part remains targetable",
+      "file": "packages/elements/src/page-header/sk-page-header.ts",
+      "from": "        <div part=\"supporting\" class=\"sk-page-header__supporting\">",
+      "to": "        <div class=\"sk-page-header__supporting\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+      "arm": "page header adopts its generated sheet",
+      "file": "packages/elements/src/page-header/sk-page-header.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+      "arm": "page header adopts the sheet by identity",
+      "file": "packages/elements/src/page-header/sk-page-header.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "readonly barred but still submits (#180)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (this.readonly) {\n      this.internals.setValidity({});\n      this.invalid = false;\n      this.errorMessage = '';\n      return;\n    }",
+      "to": "    void this.readonly;"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "merged UA flag blocks a real submit (#180)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    for (const key of [\n      'patternMismatch',\n      'rangeUnderflow',\n      'rangeOverflow',\n      'stepMismatch',\n      'typeMismatch',\n    ] as const) {\n      if (this.#probe.validity[key]) flags[key] = true;\n    }",
+      "to": "    void 0;"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "post-reset validity reports valid immediately (#180, re-sited from SC-004 — see research.md R6)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    this.#probe.value = this.value;",
+      "to": "    void 0;"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "datalist reachable by node identity (#180 — judgement call, see research.md R6)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "        list=${hasOptions ? 'options' : nothing}",
+      "to": "        list=${nothing}"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "a forwarded attribute reaches the inner control (#180; re-sited from `pattern` to `inputmode` by #196 — see the $comment)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "        inputmode=${this.inputmode ?? nothing}",
+      "to": "        inputmode=${nothing}"
+    },
+    {
+      "id": "SC-016",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "the probe and the rendered control disagree when `type` is assigned after `value` (#180's third measured desync, ADR-14; re-keyed from SC-003 by #196)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    this.#probe.type = this.type;\n    this.#probe.value = this.value;",
+      "to": "    this.#probe.value = this.value;\n    this.#probe.type = this.type;"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "null (not just undefined) removes a probe attribute rather than forwarding \"null\" (#180, debugger pass 1)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (value === undefined || value === null) {",
+      "to": "    if (value === undefined) {"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "label change alone re-runs validate() (#180, debugger pass 1)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "      changed.has('type') ||\n      // `label` feeds the required-empty MESSAGE text (`${this.label || 'This field'} is\n      // required`, below) but was missing here — changing `label` on an already-invalid field\n      // left the `role=\"alert\"` node and `internals.validationMessage` showing the OLD label\n      // until some UNRELATED trigger happened to re-run validate() next.\n      changed.has('label')\n",
+      "to": "      changed.has('type')\n"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "aria-describedby omitted, not an empty string, when nothing references it (#180, debugger pass 1)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "        aria-describedby=${describedBy || nothing}",
+      "to": "        aria-describedby=${describedBy || undefined}"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "a whitespace-only customError is treated as empty (#180, debugger pass 1)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (this.customError.trim() !== '') {",
+      "to": "    if (this.customError) {"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "bad-input control keeps the user's buffer instead of being overwritten mid-edit (#180, debugger pass 1)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (!control.validity.badInput) {\n      this.value = control.value;\n    }\n",
+      "to": "    this.value = control.value;\n"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/react-consumer/src/sk-form-input-options.test.tsx",
+      "arm": "form-input wrapper delivers and resets structured options",
+      "file": "packages/react/src/SkFormInput.js",
+      "from": "  useProperties(ref, \"options\", options, () => Object.freeze([]));",
+      "to": "  void options;"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "the programmatic badInput divergence detects a value the type cannot represent (#180, operator ruling)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (this.value.trim() !== '' && this.#probe.value === '') flags.badInput = true;\n",
+      "to": "    if (false) flags.badInput = true;\n"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "#onInput calls validate() unconditionally, not only inside the badInput branch (#180, pre-merge review pass 2)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    this.validate();\n  };\n}\n",
+      "to": "  };\n}\n"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "the divergence branch is gated on trim(), not a bare non-empty check, so pure-whitespace sanitization is not a false positive (#180, pre-merge review pass 2)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "if (this.value.trim() !== '' && this.#probe.value === '') flags.badInput = true;",
+      "to": "if (this.value !== '' && this.#probe.value === '') flags.badInput = true;"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+      "arm": "the density axis reaches the reflected attribute",
+      "file": "packages/elements/src/page-header/sk-page-header.ts",
+      "from": "    density: { type: String, reflect: true },",
+      "to": "    density: { type: String, reflect: false },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+      "arm": "the sticky axis reaches the reflected attribute the sheet reads",
+      "file": "packages/elements/src/page-header/sk-page-header.ts",
+      "from": "    sticky: { type: Boolean, reflect: true },",
+      "to": "    sticky: { type: Boolean, reflect: false },"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-section-header.test.ts",
+      "arm": "section-header eyebrow part remains targetable",
+      "file": "packages/elements/src/section-header/sk-section-header.ts",
+      "from": "<div part=\"eyebrow\" class=\"sk-section-header__eyebrow\" hidden>",
+      "to": "<div class=\"sk-section-header__eyebrow\" hidden>"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-section-header.test.ts",
+      "arm": "section-header adopts one generated sheet",
+      "file": "packages/elements/src/section-header/sk-section-header.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-section-header.test.ts",
+      "arm": "section-header adopts the named sheet by identity",
+      "file": "packages/elements/src/section-header/sk-section-header.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-status-indicator.test.ts",
+      "arm": "pre-upgrade status tone property remains reactive",
+      "file": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+      "from": "    tone: { type: String, reflect: true },",
+      "to": ""
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-status-indicator.test.ts",
+      "arm": "status-indicator marker part remains targetable",
+      "file": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+      "from": "      <span part=\"marker\" class=\"sk-status-indicator__marker\" aria-hidden=\"true\" hidden",
+      "to": "      <span class=\"sk-status-indicator__marker\" aria-hidden=\"true\" hidden"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-status-indicator.test.ts",
+      "arm": "status-indicator adopts one generated sheet",
+      "file": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-status-indicator.test.ts",
+      "arm": "status-indicator adopts the named sheet by identity",
+      "file": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "pre-upgrade entity label property remains reactive",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "    label: { type: String, reflect: true },",
+      "to": ""
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "entity-marker content part remains targetable",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "<span part=\"content\" class=\"sk-entity-marker__content\">",
+      "to": "<span class=\"sk-entity-marker__content\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "entity-marker adopts one generated sheet",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [sheet, new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "entity-marker adopts the named sheet by identity",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [(() => { const copy = new CSSStyleSheet(); copy.replaceSync([...sheet.cssRules].map((rule) => rule.cssText).join('\\n')); return copy; })()];"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "one request per native primary activation",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "  row.dispatchEvent(event);",
+      "to": "  row.dispatchEvent(event); row.dispatchEvent(event);"
+    },
+    {
+      "id": "SC-007",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "exact consumer row id detail",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "    detail: { id: row.rowId! },",
+      "to": "      detail: { id: '' },"
+    },
+    {
+      "id": "SC-008",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "bubbling and composed event flags",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "    bubbles: true,\n    composed: true,",
+      "to": "    bubbles: false,\n    composed: false,"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "pre-upgrade row id remains reactive",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "    rowId: { type: String, attribute: 'row-id', reflect: true },",
+      "to": ""
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "action-row reference part remains targetable",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "<span part=\"reference\" class=\"sk-action-row__reference\">",
+      "to": "<span class=\"sk-action-row__reference\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "action-row adopts one generated sheet",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "action-row adopts the named sheet by identity",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/react-consumer/src/sk-action-row.test.tsx",
+      "arm": "generated action-row wrapper subscribes the React callback",
+      "file": "packages/react/src/SkActionRow.js",
+      "from": "  useEventListener(ref, \"sk-action-row-activate\", props.onSkActionRowActivate);",
+      "to": "  void props.onSkActionRowActivate;"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-metric.test.ts",
+      "arm": "metric annotation part remains targetable",
+      "file": "packages/elements/src/metric/sk-metric.ts",
+      "from": "<span part=\"annotation\" class=\"sk-metric__annotation\">",
+      "to": "<span class=\"sk-metric__annotation\">"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-evidence-chain.test.ts",
+      "arm": "evidence-chain connector part remains targetable",
+      "file": "packages/elements/src/evidence-chain/sk-evidence-chain.ts",
+      "from": "                part=\"connector\"",
+      "to": "                data-part=\"connector\""
+    },
+    {
+      "id": "SC-006",
+      "arm": "the dismiss request is dispatched once, not twice",
+      "file": "packages/elements/src/notice/sk-notice.ts",
+      "from": "    if (!this.dispatchEvent(evt)) return;",
+      "to": "    this.dispatchEvent(evt);\n    if (!this.dispatchEvent(evt)) return;",
+      "subject": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+    },
+    {
+      "id": "SC-007",
+      "arm": "the dismiss detail keeps its documented key",
+      "file": "packages/elements/src/notice/sk-notice.ts",
+      "from": "      detail: { tone: noticeTone(this.tone) },",
+      "to": "      detail: { status: noticeTone(this.tone) },",
+      "subject": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+    },
+    {
+      "id": "SC-008",
+      "arm": "the dismiss request bubbles",
+      "file": "packages/elements/src/notice/sk-notice.ts",
+      "from": "      bubbles: true,",
+      "to": "      bubbles: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+    },
+    {
+      "id": "SC-008",
+      "arm": "the dismiss request crosses a shadow boundary",
+      "file": "packages/elements/src/notice/sk-notice.ts",
+      "from": "      composed: true,",
+      "to": "      composed: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+    },
+    {
+      "id": "SC-009",
+      "arm": "a cancelled dismissal abandons the focus move",
+      "file": "packages/elements/src/notice/sk-notice.ts",
+      "from": "    if (!this.dispatchEvent(evt)) return;",
+      "to": "    this.dispatchEvent(evt);",
+      "subject": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "tone reflection",
+      "file": "packages/elements/src/notice/sk-notice.ts",
+      "from": "    tone: { type: String, reflect: true },",
+      "to": "    tone: { type: String, reflect: false },",
+      "subject": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "the message stays a reactive property, so a changed message re-announces",
+      "file": "packages/elements/src/notice/sk-notice.ts",
+      "from": "    message: { type: String },",
+      "to": "",
+      "subject": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+    },
+    {
+      "id": "SC-011",
+      "arm": "the marker slot keeps its fallback content",
+      "file": "packages/elements/src/notice/sk-notice.ts",
+      "from": "><slot name=\"marker\">${MARKER[tone]}</slot></span",
+      "to": "><slot name=\"marker\"></slot></span",
+      "subject": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "dismissal lands focus on the host",
+      "file": "packages/elements/src/notice/sk-notice.ts",
+      "from": "    this.focus();",
+      "to": "",
+      "subject": "fixtures/elements-behaviour/src/sk-notice.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-013",
+      "arm": "the content part remains targetable",
+      "file": "packages/elements/src/notice/sk-notice.ts",
+      "from": "      <div part=\"content\" class=\"sk-notice__content\">",
+      "to": "      <div class=\"sk-notice__content\">",
+      "subject": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "sk-notice adopts one generated sheet",
+      "file": "packages/elements/src/notice/sk-notice.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];",
+      "subject": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "sk-notice adopts the named sheet by identity",
+      "file": "packages/elements/src/notice/sk-notice.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];",
+      "subject": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts",
+      "arm": "one request per native primary activation",
+      "file": "packages/elements/src/bar-chart/sk-bar-chart.ts",
+      "from": "          @click=${() => this.#requestSelection(datum.id)}",
+      "to": "          @click=${() => { this.#requestSelection(datum.id); this.#requestSelection(datum.id); }}"
+    },
+    {
+      "id": "SC-007",
+      "subject": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts",
+      "arm": "exact consumer datum id detail",
+      "file": "packages/elements/src/bar-chart/sk-bar-chart.ts",
+      "from": "      detail: Object.freeze({ id }),",
+      "to": "      detail: Object.freeze({ id: '' }),"
+    },
+    {
+      "id": "SC-008",
+      "subject": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts",
+      "arm": "bubbling and composed event flags",
+      "file": "packages/elements/src/bar-chart/sk-bar-chart.ts",
+      "from": "      bubbles: true,\n      composed: true,",
+      "to": "      bubbles: false,\n      composed: false,"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts",
+      "arm": "pre-upgrade label remains reactive",
+      "file": "packages/elements/src/bar-chart/sk-bar-chart.ts",
+      "from": "    label: { type: String },",
+      "to": ""
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts",
+      "arm": "bar-chart label part remains targetable",
+      "file": "packages/elements/src/bar-chart/sk-bar-chart.ts",
+      "from": "<span part=\"label\" class=\"sk-bar-chart__label\">",
+      "to": "<span class=\"sk-bar-chart__label\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts",
+      "arm": "bar-chart adopts one generated sheet",
+      "file": "packages/elements/src/bar-chart/sk-bar-chart.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts",
+      "arm": "bar-chart adopts the named sheet by identity",
+      "file": "packages/elements/src/bar-chart/sk-bar-chart.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/react-consumer/src/sk-bar-chart.test.tsx",
+      "arm": "generated bar-chart wrapper subscribes the React callback",
+      "file": "packages/react/src/SkBarChart.js",
+      "from": "  useEventListener(ref, \"sk-bar-chart-select\", props.onSkBarChartSelect);",
+      "to": "  void props.onSkBarChartSelect;"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/react-consumer/src/sk-bar-chart.test.tsx",
+      "arm": "generated bar-chart wrapper bridges the series property",
+      "file": "packages/react/src/SkBarChart.js",
+      "from": "  useProperties(ref, \"series\", series, () => Object.freeze([]));",
+      "to": "  void series;"
+    },
+    {
+      "id": "SC-017",
+      "subject": "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+      "arm": "the WIDTH threshold is declared at its documented figure and drops stickiness there",
+      "file": "packages/elements/src/page-header/sk-page-header.css.js",
+      "from": "@media (max-width: 720px) {\\n  :host([sticky]) {\\n    position: static;",
+      "to": "@media (max-width: 320px) {\\n  :host([sticky]) {\\n    position: static;"
+    },
+    {
+      "id": "SC-017",
+      "subject": "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+      "arm": "the HEIGHT threshold is declared at its documented figure, independently of the width one",
+      "file": "packages/elements/src/page-header/sk-page-header.css.js",
+      "from": "@media (max-height: 480px) {\\n  :host([sticky]) {\\n    position: static;",
+      "to": "@media (max-height: 240px) {\\n  :host([sticky]) {\\n    position: static;"
+    },
+    {
+      "id": "SC-006",
+      "arm": "one selection request per activation",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "    const proceed = this.dispatchEvent(\n      new CustomEvent<TimeSeriesChartSelectDetail>('sk-time-series-chart-select', {",
+      "to": "    this.dispatchEvent(\n      new CustomEvent<TimeSeriesChartSelectDetail>('sk-time-series-chart-select', {\n        detail: Object.freeze({ seriesId, pointId }),\n        bubbles: true,\n        composed: true,\n        cancelable: true,\n      }),\n    );\n    const proceed = this.dispatchEvent(\n      new CustomEvent<TimeSeriesChartSelectDetail>('sk-time-series-chart-select', {",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-007",
+      "arm": "the exact consumer point identity",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "        detail: Object.freeze({ seriesId, pointId }),",
+      "to": "        detail: Object.freeze({ seriesId, pointId: pointId.trim() }),",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-008",
+      "arm": "the request crosses the shadow boundary",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "        bubbles: true,",
+      "to": "        bubbles: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-009",
+      "arm": "preventDefault suppresses the element's own focus move",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "        cancelable: true,",
+      "to": "        cancelable: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "property-only series registration",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "    series: { attribute: false },",
+      "to": "    // series is deliberately unregistered by this mutation arm",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-013",
+      "arm": "interpolating across nulls removes the gap part",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "const asSupplied = (datum: TimeSeriesDatum): ReadonlyArray<TimeSeriesPoint> => datum.points;",
+      "to": "const asSupplied = (datum: TimeSeriesDatum): ReadonlyArray<TimeSeriesPoint> =>\n  datum.points.filter((point) => point.value !== null);",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "adopted stylesheet count",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "adopted stylesheet identity",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "pre-upgrade card layout stays registered and drives later render transitions",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "    layout: { type: String, reflect: true },",
+      "to": "    layoutBroken: { type: String, reflect: true },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-status-indicator.test.ts",
+      "arm": "pre-upgrade pulsing stays registered and drives later render transitions",
+      "file": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+      "from": "    pulsing: { type: Boolean, reflect: true },",
+      "to": "    pulsingBroken: { type: Boolean, reflect: true },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "pre-upgrade compact size stays registered and renders independently",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "    size: { type: String, reflect: true },",
+      "to": "    sizeBroken: { type: String, reflect: true },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "pre-upgrade circle shape stays registered and renders independently",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "    shape: { type: String, reflect: true },",
+      "to": "    shapeBroken: { type: String, reflect: true },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "pre-upgrade bordered presentation stays registered and renders independently",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "    border: { type: String, reflect: true },",
+      "to": "    borderBroken: { type: String, reflect: true },"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "action-row supporting part remains targetable",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "<span part=\"supporting\" class=\"sk-action-row__supporting\" hidden",
+      "to": "<span part=\"\" class=\"sk-action-row__supporting\" hidden"
+    },
+    {
+      "id": "SC-011",
+      "arm": "a wrapper between the dl and its dt/dd severs the definition list across the card slot boundary (ADR-11's canonical SC-011 arm is a renamed slot; this is a different failure mode under the same id, because the composition's slot belongs to sk-card and renaming it would test that element rather than the composition)",
+      "file": "packages/elements/src/patterns/operational-status.ts",
+      "from": "            <dt class=\"sk-facts__term\">${fact.term}</dt>\n            <dd class=\"sk-facts__value\">${fact.value}</dd>",
+      "to": "            <div><dt class=\"sk-facts__term\">${fact.term}</dt>\n            <dd class=\"sk-facts__value\">${fact.value}</dd></div>",
+      "subject": "fixtures/elements-behaviour/src/pattern-operational-status.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "presentation assigned before upgrade remains reflected",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    presentation: { type: String, reflect: true, converter: presentationConverter },",
+      "to": "    presentation: { type: String, reflect: false, converter: presentationConverter },",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-010",
+      "arm": "removing the presentation attribute restores the public omitted state",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    return value ?? undefined;",
+      "to": "    return value;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "dismissal intent never mutates controlled open",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      pending.accepted = this.open !== true;",
+      "to": "      this.open = false; pending.accepted = true;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-006",
+      "arm": "one dismissal event per effectively-open Escape",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    const pending = this.#pendingDismissal;",
+      "to": "    this.dispatchEvent(new CustomEvent('sk-app-shell-dismiss'));\n    const pending = this.#pendingDismissal;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-007",
+      "arm": "exact escape dismissal detail",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        detail: Object.freeze({ reason: 'escape' }),",
+      "to": "        detail: Object.freeze({ reason: 'escape', source: 'shell' }),",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-008",
+      "arm": "dismissal crosses the shadow boundary with documented flags",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        bubbles: true,\n        composed: true,",
+      "to": "        bubbles: false,\n        composed: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-012",
+      "arm": "accepted focus waits for the first closed render",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    await this.updateComplete;",
+      "to": "    // mutation: focus before the closed update",
+      "subject": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
+    },
+    {
+      "id": "SC-012",
+      "arm": "closed compact navigation remains inert",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        ?inert=${!effectivelyOpen}",
+      "to": "        ?inert=${false}",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "focus return requires the same-root light-DOM navigation target",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      this.#assignedWithin(target, 'compact-navigation'),",
+      "to": "      this.contains(target),",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "focus return requires actual compact-header assignment",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (!trigger?.isConnected || !this.#assignedWithin(trigger, 'compact-header')) return false;",
+      "to": "    if (!trigger?.isConnected || !this.contains(trigger)) return false;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "ordinary controlled close releases focus from hidden compact navigation",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (changed.get('open') === true && this.open !== true) {\n      this.#releaseHiddenFocus();\n    }",
+      "to": "    // mutation: ordinary controlled close leaves hidden navigation focused",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-017",
+      "arm": "the compact inline-size threshold remains inclusive through 860px",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "const COMPACT_MAX_INLINE_SIZE = 860;",
+      "to": "const COMPACT_MAX_INLINE_SIZE = 859;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "effective open observes the CSS content-box coordinate",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      this.#inlineSize = this.#contentInlineSize(entry);",
+      "to": "      this.#inlineSize = entry.borderBoxSize[0]?.inlineSize ?? entry.contentRect.width;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "the compact container rule remains declared at 860px",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": "@container (max-inline-size: 860px)",
+      "to": "@container (max-inline-size: 859px)",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "reconnect reapplies inactive assigned-root exposure synchronously",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (this.hasUpdated) this.#reconcileAssignedRootExposure();",
+      "to": "    // mutation: reconnect leaves assigned roots exposed",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "disconnect restores every suppressed consumer root",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    this.#pendingDismissal = null;\n    this.#restoreSuppressedRoots();\n    super.disconnectedCallback();",
+      "to": "    this.#pendingDismissal = null;\n    super.disconnectedCallback();",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "restoration removes shell-owned attributes that consumers omitted",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (value === null) root.removeAttribute(name);\n    else root.setAttribute(name, value);",
+      "to": "    if (value === null) root.setAttribute(name, '');\n    else root.setAttribute(name, value);",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "restoration preserves consumer-authored raw attribute values",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    else root.setAttribute(name, value);",
+      "to": "    else root.removeAttribute(name);",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact presentation suppresses the assigned personal-rail root",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['personal-rail', !compact],",
+      "to": "      ['personal-rail', true],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact-navigation exposure follows consumer-controlled open",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['compact-navigation', this.#effectivelyOpen],",
+      "to": "      ['compact-navigation', compact],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-012",
+      "arm": "disconnected slot events cannot resuppress restored roots",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (!this.isConnected) return;",
+      "to": "    void this.isConnected;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "personal-rail slot changes reconcile direct-root exposure",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        <slot name=\"personal-rail\" @slotchange=${this.#onExposureSlotChange}></slot>",
+      "to": "        <slot name=\"personal-rail\"></slot>",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "context-sidebar slot changes reconcile direct-root exposure",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        <slot name=\"context-sidebar\" @slotchange=${this.#onExposureSlotChange}></slot>",
+      "to": "        <slot name=\"context-sidebar\"></slot>",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact-header slot changes reconcile direct-root exposure",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        <slot name=\"compact-header\" @slotchange=${this.#onExposureSlotChange}></slot>",
+      "to": "        <slot name=\"compact-header\"></slot>",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact-navigation slot changes reconcile direct-root exposure",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        <slot name=\"compact-navigation\" @slotchange=${this.#onExposureSlotChange}></slot>",
+      "to": "        <slot name=\"compact-navigation\"></slot>",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "cross-shell suppression inherits the consumer snapshot held by the previous owner",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      const exposure = lease?.exposure ?? {\n        inert: root.getAttribute('inert'),\n        ariaHidden: root.getAttribute('aria-hidden'),\n      };",
+      "to": "      const exposure = {\n        inert: root.getAttribute('inert'),\n        ariaHidden: root.getAttribute('aria-hidden'),\n      };",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "an old shell owner cannot restore a root after its lease transfers",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      if (lease?.owner !== this) continue;",
+      "to": "      if (!lease) continue;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "an active destination releases a stale cross-shell exposure lease",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      if (active) this.#releaseAssignedRoots(slotName);",
+      "to": "      if (active) void slotName;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "arm": "the nearest effectively-open shell claims a composed Escape",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (claimedEscapeInteractions.has(event)) return;",
+      "to": "    void claimedEscapeInteractions.has(event);",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "compact CSS queries logical inline-size rather than physical width",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": "@container (max-inline-size: 860px)",
+      "to": "@container (max-width: 860px)",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "generated compactTrigger omission resets stale trigger authority",
+      "file": "packages/react/src/SkAppShell.js",
+      "from": "  useProperties(ref, \"compactTrigger\", compactTrigger, () => null);",
+      "to": "  useProperties(ref, \"compactTrigger\", compactTrigger);",
+      "subject": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
+    },
+    {
+      "id": "SC-012",
+      "arm": "dismissal acceptance waits for the current React commit",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    queueMicrotask(() => {\n      pending.accepted = this.open !== true;\n      void this.#finishDismissal(pending);\n    });",
+      "to": "    pending.accepted = this.open !== true;\n    void this.#finishDismissal(pending);",
+      "subject": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
+    },
+    {
+      "id": "SC-012",
+      "arm": "omitted React false is accepted as effectively closed",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      pending.accepted = this.open !== true;",
+      "to": "      pending.accepted = this.open === false;",
+      "subject": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
+    },
+    {
+      "id": "SC-012",
+      "arm": "an ordinary omitted-false route close releases hidden focus",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (changed.get('open') === true && this.open !== true) {",
+      "to": "    if (changed.get('open') === true && this.open === false) {",
+      "subject": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
+    },
+    {
+      "id": "SC-010",
+      "arm": "pre-upgrade native route destination stays registered and reflected",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "    href: { type: String, reflect: true },",
+      "to": "    hrefBroken: { type: String, reflect: true },",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "pre-upgrade flush presentation stays registered and reflected",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "    presentation: { type: String, reflect: true },",
+      "to": "    presentationBroken: { type: String, reflect: true },",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "arm": "native route mode emits no selectable activation request",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "          ? html`<a\n              part=\"trigger\"",
+      "to": "          ? html`<a\n              @click=${() => requestActivation(this)}\n              part=\"trigger\"",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts"
+    },
+    {
+      "id": "SC-015",
+      "arm": "copy-field module registration preserves constructor identity for duplicate guards",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "define('sk-copy-field', SkCopyField);",
+      "to": "define('sk-copy-field', class extends SkCopyField {});",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "arm": "one result event per completed activation",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "    this.dispatchEvent(event);",
+      "to": "    this.dispatchEvent(event);\n    this.dispatchEvent(event);",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-007",
+      "arm": "frozen outcome-only detail does not expose copied bytes",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "    const detail = Object.freeze({ outcome }) satisfies SkCopyFieldResultDetail;",
+      "to": "    const detail = Object.freeze({ outcome, value: snapshot }) satisfies SkCopyFieldResultDetail;",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-008",
+      "arm": "result crosses the shadow boundary",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "      bubbles: true,\n      composed: true,",
+      "to": "      bubbles: false,\n      composed: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "value is reactive, reflected, and survives pre-upgrade assignment",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "    value: { type: String, converter: stringWithDefault(''), reflect: true, noAccessor: true },",
+      "to": "    // value is deliberately unregistered by this mutation arm",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-012",
+      "arm": "the sole control keeps native non-submitting button semantics",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "        type=\"button\"",
+      "to": "        type=\"reset\"",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "manual fallback selects the full visible value across the shadow boundary",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "      selection.setBaseAndExtent(node, 0, node, node.childNodes.length);",
+      "to": "      selection.setBaseAndExtent(node, 0, node, 0);",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-013",
+      "arm": "stable status part remains targetable",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "        part=\"status\"",
+      "to": "        part=\"result\"",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "both generated and shared constructed sheets are adopted",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "  static styles = [buttonSheet, sheet];",
+      "to": "  static styles = [];",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-014",
+      "arm": "generated local sheet identity and order",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "  static styles = [buttonSheet, sheet];",
+      "to": "  static styles = [buttonSheet, new CSSStyleSheet()];",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-017",
+      "arm": "the 20rem available-inline-size reflow threshold remains declared at its documented figure",
+      "file": "packages/elements/src/copy-field/sk-copy-field.css.js",
+      "from": "@container (max-inline-size: 20rem)",
+      "to": "@container (max-inline-size: 10rem)",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "arm": "generated copy-field wrapper subscribes the React callback once",
+      "file": "packages/react/src/SkCopyField.js",
+      "from": "  useEventListener(ref, \"sk-copy-field-result\", props.onSkCopyFieldResult);",
+      "to": "  void props.onSkCopyFieldResult;",
+      "subject": "fixtures/react-consumer/src/sk-copy-field.test.tsx"
+    },
+    {
+      "id": "SC-010",
+      "arm": "generated copy-field wrapper bridges and resets exact string props",
+      "file": "packages/react/src/SkCopyField.js",
+      "from": "      value: value,",
+      "to": "      value: undefined,",
+      "subject": "fixtures/react-consumer/src/sk-copy-field.test.tsx"
+    },
+    {
+      "id": "SC-012",
+      "arm": "destination-hidden assigned-region focus release follows the exposure matrix",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    for (const [slotName, exposed] of this.#regionExposure()) {\n      if (!exposed && this.#assignedWithin(active, slotName)) {\n        active.blur();\n        return;\n      }\n    }",
+      "to": "    if (this.#assignedWithin(active, 'compact-navigation')) active.blur();",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "slot reassignment releases focus before the destination root is suppressed",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "  #onExposureSlotChange = (): void => {\n    this.#releaseHiddenFocus();\n    this.#reconcileAssignedRootExposure();\n  };",
+      "to": "  #onExposureSlotChange = (): void => {\n    this.#reconcileAssignedRootExposure();\n  };",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact presentation suppresses the assigned context-sidebar root in the shared matrix",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['context-sidebar', !responsiveNavigation],",
+      "to": "      ['context-sidebar', !this.#railPreserving],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact-header remains exposed while responsive navigation is closed",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['compact-header', responsiveNavigation],",
+      "to": "      ['compact-header', this.#effectivelyOpen],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-010",
+      "arm": "rail-preserving is recognized without an unknown-presentation warning",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      this.presentation !== 'rail-preserving' &&",
+      "to": "      this.presentation === 'rail-preserving' &&",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "the rail-preserving TypeScript threshold remains inclusive through 1100px",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "const RAIL_PRESERVING_MAX_INLINE_SIZE = 1100;",
+      "to": "const RAIL_PRESERVING_MAX_INLINE_SIZE = 1099;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "effective rail-preserving retains the assigned personal-rail root",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['personal-rail', !compact],",
+      "to": "      ['personal-rail', !responsiveNavigation],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "effective rail-preserving suppresses the assigned context-sidebar root",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['context-sidebar', !responsiveNavigation],",
+      "to": "      ['context-sidebar', !compact],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "effective rail-preserving exposes the assigned compact-header root",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['compact-header', responsiveNavigation],",
+      "to": "      ['compact-header', compact],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the shared responsive-navigation derivation includes rail-preserving",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    return this.#compact || this.#railPreserving;",
+      "to": "    return this.#compact;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-017",
+      "arm": "rail-preserving CSS queries logical inline-size rather than physical width",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": "@container (max-inline-size: 1100px)",
+      "to": "@container (max-width: 1100px)",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "the rail-preserving CSS threshold remains inclusive through 1100px",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": "@container (max-inline-size: 1100px)",
+      "to": "@container (max-inline-size: 1099px)",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "rail-preserving CSS retains the personal-rail plus content grid",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": "grid-template-columns:\\n      var(--sk-layout-personal-rail-width)\\n      minmax(0, 1fr);",
+      "to": "grid-template-columns: minmax(0, 1fr);",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "forced colors retains the rail-preserving navigation boundary selector",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": ":host([presentation=\\\"rail-preserving\\\"]) .sk-app-shell__compact-header:focus-within,\\n  :host([presentation=\\\"rail-preserving\\\"]) .sk-app-shell__compact-navigation {",
+      "to": ":host([presentation=\\\"rail-preserving\\\"]) .sk-app-shell__compact-header:focus-within {",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "focus does not return to the invoker on close",
+      "file": "packages/elements/src/confirm-dialog/sk-confirm-dialog.ts",
+      "from": "    this.#invoker?.focus();",
+      "to": "    // this.#invoker?.focus();",
+      "subject": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "arm": "confirm activation fires a second, duplicate close",
+      "file": "packages/elements/src/confirm-dialog/sk-confirm-dialog.ts",
+      "from": "    this.#dialogEl?.close('confirm');",
+      "to": "    this.#dialogEl?.close('confirm');\n    this.#dialogEl?.dispatchEvent(new Event('close'));",
+      "subject": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts"
+    },
+    {
+      "id": "SC-007",
+      "arm": "confirm activation loses its explicit outcome and resolves as cancel instead",
+      "file": "packages/elements/src/confirm-dialog/sk-confirm-dialog.ts",
+      "from": "    this.#dialogEl?.close('confirm');",
+      "to": "    this.#dialogEl?.close();",
+      "subject": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts"
+    },
+    {
+      "id": "SC-013",
+      "arm": "confirm part is renamed and becomes untargetable",
+      "file": "packages/elements/src/confirm-dialog/sk-confirm-dialog.ts",
+      "from": "          part=\"confirm\"",
+      "to": "          part=\"confirm-button\"",
+      "subject": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-014",
+      "arm": "neither the composed button sheet nor the generated local sheet is adopted",
+      "file": "packages/elements/src/confirm-dialog/sk-confirm-dialog.ts",
+      "from": "  static styles = [buttonSheet, sheet];",
+      "to": "  static styles = [];",
+      "subject": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts"
+    },
+    {
+      "id": "SC-015",
+      "arm": "confirm-dialog module registration no longer preserves constructor identity for duplicate guards",
+      "file": "packages/elements/src/confirm-dialog/sk-confirm-dialog.ts",
+      "from": "define('sk-confirm-dialog', SkConfirmDialog);",
+      "to": "define('sk-confirm-dialog', class extends SkConfirmDialog {});",
+      "subject": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "status reflection",
+      "file": "packages/elements/src/pill-tag/sk-pill-tag.ts",
+      "from": "    status: { type: String, reflect: true },",
+      "to": "    status: { type: String, reflect: false },",
+      "subject": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "preference remains reactive, reflected, and preserves pre-upgrade assignment",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    preference: { type: String, converter: preferenceConverter, reflect: true, noAccessor: true },",
+      "to": "    // preference is deliberately unregistered by this mutation arm",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the theme preference is a native same-name radio group",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "              type=\"radio\"",
+      "to": "              type=\"checkbox\"",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "System installs only a complete media-query listener lifecycle pair",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    const legacy =\n      typeof this.#media.addListener === 'function' &&\n      typeof this.#media.removeListener === 'function';",
+      "to": "    const legacy =\n      typeof this.#media.addListener === 'function';",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-013",
+      "arm": "the stable theme control part remains targetable",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "        part=\"control\"",
+      "to": "        part=\"chooser\"",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "the generated theme-toggle stylesheet is adopted by identity",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "connected theme controls share one document theme state",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "  let theme = documentThemes.get(document);",
+      "to": "  let theme: DocumentTheme | undefined;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a manual choice is shown by every connected sibling control",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    for (const control of this.#controls) if (control !== source) control(preference);",
+      "to": "    for (const control of this.#controls) if (control === source) control(preference);",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "Light and Dark release the shared System listener",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (preference === 'system') this.#startListening();\n    else this.#stopListening();",
+      "to": "    this.#startListening();",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the last disconnected control releases the shared System listener",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (this.#controls.size === 0) this.#stopListening();",
+      "to": "    if (false) this.#stopListening();",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "System asks exactly the contract's dark colour-scheme query",
+      "file": "packages/elements/src/theme-toggle/theme-preference.ts",
+      "from": "export const THEME_DARK_SCHEME_QUERY = '(prefers-color-scheme: dark)';",
+      "to": "export const THEME_DARK_SCHEME_QUERY = '(prefers-color-scheme: light)';",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "an invalid direct or pre-upgrade preference normalizes to System at the property boundary",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    const next = isThemePreference(value) ? value : 'system';",
+      "to": "    const next = value;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a dormant document trusts storage over the last in-memory preference",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (!canReadStorage(store)) return this.#preference;",
+      "to": "    if (!true) return this.#preference;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a dormant document re-reads readable storage rather than always resuming memory",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (!canReadStorage(store)) return this.#preference;",
+      "to": "    if (!false) return this.#preference;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a dormant document adopts storage only when it changed since the page last read or saved it",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (stored === this.#stored) return this.#preference;",
+      "to": "    if (false) return this.#preference;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "an adopted stored value becomes the value the page remembers having read",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    this.#stored = stored;\n    return stored;",
+      "to": "    return stored;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a write storage refused is not remembered as saved",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (writeThemePreference(storage(), preference)) this.#stored = preference;",
+      "to": "    writeThemePreference(storage(), preference);\n    this.#stored = preference;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "an empty document re-reads storage instead of the joining control's constructor-time value",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    this.#publish(assigned ? preference : wasEmpty ? this.#resume() : this.#preference, control);",
+      "to": "    this.#publish(assigned || wasEmpty ? preference : this.#preference, control);",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "an empty document re-queries matchMedia rather than reusing the list it captured first",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (wasEmpty) this.#media = mediaQuery();",
+      "to": "    if (!this.#media) this.#media = mediaQuery();",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a selection saves the preference the page settled on after dispatch",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    documentThemeFor(this.ownerDocument).persist(this.preference);",
+      "to": "    documentThemeFor(this.ownerDocument).persist(input.value as ThemePreference);",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "System installs only a complete modern media-query listener pair",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    const modern =\n      typeof this.#media.addEventListener === 'function' &&\n      typeof this.#media.removeEventListener === 'function';",
+      "to": "    const modern =\n      typeof this.#media.addEventListener === 'function';",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "an invalid attribute written onto a rendered control is reflected back as System",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "      this.requestUpdate('preference', value);",
+      "to": "      // the reflection Lit skipped is deliberately not requested by this mutation arm",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the last disconnected control's coordinator is forgotten rather than kept dormant",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "  disconnect(control: ThemeControl): void {\n    this.#controls.delete(control);\n    if (this.#controls.size === 0) this.#stopListening();\n  }",
+      "to": "  disconnect(control: ThemeControl): void {\n    this.#controls.delete(control);\n    if (this.#controls.size === 0) {\n      this.#stopListening();\n      documentThemes.delete(this.#document);\n    }\n  }",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the radio checked binding trusts Lit's cache instead of the live DOM property",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": ".checked=${live(this.preference === value)}",
+      "to": ".checked=${this.preference === value}",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    }
+  ]
+}

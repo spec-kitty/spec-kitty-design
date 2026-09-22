@@ -1,0 +1,130 @@
+schema: review-findings/v1
+complete: true
+phase: plan-post-research
+lens_group: fit
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: PLAN-POST-RESEARCH-FIT-001
+    lens: fit
+    severity: 3
+    title: "plan.md's IC-03/NFR-004 forced-colors CSS plan and IC-04 verification plan omit an explicit commitment for the disabled-state forced-colors distinguishability spec.md's User Story 4 Acceptance Scenario 4 requires"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/spec.md:189-196 (User Story 4, Acceptance Scenario 4: \"the selected, disabled and focus-visible states each remain distinguishable using a mechanism forced-colors preserves (border/outline), not one it flattens away (background, box-shadow)\")"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/spec.md:253 (NFR-004's own text names only \"the selected-state indicator and the focus-visible indicator\", not disabled)"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/plan.md:279-287 (IC-03 Purpose: \"Add the @media (forced-colors: active) block ... for the selected-state indicator and the focus-visible indicator\" — disabled is not named)"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/plan.md:112-115 (Documentation section frames GrayText as \"available precedent if a disabled-state forced-colors cue is needed, not a new requirement this plan is adding\")"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research.md:184-193 (Q4) and research/evidence-log.csv EV-032 (\"directly relevant to this mission's FR-004/NFR-004 disabled-item requirement\")"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/plan.md:309-324, 332-333 (IC-04 Purpose/Relevant requirements lists NFR-004 and names hover/active/focus-visible/axe assertions, but no distinct disabled+forced-colors assertion)"
+    claim: >
+      spec.md's User Story 4 Acceptance Scenario 4 is a binding acceptance scenario requiring that,
+      under `forced-colors: active`, "the selected, disabled and focus-visible states each remain
+      distinguishable" via border/outline, not background/box-shadow. NFR-004's own enumerated text is
+      narrower — it names only the selected-state indicator and the focus-visible indicator, omitting
+      disabled — but User Story 4 AC4 itself explicitly says "the full set of traps this bar draws on is
+      enumerated in NFR-004 and C-010", treating NFR-004/C-010 as covering the disabled clause too.
+      plan.md's IC-03 (the forced-colors CSS work package concern) inherits NFR-004's narrower framing
+      verbatim: its Purpose bullet plans the `@media (forced-colors: active)` block only "for the
+      selected-state indicator and the focus-visible indicator," never naming a disabled-state cue.
+      plan.md's Documentation section is aware of the relevant precedent — `GrayText`, already present in
+      `stylelint.config.mjs`'s `ignoreValues` and already used by `sk-context-nav.css` for exactly a
+      disabled/unavailable forced-colors cue — but explicitly declines to commit to it, characterizing it
+      as merely "available precedent if a disabled-state forced-colors cue is needed, not a new
+      requirement this plan is adding." research.md's own evidence log (EV-032) ties this precedent
+      directly to "this mission's FR-004/NFR-004 disabled-item requirement," i.e. research.md itself reads
+      this as germane to a requirement this mission carries, not as a purely optional enhancement.
+      IC-04's Playwright verification plan mirrors the same gap: it names distinct
+      hover/active/focus-visible/axe/zoom-overflow assertions (FR-009) and a pressed-item computed-style
+      delta assertion (FR-003), but no distinct assertion measuring that the disabled state remains
+      forced-colors-distinguishable via border/outline rather than background/box-shadow, the way NFR-004
+      demands "measured ... not merely read off the source" for the states it does name. The only
+      remaining backstop is the generic per-story axe-core zero-violations pass (NFR-001/SC-002), which is
+      necessary but — per NFR-004's own text — explicitly insufficient as a substitute for the specific
+      border/outline-vs-background/box-shadow measurement this acceptance bar calls for.
+      This is a real, if narrow, gap: whether the base (non-forced-colors) disabled treatment IC-01
+      authors (border/weight/opacity/cursor per FR-003) happens to already survive forced-colors emulation
+      unaided (opacity, border-width and cursor are not colour-remapped by forced-colors the way
+      color/background/box-shadow are) is a plausible outcome, but plan.md never states this as the
+      design's actual reasoning or verifies it — it is left as an unstated assumption rather than a
+      decided design point with a named verification step.
+    remediation: >
+      Either (a) add an explicit IC-03 sub-bullet stating the design decision for the disabled state under
+      forced-colors — e.g. "no dedicated forced-colors override is added for `:disabled`; the base
+      border/weight/opacity/cursor treatment from IC-01 already survives forced-colors emulation because
+      none of those properties are colour-remapped, so the disabled cue needs no `-color` override" — and
+      add a corresponding IC-04 Playwright/axe assertion that measures this claim (mirroring the selected/
+      focus-visible measurement pattern from `sk-notice-forced-colors.spec.ts`) rather than relying solely
+      on the generic per-story axe pass; or (b) if a dedicated disabled-state forced-colors override is in
+      fact needed, name it explicitly in IC-03 using the `GrayText` (or `CanvasText`) longhand `-color`
+      technique research.md's Q4/EV-032 already ground, and add C-010's keyword list to include it (C-010
+      currently omits `GrayText`, per research.md's Discrepancies section — see PLAN-POST-RESEARCH-FIT-002
+      for the related folding gap).
+
+  - id: PLAN-POST-RESEARCH-FIT-002
+    lens: fit
+    severity: 2
+    title: "plan.md's Documentation section recaps research.md's Q1-Q10 confirmations but never mentions research.md's own Discrepancies-found section, so C-006's and C-004's known accuracy gaps go unacknowledged in the plan a WP implementer will actually read"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/plan.md:100 (\"research.md is structured as ten researched questions (Q1-Q10) plus a Discrepancies-found section\" — the section is named structurally but its content is never recounted)"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/plan.md:463-472 (Delivery contract restates C-006: \"Conventional commit scope: styles, throughout every commit in this mission (C-006)\", quoting C-006's own \"all commits in this mission\" text, with no caveat)"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research.md:411-428 (Discrepancies found, item 2: C-006's unqualified \"all commits in this mission\" claim is contradicted by this mission's own design-phase commits, which use `docs(kitty-specs)`/`fix(kitty-specs)` scope, not `styles`)"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research/evidence-log.csv EV-030 (same finding, with commit SHAs and commitlint.config.cjs line citations)"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/reviews/spec-research-fresh.yaml (SPEC-RESEARCH-FRESH-002, the C-004/sk-form-select.css mis-citation, raised against an earlier research.md draft — the underlying spec.md C-004 text itself remains unamended and is still merely worked around, not corrected or flagged, in plan.md's own prose)"
+    claim: >
+      plan.md's Documentation section states it "relies on what [research.md and data-model.md]
+      established rather than restating or re-deriving it independently," and gives a detailed
+      per-question (Q1-Q10) summary of research.md's confirmations. It never once surfaces the substance
+      of research.md's own "Discrepancies found" section (items 1-3), even though it names the section's
+      existence in passing. Two of those three discrepancies bear directly on binding constraint text
+      plan.md itself repeats verbatim elsewhere:
+      (1) C-006 ("all commits in this mission use the `styles` ... scope") is restated in plan.md's
+      Delivery contract section without qualification, even though research.md's Discrepancy #2
+      (backed by EV-030, commit SHAs 9892785/d6ac1f5/614e2d0/d9a231d/d78c0d3/b91cc43) shows this literal
+      wording is already false for this mission's own design-phase bookkeeping commits, which use a
+      `kitty-specs` scope commitlint's `scope-enum` does not even list. plan.md's restatement is correct
+      for what it actually governs (the upcoming WP's `packages/styles` commits), but a reader relying on
+      plan.md alone — without independently reading research.md's Discrepancies section — would not learn
+      that C-006's own wording has this known imprecision, or that "all commits in this mission" should be
+      read as "all commits in this mission's implementation Work Package."
+      (2) C-004's sentence citing "the base-state precedent in `sk-nav-pill.css` and `sk-form-select.css`"
+      for the `--sk-bg-pill` token choice is never quoted or corrected in plan.md, even though research.md's
+      Discrepancy #3 (EV-033) shows `sk-form-select.css` contains zero references to `--sk-bg-pill`.
+      plan.md's own IC-01 text happens to cite only `sk-nav-pill.css` for this token (correctly sidestepping
+      the error), so no incorrect claim is repeated — but the plan also never flags, for a future spec
+      amendment, that C-004's literal text (which remains part of the binding spec a reviewer will check
+      plan.md against) still makes the joint-precedent claim research.md found unsupported.
+      Neither gap changes what the WP should actually build, but both leave a known, documented
+      spec-accuracy issue unacknowledged in the one document (plan.md) that claims to have already folded
+      in research.md's findings — a reviewer or implementer working from plan.md's Documentation section
+      summary alone, rather than reading research.md's Discrepancies section directly, would not learn
+      either exists.
+    remediation: >
+      Add a short subsection (or a few sentences) to plan.md's Documentation section explicitly
+      summarizing research.md's three Discrepancies-found items — not just naming the section's existence
+      — including the C-006 scope-wording gap (with the "should be read as: commits in this mission's
+      implementation Work Package" clarification research.md itself offers) and the C-004 sk-form-select.css
+      mis-citation (with the clarification that only `sk-nav-pill.css` demonstrates the `--sk-bg-pill`
+      pattern, matching what IC-01 already does correctly in practice). This keeps plan.md a complete,
+      self-contained summary of what research.md established, consistent with the Documentation section's
+      own stated intent, and gives a future spec.md amendment pass a ready-made pointer to both open items.
+
+  - id: PLAN-POST-RESEARCH-FIT-003
+    lens: fit
+    severity: 1
+    title: "IC-03's section title (\"Forced-colors and accessible-name-boundary CSS\") names an accessible-name boundary concern its content never addresses"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/plan.md:279 (IC-03 heading: \"### IC-03 — Forced-colors and accessible-name-boundary CSS\")"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/plan.md:279-307 (IC-03's Purpose/Relevant requirements/Affected surfaces/Sequencing/Risks all concern only the forced-colors `@media` block; none mentions the group's accessible name, `role=\"group\"`, or `aria-label`)"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/data-model.md:38-43 (Entity 1's accessible-name attributes are documented as consumer-owned, CSS-invisible — \"the library never reads role, aria-label, or aria-labelledby\")"
+    claim: >
+      This is a minor internal-labelling inconsistency, not a coverage gap: data-model.md and spec.md's
+      Edge Cases section both confirm the accessible-name boundary is genuinely out of the CSS layer's
+      control (FR-011/FR-007 cover it via documentation and the Playwright fixture-assertion suite, both
+      handled elsewhere — IC-06 and IC-04's live block, respectively), so nothing is actually missing from
+      the plan's requirement coverage. IC-03's own heading naming an "accessible-name-boundary" concern
+      that its body never discusses is very likely a leftover/stale title fragment from an earlier
+      revision, and could confuse a reviewer skimming section headings into thinking IC-03 owns an
+      accessible-name deliverable it does not.
+    remediation: >
+      Rename IC-03's heading to drop the "accessible-name-boundary" fragment (e.g. "IC-03 — Forced-colors
+      CSS"), since that concern is fully handled by IC-04 (fixture assertions) and IC-06 (documentation)
+      elsewhere in the plan and is not something IC-03 itself produces.

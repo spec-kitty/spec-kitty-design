@@ -1,0 +1,763 @@
+{"invocation_id":"01M1HMJ8HQ5BPCV5JCJ2Q4P9RP","profile_id":"generic-agent","started_at":"2026-09-02T18:02:13.532626+00:00"}
+{"invocation_id":"01M1HR77XR3ZJXGAKS91RJH97F","profile_id":"doctrine-daphne","started_at":"2026-09-02T19:06:07.149856+00:00"}
+{"invocation_id":"01M1PSZXWS9CKBCK1HNX3GZYXG","profile_id":"researcher-robbie","started_at":"2026-09-04T18:13:17.825861+00:00"}
+{"invocation_id":"01M1PT00D011Q8Q6V9HM3Q9BMX","profile_id":"researcher-robbie","started_at":"2026-09-04T18:13:20.024279+00:00"}
+{"invocation_id":"01M1PT02HS4317VWHPK878YGJW","profile_id":"researcher-robbie","started_at":"2026-09-04T18:13:22.169313+00:00"}
+{"invocation_id":"01M1PT04MK3FQ398PNR0QG8YPV","profile_id":"researcher-robbie","started_at":"2026-09-04T18:13:24.339258+00:00"}
+{"invocation_id":"01M1PT06RPQY395QT3KNKQQ9S5","profile_id":"researcher-robbie","started_at":"2026-09-04T18:13:26.527564+00:00"}
+{"invocation_id":"01M1PT08X0JZKCGBFQE48HJXXH","profile_id":"researcher-robbie","started_at":"2026-09-04T18:13:28.679429+00:00"}
+{"invocation_id":"01M1PT0B07XND8KKVSQ2R0VJX7","profile_id":"researcher-robbie","started_at":"2026-09-04T18:13:30.864352+00:00"}
+{"invocation_id":"01M1PT0QS38HECAD68SZK6HBAV","profile_id":"architect-alphonso","started_at":"2026-09-04T18:13:43.610032+00:00"}
+{"invocation_id":"01M1PT0SJWW0FRQPKGNEG40W73","profile_id":"architect-alphonso","started_at":"2026-09-04T18:13:45.054926+00:00"}
+{"invocation_id":"01M1PT0TZZZY0FETG8R1WTSR38","profile_id":"architect-alphonso","started_at":"2026-09-04T18:13:46.511250+00:00"}
+{"invocation_id":"01M1PT0WDDR6AGFHV77TGCQME0","profile_id":"architect-alphonso","started_at":"2026-09-04T18:13:47.951043+00:00"}
+{"invocation_id":"01M1PT0XTFS46HY2A5C1SGPNHQ","profile_id":"architect-alphonso","started_at":"2026-09-04T18:13:49.423132+00:00"}
+{"invocation_id":"01M1PT0Z8E7XEVTBK64WDYZM0D","profile_id":"architect-alphonso","started_at":"2026-09-04T18:13:50.846352+00:00"}
+{"invocation_id":"01M1PT10N0DW8R3JEZCNTD9W1B","profile_id":"architect-alphonso","started_at":"2026-09-04T18:13:52.324848+00:00"}
+{"invocation_id":"01M1PT1DNBJ090BNTQ890VW0AC","profile_id":"architect-alphonso","started_at":"2026-09-04T18:14:06.684797+00:00"}
+{"invocation_id":"01M1PT1G3YC8TX8C7B7JFJZXKW","profile_id":"architect-alphonso","started_at":"2026-09-04T18:14:08.909964+00:00"}
+{"invocation_id":"01M1PT1J96KPR0JRSNCZ3954JR","profile_id":"architect-alphonso","started_at":"2026-09-04T18:14:11.075726+00:00"}
+{"invocation_id":"01M1PT1MD5RDYTAD19BJQJX7MF","profile_id":"architect-alphonso","started_at":"2026-09-04T18:14:13.291824+00:00"}
+{"invocation_id":"01M1R6RTM85YS9XMQAF14WGQ9S","profile_id":"researcher-robbie","started_at":"2026-09-05T07:15:50.383777+00:00"}
+{"invocation_id":"01M1R6RWGJ1453RMR97HWRPJ4P","profile_id":"researcher-robbie","started_at":"2026-09-05T07:15:51.800245+00:00"}
+{"invocation_id":"01M1R6RXWYQC47CTC8Q0VMQYVZ","profile_id":"researcher-robbie","started_at":"2026-09-05T07:15:53.253632+00:00"}
+{"invocation_id":"01M1R6RZABA5WY4Q9CV8D5ES39","profile_id":"researcher-robbie","started_at":"2026-09-05T07:15:54.675564+00:00"}
+{"invocation_id":"01M1R6S0PGD0QABBMZGV60N8MJ","profile_id":"researcher-robbie","started_at":"2026-09-05T07:15:56.127048+00:00"}
+{"invocation_id":"01M1R6S23T6K2X0TV1GA05WBMF","profile_id":"researcher-robbie","started_at":"2026-09-05T07:15:57.541528+00:00"}
+{"invocation_id":"01M1R6S3FX2M5DPENDZSH9W89H","profile_id":"researcher-robbie","started_at":"2026-09-05T07:15:58.981746+00:00"}
+{"invocation_id":"01M1R7855ZP7FF45DW1BQTEE08","profile_id":"architect-alphonso","started_at":"2026-09-05T07:24:14.022745+00:00"}
+{"invocation_id":"01M1R788BNNX3RZ6518Z1G1HQF","profile_id":"architect-alphonso","started_at":"2026-09-05T07:24:16.267867+00:00"}
+{"invocation_id":"01M1R78AH5HAWX9XYT2WP46RYH","profile_id":"architect-alphonso","started_at":"2026-09-05T07:24:18.451003+00:00"}
+{"invocation_id":"01M1R78CNE06XQNXFX8H482WV4","profile_id":"architect-alphonso","started_at":"2026-09-05T07:24:20.713408+00:00"}
+{"invocation_id":"01M1R78EW2T7SABN6WX9ZHKE2R","profile_id":"architect-alphonso","started_at":"2026-09-05T07:24:22.926222+00:00"}
+{"invocation_id":"01M1R78H1GTENZBH9Y4C1TA928","profile_id":"architect-alphonso","started_at":"2026-09-05T07:24:25.124594+00:00"}
+{"invocation_id":"01M1R78K5YXA21JKBNHBQSHF7H","profile_id":"architect-alphonso","started_at":"2026-09-05T07:24:27.337538+00:00"}
+{"invocation_id":"01M1R8F4K5E3APXDYXK3J2R4A4","profile_id":"architect-alphonso","started_at":"2026-09-05T07:45:30.806919+00:00"}
+{"invocation_id":"01M1R8F76TCZXNXTJG6FRR81QX","profile_id":"architect-alphonso","started_at":"2026-09-05T07:45:33.049965+00:00"}
+{"invocation_id":"01M1R8F9CS1KTEH4FY272043JY","profile_id":"architect-alphonso","started_at":"2026-09-05T07:45:35.257357+00:00"}
+{"invocation_id":"01M1R8FBHSW74V6QSCPBFPA3AH","profile_id":"architect-alphonso","started_at":"2026-09-05T07:45:37.491782+00:00"}
+{"invocation_id":"01M1S98S1346JY2Z9R2DD6Q41V","profile_id":"researcher-robbie","started_at":"2026-09-05T17:18:45.357950+00:00"}
+{"invocation_id":"01M1S98VPWZ82WKYGNXA7MA375","profile_id":"researcher-robbie","started_at":"2026-09-05T17:18:47.669564+00:00"}
+{"invocation_id":"01M1S98XWVPR1FYX3ZM466DNCM","profile_id":"researcher-robbie","started_at":"2026-09-05T17:18:49.858436+00:00"}
+{"invocation_id":"01M1S990166WYA8WG095XK5TVA","profile_id":"researcher-robbie","started_at":"2026-09-05T17:18:52.072248+00:00"}
+{"invocation_id":"01M1S99263AS9ZT8Q02N4A1TNF","profile_id":"researcher-robbie","started_at":"2026-09-05T17:18:54.261754+00:00"}
+{"invocation_id":"01M1S994AJ7XVZZ818PQZH2XF3","profile_id":"researcher-robbie","started_at":"2026-09-05T17:18:56.502679+00:00"}
+{"invocation_id":"01M1S996GNZFZEHXBW09TDTSKE","profile_id":"researcher-robbie","started_at":"2026-09-05T17:18:58.711104+00:00"}
+{"invocation_id":"01M1S9M0PAHF261125Q0RMYGJY","profile_id":"architect-alphonso","started_at":"2026-09-05T17:24:53.675656+00:00"}
+{"invocation_id":"01M1S9M3A6D5KNZ1MSWVSB34VP","profile_id":"architect-alphonso","started_at":"2026-09-05T17:24:55.952538+00:00"}
+{"invocation_id":"01M1S9M5HF4CQ4Y38TZH57DPA1","profile_id":"architect-alphonso","started_at":"2026-09-05T17:24:58.166755+00:00"}
+{"invocation_id":"01M1S9M7PRTG4CR42XFW2HNH32","profile_id":"architect-alphonso","started_at":"2026-09-05T17:25:00.484613+00:00"}
+{"invocation_id":"01M1S9M9Z4S2AE3VS0CKH00CM7","profile_id":"architect-alphonso","started_at":"2026-09-05T17:25:02.725164+00:00"}
+{"invocation_id":"01M1S9MC4W1AVG3DH7B90NHDJ3","profile_id":"architect-alphonso","started_at":"2026-09-05T17:25:04.976215+00:00"}
+{"invocation_id":"01M1S9MEBAXYR3FY81FB6H7DVW","profile_id":"architect-alphonso","started_at":"2026-09-05T17:25:07.188632+00:00"}
+{"invocation_id":"01M1SE5QAQ127K74N9G3CAQHK3","profile_id":"architect-alphonso","started_at":"2026-09-05T18:44:28.840036+00:00"}
+{"invocation_id":"01M1SE7K6A5VRF704VJVWH80J6","profile_id":"reviewer-renata","started_at":"2026-09-05T18:45:29.504456+00:00"}
+{"invocation_id":"01M1SE7ZFT3NX0810EV1DHNECA","profile_id":"debugger-debbie","started_at":"2026-09-05T18:45:41.984781+00:00"}
+{"invocation_id":"01M1SE8C49QENPATW7FE6YZ604","profile_id":"randy-reducer","started_at":"2026-09-05T18:45:54.964485+00:00"}
+{"invocation_id":"01M1SE98Q5T6P8JF1V8N65EP2G","profile_id":"architect-alphonso","started_at":"2026-09-05T18:46:24.220864+00:00"}
+{"invocation_id":"01M1SE9Q601VSDQZ3BP8VRC6AK","profile_id":"reviewer-renata","started_at":"2026-09-05T18:46:39.061468+00:00"}
+{"invocation_id":"01M1SEA5FDS3J8MMG2R6WF3JQC","profile_id":"debugger-debbie","started_at":"2026-09-05T18:46:53.014478+00:00"}
+{"invocation_id":"01M1SEAJE39VN33AQ6YCDQJEGB","profile_id":"randy-reducer","started_at":"2026-09-05T18:47:06.905721+00:00"}
+{"invocation_id":"01M1SK3PQVRCAE3BXNGD4NNJJC","profile_id":"architect-alphonso","started_at":"2026-09-05T20:10:44.860168+00:00"}
+{"invocation_id":"01M1SK42T41V4ZCK3DM3SY5D9Z","profile_id":"reviewer-renata","started_at":"2026-09-05T20:10:57.214517+00:00"}
+{"invocation_id":"01M1SK4MQXW2ZVQRYFS5EMS6AJ","profile_id":"debugger-debbie","started_at":"2026-09-05T20:11:15.590648+00:00"}
+{"invocation_id":"01M1SK4XRQ8NKZKEN4MPW2ANS2","profile_id":"randy-reducer","started_at":"2026-09-05T20:11:24.841771+00:00"}
+{"invocation_id":"01M1SN36R5YTAKZHWHWPNH17W2","profile_id":"debugger-debbie","started_at":"2026-09-05T20:45:25.768690+00:00"}
+{"invocation_id":"01M1SN3MVR6P0FX7K6XS290HYS","profile_id":"reviewer-renata","started_at":"2026-09-05T20:45:40.365713+00:00"}
+{"invocation_id":"01M1SPP2MT1TAQ6ZP19NPBF5YK","profile_id":"architect-alphonso","started_at":"2026-09-05T21:13:13.013826+00:00"}
+{"invocation_id":"01M1SPPFM8BSCP8ZBH8PA5H8CR","profile_id":"debugger-debbie","started_at":"2026-09-05T21:13:26.598620+00:00"}
+{"invocation_id":"01M1SPPVW62BGE8NX5A2QQXN8C","profile_id":"reviewer-renata","started_at":"2026-09-05T21:13:38.936870+00:00"}
+{"invocation_id":"01M1SPQ7MG1KX931AHSF11F70S","profile_id":"randy-reducer","started_at":"2026-09-05T21:13:51.022865+00:00"}
+{"invocation_id":"01M1SV5X8D0NDYH623521DAE7V","profile_id":"researcher-robbie","started_at":"2026-09-05T22:31:45.177926+00:00"}
+{"invocation_id":"01M1SV5Z9PCET8KK5K1ZJXHP94","profile_id":"researcher-robbie","started_at":"2026-09-05T22:31:46.682137+00:00"}
+{"invocation_id":"01M1SV60RTB99CZMTCB4NZH46P","profile_id":"researcher-robbie","started_at":"2026-09-05T22:31:48.262654+00:00"}
+{"invocation_id":"01M1SV62A4ZAR78PX5A8PK0GT2","profile_id":"researcher-robbie","started_at":"2026-09-05T22:31:49.781781+00:00"}
+{"invocation_id":"01M1SV63SPYRCQPDTCKDTRVFC8","profile_id":"researcher-robbie","started_at":"2026-09-05T22:31:51.368984+00:00"}
+{"invocation_id":"01M1SV65B79SP129STAV547X9H","profile_id":"researcher-robbie","started_at":"2026-09-05T22:31:53.076224+00:00"}
+{"invocation_id":"01M1SV670J94GV89ESK611M6WW","profile_id":"researcher-robbie","started_at":"2026-09-05T22:31:54.780290+00:00"}
+{"invocation_id":"01M1SVGPHJNTW1KG4W0FY87GR5","profile_id":"architect-alphonso","started_at":"2026-09-05T22:37:39.194252+00:00"}
+{"invocation_id":"01M1SVGS10DH54CAE2S459Z1KP","profile_id":"architect-alphonso","started_at":"2026-09-05T22:37:41.436428+00:00"}
+{"invocation_id":"01M1SVGV6QZ48F12T1HGVRCH0Y","profile_id":"architect-alphonso","started_at":"2026-09-05T22:37:43.632516+00:00"}
+{"invocation_id":"01M1SVGXBDZ2QZVH30N7T94NYZ","profile_id":"architect-alphonso","started_at":"2026-09-05T22:37:45.854883+00:00"}
+{"invocation_id":"01M1SVGZGS7MFA1DTHR1RFKTW6","profile_id":"architect-alphonso","started_at":"2026-09-05T22:37:48.090635+00:00"}
+{"invocation_id":"01M1SVH1PNZ0Q3XMGBTQCMB2PS","profile_id":"architect-alphonso","started_at":"2026-09-05T22:37:50.276029+00:00"}
+{"invocation_id":"01M1SVH3V7JC8FT7HESMMY5VFK","profile_id":"architect-alphonso","started_at":"2026-09-05T22:37:52.511933+00:00"}
+{"invocation_id":"01M1SYMFFWQNJSZN1Z748M0AHQ","profile_id":"architect-alphonso","started_at":"2026-09-05T23:32:08.758353+00:00"}
+{"invocation_id":"01M1SYMHYWSBHPRMNF9RHRCRMX","profile_id":"architect-alphonso","started_at":"2026-09-05T23:32:10.954312+00:00"}
+{"invocation_id":"01M1SYMM38QJ3AZ401R2ATRAHE","profile_id":"architect-alphonso","started_at":"2026-09-05T23:32:13.102835+00:00"}
+{"invocation_id":"01M1SYMP6GG1JCKP2FAG0ZWDBT","profile_id":"architect-alphonso","started_at":"2026-09-05T23:32:15.305617+00:00"}
+{"invocation_id":"01M1SYSEXHEG3YY7G961FM36G0","profile_id":"architect-alphonso","started_at":"2026-09-05T23:34:52.098562+00:00"}
+{"invocation_id":"01M1SYSJ1JR20X5066FRCGZRBD","profile_id":"architect-alphonso","started_at":"2026-09-05T23:34:54.975081+00:00"}
+{"invocation_id":"01M1SYSMVZ4K64XBE1KW3Z0407","profile_id":"architect-alphonso","started_at":"2026-09-05T23:34:57.865643+00:00"}
+{"invocation_id":"01M1SYSQM77TH0QQHZMTEA9YAE","profile_id":"architect-alphonso","started_at":"2026-09-05T23:35:00.685427+00:00"}
+{"invocation_id":"01M1T33BQCP39H5F0KZN4E07B1","profile_id":"architect-alphonso","started_at":"2026-09-06T00:50:10.943056+00:00"}
+{"invocation_id":"01M1T33RH7D91DVGJJQVHSGFY1","profile_id":"reviewer-renata","started_at":"2026-09-06T00:50:23.883425+00:00"}
+{"invocation_id":"01M1T7N2GREVMVV1KVJ7KYWQ7X","profile_id":"reviewer-renata","started_at":"2026-09-06T02:09:45.654043+00:00"}
+{"invocation_id":"01M1T7NH0EKN8MP1EN7R3KNJFR","profile_id":"architect-alphonso","started_at":"2026-09-06T02:10:00.402007+00:00"}
+{"invocation_id":"01M1TAZHAA11RMNVAHNSZY20ZF","profile_id":"reviewer-renata","started_at":"2026-09-06T03:07:54.870883+00:00"}
+{"invocation_id":"01M1TBXK2HRQ0Z9F4Q1YSQ49Y8","profile_id":"debugger-debbie","started_at":"2026-09-06T03:24:18.157373+00:00"}
+{"invocation_id":"01M1V5KG1Z2FPQZBS1GHHZMEJD","profile_id":"node-norris","started_at":"2026-09-06T10:53:11.106722+00:00"}
+{"invocation_id":"01M1VMH4DJF0JMPB8BXFXRGRN4","profile_id":"researcher-robbie","started_at":"2026-09-06T15:14:01.628127+00:00"}
+{"invocation_id":"01M1VMH69YF667TM4KR60VHFEC","profile_id":"researcher-robbie","started_at":"2026-09-06T15:14:03.119027+00:00"}
+{"invocation_id":"01M1VMH7RE9E7HENB7MZQ4CWZ7","profile_id":"researcher-robbie","started_at":"2026-09-06T15:14:04.638181+00:00"}
+{"invocation_id":"01M1VMH97SGDDNMKXE2E5C4PJ1","profile_id":"researcher-robbie","started_at":"2026-09-06T15:14:06.091056+00:00"}
+{"invocation_id":"01M1VMHAN7K14N7DBKZZG46HJX","profile_id":"researcher-robbie","started_at":"2026-09-06T15:14:07.597166+00:00"}
+{"invocation_id":"01M1VMHC4BXF53N0CJDMWQEQPR","profile_id":"researcher-robbie","started_at":"2026-09-06T15:14:09.068213+00:00"}
+{"invocation_id":"01M1VMHDJ9RP0PF7NZQVCAYXJN","profile_id":"researcher-robbie","started_at":"2026-09-06T15:14:10.590950+00:00"}
+{"invocation_id":"01M1VMXA95JWDE89N3TT93MZ4F","profile_id":"architect-alphonso","started_at":"2026-09-06T15:20:40.922709+00:00"}
+{"invocation_id":"01M1VMXC7R0VD35QG37GRGBZR9","profile_id":"architect-alphonso","started_at":"2026-09-06T15:20:42.431070+00:00"}
+{"invocation_id":"01M1VMXDPWKJS4X5FYYK458QB1","profile_id":"architect-alphonso","started_at":"2026-09-06T15:20:44.010331+00:00"}
+{"invocation_id":"01M1VMXF89E0AH9HEWZMNJ8KAJ","profile_id":"architect-alphonso","started_at":"2026-09-06T15:20:45.572951+00:00"}
+{"invocation_id":"01M1VMXGS204DABN1WHFMVKEW1","profile_id":"architect-alphonso","started_at":"2026-09-06T15:20:47.114775+00:00"}
+{"invocation_id":"01M1VMXJ9AGQQXHQ1PTM5Y46DH","profile_id":"architect-alphonso","started_at":"2026-09-06T15:20:48.768547+00:00"}
+{"invocation_id":"01M1VMXKX0EPMS6368NBWM6VN4","profile_id":"architect-alphonso","started_at":"2026-09-06T15:20:50.322019+00:00"}
+{"invocation_id":"01M1VNTWC27APPFGCS7K093YPM","profile_id":"architect-alphonso","started_at":"2026-09-06T15:36:50.406972+00:00"}
+{"invocation_id":"01M1VNTZ05KY791SEBBXZEZMPH","profile_id":"architect-alphonso","started_at":"2026-09-06T15:36:52.716151+00:00"}
+{"invocation_id":"01M1VNV18E5BH8YH51TN02J5CT","profile_id":"architect-alphonso","started_at":"2026-09-06T15:36:54.995611+00:00"}
+{"invocation_id":"01M1VNV3FMW4NJWN9KQ5BJR093","profile_id":"architect-alphonso","started_at":"2026-09-06T15:36:57.320712+00:00"}
+{"invocation_id":"01M1W2Z5SPWFJKEXMZE19EDHSM","profile_id":"researcher-robbie","started_at":"2026-09-06T19:26:22.488259+00:00"}
+{"invocation_id":"01M1W2Z89T4A8S2WVF6VE20T0T","profile_id":"researcher-robbie","started_at":"2026-09-06T19:26:24.685103+00:00"}
+{"invocation_id":"01M1W2ZAEEJ15BD7YE10ARM0RA","profile_id":"researcher-robbie","started_at":"2026-09-06T19:26:26.868816+00:00"}
+{"invocation_id":"01M1W2ZCJF10PWJPYZQXRHWPX7","profile_id":"researcher-robbie","started_at":"2026-09-06T19:26:29.056677+00:00"}
+{"invocation_id":"01M1W2ZEQ9FY67NMQAB1HRES6N","profile_id":"researcher-robbie","started_at":"2026-09-06T19:26:31.262834+00:00"}
+{"invocation_id":"01M1W2ZGVXGSYJ8G0BAV4HE77C","profile_id":"researcher-robbie","started_at":"2026-09-06T19:26:33.436002+00:00"}
+{"invocation_id":"01M1W2ZJZTX3EM89WQYXGM7XGG","profile_id":"researcher-robbie","started_at":"2026-09-06T19:26:35.639545+00:00"}
+{"invocation_id":"01M1W4096SFHEJYTT4144FM9DH","profile_id":"architect-alphonso","started_at":"2026-09-06T19:44:27.412315+00:00"}
+{"invocation_id":"01M1W40BSMPNYNB463XRE6T177","profile_id":"architect-alphonso","started_at":"2026-09-06T19:44:29.682839+00:00"}
+{"invocation_id":"01M1W40E0QX3YEN5KXSBN1A0JX","profile_id":"architect-alphonso","started_at":"2026-09-06T19:44:31.883697+00:00"}
+{"invocation_id":"01M1W40G5MGM2KSS9DNK1H4XJ2","profile_id":"architect-alphonso","started_at":"2026-09-06T19:44:34.133262+00:00"}
+{"invocation_id":"01M1W40JBF0Y6JA5YQYBMZYJP3","profile_id":"architect-alphonso","started_at":"2026-09-06T19:44:36.356626+00:00"}
+{"invocation_id":"01M1W40MGZ280E2PQNWZTV9C32","profile_id":"architect-alphonso","started_at":"2026-09-06T19:44:38.577271+00:00"}
+{"invocation_id":"01M1W40PPR205JCW552F7RYT69","profile_id":"architect-alphonso","started_at":"2026-09-06T19:44:40.844730+00:00"}
+{"invocation_id":"01M1W4PE1778XF5CAQ2C2P7VA5","profile_id":"architect-alphonso","started_at":"2026-09-06T19:56:33.372978+00:00"}
+{"invocation_id":"01M1W4PGR06TX0NDC9HMYRNQFS","profile_id":"architect-alphonso","started_at":"2026-09-06T19:56:35.681731+00:00"}
+{"invocation_id":"01M1W4PK00BD361TRWQ0J0PT9K","profile_id":"architect-alphonso","started_at":"2026-09-06T19:56:38.011259+00:00"}
+{"invocation_id":"01M1W4PN8SJAVW97CJ795YCE6Y","profile_id":"architect-alphonso","started_at":"2026-09-06T19:56:40.325103+00:00"}
+{"invocation_id":"01M1WMNDVDBN4QEBGZT73GE8PE","profile_id":"implementer-ivan","started_at":"2026-09-07T00:35:37.993908+00:00"}
+{"invocation_id":"01M1WMNGXEF97HZ7HPKQQ57AS9","profile_id":"implementer-ivan","started_at":"2026-09-07T00:35:40.727695+00:00"}
+{"invocation_id":"01M1WMNKJW61RHPWN90W5VRZ55","profile_id":"implementer-ivan","started_at":"2026-09-07T00:35:43.210602+00:00"}
+{"invocation_id":"01M1WMNP0BV73FYJ1KYEBNB2E7","profile_id":"implementer-ivan","started_at":"2026-09-07T00:35:45.747970+00:00"}
+{"invocation_id":"01M1WMNRFKNG80KX0P62F0BZCJ","profile_id":"implementer-ivan","started_at":"2026-09-07T00:35:48.332072+00:00"}
+{"invocation_id":"01M1WMNV0EMME25FWW9JNM46K0","profile_id":"implementer-ivan","started_at":"2026-09-07T00:35:51.225169+00:00"}
+{"invocation_id":"01M1WMNXV0N2TV8DNT1M31W9MS","profile_id":"implementer-ivan","started_at":"2026-09-07T00:35:54.129836+00:00"}
+{"invocation_id":"01M1WMSDZM5RFMVJ7A3MR9N0F3","profile_id":"reviewer-renata","started_at":"2026-09-07T00:37:48.995036+00:00"}
+{"invocation_id":"01M1WMSGVAFS10R94GDSGQKP3E","profile_id":"reviewer-renata","started_at":"2026-09-07T00:37:51.700866+00:00"}
+{"invocation_id":"01M1WMSKFJE1BSN4J4P23TY5BJ","profile_id":"reviewer-renata","started_at":"2026-09-07T00:37:54.123436+00:00"}
+{"invocation_id":"01M1WMSNV97Y0QQGS6GZ7CK3HM","profile_id":"reviewer-renata","started_at":"2026-09-07T00:37:56.607014+00:00"}
+{"invocation_id":"01M1WMSR8WVKVTRY5168G7ZVKE","profile_id":"reviewer-renata","started_at":"2026-09-07T00:37:59.297576+00:00"}
+{"invocation_id":"01M1WMSTX1FJAXZ8FX5EG25YF3","profile_id":"reviewer-renata","started_at":"2026-09-07T00:38:01.786346+00:00"}
+{"invocation_id":"01M1WMSXASF43Z8SQM3BK4YX1V","profile_id":"reviewer-renata","started_at":"2026-09-07T00:38:04.283041+00:00"}
+{"invocation_id":"01M1WMSZRSVRERZKQVVRDZKH05","profile_id":"reviewer-renata","started_at":"2026-09-07T00:38:06.788057+00:00"}
+{"invocation_id":"01M1WVB35B3Q2JT7V7T1KGTGB8","profile_id":"researcher-robbie","started_at":"2026-09-07T02:32:18.798642+00:00"}
+{"invocation_id":"01M1WVB6JF69WC4E8Y206BZ94X","profile_id":"researcher-robbie","started_at":"2026-09-07T02:32:22.004704+00:00"}
+{"invocation_id":"01M1WVB9PWZHEW166TBVX22ZA9","profile_id":"researcher-robbie","started_at":"2026-09-07T02:32:25.138567+00:00"}
+{"invocation_id":"01M1WVBCSCF9DKTVCRSFH7C87X","profile_id":"researcher-robbie","started_at":"2026-09-07T02:32:28.331048+00:00"}
+{"invocation_id":"01M1WVBFVP8YQJZC33T7CDVH4N","profile_id":"researcher-robbie","started_at":"2026-09-07T02:32:31.552366+00:00"}
+{"invocation_id":"01M1WVBK08EPS6JRK32X4540V4","profile_id":"researcher-robbie","started_at":"2026-09-07T02:32:34.759769+00:00"}
+{"invocation_id":"01M1WVBP5SX3K1VQ6SYKT4RD4K","profile_id":"researcher-robbie","started_at":"2026-09-07T02:32:38.059271+00:00"}
+{"invocation_id":"01M1WVYF16QEYJH6V7ABH6V38Z","profile_id":"architect-alphonso","started_at":"2026-09-07T02:42:53.698274+00:00"}
+{"invocation_id":"01M1WVYJJT20HCY4XXX914BENT","profile_id":"architect-alphonso","started_at":"2026-09-07T02:42:57.040497+00:00"}
+{"invocation_id":"01M1WVYP1G3DM7T0029KRD2RCY","profile_id":"architect-alphonso","started_at":"2026-09-07T02:43:00.588220+00:00"}
+{"invocation_id":"01M1WVYSGEEYF8J1XNFSW31JB0","profile_id":"architect-alphonso","started_at":"2026-09-07T02:43:04.134629+00:00"}
+{"invocation_id":"01M1WVYWRXSS4FX8YW074VEZ9Y","profile_id":"architect-alphonso","started_at":"2026-09-07T02:43:07.428918+00:00"}
+{"invocation_id":"01M1WVZ03J3YMA4PC6YK1SVSCZ","profile_id":"architect-alphonso","started_at":"2026-09-07T02:43:10.792890+00:00"}
+{"invocation_id":"01M1WVZ392JCAK8RC5A7XG2JSZ","profile_id":"architect-alphonso","started_at":"2026-09-07T02:43:14.060603+00:00"}
+{"invocation_id":"01M1WWA6YKRSW8SKE2PFJVB8JW","profile_id":"debugger-debbie","started_at":"2026-09-07T02:49:18.673059+00:00"}
+{"invocation_id":"01M1WWAY6K42W9H2GC0WC7YWR7","profile_id":"architect-alphonso","started_at":"2026-09-07T02:49:42.423950+00:00"}
+{"invocation_id":"01M1WWBEPV29CPHJJRW0MVH3JH","profile_id":"reviewer-renata","started_at":"2026-09-07T02:49:59.411834+00:00"}
+{"invocation_id":"01M1WWFYHCZDWHWW2FJZBNEK37","profile_id":"randy-reducer","started_at":"2026-09-07T02:52:26.696297+00:00"}
+{"invocation_id":"01M1WX7V7G7FEJWBNS8YSZ99NZ","profile_id":"architect-alphonso","started_at":"2026-09-07T03:05:29.642856+00:00"}
+{"invocation_id":"01M1WX7YSMMX5H0AN3KQK6VT9B","profile_id":"architect-alphonso","started_at":"2026-09-07T03:05:32.927715+00:00"}
+{"invocation_id":"01M1WX82413BX4D73WYNRQ3KDP","profile_id":"architect-alphonso","started_at":"2026-09-07T03:05:36.329044+00:00"}
+{"invocation_id":"01M1WX85ASEJNYBY5BVG1A01EM","profile_id":"architect-alphonso","started_at":"2026-09-07T03:05:39.613459+00:00"}
+{"invocation_id":"01M1WXCSDAEPV0N9MYP65DGYWA","profile_id":"frontend-freddy","started_at":"2026-09-07T03:08:11.548118+00:00"}
+{"invocation_id":"01M1WXK5M4DSPSR61HGQ5SR8Q4","profile_id":"frontend-freddy","started_at":"2026-09-07T03:11:40.618683+00:00"}
+{"invocation_id":"01M1Y4NY4XY2B5GMKBBTS62HZE","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:45.858021+00:00"}
+{"invocation_id":"01M1Y4P0R4W4045B3VVSM6BMVV","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:48.139440+00:00"}
+{"invocation_id":"01M1Y4P2ZJ5SCQCEB4205V2CEM","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:50.416116+00:00"}
+{"invocation_id":"01M1Y4P56P7EDFD17YD6ZJKKQ5","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:52.728221+00:00"}
+{"invocation_id":"01M1Y4P7EYSTDWDTTM0K2RV8D8","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:55.043265+00:00"}
+{"invocation_id":"01M1Y4P9QERYEKCYMHS25RN7K0","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:57.311293+00:00"}
+{"invocation_id":"01M1Y4PBY7HW81HY9CXMMX6K11","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:59.611673+00:00"}
+{"invocation_id":"01M1Y50SYJZGERM570A2TZ9W8B","profile_id":"researcher-robbie","started_at":"2026-09-07T14:40:41.842289+00:00"}
+{"invocation_id":"01M1Y50WCTHM630KTAP1T5B007","profile_id":"researcher-robbie","started_at":"2026-09-07T14:40:44.060763+00:00"}
+{"invocation_id":"01M1Y50YJ7KQ1QVF4AFERAA19X","profile_id":"researcher-robbie","started_at":"2026-09-07T14:40:46.228868+00:00"}
+{"invocation_id":"01M1Y510NXMZMHK1VFHE0N9HWS","profile_id":"researcher-robbie","started_at":"2026-09-07T14:40:48.428967+00:00"}
+{"invocation_id":"01M1Y512TDFKANZEMADEYPMNCY","profile_id":"researcher-robbie","started_at":"2026-09-07T14:40:50.613645+00:00"}
+{"invocation_id":"01M1Y514YV7558W8F30SQT5575","profile_id":"researcher-robbie","started_at":"2026-09-07T14:40:52.812169+00:00"}
+{"invocation_id":"01M1Y5173MQ0Y9HG9CPG1J7G1T","profile_id":"researcher-robbie","started_at":"2026-09-07T14:40:55.035016+00:00"}
+{"invocation_id":"01M1Y5G20ZKJT4A4EFGVVWVQCA","profile_id":"architect-alphonso","started_at":"2026-09-07T14:49:01.685268+00:00"}
+{"invocation_id":"01M1Y5G4GV4FJD5GHJS8FZ2DE3","profile_id":"architect-alphonso","started_at":"2026-09-07T14:49:03.938001+00:00"}
+{"invocation_id":"01M1Y5G6Q2YEK3JDX1RFZWMQPG","profile_id":"architect-alphonso","started_at":"2026-09-07T14:49:06.133561+00:00"}
+{"invocation_id":"01M1Y5G8VJ9KTFB1NWTWMGEQHN","profile_id":"architect-alphonso","started_at":"2026-09-07T14:49:08.355510+00:00"}
+{"invocation_id":"01M1Y5GB13S1M0RC5B7N0XBPGJ","profile_id":"architect-alphonso","started_at":"2026-09-07T14:49:10.925997+00:00"}
+{"invocation_id":"01M1Y5GDHDQAP8KHX14F0B7418","profile_id":"architect-alphonso","started_at":"2026-09-07T14:49:13.128801+00:00"}
+{"invocation_id":"01M1Y5GFP7RW3SR0J3N3S96T03","profile_id":"architect-alphonso","started_at":"2026-09-07T14:49:15.356577+00:00"}
+{"invocation_id":"01M1Y5N07WZQW1VTGEAVWESMXG","profile_id":"architect-alphonso","started_at":"2026-09-07T14:51:43.024055+00:00"}
+{"invocation_id":"01M1Y5N238QGN3BTZ6Q7TCAHDG","profile_id":"architect-alphonso","started_at":"2026-09-07T14:51:44.489166+00:00"}
+{"invocation_id":"01M1Y5N3G69FFY85850XCMY7DQ","profile_id":"architect-alphonso","started_at":"2026-09-07T14:51:45.957759+00:00"}
+{"invocation_id":"01M1Y5N4Y3DDA2YR1Z2WX706RF","profile_id":"architect-alphonso","started_at":"2026-09-07T14:51:47.378697+00:00"}
+{"invocation_id":"01M1Y5N6AK57987V9GB5KRJ135","profile_id":"architect-alphonso","started_at":"2026-09-07T14:51:48.856457+00:00"}
+{"invocation_id":"01M1Y5N7S0S6J6K81C4BA7S58D","profile_id":"architect-alphonso","started_at":"2026-09-07T14:51:50.297461+00:00"}
+{"invocation_id":"01M1Y5N961B1F669JKEC2DB497","profile_id":"architect-alphonso","started_at":"2026-09-07T14:51:51.777613+00:00"}
+{"invocation_id":"01M1Y5WP7T47MFBHVG3QE27GTF","profile_id":"architect-alphonso","started_at":"2026-09-07T14:55:55.596393+00:00"}
+{"invocation_id":"01M1Y5WRQJZR21JB5ZFZXY939D","profile_id":"architect-alphonso","started_at":"2026-09-07T14:55:57.824260+00:00"}
+{"invocation_id":"01M1Y5WTXAMJEEPN67FP43TA9Y","profile_id":"architect-alphonso","started_at":"2026-09-07T14:56:00.033838+00:00"}
+{"invocation_id":"01M1Y5WX21ZSPK40XHG58X2231","profile_id":"architect-alphonso","started_at":"2026-09-07T14:56:02.260694+00:00"}
+{"invocation_id":"01M1Y7HEYE0HQBKYQ4Q0V8F7JD","profile_id":"architect-alphonso","started_at":"2026-09-07T15:24:45.826998+00:00"}
+{"invocation_id":"01M1Y7HJD8YEM118SARE55RPDP","profile_id":"architect-alphonso","started_at":"2026-09-07T15:24:48.607135+00:00"}
+{"invocation_id":"01M1Y7HN413TE6C5VTA01NY6BV","profile_id":"architect-alphonso","started_at":"2026-09-07T15:24:51.414632+00:00"}
+{"invocation_id":"01M1Y7HQVR1B4FEB07W6RX683Y","profile_id":"architect-alphonso","started_at":"2026-09-07T15:24:54.481976+00:00"}
+{"invocation_id":"01M1YCC041WFAH7E5RH4SMX7HF","profile_id":"implementer-ivan","started_at":"2026-09-07T16:49:10.131719+00:00"}
+{"invocation_id":"01M1YCC4QBZP8D4R9CRSH2G9HQ","profile_id":"implementer-ivan","started_at":"2026-09-07T16:49:14.028081+00:00"}
+{"invocation_id":"01M1YCC8GBEP6JFEKYASW206JH","profile_id":"implementer-ivan","started_at":"2026-09-07T16:49:17.690940+00:00"}
+{"invocation_id":"01M1YCCC0Q7J6J8Q2B9VFJKH0F","profile_id":"implementer-ivan","started_at":"2026-09-07T16:49:21.576616+00:00"}
+{"invocation_id":"01M1YCCFWXBQ92W620FRQD5FSB","profile_id":"implementer-ivan","started_at":"2026-09-07T16:49:25.298208+00:00"}
+{"invocation_id":"01M1YCCKEN83WDNRDCNY16ARZK","profile_id":"implementer-ivan","started_at":"2026-09-07T16:49:28.871310+00:00"}
+{"invocation_id":"01M1YCCQ05NX0B500E3Z99J3FZ","profile_id":"implementer-ivan","started_at":"2026-09-07T16:49:33.706824+00:00"}
+{"invocation_id":"01M1YQMMFEZ21B4YZVGHG9KTA2","profile_id":"researcher-robbie","started_at":"2026-09-07T20:06:06.098042+00:00"}
+{"invocation_id":"01M1YQMQ1HTKNDFC01M1YVAW3D","profile_id":"researcher-robbie","started_at":"2026-09-07T20:06:08.320448+00:00"}
+{"invocation_id":"01M1YQMS6ZBD4CPEXWHDY4HFSR","profile_id":"researcher-robbie","started_at":"2026-09-07T20:06:10.524597+00:00"}
+{"invocation_id":"01M1YQMVBZWX6895PJFC52CACM","profile_id":"researcher-robbie","started_at":"2026-09-07T20:06:12.786832+00:00"}
+{"invocation_id":"01M1YQMXJJ4MW4CEW8DH4V6AYP","profile_id":"researcher-robbie","started_at":"2026-09-07T20:06:15.065299+00:00"}
+{"invocation_id":"01M1YQMZT9A52RTE0VXTE0Z0FR","profile_id":"researcher-robbie","started_at":"2026-09-07T20:06:17.352948+00:00"}
+{"invocation_id":"01M1YQN23CW3944FK5Z61HRK3J","profile_id":"researcher-robbie","started_at":"2026-09-07T20:06:19.690521+00:00"}
+{"invocation_id":"01M1YQNDXSDG38CE0CCCDA0TJH","profile_id":"architect-alphonso","started_at":"2026-09-07T20:06:32.132719+00:00"}
+{"invocation_id":"01M1YQNGFR75PAQBZ3NB4FPT7H","profile_id":"architect-alphonso","started_at":"2026-09-07T20:06:34.454796+00:00"}
+{"invocation_id":"01M1YQNJQN6YRAJTFV8TB60QPZ","profile_id":"architect-alphonso","started_at":"2026-09-07T20:06:36.691389+00:00"}
+{"invocation_id":"01M1YQNMXQBV2FNBSXAS0ECRZV","profile_id":"architect-alphonso","started_at":"2026-09-07T20:06:38.959687+00:00"}
+{"invocation_id":"01M1YQNQ4EPQ16FMR1MYY5CPFC","profile_id":"architect-alphonso","started_at":"2026-09-07T20:06:41.204226+00:00"}
+{"invocation_id":"01M1YQNSAQXYHTR46PDQVW0YRV","profile_id":"architect-alphonso","started_at":"2026-09-07T20:06:43.443017+00:00"}
+{"invocation_id":"01M1YQNVGT7D9ZR23VC2NGV1G9","profile_id":"architect-alphonso","started_at":"2026-09-07T20:06:45.702450+00:00"}
+{"invocation_id":"01M1YQP8NG6P6VE6V75AW5D0FV","profile_id":"architect-alphonso","started_at":"2026-09-07T20:06:59.539501+00:00"}
+{"invocation_id":"01M1YQPB83B24CYNPEVJ9VH37K","profile_id":"architect-alphonso","started_at":"2026-09-07T20:07:01.910775+00:00"}
+{"invocation_id":"01M1YQPDJ6MVSJ3R4RE84HCBW0","profile_id":"architect-alphonso","started_at":"2026-09-07T20:07:04.416514+00:00"}
+{"invocation_id":"01M1YQPG00RK5F8SD0HSH3NDVA","profile_id":"architect-alphonso","started_at":"2026-09-07T20:07:06.729819+00:00"}
+{"invocation_id":"01M1YZMB57N38CHEX3W2XYGC6D","profile_id":"researcher-robbie","started_at":"2026-09-07T22:25:44.456729+00:00"}
+{"invocation_id":"01M1YZMD1KEZH41X6GXHPP5XZP","profile_id":"researcher-robbie","started_at":"2026-09-07T22:25:45.883612+00:00"}
+{"invocation_id":"01M1YZMEE6YRE2AY974161E3GM","profile_id":"researcher-robbie","started_at":"2026-09-07T22:25:47.357464+00:00"}
+{"invocation_id":"01M1YZMFVXT91KPZRMKAP7WDE9","profile_id":"researcher-robbie","started_at":"2026-09-07T22:25:48.790867+00:00"}
+{"invocation_id":"01M1YZMH93S3PS25GTDP24VAGP","profile_id":"researcher-robbie","started_at":"2026-09-07T22:25:50.291640+00:00"}
+{"invocation_id":"01M1YZMJQNZD28AZJAJD2X55P5","profile_id":"researcher-robbie","started_at":"2026-09-07T22:25:51.749537+00:00"}
+{"invocation_id":"01M1YZMM570H3WYY4SSYVMJFC3","profile_id":"researcher-robbie","started_at":"2026-09-07T22:25:53.215447+00:00"}
+{"invocation_id":"01M1YZMY6T1QW1506DDXZCARHG","profile_id":"architect-alphonso","started_at":"2026-09-07T22:26:03.921488+00:00"}
+{"invocation_id":"01M1YZN01JNN1SC4FR09733XA2","profile_id":"architect-alphonso","started_at":"2026-09-07T22:26:05.383481+00:00"}
+{"invocation_id":"01M1YZN1F75GBQ6C41WYYD3TWM","profile_id":"architect-alphonso","started_at":"2026-09-07T22:26:06.890442+00:00"}
+{"invocation_id":"01M1YZN2YB1RCQCFM7193RJSGV","profile_id":"architect-alphonso","started_at":"2026-09-07T22:26:08.363735+00:00"}
+{"invocation_id":"01M1YZN4CMEBJSXFMP2YG3E8TM","profile_id":"architect-alphonso","started_at":"2026-09-07T22:26:09.884050+00:00"}
+{"invocation_id":"01M1YZN5W0DJW2YFPZBSJ25E68","profile_id":"architect-alphonso","started_at":"2026-09-07T22:26:11.338202+00:00"}
+{"invocation_id":"01M1YZN79BCW0KWA9B0E3W2P8Y","profile_id":"architect-alphonso","started_at":"2026-09-07T22:26:12.907886+00:00"}
+{"invocation_id":"01M1YZNGYHQYN6MQXE9MFHH1Y5","profile_id":"architect-alphonso","started_at":"2026-09-07T22:26:24.045412+00:00"}
+{"invocation_id":"01M1YZNKPMR5EBZCPRY36XWRN7","profile_id":"architect-alphonso","started_at":"2026-09-07T22:26:26.398587+00:00"}
+{"invocation_id":"01M1YZNP0714T2PQ3H33SZK0V6","profile_id":"architect-alphonso","started_at":"2026-09-07T22:26:28.691473+00:00"}
+{"invocation_id":"01M1YZNR7P4QFX38JTJZB9BGG0","profile_id":"architect-alphonso","started_at":"2026-09-07T22:26:31.009817+00:00"}
+{"invocation_id": "01M1HMJ8HQ5BPCV5JCJ2Q4P9RP", "profile_id": "generic-agent", "started_at": "2026-09-02T18:02:13.532626+00:00"}
+{"invocation_id": "01M1HR77XR3ZJXGAKS91RJH97F", "profile_id": "doctrine-daphne", "started_at": "2026-09-02T19:06:07.149856+00:00"}
+{"invocation_id": "01M1PSZXWS9CKBCK1HNX3GZYXG", "profile_id": "researcher-robbie", "started_at": "2026-09-04T18:13:17.825861+00:00"}
+{"invocation_id": "01M1PT00D011Q8Q6V9HM3Q9BMX", "profile_id": "researcher-robbie", "started_at": "2026-09-04T18:13:20.024279+00:00"}
+{"invocation_id": "01M1PT02HS4317VWHPK878YGJW", "profile_id": "researcher-robbie", "started_at": "2026-09-04T18:13:22.169313+00:00"}
+{"invocation_id": "01M1PT04MK3FQ398PNR0QG8YPV", "profile_id": "researcher-robbie", "started_at": "2026-09-04T18:13:24.339258+00:00"}
+{"invocation_id": "01M1PT06RPQY395QT3KNKQQ9S5", "profile_id": "researcher-robbie", "started_at": "2026-09-04T18:13:26.527564+00:00"}
+{"invocation_id": "01M1PT08X0JZKCGBFQE48HJXXH", "profile_id": "researcher-robbie", "started_at": "2026-09-04T18:13:28.679429+00:00"}
+{"invocation_id": "01M1PT0B07XND8KKVSQ2R0VJX7", "profile_id": "researcher-robbie", "started_at": "2026-09-04T18:13:30.864352+00:00"}
+{"invocation_id": "01M1PT0QS38HECAD68SZK6HBAV", "profile_id": "architect-alphonso", "started_at": "2026-09-04T18:13:43.610032+00:00"}
+{"invocation_id": "01M1PT0SJWW0FRQPKGNEG40W73", "profile_id": "architect-alphonso", "started_at": "2026-09-04T18:13:45.054926+00:00"}
+{"invocation_id": "01M1PT0TZZZY0FETG8R1WTSR38", "profile_id": "architect-alphonso", "started_at": "2026-09-04T18:13:46.511250+00:00"}
+{"invocation_id": "01M1PT0WDDR6AGFHV77TGCQME0", "profile_id": "architect-alphonso", "started_at": "2026-09-04T18:13:47.951043+00:00"}
+{"invocation_id": "01M1PT0XTFS46HY2A5C1SGPNHQ", "profile_id": "architect-alphonso", "started_at": "2026-09-04T18:13:49.423132+00:00"}
+{"invocation_id": "01M1PT0Z8E7XEVTBK64WDYZM0D", "profile_id": "architect-alphonso", "started_at": "2026-09-04T18:13:50.846352+00:00"}
+{"invocation_id": "01M1PT10N0DW8R3JEZCNTD9W1B", "profile_id": "architect-alphonso", "started_at": "2026-09-04T18:13:52.324848+00:00"}
+{"invocation_id": "01M1PT1DNBJ090BNTQ890VW0AC", "profile_id": "architect-alphonso", "started_at": "2026-09-04T18:14:06.684797+00:00"}
+{"invocation_id": "01M1PT1G3YC8TX8C7B7JFJZXKW", "profile_id": "architect-alphonso", "started_at": "2026-09-04T18:14:08.909964+00:00"}
+{"invocation_id": "01M1PT1J96KPR0JRSNCZ3954JR", "profile_id": "architect-alphonso", "started_at": "2026-09-04T18:14:11.075726+00:00"}
+{"invocation_id": "01M1PT1MD5RDYTAD19BJQJX7MF", "profile_id": "architect-alphonso", "started_at": "2026-09-04T18:14:13.291824+00:00"}
+{"invocation_id": "01M1R6RTM85YS9XMQAF14WGQ9S", "profile_id": "researcher-robbie", "started_at": "2026-09-05T07:15:50.383777+00:00"}
+{"invocation_id": "01M1R6RWGJ1453RMR97HWRPJ4P", "profile_id": "researcher-robbie", "started_at": "2026-09-05T07:15:51.800245+00:00"}
+{"invocation_id": "01M1R6RXWYQC47CTC8Q0VMQYVZ", "profile_id": "researcher-robbie", "started_at": "2026-09-05T07:15:53.253632+00:00"}
+{"invocation_id": "01M1R6RZABA5WY4Q9CV8D5ES39", "profile_id": "researcher-robbie", "started_at": "2026-09-05T07:15:54.675564+00:00"}
+{"invocation_id": "01M1R6S0PGD0QABBMZGV60N8MJ", "profile_id": "researcher-robbie", "started_at": "2026-09-05T07:15:56.127048+00:00"}
+{"invocation_id": "01M1R6S23T6K2X0TV1GA05WBMF", "profile_id": "researcher-robbie", "started_at": "2026-09-05T07:15:57.541528+00:00"}
+{"invocation_id": "01M1R6S3FX2M5DPENDZSH9W89H", "profile_id": "researcher-robbie", "started_at": "2026-09-05T07:15:58.981746+00:00"}
+{"invocation_id": "01M1R7855ZP7FF45DW1BQTEE08", "profile_id": "architect-alphonso", "started_at": "2026-09-05T07:24:14.022745+00:00"}
+{"invocation_id": "01M1R788BNNX3RZ6518Z1G1HQF", "profile_id": "architect-alphonso", "started_at": "2026-09-05T07:24:16.267867+00:00"}
+{"invocation_id": "01M1R78AH5HAWX9XYT2WP46RYH", "profile_id": "architect-alphonso", "started_at": "2026-09-05T07:24:18.451003+00:00"}
+{"invocation_id": "01M1R78CNE06XQNXFX8H482WV4", "profile_id": "architect-alphonso", "started_at": "2026-09-05T07:24:20.713408+00:00"}
+{"invocation_id": "01M1R78EW2T7SABN6WX9ZHKE2R", "profile_id": "architect-alphonso", "started_at": "2026-09-05T07:24:22.926222+00:00"}
+{"invocation_id": "01M1R78H1GTENZBH9Y4C1TA928", "profile_id": "architect-alphonso", "started_at": "2026-09-05T07:24:25.124594+00:00"}
+{"invocation_id": "01M1R78K5YXA21JKBNHBQSHF7H", "profile_id": "architect-alphonso", "started_at": "2026-09-05T07:24:27.337538+00:00"}
+{"invocation_id": "01M1R8F4K5E3APXDYXK3J2R4A4", "profile_id": "architect-alphonso", "started_at": "2026-09-05T07:45:30.806919+00:00"}
+{"invocation_id": "01M1R8F76TCZXNXTJG6FRR81QX", "profile_id": "architect-alphonso", "started_at": "2026-09-05T07:45:33.049965+00:00"}
+{"invocation_id": "01M1R8F9CS1KTEH4FY272043JY", "profile_id": "architect-alphonso", "started_at": "2026-09-05T07:45:35.257357+00:00"}
+{"invocation_id": "01M1R8FBHSW74V6QSCPBFPA3AH", "profile_id": "architect-alphonso", "started_at": "2026-09-05T07:45:37.491782+00:00"}
+{"invocation_id": "01M1SE98Q5T6P8JF1V8N65EP2G", "profile_id": "architect-alphonso", "started_at": "2026-09-05T18:46:24.220864+00:00"}
+{"invocation_id": "01M1SE9Q601VSDQZ3BP8VRC6AK", "profile_id": "reviewer-renata", "started_at": "2026-09-05T18:46:39.061468+00:00"}
+{"invocation_id": "01M1SEA5FDS3J8MMG2R6WF3JQC", "profile_id": "debugger-debbie", "started_at": "2026-09-05T18:46:53.014478+00:00"}
+{"invocation_id": "01M1SEAJE39VN33AQ6YCDQJEGB", "profile_id": "randy-reducer", "started_at": "2026-09-05T18:47:06.905721+00:00"}
+{"invocation_id": "01M1SK3PQVRCAE3BXNGD4NNJJC", "profile_id": "architect-alphonso", "started_at": "2026-09-05T20:10:44.860168+00:00"}
+{"invocation_id": "01M1SK42T41V4ZCK3DM3SY5D9Z", "profile_id": "reviewer-renata", "started_at": "2026-09-05T20:10:57.214517+00:00"}
+{"invocation_id": "01M1SK4MQXW2ZVQRYFS5EMS6AJ", "profile_id": "debugger-debbie", "started_at": "2026-09-05T20:11:15.590648+00:00"}
+{"invocation_id": "01M1SK4XRQ8NKZKEN4MPW2ANS2", "profile_id": "randy-reducer", "started_at": "2026-09-05T20:11:24.841771+00:00"}
+{"invocation_id": "01M1SN36R5YTAKZHWHWPNH17W2", "profile_id": "debugger-debbie", "started_at": "2026-09-05T20:45:25.768690+00:00"}
+{"invocation_id": "01M1SN3MVR6P0FX7K6XS290HYS", "profile_id": "reviewer-renata", "started_at": "2026-09-05T20:45:40.365713+00:00"}
+{"invocation_id": "01M1SE5QAQ127K74N9G3CAQHK3", "profile_id": "architect-alphonso", "started_at": "2026-09-05T18:44:28.840036+00:00"}
+{"invocation_id": "01M1SE7K6A5VRF704VJVWH80J6", "profile_id": "reviewer-renata", "started_at": "2026-09-05T18:45:29.504456+00:00"}
+{"invocation_id": "01M1SE7ZFT3NX0810EV1DHNECA", "profile_id": "debugger-debbie", "started_at": "2026-09-05T18:45:41.984781+00:00"}
+{"invocation_id": "01M1SE8C49QENPATW7FE6YZ604", "profile_id": "randy-reducer", "started_at": "2026-09-05T18:45:54.964485+00:00"}
+{"invocation_id": "01M1SPP2MT1TAQ6ZP19NPBF5YK", "profile_id": "architect-alphonso", "started_at": "2026-09-05T21:13:13.013826+00:00"}
+{"invocation_id": "01M1SPPFM8BSCP8ZBH8PA5H8CR", "profile_id": "debugger-debbie", "started_at": "2026-09-05T21:13:26.598620+00:00"}
+{"invocation_id": "01M1SPPVW62BGE8NX5A2QQXN8C", "profile_id": "reviewer-renata", "started_at": "2026-09-05T21:13:38.936870+00:00"}
+{"invocation_id": "01M1SPQ7MG1KX931AHSF11F70S", "profile_id": "randy-reducer", "started_at": "2026-09-05T21:13:51.022865+00:00"}
+{"invocation_id": "01M1T33BQCP39H5F0KZN4E07B1", "profile_id": "architect-alphonso", "started_at": "2026-09-06T00:50:10.943056+00:00"}
+{"invocation_id": "01M1T33RH7D91DVGJJQVHSGFY1", "profile_id": "reviewer-renata", "started_at": "2026-09-06T00:50:23.883425+00:00"}
+{"invocation_id": "01M1T7N2GREVMVV1KVJ7KYWQ7X", "profile_id": "reviewer-renata", "started_at": "2026-09-06T02:09:45.654043+00:00"}
+{"invocation_id": "01M1T7NH0EKN8MP1EN7R3KNJFR", "profile_id": "architect-alphonso", "started_at": "2026-09-06T02:10:00.402007+00:00"}
+{"invocation_id": "01M1TAZHAA11RMNVAHNSZY20ZF", "profile_id": "reviewer-renata", "started_at": "2026-09-06T03:07:54.870883+00:00"}
+{"invocation_id": "01M1TBXK2HRQ0Z9F4Q1YSQ49Y8", "profile_id": "debugger-debbie", "started_at": "2026-09-06T03:24:18.157373+00:00"}
+{"invocation_id": "01M1V5KG1Z2FPQZBS1GHHZMEJD", "profile_id": "node-norris", "started_at": "2026-09-06T10:53:11.106722+00:00"}
+{"invocation_id": "01M1S98S1346JY2Z9R2DD6Q41V", "profile_id": "researcher-robbie", "started_at": "2026-09-05T17:18:45.357950+00:00"}
+{"invocation_id": "01M1S98VPWZ82WKYGNXA7MA375", "profile_id": "researcher-robbie", "started_at": "2026-09-05T17:18:47.669564+00:00"}
+{"invocation_id": "01M1S98XWVPR1FYX3ZM466DNCM", "profile_id": "researcher-robbie", "started_at": "2026-09-05T17:18:49.858436+00:00"}
+{"invocation_id": "01M1S990166WYA8WG095XK5TVA", "profile_id": "researcher-robbie", "started_at": "2026-09-05T17:18:52.072248+00:00"}
+{"invocation_id": "01M1S99263AS9ZT8Q02N4A1TNF", "profile_id": "researcher-robbie", "started_at": "2026-09-05T17:18:54.261754+00:00"}
+{"invocation_id": "01M1S994AJ7XVZZ818PQZH2XF3", "profile_id": "researcher-robbie", "started_at": "2026-09-05T17:18:56.502679+00:00"}
+{"invocation_id": "01M1S996GNZFZEHXBW09TDTSKE", "profile_id": "researcher-robbie", "started_at": "2026-09-05T17:18:58.711104+00:00"}
+{"invocation_id": "01M1S9M0PAHF261125Q0RMYGJY", "profile_id": "architect-alphonso", "started_at": "2026-09-05T17:24:53.675656+00:00"}
+{"invocation_id": "01M1S9M3A6D5KNZ1MSWVSB34VP", "profile_id": "architect-alphonso", "started_at": "2026-09-05T17:24:55.952538+00:00"}
+{"invocation_id": "01M1S9M5HF4CQ4Y38TZH57DPA1", "profile_id": "architect-alphonso", "started_at": "2026-09-05T17:24:58.166755+00:00"}
+{"invocation_id": "01M1S9M7PRTG4CR42XFW2HNH32", "profile_id": "architect-alphonso", "started_at": "2026-09-05T17:25:00.484613+00:00"}
+{"invocation_id": "01M1S9M9Z4S2AE3VS0CKH00CM7", "profile_id": "architect-alphonso", "started_at": "2026-09-05T17:25:02.725164+00:00"}
+{"invocation_id": "01M1S9MC4W1AVG3DH7B90NHDJ3", "profile_id": "architect-alphonso", "started_at": "2026-09-05T17:25:04.976215+00:00"}
+{"invocation_id": "01M1S9MEBAXYR3FY81FB6H7DVW", "profile_id": "architect-alphonso", "started_at": "2026-09-05T17:25:07.188632+00:00"}
+{"invocation_id": "01M1SYSEXHEG3YY7G961FM36G0", "profile_id": "architect-alphonso", "started_at": "2026-09-05T23:34:52.098562+00:00"}
+{"invocation_id": "01M1SYSJ1JR20X5066FRCGZRBD", "profile_id": "architect-alphonso", "started_at": "2026-09-05T23:34:54.975081+00:00"}
+{"invocation_id": "01M1SYSMVZ4K64XBE1KW3Z0407", "profile_id": "architect-alphonso", "started_at": "2026-09-05T23:34:57.865643+00:00"}
+{"invocation_id": "01M1SYSQM77TH0QQHZMTEA9YAE", "profile_id": "architect-alphonso", "started_at": "2026-09-05T23:35:00.685427+00:00"}
+{"invocation_id": "01M1VMH4DJF0JMPB8BXFXRGRN4", "profile_id": "researcher-robbie", "started_at": "2026-09-06T15:14:01.628127+00:00"}
+{"invocation_id": "01M1VMH69YF667TM4KR60VHFEC", "profile_id": "researcher-robbie", "started_at": "2026-09-06T15:14:03.119027+00:00"}
+{"invocation_id": "01M1VMH7RE9E7HENB7MZQ4CWZ7", "profile_id": "researcher-robbie", "started_at": "2026-09-06T15:14:04.638181+00:00"}
+{"invocation_id": "01M1VMH97SGDDNMKXE2E5C4PJ1", "profile_id": "researcher-robbie", "started_at": "2026-09-06T15:14:06.091056+00:00"}
+{"invocation_id": "01M1VMHAN7K14N7DBKZZG46HJX", "profile_id": "researcher-robbie", "started_at": "2026-09-06T15:14:07.597166+00:00"}
+{"invocation_id": "01M1VMHC4BXF53N0CJDMWQEQPR", "profile_id": "researcher-robbie", "started_at": "2026-09-06T15:14:09.068213+00:00"}
+{"invocation_id": "01M1VMHDJ9RP0PF7NZQVCAYXJN", "profile_id": "researcher-robbie", "started_at": "2026-09-06T15:14:10.590950+00:00"}
+{"invocation_id": "01M1VMXA95JWDE89N3TT93MZ4F", "profile_id": "architect-alphonso", "started_at": "2026-09-06T15:20:40.922709+00:00"}
+{"invocation_id": "01M1VMXC7R0VD35QG37GRGBZR9", "profile_id": "architect-alphonso", "started_at": "2026-09-06T15:20:42.431070+00:00"}
+{"invocation_id": "01M1VMXDPWKJS4X5FYYK458QB1", "profile_id": "architect-alphonso", "started_at": "2026-09-06T15:20:44.010331+00:00"}
+{"invocation_id": "01M1VMXF89E0AH9HEWZMNJ8KAJ", "profile_id": "architect-alphonso", "started_at": "2026-09-06T15:20:45.572951+00:00"}
+{"invocation_id": "01M1VMXGS204DABN1WHFMVKEW1", "profile_id": "architect-alphonso", "started_at": "2026-09-06T15:20:47.114775+00:00"}
+{"invocation_id": "01M1VMXJ9AGQQXHQ1PTM5Y46DH", "profile_id": "architect-alphonso", "started_at": "2026-09-06T15:20:48.768547+00:00"}
+{"invocation_id": "01M1VMXKX0EPMS6368NBWM6VN4", "profile_id": "architect-alphonso", "started_at": "2026-09-06T15:20:50.322019+00:00"}
+{"invocation_id": "01M1VNTWC27APPFGCS7K093YPM", "profile_id": "architect-alphonso", "started_at": "2026-09-06T15:36:50.406972+00:00"}
+{"invocation_id": "01M1VNTZ05KY791SEBBXZEZMPH", "profile_id": "architect-alphonso", "started_at": "2026-09-06T15:36:52.716151+00:00"}
+{"invocation_id": "01M1VNV18E5BH8YH51TN02J5CT", "profile_id": "architect-alphonso", "started_at": "2026-09-06T15:36:54.995611+00:00"}
+{"invocation_id": "01M1VNV3FMW4NJWN9KQ5BJR093", "profile_id": "architect-alphonso", "started_at": "2026-09-06T15:36:57.320712+00:00"}
+{"invocation_id": "01M1SV5X8D0NDYH623521DAE7V", "profile_id": "researcher-robbie", "started_at": "2026-09-05T22:31:45.177926+00:00"}
+{"invocation_id": "01M1SV5Z9PCET8KK5K1ZJXHP94", "profile_id": "researcher-robbie", "started_at": "2026-09-05T22:31:46.682137+00:00"}
+{"invocation_id": "01M1SV60RTB99CZMTCB4NZH46P", "profile_id": "researcher-robbie", "started_at": "2026-09-05T22:31:48.262654+00:00"}
+{"invocation_id": "01M1SV62A4ZAR78PX5A8PK0GT2", "profile_id": "researcher-robbie", "started_at": "2026-09-05T22:31:49.781781+00:00"}
+{"invocation_id": "01M1SV63SPYRCQPDTCKDTRVFC8", "profile_id": "researcher-robbie", "started_at": "2026-09-05T22:31:51.368984+00:00"}
+{"invocation_id": "01M1SV65B79SP129STAV547X9H", "profile_id": "researcher-robbie", "started_at": "2026-09-05T22:31:53.076224+00:00"}
+{"invocation_id": "01M1SV670J94GV89ESK611M6WW", "profile_id": "researcher-robbie", "started_at": "2026-09-05T22:31:54.780290+00:00"}
+{"invocation_id": "01M1SVGPHJNTW1KG4W0FY87GR5", "profile_id": "architect-alphonso", "started_at": "2026-09-05T22:37:39.194252+00:00"}
+{"invocation_id": "01M1SVGS10DH54CAE2S459Z1KP", "profile_id": "architect-alphonso", "started_at": "2026-09-05T22:37:41.436428+00:00"}
+{"invocation_id": "01M1SVGV6QZ48F12T1HGVRCH0Y", "profile_id": "architect-alphonso", "started_at": "2026-09-05T22:37:43.632516+00:00"}
+{"invocation_id": "01M1SVGXBDZ2QZVH30N7T94NYZ", "profile_id": "architect-alphonso", "started_at": "2026-09-05T22:37:45.854883+00:00"}
+{"invocation_id": "01M1SVGZGS7MFA1DTHR1RFKTW6", "profile_id": "architect-alphonso", "started_at": "2026-09-05T22:37:48.090635+00:00"}
+{"invocation_id": "01M1SVH1PNZ0Q3XMGBTQCMB2PS", "profile_id": "architect-alphonso", "started_at": "2026-09-05T22:37:50.276029+00:00"}
+{"invocation_id": "01M1SVH3V7JC8FT7HESMMY5VFK", "profile_id": "architect-alphonso", "started_at": "2026-09-05T22:37:52.511933+00:00"}
+{"invocation_id": "01M1SYMFFWQNJSZN1Z748M0AHQ", "profile_id": "architect-alphonso", "started_at": "2026-09-05T23:32:08.758353+00:00"}
+{"invocation_id": "01M1SYMHYWSBHPRMNF9RHRCRMX", "profile_id": "architect-alphonso", "started_at": "2026-09-05T23:32:10.954312+00:00"}
+{"invocation_id": "01M1SYMM38QJ3AZ401R2ATRAHE", "profile_id": "architect-alphonso", "started_at": "2026-09-05T23:32:13.102835+00:00"}
+{"invocation_id": "01M1SYMP6GG1JCKP2FAG0ZWDBT", "profile_id": "architect-alphonso", "started_at": "2026-09-05T23:32:15.305617+00:00"}
+{"invocation_id": "01M1W2Z5SPWFJKEXMZE19EDHSM", "profile_id": "researcher-robbie", "started_at": "2026-09-06T19:26:22.488259+00:00"}
+{"invocation_id": "01M1W2Z89T4A8S2WVF6VE20T0T", "profile_id": "researcher-robbie", "started_at": "2026-09-06T19:26:24.685103+00:00"}
+{"invocation_id": "01M1W2ZAEEJ15BD7YE10ARM0RA", "profile_id": "researcher-robbie", "started_at": "2026-09-06T19:26:26.868816+00:00"}
+{"invocation_id": "01M1W2ZCJF10PWJPYZQXRHWPX7", "profile_id": "researcher-robbie", "started_at": "2026-09-06T19:26:29.056677+00:00"}
+{"invocation_id": "01M1W2ZEQ9FY67NMQAB1HRES6N", "profile_id": "researcher-robbie", "started_at": "2026-09-06T19:26:31.262834+00:00"}
+{"invocation_id": "01M1W2ZGVXGSYJ8G0BAV4HE77C", "profile_id": "researcher-robbie", "started_at": "2026-09-06T19:26:33.436002+00:00"}
+{"invocation_id": "01M1W2ZJZTX3EM89WQYXGM7XGG", "profile_id": "researcher-robbie", "started_at": "2026-09-06T19:26:35.639545+00:00"}
+{"invocation_id": "01M1W4096SFHEJYTT4144FM9DH", "profile_id": "architect-alphonso", "started_at": "2026-09-06T19:44:27.412315+00:00"}
+{"invocation_id": "01M1W40BSMPNYNB463XRE6T177", "profile_id": "architect-alphonso", "started_at": "2026-09-06T19:44:29.682839+00:00"}
+{"invocation_id": "01M1W40E0QX3YEN5KXSBN1A0JX", "profile_id": "architect-alphonso", "started_at": "2026-09-06T19:44:31.883697+00:00"}
+{"invocation_id": "01M1W40G5MGM2KSS9DNK1H4XJ2", "profile_id": "architect-alphonso", "started_at": "2026-09-06T19:44:34.133262+00:00"}
+{"invocation_id": "01M1W40JBF0Y6JA5YQYBMZYJP3", "profile_id": "architect-alphonso", "started_at": "2026-09-06T19:44:36.356626+00:00"}
+{"invocation_id": "01M1W40MGZ280E2PQNWZTV9C32", "profile_id": "architect-alphonso", "started_at": "2026-09-06T19:44:38.577271+00:00"}
+{"invocation_id": "01M1W40PPR205JCW552F7RYT69", "profile_id": "architect-alphonso", "started_at": "2026-09-06T19:44:40.844730+00:00"}
+{"invocation_id": "01M1W4PE1778XF5CAQ2C2P7VA5", "profile_id": "architect-alphonso", "started_at": "2026-09-06T19:56:33.372978+00:00"}
+{"invocation_id": "01M1W4PGR06TX0NDC9HMYRNQFS", "profile_id": "architect-alphonso", "started_at": "2026-09-06T19:56:35.681731+00:00"}
+{"invocation_id": "01M1W4PK00BD361TRWQ0J0PT9K", "profile_id": "architect-alphonso", "started_at": "2026-09-06T19:56:38.011259+00:00"}
+{"invocation_id": "01M1W4PN8SJAVW97CJ795YCE6Y", "profile_id": "architect-alphonso", "started_at": "2026-09-06T19:56:40.325103+00:00"}
+{"invocation_id": "01M1WMNDVDBN4QEBGZT73GE8PE", "profile_id": "implementer-ivan", "started_at": "2026-09-07T00:35:37.993908+00:00"}
+{"invocation_id": "01M1WMNGXEF97HZ7HPKQQ57AS9", "profile_id": "implementer-ivan", "started_at": "2026-09-07T00:35:40.727695+00:00"}
+{"invocation_id": "01M1WMNKJW61RHPWN90W5VRZ55", "profile_id": "implementer-ivan", "started_at": "2026-09-07T00:35:43.210602+00:00"}
+{"invocation_id": "01M1WMNP0BV73FYJ1KYEBNB2E7", "profile_id": "implementer-ivan", "started_at": "2026-09-07T00:35:45.747970+00:00"}
+{"invocation_id": "01M1WMNRFKNG80KX0P62F0BZCJ", "profile_id": "implementer-ivan", "started_at": "2026-09-07T00:35:48.332072+00:00"}
+{"invocation_id": "01M1WMNV0EMME25FWW9JNM46K0", "profile_id": "implementer-ivan", "started_at": "2026-09-07T00:35:51.225169+00:00"}
+{"invocation_id": "01M1WMNXV0N2TV8DNT1M31W9MS", "profile_id": "implementer-ivan", "started_at": "2026-09-07T00:35:54.129836+00:00"}
+{"invocation_id": "01M1WMSDZM5RFMVJ7A3MR9N0F3", "profile_id": "reviewer-renata", "started_at": "2026-09-07T00:37:48.995036+00:00"}
+{"invocation_id": "01M1WMSGVAFS10R94GDSGQKP3E", "profile_id": "reviewer-renata", "started_at": "2026-09-07T00:37:51.700866+00:00"}
+{"invocation_id": "01M1WMSKFJE1BSN4J4P23TY5BJ", "profile_id": "reviewer-renata", "started_at": "2026-09-07T00:37:54.123436+00:00"}
+{"invocation_id": "01M1WMSNV97Y0QQGS6GZ7CK3HM", "profile_id": "reviewer-renata", "started_at": "2026-09-07T00:37:56.607014+00:00"}
+{"invocation_id": "01M1WMSR8WVKVTRY5168G7ZVKE", "profile_id": "reviewer-renata", "started_at": "2026-09-07T00:37:59.297576+00:00"}
+{"invocation_id": "01M1WMSTX1FJAXZ8FX5EG25YF3", "profile_id": "reviewer-renata", "started_at": "2026-09-07T00:38:01.786346+00:00"}
+{"invocation_id": "01M1WMSXASF43Z8SQM3BK4YX1V", "profile_id": "reviewer-renata", "started_at": "2026-09-07T00:38:04.283041+00:00"}
+{"invocation_id": "01M1WMSZRSVRERZKQVVRDZKH05", "profile_id": "reviewer-renata", "started_at": "2026-09-07T00:38:06.788057+00:00"}
+{"invocation_id": "01M1WVB35B3Q2JT7V7T1KGTGB8", "profile_id": "researcher-robbie", "started_at": "2026-09-07T02:32:18.798642+00:00"}
+{"invocation_id": "01M1WVB6JF69WC4E8Y206BZ94X", "profile_id": "researcher-robbie", "started_at": "2026-09-07T02:32:22.004704+00:00"}
+{"invocation_id": "01M1WVB9PWZHEW166TBVX22ZA9", "profile_id": "researcher-robbie", "started_at": "2026-09-07T02:32:25.138567+00:00"}
+{"invocation_id": "01M1WVBCSCF9DKTVCRSFH7C87X", "profile_id": "researcher-robbie", "started_at": "2026-09-07T02:32:28.331048+00:00"}
+{"invocation_id": "01M1WVBFVP8YQJZC33T7CDVH4N", "profile_id": "researcher-robbie", "started_at": "2026-09-07T02:32:31.552366+00:00"}
+{"invocation_id": "01M1WVBK08EPS6JRK32X4540V4", "profile_id": "researcher-robbie", "started_at": "2026-09-07T02:32:34.759769+00:00"}
+{"invocation_id": "01M1WVBP5SX3K1VQ6SYKT4RD4K", "profile_id": "researcher-robbie", "started_at": "2026-09-07T02:32:38.059271+00:00"}
+{"invocation_id": "01M1WVYF16QEYJH6V7ABH6V38Z", "profile_id": "architect-alphonso", "started_at": "2026-09-07T02:42:53.698274+00:00"}
+{"invocation_id": "01M1WVYJJT20HCY4XXX914BENT", "profile_id": "architect-alphonso", "started_at": "2026-09-07T02:42:57.040497+00:00"}
+{"invocation_id": "01M1WVYP1G3DM7T0029KRD2RCY", "profile_id": "architect-alphonso", "started_at": "2026-09-07T02:43:00.588220+00:00"}
+{"invocation_id": "01M1WVYSGEEYF8J1XNFSW31JB0", "profile_id": "architect-alphonso", "started_at": "2026-09-07T02:43:04.134629+00:00"}
+{"invocation_id": "01M1WVYWRXSS4FX8YW074VEZ9Y", "profile_id": "architect-alphonso", "started_at": "2026-09-07T02:43:07.428918+00:00"}
+{"invocation_id": "01M1WVZ03J3YMA4PC6YK1SVSCZ", "profile_id": "architect-alphonso", "started_at": "2026-09-07T02:43:10.792890+00:00"}
+{"invocation_id": "01M1WVZ392JCAK8RC5A7XG2JSZ", "profile_id": "architect-alphonso", "started_at": "2026-09-07T02:43:14.060603+00:00"}
+{"invocation_id": "01M1WWA6YKRSW8SKE2PFJVB8JW", "profile_id": "debugger-debbie", "started_at": "2026-09-07T02:49:18.673059+00:00"}
+{"invocation_id": "01M1WWAY6K42W9H2GC0WC7YWR7", "profile_id": "architect-alphonso", "started_at": "2026-09-07T02:49:42.423950+00:00"}
+{"invocation_id": "01M1WWBEPV29CPHJJRW0MVH3JH", "profile_id": "reviewer-renata", "started_at": "2026-09-07T02:49:59.411834+00:00"}
+{"invocation_id": "01M1WWFYHCZDWHWW2FJZBNEK37", "profile_id": "randy-reducer", "started_at": "2026-09-07T02:52:26.696297+00:00"}
+{"invocation_id": "01M1WX7V7G7FEJWBNS8YSZ99NZ", "profile_id": "architect-alphonso", "started_at": "2026-09-07T03:05:29.642856+00:00"}
+{"invocation_id": "01M1WX7YSMMX5H0AN3KQK6VT9B", "profile_id": "architect-alphonso", "started_at": "2026-09-07T03:05:32.927715+00:00"}
+{"invocation_id": "01M1WX82413BX4D73WYNRQ3KDP", "profile_id": "architect-alphonso", "started_at": "2026-09-07T03:05:36.329044+00:00"}
+{"invocation_id": "01M1WX85ASEJNYBY5BVG1A01EM", "profile_id": "architect-alphonso", "started_at": "2026-09-07T03:05:39.613459+00:00"}
+{"invocation_id": "01M1WXCSDAEPV0N9MYP65DGYWA", "profile_id": "frontend-freddy", "started_at": "2026-09-07T03:08:11.548118+00:00"}
+{"invocation_id": "01M1WXK5M4DSPSR61HGQ5SR8Q4", "profile_id": "frontend-freddy", "started_at": "2026-09-07T03:11:40.618683+00:00"}
+{"invocation_id": "01M1Y4NY4XY2B5GMKBBTS62HZE", "profile_id": "researcher-robbie", "started_at": "2026-09-07T14:34:45.858021+00:00"}
+{"invocation_id": "01M1Y4P0R4W4045B3VVSM6BMVV", "profile_id": "researcher-robbie", "started_at": "2026-09-07T14:34:48.139440+00:00"}
+{"invocation_id": "01M1Y4P2ZJ5SCQCEB4205V2CEM", "profile_id": "researcher-robbie", "started_at": "2026-09-07T14:34:50.416116+00:00"}
+{"invocation_id": "01M1Y4P56P7EDFD17YD6ZJKKQ5", "profile_id": "researcher-robbie", "started_at": "2026-09-07T14:34:52.728221+00:00"}
+{"invocation_id": "01M1Y4P7EYSTDWDTTM0K2RV8D8", "profile_id": "researcher-robbie", "started_at": "2026-09-07T14:34:55.043265+00:00"}
+{"invocation_id": "01M1Y4P9QERYEKCYMHS25RN7K0", "profile_id": "researcher-robbie", "started_at": "2026-09-07T14:34:57.311293+00:00"}
+{"invocation_id": "01M1Y4PBY7HW81HY9CXMMX6K11", "profile_id": "researcher-robbie", "started_at": "2026-09-07T14:34:59.611673+00:00"}
+{"invocation_id": "01M1Y5N07WZQW1VTGEAVWESMXG", "profile_id": "architect-alphonso", "started_at": "2026-09-07T14:51:43.024055+00:00"}
+{"invocation_id": "01M1Y5N238QGN3BTZ6Q7TCAHDG", "profile_id": "architect-alphonso", "started_at": "2026-09-07T14:51:44.489166+00:00"}
+{"invocation_id": "01M1Y5N3G69FFY85850XCMY7DQ", "profile_id": "architect-alphonso", "started_at": "2026-09-07T14:51:45.957759+00:00"}
+{"invocation_id": "01M1Y5N4Y3DDA2YR1Z2WX706RF", "profile_id": "architect-alphonso", "started_at": "2026-09-07T14:51:47.378697+00:00"}
+{"invocation_id": "01M1Y5N6AK57987V9GB5KRJ135", "profile_id": "architect-alphonso", "started_at": "2026-09-07T14:51:48.856457+00:00"}
+{"invocation_id": "01M1Y5N7S0S6J6K81C4BA7S58D", "profile_id": "architect-alphonso", "started_at": "2026-09-07T14:51:50.297461+00:00"}
+{"invocation_id": "01M1Y5N961B1F669JKEC2DB497", "profile_id": "architect-alphonso", "started_at": "2026-09-07T14:51:51.777613+00:00"}
+{"invocation_id": "01M1Y5WP7T47MFBHVG3QE27GTF", "profile_id": "architect-alphonso", "started_at": "2026-09-07T14:55:55.596393+00:00"}
+{"invocation_id": "01M1Y5WRQJZR21JB5ZFZXY939D", "profile_id": "architect-alphonso", "started_at": "2026-09-07T14:55:57.824260+00:00"}
+{"invocation_id": "01M1Y5WTXAMJEEPN67FP43TA9Y", "profile_id": "architect-alphonso", "started_at": "2026-09-07T14:56:00.033838+00:00"}
+{"invocation_id": "01M1Y5WX21ZSPK40XHG58X2231", "profile_id": "architect-alphonso", "started_at": "2026-09-07T14:56:02.260694+00:00"}
+{"invocation_id": "01M1YCC041WFAH7E5RH4SMX7HF", "profile_id": "implementer-ivan", "started_at": "2026-09-07T16:49:10.131719+00:00"}
+{"invocation_id": "01M1YCC4QBZP8D4R9CRSH2G9HQ", "profile_id": "implementer-ivan", "started_at": "2026-09-07T16:49:14.028081+00:00"}
+{"invocation_id": "01M1YCC8GBEP6JFEKYASW206JH", "profile_id": "implementer-ivan", "started_at": "2026-09-07T16:49:17.690940+00:00"}
+{"invocation_id": "01M1YCCC0Q7J6J8Q2B9VFJKH0F", "profile_id": "implementer-ivan", "started_at": "2026-09-07T16:49:21.576616+00:00"}
+{"invocation_id": "01M1YCCFWXBQ92W620FRQD5FSB", "profile_id": "implementer-ivan", "started_at": "2026-09-07T16:49:25.298208+00:00"}
+{"invocation_id": "01M1YCCKEN83WDNRDCNY16ARZK", "profile_id": "implementer-ivan", "started_at": "2026-09-07T16:49:28.871310+00:00"}
+{"invocation_id": "01M1YCCQ05NX0B500E3Z99J3FZ", "profile_id": "implementer-ivan", "started_at": "2026-09-07T16:49:33.706824+00:00"}
+{"invocation_id": "01M1YQMMFEZ21B4YZVGHG9KTA2", "profile_id": "researcher-robbie", "started_at": "2026-09-07T20:06:06.098042+00:00"}
+{"invocation_id": "01M1YQMQ1HTKNDFC01M1YVAW3D", "profile_id": "researcher-robbie", "started_at": "2026-09-07T20:06:08.320448+00:00"}
+{"invocation_id": "01M1YQMS6ZBD4CPEXWHDY4HFSR", "profile_id": "researcher-robbie", "started_at": "2026-09-07T20:06:10.524597+00:00"}
+{"invocation_id": "01M1YQMVBZWX6895PJFC52CACM", "profile_id": "researcher-robbie", "started_at": "2026-09-07T20:06:12.786832+00:00"}
+{"invocation_id": "01M1YQMXJJ4MW4CEW8DH4V6AYP", "profile_id": "researcher-robbie", "started_at": "2026-09-07T20:06:15.065299+00:00"}
+{"invocation_id": "01M1YQMZT9A52RTE0VXTE0Z0FR", "profile_id": "researcher-robbie", "started_at": "2026-09-07T20:06:17.352948+00:00"}
+{"invocation_id": "01M1YQN23CW3944FK5Z61HRK3J", "profile_id": "researcher-robbie", "started_at": "2026-09-07T20:06:19.690521+00:00"}
+{"invocation_id": "01M1YQNDXSDG38CE0CCCDA0TJH", "profile_id": "architect-alphonso", "started_at": "2026-09-07T20:06:32.132719+00:00"}
+{"invocation_id": "01M1YQNGFR75PAQBZ3NB4FPT7H", "profile_id": "architect-alphonso", "started_at": "2026-09-07T20:06:34.454796+00:00"}
+{"invocation_id": "01M1YQNJQN6YRAJTFV8TB60QPZ", "profile_id": "architect-alphonso", "started_at": "2026-09-07T20:06:36.691389+00:00"}
+{"invocation_id": "01M1YQNMXQBV2FNBSXAS0ECRZV", "profile_id": "architect-alphonso", "started_at": "2026-09-07T20:06:38.959687+00:00"}
+{"invocation_id": "01M1YQNQ4EPQ16FMR1MYY5CPFC", "profile_id": "architect-alphonso", "started_at": "2026-09-07T20:06:41.204226+00:00"}
+{"invocation_id": "01M1YQNSAQXYHTR46PDQVW0YRV", "profile_id": "architect-alphonso", "started_at": "2026-09-07T20:06:43.443017+00:00"}
+{"invocation_id": "01M1YQNVGT7D9ZR23VC2NGV1G9", "profile_id": "architect-alphonso", "started_at": "2026-09-07T20:06:45.702450+00:00"}
+{"invocation_id": "01M1YQP8NG6P6VE6V75AW5D0FV", "profile_id": "architect-alphonso", "started_at": "2026-09-07T20:06:59.539501+00:00"}
+{"invocation_id": "01M1YQPB83B24CYNPEVJ9VH37K", "profile_id": "architect-alphonso", "started_at": "2026-09-07T20:07:01.910775+00:00"}
+{"invocation_id": "01M1YQPDJ6MVSJ3R4RE84HCBW0", "profile_id": "architect-alphonso", "started_at": "2026-09-07T20:07:04.416514+00:00"}
+{"invocation_id": "01M1YQPG00RK5F8SD0HSH3NDVA", "profile_id": "architect-alphonso", "started_at": "2026-09-07T20:07:06.729819+00:00"}
+{"invocation_id": "01M1YZMB57N38CHEX3W2XYGC6D", "profile_id": "researcher-robbie", "started_at": "2026-09-07T22:25:44.456729+00:00"}
+{"invocation_id": "01M1YZMD1KEZH41X6GXHPP5XZP", "profile_id": "researcher-robbie", "started_at": "2026-09-07T22:25:45.883612+00:00"}
+{"invocation_id": "01M1YZMEE6YRE2AY974161E3GM", "profile_id": "researcher-robbie", "started_at": "2026-09-07T22:25:47.357464+00:00"}
+{"invocation_id": "01M1YZMFVXT91KPZRMKAP7WDE9", "profile_id": "researcher-robbie", "started_at": "2026-09-07T22:25:48.790867+00:00"}
+{"invocation_id": "01M1YZMH93S3PS25GTDP24VAGP", "profile_id": "researcher-robbie", "started_at": "2026-09-07T22:25:50.291640+00:00"}
+{"invocation_id": "01M1YZMJQNZD28AZJAJD2X55P5", "profile_id": "researcher-robbie", "started_at": "2026-09-07T22:25:51.749537+00:00"}
+{"invocation_id": "01M1YZMM570H3WYY4SSYVMJFC3", "profile_id": "researcher-robbie", "started_at": "2026-09-07T22:25:53.215447+00:00"}
+{"invocation_id": "01M1YZMY6T1QW1506DDXZCARHG", "profile_id": "architect-alphonso", "started_at": "2026-09-07T22:26:03.921488+00:00"}
+{"invocation_id": "01M1YZN01JNN1SC4FR09733XA2", "profile_id": "architect-alphonso", "started_at": "2026-09-07T22:26:05.383481+00:00"}
+{"invocation_id": "01M1YZN1F75GBQ6C41WYYD3TWM", "profile_id": "architect-alphonso", "started_at": "2026-09-07T22:26:06.890442+00:00"}
+{"invocation_id": "01M1YZN2YB1RCQCFM7193RJSGV", "profile_id": "architect-alphonso", "started_at": "2026-09-07T22:26:08.363735+00:00"}
+{"invocation_id": "01M1YZN4CMEBJSXFMP2YG3E8TM", "profile_id": "architect-alphonso", "started_at": "2026-09-07T22:26:09.884050+00:00"}
+{"invocation_id": "01M1YZN5W0DJW2YFPZBSJ25E68", "profile_id": "architect-alphonso", "started_at": "2026-09-07T22:26:11.338202+00:00"}
+{"invocation_id": "01M1YZN79BCW0KWA9B0E3W2P8Y", "profile_id": "architect-alphonso", "started_at": "2026-09-07T22:26:12.907886+00:00"}
+{"invocation_id": "01M1YZNGYHQYN6MQXE9MFHH1Y5", "profile_id": "architect-alphonso", "started_at": "2026-09-07T22:26:24.045412+00:00"}
+{"invocation_id": "01M1YZNKPMR5EBZCPRY36XWRN7", "profile_id": "architect-alphonso", "started_at": "2026-09-07T22:26:26.398587+00:00"}
+{"invocation_id": "01M1YZNP0714T2PQ3H33SZK0V6", "profile_id": "architect-alphonso", "started_at": "2026-09-07T22:26:28.691473+00:00"}
+{"invocation_id": "01M1YZNR7P4QFX38JTJZB9BGG0", "profile_id": "architect-alphonso", "started_at": "2026-09-07T22:26:31.009817+00:00"}
+{"invocation_id": "01M20E6K44QRHY2ZQG8NAKJ91N", "profile_id": "researcher-robbie", "started_at": "2026-09-08T11:59:37.748543+00:00"}
+{"invocation_id": "01M20E6NT8KS6MF52ME3XJ0T0S", "profile_id": "researcher-robbie", "started_at": "2026-09-08T11:59:39.981587+00:00"}
+{"invocation_id": "01M20E6QZP50CDYPYA2MZPFD33", "profile_id": "researcher-robbie", "started_at": "2026-09-08T11:59:42.136924+00:00"}
+{"invocation_id": "01M20E6T32HF5VV6G8ESHFHAFX", "profile_id": "researcher-robbie", "started_at": "2026-09-08T11:59:44.436875+00:00"}
+{"invocation_id": "01M20E6WAVS953NNF2HEA1SQFD", "profile_id": "researcher-robbie", "started_at": "2026-09-08T11:59:46.760104+00:00"}
+{"invocation_id": "01M20E6YKF8RFH93Z22QWF99QA", "profile_id": "researcher-robbie", "started_at": "2026-09-08T11:59:48.920895+00:00"}
+{"invocation_id": "01M20E70Q083ZFQE5A9QDFXMQM", "profile_id": "researcher-robbie", "started_at": "2026-09-08T11:59:51.195861+00:00"}
+{"invocation_id": "01M20KWE613MZN094PYFY230BD", "profile_id": "architect-alphonso", "started_at": "2026-09-08T13:38:56.533133+00:00"}
+{"invocation_id": "01M20KWH1B70EAE5FJ5AZ55VW1", "profile_id": "architect-alphonso", "started_at": "2026-09-08T13:38:58.915361+00:00"}
+{"invocation_id": "01M20KWK84MVCTW3ADKHXTCNYB", "profile_id": "architect-alphonso", "started_at": "2026-09-08T13:39:01.153160+00:00"}
+{"invocation_id": "01M20KWNEDD76GD87WK44KP7TQ", "profile_id": "architect-alphonso", "started_at": "2026-09-08T13:39:03.478828+00:00"}
+{"invocation_id": "01M20KWQPTHNMZJ3620GD02448", "profile_id": "architect-alphonso", "started_at": "2026-09-08T13:39:05.758071+00:00"}
+{"invocation_id": "01M20KWSY35SNBA22C3SCBHXJF", "profile_id": "architect-alphonso", "started_at": "2026-09-08T13:39:08.018263+00:00"}
+{"invocation_id": "01M20KWW4XH1CG350M5JQ8VXF3", "profile_id": "architect-alphonso", "started_at": "2026-09-08T13:39:10.315222+00:00"}
+{"invocation_id": "01M20PSCT394G2Y07EZ9PGKF95", "profile_id": "architect-alphonso", "started_at": "2026-09-08T14:29:42.283035+00:00"}
+{"invocation_id": "01M20PSF9HEA0KAB09K6GRESEW", "profile_id": "architect-alphonso", "started_at": "2026-09-08T14:29:44.514863+00:00"}
+{"invocation_id": "01M20PSHF3JW4H066ZNDCC55QK", "profile_id": "architect-alphonso", "started_at": "2026-09-08T14:29:46.705535+00:00"}
+{"invocation_id": "01M20PSKKJHGF7NZDWNB0SZ3BX", "profile_id": "architect-alphonso", "started_at": "2026-09-08T14:29:48.935989+00:00"}
+{"invocation_id": "01M20QMJESM04PX5K68NJQE588", "profile_id": "frontend-freddy", "started_at": "2026-09-08T14:44:32.791069+00:00"}
+{"invocation_id": "01M20QQ5YXC4QSZ45X7FTQCNE6", "profile_id": "planner-priti", "started_at": "2026-09-08T14:45:58.249614+00:00"}
+{"invocation_id": "01M21204ZE9H7VFWQE24XNZ6ME", "profile_id": "planner-priti", "started_at": "2026-09-08T17:45:37.978307+00:00"}
+{"invocation_id": "01M21222DX5C4YVJ4Y9RQMBBWD", "profile_id": "planner-priti", "started_at": "2026-09-08T17:46:40.898844+00:00"}
+{"invocation_id": "01M214QGDK6ZDP5VMTJF1EJMHQ", "profile_id": "frontend-freddy", "started_at": "2026-09-08T18:33:20.540846+00:00"}
+{"invocation_id": "01M214YR9G6GQ6YJV6AEQ78E3Z", "profile_id": "frontend-freddy", "started_at": "2026-09-08T18:37:18.062425+00:00"}
+{"invocation_id": "01M218FT9EJX2RT0T8W3FWN0E4", "profile_id": "frontend-freddy", "started_at": "2026-09-08T19:39:02.736960+00:00"}
+{"invocation_id": "01M218KGBYHNVNJ84KD21ZZ1N5", "profile_id": "frontend-freddy", "started_at": "2026-09-08T19:41:03.687177+00:00"}
+{"invocation_id":"01M1Y4MXCN3CKGFJDS9J5495D7","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:12.382752+00:00"}
+{"invocation_id":"01M1Y4N02319HJCMJ85RZGM54R","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:14.813641+00:00"}
+{"invocation_id":"01M1Y4N2DWPQSEPPWHS8MB2DQ4","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:17.167945+00:00"}
+{"invocation_id":"01M1Y4N4QFQ6XRYSA5Y9BMZ5RB","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:19.536151+00:00"}
+{"invocation_id":"01M1Y4N71G7XXD8QTMAWZQ33ES","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:21.912151+00:00"}
+{"invocation_id":"01M1Y4N9BQ1271X5J53FPQMGEB","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:24.242540+00:00"}
+{"invocation_id":"01M1Y4NBMJG41HYJYJXMK6HF0S","profile_id":"researcher-robbie","started_at":"2026-09-07T14:34:26.607066+00:00"}
+{"invocation_id":"01M1Y4X1A0Q97KYCMVYCNAHJG4","profile_id":"architect-alphonso","started_at":"2026-09-07T14:38:38.363049+00:00"}
+{"invocation_id":"01M1Y4X3SYN8TAC3SS0HZN0Y8B","profile_id":"architect-alphonso","started_at":"2026-09-07T14:38:40.600845+00:00"}
+{"invocation_id":"01M1Y4X5ZZYQSGHK83X1KZ65X9","profile_id":"architect-alphonso","started_at":"2026-09-07T14:38:42.838772+00:00"}
+{"invocation_id":"01M1Y4X85XNTEK0WHMJ7B6HZT2","profile_id":"architect-alphonso","started_at":"2026-09-07T14:38:45.081365+00:00"}
+{"invocation_id":"01M1Y4XAC11Q3GACH4V6WNKWE4","profile_id":"architect-alphonso","started_at":"2026-09-07T14:38:47.343143+00:00"}
+{"invocation_id":"01M1Y4XCJGGE12YZPWBW6BQFQZ","profile_id":"architect-alphonso","started_at":"2026-09-07T14:38:49.571071+00:00"}
+{"invocation_id":"01M1Y4XER0R24HFNEE9ZJGGE8N","profile_id":"architect-alphonso","started_at":"2026-09-07T14:38:51.849170+00:00"}
+{"invocation_id": "01M21JNHV0T27VMRG91VWE51KT", "profile_id": "researcher-robbie", "started_at": "2026-09-08T22:36:55.844437+00:00"}
+{"invocation_id": "01M21JNKP948JN3XQ0ZVP0YCB0", "profile_id": "researcher-robbie", "started_at": "2026-09-08T22:36:57.277024+00:00"}
+{"invocation_id": "01M21JNN35PFCD88MK69A4RRSF", "profile_id": "researcher-robbie", "started_at": "2026-09-08T22:36:58.816959+00:00"}
+{"invocation_id": "01M21JNPK3X2DP7W0GESR7296B", "profile_id": "researcher-robbie", "started_at": "2026-09-08T22:37:00.275533+00:00"}
+{"invocation_id": "01M21JNR0KBN2PH940KJNGVKV8", "profile_id": "researcher-robbie", "started_at": "2026-09-08T22:37:01.751891+00:00"}
+{"invocation_id": "01M21JNSF1CH0N3RNTECC85146", "profile_id": "researcher-robbie", "started_at": "2026-09-08T22:37:03.226975+00:00"}
+{"invocation_id": "01M21JNTWWMCDZ1YKGC9DG303V", "profile_id": "researcher-robbie", "started_at": "2026-09-08T22:37:04.736346+00:00"}
+{"invocation_id": "01M21K2KZTN46XM5P0M1B1WQBS", "profile_id": "architect-alphonso", "started_at": "2026-09-08T22:44:04.038220+00:00"}
+{"invocation_id": "01M21K2NV9M251ZPJ8G2R634DD", "profile_id": "architect-alphonso", "started_at": "2026-09-08T22:44:05.483838+00:00"}
+{"invocation_id": "01M21K2Q8CAF9B4TJNYEETS7KJ", "profile_id": "architect-alphonso", "started_at": "2026-09-08T22:44:07.008419+00:00"}
+{"invocation_id": "01M21K2RRD4JA5G3BNBGW4Z9P0", "profile_id": "architect-alphonso", "started_at": "2026-09-08T22:44:08.486936+00:00"}
+{"invocation_id": "01M21K2T67GXKF9X0MH94SFB34", "profile_id": "architect-alphonso", "started_at": "2026-09-08T22:44:09.994209+00:00"}
+{"invocation_id": "01M21K2VND2A1ZP2MARG947CZD", "profile_id": "architect-alphonso", "started_at": "2026-09-08T22:44:11.444547+00:00"}
+{"invocation_id": "01M21K2X2N4CK95XWP7WB7ZJR8", "profile_id": "architect-alphonso", "started_at": "2026-09-08T22:44:12.993680+00:00"}
+{"invocation_id": "01M21K9G8C6R0RBTW9P0XWHYBH", "profile_id": "architect-alphonso", "started_at": "2026-09-08T22:47:50.275083+00:00"}
+{"invocation_id": "01M21K9JS8ETD1WTC4J5GZACFB", "profile_id": "architect-alphonso", "started_at": "2026-09-08T22:47:52.559907+00:00"}
+{"invocation_id": "01M21K9N0KX02BE9WPQKD8FXAQ", "profile_id": "architect-alphonso", "started_at": "2026-09-08T22:47:54.770005+00:00"}
+{"invocation_id": "01M21K9Q5MTW2KCDG2H7PS1KNB", "profile_id": "architect-alphonso", "started_at": "2026-09-08T22:47:57.018259+00:00"}
+{"invocation_id": "01M21W2MX1MPD1K3J7D0X5GD5M", "profile_id": "implementer-ivan", "started_at": "2026-09-09T01:21:24.515112+00:00"}
+{"invocation_id": "01M21W2TC9FKFWT1WZVZZC7P1G", "profile_id": "implementer-ivan", "started_at": "2026-09-09T01:21:29.264438+00:00"}
+{"invocation_id": "01M21W2YWKH3SZHSAAM15S151Y", "profile_id": "implementer-ivan", "started_at": "2026-09-09T01:21:33.663820+00:00"}
+{"invocation_id": "01M21W32YFK98VQ6FDB0C3Q300", "profile_id": "implementer-ivan", "started_at": "2026-09-09T01:21:37.911017+00:00"}
+{"invocation_id": "01M21W36ZRYCG2RCDQN0SG4S0R", "profile_id": "implementer-ivan", "started_at": "2026-09-09T01:21:41.970942+00:00"}
+{"invocation_id": "01M21W3B5HD5C0AA22EJYXDYNB", "profile_id": "implementer-ivan", "started_at": "2026-09-09T01:21:46.182336+00:00"}
+{"invocation_id": "01M21W3EXFZS79SVEJGH8AB9ZP", "profile_id": "implementer-ivan", "started_at": "2026-09-09T01:21:49.639580+00:00"}
+{"invocation_id": "01M22XEN4MCS22BH3PWE9B6J6N", "profile_id": "researcher-robbie", "started_at": "2026-09-09T11:04:39.318956+00:00"}
+{"invocation_id": "01M22XEQP651KTB9X5MXQHF5S1", "profile_id": "researcher-robbie", "started_at": "2026-09-09T11:04:41.549528+00:00"}
+{"invocation_id": "01M22XESVD06FK7XQQ5SCX3KY2", "profile_id": "researcher-robbie", "started_at": "2026-09-09T11:04:43.723522+00:00"}
+{"invocation_id": "01M22XEVZD881EWXH9T1WTV374", "profile_id": "researcher-robbie", "started_at": "2026-09-09T11:04:45.928857+00:00"}
+{"invocation_id": "01M22XEY4789KKHEMK28RAZGP3", "profile_id": "researcher-robbie", "started_at": "2026-09-09T11:04:48.160551+00:00"}
+{"invocation_id": "01M22XF0A3GQ48ARBDJ1ATQD68", "profile_id": "researcher-robbie", "started_at": "2026-09-09T11:04:50.350395+00:00"}
+{"invocation_id": "01M22XF2EMSWHG1HD316JZYJRJ", "profile_id": "researcher-robbie", "started_at": "2026-09-09T11:04:52.571803+00:00"}
+{"invocation_id": "01M22XFANAWVZQ4QF3A09R7KK5", "profile_id": "architect-alphonso", "started_at": "2026-09-09T11:05:00.641093+00:00"}
+{"invocation_id": "01M22XFCG931EKN8CK53Z0MHP7", "profile_id": "architect-alphonso", "started_at": "2026-09-09T11:05:02.108473+00:00"}
+{"invocation_id": "01M22XFDY0RQT7D273W3CQJAZY", "profile_id": "architect-alphonso", "started_at": "2026-09-09T11:05:03.605902+00:00"}
+{"invocation_id": "01M22XFFCPEVCYY1K19D894R6H", "profile_id": "architect-alphonso", "started_at": "2026-09-09T11:05:05.055277+00:00"}
+{"invocation_id": "01M22XFGT0H2FEDZXYX7B0F007", "profile_id": "architect-alphonso", "started_at": "2026-09-09T11:05:06.546608+00:00"}
+{"invocation_id": "01M22XFJ8M9GV6JXRYE8MFDM37", "profile_id": "architect-alphonso", "started_at": "2026-09-09T11:05:07.988256+00:00"}
+{"invocation_id": "01M22XFKNKJWKJ824WWS120JDR", "profile_id": "architect-alphonso", "started_at": "2026-09-09T11:05:09.473886+00:00"}
+{"invocation_id": "01M22XG7DGX3GGJTEGAV08RSJV", "profile_id": "architect-alphonso", "started_at": "2026-09-09T11:05:30.751421+00:00"}
+{"invocation_id": "01M22XG9X2ME4ZEK55WYTQJNRP", "profile_id": "architect-alphonso", "started_at": "2026-09-09T11:05:32.964735+00:00"}
+{"invocation_id": "01M22XGC2FJJDD74S2G0T43A1B", "profile_id": "architect-alphonso", "started_at": "2026-09-09T11:05:35.178838+00:00"}
+{"invocation_id": "01M22XGE7D3NRM7NQ6JJWCGN85", "profile_id": "architect-alphonso", "started_at": "2026-09-09T11:05:37.400169+00:00"}
+{"invocation_id": "01M249MEQ5ZZY8611C87H75PTG", "profile_id": "researcher-robbie", "started_at": "2026-09-09T23:56:45.888486+00:00"}
+{"invocation_id": "01M249MGF999A5NY0HN5HFM23E", "profile_id": "researcher-robbie", "started_at": "2026-09-09T23:56:47.261597+00:00"}
+{"invocation_id": "01M249MHT25W9GM2G0FB9K0ED4", "profile_id": "researcher-robbie", "started_at": "2026-09-09T23:56:48.673853+00:00"}
+{"invocation_id": "01M249MK6CH1WC1P99CYMDQZTB", "profile_id": "researcher-robbie", "started_at": "2026-09-09T23:56:50.075171+00:00"}
+{"invocation_id": "01M249MMHX223D6K5STABSZDH8", "profile_id": "researcher-robbie", "started_at": "2026-09-09T23:56:51.484886+00:00"}
+{"invocation_id": "01M249MNY6GH5QP70RZAFS86P7", "profile_id": "researcher-robbie", "started_at": "2026-09-09T23:56:52.871154+00:00"}
+{"invocation_id": "01M249MQ9DX6CWZWEV46NR718E", "profile_id": "researcher-robbie", "started_at": "2026-09-09T23:56:54.284399+00:00"}
+{"invocation_id": "01M249MY7B1VHD9S7Z1WE0392S", "profile_id": "architect-alphonso", "started_at": "2026-09-09T23:57:01.815055+00:00"}
+{"invocation_id": "01M249N00YPRR0ZB3BJ3BVS3EH", "profile_id": "architect-alphonso", "started_at": "2026-09-09T23:57:03.229074+00:00"}
+{"invocation_id": "01M249N1CW42G2NX1A09J8CPKZ", "profile_id": "architect-alphonso", "started_at": "2026-09-09T23:57:04.671611+00:00"}
+{"invocation_id": "01M249N2T7VRCXKH9PGKVBRQPF", "profile_id": "architect-alphonso", "started_at": "2026-09-09T23:57:06.094653+00:00"}
+{"invocation_id": "01M249N46QS1NZRM3QDKXMWZH5", "profile_id": "architect-alphonso", "started_at": "2026-09-09T23:57:07.574351+00:00"}
+{"invocation_id": "01M249N5MN7MM5PR16TSZMJEZF", "profile_id": "architect-alphonso", "started_at": "2026-09-09T23:57:08.984163+00:00"}
+{"invocation_id": "01M249N712D2XK9YP643JYC582", "profile_id": "architect-alphonso", "started_at": "2026-09-09T23:57:10.434089+00:00"}
+{"invocation_id": "01M24CVTYZR2CAJKVKH5F8WNKJ", "profile_id": "architect-alphonso", "started_at": "2026-09-10T00:53:14.281510+00:00"}
+{"invocation_id": "01M24CVXE906AD13TASW3Z7B7J", "profile_id": "architect-alphonso", "started_at": "2026-09-10T00:53:16.510191+00:00"}
+{"invocation_id": "01M24CVZKYH46VPA57Y78NAAZW", "profile_id": "architect-alphonso", "started_at": "2026-09-10T00:53:18.687180+00:00"}
+{"invocation_id": "01M24CW1QX0DP71YK2P5QQ29RS", "profile_id": "architect-alphonso", "started_at": "2026-09-10T00:53:20.921985+00:00"}
+{"invocation_id": "01M25BBMB5RZDWKW5EXYM7HXVM", "profile_id": "researcher-robbie", "started_at": "2026-09-10T09:46:08.357857+00:00"}
+{"invocation_id": "01M25BBP546C2KGHXBYXTAWFBZ", "profile_id": "researcher-robbie", "started_at": "2026-09-10T09:46:09.788071+00:00"}
+{"invocation_id": "01M25BBQH6FAEQFSHEERTS9DVM", "profile_id": "researcher-robbie", "started_at": "2026-09-10T09:46:11.222476+00:00"}
+{"invocation_id": "01M25BBRY0VNE9NNNMNQQXF7C5", "profile_id": "researcher-robbie", "started_at": "2026-09-10T09:46:12.628906+00:00"}
+{"invocation_id": "01M25BBT9S3VTBRSM2MFKN35VW", "profile_id": "researcher-robbie", "started_at": "2026-09-10T09:46:14.061353+00:00"}
+{"invocation_id": "01M25BBVPPQB5X76HVP4540568", "profile_id": "researcher-robbie", "started_at": "2026-09-10T09:46:15.465677+00:00"}
+{"invocation_id": "01M25BBX2NKPASJA5XCH4JJNZ2", "profile_id": "researcher-robbie", "started_at": "2026-09-10T09:46:16.912280+00:00"}
+{"invocation_id": "01M25BKYGFDWWV3KYD0D791MC2", "profile_id": "architect-alphonso", "started_at": "2026-09-10T09:50:41.006215+00:00"}
+{"invocation_id": "01M25BM0CRSAC8NDBT7ETVXY50", "profile_id": "architect-alphonso", "started_at": "2026-09-10T09:50:42.452528+00:00"}
+{"invocation_id": "01M25BM1SRMGMS6PPMEAAB6JVX", "profile_id": "architect-alphonso", "started_at": "2026-09-10T09:50:43.932760+00:00"}
+{"invocation_id": "01M25BM37XRN5JMC88NKT6X3H9", "profile_id": "architect-alphonso", "started_at": "2026-09-10T09:50:45.359777+00:00"}
+{"invocation_id": "01M25BM4MFXHYAQBG727RC1SCH", "profile_id": "architect-alphonso", "started_at": "2026-09-10T09:50:46.843200+00:00"}
+{"invocation_id": "01M25BM62YKYF0PJ2WNKVCWM0M", "profile_id": "architect-alphonso", "started_at": "2026-09-10T09:50:48.280432+00:00"}
+{"invocation_id": "01M25BM7FVH738BDZ8SADZ0XQB", "profile_id": "architect-alphonso", "started_at": "2026-09-10T09:50:49.770267+00:00"}
+{"invocation_id": "01M25BXCDM7KYP2RST4C546YFH", "profile_id": "architect-alphonso", "started_at": "2026-09-10T09:55:50.859212+00:00"}
+{"invocation_id": "01M25BXEZG5B9QBQ75MRXXXSMQ", "profile_id": "architect-alphonso", "started_at": "2026-09-10T09:55:53.092767+00:00"}
+{"invocation_id": "01M25BXH55MWZCR68C8K395FR8", "profile_id": "architect-alphonso", "started_at": "2026-09-10T09:55:55.266801+00:00"}
+{"invocation_id": "01M25BXK93FXJSMJMEQ61JJ6WS", "profile_id": "architect-alphonso", "started_at": "2026-09-10T09:55:57.494583+00:00"}
+{"invocation_id": "01M25CZPS8VQGPPV0B480YYQTB", "profile_id": "researcher-robbie", "started_at": "2026-09-10T10:14:34.904619+00:00"}
+{"invocation_id": "01M25CZRP10C7XQCWGRVCGQPBN", "profile_id": "researcher-robbie", "started_at": "2026-09-10T10:14:36.371775+00:00"}
+{"invocation_id": "01M25CZT3M1198F12YKMT7MF95", "profile_id": "researcher-robbie", "started_at": "2026-09-10T10:14:37.866249+00:00"}
+{"invocation_id": "01M25CZVJE811D6BDMGWT4RC25", "profile_id": "researcher-robbie", "started_at": "2026-09-10T10:14:39.331772+00:00"}
+{"invocation_id": "01M25CZX06GPA705FYQN0V294E", "profile_id": "researcher-robbie", "started_at": "2026-09-10T10:14:40.865397+00:00"}
+{"invocation_id": "01M25CZYG4SF15YHFE4MYN9RPD", "profile_id": "researcher-robbie", "started_at": "2026-09-10T10:14:42.328618+00:00"}
+{"invocation_id": "01M25CZZXXJYG8G815CZT049JZ", "profile_id": "researcher-robbie", "started_at": "2026-09-10T10:14:43.995785+00:00"}
+{"invocation_id": "01M25D3KWCA4FZCG62TYQDRVD5", "profile_id": "architect-alphonso", "started_at": "2026-09-10T10:16:42.957898+00:00"}
+{"invocation_id": "01M25D3NQHRYEX03M9NHNVM59T", "profile_id": "architect-alphonso", "started_at": "2026-09-10T10:16:44.399559+00:00"}
+{"invocation_id": "01M25D3Q4KXNYT4W31QTAFVPQB", "profile_id": "architect-alphonso", "started_at": "2026-09-10T10:16:45.875139+00:00"}
+{"invocation_id": "01M25D3RJRYK131DKJHYY9ST5Y", "profile_id": "architect-alphonso", "started_at": "2026-09-10T10:16:47.318086+00:00"}
+{"invocation_id": "01M25D3SZQJ84ACJ4ES07WYPVZ", "profile_id": "architect-alphonso", "started_at": "2026-09-10T10:16:48.808852+00:00"}
+{"invocation_id": "01M25D3VE8W5FHSS4SCP7GNF5D", "profile_id": "architect-alphonso", "started_at": "2026-09-10T10:16:50.247096+00:00"}
+{"invocation_id": "01M25D3WV8G88Y5BESMVNMG071", "profile_id": "architect-alphonso", "started_at": "2026-09-10T10:16:51.721083+00:00"}
+{"invocation_id": "01M25K594A0SPZ2S6SXZSXY149", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:02:28.909761+00:00"}
+{"invocation_id": "01M25K5B026AG4MQATXS0BR7V9", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:02:30.378026+00:00"}
+{"invocation_id": "01M25K5CCC36BWCF8X04QRV0R0", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:02:31.847204+00:00"}
+{"invocation_id": "01M25K5DTBPTSGSK9JY08W672Q", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:02:33.289944+00:00"}
+{"invocation_id": "01M25K5F7FSDSMV1F5P9MKH53Y", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:02:34.829503+00:00"}
+{"invocation_id": "01M25K5GQKMBRV02VY03Z2ZKBK", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:02:36.354925+00:00"}
+{"invocation_id": "01M25K5J757GNFGM2ES41QCYJE", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:02:37.969513+00:00"}
+{"invocation_id": "01M25KBRK7EZFMVHXDVV1TRPGH", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:06:01.357097+00:00"}
+{"invocation_id": "01M25KBTDM5GYT2YNXCPQK33K6", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:06:02.789720+00:00"}
+{"invocation_id": "01M25KBVTN3W0DFGWQGBANCBJQ", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:06:04.343841+00:00"}
+{"invocation_id": "01M25KBXATGAX5MV86F6XF345J", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:06:05.778229+00:00"}
+{"invocation_id": "01M25KBYQZ3T6Y4EJWHDFH03PB", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:06:07.361011+00:00"}
+{"invocation_id": "01M25KC0940NF4T4TMNYC5DY37", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:06:08.809005+00:00"}
+{"invocation_id": "01M25KC1PB7AM29PJQGJJANH4A", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:06:10.279144+00:00"}
+{"invocation_id": "01M25TV5F362K7M4DCCPZZHJR2", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:16:46.078372+00:00"}
+{"invocation_id": "01M25TV79R72JF96DSPF9CQ5YR", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:16:47.525048+00:00"}
+{"invocation_id": "01M25TV8P8FVFNVRX3ZJJ5EK5B", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:16:49.006804+00:00"}
+{"invocation_id": "01M25TVA4P3DPZKT2E2PA94MNS", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:16:50.415734+00:00"}
+{"invocation_id": "01M25TVBGMQVABJHWKSCJ4ZPMJ", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:16:51.865450+00:00"}
+{"invocation_id": "01M25TVCY3NCWSHQ24JAMRNKC7", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:16:53.302049+00:00"}
+{"invocation_id": "01M25TVEAR4ZPT0TQZW43RGFBP", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:16:54.770619+00:00"}
+{"invocation_id": "01M25TZJ4XMX4M2A9WZRTF4Z45", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:19:10.138400+00:00"}
+{"invocation_id": "01M25TZKZ8DF9KRMWRZQD3RC1J", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:19:11.590005+00:00"}
+{"invocation_id": "01M25TZNC808BZB7MYSBFRBSZ1", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:19:13.049704+00:00"}
+{"invocation_id": "01M25TZPT1187WMWCY4PWKQM18", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:19:14.479042+00:00"}
+{"invocation_id": "01M25TZR6G8ZN9Z247FQD4PDR5", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:19:15.947780+00:00"}
+{"invocation_id": "01M25TZSMQHM6T1M0J1BT7WQMK", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:19:17.383717+00:00"}
+{"invocation_id": "01M25TZV1B9E5D17XRX2XMCCY9", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:19:18.859231+00:00"}
+{"invocation_id": "01M25TVR2N8HZ44WHG60YVW079", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:17:05.136779+00:00"}
+{"invocation_id": "01M25TVSX28V0V7KRW7VS8NMN5", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:17:06.580740+00:00"}
+{"invocation_id": "01M25TVV9N73PRNZ7700J94JBD", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:17:08.062515+00:00"}
+{"invocation_id": "01M25TVWR8RF8EAXRKSBH2QX2G", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:17:09.476147+00:00"}
+{"invocation_id": "01M25TVY4523BZK6HWTSHY46X0", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:17:10.952367+00:00"}
+{"invocation_id": "01M25TVZJKZCGNDTWD8J9NM1WY", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:17:12.401288+00:00"}
+{"invocation_id": "01M25TW0ZVY38Q4KT2ZVBAZ2QK", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:17:13.868389+00:00"}
+{"invocation_id": "01M25TW791QZ10SPYC2K15AY10", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:17:20.704536+00:00"}
+{"invocation_id": "01M25TW9367YS6XWY60HK1W6M2", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:17:22.158214+00:00"}
+{"invocation_id": "01M25TWAGQK9XBTZ3KBSRQQ0E6", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:17:23.652239+00:00"}
+{"invocation_id": "01M25TWBZFHDEZ3FCA7AE6PFT3", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:17:25.085423+00:00"}
+{"invocation_id": "01M25TWDBYQAM7CY4DSMJ2PDMV", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:17:26.586740+00:00"}
+{"invocation_id": "01M25TWETXGWE3SZ27BC0WQY14", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:17:28.018080+00:00"}
+{"invocation_id": "01M25TWG7MX088GKKSY83P8FH0", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:17:29.504746+00:00"}
+{"invocation_id": "01M25V2HYKKZR5WG32FT50MKAN", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:20:48.899869+00:00"}
+{"invocation_id": "01M25V2MDG247GMBYF47P2AHMX", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:20:51.111011+00:00"}
+{"invocation_id": "01M25V2PJG8JKAT8PV0FM62838", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:20:53.279379+00:00"}
+{"invocation_id": "01M25V2RP54T44KEW84G8Y6G5Q", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:20:55.495149+00:00"}
+{"invocation_id": "01M25MPV8GWWYVXW2WJ6B7JF5S", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:29:33.902152+00:00"}
+{"invocation_id": "01M25MPXVPW5BQ0GKEENV7QRVX", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:29:36.372313+00:00"}
+{"invocation_id": "01M25MQ08RB8EE3XPHMFTWGAVH", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:29:38.756673+00:00"}
+{"invocation_id": "01M25MQ2KDMTJA5N5ETEYDRVHN", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:29:41.226793+00:00"}
+{"invocation_id": "01M25MQ50DTR9TPBKQENPSDT73", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:29:43.668432+00:00"}
+{"invocation_id": "01M25MQ7CXAHHRF2WJ0ETTF1P4", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:29:46.089499+00:00"}
+{"invocation_id": "01M25MQ9RGD5Z34WX07D72PRB7", "profile_id": "researcher-robbie", "started_at": "2026-09-10T12:29:48.633380+00:00"}
+{"invocation_id": "01M25NDN8CA97H57R9GA8W0EM4", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:42:01.341615+00:00"}
+{"invocation_id": "01M25NDQS18K3JY1TXWS7RAVNQ", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:42:03.649026+00:00"}
+{"invocation_id": "01M25NDT15DJ3JMXTG48E6BXKV", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:42:05.906795+00:00"}
+{"invocation_id": "01M25NDW7MZQVBXKD6RJRPHEK3", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:42:08.220443+00:00"}
+{"invocation_id": "01M25NDYFXDGKR0HYA4W0DTJQC", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:42:10.526839+00:00"}
+{"invocation_id": "01M25NE0R1B5AGQMXRJSZTYJK0", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:42:12.783602+00:00"}
+{"invocation_id": "01M25NE2YPD7K5S7XP7AR1JBMX", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:42:15.097645+00:00"}
+{"invocation_id": "01M25NW002F8DW0XHFW2RM0TB3", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:49:51.098682+00:00"}
+{"invocation_id": "01M25NW2GZ7000Y6V4F7JR5FKG", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:49:53.335300+00:00"}
+{"invocation_id": "01M25NW4Q05C4F4A3TCVNAGPZ3", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:49:55.616441+00:00"}
+{"invocation_id": "01M25NW6Y3PM9RJFQYXSRW3PA0", "profile_id": "architect-alphonso", "started_at": "2026-09-10T12:49:57.824455+00:00"}
+{"invocation_id": "01M25W45CBXHZAQW49EW84V473", "profile_id": "implementer-ivan", "started_at": "2026-09-10T14:39:10.290941+00:00"}
+{"invocation_id": "01M25W47ZWGMXW51VXXSFM8GRZ", "profile_id": "implementer-ivan", "started_at": "2026-09-10T14:39:12.610194+00:00"}
+{"invocation_id": "01M25W4A884MZ4CXQH9THHPTVH", "profile_id": "implementer-ivan", "started_at": "2026-09-10T14:39:14.929735+00:00"}
+{"invocation_id": "01M25W4CGQVR7Y45DA31454WKZ", "profile_id": "implementer-ivan", "started_at": "2026-09-10T14:39:17.339803+00:00"}
+{"invocation_id": "01M25W4EW5396ZJ064J3F27MW9", "profile_id": "implementer-ivan", "started_at": "2026-09-10T14:39:19.698020+00:00"}
+{"invocation_id": "01M25W4H5T7VBZ9HHAV6Z078V1", "profile_id": "implementer-ivan", "started_at": "2026-09-10T14:39:21.977033+00:00"}
+{"invocation_id": "01M25W4KCZWB42399MVTVT29JE", "profile_id": "implementer-ivan", "started_at": "2026-09-10T14:39:24.461742+00:00"}
+{"invocation_id": "01M268WA2VXGM1DX4X0RBE56T3", "profile_id": "frontend-freddy", "started_at": "2026-09-10T18:22:04.453962+00:00"}
+{"invocation_id": "01M2697CV6BYNG0ZKD1QHYQ44Q", "profile_id": "reviewer-renata", "started_at": "2026-09-10T18:28:07.708437+00:00"}
+{"invocation_id": "01M26BGBAB4J9VKMN9GGXJQ9Z4", "profile_id": "architect-alphonso", "started_at": "2026-09-10T19:07:58.422103+00:00"}
+{"invocation_id": "01M26BGGWR696SY221RH0MKYBT", "profile_id": "debugger-debbie", "started_at": "2026-09-10T19:08:04.026733+00:00"}
+{"invocation_id": "01M26BGPJX4NN958288KD53YYZ", "profile_id": "designer-dagmar", "started_at": "2026-09-10T19:08:10.245397+00:00"}
+{"invocation_id": "01M26BGX0CJSNV5PMDQ8M0NKRH", "profile_id": "randy-reducer", "started_at": "2026-09-10T19:08:16.481030+00:00"}
+{"invocation_id": "01M26DDXM559KWABQZGM9ST1Z6", "profile_id": "frontend-freddy", "started_at": "2026-09-10T19:42:06.769282+00:00"}
+{"invocation_id": "01M26FDAW4MB8YV7VTYRZSATCQ", "profile_id": "reviewer-renata", "started_at": "2026-09-10T20:16:13.835390+00:00"}
+{"invocation_id": "01M26G61HC68WA7TS6XBDAD2VM", "profile_id": "frontend-freddy", "started_at": "2026-09-10T20:29:43.303043+00:00"}
+{"invocation_id": "01M26GKAZ8HZG9KNVR7GECRMP0", "profile_id": "reviewer-renata", "started_at": "2026-09-10T20:36:58.945965+00:00"}
+{"invocation_id": "01M26M8CD6YXF0Z6070SGEPEY9", "profile_id": "architect-alphonso", "started_at": "2026-09-10T21:40:54.341700+00:00"}
+{"invocation_id": "01M26M8HNJP6029TE9X59GM8XA", "profile_id": "designer-dagmar", "started_at": "2026-09-10T21:40:59.651904+00:00"}
+{"invocation_id": "01M26M8PVBNM7V8F0AT23B5NX4", "profile_id": "debugger-debbie", "started_at": "2026-09-10T21:41:05.061815+00:00"}
+{"invocation_id": "01M26M8W4GJ3TZWCPTNDZY3N6D", "profile_id": "randy-reducer", "started_at": "2026-09-10T21:41:10.456921+00:00"}
+{"invocation_id": "01M26P9C3YQN3YJS0ZY6DZEDGD", "profile_id": "frontend-freddy", "started_at": "2026-09-10T22:16:23.897511+00:00"}
+{"invocation_id": "01M26SYR6566YPWBQ5A0H3YBAT", "profile_id": "reviewer-renata", "started_at": "2026-09-10T23:20:30.269812+00:00"}
+{"invocation_id": "01M26W0YAJ4JHY5N6Y52352H13", "profile_id": "frontend-freddy", "started_at": "2026-09-10T23:56:39.272621+00:00"}
+{"invocation_id": "01M272SBG547GP2ET7XJ780Q87", "profile_id": "architect-alphonso", "started_at": "2026-09-11T01:54:50.564975+00:00"}
+{"invocation_id": "01M275TD2FV77BEVH8D65XW4DC", "profile_id": "frontend-freddy", "started_at": "2026-09-11T02:47:51.379608+00:00"}
+{"invocation_id": "01M2761HKKNHPQ5T1KQERAVWV1", "profile_id": "reviewer-renata", "started_at": "2026-09-11T02:51:44.581484+00:00"}
+{"invocation_id": "01M25TFR91MS57A8DN46K4YFJW", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:10:32.127559+00:00"}
+{"invocation_id": "01M25TFT3GM7JKEH4VXNQ7W7ZD", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:10:33.570395+00:00"}
+{"invocation_id": "01M25TFVG6MHC27EY8Z9ST5R3M", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:10:35.051926+00:00"}
+{"invocation_id": "01M25TFWYKBBRYV2RRAP5EJPD1", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:10:36.494588+00:00"}
+{"invocation_id": "01M25TFYBNT1RYGEW3ZK1E4N8B", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:10:37.977721+00:00"}
+{"invocation_id": "01M25TFZT86R2ZP261TKXVF50Q", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:10:39.423929+00:00"}
+{"invocation_id": "01M25TG177K2M2YPH622E6BHQK", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:10:40.894590+00:00"}
+{"invocation_id": "01M25TG7V16B22NCVZXDH1Q6ZV", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:10:48.087786+00:00"}
+{"invocation_id": "01M25TG9P4V4E3FR52YX55RRS6", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:10:49.549175+00:00"}
+{"invocation_id": "01M25TGB3HMHATP3YS2J3W0YQ6", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:10:51.068722+00:00"}
+{"invocation_id": "01M25TGCK9VT2FJZ82YX091HE5", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:10:52.523925+00:00"}
+{"invocation_id": "01M25TGE0FHRTS6P32695N1XF0", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:10:54.024610+00:00"}
+{"invocation_id": "01M25TGFFCE3DCRJ5HPH1N17ZJ", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:10:55.471881+00:00"}
+{"invocation_id": "01M25TGGWS2H7NN5QKPY7S9FJJ", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:10:56.969364+00:00"}
+{"invocation_id": "01M25TNFXK1WMFM58SXG9EHEY1", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:13:40.908367+00:00"}
+{"invocation_id": "01M25TNJEJM1B6A84JTTB9RJA2", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:13:43.203603+00:00"}
+{"invocation_id": "01M25TNMP6JJRJT7Y4Q47DPT8Q", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:13:45.438665+00:00"}
+{"invocation_id": "01M25TNPW4MTJ46FABTMWZZZQE", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:13:47.773409+00:00"}
+{"invocation_id": "01M2603CPJVTSYHY7TH74RP8NH", "profile_id": "reviewer-renata", "started_at": "2026-09-10T15:48:39.406535+00:00"}
+{"invocation_id": "01M25TCP7E38CB02P8HNWSSZYC", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:08:51.724381+00:00"}
+{"invocation_id": "01M25TCR1JKXG0G0864TMG4552", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:08:53.144051+00:00"}
+{"invocation_id": "01M25TCSE40QR7FWF6BW73K5CN", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:08:54.609092+00:00"}
+{"invocation_id": "01M25TD0532HRED7QVX6S2C6M6", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:09:01.913807+00:00"}
+{"invocation_id": "01M25TD1ZX6T0SX55JH9DM13WV", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:09:03.370822+00:00"}
+{"invocation_id": "01M25TD3DE9V0SJQ4TPZY3J9XR", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:09:04.837907+00:00"}
+{"invocation_id": "01M25TD4VK3NDN5D3KA9JRVV61", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:09:06.289384+00:00"}
+{"invocation_id": "01M25TD68PF6X7X3XSFN4JSV1B", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:09:07.783425+00:00"}
+{"invocation_id": "01M25TD7QRJ31TW2QF8MQ83XZG", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:09:09.372273+00:00"}
+{"invocation_id": "01M25TD99EWP6JFEQSCJKB57NC", "profile_id": "researcher-robbie", "started_at": "2026-09-10T14:09:11.031027+00:00"}
+{"invocation_id": "01M25TGD1ETZ2DDJZY96K18HBT", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:10:53.417773+00:00"}
+{"invocation_id": "01M25TGEWRD2WAQD5PJ2JWGXV6", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:10:54.885310+00:00"}
+{"invocation_id": "01M25TGGAGRM9AARJS3NEMF3D6", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:10:56.404987+00:00"}
+{"invocation_id": "01M25TGHSZ63HVH1B3B4WS3WZT", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:10:57.870023+00:00"}
+{"invocation_id": "01M25TGK7QRWQS3HFDVC9ZHWAF", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:10:59.375206+00:00"}
+{"invocation_id": "01M25TGMPX1EV971XYSQKC1FX9", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:11:00.865787+00:00"}
+{"invocation_id": "01M25TGP5EDP76JBKC7TKMBMW5", "profile_id": "architect-alphonso", "started_at": "2026-09-10T14:11:02.390074+00:00"}
+{"invocation_id": "01M269VCQ1Z531PZT7PM3MAYXJ", "profile_id": "researcher-robbie", "started_at": "2026-09-10T18:39:02.666079+00:00"}
+{"invocation_id": "01M269VF244NS608X98ZWK7YN1", "profile_id": "researcher-robbie", "started_at": "2026-09-10T18:39:04.697788+00:00"}
+{"invocation_id": "01M269VH2E6MCJX16GHTVGMAV9", "profile_id": "researcher-robbie", "started_at": "2026-09-10T18:39:06.859095+00:00"}
+{"invocation_id": "01M269VK5176BFTS7D8TFE965X", "profile_id": "researcher-robbie", "started_at": "2026-09-10T18:39:08.815438+00:00"}
+{"invocation_id": "01M269VN2GVC0ZJP3RK2DG6S6D", "profile_id": "researcher-robbie", "started_at": "2026-09-10T18:39:10.799241+00:00"}
+{"invocation_id": "01M269VQ0J7HM92YWDVNCFHXYD", "profile_id": "researcher-robbie", "started_at": "2026-09-10T18:39:13.112579+00:00"}
+{"invocation_id": "01M269VS8C1C67AQE1GW6F8T7A", "profile_id": "researcher-robbie", "started_at": "2026-09-10T18:39:15.287304+00:00"}
+{"invocation_id": "01M269W227CY6CY1TSDN0NAEFX", "profile_id": "architect-alphonso", "started_at": "2026-09-10T18:39:24.877282+00:00"}
+{"invocation_id": "01M269W4RN3SR62CFHJ42C0DA0", "profile_id": "architect-alphonso", "started_at": "2026-09-10T18:39:26.651680+00:00"}
+{"invocation_id": "01M269W6F8MJXQV3RZ7C15V6SV", "profile_id": "architect-alphonso", "started_at": "2026-09-10T18:39:28.281426+00:00"}
+{"invocation_id": "01M269W81WZ7TDZW8HGEV4BTXW", "profile_id": "architect-alphonso", "started_at": "2026-09-10T18:39:29.943873+00:00"}
+{"invocation_id": "01M269W9NV4SBZ9ZSP2Z9R12X5", "profile_id": "architect-alphonso", "started_at": "2026-09-10T18:39:31.525384+00:00"}
+{"invocation_id": "01M269WB7FW40XFCN3H29N6PXJ", "profile_id": "architect-alphonso", "started_at": "2026-09-10T18:39:33.084057+00:00"}
+{"invocation_id": "01M269WCQZB227NX2T6FQ712ME", "profile_id": "architect-alphonso", "started_at": "2026-09-10T18:39:34.656822+00:00"}
+{"invocation_id": "01M29MEQHHH3EZ9DA82P0EXQ66", "profile_id": "doctrine-daphne", "started_at": "2026-09-12T01:42:05.810699+00:00"}

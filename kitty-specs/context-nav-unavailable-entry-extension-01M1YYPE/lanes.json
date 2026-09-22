@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "mission_slug": "context-nav-unavailable-entry-extension-01M1YYPE",
+  "mission_id": "01M1YYPE572AT3MGN5ZR1AJ9PC",
+  "mission_branch": "kitty/mission-context-nav-unavailable-entry-extension-01M1YYPE",
+  "target_branch": "train/elements-first",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-context-nav.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/*context-nav*",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "packages/elements/SIZES.md",
+        "packages/styles/src/context-nav/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-07T22:22:43.414446+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "621be9285f815f256a773955f19e10797052ad93"
+}

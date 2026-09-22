@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "mission_slug": "react-wrapper-generation-01M1KK3W",
+  "mission_id": "01M1KK3WWH0B626ZSS8WHF3S2W",
+  "mission_branch": "kitty/mission-react-wrapper-generation-01M1KK3W",
+  "target_branch": "mission/react-wrapper-generation",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/card/sk-card.ts",
+        "packages/elements/src/form-control-base.ts",
+        "packages/elements/src/form-input/sk-form-input.ts",
+        "packages/elements/src/form-textarea/sk-form-textarea.ts",
+        "packages/elements/src/nav-pill/sk-nav-pill.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        ".github/workflows/ci-quality.yml",
+        "package-lock.json",
+        "package.json",
+        "packages/react/package.json",
+        "packages/react/project.json",
+        "packages/react/tsconfig.json",
+        "scripts/build-react-wrappers.mjs",
+        "scripts/check-gate-wiring.mjs",
+        "tests/node/react-wrappers.test.ts"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tracker-integration",
+        "workspace"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03",
+        "WP04"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "fixtures/react-consumer/package.json",
+        "fixtures/react-consumer/project.json",
+        "fixtures/react-consumer/src/wrappers.test.tsx",
+        "fixtures/react-consumer/tsconfig.json",
+        "mutations.json",
+        "scripts/suite-selftest.mjs",
+        "suite-budget.json",
+        "vitest.config.mts"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering",
+        "workspace"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-03T12:53:27.480936+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "204520ed38fe5cec298b9f77cc93587c3d575bea",
+  "collapse_report": {
+    "events": [
+      {
+        "wp_a": "WP03",
+        "wp_b": "WP04",
+        "rule": "write_scope_overlap",
+        "evidence": "overlapping globs: 'vitest.config.mts' vs 'vitest.config.mts'"
+      }
+    ],
+    "total_merges": 1,
+    "independent_wps_collapsed": 1,
+    "by_rule": {
+      "write_scope_overlap": 1
+    }
+  }
+}

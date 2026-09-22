@@ -1,0 +1,186 @@
+{
+  "mission_slug": "mission-kanban-ten-lane-pattern-extension-01M288RG",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "built index + browser test + CI visual",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T001]: the index lists exactly 11 ten-lane ids and exactly the 10 #278 ids; NI-002 re-executed; visual-regression green at 0be840ae with the 12 new baselines and every existing one; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:26.892973+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "seam test + source guard",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T002]: the extension keys are copy/format/routes/stress/tones/unverifiedOverlays and restate no Work Package route; [T006]: the module imports the #278 fixture module, and the only WP literals in either quote style are WP03 (overlay reference) and WP99 (guard); CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:27.909335+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "per-guard proof + seam derivations",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T002]: 25 named guards each throw their own error, so a later guard cannot mask an earlier one; mutation is blocked; repeated projection is equal; moving WP04 changes the counts; a reversed selection renders in supplied order; a reversed 3-lane subset renders in its own supplied order with counts 0/1/4 (no lane vocabulary); CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:28.938871+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "browser test",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K1: 10 lanes in canonical order with counts 0/2/1/3/2/1/1/4/1/0; 15 cards under their committed lanes; native routes named by WP id; 'Detailed lane \u00b7 <lane>'; profiles; independent trackers; no stage ids; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:29.950699+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "browser geometry test",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T005/T007] K2 at 390x844: compact shell; same lanes and counts; triad present; first lane fully visible and the second partly; equal gutters within 1px; no document overflow; K2 baseline green; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:31.007689+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "browser + keyboard tests",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K3: open disclosure; 10 name=lanes choices with counts; exactly in_review and blocked checked; lanes in_review (WP10) then blocked (WP05); the board is unchanged after toggling a choice or pressing Apply or Clear. [T007]: Tab order equals DOM order summary->10 choices->Apply->Clear->WP10->WP05->#1054, every ring visible and unclipped, including WebKit in CI; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:32.025471+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "browser parity test",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K4: commit, counts, ids and truth band identical to K1, plus one attention notice carrying the base heading and message; no action; one SHA; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:33.034731+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "browser test + grep invariant",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K5: lane signature equals K1; one overlay inside WP03 with a visible neutral sk-status-indicator 'Presence \u00b7 unverified', actor lynn, and '\u2192 for_review, not yet pushed'; 'live overlays shown' appears once; no Observed text; the overlay sits outside reported-live; NI-005 confirmed; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:34.034476+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "browser test",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K6: 10 lanes with count 0; empty ol with the sibling 'No work packages in this lane.'; 10 empty states; no controls in the board; the base empty reported-live sentence; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:35.052501+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "browser + tree test",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T006]: the reported-live panel is a separate section with its own tier; [T010]: 'Live now' is an H2 in each K tree; the overlay is not inside the reported region; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:36.136666+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "browser lifecycle tests",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T007]: the triad is present exactly while the board overflows (K1, K2, K3@390, K6@1440) and absent with no tab stop when it fits (K3@1440, K6@2800); live resize both ways; content change at the fit width where no box resizes; the triad flips at the board-fit width and at the exact viewport flip width, with no document overflow; Storybook Reload keeps 1 resize target, 1 content target and exactly 1 pattern mount watcher per cycle, 0 detached; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:37.153453+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "composition gate + source test",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); check-pattern-composition and its --selftest are green; sk-mission-kanban-ten-lane-pattern.spec.ts [T006]: no library selectors, physical properties, raw lengths, colour functions, colour-bearing, font or multi-value physical shorthands, .style, order/direction/reverse; ordinary colour, font-family and typography declarations are --sk tokens, with system colours only under forced colors; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:38.179685+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "TypeScript-AST scan + runtime audit",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T006]: every html template is reached (count pinned to source), with no text between tags, no literal or partly literal user-facing attribute, no style attribute, no literal inside a template expression outside a 4-token allow-list, and no literal copy written by setAttribute; 15 red self-probes (including a name || 'literal' fallback, a variable attribute name and aria-valuetext) and 2 clean controls; script attribute writes are copy unless they target a token attribute (data-*, role, tabindex, ARIA state); every rendered text node and 8 user-facing attributes across 11 stories are fixture strings or formatter outputs; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:39.191270+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Verify FR-014 is satisfied",
+      "proof_type": "stories + browser tests + baselines",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts: LightMode semantic parity with a theme delta; long content at 390 and 780; forced colors with dashed overlay border = CanvasText and visible checked cues; reduced motion with no running animation; RTL at 1440 and 390; the 12 CI baselines match; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:40.217639+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Verify FR-015 is satisfied",
+      "proof_type": "index + generated checks",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); excludeStories lists the 4 helper exports and the index shows only the 11 stories; custom-elements.json, vue.d.ts, the react wrappers and SIZES.md are byte-identical (the release-gate and lint-code --checks are green in run 34620107785); CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T16:39:41.287583+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "No published Kanban/lane/card/overlay/filter element tag exists in package source.",
+      "verification_method": "grep_absence",
+      "verification_command": "<sk-mission-kanban\\|<sk-kanban\\|define(.sk-mission-kanban\\|define(.sk-kanban",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "packages/elements/src packages/react/src packages/styles/src"
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "No #278 story, spec, baseline or ratchet entry changes, and the shared visual suite only gains lines: #278's module, spec and ten PNGs are byte-identical to the train, the visual.spec.ts diff removes no line (blank lines included), and #278's expected-stories entry at HEAD equals the train's.",
+      "verification_method": "custom_command",
+      "verification_command": "git diff --quiet origin/train/elements-first...HEAD -- packages/elements/src/patterns/mission-kanban.stories.ts apps/storybook/src/tests/sk-mission-kanban-pattern.spec.ts ':(glob)apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-[!t]*.png' && ! git diff origin/train/elements-first...HEAD -- apps/storybook/src/tests/visual.spec.ts | grep -qE '^-($|[^-])' && python3 -c \"import json,subprocess,sys; a=json.loads(subprocess.check_output(['git','show','origin/train/elements-first:expected-stories.json']))['byElement']['mission-kanban-pattern']; b=json.loads(subprocess.check_output(['git','show','HEAD:expected-stories.json']))['byElement']['mission-kanban-pattern']; sys.exit(0 if a == b else 1)\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "An unverified overlay never renders as Observed: the ten-lane module never names #278's observed tier or field.",
+      "verification_method": "grep_absence",
+      "verification_command": "Observed\\|observedActivity\\|up to 60 s behind",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "packages/elements/src/patterns/mission-kanban-ten-lane.stories.ts"
+    }
+  ]
+}

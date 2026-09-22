@@ -1,0 +1,199 @@
+{
+  "mission_slug": "native-form-select-styles-01M1WSXJ",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); exact-head CI https://github.com/spec-kitty/spec-kitty-design/actions/runs/34084516931; native focused/full browser contract green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:11:56.894257+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "source_inspection",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); exact selectors .sk-form-select and .sk-form-select--compact; no third public selector",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:11:59.801132+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); seven generated fixtures; native option/optgroup order and light-DOM assertions green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:12:02.392329+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); fixtures compose existing sk-form-field label/description ownership",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:12:05.213535+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); keyboard/typeahead/requestSubmit/FormData/reset/disabled semantics green across CI browsers",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:12:07.710490+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); native validity/valueMissing and same-root described help green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:12:10.453990+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); 10 non-empty routes; fullscreen T10 and 320px containment geometry green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:12:13.236032+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); visible focus/invalid/disabled and native forced-colors affordances green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:12:16.004910+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "custom_command",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); token-literal selftest/audit and stylelint green in https://github.com/spec-kitty/spec-kitty-design/actions/runs/34084516931",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:12:18.435288+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); forbidden CSS absent and native appearance retained in forced colors",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:12:21.234672+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); 10 Storybook routes, real .sk-light delta, CI-authored Default baseline, visual 53/53",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:12:24.087471+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "custom_command",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); generated barrel, packed CSS subpath, release graph and no-side-effect root export green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:12:27.047165+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "ci_visual",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); https://github.com/spec-kitty/spec-kitty-design/actions/runs/34084516931: behavior 806, mutation 157/157, guards 10/10, Playwright 488 + 16 intentional skips, visual 53/53, axe 319/319. Real Chrome 151 X11 UI zoom at docs/architecture/validation/issue-211-form-select-zoom/README.md: host factor 2; outer 1200x800 fixed; inner 1200x657->600x328; DPR 1->2; no overflow; focused Default/RequiredInvalid/Disabled all pass; six durable checksummed screenshots",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:12:29.824706+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Verify FR-014 is satisfied",
+      "proof_type": "source_inspection",
+      "evidence": "a3245ae7def93da2c2de7777cfb2be74ff1feca2 (tree cf61acb02fc5d067da19a56dac95a585d6aa082f); consumer docs and contracts cover native light DOM, datalist distinction, application ownership",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T05:12:32.609830+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001-no-later-layer-form-select",
+      "description": "No form-select element, wrapper, manifest, behaviour, mutation, parts or element-doc surface exists",
+      "verification_method": "custom_command",
+      "verification_command": "test ! -e packages/elements/src/form-select && ! rg -n 'SkFormSelect|sk-form-select|form-select' packages/elements/custom-elements.json packages/elements/vue.d.ts packages/react/src behaviours.json mutations.json mutations.selftest.json expected-parts.json expected-docs.json",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-002-exact-public-selector-vocabulary",
+      "description": "The authored CSS exposes no public selector outside sk-form-select and sk-form-select--compact",
+      "verification_method": "custom_command",
+      "verification_command": "test \"$(rg -o --pcre2 \"\\\\.sk-form-select(?:--compact)?(?=[^A-Za-z0-9_-]|$)\" packages/styles/src/form-select/sk-form-select.css | sort -u | wc -l)\" -eq 2 && ! rg -n --pcre2 \"\\\\.sk-form-select(?!--compact)(?:__[A-Za-z0-9_-]+|--(?!compact)[A-Za-z0-9_-]+)\" packages/styles/src/form-select/sk-form-select.css",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-003-no-forbidden-select-css",
+      "description": "The stylesheet has no appearance reset, forced-color suppression, generated content, motion or replacement-indicator mechanism",
+      "verification_method": "grep_absence",
+      "verification_command": "appearance\\\\s*:\\\\s*none|forced-color-adjust\\\\s*:\\\\s*none|content\\\\s*:|transition\\\\s*:|animation\\\\s*:|background-image\\\\s*:|mask(?:-image)?\\\\s*:|(?:linear|radial|conic)-gradient\\\\s*\\\\(|url\\\\s*\\\\(|::(?:before|after)",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "packages/styles/src/form-select"
+    },
+    {
+      "invariant_id": "NI-004-no-application-or-demo-delta",
+      "description": "The mission adds no demo, application state, element or wrapper implementation",
+      "verification_method": "custom_command",
+      "verification_command": "base=$(git merge-base HEAD origin/train/elements-first) && git diff --quiet \"$base\"..HEAD -- apps/demo packages/elements/src/form-select packages/react packages/vue behaviours.json mutations.json mutations.selftest.json expected-parts.json expected-docs.json",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-005-styles-only-generation-current",
+      "description": "The generated styles-only markup barrel exactly matches authored HTML fixtures",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/build-styles-only-markup.mjs --check",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 styles-only barrels are current (data-table, disclosure, empty-state, facts, form-field, form-select, progress, skip-link, workflow-board, workflow-lane)."
+    },
+    {
+      "invariant_id": "NI-006-packed-css-subpath-present",
+      "description": "The release graph proves the packed form-select CSS subpath and the root TypeScript barrel contains no side-effect CSS import",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/check-release-graph.mjs && ! rg -n --pcre2 \"(?:from\\\\s+|import\\\\s*)[\\u0027\\u0022][^\\u0027\\u0022]+\\\\.css[\\u0027\\u0022]\" packages/styles/src/index.ts",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: packages:    elements, react, styles, tokens\npublishable: @spec-kitty/tokens, @spec-kitty/styles, @spec-kitty/elements, @spec-kitty/react\nbuildable:   tokens, styles, elements\n  @spec-kitty/tokens: 37"
+    }
+  ]
+}

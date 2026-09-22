@@ -1,0 +1,18 @@
+{
+  "baseline_merge_commit": "cf7017f632e0b08f4e3b2dd00460c36d9f65ed51",
+  "created_at": "2026-09-04T15:30:18.751903+00:00",
+  "flattened": false,
+  "friendly_name": "flow health transition matrix",
+  "mission_id": "01M1PGNJFZ7DFXV4HXJ417N5GT",
+  "mission_number": null,
+  "mission_slug": "flow-health-transition-matrix-01M1PGNJ",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances flow health transition matrix on mission/flow-health-transition-matrix so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "flow health transition matrix",
+  "slug": "flow-health-transition-matrix-01M1PGNJ",
+  "status_phase": "1",
+  "target_branch": "mission/flow-health-transition-matrix",
+  "topology": "single_branch",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-04T18:58:50.827867+00:00"
+}

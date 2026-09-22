@@ -1,0 +1,14 @@
+id,decision,finding,file_or_source,line_or_section,checked_at
+E1,Decision 1,ADR-15 host-owned container-type ruling; wrapper equal 20/20, collapsed diverges 6/20,docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md,"section '2. Host-owned container-type'",2026-09-10
+E2,Decision 1,Header comment already documents the wrapper contract and literal CSS block,packages/styles/src/action-row/sk-action-row.css,lines 1-38,2026-09-10
+E3,Decision 2,grep confirms no shipped stylesheet defines .sk-action-row-host,packages/ (grep -rn "sk-action-row-host" packages/),n/a,2026-09-10
+E4,Decision 2,ADR-15 states #307 must freeze markup+CSS together; wrapper CSS is #309/#310's generator/gate work,docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md,"section 'Which gated children may freeze a static API' -> #307 bullet",2026-09-10
+E5,Decision 3,Shadow render() places .sk-action-row__controls as sibling of part=trigger not descendant,packages/elements/src/action-row/sk-action-row.ts,render() method,2026-09-10
+E6,Decision 3,#272 states independent controls stay outside the primary anchor; no button nested in a link,GitHub issue #272 (closed) body,"Public contract and behavior section",2026-09-10
+E7,Decision 3,#307 issue restates the same rule as load-bearing and ties it to #272,GitHub issue #307 body,"Outcome and public contract, 3rd bullet",2026-09-10
+E8,Decision 4,#283 is OPEN unmoved since 2026-09-08; explicitly excludes row link/action as non-goal,GitHub issue #283 body + metadata,"Non-goals list; updatedAt field",2026-09-10
+E9,Decision 4,Epic #300 names the #307<->#283 coordination requirement explicitly,GitHub issue #300 body,"Sequenced row lane note",2026-09-10
+E10,Decision 5,render() contains no user-visible string literal; all text is slotted or attribute/ARIA tokens,packages/elements/src/action-row/sk-action-row.ts,full file,2026-09-10
+E11,Decision 5,Epic shared constraint 1 forbids any child building a repo-wide #286 gate,GitHub issue #300 body,"Shared constraints item 1",2026-09-10
+E12,Decision 6,#308 HIGH: display:flex with no [open] qualifier hid nothing; caught only by presence-state tests,mission brief (operator-provided),"defect pattern section",2026-09-10
+E13,Decision 6,Shadow form's own absent-state mechanism is #syncSlot() hidden-attribute toggling via slotchange,packages/elements/src/action-row/sk-action-row.ts,#syncSlot() / firstUpdated(),2026-09-10

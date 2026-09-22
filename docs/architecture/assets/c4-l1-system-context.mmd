@@ -2,7 +2,8 @@
 
 flowchart TB
     subgraph Consumers["Consumers"]
-        angular_dev["Angular Developer\n(SK dashboard · custom apps)"]
+        nobuild_dev["No-Build Developer\n(SK dashboard · vanilla JS, no bundler)"]
+        app_dev["App Developer\n(Svelte · Vue · React · Django templates)"]
         html_dev["Static / HTML Developer\n(Jekyll · Hugo · blog)"]
         agent["AI Coding Agent\n(Claude Code · Cursor · Codex · Gemini)"]
     end
@@ -23,11 +24,14 @@ flowchart TB
 
     subgraph Downstream["Consuming Repositories"]
         sk_repo["spec-kitty\ndashboard  #650"]
+        desktop["kitty-desktop\nTauri + Svelte"]
+        saas["Team Kitty SaaS\nDjango + HTMX · React design surface"]
         docsite["Future Docsite\nJekyll / Hugo  #648"]
     end
 
-    angular_dev -->|"npm install @spec-kitty/angular"| npm
-    html_dev -->|"CDN link or @spec-kitty/tokens"| npm
+    nobuild_dev -->|"script tag: @spec-kitty/elements browser bundle"| npm
+    app_dev -->|"npm install @spec-kitty/elements (+ wrapper if one exists)"| npm
+    html_dev -->|"CDN link · @spec-kitty/tokens + /styles"| npm
     agent -->|"reads SKILL.md + doctrine/"| ds
 
     ds -->|"publishes packages"| npm
@@ -36,8 +40,10 @@ flowchart TB
     mk -->|"token value reconciliation  FR-034"| ds
     ref -->|"visual baseline"| ds
 
-    sk_repo -->|"@spec-kitty/tokens\n@spec-kitty/angular"| npm
-    docsite -->|"@spec-kitty/tokens"| npm
+    sk_repo -.->|"@spec-kitty/tokens + /elements\n(planned — #650; consumes nothing today)"| npm
+    docsite -.->|"@spec-kitty/tokens  (planned — #648)"| npm
+    desktop -->|"vendored tokens.css mirror @ cdde80a"| ds
+    saas -->|"hand-copied token bridge, synced 2026-05-19"| ds
 
     classDef consumer fill:#14202E,stroke:#A9C7E8,color:#A9C7E8,stroke-width:1.5px
     classDef core fill:#1a1a08,stroke:#F5C518,color:#F5C518,stroke-width:2px
@@ -45,8 +51,8 @@ flowchart TB
     classDef upstream fill:#1C1C20,stroke:#B8A9E0,color:#B8A9E0,stroke-width:1.5px
     classDef downstream fill:#161619,stroke:#D9B36A,color:#D9B36A,stroke-width:1.5px
 
-    class angular_dev,html_dev,agent consumer
+    class nobuild_dev,app_dev,html_dev,agent consumer
     class ds core
     class npm,pages registry
     class mk,ref upstream
-    class sk_repo,docsite downstream
+    class sk_repo,desktop,saas,docsite downstream

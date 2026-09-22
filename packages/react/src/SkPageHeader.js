@@ -1,0 +1,40 @@
+"use client";
+import React, { forwardRef, useEffect, useRef } from "react";
+
+import { createForwardedRefHandler } from "./react-utils.js";
+
+export const SkPageHeader = forwardRef((props, forwardedRef) => {
+  const ref = useRef(null);
+  const {
+    sticky,
+    density,
+    className,
+    exportparts,
+    htmlFor,
+    part,
+    tabIndex,
+    ...restProps
+  } = props;
+
+  /** Waits for the client before loading the custom element */
+  useEffect(() => {
+    import("@spec-kitty/elements");
+  }, []);
+
+  return React.createElement(
+    "sk-page-header",
+    {
+      ref: createForwardedRefHandler(ref, forwardedRef),
+      ...restProps,
+      density: density,
+      class: className,
+      exportparts: exportparts,
+      for: htmlFor ?? props["for"],
+      part: part,
+      tabindex: tabIndex ?? props["tabindex"],
+      sticky: sticky ? true : undefined,
+      style: { ...props.style },
+    },
+    props.children,
+  );
+});

@@ -1,0 +1,123 @@
+/* sk-copy-field — exact non-editable value plus one copy action. */
+
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   `:host { container-type: inline-size }` below is the sole container establishing the
+   `@container (max-inline-size: 20rem)` reflow further down. ADR-15 ruled this construct kind
+   (a host-owned container-type) generable as a static form, but only in a TWO-ELEMENT shape,
+   and #309 has now generated it. A server-rendered consumer links
+
+       @spec-kitty/styles/copy-field/static/sk-copy-field.static.css
+
+   INSTEAD OF this file, never in addition to it — it carries every rule below in the same order
+   with `:host` rewritten onto `.sk-copy-field-host` — and authors the two-element markup:
+
+       <div class="sk-copy-field-host">
+         <div class="sk-copy-field"> ... </div>
+       </div>
+
+   The generated wrapper rule carries this sheet's whole `:host` set; it is not restated here,
+   because a copy in a comment is a second source of record for a generated rule. #310 holds the
+   generated form rendered-equal to the shadow form on every declared outcome in both engines,
+   this component included — ADR-15 ruled on it without measuring it, and that is no longer true.
+
+   THE WRAPPER CARRIES THIS SHEET'S WHOLE `:host` DECLARATION SET, as written above — not
+   `container-type` alone, and not a list copied from another component. Measured on
+   sk-app-shell: dropping `:host`'s width declaration makes the component compute `0px` instead
+   of `300px` as an item of a 300px flex row, in both engines.
+
+   DO NOT MOVE `container-type` ONTO `.sk-copy-field`. An element is never its own query
+   container, so the `@container` rules below would answer some outer ancestor of the page, or
+   nothing, while `.sk-copy-field`'s descendants kept querying correctly — most of the sheet
+   keeps working, which is what makes the defect quiet.
+
+   OVERRIDING A WRAPPER DECLARATION IS NOT THE SAME AS OVERRIDING `:host` — A RULED LIMIT (#375).
+   `:host` declarations sit in the element's INNER tree, and under CSS Cascade's tree-order sort a
+   normal outer-tree declaration wins BEFORE specificity or source order is consulted. So any
+   document rule matching `<sk-copy-field>` beats `:host` at any weight, in any order. On
+   `.sk-copy-field-host` the same declarations are ordinary document declarations. Measured,
+   chromium and firefox identical: `sk-action-row { display: flex }` at (0,0,1) beats `:host`,
+   while `div { display: flex }` at the SAME (0,0,1) loses to `.sk-action-row-host`; and
+   `sk-action-row { container-type: normal }` destroys the element's container while the same
+   declaration on the wrapper, at equal weight authored first, does not. The static form therefore
+   reproduces `:host`'s LAYOUT and HARDENS its cascade position. To change a wrapper declaration a
+   consumer needs specificity STRICTLY HIGHER than the generated rule that declares it — or the
+   same specificity in a LATER stylesheet — computed from that rule rather than from a number
+   quoted here: `.sk-copy-field-host` is (0,1,0), and a modifier rule
+   `.sk-copy-field-host.sk-copy-field-host--<axis>` is (0,2,0). `:where()` on the wrapper
+   was measured as a candidate and is deliberately not emitted; the generated sheet's own header
+   records why.
+
+   ADR-15's own measurement used sk-app-shell and sk-action-row and did not probe this component;
+   expected-static-form.json now does, on eight scenarios per engine. This comment adds no rule
+   and changes none. */
+
+:host {
+  box-sizing: border-box;
+  display: block;
+  container-type: inline-size;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.sk-copy-field {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--sk-space-2) var(--sk-space-3);
+  min-inline-size: 0;
+  padding: var(--sk-space-3);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  background: var(--sk-surface-input);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+}
+
+.sk-copy-field__value {
+  min-inline-size: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-sm);
+}
+
+.sk-copy-field__value:focus {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-2);
+}
+
+.sk-copy-field .sk-button {
+  transition: none;
+}
+
+.sk-copy-field__status {
+  grid-column: 1 / -1;
+  min-inline-size: 0;
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-sm);
+  overflow-wrap: anywhere;
+}
+
+@container (max-inline-size: 20rem) {
+  .sk-copy-field {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sk-copy-field .sk-button {
+    justify-self: end;
+  }
+}
+
+@media (forced-colors: active) {
+  .sk-copy-field {
+    border-color: CanvasText;
+    border-width: var(--sk-border-width-2);
+  }
+
+  .sk-copy-field__status {
+    color: CanvasText;
+  }
+}

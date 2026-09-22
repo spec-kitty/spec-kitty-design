@@ -1,0 +1,113 @@
+{
+  "event_count": 24,
+  "last_event_id": "01M1J311MARCXE5RY91D2V83KK",
+  "materialized_at": "2026-09-02T22:14:56.906741+00:00",
+  "mission_number": "",
+  "mission_slug": "storybook-renderer-and-angular-retirement-01M1HVX4",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 4,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 2,
+      "lane": "approved",
+      "last_event_id": "01M1J30YECD92G36ARKZ3BFJMF",
+      "last_transition_at": "2026-09-02T22:14:53.644576+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Subtasks complete and CI-verified on 805de32 (build pass, visual-regression pass, playwright pass, lint-code pass, axe 74 stories/0 render failures). Forced because mark-status requires a legacy tasks.md that the flat tasks/WP*.md layout does not create, so there is no non-force path to record subtask completion. Filed upstream.",
+        "Four-lens pre-merge gate pass 1 on fd1bf6c: all four HOLD, 3 blockers folded in 805de32. Pass 2 dispatched.",
+        "Four-lens pre-merge gate: pass 1 all HOLD, 3 blockers folded in 805de32, CI verified (build/visual-regression/playwright/lint-code pass; axe 74 stories, 0 render failures). Only #101 outstanding — an operator design decision, not a WP defect."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/work/ef-1788351728-2101071/kitty-specs/storybook-renderer-and-angular-retirement-01M1HVX4/tasks/WP01-renderer-swap-and-css/review-cycle-1.md",
+        "reference": "review-cycle://storybook-renderer-and-angular-retirement-01M1HVX4/WP01-renderer-swap-and-css/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer"
+    },
+    "WP02": {
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 2,
+      "lane": "approved",
+      "last_event_id": "01M1J30ZH2KMK3VQXT0CFGHA7Z",
+      "last_transition_at": "2026-09-02T22:14:54.754946+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Subtasks complete and CI-verified on 805de32 (build pass, visual-regression pass, playwright pass, lint-code pass, axe 74 stories/0 render failures). Forced because mark-status requires a legacy tasks.md that the flat tasks/WP*.md layout does not create, so there is no non-force path to record subtask completion. Filed upstream.",
+        "Four-lens pre-merge gate pass 1 on fd1bf6c: all four HOLD, 3 blockers folded in 805de32. Pass 2 dispatched.",
+        "Four-lens pre-merge gate: pass 1 all HOLD, 3 blockers folded in 805de32, CI verified (build/visual-regression/playwright/lint-code pass; axe 74 stories, 0 render failures). Only #101 outstanding — an operator design decision, not a WP defect."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/work/ef-1788351728-2101071/kitty-specs/storybook-renderer-and-angular-retirement-01M1HVX4/tasks/WP02-prove-the-catalogue-renders/review-cycle-1.md",
+        "reference": "review-cycle://storybook-renderer-and-angular-retirement-01M1HVX4/WP02-prove-the-catalogue-renders/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer"
+    },
+    "WP03": {
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 2,
+      "lane": "approved",
+      "last_event_id": "01M1J310JWSJDDDXHV6AK4BDBB",
+      "last_transition_at": "2026-09-02T22:14:55.836440+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Subtasks complete and CI-verified on 805de32 (build pass, visual-regression pass, playwright pass, lint-code pass, axe 74 stories/0 render failures). Forced because mark-status requires a legacy tasks.md that the flat tasks/WP*.md layout does not create, so there is no non-force path to record subtask completion. Filed upstream.",
+        "Four-lens pre-merge gate pass 1 on fd1bf6c: all four HOLD, 3 blockers folded in 805de32. Pass 2 dispatched.",
+        "Four-lens pre-merge gate: pass 1 all HOLD, 3 blockers folded in 805de32, CI verified (build/visual-regression/playwright/lint-code pass; axe 74 stories, 0 render failures). Only #101 outstanding — an operator design decision, not a WP defect."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/work/ef-1788351728-2101071/kitty-specs/storybook-renderer-and-angular-retirement-01M1HVX4/tasks/WP03-angular-removal/review-cycle-1.md",
+        "reference": "review-cycle://storybook-renderer-and-angular-retirement-01M1HVX4/WP03-angular-removal/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer"
+    },
+    "WP04": {
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 2,
+      "lane": "approved",
+      "last_event_id": "01M1J311MARCXE5RY91D2V83KK",
+      "last_transition_at": "2026-09-02T22:14:56.906741+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Subtasks complete and CI-verified on 805de32 (build pass, visual-regression pass, playwright pass, lint-code pass, axe 74 stories/0 render failures). Forced because mark-status requires a legacy tasks.md that the flat tasks/WP*.md layout does not create, so there is no non-force path to record subtask completion. Filed upstream.",
+        "Four-lens pre-merge gate pass 1 on fd1bf6c: all four HOLD, 3 blockers folded in 805de32. Pass 2 dispatched.",
+        "Four-lens pre-merge gate: pass 1 all HOLD, 3 blockers folded in 805de32, CI verified (build/visual-regression/playwright/lint-code pass; axe 74 stories, 0 render failures). Only #101 outstanding — an operator design decision, not a WP defect."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/work/ef-1788351728-2101071/kitty-specs/storybook-renderer-and-angular-retirement-01M1HVX4/tasks/WP04-baseline-re-establishment/review-cycle-1.md",
+        "reference": "review-cycle://storybook-renderer-and-angular-retirement-01M1HVX4/WP04-baseline-re-establishment/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer"
+    }
+  }
+}

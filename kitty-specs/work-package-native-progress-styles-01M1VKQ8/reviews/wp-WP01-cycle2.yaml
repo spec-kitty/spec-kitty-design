@@ -1,0 +1,11 @@
+schema: wp-verdict/v1
+complete: true
+wp: WP01
+cycle: 2
+mission: work-package-native-progress-styles-01M1VKQ8
+verdict: approved
+gates_observed:
+  tsc: pass
+  tests: pass
+  coverage: pass
+feedback: []

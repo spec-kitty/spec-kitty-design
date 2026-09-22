@@ -1,0 +1,81 @@
+{
+  "name": "@spec-kitty/styles",
+  "version": "1.0.0",
+  "description": "Spec Kitty HTML primitives \u2014 CSS and markup only, no JavaScript",
+  "license": "MIT",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./action-row/*": "./dist/action-row/*",
+    "./app-shell/*": "./dist/app-shell/*",
+    "./bar-chart/*": "./dist/bar-chart/*",
+    "./blog-card/*": "./dist/blog-card/*",
+    "./boundary-page/*": "./dist/boundary-page/*",
+    "./breadcrumbs/*": "./dist/breadcrumbs/*",
+    "./button/*": "./dist/button/*",
+    "./card/*": "./dist/card/*",
+    "./check-bullet/*": "./dist/check-bullet/*",
+    "./checkbox-choice-group/*": "./dist/checkbox-choice-group/*",
+    "./collection/*": "./dist/collection/*",
+    "./confirm-dialog/*": "./dist/confirm-dialog/*",
+    "./context-nav/*": "./dist/context-nav/*",
+    "./context-sidebar/*": "./dist/context-sidebar/*",
+    "./copy-field/*": "./dist/copy-field/*",
+    "./data-table/*": "./dist/data-table/*",
+    "./disclosure/*": "./dist/disclosure/*",
+    "./empty-state/*": "./dist/empty-state/*",
+    "./entity-marker/*": "./dist/entity-marker/*",
+    "./event-timeline/*": "./dist/event-timeline/*",
+    "./evidence-chain/*": "./dist/evidence-chain/*",
+    "./facts/*": "./dist/facts/*",
+    "./feature-card/*": "./dist/feature-card/*",
+    "./form-field/*": "./dist/form-field/*",
+    "./form-input/*": "./dist/form-input/*",
+    "./form-select/*": "./dist/form-select/*",
+    "./form-textarea/*": "./dist/form-textarea/*",
+    "./grid/*": "./dist/grid/*",
+    "./metric/*": "./dist/metric/*",
+    "./nav-pill/*": "./dist/nav-pill/*",
+    "./notice/*": "./dist/notice/*",
+    "./page-header/*": "./dist/page-header/*",
+    "./personal-rail/*": "./dist/personal-rail/*",
+    "./pill-tag/*": "./dist/pill-tag/*",
+    "./progress/*": "./dist/progress/*",
+    "./prose/*": "./dist/prose/*",
+    "./public-header/*": "./dist/public-header/*",
+    "./radio-choice-group/*": "./dist/radio-choice-group/*",
+    "./ribbon-card/*": "./dist/ribbon-card/*",
+    "./section-banner/*": "./dist/section-banner/*",
+    "./section-header/*": "./dist/section-header/*",
+    "./section-nav/*": "./dist/section-nav/*",
+    "./segmented-choice/*": "./dist/segmented-choice/*",
+    "./site-footer/*": "./dist/site-footer/*",
+    "./skip-link/*": "./dist/skip-link/*",
+    "./status-indicator/*": "./dist/status-indicator/*",
+    "./stub/*": "./dist/stub/*",
+    "./theme-toggle/*": "./dist/theme-toggle/*",
+    "./time-series-chart/*": "./dist/time-series-chart/*",
+    "./transition-matrix/*": "./dist/transition-matrix/*",
+    "./workflow-board/*": "./dist/workflow-board/*",
+    "./workflow-lane/*": "./dist/workflow-lane/*"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "@spec-kitty/tokens": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spec-kitty/spec-kitty-design.git",
+    "directory": "packages/styles"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}

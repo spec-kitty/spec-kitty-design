@@ -1,0 +1,68 @@
+{
+  "rows": {
+    "#177": {
+      "evidence_ref": "packages/tokens/src/tokens.css \u2014 the literals are present and unchanged by this mission; #177 is quoted as the source of the fact #217 turns on, and the verdict enum has no \"not applicable\" value",
+      "fr": [],
+      "nfr": [],
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": [
+        "SC-008"
+      ],
+      "scope": "reference-only",
+      "source_file": "spec.md",
+      "title": "CITED, NOT TARGETED \u2014 the mission that added the rose literals and the --sk-status-* category",
+      "verdict": "verified-already-fixed",
+      "wp": "WP02"
+    },
+    "#217": {
+      "evidence_ref": "commit ced5384",
+      "fr": [
+        "FR-008",
+        "FR-009",
+        "FR-010"
+      ],
+      "nfr": [],
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": [
+        "SC-006",
+        "SC-007",
+        "SC-008"
+      ],
+      "scope": "in-scope",
+      "source_file": "spec.md",
+      "title": "The token doctrine forbids the rose literals the operator ratified",
+      "verdict": "fixed",
+      "wp": "WP02"
+    },
+    "#228": {
+      "evidence_ref": "commit 48777b6 + the geometry follow-up; red captured at 7e181a9",
+      "fr": [
+        "FR-001",
+        "FR-002",
+        "FR-003",
+        "FR-004",
+        "FR-005",
+        "FR-006",
+        "FR-007"
+      ],
+      "nfr": [
+        "NFR-001",
+        "NFR-003"
+      ],
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": [
+        "SC-001",
+        "SC-002",
+        "SC-003",
+        "SC-004",
+        "SC-005"
+      ],
+      "scope": "in-scope",
+      "source_file": "spec.md",
+      "title": "sk-notice: the heading slot sits outside the live region, so the headline is not announced",
+      "verdict": "fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

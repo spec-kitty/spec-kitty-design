@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "mission_slug": "theme-toggle-01M25KMP",
+  "mission_id": "01M25KMPPGYRPHTBZATJG15NWK",
+  "mission_branch": "kitty/mission-theme-toggle-01M25KMP",
+  "target_branch": "mission/theme-toggle",
+  "lanes": [
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-theme-toggle.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "behaviours.json",
+        "docs/architecture/validation/issue-323-theme-toggle/",
+        "docs/design-system/using-components.md",
+        "expected-docs.json",
+        "expected-parts.json",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/pattern-operational-status.test.ts",
+        "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts",
+        "mutations.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/package.json",
+        "packages/elements/src/elements.ts",
+        "packages/elements/src/index.ts",
+        "packages/elements/src/patterns/operational-status.stories.ts",
+        "packages/elements/src/patterns/operational-status.ts",
+        "packages/elements/src/theme-toggle/",
+        "packages/elements/src/theme-toggle/theme-preference.ts",
+        "packages/elements/theme-bootstrap.js",
+        "packages/elements/vue.d.ts",
+        "packages/react/src/",
+        "packages/react/type-tests/",
+        "packages/styles/src/theme-toggle/",
+        "scripts/build-theme-bootstrap.mjs"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T12:48:45.760814+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01"
+  ],
+  "planning_commit_sha": "c91a8cf0c0b07b9cb7e33ec280561d508fece8c4"
+}

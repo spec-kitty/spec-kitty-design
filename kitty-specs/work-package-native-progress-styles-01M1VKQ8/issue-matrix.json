@@ -1,0 +1,77 @@
+{
+  "rows": {
+    "#125": {
+      "evidence_ref": "Follow-up: #125 \u2014 broader conversion tracker, not closed by TKW2",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#178": {
+      "evidence_ref": "Follow-up: #178 \u2014 external notice prerequisite for downstream #214; not part of TKW2",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#208": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/208 \u2014 #210 is one child; epic remains open for #209 and #211-#214",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#210": {
+      "evidence_ref": "e4bae44 + 200d6a9; WP01 cycle-2 approval",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#214": {
+      "evidence_ref": "Follow-up: #214 \u2014 downstream pattern composition after #209-#213 and #178 close",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#93": {
+      "evidence_ref": "200d6a9 \u2014 this component uses class=sk-light and has mutation-proven computed-style coverage; #93 remains broader follow-up",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

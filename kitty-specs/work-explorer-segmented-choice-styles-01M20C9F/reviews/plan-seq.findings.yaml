@@ -1,0 +1,68 @@
+schema: review-findings/v1
+complete: true
+phase: plan
+lens_group: seq
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: PLAN-SEQ-001
+    lens: red-first sequencing operational correctness
+    severity: 4
+    title: "IC-01/IC-03's red-first narrative and IC-04's own dependency list omit IC-05 (stories file + Storybook build), which the live Playwright block structurally requires before it can run at all"
+    evidence:
+      - artifact: "plan.md § Implementation Concern Map, IC-01 \"Sequencing/depends-on\" (lines 195-209)"
+      - artifact: "plan.md § Implementation Concern Map, IC-03 \"Sequencing/depends-on\" (lines 245-249)"
+      - artifact: "plan.md § Implementation Concern Map, IC-04 \"Purpose\" and \"Sequencing/depends-on\" (lines 256-276)"
+      - code: "playwright.config.ts:16-25 (webServer.command runs `npx http-server apps/storybook/storybook-static`, i.e. it serves a pre-built STATIC Storybook — there is no dev server / hot reload in this test setup)"
+      - code: "apps/storybook/src/tests/sk-form-select.spec.ts:36-53 (openStory: `page.goto('/iframe.html?id=${STORY_PREFIX}--${id}&viewMode=story')`, then waits for the component root to become visible — this is the exact pattern IC-04 says it will follow for the live block)"
+      - code: "packages/styles/src/form-select/sk-form-select-html.stories.ts:1-75 (the stories file is what registers each story id `openStory` resolves; without it, `STORY_PREFIX--id` does not exist in the built Storybook)"
+    claim: >
+      IC-01's red-first mechanism ("author the .html exemplars (IC-02) and a minimal/undifferentiated
+      first CSS pass together, write the Playwright spec's hover/active/focus/disabled assertions (IC-04)
+      against that pass and watch them fail") and IC-03's equivalent ("write ... assertions in IC-04
+      against the IC-01-only CSS and confirm they fail") both describe running IC-04's *live* block
+      (hover/active/focus-visible/forced-colors assertions, per IC-04's own Purpose item (b), which
+      iterates all 13 story ids via `page.goto` to a built Storybook) using only IC-02 (markup + barrel)
+      as a stated prerequisite. IC-04's own "Sequencing/depends-on" section repeats this, naming only
+      IC-02 ("needs real generated fixtures and a built Storybook to open stories against") for the live
+      block — it never names IC-05. But this repo's Playwright setup (playwright.config.ts) serves a
+      STATIC Storybook build with no dev server, and a story id only exists in that build once the stories
+      file (IC-05) has been authored, imported the barrel's exports, and Storybook has been rebuilt. IC-05
+      is sequenced after IC-04 in the document and its own "Sequencing/depends-on" line names only IC-02,
+      not IC-04, so nothing in the plan tells the implementer that IC-05 (and a rebuild) must land before
+      IC-04's live-block assertions can be written and run "red" in any meaningful sense — attempting to
+      run them against IC-02 alone would fail on "story not found," not on the intended CSS-cue assertion,
+      which is not the red-first test DIRECTIVE_041 calls for. Only IC-04's source-contract block
+      (file-read assertions, no `page.goto`) is genuinely runnable red before IC-02/IC-05 land, and the
+      plan's Sequencing text for that block is correct — but IC-01/IC-03's red-first claims are scoped to
+      the live block's hover/active/focus/forced-colors assertions specifically, which is the part with
+      the missing dependency.
+    remediation: >
+      Add IC-05 as an explicit prerequisite of IC-04's live block in IC-04's "Sequencing/depends-on"
+      (distinct from the source-contract block, which has no such dependency), and update IC-01's and
+      IC-03's red-first narratives to state the real order: author minimal CSS (IC-01) + exemplars/barrel
+      (IC-02) + a first-pass stories file (IC-05, ids may still be adjusted) + `storybook:storybook:build`,
+      THEN write/run the live-block hover/active/focus/forced-colors assertions red, THEN add the
+      distinguishing/forced-colors CSS declarations to turn them green. This preserves the
+      assertions-before-the-fix ordering DIRECTIVE_041 requires while making the build step the plan
+      currently omits visible and sequenced correctly.
+
+  - id: PLAN-SEQ-002
+    lens: phasing / dependency order
+    severity: 2
+    title: "IC-02's dependency line mislabels its own downstream consumer as IC-03 instead of IC-04"
+    evidence:
+      - artifact: "plan.md § Implementation Concern Map, IC-02 \"Sequencing/depends-on\" (lines 219-222): \"Feeds IC-01 ... and IC-03/IC-05 (Storybook stories and the Playwright spec both consume the generated barrel's named exports).\""
+      - artifact: "plan.md § Implementation Concern Map, IC-03 \"Purpose\"/\"Sequencing/depends-on\" (lines 228-249): IC-03 is the forced-colors CSS media-query block and separately, correctly states its own dependency as IC-01 only — it does not import or consume the generated barrel."
+      - artifact: "plan.md § Implementation Concern Map, IC-04 \"Purpose\" (lines 256-263): IC-04 is \"the Playwright spec\", the concern the IC-02 parenthetical is actually describing."
+    claim: >
+      IC-02's Sequencing/depends-on line names "IC-03/IC-05" as the concerns fed by the generated barrel,
+      then glosses that pairing as "Storybook stories and the Playwright spec" — but "the Playwright spec"
+      is IC-04, not IC-03 (a CSS-only forced-colors block that never imports the TS barrel). IC-03's own,
+      separately stated dependency line correctly names only IC-01, confirming this is a labeling/copy
+      error rather than an intentional second edge. Left as-is it misstates the dependency graph the
+      lens is meant to verify, and could lead an implementer skimming the map to believe IC-03 needs the
+      generated exports.
+    remediation: >
+      Change "IC-03/IC-05" to "IC-04/IC-05" in IC-02's Sequencing/depends-on line so the parenthetical
+      ("Storybook stories and the Playwright spec both consume the generated barrel's named exports")
+      matches the concerns it actually names.

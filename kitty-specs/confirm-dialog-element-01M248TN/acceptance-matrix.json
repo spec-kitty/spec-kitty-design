@@ -1,0 +1,189 @@
+{
+  "mission_slug": "confirm-dialog-element-01M248TN",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"an omitted required string renders no substituted literal and warns exactly once per omission\" and \"every one of the four required strings independently omits with no fallback and no throw\" both assert zero library-authored fallback text for any of the four required strings; independently re-run via `npx vitest run fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts` = 20/20 passed.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:42.265930+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"FR-002: aria-labelledby/aria-describedby resolve within the same shadow root\" asserts the dialog's aria-labelledby/aria-describedby targets resolve within the same shadow root (ADR-9 \u00a74) and carry the supplied title/message text; passing in the 20/20 run.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:43.268996+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "expected-parts.json enumerates exactly {actions, body, cancel, confirm, dialog, title} for sk-confirm-dialog (one confirm part, one cancel part, no third action part); render() in sk-confirm-dialog.ts emits exactly two <button> elements (part=\"cancel\", part=\"confirm\"); SC-013 test \"every declared part is present and targetable from outside\" (written out in full per check-part-ratchet.mjs) passes in the 20/20 run.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:44.239031+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"FR-004: the confirm control carries the consumer-chosen .sk-button tone; the element applies none by default\" passes in the 20/20 run; sk-confirm-dialog.ts composes buttonClasses(this.confirmVariant) with no library-inferred tone.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:45.207357+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "document_inspection",
+      "evidence": "packages/elements/src/confirm-dialog/sk-confirm-dialog.ts contains no fetch/XMLHttpRequest/location/navigate/window.open/.submit() call anywhere (verified by `grep -niE \"fetch\\(|XMLHttpRequest|location\\.|navigate|window\\.open|\\.submit\\(\"` returning zero matches); the class JSDoc states the element \"performs no mutation, request, or navigation\" and the only observable action is reading `returnValue` off the native `close` event.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:46.176855+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"[SC-006][SC-007] confirm activation fires close exactly once with returnValue \\\"confirm\\\"\" and the paired cancel test confirm the single native `close`/`returnValue` mechanism is the only reporting path; no custom event is fired anywhere in sk-confirm-dialog.ts.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:47.179910+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"[SC-007] Escape resolves \\\"cancel\\\" even immediately after a prior confirming close\", \"[SC-007] backdrop dismissal resolves \\\"cancel\\\", and only when enabled\", \"[SC-007] a click inside the dialog content never dismisses, even with backdrop-dismiss enabled\", and \"[SC-007] a programmatic close with no explicit outcome resolves \\\"cancel\\\", never an invented \\\"confirm\\\"\" all pass in the 20/20 run, covering every dismissal path named in the FR.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:48.174346+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"[SC-005] initial focus lands on the documented target and is consumer-overridable\" and \"[SC-005] an unknown initial-focus value warns and falls back to cancel\" pass in the 20/20 run; sk-confirm-dialog.ts documents the default in its `initialFocus` JSDoc (defaults to cancel).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:49.128318+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"[SC-005] Escape closes as cancel, focus returns to the invoker, and `open` tracks real state\" and \"[SC-005] an explicit showModal(invoker) argument overrides the platform-tracked previously-focused element\" pass in the 20/20 run; #handleClose in sk-confirm-dialog.ts is the single funnel point restoring focus to the captured invoker on every close path.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:50.087687+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "document_inspection",
+      "evidence": "packages/styles/src/confirm-dialog/sk-confirm-dialog.css \u2014 `.sk-confirm-dialog__body` is the sole flexible flex-column item (`flex: 1 1 auto; min-block-size: 0; overflow-y: auto`) while `.sk-confirm-dialog__actions` is a fixed, non-shrinking sibling (`flex: 0 0 auto`) that the body's scroll can never cover; demonstrated visually by the OpenLongScrollingBody/NarrowWidth/Zoom200 stories in sk-confirm-dialog.stories.ts (CI-authoritative visual baselines per this repo's convention, not re-derived locally).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:51.037399+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "document_inspection",
+      "evidence": "packages/styles/src/confirm-dialog/sk-confirm-dialog.css \u2014 `@media (prefers-reduced-motion: reduce) { .sk-confirm-dialog { animation-name: none; } }` is scoped to the exact selector and property the component animates (its one entrance keyframe); demonstrated by the ReducedMotion story in sk-confirm-dialog.stories.ts.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:52.012425+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "document_inspection",
+      "evidence": "packages/styles/src/confirm-dialog/sk-confirm-dialog.css \u2014 `@media (forced-colors: active) { .sk-confirm-dialog { border-width: calc(var(--sk-border-width-1) * 2); box-shadow: none; } }` keeps the dialog surface/boundary/backdrop distinguishable once forced-colors flattens `background`; demonstrated by the ForcedColors story in sk-confirm-dialog.stories.ts.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:52.972934+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/elements/src/confirm-dialog/sk-confirm-dialog.ts \u2014 `showModal()` calls the native `HTMLDialogElement.showModal()` directly (no reimplementation of focus trap/inertness/top-layer); exercised by every SC-005/SC-006/SC-007 test in the 20/20 passing run, all of which open the dialog via this method.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:53.952703+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Verify FR-014 is satisfied",
+      "proof_type": "document_inspection",
+      "evidence": "Independently re-ran `grep -rniE \"team.{0,20}(delet|remov)\" packages/elements/src/confirm-dialog packages/styles/src/confirm-dialog fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts kitty-specs/confirm-dialog-element-01M248TN` \u2014 every match is prohibition documentation (JSDoc, spec.md, tasks.md, issue-matrix.json, review notes) naming the Team Kitty SaaS #1432 constraint or membership-removal/leave/bearer-link-revoke framing; zero matches present whole-Team deletion as an available flow. Matches review-cycle-1/2's own independent T011 audit.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:54.921548+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Verify FR-015 is satisfied",
+      "proof_type": "document_inspection",
+      "evidence": "`grep -niE \"team|membership|invitation|bearer.?link|session\"` over sk-confirm-dialog.ts returns only the FR-014 prohibition comment in the class JSDoc \u2014 no Team/membership/invitation/bearer-link/session reactive property, method, or type exists anywhere in the element; the component's only public surface is dialogTitle/message/confirmLabel/cancelLabel/confirmVariant/initialFocus/backdropDismiss/open.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:55.901749+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Verify FR-016 is satisfied",
+      "proof_type": "document_inspection",
+      "evidence": "The class JSDoc's \"STATIC FORM (FR-016)\" section explicitly defers the stylesheet's static-twin question to open issue #301's ruling; no `sk-confirm-dialog.markup.ts` exists and `packages/elements/src/confirm-dialog/` contains no generated `.html`/`index.ts` twin (confirmed by directory listing: only sk-confirm-dialog.ts, .stories.ts, .css.js, .css.d.ts).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:56.890852+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Verify FR-017 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"an omitted required string renders no substituted literal and warns exactly once per omission\" asserts exactly one console.warn per omitted property per stretch of renders it stays omitted, naming the missing property, with no substituted literal; passes in the 20/20 run.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:57.850807+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Verify FR-018 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 the two unmarked (no [SC-NNN] id) component-scoped tests \"all four strings supplied: the shadow tree carries exactly those four strings and nothing else\" and \"an omitted required string renders no substituted literal and warns exactly once per omission\" are FR-018's own red-first-demonstrated deliverable (per #178's sk-notice precedent), registered as this component's subject in behaviours.json/mutations.json; review-cycle-2 independently reproduced the FR-018 mutation red then reverted clean, and the full 243/243 mutation harness pass (906.3s) includes this arm.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:58.807241+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}

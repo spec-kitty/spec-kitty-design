@@ -1,0 +1,173 @@
+{
+  "rows": {
+    "#125": {
+      "evidence_ref": "'tracks #125' per spec.md line 6 -- a cross-tracking reference, not an issue this WP resolves directly.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#1520": {
+      "evidence_ref": "Team Kitty SaaS double-submit prevention (different repo; C-006/FR-018 out of scope). Verified this WP takes no ownership: the [FR-003/004/005] test confirms busy composes independently of native disabled and focusable aria-disabled, matching #1520's required shape.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#178": {
+      "evidence_ref": "sk-notice is the consumer's own announcement mechanism (FR-008). Verified via grep: no aria-live, role=status, or role=alert anywhere in this mission's source diff.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#286": {
+      "evidence_ref": "FR-017/C-009: no component-scoped #286 test added, reasoned explicitly in spec.md's Decision section (matching #302's precedent, not #308's) since no new literal-emitting code path exists in this mission's render() diff -- confirmed by direct read of sk-button.ts's render().",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#300": {
+      "evidence_ref": "Epic tracking parent, Gap G4 (spec.md line 6). This WP delivers #305's slice of epic #300; the epic itself is not closed by this WP.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#301": {
+      "evidence_ref": "#301 merged into train/elements-first as PR #312 (5061e68), prior to this mission's base 4d4031f (spec.md lines 26-31). ADR-15 ruling reconfirmed directly at review time: packages/styles/src/button/sk-button.css's only :host rule is bare 'display: inline-flex', no container-type or ::slotted anywhere in the file (git grep confirmed).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#302": {
+      "evidence_ref": "Precedent mission (sk-pill-tag's render()-widened-safely reasoning for #286). This mission mirrors #302's reasoning per FR-017/spec.md line 235, rather than #308's -- confirmed by direct read of sk-button.ts's render() diff (no new literal-emitting path).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#305": {
+      "evidence_ref": "This IS the mission (issue #305 itself, spec.md line 6). Implemented and independently reviewed in WP01 at 294022d; approved.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#306": {
+      "evidence_ref": "TKT5/TKT6 cross-mission decision (two independently-authored cues, no shared primitive). Verified by grep: no <progress> element, no sk-progress__bar, and no shared DOM/class between sk-button.css/sk-button.ts and the progress family.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#308": {
+      "evidence_ref": "Precedent mission; its absent-state testing lesson (a closed-state HIGH) is applied here and independently reconfirmed via mutation testing: an unconditional busy-class leak is caught by the [FR-001/FR-006] idle-cue-visibility assertion and the pre-existing exact-match class-list test.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#309": {
+      "evidence_ref": "spec.md line 36 / C-008: this mission's static-form freeze deliberately does not wait on #309/#310/#311/#314 (ADR-15 read directly against sk-button.css's :host rule instead). Those missions remain independently tracked and are out of this WP's scope.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#312": {
+      "evidence_ref": "The PR that merged #301's ADR-15 ruling into train/elements-first at 5061e68, prior to this mission's base.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#79": {
+      "evidence_ref": "Prior mission that established sk-button's primitive, export-map entries, and CSS source structure (plan.md lines 55, 130; WP01 task file line 204). Already merged and confirmed present/unchanged at this mission's base.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#93": {
+      "evidence_ref": "Recorded LightMode/class=sk-light defect. Verified sk-button.stories.ts's LightMode story uses class=\"sk-light\", not data-theme=\"light\" (packages/elements/src/button/sk-button.stories.ts).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

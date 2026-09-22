@@ -1,0 +1,69 @@
+{
+  "mission_slug": "adr11-wrapper-prop-name-invariant-01M1T2A1",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "State the real invariant: the wrapper preserves the field set; casing follows React/JSX convention via the generator's MAPPED_PROPS table, over DELIVERABLE (attributed or property-only) fields specifically.",
+      "proof_type": "code_review",
+      "evidence": "ADR \u00a7'The wrapper prop-name invariant this ADR omitted (#189)', paragraph 'The invariant this ADR should always have stated': states field-SET preservation over deliverable fields and the React/JSX casing exception via MAPPED_PROPS; satisfies spec.md SC-001 (grep for MAPPED_PROPS/readOnly/autoComplete/inputMode).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-06T01:09:01.690580+00:00",
+      "notes": "Verified against the shipped script (EXPECTED_NON_PROP_FIELDS, :123/:783-793) and against sk-form-input.errorMessage as the deliverable-vs-non-deliverable boundary case; pre-merge squad (PR #190) caught the first draft's omission of this boundary."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Record the sk-form-input worked example: readonly->readOnly, autocomplete->autoComplete, inputmode->inputMode.",
+      "proof_type": "code_review",
+      "evidence": "ADR \u00a7'The worked example \u2014 sk-form-input': table naming all three renamed fields (readonly/autocomplete/inputmode); satisfies spec.md SC-002.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-06T01:09:02.710643+00:00",
+      "notes": "Verified against packages/react/src/SkFormInput.d.ts and the manifest."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Record that MAPPED_PROPS is not exported, that the gate parses it from the installed bundle (fail-closed: exact-compare, narrower fallback on read failure) rather than mirroring it by hand.",
+      "proof_type": "code_review",
+      "evidence": "ADR \u00a7'The table is a package internal, not a contract this repo controls': states MAPPED_PROPS is not exported, the gate parses the installed bundle, and the fail-closed read/exact-compare/narrower-fallback pattern, plus the index.js-vs-index.cjs packaging note.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-06T01:09:03.729951+00:00",
+      "notes": "Verified by reading loadReactPropRenameMap() end to end and diffing node_modules/@wc-toolkit/react-wrappers/dist/index.js against dist/index.cjs (byte-identical MAPPED_PROPS in 1.2.7)."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Assess whether consolidating REACT_PROPS and the rename table is worth it; record a verdict with reasoning, and flag to the operator rather than implementing a gate-behaviour change unilaterally.",
+      "proof_type": "code_review",
+      "evidence": "ADR \u00a7'Should REACT_PROPS and the rename table be one mechanism?' plus 'Verdict: not worth consolidating now': explicit verdict with reasoning, flagged to the operator rather than implemented; satisfies spec.md SC-003.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-06T01:09:04.690631+00:00",
+      "notes": "Verdict: not worth consolidating now (see ADR). Overlap measured at 7/12 REACT_PROPS entries (58%). Not implemented in code per this mission's scope."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "State the contract-doc obligation for future element authors, using sk-form-input's contract as the worked example, and be honest that it is unenforced guidance rather than a gate mechanism.",
+      "proof_type": "code_review",
+      "evidence": "ADR \u00a7'What a future element author must know, before naming a field': states the disclosure obligation, that it is unenforced guidance (not a gate mechanism), and that it already failed once on sk-form-input's own contract doc; stale contract-doc drift filed as spec-kitty-design#191 rather than silently left.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-06T01:09:05.665057+00:00",
+      "notes": "Pre-merge squad (PR #190) found the obligation as first drafted was a bare 'must' with no enforcement mechanism; revised to state this plainly and to file spec-kitty-design#191 for the contract doc's own drift."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Record the operator override authorizing this ADR write outside #67, in the shape ADR-10 used for #176.",
+      "proof_type": "code_review",
+      "evidence": "ADR header Deciders line and \u00a7'Operator override, recorded for the record': names issue #189, the #176/ADR-10 precedent, dates the ratification to 2026-09-06, and notes ADR status remains Proposed overall; satisfies spec.md SC-004.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-06T01:09:06.644258+00:00",
+      "notes": "Dated to 2026-09-06, the session that dispatched this mission; no dated operator GitHub comment exists on #189 itself, so the ADR cites the dispatching session rather than fabricating a citation."
+    }
+  ],
+  "negative_invariants": []
+}

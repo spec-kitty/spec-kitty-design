@@ -1,0 +1,173 @@
+{
+  "rows": {
+    "#146": {
+      "evidence_ref": "plan.md L271: prior mission (#146) already added sk-action-row's rows to expected-docs.json/expected-parts.json; this WP confirms (check-manifest-content.mjs/check-part-ratchet.mjs green, zero diff) it does not need to change",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#163": {
+      "evidence_ref": "WP01-static-action-row.md L183: the shared HTML-escaper is explicitly #163's future scope; this WP copies sk-button.markup.ts's local attr() helper rather than importing a shared one, by design, until #163 lands",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#212": {
+      "evidence_ref": "plan.md L271-272: prior mission (#212) already added sk-action-row's rows to expected-docs.json/expected-parts.json; this WP confirms those ratchets are unchanged",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#272": {
+      "evidence_ref": "spec.md L59/L252: sibling-not-descendant/no-new-activation already established by #272 in the shadow element; this WP's T005 mutation-proven test re-verifies the same rule for the new static form, does not change it",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#283": {
+      "evidence_ref": "spec.md C-005/L229: .sk-record-list (#283) is OPEN and explicitly not touched or widened by this mission; only the boundary is stated in prose (FR-018)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#286": {
+      "evidence_ref": "spec.md C-004: this mission must not build the repo-wide #286 no-user-visible-literal enforcement mechanism -- explicitly #286's own separate scope",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#300": {
+      "evidence_ref": "spec.md L6: epic #300 is this mission's parent epic; WP01 is the scoped unit of work delivered under it",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#301": {
+      "evidence_ref": "spec.md L27: #301 was opened because of the exact gap this mission's markup module + docs close (the missing static-form guidance); the CSS-rule half remains gated on #309 per C-002",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#302": {
+      "evidence_ref": "research.md L138/151: #302 already shipped the reasoned-out-precedent this WP follows for its own absent-state test design; not reopened or modified by this WP",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#307": {
+      "evidence_ref": "spec.md L6: #307 is this mission's own issue; WP01 is its sole work package",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#308": {
+      "evidence_ref": "research.md L154/163/197: #308 (a HIGH in sk-confirm-dialog, a different component) was already fixed; this WP's T006 absent-state tests (mutation-proven, independently verified by reviewer) are the applied lesson, not a reopening of #308 itself",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#309": {
+      "evidence_ref": "spec.md C-002/FR-005: the generated .sk-action-row-host CSS rule is explicitly #309's scope, not shipped in this mission",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#310": {
+      "evidence_ref": "spec.md C-002/L142: the equivalence gate for the generated rule is explicitly #310's scope, gated on #309 landing first",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#93": {
+      "evidence_ref": "WP01-static-action-row.md L267: the class=\"sk-light\" (never data-theme=\"light\") convention was already established by #93; this WP's stories follow it unchanged",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

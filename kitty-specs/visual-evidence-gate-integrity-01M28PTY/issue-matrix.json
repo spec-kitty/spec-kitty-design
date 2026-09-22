@@ -1,0 +1,41 @@
+{
+  "rows": {
+    "#339": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/339 (merged)",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "feat(tokens): control-boundary contrast and target-size contract for .sk-input and sk-form-input",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#367": {
+      "evidence_ref": "WP01: apps/storybook/src/tests/visual.spec.ts (166/166 toHaveScreenshot call sites soft), scripts/check-visual-screenshot-softness.mjs (flat rule + EXEMPTIONS, hardened after review finding H2 against 3 live parser bypasses: comment-before-dot, short lookahead, optional chaining -- all re-verified fixed against the real file), .github/workflows/ci-quality.yml",
+      "fr": "FR-003, FR-004, FR-005",
+      "nfr": "NFR-001, NFR-002, NFR-004, NFR-005",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-003, SC-004, SC-006",
+      "scope": "in-mission",
+      "source_file": "spec.md",
+      "title": "20 visual baselines sit behind a preceding hard toHaveScreenshot and can be silently missed at harvest",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#401": {
+      "evidence_ref": "WP01: 31 per-test chromium-project floor assertions across 18 files, PLUS all 8 standalone floor tests for the describe-level predicate skips (corrected from an initial 4/8 after review finding H1) under apps/storybook/src/tests/",
+      "fr": "FR-001, FR-002, FR-006",
+      "nfr": "NFR-003",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001, SC-002",
+      "scope": "in-mission",
+      "source_file": "spec.md",
+      "title": "[ci] one of two new forced-colors tests lacks the chromium project floor its neighbour documents",
+      "verdict": "fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

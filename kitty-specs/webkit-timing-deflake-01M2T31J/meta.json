@@ -1,0 +1,16 @@
+{
+  "created_at": "2026-09-18T11:04:51.327310+00:00",
+  "flattened": false,
+  "friendly_name": "webkit timing deflake",
+  "mission_id": "01M2T31JBYZYD2AMQ16JD08Z4Y",
+  "mission_number": null,
+  "mission_slug": "webkit-timing-deflake-01M2T31J",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances webkit timing deflake on mission/webkit-deflake so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "webkit timing deflake",
+  "slug": "webkit-timing-deflake-01M2T31J",
+  "target_branch": "mission/webkit-deflake",
+  "topology": "single_branch",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-18T11:30:36.488689+00:00"
+}

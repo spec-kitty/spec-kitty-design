@@ -1,0 +1,46 @@
+// IIFE entry (ADR-10 §2): self-contained, carries the Lit runtime, loadable from
+// file:// and over HTTP with an integrity hash. Importing for side effects
+// registers every element via the guarded define().
+//
+// HAND-MAINTAINED, AND CHECKED. scripts/check-elements-entries.mjs derives the element list
+// from the source tree and fails if one is missing from here or from index.ts. #73 added
+// sk-nav-pill to index.ts and not to this file, and every gate stayed green — the vitest lane
+// resolves the package to index.ts, the analyzer reads source, and Storybook has its own
+// module graph. Only the deployed demo went quiet.
+//
+// ORDER IS NOT SIGNIFICANT and is not checked: the gate derives the element list from the tree
+// and asserts MEMBERSHIP, and `define()` is guarded so registration order cannot matter. This
+// list is historical, not alphabetical — a lens read the two alphabetical insertions in one
+// hunk as a convention and flagged the third for breaking it. Append new elements; do not
+// reshuffle for tidiness.
+import './stub/sk-stub.js';
+import './action-row/sk-action-row.js';
+import './button/sk-button.js';
+import './card/sk-card.js';
+import './check-bullet/sk-check-bullet.js';
+import './nav-pill/sk-nav-pill.js';
+import './form-input/sk-form-input.js';
+import './form-textarea/sk-form-textarea.js';
+import './grid/sk-grid.js';
+import './feature-card/sk-feature-card.js';
+import './ribbon-card/sk-ribbon-card.js';
+import './pill-tag/sk-pill-tag.js';
+import './section-banner/sk-section-banner.js';
+import './blog-card/sk-blog-card.js';
+import './site-footer/sk-site-footer.js';
+import './transition-matrix/sk-transition-matrix.js';
+import './app-shell/sk-app-shell.js';
+import './personal-rail/sk-personal-rail.js';
+import './context-sidebar/sk-context-sidebar.js';
+import './page-header/sk-page-header.js';
+import './section-header/sk-section-header.js';
+import './status-indicator/sk-status-indicator.js';
+import './entity-marker/sk-entity-marker.js';
+import './metric/sk-metric.js';
+import './evidence-chain/sk-evidence-chain.js';
+import './notice/sk-notice.js';
+import './bar-chart/sk-bar-chart.js';
+import './time-series-chart/sk-time-series-chart.js';
+import './copy-field/sk-copy-field.js';
+import './confirm-dialog/sk-confirm-dialog.js';
+import './theme-toggle/sk-theme-toggle.js';

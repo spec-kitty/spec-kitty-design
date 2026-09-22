@@ -1,0 +1,36 @@
+schema: review-findings/v1
+complete: true
+phase: analysis
+lens_group: confirmed
+mission: work-explorer-segmented-choice-styles-01M20C9F
+source_files:
+  - reviews/analysis.merged.yaml
+  - reviews/analysis-refute-1.yaml
+findings:
+  - id: ANALYSIS-COVERAGE-001
+    lens: Complete requirement and success-criterion coverage
+    severity: 3
+    title: The old report generalized instead of explicitly covering every FR/NFR/C and SC ID
+    evidence:
+      - artifact: "old analysis-report.md §4 and final verdict"
+      - artifact: "spec.md contains 43 distinct FR/NFR/C/SC identifiers"
+    claim: The old report did not visibly substantiate full coverage.
+    remediation: Map all identifiers explicitly and distinguish requirement_refs from SC outcome traceability.
+  - id: ANALYSIS-COVERAGE-002
+    lens: Prior review-trail verification
+    severity: 3
+    title: The old report did not show evidence for TASKS-DECOMP-001/-002
+    evidence:
+      - artifact: "reviews/tasks-decomp.findings.yaml"
+      - artifact: "old analysis-report.md final verdict"
+    claim: The claimed direct re-inspection was not demonstrated.
+    remediation: Name both findings and verify their current resolution from WP01.
+  - id: ANALYSIS-RUNTIME-001
+    lens: Machine-readable analysis readiness
+    severity: 4
+    title: The old generated verdict and findings disagreed with the prose
+    evidence:
+      - artifact: "old analysis-report.md header and body"
+      - code: "specify_cli/analysis_report.py structured-carrier write path"
+    claim: Missing structured input caused verdict unknown and erased the two prose findings from machine-readable evidence.
+    remediation: Regenerate from a valid analysis-findings/v1 carrier with a truthful tally and computed ready verdict.

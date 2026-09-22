@@ -1,0 +1,16 @@
+<!-- @spec-kitty/styles — sk-disclosure (nested: open outer, closed inner) -->
+<!-- Proves the child-combinator [open] marker rule: the outer's open marker
+     must not bleed onto the inner's closed marker (a descendant-combinator
+     selector would make both markers show as "open"). -->
+<details class="sk-disclosure" open>
+  <summary class="sk-disclosure__summary">Deployment history</summary>
+  <div class="sk-disclosure__body">
+    <p>Three deployments this week. Expand a deployment for its detail:</p>
+    <details class="sk-disclosure">
+      <summary class="sk-disclosure__summary">2026-09-03 14:02 UTC — v2.4.1</summary>
+      <div class="sk-disclosure__body">
+        <p>Rolled out to 100% of traffic with no incidents.</p>
+      </div>
+    </details>
+  </div>
+</details>

@@ -1,0 +1,113 @@
+{
+  "rows": {
+    "#101": {
+      "evidence_ref": "research.md 'Decision: --sk-border-control is an INDEPENDENTLY DECLARED LITERAL' section; #101's --sk-fg-subtle move is historical precedent this mission deliberately does NOT alias into (that was the rejected draft) -- independently re-derived by this reviewer from tokens.css, matches the cited #101 figures",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#155": {
+      "evidence_ref": "FR-010/C-004: this mission creates --sk-border-control and records the coordination outcome in the PR body for #155 to link; .sk-button--secondary's own adoption remains #155's scope, untouched here (verified: zero *button* files in diff)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#173": {
+      "evidence_ref": "FR-002 closed the #173-documented 1px vs var(--sk-border-width-1) spelling gap on .sk-input in this mission's own diff (verified: no class renamed). The rename decision itself is explicitly NOT performed (C-002) and remains #173's own call to make -- this mission does not and cannot close #173. Verdict corrected from the pre-merge 'in-mission' placeholder (which was never accurate: WP01 is this mission's only WP and it did not touch the rename) to deferred-with-followup, per the evidence already recorded on this row at merge time.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#177": {
+      "evidence_ref": "plan.md Structure Decision cites #177 (rose tint family) as the structural precedent this mission's shape follows (tokens.css + catalogue regen only) -- #177 is historical, already shipped, not touched or reopened by this mission",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#286": {
+      "evidence_ref": "C-006: no ElementInternals/validation/copy change added by this mission; #286's copy/i18n intake boundary is respected, not advanced -- verified: diff adds no copy string",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#303": {
+      "evidence_ref": "research.md 'Decision: 44px floor via --sk-space-9': #303 already established the 44px target-size precedent (sk-boundary-page action group); this mission reuses the identical --sk-space-9 shape, reconciled not re-derived",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#319": {
+      "evidence_ref": "This mission delivers GAP-F5-02, one slice of epic #319's Family 5 component-gap audit. Epic #319 remains open across its other gaps (e.g. GAP-F5-01/#320) and is not closed by this mission alone. Verdict corrected from the pre-merge 'in-mission' placeholder (inaccurate: WP01 is this mission's only WP and does not close the epic) to deferred-with-followup, per the evidence already recorded on this row at merge time -- the epic's remaining gaps are the follow-up.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#320": {
+      "evidence_ref": "C-005: sibling mission (danger button), deliberately disjoint scope -- this mission's only packages/tokens edit is the one new Borders-block declaration; verified zero button/danger files in diff. #320 proceeds independently, not this mission's to fix",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#321": {
+      "evidence_ref": "Mission's own source issue; WP01 delivers FR-001..FR-012 in full, independently verified by this post-merge review against the merged PR #339 diff (base bab211c9..head 95ee9e30): --sk-border-control landed as an independent literal in both theme blocks, .sk-input and .sk-form-input__control both adopt it plus the 44px min-block-size floor, all ten contrast ratios re-derived and clearing 3:1 (tightest 3.35:1 light vs muted), .sk-textarea/.sk-form-textarea__control/.sk-form-select confirmed untouched. Verdict corrected from the pre-merge 'in-mission' placeholder to match evidence already on record.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

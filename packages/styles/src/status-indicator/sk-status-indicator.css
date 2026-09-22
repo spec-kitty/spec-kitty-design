@@ -1,0 +1,100 @@
+:host {
+  display: inline-flex;
+}
+
+.sk-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sk-space-2);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+}
+
+.sk-status-indicator__marker {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--sk-fg-muted);
+}
+
+.sk-status-indicator--pulsing .sk-status-indicator__marker {
+  outline-style: solid;
+  outline-width: var(--sk-border-width-1);
+  outline-color: var(--sk-fg-muted);
+  outline-offset: 0;
+  animation-name: sk-status-indicator-pulse;
+  animation-duration: var(--sk-motion-duration-slow);
+  animation-timing-function: var(--sk-motion-ease-in-out);
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+}
+
+@keyframes sk-status-indicator-pulse {
+  from {
+    outline-width: var(--sk-border-width-1);
+    outline-offset: 0;
+  }
+
+  to {
+    outline-width: var(--sk-border-width-2);
+    outline-offset: var(--sk-space-1);
+  }
+}
+
+.sk-status-indicator--info .sk-status-indicator__marker {
+  color: var(--sk-on-tint-sky);
+}
+
+.sk-status-indicator--success .sk-status-indicator__marker {
+  color: var(--sk-on-tint-mint);
+}
+
+.sk-status-indicator--attention .sk-status-indicator__marker {
+  color: var(--sk-on-tint-butter);
+}
+
+/* --sk-on-tint-rose, not --sk-color-red (#177). Every OTHER tone's marker already
+   resolves through an --sk-on-tint-* token, which the light block redefines;
+   --sk-color-red is defined only in :root and never redefined for .sk-light, so
+   danger was the one tone whose marker did not follow the theme. Measured on the
+   light card surface this axis introduces (--sk-status-danger =
+   --sk-surface-tint-rose, #F8E5E5): #E97373 is 2.42:1, failing AA's 4.5 for text
+   and 1.4.11's 3 for a graphical object, and out of family by a factor of two
+   against neutral 5.22 / info 7.70 / success 7.10 / attention 6.28 /
+   recovery 8.00. --sk-on-tint-rose is 9.11:1 there. Dark is unchanged: it aliases
+   --sk-color-red, so the value is identical.
+   This is the whole of #177's edit to #146's component, and it is one declaration. */
+.sk-status-indicator--danger .sk-status-indicator__marker {
+  color: var(--sk-on-tint-rose);
+}
+
+.sk-status-indicator--recovery .sk-status-indicator__marker {
+  color: var(--sk-on-tint-lilac);
+}
+
+.sk-status-indicator__text {
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-status-indicator--pulsing .sk-status-indicator__marker {
+    outline-style: solid;
+    outline-width: var(--sk-border-width-2);
+    outline-offset: var(--sk-space-1);
+    animation-name: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .sk-status-indicator__marker {
+    outline-style: solid;
+    outline-width: var(--sk-border-width-1);
+    outline-color: CanvasText;
+  }
+
+  .sk-status-indicator--pulsing .sk-status-indicator__marker {
+    outline-style: double;
+    outline-width: var(--sk-border-width-2);
+    outline-color: Highlight;
+  }
+}

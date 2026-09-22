@@ -1,0 +1,1 @@
+REJECT at c5337dd9: Medium multi-toggle stale System listener, invalid public property bypass, and incomplete exact-head mutation gate; single-instance failure paths otherwise passed.

@@ -1,0 +1,33 @@
+{
+  "event_count": 6,
+  "last_event_id": "01M26GX1D7D51GQWCHMNBQH877",
+  "materialized_at": "2026-09-10T20:42:14.311501+00:00",
+  "mission_number": "",
+  "mission_slug": "connector-radio-choice-group-01M2693Y",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 1,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "claude",
+      "force_count": 1,
+      "lane": "approved",
+      "last_event_id": "01M26GX1D7D51GQWCHMNBQH877",
+      "last_transition_at": "2026-09-10T20:42:14.311501+00:00",
+      "review_result": {
+        "reference": "initial reject on the accent-color forced-colors proof (circular DOM/AX comparison), remediated with a rendered-pixel probe verified red-first, then approved: checked-vs-unchecked measured 154/272 differing pixels (56%) with a 0-pixel noise floor on repeat, crop confirmed as exactly the 16x16 control box",
+        "reviewer": "orchestrator (independent review)",
+        "verdict": "approved"
+      }
+    }
+  }
+}

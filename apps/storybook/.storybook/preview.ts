@@ -1,18 +1,148 @@
-import '../../../packages/tokens/src/tokens.css';
-import type { Preview } from '@storybook/angular';
+// Still the SOURCE stylesheet, deliberately — importing packages/tokens/dist/tokens.css instead
+// was tried and reverted (mission #1673's Storybook font-path fix). tokens.css declares every
+// @font-face as a relative `url('./fonts/...')`, resolved by the browser against wherever the
+// stylesheet itself ends up served from. That URL 404'd from here because the fonts lived at
+// packages/tokens/fonts/ — a sibling of dist/, never of src/ — verified directly: a real
+// headless-Chromium load of a Falling-Sky-dependent story showed `document.fonts` entries at
+// `status: "error"` for exactly the weights that story used, silent because nothing here asserts
+// on the rendered TYPEFACE, only on layout/contrast/semantics, which font-display: swap's
+// system-font fallback still satisfies.
+//
+// Switching THIS IMPORT to dist/tokens.css did fix that 404, but it fixed the wrong layer and
+// broke something bigger: build-tokens-css.mjs's dist output adds a `:root:not([data-theme])`
+// block under `@media (prefers-color-scheme: light)` — the no-JS "follow the OS" fallback for
+// unenhanced HTML consumers. src/tokens.css, the hand-authored source, has no such block. Every
+// story here that does not explicitly set `data-theme`/`.sk-light` (most of them — this is the
+// DEFAULT/dark path) was relying on that absence to render dark unconditionally. Headless
+// Chromium's default `prefers-color-scheme` is `light` (verified: `matchMedia('(prefers-color-
+// scheme: light)').matches` is true with no explicit emulation), so importing dist/ silently
+// flipped every theme-unmarked story from dark to light — measured on
+// `card--blog-card-example`: `.sk-card`'s background went from `rgb(24,26,31)` (dark) to
+// `rgb(255,255,255)` (white), which is what turned a fine dark-mode `--sk-color-yellow` link into
+// a 1.63:1 axe color-contrast violation against a white card it was never designed to sit on.
+// Three stories failed for exactly this reason before the revert.
+//
+// The fonts moved instead: packages/tokens/fonts/ -> packages/tokens/src/fonts/ (this repo's own
+// tokens:build now cp -r's from there). tokens.css's `./fonts/...` URLs need no edit — they were
+// always relative to wherever tokens.css itself lives, and now that IS a sibling. This keeps
+// Storybook consuming the same source stylesheet it always has, with none of the built
+// artifact's no-JS theme-fallback behaviour, and fixes only the one thing that was actually
+// broken.
+import "../../../packages/tokens/src/tokens.css";
+// #176's content primitives, loaded globally for the same reason tokens.css is: they style
+// LIGHT-DOM markup. #177 composes facts and disclosure inside an <sk-card>'s default slot, and
+// #213 composes empty-state beside check bullets when there are no subtasks — all stay in the
+// document's cascade rather than an element's shadow root.
+//
+// It has to be here rather than in the story file, and the reason is two rules meeting:
+// packages/elements may not import a stylesheet at all (scripts/check-no-css-in-source.mjs,
+// ADR-10 §1 Confirmation #4), and packages/styles may not import an element
+// (@nx/enforce-module-boundaries: scope:styles depends on scope:tokens only). A story that
+// composes an element with a styles-layer class therefore has no layer of its own to import
+// from. `scope:storybook` is the one project allowed to reach both.
+//
+// Both rulesets are class-scoped, so this changes nothing for any story that does not use the
+// classes — which is what keeps it out of the axe gate's way.
+import "../../../packages/styles/src/facts/sk-facts.css";
+import "../../../packages/styles/src/disclosure/sk-disclosure.css";
+import "../../../packages/styles/src/empty-state/sk-empty-state.css";
+import "../../../packages/styles/src/breadcrumbs/sk-breadcrumbs.css";
+import "../../../packages/styles/src/checkbox-choice-group/sk-checkbox-choice-group.css";
+import "../../../packages/styles/src/radio-choice-group/sk-radio-choice-group.css";
+import "../../../packages/styles/src/section-nav/sk-section-nav.css";
+// #338's connectors pattern renders native `<button>`/`<a class="sk-button sk-button--*">` light-DOM
+// markup (ADR-9 §4: a `<button>` inside `sk-button`'s shadow root cannot participate in an ancestor
+// `<form>`). Verified missing by the pre-merge squad against the BUILT preview, not by reasoning:
+// the linked stylesheet carried zero `.sk-button` rules and the connectors chunk loads no CSS chunk
+// at all — every connectors canvas painted UA-default buttons, including #320's
+// `.sk-button--danger-secondary` at the two places this pattern actually needs it (C8, C9a).
+import "../../../packages/styles/src/button/sk-button.css";
+import "../../../packages/styles/src/context-nav/sk-context-nav.css";
+import "../../../packages/styles/src/data-table/sk-data-table.css";
+import "../../../packages/styles/src/event-timeline/sk-event-timeline.css";
+import "../../../packages/styles/src/form-field/sk-form-field.css";
+import "../../../packages/styles/src/form-select/sk-form-select.css";
+import "../../../packages/styles/src/collection/sk-collection.css";
+import "../../../packages/styles/src/segmented-choice/sk-segmented-choice.css";
+import "../../../packages/styles/src/progress/sk-progress.css";
+import "../../../packages/styles/src/prose/sk-prose.css";
+import "../../../packages/styles/src/workflow-board/sk-workflow-board.css";
+import "../../../packages/styles/src/workflow-lane/sk-workflow-lane.css";
+// TWO MORE, ADDED BY #355 FOR THE SAME REASON AND UNDER THE SAME INVARIANT. The account /
+// front-door pattern (packages/elements/src/patterns/account-front-door.stories.ts) composes
+// custom elements with four STYLES-ONLY families that ship no custom element of their own
+// (ADR-10 §3): public-header (#353), boundary-page (#303), radio-choice-group and skip-link. It
+// registers only TWO of the four, because sibling pattern missions reached the same conclusion
+// about the other two first and their imports are already on the train — boundary-page further
+// down this file (#329's CLI Auth pattern) and radio-choice-group in the block above. A second
+// identical specifier for one sheet changes nothing in the bundle and reads as deliberate to the
+// next author, so each was dropped from here on the rebase that brought it in, rather than
+// dropped from the landed mission that got there first.
+//
+// The pattern story cannot import this CSS itself — `scripts/check-no-css-in-source.mjs` rejects
+// a bare stylesheet import anywhere under packages/elements/src (FR-009, ADR-10 §1 Confirmation
+// #4), and it rejected exactly that, which is how this landed here instead. The block above is
+// the documented route for the case, and this is that case.
+//
+// Without these, every class in the four families paints with the browser's UNSTYLED default —
+// measured: an unstyled <a> under a dark `color-scheme` renders rgb(158, 158, 255), an axe
+// colour-contrast violation.
+//
+// The line-14 invariant holds for all four sheets this pattern needs, including the two
+// registered elsewhere: every top-level selector in them is a `.sk-<family>` class or a
+// `:where(.sk-<family>__*) ...` descendant of one, so a story that does not use the classes is
+// unaffected and the axe gate sees no change.
+import "../../../packages/styles/src/public-header/sk-public-header.css";
+import "../../../packages/styles/src/skip-link/sk-skip-link.css";
+// #303's sk-boundary-page is the mirror-image case of the block above: a styles-only, no-element
+// FRAME (packages/styles, scope:styles) composing an already-shipped CUSTOM ELEMENT
+// (sk-entity-marker #304) as an opaque child in its own plain HTML exemplars — never the other
+// way around. Its own CSS sets no default size/shape/border on it (research.md Decision 2) and
+// reaches into it via no `::part()` (spec C-005). sk-pill-tag is NOT registered here: after this
+// mission's review-remediation pass, the composed status pill is authored as the STYLES-LAYER
+// span form (`<span class="sk-pill-tag sk-pill-tag--status-<tone>">`, exactly what
+// packages/styles/src/pill-tag/sk-pill-tag.html ships), not `<sk-pill-tag status="...">` — the
+// custom element's `status` is a PROPERTY, and `pillTagClasses()` puts the tone modifier on the
+// SHADOW `<span part="tag">`, so a class on the light-DOM `<sk-pill-tag>` host never reaches it.
+// sk-boundary-page-html.stories.ts imports packages/styles/src/pill-tag/sk-pill-tag.css directly
+// instead (an intra-project import within the single `styles` nx project, not a cross-project
+// one `@nx/enforce-module-boundaries` would constrain), so no element registration is needed for
+// it at all.
+//
+// sk-entity-marker still needs registering here, and the reason is checked, not assumed: a
+// styles-only component has no layer of its own to import a custom element's definition from,
+// and `scope:storybook` is the one project allowed to reach both scope:styles and scope:elements
+// (see the depConstraints in eslint.config.mjs). Probed directly (this mission's review pass) —
+// a bare `import "@spec-kitty/elements"` from inside packages/styles fails as a CIRCULAR
+// DEPENDENCY (`Circular dependency between "styles" and "elements" detected: styles -> elements
+// -> styles`), not the `scope:styles` depConstraint an earlier revision of this comment implied
+// (elements itself depends on styles, so styles importing elements closes a cycle, and nx's
+// circular-dependency check fires before the depConstraints check gets a chance to); a relative
+// path (`import "../../elements/src/..."`) fails separately, with "Projects cannot be imported
+// by a relative or absolute path, and must begin with a npm scope"; and a deep subpath import
+// (`@spec-kitty/elements/entity-marker/...`) raises NO lint error at all, because it is simply
+// unmapped in `tsconfig.base.json`'s `paths` (only the package root and a `/dist/*` alias exist
+// there) — it would fail at resolution time, not at lint time. None of the three is a route
+// packages/styles can take; `scope:storybook` importing the built element module, here, is the
+// only one that works.
+import "../../../packages/elements/src/entity-marker/sk-entity-marker.js";
+// #303's own styles-layer sheet — its stories load it via an intra-project import (see
+// sk-boundary-page-html.stories.ts), but #329's CLI Auth pattern lives in packages/elements
+// (scope:elements), which may not import a stylesheet at all, so it needs the same
+// scope:storybook global-import route as the sk-button.css case directly below.
+import "../../../packages/styles/src/boundary-page/sk-boundary-page.css";
+// #329's CLI Auth pattern renders its three native form actions as
+// `<button type="submit" class="sk-button sk-button--*">` rather than `<sk-button>`: a
+// shadow-root `<button>` cannot submit an enclosing form (`type="button"` is hard-coded in
+// sk-button.ts), so a story proving a native-form flow composes the styles-layer class
+// directly — the same two-rule reach this file's own header comment explains.
+import "../../../packages/styles/src/button/sk-button.css";
+import type { Preview } from "@storybook/web-components";
 
 const preview: Preview = {
   parameters: {
-    backgrounds: {
-      default: 'sk-dark',
-      values: [
-        { name: 'sk-dark', value: '#0A0A0B' },
-        { name: 'sk-card', value: '#161619' },
-        { name: 'sk-light', value: '#ffffff' },
-      ],
-    },
-    a11y: { config: { rules: [{ id: 'color-contrast', enabled: true }] } },
-    layout: 'centered',
+    a11y: { config: { rules: [{ id: "color-contrast", enabled: true }] } },
+    layout: "centered",
   },
 };
 

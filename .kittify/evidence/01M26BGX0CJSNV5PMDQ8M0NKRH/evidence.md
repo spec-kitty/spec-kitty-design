@@ -1,0 +1,1 @@
+REJECT exact 61d2a5f1: semantic lens confirmed all three Mediums; resolver and session registry irreducible

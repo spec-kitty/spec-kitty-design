@@ -1,0 +1,13 @@
+evidence_id,source_id,finding,decision_or_requirement,confidence
+EV-001,SRC-001,"Public components are metric and evidence-chain; values are supplied and opaque.","FR-001 through FR-008",high
+EV-002,SRC-001,"Two/four/six stages and narrow vertical reflow are required, so four cannot be hardcoded.","FR-009 through FR-011",high
+EV-003,SRC-002,"Library owns presentation/accessibility; Team Kitty owns all application state and calculations.","C-001 through C-004",high
+EV-004,SRC-002,"Shared generated artifacts force serial final integration and latest-train regeneration.","D10 and NFR-004/005",high
+EV-005,SRC-004,"Shadow-root styling API is tokens, declared parts, and documented custom properties only.","C-006 and FR-016",high
+EV-006,SRC-005,"Markup modules are conditional; duplicating nested metric markup is not an acceptable static form.","D7 and C-005",high
+EV-007,SRC-006,"Presentational elements own no event/form/focus/keyboard behavior subjects, but parts/style adoption remain test obligations.","D8 and verification plan",high
+EV-008,SRC-008,"The repository already exposes readonly array inputs through attribute:false properties with frozen empty defaults.","D2 and FR-006",high
+EV-009,SRC-009,"Generated React wrappers have a dedicated property-only hook and reject unsafe classification.","FR-014",high
+EV-010,SRC-010,"ReadonlyArray plus attribute:false is source-located and marked in the normalized manifest.","FR-014",high
+EV-011,SRC-011,"Card, grid, and pill-tag capabilities already exist and are not mission-owned.","D5 and C-004",high
+EV-012,SRC-012,"Approved visual hierarchy requires eyebrow labels, strong tabular values, supporting annotations, and connected stages.","FR-003, FR-009, NFR-002",medium

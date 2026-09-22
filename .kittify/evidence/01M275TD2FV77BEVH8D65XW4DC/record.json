@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M275TD2FV77BEVH8D65XW4DC",
+  "completed_at": "2026-09-11T03:31:36.769720+00:00",
+  "outcome": "done",
+  "closed_by": "agent",
+  "evidence_ref": "kitty-specs/theme-toggle-01M25KMP/implementation-evidence.md"
+}

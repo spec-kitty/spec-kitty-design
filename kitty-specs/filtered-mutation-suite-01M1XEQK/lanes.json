@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "mission_slug": "filtered-mutation-suite-01M1XEQK",
+  "mission_id": "01M1XEQK2BCA047ZA935CDX61F",
+  "mission_branch": "kitty/mission-filtered-mutation-suite-01M1XEQK",
+  "target_branch": "mission/filtered-mutation-suite",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "fixtures/elements-behaviour/src/*.test.ts",
+        "scripts/suite-selftest.mjs",
+        "suite-budget.json"
+      ],
+      "predicted_surfaces": [],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-07T08:17:44.762787+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "732839fe3e17654fdb03d7384be51384a3dadb97"
+}

@@ -1,0 +1,489 @@
+{
+  "mission_slug": "copy-field-element-01M1Y3QH",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Visible text and attempted clipboard text come from the exact same reactive value without normalization.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:31.135568+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "One native type=button control provides the action and the host adds no sequential tab stop.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:33.098608+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "The label names the control and missing or blank labels warn and fail open to Copy value.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:34.970871+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "A supported secure Clipboard API receives exactly one writeText call with the exact non-empty snapshot.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:36.851716+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Copied is reported only after the attempted write fulfills.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:38.770476+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Clipboard absence, insecure context, synchronous throw, and rejection fall back to focus and full selection.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:40.796996+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "A fallback that cannot focus and fully select reports failed and never copied.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:42.692479+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "An exactly empty value disables the control and invokes no result path.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:44.648316+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Every actual value change advances the revision, clears status, and suppresses stale settlements.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:46.528773+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "One stable polite atomic status node exists from first render and is updated in place.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:48.418463+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "All three outcome messages have defaults, consumer overrides, and blank-override fail-open behavior.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:50.296647+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Each completed non-empty attempt emits one bubbling, composed, non-cancelable typed result event.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:52.242658+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Result detail is frozen, contains only outcome, and cannot expose the copied value.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:54.290123+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Pointer click and native Enter and Space activation share one copy path without duplicate results.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:56.237731+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Success retains button focus while manual fallback focuses the non-sequential visible value.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:24:58.240512+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "The field, value, copy-control, and status parts are public and documented.",
+      "proof_type": "generated_contract_and_drift_gates",
+      "evidence": "Authored docs plus manifest, CSS module, element indexes, React wrapper, Vue types, story inventory, ratchets, size report, builds, type checks, and drift checks agree; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:00.271967+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "The host is block-level and long values wrap without clipping the action or page overflow.",
+      "proof_type": "chromium_firefox_responsive_and_real_ui_zoom",
+      "evidence": "Chromium and Firefox cover desktop, 390px, narrow-host, forced-scroll 195px, and genuine fixed-physical-window 200%/400% UI zoom; component, story frame, value, action, and document remain contained. Immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:02.272168+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "The class registers through define and is exported from every applicable element entry point.",
+      "proof_type": "generated_contract_and_drift_gates",
+      "evidence": "Authored docs plus manifest, CSS module, element indexes, React wrapper, Vue types, story inventory, ratchets, size report, builds, type checks, and drift checks agree; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:04.201223+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Generated React and Vue surfaces preserve all inputs and the narrowed result-event union.",
+      "proof_type": "generated_contract_and_drift_gates",
+      "evidence": "Authored docs plus manifest, CSS module, element indexes, React wrapper, Vue types, story inventory, ratchets, size report, builds, type checks, and drift checks agree; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:06.106237+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-020",
+      "description": "Storybook publishes every required deterministic state across themes and interaction modes.",
+      "proof_type": "storybook_visual_regression",
+      "evidence": "Nine pinned Ubuntu Chromium baselines cover dark, LightMode, focus, empty, long, narrow, success/manual/failure, and forced colors; each was inspected and replayed without update. Immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:08.174606+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-021",
+      "description": "Authored behavior, browser, framework, registration, style, and mutation coverage exercises the public contract.",
+      "proof_type": "generated_contract_and_drift_gates",
+      "evidence": "Authored docs plus manifest, CSS module, element indexes, React wrapper, Vue types, story inventory, ratchets, size report, builds, type checks, and drift checks agree; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:10.117994+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "FR-022",
+      "description": "No static markup form is generated or exported and the JavaScript-required boundary is documented.",
+      "proof_type": "generated_contract_and_drift_gates",
+      "evidence": "Authored docs plus manifest, CSS module, element indexes, React wrapper, Vue types, story inventory, ratchets, size report, builds, type checks, and drift checks agree; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:11.959181+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "All behavior and layout paths pass in supported Chromium and Firefox projects on the reviewed candidate.",
+      "proof_type": "chromium_firefox_responsive_and_real_ui_zoom",
+      "evidence": "Chromium and Firefox cover desktop, 390px, narrow-host, forced-scroll 195px, and genuine fixed-physical-window 200%/400% UI zoom; component, story frame, value, action, and document remain contained. Immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:14.031397+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Required states pass axe and expose the specified tab stops, names, visible code, and stable status semantics.",
+      "proof_type": "axe_and_accessibility_tree_browser_tests",
+      "evidence": "All published stories pass axe; Chromium/Firefox accessibility snapshots and real Tab traversal prove exact readable value, named native control, stable live region/outcome, one non-empty stop, and zero empty stops. Immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:16.228322+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "Long content causes no page overflow at 390px or actual fixed-window 200% and 400% UI zoom in both browsers.",
+      "proof_type": "chromium_firefox_responsive_and_real_ui_zoom",
+      "evidence": "Chromium and Firefox cover desktop, 390px, narrow-host, forced-scroll 195px, and genuine fixed-physical-window 200%/400% UI zoom; component, story frame, value, action, and document remain contained. Immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:18.252015+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "Dark, LightMode, forced-colors, focus, disabled, copied, manual, and failed states are perceivable without colour alone.",
+      "proof_type": "storybook_visual_regression",
+      "evidence": "Nine pinned Ubuntu Chromium baselines cover dark, LightMode, focus, empty, long, narrow, success/manual/failure, and forced colors; each was inspected and replayed without update. Immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:20.208587+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "The component adds no unguarded transition or animation and does not retain redundant motion overrides.",
+      "proof_type": "css_source_and_reduced_motion_audit",
+      "evidence": "Authored and generated CSS have no transition or animation and no redundant reduced-motion override; CSS boundary/hygiene gates enforce the result.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:22.201227+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "Authored styles use the existing token surface and pass CSS boundary and hygiene gates.",
+      "proof_type": "generated_contract_and_drift_gates",
+      "evidence": "Authored docs plus manifest, CSS module, element indexes, React wrapper, Vue types, story inventory, ratchets, size report, builds, type checks, and drift checks agree; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:24.197885+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "NFR-007",
+      "description": "Every applicable conformance responsibility has meaningful ordinary and mutation coverage.",
+      "proof_type": "full_mutation_registry",
+      "evidence": "Every copy-field behavior-bearing branch has ordinary coverage and a named registered mutation red, including container reflow and declared stylesheet-adoption collateral; immutable final-head full sweep follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:26.138630+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "NFR-008",
+      "description": "All generated contracts, indexes, ratchets, CSS, wrappers, and size reports are fresh from source.",
+      "proof_type": "generated_contract_and_drift_gates",
+      "evidence": "Authored docs plus manifest, CSS module, element indexes, React wrapper, Vue types, story inventory, ratchets, size report, builds, type checks, and drift checks agree; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:28.180643+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "C-001",
+      "description": "Delivery is based on latest train/elements-first and the PR targets that train with Refs #257.",
+      "proof_type": "git_ancestry_and_delivery_preflight",
+      "evidence": "Delivery branch is a clean descendant of the fetched train/elements-first head; programme instructions pin the single WP PR target to that train and body to Refs #257. Remote creation remains intentionally gated on final replay/review authorization.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:30.157819+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "C-002",
+      "description": "Element source, styles, stories, tests, registrations, docs, and generated surfaces remain one coherent work package.",
+      "proof_type": "work_package_and_generated_ownership_audit",
+      "evidence": "Runtime records exactly one coherent WP; authored files stay in owning packages and repository generators alone produce derived CSS, manifest, wrappers, Vue types, indexes, ratchets, and size outputs.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:32.171275+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "C-003",
+      "description": "The library adds no Team Kitty routing, stores, discovery, polling, inference, arithmetic, validation, or command execution.",
+      "proof_type": "scope_diff_and_behavior_audit",
+      "evidence": "Base-to-delivery diff and tests publish only sk-copy-field with native button/code/selection semantics and contain none of the prohibited application behavior, adjacent components, timers, retries, analytics, telemetry, editors, parsers, or command execution.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:34.353445+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "C-004",
+      "description": "No adjacent dossier, row, provenance, list-wrapper, toast, editor, parser, credential, history, queue, or second-button component is added.",
+      "proof_type": "scope_diff_and_behavior_audit",
+      "evidence": "Base-to-delivery diff and tests publish only sk-copy-field with native button/code/selection semantics and contain none of the prohibited application behavior, adjacent components, timers, retries, analytics, telemetry, editors, parsers, or command execution.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:36.493979+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "C-005",
+      "description": "The component starts no timer, retry, permission prompt, analytics, or telemetry behavior.",
+      "proof_type": "scope_diff_and_behavior_audit",
+      "evidence": "Base-to-delivery diff and tests publish only sk-copy-field with native button/code/selection semantics and contain none of the prohibited application behavior, adjacent components, timers, retries, analytics, telemetry, editors, parsers, or command execution.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:38.666239+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "C-006",
+      "description": "Native button, code, and selection semantics remain intact.",
+      "proof_type": "scope_diff_and_behavior_audit",
+      "evidence": "Base-to-delivery diff and tests publish only sk-copy-field with native button/code/selection semantics and contain none of the prohibited application behavior, adjacent components, timers, retries, analytics, telemetry, editors, parsers, or command execution.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:40.814548+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "C-007",
+      "description": "Authored source remains in owning packages and generated files are script-produced.",
+      "proof_type": "work_package_and_generated_ownership_audit",
+      "evidence": "Runtime records exactly one coherent WP; authored files stay in owning packages and repository generators alone produce derived CSS, manifest, wrappers, Vue types, indexes, ratchets, and size outputs.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:42.881375+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "C-008",
+      "description": "Approved Repository Dossier evidence remains read-only and unchanged.",
+      "proof_type": "workspace_boundary_audit",
+      "evidence": "Approved Repository Dossier artifacts were read-only evidence outside this checkout; the delivery diff contains no changes to that workspace.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:45.140627+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "C-009",
+      "description": "Every implementation and review seat uses Codex; prohibited transports are unused.",
+      "proof_type": "agent_transport_audit",
+      "evidence": "All implementation and review seats are Codex; no Claude, Claude Code, Hermes worker, legacy /tk transport, or Team Kitty worker seat was invoked.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:47.266143+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "C-010",
+      "description": "Delivery stops at accepted PR readiness; programme orchestration owns merge and issue closure.",
+      "proof_type": "delivery_authority_audit",
+      "evidence": "This lane is restricted to accepted PR readiness and explicitly performs no merge or issue closure; programme orchestration retains both authorities.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:49.496065+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "SC-001",
+      "description": "Success tests observe exactly one clipboard write strictly equal to supplied whitespace and Unicode text.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:51.847503+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "SC-002",
+      "description": "Every clipboard-negative path is contained and reports manual only after exact selection, otherwise failed, never copied.",
+      "proof_type": "behavior_unit_browser_mutation",
+      "evidence": "Deterministic authored unit tests, real Chromium/Firefox browser tests, and named mutation arms cover exact-value, native activation, stale async, feedback, event, fallback, failure, focus, and selection behavior; immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:54.015601+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "SC-003",
+      "description": "Required stories have zero axe violations and the specified tab-stop and stable-status accessibility evidence.",
+      "proof_type": "axe_and_accessibility_tree_browser_tests",
+      "evidence": "All published stories pass axe; Chromium/Firefox accessibility snapshots and real Tab traversal prove exact readable value, named native control, stable live region/outcome, one non-empty stop, and zero empty stops. Immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:56.115459+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "SC-004",
+      "description": "Chromium and Firefox show no page overflow at 390px and actual fixed-window 200% and 400% UI zoom.",
+      "proof_type": "chromium_firefox_responsive_and_real_ui_zoom",
+      "evidence": "Chromium and Firefox cover desktop, 390px, narrow-host, forced-scroll 195px, and genuine fixed-physical-window 200%/400% UI zoom; component, story frame, value, action, and document remain contained. Immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:25:58.525975+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "SC-005",
+      "description": "All generated-artifact, build, lint, type, size, contract, and repository test gates pass on the reviewed candidate.",
+      "proof_type": "repository_quality_matrix",
+      "evidence": "Repository static quality, generation, type, build, release, security, unit, browser, visual, axe, size, selftest, and mutation gates are included in the immutable final-head replay after this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:26:00.713348+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "SC-006",
+      "description": "Required visual states preserve approved Dossier hierarchy without application behavior.",
+      "proof_type": "storybook_visual_regression",
+      "evidence": "Nine pinned Ubuntu Chromium baselines cover dark, LightMode, focus, empty, long, narrow, success/manual/failure, and forced colors; each was inspected and replayed without update. Immutable final-head replay follows this ledger freeze.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:26:02.954246+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "SC-007",
+      "description": "The diff publishes exactly one element and no prohibited adjacent behavior or component.",
+      "proof_type": "scope_diff_and_behavior_audit",
+      "evidence": "Base-to-delivery diff and tests publish only sk-copy-field with native button/code/selection semantics and contain none of the prohibited application behavior, adjacent components, timers, retries, analytics, telemetry, editors, parsers, or command execution.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:26:05.196043+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    },
+    {
+      "criterion_id": "SC-008",
+      "description": "Independent Codex implementation/review and Spec Kitty accept complete before one unmerged PR references #257.",
+      "proof_type": "spec_kitty_and_independent_codex_gates",
+      "evidence": "Independent Codex implementation/runtime review is recorded. A fresh four-lens Codex review and Spec Kitty accept are mandatory on the immutable post-ledger head before the one unmerged Refs #257 PR; no prohibited transport or premature remote action is permitted.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-09T00:26:07.444652+00:00",
+      "notes": "The immutable post-ledger candidate must pass the complete exact-head gate, independent Codex review, and Spec Kitty accept sequence before any remote PR action."
+    }
+  ],
+  "negative_invariants": []
+}

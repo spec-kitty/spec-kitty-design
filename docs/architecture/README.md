@@ -10,20 +10,38 @@ This directory contains the architectural record for the Spec Kitty Design Syste
 | [system-context-canvas.md](system-context-canvas.md) | Organisational context, stakeholders, external forces, constraints |
 | [quality-attribute-assessment.md](quality-attribute-assessment.md) | AMMERSE impact analysis of the core architectural choices |
 | [risk-register.md](risk-register.md) | Full risk inventory with mitigations and owners |
+| [adversarial-squad-gate.md](adversarial-squad-gate.md) | Why the adversarial squad is a merge gate here, how the `.kittify/doctrine/` overrides bind, and what was verified |
 
 ## Decisions (ADRs)
 
-All Accepted decisions are in [`decisions/`](decisions/). Any mission spec that would contradict an Accepted ADR must include an ADR amendment as a tracked work item before implementation — see charter `architectural_review_requirement`.
+The decision records are in [`decisions/`](decisions/), and the table below is that directory — `scripts/check-adr-index.mjs` fails CI when a record has no row, when a row points at no record, or when a row's **Status** disagrees with the record's own. The Status column transcribes each record's own Status field; the index reports statuses, it does not confer them. Any mission spec that would contradict an Accepted ADR must include an ADR amendment as a tracked work item before implementation — see charter `architectural_review_requirement`.
+
+**What a Status obliges (#200).** An **Accepted** record binds: a mission spec that would contradict one must carry an ADR amendment as a tracked work item before implementation, per the charter's `architectural_review_requirement` above. A **Proposed** record is *not yet enforced* — on its own it does not constrain a spec, and no amendment is owed to depart from one. It is still read: the review requirement is not conditional on status, and a Proposed record is this repository's recorded reasoning on its subject, not a draft nobody consults. The way to make one binding is to have the operator ratify it. That distinction is settled by the operator's ruling on #200, which ratified ADR-9 and ADR-11 rather than redefining what `Proposed` means — and ratified them **by observation rather than by review**: three `[ENFORCED]` CI steps across two jobs — two in `lint-code` naming ADR-9, one in `test` naming ADR-11 — and two charter done-conditions, which name ADR-11's required-behaviours list and not ADR-9, already treated both as binding, so the ruling aligned the records with what CI enforces rather than re-examining their contents.
+
+**Complete** appears on the ADR-003 addendum alone. That record uses it to say the reconciliation work it describes has been carried out ("pre-implementation gate FR-034 satisfied — WP01 delivered"); it is a description of finished work, not a decision state.
+
+Identifiers below are the ones each record uses in its own H1. Every ADR record's own H1 is unpadded — `ADR-8`, not `ADR-008` — with one exception: the ADR-003 addendum, whose H1 writes the identifier padded, and whose row transcribes that.
 
 | ADR | Title | Status |
 |---|---|---|
-| [ADR-001](decisions/2026-05-01-1-token-distribution-format.md) | Token Distribution Format — CSS Custom Properties | Accepted |
-| [ADR-002](decisions/2026-05-01-2-monorepo-package-topology.md) | Monorepo Package Topology — Separate Publishable Packages | Accepted |
-| [ADR-003](decisions/2026-05-01-3-token-schema-naming-convention.md) | Token Schema and Naming Convention | Accepted |
-| [ADR-004](decisions/2026-05-01-4-org-layer-doctrine-distribution.md) | Org-Layer Doctrine Distribution | Accepted |
-| [ADR-005](decisions/2026-05-01-5-npm-supply-chain-security-posture.md) | npm Supply Chain Security Posture | Accepted |
-| [ADR-006](decisions/2026-05-01-6-storybook-multi-framework-rendering.md) | Storybook Multi-Framework Rendering Strategy | Accepted |
-| [ADR-007](decisions/2026-05-01-7-storybook-version-10x-adoption.md) | Storybook 10.x Adoption — Angular 21 Compatibility | Accepted |
+| [ADR-1](decisions/2026-05-01-1-token-distribution-format.md) | Token Distribution Format — CSS Custom Properties over Utility Frameworks | Accepted |
+| [ADR-2](decisions/2026-05-01-2-monorepo-package-topology.md) | Monorepo Package Topology — Separate Publishable Packages per Framework Target | Accepted |
+| [ADR-3](decisions/2026-05-01-3-token-schema-naming-convention.md) | Token Schema and Naming Convention — Precondition for Implementation | Accepted |
+| [ADR-003 addendum](decisions/ADR-003-addendum-token-values.md) | Token value reconciliation results | Complete |
+| [ADR-4](decisions/2026-05-01-4-org-layer-doctrine-distribution.md) | Org-Layer Doctrine Distribution — Design System as Priivacy-ai Org Doctrine Source | Accepted |
+| [ADR-5](decisions/2026-05-01-5-npm-supply-chain-security-posture.md) | npm Supply Chain Security Posture — Accepted Controls and Residual Risk | Accepted |
+| [ADR-6](decisions/2026-05-01-6-storybook-multi-framework-rendering.md) | Storybook Multi-Framework Rendering Strategy | Accepted |
+| [ADR-7](decisions/2026-05-01-7-storybook-version-10x-adoption.md) | Storybook 10.x Adoption — Angular 21 Compatibility | Accepted |
+| [ADR-8](decisions/2026-09-02-8-custom-elements-base-layer.md) | Custom Elements as the Shared Component Base Layer | Accepted |
+| [ADR-9](decisions/2026-09-02-9-shadow-dom-and-styling-api.md) | Shadow DOM, the Styling API, and Label Ownership | Accepted |
+| [ADR-10](decisions/2026-09-02-10-distribution-and-canonical-markup.md) | Distribution, Build Artifacts, and Canonical Markup | Accepted |
+| [ADR-11](decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md) | Verification Stack for Elements, and Generated Wrappers | Accepted |
+| [ADR-12](decisions/2026-09-02-12-consumer-audit-of-record.md) | Consumer Audit of Record, and Diagram Corrections | Proposed |
+| [ADR-13](decisions/2026-09-02-13-storybook-web-components-builder.md) | Storybook Moves to the Web-Components Renderer on Vite | Proposed |
+| [ADR-14](decisions/2026-09-06-14-detached-probe-validation-seam.md) | The Detached-Probe Validation Seam | Proposed |
+| [ADR-15](decisions/2026-09-10-15-static-form-of-element-backed-css.md) | The Static Form of Element-Backed CSS | Proposed |
+| [ADR-16](decisions/2026-09-10-16-static-form-of-cross-sheet-part-styling.md) | The Static Form of Cross-Sheet `::part()` Styling | Proposed |
+| [ADR-17](decisions/2026-09-11-17-sk-button-tone-intensity-flattening.md) | sk-button's Tone × Intensity Flattening, and the Ceiling on `BUTTON_VARIANTS` | Proposed |
 
 ## Research
 

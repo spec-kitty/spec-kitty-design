@@ -1,0 +1,93 @@
+schema: review-findings/v1
+complete: false
+phase: spec
+lens_group: arch
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: SPEC-ARCH-001
+    lens: forced-colors mechanism correctness (mission-derived)
+    severity: 4
+    title: "Third forced-colors trap (stylelint blind to border/outline shorthand) is named but not closed by any testable requirement, and C-004's cited precedent doesn't demonstrate the fix"
+    evidence:
+      - artifact: "spec.md § NFR-004 and User Story 4 scenario 4 (\"following the documented traps in docs/contributing/adding-a-component.md\")"
+      - artifact: "spec.md § C-004: \"reusing existing pill/surface/border-focus families where they already cover the visual need (per the readiness investigation's confirmed precedent in `sk-nav-pill.css` and `sk-form-select.css`)\""
+      - code: "docs/contributing/adding-a-component.md, Forced-colors section: \"stylelint's `declaration-strict-value` ... does **not** police the `border`/`outline` **shorthand** forms at all, regardless of value ... Use the LONGHAND `-color` properties instead ... `packages/styles/src/skip-link/sk-skip-link.css` and `packages/styles/src/data-table/sk-data-table.css` both use this pattern — copy it\""
+      - code: "packages/styles/src/nav-pill/sk-nav-pill.css:45,53 — uses shorthand `border:`/`outline:` and has ZERO `forced-colors` block (grep confirms no match)"
+      - code: "packages/styles/src/form-select/sk-form-select.css — uses longhand `border-color`/`outline-color` throughout but also has ZERO `forced-colors` block (grep confirms no match)"
+      - code: "stylelint.config.mjs:22-23 — `scale-unlimited/declaration-strict-value` list is `['/color/', 'background', 'background-color', 'font-family', 'padding', 'margin', 'border-radius']`, confirming shorthand `border`/`outline` are genuinely unpoliced in this repo, matching the recipe's claim"
+    claim: >
+      NFR-004 and User Story 4 scenario 4 correctly state the mechanism requirement (border/outline,
+      not background/box-shadow) but cite "the documented traps" as their authority without
+      restating or operationalizing the recipe's third named trap: that stylelint's
+      declaration-strict-value never inspects shorthand `border`/`outline` at all, so a hardcoded,
+      non-token color written in shorthand form inside a `@media (forced-colors: active)` override
+      passes CI identically to a compliant one. No FR, NFR or Constraint in this spec requires the
+      segmented-choice CSS to use longhand `-color` properties for its selected/focus-visible
+      declarations, so nothing makes this a testable acceptance bar — a WP author could ship a
+      shorthand-authored forced-colors override with a hardcoded (non-token) system-color value and
+      every declared gate (stylelint, axe, the SC-006/NFR-004 Playwright assertion, which only checks
+      the rendered mechanism is border/outline, not that it's token-driven) would pass it. This is
+      compounded by C-004's own precedent citation: it points implementers at `sk-nav-pill.css` and
+      `sk-form-select.css` as "confirmed precedent" for token reuse, but verified by grep, NEITHER
+      file contains a `forced-colors` block — neither demonstrates the longhand-plus-ignoreValues
+      technique the recipe actually requires. The real worked examples the recipe itself names
+      (`sk-skip-link.css`, `sk-data-table.css`) are absent from C-004's citation entirely.
+    remediation: >
+      Add a new Constraint (or extend C-004) requiring that any `@media (forced-colors: active)`
+      override in `sk-segmented-choice.css` use LONGHAND `-color` properties (e.g. `border-color`,
+      `outline-color`, or a specific per-side longhand), matching the pattern in `sk-skip-link.css`
+      and `sk-data-table.css`, with any new system-color keyword added to
+      `stylelint.config.mjs`'s `ignoreValues`. Repoint C-004's "confirmed precedent" citation: keep
+      `sk-nav-pill.css`/`sk-form-select.css` for base-state token reuse (neither has a forced-colors
+      block, so neither is precedent for that mechanism), and add `sk-skip-link.css`/`sk-data-table.css`
+      as the specific precedent for the forced-colors override technique.
+
+  - id: SPEC-ARCH-002
+    lens: forced-colors mechanism correctness (mission-derived)
+    severity: 3
+    title: "Recipe's second forced-colors trap (forced-color-adjust:none freezing an authored color) is never restated, despite the spec citing 'the documented traps' as full authority"
+    evidence:
+      - artifact: "spec.md § NFR-004, User Story 4 scenario 4 — restates only the background/box-shadow-vs-border/outline mechanism, citing \"the documented traps\" (plural) in `docs/contributing/adding-a-component.md`"
+      - artifact: "spec.md § FR-003 — \"selected, hover, active, focus-visible and disabled states to each be distinguishable by more than colour\" does not rule out a background-drawn icon/glyph as the non-colour cue"
+      - code: "docs/contributing/adding-a-component.md, Forced-colors section: \"forcing it to survive with `forced-color-adjust: none` freezes it at its **authored** color, which is frequently invisible against the forced-colors background — measured dark-grey-on-black in one probe. Never set `forced-color-adjust: none` on an affordance that must remain visible\""
+      - code: "packages/styles/src/disclosure/sk-disclosure.css:1-17 and packages/styles/src/data-table/sk-data-table.css:201-257 — the repo's own working precedent for this exact trap, neither cited by the spec"
+    claim: >
+      A grep of spec.md for "forced-color-adjust" returns no matches. Only one of the recipe's three
+      forced-colors traps (background/box-shadow flattening) is restated in NFR-004/the User Story 4
+      scenario, even though the spec cites "the documented traps" (plural) as its authority for the
+      requirement. FR-003 requires a non-colour cue for the selected state but does not constrain
+      how it is achieved, leaving a background-drawn icon/glyph (e.g. a checkmark) as a plausible
+      implementation choice — exactly the affordance shape the recipe's second trap warns about,
+      where `forced-color-adjust: none` is reached for to keep it visible and instead freezes it at
+      an authored color that the recipe measured as invisible in at least one real case.
+    remediation: >
+      Add a sentence to NFR-004 (or a new constraint) stating that if a non-colour selected-state cue
+      is implemented via a background-drawn icon/glyph, `forced-color-adjust: none` must not be used
+      to force it to survive forced-colors mode; prefer a border/outline- or content-drawn cue that
+      survives automatically, per the recipe's own guidance, and cite the working in-repo precedent
+      (`sk-disclosure.css`, `sk-data-table.css`) alongside the recipe reference already present.
+
+  - id: SPEC-ARCH-003
+    lens: token contract
+    severity: 2
+    title: "C-004/FR-015's generic 'pill/surface' token-family language is ambiguous between two same-valued, differently-named tokens"
+    evidence:
+      - artifact: "spec.md § C-004: \"reusing existing pill/surface/border-focus families\""
+      - artifact: "spec.md § FR-015: \"reusing the existing pill/surface/border/focus token families rather than inventing component-named tokens\""
+      - code: "packages/tokens/src/tokens.css:42 — `--sk-surface-pill: #212830;` (Dark Surfaces block)"
+      - code: "packages/tokens/src/tokens.css:181 — `--sk-bg-pill: #212830;` (Pill/Chip Background block) — identical hex value, different name"
+      - code: "packages/styles/src/nav-pill/sk-nav-pill.css:8 — the cited precedent uses `--sk-bg-pill`, not `--sk-surface-pill`"
+    claim: >
+      `packages/tokens/src/tokens.css` currently carries two tokens for the same pill background
+      value under two different names (`--sk-surface-pill` and `--sk-bg-pill`, both `#212830` in dark
+      mode) — a pre-existing token duplication the spec did not introduce but also did not flag.
+      C-004 and FR-015 name "the pill/surface … families" generically without picking one, so a WP
+      author has no spec-level guidance on which of the two to reuse, and could pick either
+      (both render identically today, so no gate would catch a choice inconsistent with the
+      `sk-nav-pill.css` precedent C-004 itself cites, which uses `--sk-bg-pill`).
+    remediation: >
+      Name the specific token in C-004/FR-015 — `--sk-bg-pill`, matching the `sk-nav-pill.css`
+      precedent already cited — rather than the generic "pill/surface … families" phrasing, so the
+      WP has one unambiguous token to reuse instead of two candidates with identical current values.
+
+complete: true

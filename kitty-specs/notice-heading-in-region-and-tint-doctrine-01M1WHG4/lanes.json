@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "mission_slug": "notice-heading-in-region-and-tint-doctrine-01M1WHG4",
+  "mission_id": "01M1WHG4QZ6S85A8T9WYDAAQXP",
+  "mission_branch": "kitty/mission-notice-heading-in-region-and-tint-doctrine-01M1WHG4",
+  "target_branch": "mission/notice-heading-in-region-and-tint-doctrine",
+  "lanes": [
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01",
+        "WP02"
+      ],
+      "write_scope": [
+        "docs/contributing/adding-a-token.md",
+        "docs/design-system/changelog.md",
+        "docs/design-system/using-tokens.md",
+        "fixtures/elements-behaviour/src/sk-notice.test.ts",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/notice/sk-notice.css.d.ts",
+        "packages/elements/src/notice/sk-notice.css.js",
+        "packages/elements/src/notice/sk-notice.stories.ts",
+        "packages/elements/src/notice/sk-notice.ts",
+        "packages/react/src/index.js",
+        "packages/styles/src/notice/sk-notice.css"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T23:44:36.170626+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01",
+    "WP02"
+  ],
+  "planning_commit_sha": "f119b986c187eacd0ae2dacff371ea89f564f2d7"
+}

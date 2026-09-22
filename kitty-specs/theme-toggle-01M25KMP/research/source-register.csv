@@ -1,0 +1,9 @@
+source_id,title,location,state_or_revision,accessed_at
+S-001,"spec-kitty-design issue #323","https://github.com/spec-kitty/spec-kitty-design/issues/323",open-no-comments,2026-09-10
+S-002,"factory-dashboard issue #14","https://github.com/spec-kitty/factory-dashboard/issues/14",open-no-comments,2026-09-10
+S-003,"spec-kitty-design issue #93 and inert-wrapper ratchet","https://github.com/spec-kitty/spec-kitty-design/issues/93; expected-inert-theme-wrappers.json",open/current-train,2026-09-10
+S-004,"Design token theme blocks","packages/tokens/src/tokens.css","4d4031fa2416ceaadcb0c51f313386c3dee3db36",2026-09-10
+S-005,"Factory composition precedent","packages/elements/src/patterns/operational-status.ts; packages/elements/src/patterns/operational-status.stories.ts; scripts/check-pattern-composition.mjs","#259 / current-train",2026-09-10
+S-006,"Legacy demo theme scripts","apps/demo/blog-demo.html; apps/demo/dashboard-demo.html","current-train",2026-09-10
+S-007,"Current component authoring recipe and ADR-11","docs/contributing/adding-a-component.md; docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md","current-train",2026-09-10
+S-008,"Story-ratchet fix PR #325","https://github.com/spec-kitty/spec-kitty-design/pull/325",open,2026-09-10

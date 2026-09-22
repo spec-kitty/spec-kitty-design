@@ -1,0 +1,17 @@
+{
+  "$schema": "../../node_modules/typescript/lib/tsconfig-schema.json",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "types": [],
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": false
+  },
+  "include": [
+    "src/Good.vue",
+    "src/Bad.vue",
+    "src/types.test-d.ts"
+  ]
+}
