@@ -42,7 +42,7 @@
     "@storybook/addon-docs": "^10.6.0",
     "@storybook/web-components": "^10.6.0",
     "@storybook/web-components-vite": "^10.6.0",
-    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/eslint-plugin": "^8.70.0",
     "@typescript-eslint/parser": "^8.59.1",
     "@vitest/browser": "4.1.11",
     "@vitest/browser-playwright": "4.1.11",
