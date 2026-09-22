@@ -42,11 +42,9 @@ export interface BlogCardStaticOptions {
 //
 // WHAT IS AND IS NOT ESCAPED, stated fully because an earlier revision of this comment claimed
 // "all three vectors" and a lens counted four. `thumbnail` and `alt` go through `attr()` into
-// quoted attributes; `eyebrow` goes through `text()` into a text node. `content` is the fourth
-// caller-supplied value and is deliberately RAW — it is the slot for the title, excerpt and
-// meta markup, so escaping it would break the documented use. That is the same convention
-// sk-button records for its own `content`, and it means "this module escapes caller input" is
-// never wholly true. A consumer passing untrusted text should escape it themselves.
+// quoted attributes; `eyebrow` and caller-supplied `content` go through `text()` into text nodes.
+// The built-in default content remains authored markup, but a caller cannot turn the public string
+// parameter into an HTML injection sink.
 //
 // Local rather than shared, and the REASON changed at #216. It used to be forced: the generator
 // evaluated this module from a `data:` URL, which has no module base, so a relative import failed.
@@ -85,6 +83,11 @@ export const BLOG_CARD_CLASSES = {
   eyebrow: 'sk-blog-card__eyebrow',
 } as const;
 
+const DEFAULT_BLOG_CARD_CONTENT =
+  '<h3 class="sk-blog-card__title">Article title</h3>' +
+  '<p class="sk-blog-card__excerpt">What the article is about.</p>' +
+  '<p class="sk-blog-card__meta">Date · reading time</p>';
+
 // A CONST, NOT A ZERO-ARGUMENT `blogCardClasses()`. The siblings export a function because they
 // have variants to narrow; this component has none, so a function would be a call that can only
 // ever return one string — the shape a lens flagged on sk-check-bullet's equivalent.
@@ -102,12 +105,7 @@ export const BLOG_CARD_CLASSES = {
  * BOTH CLASSES ON ONE ELEMENT. The element renders from the same `BLOG_CARD_CLASSES` above, so
  * the two paths cannot diverge — that is now enforced by construction rather than asserted.
  */
-export function blogCardStaticHtml(
-  opts: BlogCardStaticOptions = {},
-  content = '<h3 class="sk-blog-card__title">Article title</h3>' +
-    '<p class="sk-blog-card__excerpt">What the article is about.</p>' +
-    '<p class="sk-blog-card__meta">Date · reading time</p>',
-): string {
+export function blogCardStaticHtml(opts: BlogCardStaticOptions = {}, content?: string): string {
   const { thumbnail, alt, eyebrow } = opts;
 
   // THROWS ON THE AUTHORING PATH. Every other static helper in this repo does — button, card,
@@ -139,10 +137,11 @@ export function blogCardStaticHtml(
   const lead = eyebrow
     ? `<p class="${BLOG_CARD_CLASSES.eyebrow}">${text(eyebrow)}</p>`
     : '';
+  const safeContent = content === undefined ? DEFAULT_BLOG_CARD_CONTENT : text(content);
   return (
     `<article class="${BLOG_CARD_CLASSES.root}">` +
     image +
-    `<div class="${BLOG_CARD_CLASSES.content}">${lead}${content}</div>` +
+    `<div class="${BLOG_CARD_CLASSES.content}">${lead}${safeContent}</div>` +
     `</article>`
   );
 }

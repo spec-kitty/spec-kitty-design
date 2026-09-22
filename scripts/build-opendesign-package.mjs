@@ -78,6 +78,45 @@ const stripLeadingHtmlComments = (html) => {
 };
 
 /**
+ * Remove regions that are inert for the static-markup policy without using chained regex
+ * replacements. A replacement can expose a delimiter that was previously hidden inside the
+ * removed text (for example, a comment boundary inside a style block), making a single pass an
+ * incomplete sanitizer. This scanner always advances over the original source instead.
+ */
+const stripInertHtml = (html) => {
+  const lower = html.toLowerCase();
+  const styleOpen = /<style\b[^>]*>/gi;
+  let cursor = 0;
+  let visible = '';
+
+  while (cursor < html.length) {
+    const commentStart = lower.indexOf('<!--', cursor);
+    styleOpen.lastIndex = cursor;
+    const styleMatch = styleOpen.exec(html);
+    const styleStart = styleMatch?.index ?? -1;
+    const starts = [commentStart, styleStart].filter((index) => index !== -1);
+    if (starts.length === 0) return visible + html.slice(cursor);
+
+    const start = Math.min(...starts);
+    visible += html.slice(cursor, start);
+
+    if (start === commentStart) {
+      const end = lower.indexOf('-->', start + 4);
+      if (end === -1) return visible + html.slice(start);
+      cursor = end + 3;
+      continue;
+    }
+
+    const contentStart = start + styleMatch[0].length;
+    const end = lower.indexOf('</style>', contentStart);
+    if (end === -1) return visible + html.slice(start);
+    cursor = end + '</style>'.length;
+  }
+
+  return visible;
+};
+
+/**
  * Derive everything the package is built from. PURE over `root`, so the probe table can point it at
  * a fixture tree. DERIVED, never listed: every hand-written package or component list in this
  * repository has drifted, and the one in the carried DESIGN.md had already lost `sk-theme-toggle`.
@@ -213,7 +252,7 @@ export function derive(root = ROOT) {
  */
 export function staticOnlyProblems(html) {
   const problems = [];
-  const body = html.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<!--[\s\S]*?-->/g, '');
+  const body = stripInertHtml(html);
   const custom = [...new Set([...body.matchAll(/<([a-z][a-z0-9]*-[a-z0-9-]*)\b/gi)].map((m) => m[1].toLowerCase()))];
   if (custom.length) problems.push(`it composes custom-element tags: ${custom.join(', ')}`);
   if (/<script\b/i.test(body)) problems.push('it contains a <script> element');
@@ -632,6 +671,8 @@ const PROBES = [
   ['a declarative shadow root is refused', () => staticOnlyProblems('<body><template shadowrootmode="open"></template></body>').length === 1],
   ['a hyphenated tag inside a comment is not a false positive', () => staticOnlyProblems('<body><!-- <sk-x> --></body>').length === 0],
   ['CSS is not scanned for tags (inert :host is allowed)', () => staticOnlyProblems('<style>:host{} sk-x{}</style><body></body>').length === 0],
+  ['removing a comment cannot hide a following custom element', () => staticOnlyProblems('<!-- <style> --><sk-x></sk-x>').length === 1],
+  ['removing a style block cannot hide a following custom element', () => staticOnlyProblems('<style><!--</style><sk-x></sk-x>').length === 1],
   ['every component gets a section', () => (buildComponentsHtml(FIXTURE).match(/data-od-component=/g) || []).length === 2],
   ['the fixture is deterministic', () => buildComponentsHtml(FIXTURE) === buildComponentsHtml(structuredClone(FIXTURE))],
   ['the manifest records no commit SHA', () => !('commit' in buildManifest(FIXTURE).source)],
