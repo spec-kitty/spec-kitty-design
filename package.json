@@ -47,7 +47,7 @@
     "@vitest/browser": "4.1.11",
     "@vitest/browser-playwright": "4.1.11",
     "@vue/compiler-dom": "3.5.42",
-    "@wc-toolkit/react-wrappers": "1.2.7",
+    "@wc-toolkit/react-wrappers": "1.2.11",
     "axe-playwright": "^2.2.2",
     "commonmark": "0.31.2",
     "esbuild": "0.28.1",
