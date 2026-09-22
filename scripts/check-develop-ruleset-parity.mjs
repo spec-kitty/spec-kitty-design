@@ -276,7 +276,13 @@ function cliCheck(args) {
   }
   const live = JSON.parse(execFileSync('gh', ['api', `repos/${REPO}/rulesets/${id}`], { encoding: 'utf8' }));
   const artifact = JSON.parse(readFileSync(ARTIFACT_PATH, 'utf8'));
-  const diffs = diffRulesetParity(live, artifact);
+  const opts = {
+    unverifiableIfAbsent: RULESET_BYPASS_ACTORS_UNVERIFIABLE_IF_ABSENT,
+  };
+  for (const w of findUnverifiableAbsences(live, artifact, RULESET_BYPASS_ACTORS_UNVERIFIABLE_IF_ABSENT)) {
+    console.log(`::warning::${w}`);
+  }
+  const diffs = diffRulesetParity(live, artifact, opts);
   if (diffs.length) {
     console.error(`::error::the live develop ruleset (id ${id}) has drifted from the committed artifact:`);
     for (const d of diffs) {
@@ -288,11 +294,12 @@ function cliCheck(args) {
   console.log(`✅ the live develop ruleset (id ${id}) matches the committed artifact.`);
 }
 
-// F-E, incident 3: `bypass_actors` is the one field this PR-time token cannot see (see the
-// `UNVERIFIABLE_IF_ABSENT_DEFAULT` comment above) — named here, not folded into that default,
-// because it is specific to WHICH ruleset is being read with WHICH token, not a universal
-// response-only field the way `IGNORED_TOP_LEVEL_FIELDS` are.
-const PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT = new Set(['bypass_actors']);
+// F-E, incident 3: `bypass_actors` is the one field a workflow token without ruleset write
+// access cannot see (see the `UNVERIFIABLE_IF_ABSENT_DEFAULT` comment above). That applies to
+// both live rulesets read by this script. It is named here, not folded into the default,
+// because the omission depends on WHICH token performs the read rather than being a universal
+// response-only field like `IGNORED_TOP_LEVEL_FIELDS`.
+const RULESET_BYPASS_ACTORS_UNVERIFIABLE_IF_ABSENT = new Set(['bypass_actors']);
 
 /** F-E: same shape as `cliCheck` above, minus the bootstrap-deadline dance — this ruleset
  *  already exists and its id is already known and recorded, so there is no pre-bootstrap
@@ -302,8 +309,8 @@ function cliCheckParityAnchorTags() {
     execFileSync('gh', ['api', `repos/${REPO}/rulesets/${PARITY_ANCHOR_RULESET_ID}`], { encoding: 'utf8' }),
   );
   const artifact = JSON.parse(readFileSync(PARITY_ANCHOR_ARTIFACT_PATH, 'utf8'));
-  const opts = { namedDifferences: new Set(), namedPrefixDifferences: [], unverifiableIfAbsent: PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT };
-  for (const w of findUnverifiableAbsences(live, artifact, PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT)) {
+  const opts = { namedDifferences: new Set(), namedPrefixDifferences: [], unverifiableIfAbsent: RULESET_BYPASS_ACTORS_UNVERIFIABLE_IF_ABSENT };
+  for (const w of findUnverifiableAbsences(live, artifact, RULESET_BYPASS_ACTORS_UNVERIFIABLE_IF_ABSENT)) {
     console.log(`::warning::${w}`);
   }
   const diffs = diffRulesetParity(live, artifact, opts);
@@ -457,14 +464,14 @@ function runProbes() {
   // driven through the real `diffRulesetParity`/`findUnverifiableAbsences` pair, with the SAME
   // `unverifiableIfAbsent` set `cliCheckParityAnchorTags` actually uses — never a hand-rolled
   // reimplementation of "is it absent".
-  const withBypassOpts = { ...noNamedDiffs, unverifiableIfAbsent: PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT };
+  const withBypassOpts = { ...noNamedDiffs, unverifiableIfAbsent: RULESET_BYPASS_ACTORS_UNVERIFIABLE_IF_ABSENT };
 
   // Probe 11 — ABSENT (the real, reproduced case): a named warning, zero diffs, exit-0 shape.
   {
     const live = liveShapedFrom(parityAnchorArtifact);
     delete live.bypass_actors;
     const diffs = diffRulesetParity(live, parityAnchorArtifact, withBypassOpts);
-    const warnings = findUnverifiableAbsences(live, parityAnchorArtifact, PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT);
+    const warnings = findUnverifiableAbsences(live, parityAnchorArtifact, RULESET_BYPASS_ACTORS_UNVERIFIABLE_IF_ABSENT);
     const named = warnings.length === 1 && warnings[0].includes('bypass_actors') && warnings[0].includes('write access');
     record(
       11,
@@ -480,7 +487,7 @@ function runProbes() {
     const live = liveShapedFrom(parityAnchorArtifact);
     live.bypass_actors = [{ actor_id: 1, actor_type: 'Team', bypass_mode: 'always' }];
     const diffs = diffRulesetParity(live, parityAnchorArtifact, withBypassOpts);
-    const warnings = findUnverifiableAbsences(live, parityAnchorArtifact, PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT);
+    const warnings = findUnverifiableAbsences(live, parityAnchorArtifact, RULESET_BYPASS_ACTORS_UNVERIFIABLE_IF_ABSENT);
     const flagged = diffs.some((d) => d.path === 'bypass_actors');
     record(
       12,
@@ -495,14 +502,26 @@ function runProbes() {
   {
     const live = liveShapedFrom(parityAnchorArtifact); // clones the artifact, so bypass_actors: [] survives untouched
     const diffs = diffRulesetParity(live, parityAnchorArtifact, withBypassOpts);
-    const warnings = findUnverifiableAbsences(live, parityAnchorArtifact, PARITY_ANCHOR_UNVERIFIABLE_IF_ABSENT);
+    const warnings = findUnverifiableAbsences(live, parityAnchorArtifact, RULESET_BYPASS_ACTORS_UNVERIFIABLE_IF_ABSENT);
     record(13, 'parity-anchor-tags: bypass_actors present and equal -> clean, no warning', 'pass', diffs.length === 0 && warnings.length === 0, { diffs, warnings });
+  }
+
+  // Probe 14 — the same token omission on develop follows the same explicit warning path.
+  // This is the exact shape returned to the push job's GITHUB_TOKEN on 2026-09-22.
+  {
+    const live = liveShapedFrom(artifact);
+    delete live.bypass_actors;
+    const opts = { unverifiableIfAbsent: RULESET_BYPASS_ACTORS_UNVERIFIABLE_IF_ABSENT };
+    const diffs = diffRulesetParity(live, artifact, opts);
+    const warnings = findUnverifiableAbsences(live, artifact, RULESET_BYPASS_ACTORS_UNVERIFIABLE_IF_ABSENT);
+    const named = warnings.length === 1 && warnings[0].includes('bypass_actors') && warnings[0].includes('write access');
+    record(14, 'develop: bypass_actors absent from the workflow-token response -> named warning, zero diffs', 'pass', diffs.length === 0 && named, { diffs, warnings });
   }
 
   return results;
 }
 
-const PROBE_FLOOR = 13;
+const PROBE_FLOOR = 14;
 
 function selftest() {
   const results = runProbes();
