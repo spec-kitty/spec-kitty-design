@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import postcss from "postcss";
 import selectorParser from "postcss-selector-parser";
+import { stripCssAndHtmlComments as stripComments } from "./source-comments.mjs";
 
 const BOARD_CSS = "packages/styles/src/workflow-board/sk-workflow-board.css";
 const LANE_CSS = "packages/styles/src/workflow-lane/sk-workflow-lane.css";
@@ -114,12 +115,6 @@ function readGeneratedFixtures(
   if (fixtures.length === 0)
     throw new Error(`no generated fixtures parsed from ${path}`);
   return fixtures;
-}
-
-function stripComments(source: string): string {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/<!--[\s\S]*?-->/g, "");
 }
 
 function classSelectorInventory(source: string, from: string): string[] {
