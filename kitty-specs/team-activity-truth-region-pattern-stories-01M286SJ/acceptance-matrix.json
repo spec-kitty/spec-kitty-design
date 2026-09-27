@@ -1,0 +1,280 @@
+{
+  "mission_slug": "team-activity-truth-region-pattern-stories-01M286SJ",
+  "mission_number": "382",
+  "mission_type": "software-dev",
+  "overall_verdict": "pending_review",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Deliver Patterns/Team Activity as Storybook evidence only, with no registered or exported runtime domain surface.",
+      "proof_type": "automated_test",
+      "evidence": "Compact implementation a260ef9e, executable evidence 495b018b, and the current locality correction; source-boundary test `source stays Storybook-only, public-surface, deterministic, token-local composition`; current composition gate reports 17 fixtures, 368 inline rules, 25 composed public element tags, zero reach-through or copied component CSS.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "The story-local projection seam is not a package export or runtime component API."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Use deeply frozen consumer-shaped fixtures and pure, deeply frozen projections that reject invalid truth combinations.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b plus the current locality correction; fixture/projection determinism and `projection freeze is detached from caller-owned nested fixture nodes` prove frozen results, repeatability, unchanged caller descriptors/deep equality, post-render caller mutability, and alternate supplied observed headings carried by the detached projection and rendered through the actual Storybook path.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "Each result is structured-cloned before recursive freeze."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Render supplied L1 presence, focus, and opaque event entries in one named reported-live region.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b; focused built-story L1 test passes in the Noble Chromium/Firefox/WebKit matrix.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "Presence markers remain entry-local and consumer supplied."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Render L2 as exact ordinary quiet absence with no warning, rows, history, illustration, or CTA.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b; `L2 is exact ordinary quiet absence` and inspected regenerated Noble baseline `team-activity-l2-quiet-chromium-linux.png`.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "Quiet stays distinct from degraded and unauthorized."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Render L3 relay-unavailable notice inside the live boundary with zero stale rows and unchanged factual context.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b; L3 row/notice test and L1/L3 byte-and-semantic factual-context equivalence test pass.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "The projection owns a detached equal copy, not caller object identity."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Render L4 complete supplied gap sentence before current rows without inferred count, reconstruction, or observed claim.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b; L4 render/guard tests vary from/to bounds, reject every incomplete bound with exact errors, and verify notice-before-rows ordering.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "No missing-count derivation exists."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Render L5 as only the route-exact denial in a bare boundary, with no protected payload reachable from its root.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b; L5 asserts complete MAIN/STYLE/P DOM, exact class-only root attributes/text, empty own-property/symbol allowlists, and absence of protected payload/proof/seam strings; its story play check independently asserts the same boundary.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "No __teamActivityTestSeam, fixture/projection reference, proof attribute, state attribute, or pattern marker."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Render TL1 populated, quiet, degraded, and gap repositories as independent named truth regions without aggregate status.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b; TL1 independent-region test and coherent state-swap mutation coverage pass through the authorized seam.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "Each admitted repository preserves its validated state tuple."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Render OA1 populated, retained-degraded, quiet, and loading projections with supplied freshness/retention copy.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b; OA1 populated/degraded/quiet/loading tests and state-swap mutation matrix pass; all four regenerated Noble baselines were inspected.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "Retained-degraded keeps rows; observed rows carry no live marker."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Keep OA1 loading heading semantics, aria-busy, separate polite status, and hidden static skeleton geometry.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b; OA1 loading semantics/accessibility-tree checks, current axe 828/828, and inspected loading baseline.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "Skeleton decoration is absent from the accessibility tree."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Render DM1 as exactly supplied Decision plus wire-safe identifier inside the observed boundary.",
+      "proof_type": "automated_test",
+      "evidence": "a260ef9e + 495b018b; the real built seam accepts the valid control with exactly own string names id,label and zero own symbols. Five enumerable extras, a non-enumerable own question property, and an own Symbol(question) all reject with exact `TypeError: Decision data must contain exactly id and label.`",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "Mission-strip is_decision remains a Team Kitty prerequisite only."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Mutually exclude live and observed markers and add no page-wide synchronization claim.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b; contradictory-state mutations reject live rows without presence, observed rows with presence, retained-degraded without rows, and degraded-live with rows; TL1 asserts no aggregate freshness node.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "Truth remains region scoped."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Source every visible/accessibility string from consumer fixture inputs under #286.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b plus the current locality correction; source contract and non-canonical copy mutation assertions prove strings, including both observed subsection headings, flow through fixture/projection inputs to exact rendered H3 text and accessible names; canonical headings are absent from the alternate render and no element render default or runtime literal was added.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "#286 remains the owning platform policy."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Compose only public elements/static forms/native semantics/tokens/parts without shadow reach-through or copied CSS.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b plus the current locality correction; composition selftest 47 probe behaviors and current live scan 17 fixtures/368 inline rules/25 public tags/zero reach-through or copied CSS.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "No public manifest, wrapper, type, or barrel change."
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Provide all L1-L5/TL1/OA1/DM1 and theme/responsive/long/RTL/media stories.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b; built-index test asserts the exact 18 Team Activity story IDs; current regenerated target-era inventory reports all 672 declared IDs present and axe traverses all 18 Team Activity entries within the 828-story run.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "No unrelated ratchet change in the corrective commit."
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Use native landmark/section/heading/list/code/time/busy/status semantics and no passive-row focus target.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b plus the current real-zoom correction; native accessibility-tree/no-tab-stop test, focused Chromium 24/24, pinned Noble matrix 68 pass with 4 expected skips, and axe 828/828 with zero violations.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "Evidence uses built public DOM/accessibility surfaces."
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Prove L5 leakage prevention, TL1 independence, OA1 retained degradation, DM1 exact shape, and marker exclusion.",
+      "proof_type": "automated_test",
+      "evidence": "a260ef9e + 495b018b plus the current real-zoom/locality corrections; black-box L5, detached-purity, alternate supplied-heading projection and actual render, complete guarded state mutations, and built-seam DM1 exact-own-key proof pass. L5 remains capability-free; DM1 covers enumerable, non-enumerable string, and symbol extras with the exact fail-closed TypeError; focused Chromium passes 24/24.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "Mutation calls use the authorized Default seam, never L5."
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Prove responsive/long/RTL/media/a11y/keyboard/overflow behavior including the repository's automated 200% zoom convention.",
+      "proof_type": "automated_test",
+      "evidence": "495b018b plus the current corrective real-zoom work; focused cases cover 390/intermediate/1440/short/long/RTL/media, while a fresh DPR-2 Playwright context exactly halves the normal 1280x1000 CSS viewport to 640x500. Load-bearing assertions prove the public auto-fit truth-region grid changes from two columns to stacked regions, document/root geometry remains contained, long supplied copy remains visible, and the existing public notice focus target retains a visible outline and at least 44px height without shadow-root reach-through. CSS zoom remains separately named supplemental stress. Focused Chromium passes 24/24; the pinned Noble Chromium/Firefox/WebKit matrix passes 68 with 4 expected engine-specific skips; axe is 828/828 with zero violations.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "The train convention models browser zoom with an exactly halved CSS viewport and DPR 2 in a fresh context; it does not claim Playwright drove browser-chrome zoom UI state."
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Maintain exact story/visual inventories and reviewed Chromium/Linux baselines.",
+      "proof_type": "visual_inspection",
+      "evidence": "495b018b plus current exact verification; the 18 CI-authoritative Chromium/Linux snapshot hashes are unchanged by the real-zoom and locality corrections. All 18 images were inspected previously; target-era hashes, artifact provenance, and environment are recorded in rebase-evidence.md.",
+      "pass_fail": "pass",
+      "verified_by": "codex / frontend-freddy",
+      "verified_at": "2026-09-12T05:03:27Z",
+      "notes": "#368 changed no Team Activity/shared theme CSS; its landed history records the same CI-vs-local font-rasterization precedent."
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "L5 carries no fixture, projection, seam, proof attributes, story state, or payload-bearing expando.",
+      "verification_method": "automated_test",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-team-activity-pattern.spec.ts --grep L5",
+      "result": "confirmed_absent",
+      "evidence": "Complete DOM/attribute and own-property/symbol allowlists pass at 495b018b."
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "Projection/deep-freeze never freezes or mutates caller-owned fixture nodes.",
+      "verification_method": "automated_test",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-team-activity-pattern.spec.ts --grep 'projection freeze is detached'",
+      "result": "confirmed_absent",
+      "evidence": "Descriptors/deep equality stay identical, caller nodes remain mutable, projected values stay detached."
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "DM1 accepts exactly the own string property names id and label, accepts zero own symbols, and renders no question/title/owner/action/source payload.",
+      "verification_method": "automated_test",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-team-activity-pattern.spec.ts --grep DM1",
+      "result": "confirmed_absent",
+      "evidence": "At a260ef9e + 495b018b the exact two-name/zero-symbol control passes; five enumerable extras, a non-enumerable own question property, and an own Symbol(question) fail through the real built seam with the exact TypeError and message. Descriptor reads avoid invoking decision getters."
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "No live row gains observed markers and no observed row gains presence, gap-history, or page-wide freshness claims.",
+      "verification_method": "automated_test",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-team-activity-pattern.spec.ts",
+      "result": "confirmed_absent",
+      "evidence": "State mutation matrix and DOM mutual-exclusion assertions pass."
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "No live/activity/Decision/tier/Team Overview component, generic helper, or public runtime API is introduced.",
+      "verification_method": "automated_test",
+      "verification_command": "node scripts/check-pattern-composition.mjs",
+      "result": "confirmed_absent",
+      "evidence": "Story-only source/public-surface tests pass; generated/public surfaces are unchanged."
+    },
+    {
+      "invariant_id": "NI-006",
+      "description": "No route, permission, relay, polling, clock, retention, truth classification, copy/i18n, clipboard, or mutation logic enters the library.",
+      "verification_method": "source_inspection",
+      "verification_command": "git diff origin/train/elements-first...HEAD -- packages/elements/src/patterns/team-activity.stories.ts",
+      "result": "confirmed_absent",
+      "evidence": "Story consumes supplied classifications/copy; no fetch/router/store/poller/timer/relative-time computation or mutation path."
+    },
+    {
+      "invariant_id": "NI-007",
+      "description": "No component CSS is copied and no private shadow root or selector is accessed.",
+      "verification_method": "automated_test",
+      "verification_command": "node scripts/check-pattern-composition.mjs --selftest && node scripts/check-pattern-composition.mjs",
+      "result": "confirmed_absent",
+      "evidence": "47 probe behaviors and live composition scan pass with zero reach-through/copy findings."
+    },
+    {
+      "invariant_id": "NI-008",
+      "description": "The 200% evidence makes no false claim that Playwright controls native browser-chrome zoom.",
+      "verification_method": "source_inspection",
+      "verification_command": "rg -n 'deviceScaleFactor: 2|ZOOM_200_VIEWPORT|two-column|supplemental' apps/storybook/src/tests/sk-team-activity-pattern.spec.ts",
+      "result": "confirmed_absent",
+      "evidence": "The accepted #427 convention uses a fresh DPR-2 context and exactly halves 1280x1000 to 640x500; load-bearing assertions prove two-column-to-stacked reflow, containment, visible focus, and target height. CSS zoom is explicitly supplemental, and no browser-chrome UI claim is made."
+    },
+    {
+      "invariant_id": "NI-009",
+      "description": "No retired Delivery/Flow, Topics UI, Mission-strip backend, relay-client, or notification surface ships.",
+      "verification_method": "source_inspection",
+      "verification_command": "git diff --name-only origin/train/elements-first...HEAD",
+      "result": "confirmed_absent",
+      "evidence": "Implementation remains story/test/inventory/snapshot and mission-evidence only."
+    },
+    {
+      "invariant_id": "NI-010",
+      "description": "Lifecycle history is emitted only through canonical status.events.jsonl; no fabricated mission-events.jsonl exists.",
+      "verification_method": "source_inspection",
+      "verification_command": "test -f kitty-specs/team-activity-truth-region-pattern-stories-01M286SJ/status.events.jsonl && test ! -e kitty-specs/team-activity-truth-region-pattern-stories-01M286SJ/mission-events.jsonl",
+      "result": "confirmed_absent",
+      "evidence": "Cycle 6 planned/doing events were emitted by supported CLI; plan names status.events.jsonl canonical."
+    }
+  ]
+}

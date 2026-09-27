@@ -1,0 +1,16 @@
+{
+  "created_at": "2026-09-11T12:24:03.573621+00:00",
+  "flattened": false,
+  "friendly_name": "Team activity truth-region pattern stories",
+  "mission_id": "01M286SJ7N75DFJQBS0A1WMQQ5",
+  "mission_number": null,
+  "mission_slug": "team-activity-truth-region-pattern-stories-01M286SJ",
+  "mission_type": "software-dev",
+  "purpose_context": "Design-system consumers need a complete, truthful region matrix for repository live, mixed Team live, retained observed activity, and identifier-only Decision events without a runtime component or application-state API.",
+  "purpose_tldr": "Prove live, observed, and Decision truth boundaries with immutable Storybook patterns.",
+  "slug": "team-activity-truth-region-pattern-stories-01M286SJ",
+  "target_branch": "team-activity-truth-region-pattern-stories",
+  "topology": "single_branch",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-11T12:32:57.386983+00:00"
+}

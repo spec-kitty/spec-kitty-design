@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "mission_slug": "team-activity-truth-region-pattern-stories-01M286SJ",
+  "mission_id": "01M286SJ7N75DFJQBS0A1WMQQ5",
+  "mission_branch": "kitty/mission-team-activity-truth-region-pattern-stories-01M286SJ",
+  "target_branch": "team-activity-truth-region-pattern-stories",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-team-activity-pattern.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/team-activity-*.png",
+        "expected-stories.json",
+        "packages/elements/src/patterns/team-activity.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-11T12:31:12.375309+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "611f5cd50f93d6951765df37bb2d84932a66e4f9"
+}

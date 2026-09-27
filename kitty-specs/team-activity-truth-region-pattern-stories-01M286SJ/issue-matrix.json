@@ -1,0 +1,53 @@
+{
+  "rows": {
+    "#286": {
+      "evidence_ref": "Issue #286 remains independently owned. Current verification introduces no runtime element render literal and supplies every Storybook-visible/accessibility string through the frozen consumer fixture. The Storybook-only renderer seam drives non-canonical observed subsection headings through the actual projection and render path, proving both rendered H3 text and accessible names remain consumer supplied; FR-013 and NI-006 in acceptance-matrix.json record the positive and negative proof.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "No user-visible literal in an element's render() \u2014 shadow DOM makes them untranslatable by any consumer",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#381": {
+      "evidence_ref": "Epic #381 is partially delivered by child #382 at compact implementation a260ef9e with executable evidence 495b018b; #382's L1-L5/TL1/OA1/DM1 acceptance is criterion-mapped in acceptance-matrix.json while sibling #383 remains separately owned.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "Epic: Team workspace and activity \u2014 truthful live/observed regions and current Team Overview patterns",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#382": {
+      "evidence_ref": "Independent final approval remains preserved in review-cycle-8.md (historical reviewed code SHA 91b5d0cf). Current exact verification on train base 57fe4ce7 retains the compiled-seam enumerable/non-enumerable/symbol/getter-safety proofs, adds the repository-convention DPR-2/exact-half-viewport real-zoom proof, and drives alternate consumer headings through a projection-local Storybook renderer. Truth-region, a11y, responsive, visual, composition, unit, type, quality, and commitlint evidence is green; rebase-evidence.md records the current counts, host-raster visual diagnostic, and immutable snapshot ledger.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "[TKTW1] Team activity truth-region pattern stories \u2014 repository/team live, observed, and Decision states",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#383": {
+      "evidence_ref": "Sibling epic child #383 is independently owned by its literal mission branch; #382 adds no Team Overview surface, TeamMoment/onboarding logic, or #383 copy/state behavior (acceptance NI-005/NI-006).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": "[TKTW2] Team Overview current-main pattern refresh \u2014 TeamMoment populated and role-aware first run",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    }
+  },
+  "schema_version": 1
+}
