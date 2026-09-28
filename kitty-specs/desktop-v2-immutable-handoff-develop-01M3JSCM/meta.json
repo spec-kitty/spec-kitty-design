@@ -11,5 +11,7 @@
   "purpose_tldr": "desktop v2 immutable handoff develop",
   "slug": "desktop-v2-immutable-handoff-develop-01M3JSCM",
   "target_branch": "develop",
-  "topology": "lanes"
+  "topology": "lanes",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-28T02:08:04.031100+00:00"
 }
