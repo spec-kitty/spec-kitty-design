@@ -6,94 +6,143 @@
   "criteria": [
     {
       "criterion_id": "FR-001",
-      "description": "Verify FR-001 is satisfied",
+      "description": "Stage A must verify exactly the 22 issue-listed primitive families, each with its actual source form and a real public consumer entry; missing or extra families fail.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "Provisional: source contract checker covers exactly 22 Desktop primitive families and public entries; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "verified_by": "codex-program-orchestrator",
+      "verified_at": "2026-09-28T14:34:05.791608+00:00",
+      "notes": "Outstanding: lane evidence is provisional. Confirm the exact 22-family set, actual source forms, and public entries at the consolidated PR head; keep pending until that evidence is reviewed."
     },
     {
       "criterion_id": "FR-002",
-      "description": "Verify FR-002 is satisfied",
+      "description": "Stage A must independently declare each family's required states, themes, and responsive modes, map each state to a live story, visual test, and committed snapshot, and fail on missing or stale entries.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "Provisional: required-state mapping and story to visual-test to snapshot closure; focused deletion probes passed locally 4/4, CI visual 456/456; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "verified_by": "codex-program-orchestrator",
+      "verified_at": "2026-09-28T14:34:07.783394+00:00",
+      "notes": "Outstanding: focused deletion probes and lane visual evidence are provisional. Confirm the independent state inventory, story-to-visual-test-to-snapshot closure, and deletion failures at the consolidated PR head; keep pending until reviewed."
     },
     {
       "criterion_id": "FR-003",
-      "description": "Verify FR-003 is satisfied",
+      "description": "Stage A must account for transitive source, token, and font assets with redistribution evidence; reject unchanged full tokens.css while Swansea rights are unresolved, allow only a checked source-mapped scoped derivative, and recognize Falling Sky OFL evidence.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "Provisional: Swansea full CSS rejection and scoped derivative rights closure; focused Swansea probe passed locally 1/1; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "verified_by": "codex-program-orchestrator",
+      "verified_at": "2026-09-28T14:34:09.415604+00:00",
+      "notes": "Outstanding: the lane rights probe is provisional. Confirm rights closure, Swansea full-CSS rejection and scoped-derivative provenance, and Falling Sky OFL handling at the consolidated PR head; keep pending until reviewed."
     },
     {
       "criterion_id": "FR-004",
-      "description": "Verify FR-004 is satisfied",
+      "description": "Stage A must export committed Git blob bytes for the selected full source SHA and emit a post-source manifest with normalized paths, byte lengths, per-file SHA-256 values, the full source SHA, and a canonical artifact digest.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "Source d416eb6d335b9cce63bfacaa5bda56902db6009d: two committed-byte exports each 180 files; diff -qr exit 0; independent payload digest 323ed95bd953c2a309ed9ed4eedf3642c1d26c74d948963b368e87994e8cb3eb; CI https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710. Pending consolidated PR-head provenance.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-28T13:20:52.962769+00:00",
+      "notes": "Outstanding: the recorded lane export is provisional. Verify committed-blob provenance and manifest contents at the consolidated PR head; acceptance remains pending until that head-specific evidence is reviewed."
     },
     {
       "criterion_id": "FR-005",
-      "description": "Verify FR-005 is satisfied",
+      "description": "Stage A must produce byte-identical exports from the same committed SHA and verify a detached copy offline in internal-integrity and independently pinned approved-source modes, without network or npm runtime access.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "Source d416eb6d335b9cce63bfacaa5bda56902db6009d: repeat exports byte-identical; detached copy internal-integrity and independently pinned approved-source verification both exit 0 for 180 files, digest 323ed95bd953c2a309ed9ed4eedf3642c1d26c74d948963b368e87994e8cb3eb. Pending consolidated PR-head copy.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-28T13:20:54.613296+00:00",
+      "notes": "Outstanding: the recorded repeat-export and detached-copy results are provisional. Confirm both offline verifier modes at the consolidated PR head; keep pending until that evidence is reviewed."
     },
     {
       "criterion_id": "FR-006",
-      "description": "Verify FR-006 is satisfied",
+      "description": "Stage A must name failures for changed, missing, extra, or path-substituted files and detect dirty or mid-export source drift; coordinated rehash must fail when independently pinned SHA and digest are supplied.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "Provisional: tamper matrix and coordinated-rehash rejection checked in lane-b; focused coordinated-rehash probe passed locally 1/1; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "verified_by": "codex-program-orchestrator",
+      "verified_at": "2026-09-28T14:34:11.029993+00:00",
+      "notes": "Outstanding: lane tamper and coordinated-rehash probes are provisional. Confirm the failure matrix and independently pinned rejection at the consolidated PR head; keep pending until reviewed."
     },
     {
       "criterion_id": "FR-007",
-      "description": "Verify FR-007 is satisfied",
+      "description": "Stage A must record lint, test, build, Storybook, axe, visual, and export results at the consolidated PR head, including positive visual test count and per-story axe plus visual-mapping evidence outside the source contract; Stage B repeats gates at S.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "Lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d CI Quality https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710: SUCCESS; Node/Chromium/WebKit 1532 passed, 0 skipped; Playwright 2777 passed, 147 skipped, 1 retried WebKit internal-error flake; axe 810 stories/0 violations; visual 456/456. Pending consolidated PR-head gates. Local same-head Chromium on this machine: 206 passed and 250 screenshot mismatches out of 456; this conflicts with exact-head CI and is not counted as a local pass. Cause not established.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "verified_by": "codex-program-orchestrator",
+      "verified_at": "2026-09-28T15:10:21.350735+00:00",
+      "notes": "Outstanding: current lane CI is not consolidated PR-head evidence. The local Chromium run has 250 screenshot mismatches and its cause is unknown, so it is not counted as a pass; capture and review all seven gates and reports at the consolidated PR head. Keep pending."
     },
     {
       "criterion_id": "FR-008",
-      "description": "Verify FR-008 is satisfied",
+      "description": "Stage A must keep the source contract independent of its own SHA and results, bind the post-source manifest to a full committed SHA, and support a separate post-source evidence report. Stage B creates S-labelled reports after stable S is selected.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "Provisional: source contract has no self SHA/results, manifest binds committed SHA, Stage-B S-labelled report still not produced; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "verified_by": "codex-program-orchestrator",
+      "verified_at": "2026-09-28T14:34:12.621052+00:00",
+      "notes": "Outstanding for Stage A: confirm contract, manifest, and separate report capability at the consolidated PR head. The S-labelled report is intentionally deferred to Stage B after S exists; its absence is not a Stage-A acceptance gap. Keep pending until Stage-A evidence is reviewed."
     },
     {
       "criterion_id": "FR-009",
-      "description": "Verify FR-009 is satisfied",
+      "description": "Stage A must express selected navigation by composing existing neutral primitives and tokens, and keep Desktop-specific artifact or file-tree structure outside generic primitives.",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "Provisional: consumer-boundary contract test checks neutral selected-nav styling and excludes named Desktop domain tree surfaces; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "verified_by": "codex-program-orchestrator",
+      "verified_at": "2026-09-28T14:34:14.203653+00:00",
+      "notes": "Outstanding: the lane consumer-boundary check is provisional. Confirm neutral selected-navigation composition and absence of a generic Desktop domain tree at the consolidated PR head; keep pending until reviewed."
     }
   ],
-  "negative_invariants": []
+  "negative_invariants": [
+    {
+      "invariant_id": "NEG-D1-COORDINATED-REHASH",
+      "description": "A coordinated manifest, contract, and payload rehash must not impersonate an independently approved source",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/desktop-v2-immutable-handoff-develop-01M3JSCM-lane-b && npx vitest run --project node --reporter=default tests/node/desktop-v2-handoff.test.ts -t 'coordinated rehash'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: RUN  v4.1.11 /home/jeroennouws/dev/spec-kitty-design-missions/470-develop/.worktrees/desktop-v2-immutable-handoff-develop-01M3JSCM-lane-b\n\n \u2713 |node| tests/node/desktop-v2-handoff.test.ts (16 tests | 1"
+    },
+    {
+      "invariant_id": "NEG-D1-SOURCE-RACE",
+      "description": "Dirty or mid-export source changes must not silently alter the immutable committed-byte payload",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/desktop-v2-immutable-handoff-develop-01M3JSCM-lane-b && npx vitest run --project node --reporter=default tests/node/desktop-v2-handoff.test.ts -t 'source race rejection'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: RUN  v4.1.11 /home/jeroennouws/dev/spec-kitty-design-missions/470-develop/.worktrees/desktop-v2-immutable-handoff-develop-01M3JSCM-lane-b\n\n \u2713 |node| tests/node/desktop-v2-handoff.test.ts (16 tests | 1"
+    },
+    {
+      "invariant_id": "NEG-D1-CONTRACT-CI-FILTER",
+      "description": "A change only to the Desktop V2 source contract must not skip the relevant component quality gates",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/desktop-v2-immutable-handoff-develop-01M3JSCM-lane-b && npx vitest run --project node --reporter=default tests/node/desktop-v2-handoff.test.ts -t 'components CI filter'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: RUN  v4.1.11 /home/jeroennouws/dev/spec-kitty-design-missions/470-develop/.worktrees/desktop-v2-immutable-handoff-develop-01M3JSCM-lane-b\n\n \u2713 |node| tests/node/desktop-v2-handoff.test.ts (16 tests | 1"
+    },
+    {
+      "invariant_id": "NEG-D1-FAMILY-STATE-STORY-DELETION",
+      "description": "Deleting a required family, state, or story must make the independent contract checker fail",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/desktop-v2-immutable-handoff-develop-01M3JSCM-lane-b && npx vitest run --project node --reporter=default tests/node/desktop-v2-contract.test.ts -t 'deletion probes'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: RUN  v4.1.11 /home/jeroennouws/dev/spec-kitty-design-missions/470-develop/.worktrees/desktop-v2-immutable-handoff-develop-01M3JSCM-lane-b\n\n \u2713 |node| tests/node/desktop-v2-contract.test.ts (10 tests | "
+    },
+    {
+      "invariant_id": "NEG-D1-SWANSEA-FULL-CSS",
+      "description": "Unlicensed unchanged full Swansea CSS must be rejected while the source-mapped scoped derivative remains verifiable",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/desktop-v2-immutable-handoff-develop-01M3JSCM-lane-b && npx vitest run --project node --reporter=default tests/node/desktop-v2-contract.test.ts -t 'Swansea full CSS rejection'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: RUN  v4.1.11 /home/jeroennouws/dev/spec-kitty-design-missions/470-develop/.worktrees/desktop-v2-immutable-handoff-develop-01M3JSCM-lane-b\n\n \u2713 |node| tests/node/desktop-v2-contract.test.ts (10 tests | "
+    },
+    {
+      "invariant_id": "NEG-D1-ZERO-VISUAL-TESTS",
+      "description": "The visual gate must execute a positive number of mapped Chromium visual tests; a zero-test run is not a pass",
+      "verification_method": "custom_command",
+      "verification_command": "test \"$(gh run view 36423448710 -R spec-kitty/spec-kitty-design --json headSha,conclusion --jq '.headSha + \" \" + .conclusion')\" = \"d416eb6d335b9cce63bfacaa5bda56902db6009d success\" && test \"$(gh run view 36423448710 -R spec-kitty/spec-kitty-design --json jobs --jq '.jobs[] | select(.name==\"visual-regression\") | .conclusion')\" = \"success\" && gh run view --job 108932073381 -R spec-kitty/spec-kitty-design --log | rg -o '456 passed'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: 456 passed"
+    }
+  ]
 }

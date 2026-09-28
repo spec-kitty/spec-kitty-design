@@ -1,12 +1,12 @@
 {
-  "event_count": 2,
-  "last_event_id": "01M3JTM2W34GP2FYX6ZMWSXS5P",
-  "materialized_at": "2026-09-28T01:38:41.667028+00:00",
+  "event_count": 17,
+  "last_event_id": "01M3KYS1ENKER5P7YMZ4ARW2KY",
+  "materialized_at": "2026-09-28T12:10:32.790008+00:00",
   "mission_number": "",
   "mission_slug": "desktop-v2-immutable-handoff-develop-01M3JSCM",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 0,
+    "approved": 2,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
@@ -14,22 +14,71 @@
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 2
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
-      "actor": "finalize-tasks",
-      "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M3JTM2S919XQT53813TKPNTH",
-      "last_transition_at": "2026-09-28T01:38:41.577160+00:00"
+      "actor": "user",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 1,
+      "lane": "approved",
+      "last_event_id": "01M3K3GZX34WXQV1J23MQNCX5K",
+      "last_transition_at": "2026-09-28T04:14:17.507368+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Ready for review: commit ce24a13f9e99eb22a372eeb8cde58b403ff9a5b4 adds exact 22-family/110-state source contract, deletion probes, mappings, rights closure, and 110 local Chromium snapshots. Vitest 814/814, focused WP01 visuals 110/110, and axe 810/810 pass. Full visual spec is 251/456: 205 pre-existing non-WP01 snapshot failures; observed local/CI raster-size drift, no unrelated baselines updated, and CI equivalence is not claimed. Swansea keeps full tokens.css export fail-closed. External per-state evidence: tmp/finding/desktop-v2-wp01-evidence.md.",
+        "Cycle-2 review passed at source 932756693c82cf9e9d313574f7ab2f604e347019: MIT LICENSE covers all 140 authored family paths with negative probes; tracked evidence 78b672c2bc99248d6a5f66f1273b406fe18e8f47 maps 110 states and 810 axe outcomes to tested source. Anti-patterns: dead code PASS; synthetic fixtures PASS; silent empty return PASS; FR coverage PASS; frozen surface PASS; locked decisions PASS; shared ownership N/A; production fragility PASS. Full visual 205 older failures remain a mission PR gate."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/470-develop/kitty-specs/desktop-v2-immutable-handoff-develop-01M3JSCM/tasks/WP01-source-contract-evidence/review-cycle-2.md",
+        "reference": "review-cycle://desktop-v2-immutable-handoff-develop-01M3JSCM/WP01-source-contract-evidence/review-cycle-2.md",
+        "reviewer": "reviewer-renata",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 880992,
+      "shell_pid_created_at": "1790476857.62",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done"
+      }
     },
     "WP02": {
-      "actor": "finalize-tasks",
+      "actor": "user",
+      "agent": "reviewer-renata",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M3JTM2W34GP2FYX6ZMWSXS5P",
-      "last_transition_at": "2026-09-28T01:38:41.667028+00:00"
+      "lane": "approved",
+      "last_event_id": "01M3KYS1ENKER5P7YMZ4ARW2KY",
+      "last_transition_at": "2026-09-28T12:10:32.790008+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "WP02 source and post-source evidence verified at CI run 36416436998 (head 070f7bf7); submit for independent aggregate review",
+        "Reviewer Renata formal approval at 070f7bf7bac745f7fe6e9f44feee01341289c577; exact-head CI 36416436998 SUCCESS. T005-T008 export, rights, integrity, offline verification, source binding, 110-state mapping, and evidence reviewed. Coordinated aggregate WP01-owned visual refresh: 55 PNG change events / 48 distinct paths after WP01 approval, including 10 aggregate captures. Anti-pattern checklist 1-8 PASS; pre-review architectural gate no_coverage (not a pass)."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/470-develop/kitty-specs/desktop-v2-immutable-handoff-develop-01M3JSCM/tasks/WP02-offline-export-verifier/review-cycle-1.md",
+        "reference": "review-cycle://desktop-v2-immutable-handoff-develop-01M3JSCM/WP02-offline-export-verifier/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 1465269,
+      "shell_pid_created_at": "1790584188.1",
+      "subtasks": {
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done"
+      }
     }
   }
 }

@@ -20,6 +20,9 @@ requirement_refs:
 planning_base_branch: develop
 merge_target_branch: develop
 branch_strategy: Planning artifacts for this mission were generated on develop. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into develop unless the human explicitly redirects the landing branch.
+base_branch: kitty/mission-desktop-v2-immutable-handoff-develop-01M3JSCM
+base_commit: 9be1466d657d0aace4cc9804fc06077de1d8e400
+created_at: '2026-09-28T04:14:50.754306+00:00'
 subtasks:
 - T005
 - T006
@@ -56,3 +59,7 @@ Start after WP01's SHA-independent contract and evidence mappings are approved t
 Implement T005–T008. The copied verifier has explicit internal-integrity and approved-source modes. Internal mode rejects changed/missing/extra files, path traversal, symlinks, duplicate/case-colliding paths, and mismatched manifest/contract/file digests, but cannot authenticate a coordinated replacement. Approved-source mode additionally requires caller-supplied, independently pinned expected source SHA and artifact digest, and rejects a coordinated manifest+contract+payload rehash. A failure names the path or field. Tests must include dirty included-file and mid-export mutation probes, same-S byte repeatability, ordinary tamper, coordinated rehash (internal may pass; pinned mode must fail), rights and path failures. Wire `contracts/desktop-v2/**` into the existing `components` path filter and run contract/export checks in relevant existing quality jobs in `.github/workflows/ci-quality.yml`; do not add a new harness.
 
 Run all seven gate categories at the actual reviewed PR head: `npm run quality:all`, `npm test` plus focused contract/export tests, `npx nx run-many --target=build --projects=tokens,styles,elements,react`, `npx nx run storybook:storybook:build`, `node scripts/run-axe-storybook.js`, `PW_INCLUDE_VISUAL=1 npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium` with positive test count, and two exports plus copied offline verification against independent pins. Preserve per-story axe outcomes and story→visual-test→snapshot mapping with tested SHA in PR evidence outside the source contract. If CI skips a gate, provide exact-head manual evidence. Submit WP02 for independent review. After both WPs are approved, consolidate one mission PR to `develop`. A later focused mission freezes stable post-merge S, repeats required gates, and produces the final handoff artifact and S-labelled reports after S.
+
+## Activity Log
+
+- 2026-09-28T12:12:04Z – reviewer-renata – shell_pid=1465269 – Attribution clarification for verdict event 01M3KYS1ENKER5P7YMZ4ARW2KY: the CLI auto-recorded reviewer=user because the optional --reviewer flag was omitted. The actual independent reviewer was Codex Sol High operating as reviewer-renata; this was not a human/user approval. Review evidence and exact-head CI 36416436998 remain as stated in the approval reason.

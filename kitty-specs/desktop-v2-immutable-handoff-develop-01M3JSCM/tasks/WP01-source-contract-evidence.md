@@ -17,6 +17,9 @@ requirement_refs:
 planning_base_branch: develop
 merge_target_branch: develop
 branch_strategy: Planning artifacts for this mission were generated on develop. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into develop unless the human explicitly redirects the landing branch.
+base_branch: kitty/mission-desktop-v2-immutable-handoff-develop-01M3JSCM
+base_commit: 9be1466d657d0aace4cc9804fc06077de1d8e400
+created_at: '2026-09-28T02:08:04.626611+00:00'
 subtasks:
 - T001
 - T002
