@@ -96,6 +96,9 @@ async function screenshotDesktopV2Targets(
 
   const viewport = page.viewportSize();
   if (!viewport) throw new Error('Desktop V2 aggregate capture requires a fixed viewport');
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
   const pageSize = await page.evaluate(() => ({
     width: document.documentElement.scrollWidth,
     height: document.documentElement.scrollHeight,
