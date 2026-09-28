@@ -32,10 +32,12 @@ authoritative_surface: contracts/desktop-v2/
 create_intent:
 - contracts/desktop-v2/
 - scripts/check-desktop-v2-contract.mjs
+- tests/node/desktop-v2-contract.test.ts
 execution_mode: code_change
 owned_files:
 - contracts/desktop-v2/**
 - scripts/check-desktop-v2-contract.mjs
+- tests/node/desktop-v2-contract.test.ts
 - packages/styles/src/**
 - packages/elements/src/**
 - packages/tokens/src/**
@@ -50,8 +52,8 @@ tracker_refs:
 
 # WP01 — Source contract and evidence
 
-Inventory the exact 22 families in [spec.md](../spec.md) against the current `develop` checkout. Each entry must identify its actual styles/element form, public consumer entry, repository-relative source paths, state/theme/responsive story IDs, accessibility evidence, visual evidence, token dependencies, transitive assets and redistribution basis. An entry that lacks a required story, axe result, visual reference or rights evidence is an explicit gap to close, not a green result. Keep the current repository code as truth; use the old D1 lane and approved prototype only as reference when deciding whether a narrow source edit is needed.
+Inventory the exact 22 families in [spec.md](../spec.md) against the current `develop` checkout. Declare each family's required states/themes/responsive modes independently of existing stories, then map each required state to a resolvable story ID, visual test ID and committed snapshot. Record actual styles/element form, public entry, repository-relative source paths, token/asset closure and redistribution basis. The source contract is SHA-independent: no own commit SHA, digest, timestamp, axe result or gate result. A missing story, snapshot, per-story axe result or rights basis is a gap, never green evidence. Keep current repository code as truth; the old D1 lane and approved prototype are reference only.
 
-Implement T001–T004. Close source/story gaps through existing repo conventions and generators; do not hand-edit generated React wrappers or markup. Neutral selected navigation remains a Desktop composition using existing tokens. Do not add a generic artifact tree, Desktop route/data, or Tauri behavior. Assess font closure carefully: Inter has an OFL file; the brand guide flags Swansea rights as unresolved. If exported CSS requires an unresolved font asset, fail the contract or produce a justified source-preserving scoped closure that does not reference it.
+Implement T001–T004. Close source/story gaps through existing repo conventions and generators; do not hand-edit generated React wrappers or markup. Neutral selected navigation remains a Desktop composition using existing tokens. Do not add a generic artifact tree, Desktop route/data, or Tauri behavior. Inter has an OFL file, Falling Sky OTF embeds SIL OFL terms, and the full `packages/tokens/src/tokens.css` contains Swansea URLs with unresolved rights. Mark an unchanged full-token export blocked until Swansea terms are proven; a scoped derivative may exclude those URLs only with checked source mapping. Do not falsely mark Falling Sky uncleared.
 
-Add a machine check that rejects a missing/extra family, absent source/public path, stale story/evidence ID, and unresolved license. Demonstrate a red case for each meaningful rule. Run lint, tests, package build, Storybook, axe and visual checks affected by the changes; document commands, results and evidence paths. Submit this WP for independent Spec Kitty review. WP02 follows its approval within the same mission; both WPs consolidate into one reviewed PR to `develop`.
+Add a machine check that rejects a missing/extra family, removed required state even if its story is also deleted, absent source/public path, stale story→visual-test→snapshot mapping and unresolved license. Demonstrate deletion probes for a family, a required state and a mapped story. Run affected lint, tests, package build, Storybook, axe and visual checks, using `PW_INCLUDE_VISUAL=1 npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium` with a positive executed-test count. Persist per-story axe results, visual mappings, command/result and tested SHA as PR evidence outside the source contract; the final S-labelled evidence belongs to the later handoff mission. Submit this WP for independent Spec Kitty review. WP02 follows its approval within the same mission; both WPs consolidate into one reviewed PR to `develop`.
