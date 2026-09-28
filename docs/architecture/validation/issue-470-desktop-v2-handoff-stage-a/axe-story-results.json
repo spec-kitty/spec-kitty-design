@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-28",
+  "checkoutHead": "78b672c2bc99248d6a5f66f1273b406fe18e8f47",
+  "exactReviewedHeadEvidence": false,
+  "command": "node scripts/run-axe-storybook.js",
+  "totalStories": 810,
+  "passed": 810,
+  "failed": 0,
+  "timeouts": 0,
+  "wcag21aaViolations": 0
+}
