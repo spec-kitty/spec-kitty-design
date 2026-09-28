@@ -267,7 +267,7 @@ jobs:
           [ -z "$FAILED" ] || { echo "::error::could not confirm dist-tags for:$FAILED"; exit 1; }
 
       - name: Create GitHub Release with SBOM
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # softprops/action-gh-release v3.0.0
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64  # softprops/action-gh-release v3.0.3
         with:
           files: spec-kitty-design-sbom.cdx.json
           generate_release_notes: true
