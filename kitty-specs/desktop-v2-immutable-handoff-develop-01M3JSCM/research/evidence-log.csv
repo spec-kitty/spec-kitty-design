@@ -1,0 +1,7 @@
+id,source_id,finding,implication
+E1,S1,22 named primitive families and immutable offline handoff required,contract-covers-exact-family-set
+E2,S2,all 22 family style directories exist at origin/develop c5ab89ea,inventory-current-source-paths
+E3,S3,element directories exist for a subset of named families,record-source-form-per-family
+E4,S4,token CSS references local font assets,verify-transitive-export-closure
+E5,S5,Swansea redistribution terms remain unresolved,fail-closed-on-unlicensed-export-assets
+E6,S6,repo-native lint test build Storybook axe and visual commands documented,bind-gate-evidence-to-source-S

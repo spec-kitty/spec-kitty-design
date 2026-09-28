@@ -1,0 +1,7 @@
+id,source,kind,accessed_utc,authority
+S1,https://github.com/spec-kitty/spec-kitty-design/issues/470,issue,2026-09-28,scope-and-acceptance
+S2,packages/styles/src/,repository,2026-09-28,primitive-source
+S3,packages/elements/src/,repository,2026-09-28,element-source
+S4,packages/tokens/src/tokens.css,repository,2026-09-28,token-and-font-references
+S5,docs/design-system/brand-guidelines.md,repository,2026-09-28,font-rights-status
+S6,docs/contributing/running-quality-checks.md,repository,2026-09-28,native-quality-commands
