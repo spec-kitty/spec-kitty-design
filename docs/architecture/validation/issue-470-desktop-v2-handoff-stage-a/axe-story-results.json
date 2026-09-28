@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "date": "2026-09-28",
-  "testedHead": "2d9f25371be02ed6608eba8c8386e0a9ba6a5237",
+  "testedHead": "f6873680ed3ff8f5ff5e939a5339e2ba436c6ce7",
   "command": "node scripts/run-axe-storybook.js",
   "storybookBuildCommand": "npx nx run storybook:storybook:build",
   "contractCheckCommand": "node scripts/check-desktop-v2-contract.mjs",
@@ -12,7 +12,7 @@
   "rendered": 810,
   "timeouts": 0,
   "wcag21aaViolations": 0,
-  "rawLogSha256": "dc5d73a94de659332e49075eb5029dc282b11f0408e3431a560ca6ff6d7b67c9",
+  "rawLogSha256": "31e64beb6ac3c770c71b5394e93acea374a719cedd95b5f7553a12d682152808",
   "passedStoryIds": [
     "elements-skactionrow--default", "elements-skactionrow--native-list", "elements-skactionrow--selected", "elements-skactionrow--non-selectable", "elements-skactionrow--with-controls", "elements-skactionrow--route", "elements-skactionrow--route-flush", "elements-skactionrow--button-flush",
     "elements-skactionrow--selected-flush", "elements-skactionrow--route-selected", "elements-skactionrow--unknown-presentation", "elements-skactionrow--forced-colors", "elements-skactionrow--long-content", "elements-skactionrow--selectable-states", "elements-skactionrow--card-states", "elements-skactionrow--card-long-content",
