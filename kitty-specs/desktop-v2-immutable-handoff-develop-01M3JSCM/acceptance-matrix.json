@@ -56,7 +56,7 @@
     },
     {
       "criterion_id": "FR-006",
-      "description": "Stage A must name failures for changed, missing, extra, or path-substituted files and detect dirty or mid-export source drift; coordinated rehash must fail when independently pinned SHA and digest are supplied.",
+      "description": "Stage A must name failures for changed, missing, extra, or path-substituted artifact files; dirty or mid-export worktree changes cannot alter the committed-blob payload, and coordinated rehash must fail when independently pinned SHA and digest are supplied.",
       "proof_type": "automated_test",
       "evidence": "Provisional: tamper matrix and coordinated-rehash rejection checked in lane-b; focused coordinated-rehash probe passed locally 1/1; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
       "pass_fail": "pending",
