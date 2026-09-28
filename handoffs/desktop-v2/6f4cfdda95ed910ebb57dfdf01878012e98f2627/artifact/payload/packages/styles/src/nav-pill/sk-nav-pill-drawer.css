@@ -1,0 +1,193 @@
+/* @spec-kitty/styles — sk-nav-pill-drawer: hamburger trigger + collapsible drawer */
+/* Import this file IN ADDITION TO sk-nav-pill.css for responsive/collapsible nav behaviour. */
+/* Requires: sk-nav-pill.css (base pill layout must be loaded first) */
+/* NO JS SHIPS WITH THIS PACKAGE. The two-container arrangement below is CSS only: something
+   must toggle `is-open` on the drawer, and since #73 that something is the consumer's own
+   code — `<sk-nav-pill>` in @spec-kitty/elements is the supported version and owns its panel.
+   This header used to name a `skToggleDrawer()` helper that no longer exists, and because the
+   sheet is embedded verbatim into the adopted stylesheet it told every consumer of the
+   element to wire a function that had been deleted. */
+
+/* ── Collapsed / hamburger button (mobile) ─────────────────────────────── */
+
+.sk-nav-pill__hamburger {
+  display: none; /* hidden on desktop; shown via media query */
+  width: 44px;
+  height: 44px;
+  border-radius: var(--sk-radius-pill);
+  background: var(--sk-surface-input);
+  color: var(--sk-fg-muted);
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    box-shadow var(--sk-motion-duration-base) var(--sk-motion-ease-out),
+    transform var(--sk-motion-duration-base) var(--sk-motion-ease-out);
+}
+
+.sk-nav-pill__hamburger svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Hover accent variants — matching reference is-hover-* classes */
+.sk-nav-pill__hamburger:hover {
+  color: var(--sk-color-yellow);
+  background: var(--sk-color-yellow-alpha-15);
+  box-shadow:
+    0 0 0 var(--sk-border-width-1) var(--sk-color-yellow-alpha-35),
+    0 6px 22px -4px var(--sk-color-yellow-alpha-60);
+  transform: translateY(-1px);
+}
+
+/* Drawer: full-width nav shown when hamburger is active */
+.sk-nav-pill__drawer {
+  display: none;
+  flex-direction: column;
+  gap: var(--sk-space-1);
+  padding: var(--sk-space-3);
+  background: var(--sk-surface-card);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  margin-top: var(--sk-space-2);
+  /* Collapse animation */
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height var(--sk-motion-duration-base) var(--sk-motion-ease-out),
+    opacity var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    padding var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-nav-pill__drawer.is-open {
+  display: flex;
+  max-height: 400px;
+  opacity: 1;
+  padding: var(--sk-space-3);
+}
+
+/* Animated open state */
+.sk-nav-pill--has-drawer .sk-nav-pill__hamburger[aria-expanded="true"] {
+  color: var(--sk-fg-default);
+  background: var(--sk-surface-card);
+  box-shadow: 0 0 0 var(--sk-border-width-1) var(--sk-border-default);
+}
+
+/* BORDER-BOX ON THE ITEM, and without it the drawer clips its own rows.
+   `width: 100%` on a content-box element resolves to the container's CONTENT width, and the
+   item's own horizontal padding is then added OUTSIDE it — so every row overflowed the drawer's
+   right padding by 2 x --sk-space-4 and was cut off by the drawer's `overflow: hidden`. Visible
+   as a highlighted row running past the panel edge with no gutter on the right.
+   Only the form components set box-sizing in this repo; there is no global reset.
+
+   ON THE ITEM ONLY. Setting it on `.sk-nav-pill__drawer` as well fixes nothing — measured
+   overflow is 0px either way, because the drawer's width is `auto` and box-sizing does not
+   affect an auto-width box. It is not inert, though: the drawer's collapse animation runs on
+   `max-height: 0` -> `400px`, and under border-box that 400px caps the BORDER box, dropping the
+   content cap to 374px and making `overflow: hidden` bite 26px earlier. */
+.sk-nav-pill__drawer .sk-nav-pill__item {
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: var(--sk-radius-sm);
+  padding: var(--sk-space-3) var(--sk-space-4);
+}
+
+/* Responsive: hide desktop items, show hamburger below 720px */
+@media (max-width: 720px) {
+  .sk-nav-pill--responsive .sk-nav-pill__items {
+    display: none;
+  }
+  .sk-nav-pill--responsive .sk-nav-pill__hamburger {
+    display: inline-flex;
+  }
+}
+
+/* ── Element arrangement: one items container, two presentations ────────── */
+/*
+   ADDED for <sk-nav-pill> (#73), NOT a replacement. Every rule above stays: static
+   consumers still compose the two-container arrangement (a row plus a separate
+   .sk-nav-pill__drawer) and keep working until the migration batches reach them.
+
+   These rules are inert in a document. `:host` matches only when this sheet is ADOPTED
+   into a shadow root, so a plain <link> to this file cannot activate them — which is what
+   lets both arrangements live in one source of record.
+
+   WHY ONE CONTAINER. The consumer slots their nav items ONCE. Two slots cannot hold the
+   same nodes, so a two-container element would force the items to be authored twice — and
+   authoring them twice is exactly what dashboard-demo.html and the story do today, and what
+   FR-006 removes. Below the breakpoint the same container IS the panel.
+
+   The hamburger and the container share the element's shadow root, so the hamburger's
+   aria-controls resolves: ADR-9 records that axe scopes ID lookups to getRootNode() and no
+   cross-root reference resolves.
+*/
+@media (max-width: 720px) {
+  /* The containing block for the panel above. Scoped to the media query so the element adds
+     no stacking context at desktop widths. */
+  :host {
+    position: relative;
+  }
+
+  :host .sk-nav-pill__items {
+    display: none;
+  }
+
+  :host .sk-nav-pill__hamburger {
+    display: inline-flex;
+  }
+
+  /* The row becomes the panel. The same DESIGN as .sk-nav-pill__drawer.is-open above,
+     reached by a different arrangement — but not the same declaration list, and the first
+     draft's comment claimed it was. The static drawer animates open from `max-height: 0`
+     because it is always in the tree; this container is `display: none` until the panel
+     opens, so there is no from-state to animate and the transition is deliberately absent.
+
+     POSITIONED BY THE ELEMENT, not by the consumer. In the two-container arrangement the
+     page had to place the panel itself: dashboard-demo.html carried a .dash-nav-drawer-wrap
+     with `position:absolute; top:100%` for exactly this. That is component layout leaking
+     into consumer CSS, and it went with the id contract. */
+  :host([open]) .sk-nav-pill__items {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sk-space-1);
+    padding: var(--sk-space-3);
+    background: var(--sk-surface-card);
+    border: var(--sk-border-width-1) solid var(--sk-border-default);
+    border-radius: var(--sk-radius-md);
+    margin-top: var(--sk-space-2);
+  }
+
+  /* By CLASS, matching the base sheet — an earlier draft selected `::slotted(a)` by tag, so a
+     slotted <button> item got no panel padding and a classless <a> got panel padding with no
+     base styling. One contract for slotted items, not two. */
+  :host([open]) .sk-nav-pill__items ::slotted(.sk-nav-pill__item) {
+    /* BORDER-BOX HERE TOO. This is the ELEMENT path's copy of the rule fixed above, and it is
+       the supported one — the bare descendant selector cannot match a slotted node, so fixing
+       only that rule left `<sk-nav-pill>` broken while the static arrangement was correct: the
+       exact cross-path divergence ADR-8 criterion 1 exists to prevent. Measured before the fix:
+       the item's border box overflowed the panel's content box by 16px on EACH side and ran 3px
+       past the panel's border. This panel is `overflow: visible`, so unlike the static drawer it
+       was not even clipped — the row's background painted over the panel's rounded corner. */
+    box-sizing: border-box;
+    width: 100%;
+    border-radius: var(--sk-radius-sm);
+    padding: var(--sk-space-3) var(--sk-space-4);
+  }
+}
+
+/* Open-state affordance on the trigger, mirroring the static arrangement's rule. */
+:host([open]) .sk-nav-pill__hamburger {
+  color: var(--sk-fg-default);
+  background: var(--sk-surface-card);
+  box-shadow: 0 0 0 var(--sk-border-width-1) var(--sk-border-default);
+}

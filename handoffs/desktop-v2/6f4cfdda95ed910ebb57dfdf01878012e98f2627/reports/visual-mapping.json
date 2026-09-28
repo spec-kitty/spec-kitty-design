@@ -1,0 +1,3115 @@
+{
+  "sourceSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+  "sourceContract": "handoffs/desktop-v2/6f4cfdda95ed910ebb57dfdf01878012e98f2627/artifact/contract/source-contract.json",
+  "visualRunner": "apps/storybook/src/tests/visual.spec.ts",
+  "exactSVisualGate": {
+    "command": "PW_INCLUDE_VISUAL=1 npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium",
+    "ciRun": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36457894235",
+    "ciJob": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36457894235/job/109049374784",
+    "exitCode": 0,
+    "enumerated": 456,
+    "passed": 456,
+    "failed": 0,
+    "skipped": 0,
+    "localEnumeration": {
+      "command": "PW_INCLUDE_VISUAL=1 npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium --list",
+      "exitCode": 0,
+      "inventoryLog": "handoffs/desktop-v2/6f4cfdda95ed910ebb57dfdf01878012e98f2627/reports/logs/visual-inventory-list.log",
+      "enumerated": 456
+    }
+  },
+  "desktopV2ContractMapping": {
+    "families": 22,
+    "requiredStates": 110,
+    "states": [
+      {
+        "family": "action-row",
+        "state": "default-dark",
+        "storyId": "elements-skactionrow--default",
+        "visualTestId": "desktop-v2/action-row/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "action-row",
+        "state": "light-mode",
+        "storyId": "elements-skactionrow--light-mode",
+        "visualTestId": "desktop-v2/action-row/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "action-row",
+        "state": "responsive-narrow",
+        "storyId": "elements-skactionrow--long-content",
+        "visualTestId": "desktop-v2/action-row/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "action-row",
+        "state": "hover",
+        "storyId": "elements-skactionrow--default",
+        "visualTestId": "desktop-v2/action-row/hover",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-hover-chromium-linux.png"
+      },
+      {
+        "family": "action-row",
+        "state": "focus",
+        "storyId": "elements-skactionrow--default",
+        "visualTestId": "desktop-v2/action-row/focus",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-focus-chromium-linux.png"
+      },
+      {
+        "family": "action-row",
+        "state": "active",
+        "storyId": "elements-skactionrow--default",
+        "visualTestId": "desktop-v2/action-row/active",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-active-chromium-linux.png"
+      },
+      {
+        "family": "action-row",
+        "state": "selected",
+        "storyId": "elements-skactionrow--selected",
+        "visualTestId": "desktop-v2/action-row/selected",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-selected-chromium-linux.png"
+      },
+      {
+        "family": "app-shell",
+        "state": "default-dark",
+        "storyId": "elements-skappshell--default",
+        "visualTestId": "desktop-v2/app-shell/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "app-shell",
+        "state": "light-mode",
+        "storyId": "elements-skappshell--light-mode",
+        "visualTestId": "desktop-v2/app-shell/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "app-shell",
+        "state": "responsive-narrow",
+        "storyId": "elements-skappshell--narrow",
+        "visualTestId": "desktop-v2/app-shell/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "app-shell",
+        "state": "focus",
+        "storyId": "elements-skappshell--compact-open",
+        "visualTestId": "desktop-v2/app-shell/focus",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-focus-chromium-linux.png"
+      },
+      {
+        "family": "app-shell",
+        "state": "compact-open",
+        "storyId": "elements-skappshell--compact-open",
+        "visualTestId": "desktop-v2/app-shell/compact-open",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-compact-open-chromium-linux.png"
+      },
+      {
+        "family": "app-shell",
+        "state": "compact-closed",
+        "storyId": "elements-skappshell--compact-closed",
+        "visualTestId": "desktop-v2/app-shell/compact-closed",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-compact-closed-chromium-linux.png"
+      },
+      {
+        "family": "button",
+        "state": "default-dark",
+        "storyId": "elements-skbutton--primary",
+        "visualTestId": "desktop-v2/button/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "button",
+        "state": "light-mode",
+        "storyId": "elements-skbutton--light-mode",
+        "visualTestId": "desktop-v2/button/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "button",
+        "state": "responsive-narrow",
+        "storyId": "elements-skbutton--primary",
+        "visualTestId": "desktop-v2/button/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "button",
+        "state": "hover",
+        "storyId": "elements-skbutton--primary",
+        "visualTestId": "desktop-v2/button/hover",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-hover-chromium-linux.png"
+      },
+      {
+        "family": "button",
+        "state": "focus",
+        "storyId": "elements-skbutton--primary",
+        "visualTestId": "desktop-v2/button/focus",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-focus-chromium-linux.png"
+      },
+      {
+        "family": "button",
+        "state": "active",
+        "storyId": "elements-skbutton--primary",
+        "visualTestId": "desktop-v2/button/active",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-active-chromium-linux.png"
+      },
+      {
+        "family": "button",
+        "state": "disabled",
+        "storyId": "elements-skbutton--disabled",
+        "visualTestId": "desktop-v2/button/disabled",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-disabled-chromium-linux.png"
+      },
+      {
+        "family": "card",
+        "state": "default-dark",
+        "storyId": "elements-skcard--default",
+        "visualTestId": "desktop-v2/card/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "card",
+        "state": "light-mode",
+        "storyId": "elements-skcard--light-mode",
+        "visualTestId": "desktop-v2/card/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "card",
+        "state": "responsive-narrow",
+        "storyId": "elements-skcard--default",
+        "visualTestId": "desktop-v2/card/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "card",
+        "state": "hover",
+        "storyId": "elements-skcard--status-info",
+        "visualTestId": "desktop-v2/card/hover",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-hover-chromium-linux.png"
+      },
+      {
+        "family": "context-sidebar",
+        "state": "default-dark",
+        "storyId": "elements-skcontextsidebar--default",
+        "visualTestId": "desktop-v2/context-sidebar/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-context-sidebar-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "context-sidebar",
+        "state": "light-mode",
+        "storyId": "elements-skcontextsidebar--light-mode",
+        "visualTestId": "desktop-v2/context-sidebar/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-context-sidebar-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "context-sidebar",
+        "state": "responsive-narrow",
+        "storyId": "elements-skcontextsidebar--long-labels",
+        "visualTestId": "desktop-v2/context-sidebar/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-context-sidebar-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "data-table",
+        "state": "default-dark",
+        "storyId": "primitives-skdatatable-html--default",
+        "visualTestId": "desktop-v2/data-table/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "data-table",
+        "state": "light-mode",
+        "storyId": "primitives-skdatatable-html--light-mode",
+        "visualTestId": "desktop-v2/data-table/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "data-table",
+        "state": "responsive-narrow",
+        "storyId": "primitives-skdatatable-html--narrow-scrollable",
+        "visualTestId": "desktop-v2/data-table/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "data-table",
+        "state": "hover",
+        "storyId": "primitives-skdatatable-html--default",
+        "visualTestId": "desktop-v2/data-table/hover",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-hover-chromium-linux.png"
+      },
+      {
+        "family": "data-table",
+        "state": "focus",
+        "storyId": "primitives-skdatatable-html--sticky-header",
+        "visualTestId": "desktop-v2/data-table/focus",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-focus-chromium-linux.png"
+      },
+      {
+        "family": "data-table",
+        "state": "sticky-header",
+        "storyId": "primitives-skdatatable-html--sticky-header",
+        "visualTestId": "desktop-v2/data-table/sticky-header",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-sticky-header-chromium-linux.png"
+      },
+      {
+        "family": "disclosure",
+        "state": "default-dark",
+        "storyId": "primitives-skdisclosure-html--closed",
+        "visualTestId": "desktop-v2/disclosure/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "disclosure",
+        "state": "light-mode",
+        "storyId": "primitives-skdisclosure-html--light-mode",
+        "visualTestId": "desktop-v2/disclosure/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "disclosure",
+        "state": "responsive-narrow",
+        "storyId": "primitives-skdisclosure-html--long-body",
+        "visualTestId": "desktop-v2/disclosure/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "disclosure",
+        "state": "focus",
+        "storyId": "primitives-skdisclosure-html--closed",
+        "visualTestId": "desktop-v2/disclosure/focus",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-focus-chromium-linux.png"
+      },
+      {
+        "family": "disclosure",
+        "state": "open",
+        "storyId": "primitives-skdisclosure-html--open",
+        "visualTestId": "desktop-v2/disclosure/open",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-open-chromium-linux.png"
+      },
+      {
+        "family": "empty-state",
+        "state": "default-dark",
+        "storyId": "primitives-skemptystate-html--without-action",
+        "visualTestId": "desktop-v2/empty-state/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "empty-state",
+        "state": "light-mode",
+        "storyId": "primitives-skemptystate-html--light-mode",
+        "visualTestId": "desktop-v2/empty-state/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "empty-state",
+        "state": "responsive-narrow",
+        "storyId": "primitives-skemptystate-html--inline-long-narrow",
+        "visualTestId": "desktop-v2/empty-state/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "empty-state",
+        "state": "with-action",
+        "storyId": "primitives-skemptystate-html--with-action",
+        "visualTestId": "desktop-v2/empty-state/with-action",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-with-action-chromium-linux.png"
+      },
+      {
+        "family": "empty-state",
+        "state": "without-action",
+        "storyId": "primitives-skemptystate-html--without-action",
+        "visualTestId": "desktop-v2/empty-state/without-action",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-without-action-chromium-linux.png"
+      },
+      {
+        "family": "event-timeline",
+        "state": "default-dark",
+        "storyId": "primitives-skeventtimeline-html--default",
+        "visualTestId": "desktop-v2/event-timeline/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-event-timeline-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "event-timeline",
+        "state": "light-mode",
+        "storyId": "primitives-skeventtimeline-html--light-mode",
+        "visualTestId": "desktop-v2/event-timeline/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-event-timeline-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "event-timeline",
+        "state": "responsive-narrow",
+        "storyId": "primitives-skeventtimeline-html--narrow",
+        "visualTestId": "desktop-v2/event-timeline/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-event-timeline-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "event-timeline",
+        "state": "compact",
+        "storyId": "primitives-skeventtimeline-html--compact-default",
+        "visualTestId": "desktop-v2/event-timeline/compact",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-event-timeline-compact-chromium-linux.png"
+      },
+      {
+        "family": "facts",
+        "state": "default-dark",
+        "storyId": "primitives-skfacts-html--default",
+        "visualTestId": "desktop-v2/facts/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-facts-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "facts",
+        "state": "light-mode",
+        "storyId": "primitives-skfacts-html--light-mode",
+        "visualTestId": "desktop-v2/facts/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-facts-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "facts",
+        "state": "responsive-narrow",
+        "storyId": "primitives-skfacts-html--long-value",
+        "visualTestId": "desktop-v2/facts/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-facts-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "facts",
+        "state": "compact",
+        "storyId": "primitives-skfacts-html--compact",
+        "visualTestId": "desktop-v2/facts/compact",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-facts-compact-chromium-linux.png"
+      },
+      {
+        "family": "form-select",
+        "state": "default-dark",
+        "storyId": "form-skformselect-html--default",
+        "visualTestId": "desktop-v2/form-select/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "form-select",
+        "state": "light-mode",
+        "storyId": "form-skformselect-html--light-mode",
+        "visualTestId": "desktop-v2/form-select/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "form-select",
+        "state": "responsive-narrow",
+        "storyId": "form-skformselect-html--narrow",
+        "visualTestId": "desktop-v2/form-select/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "form-select",
+        "state": "focus",
+        "storyId": "form-skformselect-html--default",
+        "visualTestId": "desktop-v2/form-select/focus",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-focus-chromium-linux.png"
+      },
+      {
+        "family": "form-select",
+        "state": "disabled",
+        "storyId": "form-skformselect-html--disabled",
+        "visualTestId": "desktop-v2/form-select/disabled",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-disabled-chromium-linux.png"
+      },
+      {
+        "family": "form-select",
+        "state": "invalid",
+        "storyId": "form-skformselect-html--required-invalid",
+        "visualTestId": "desktop-v2/form-select/invalid",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-invalid-chromium-linux.png"
+      },
+      {
+        "family": "metric",
+        "state": "default-dark",
+        "storyId": "elements-skmetric--default",
+        "visualTestId": "desktop-v2/metric/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-metric-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "metric",
+        "state": "light-mode",
+        "storyId": "elements-skmetric--light-mode",
+        "visualTestId": "desktop-v2/metric/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-metric-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "metric",
+        "state": "responsive-narrow",
+        "storyId": "elements-skmetric--long-content",
+        "visualTestId": "desktop-v2/metric/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-metric-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "metric",
+        "state": "compact",
+        "storyId": "elements-skmetric--compact",
+        "visualTestId": "desktop-v2/metric/compact",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-metric-compact-chromium-linux.png"
+      },
+      {
+        "family": "nav-pill",
+        "state": "default-dark",
+        "storyId": "elements-sknavpill--default",
+        "visualTestId": "desktop-v2/nav-pill/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "nav-pill",
+        "state": "light-mode",
+        "storyId": "navigation-sknavpill-html--light-mode",
+        "visualTestId": "desktop-v2/nav-pill/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "nav-pill",
+        "state": "responsive-narrow",
+        "storyId": "navigation-sknavpill-html--mobile",
+        "visualTestId": "desktop-v2/nav-pill/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "nav-pill",
+        "state": "hover",
+        "storyId": "elements-sknavpill--default",
+        "visualTestId": "desktop-v2/nav-pill/hover",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-hover-chromium-linux.png"
+      },
+      {
+        "family": "nav-pill",
+        "state": "focus",
+        "storyId": "elements-sknavpill--default",
+        "visualTestId": "desktop-v2/nav-pill/focus",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-focus-chromium-linux.png"
+      },
+      {
+        "family": "nav-pill",
+        "state": "active",
+        "storyId": "navigation-sknavpill-html--active-item",
+        "visualTestId": "desktop-v2/nav-pill/active",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-active-chromium-linux.png"
+      },
+      {
+        "family": "notice",
+        "state": "default-dark",
+        "storyId": "elements-sknotice--default",
+        "visualTestId": "desktop-v2/notice/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "notice",
+        "state": "light-mode",
+        "storyId": "elements-sknotice--light-mode",
+        "visualTestId": "desktop-v2/notice/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "notice",
+        "state": "responsive-narrow",
+        "storyId": "elements-sknotice--long-message",
+        "visualTestId": "desktop-v2/notice/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "notice",
+        "state": "focus",
+        "storyId": "elements-sknotice--dismissible",
+        "visualTestId": "desktop-v2/notice/focus",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-focus-chromium-linux.png"
+      },
+      {
+        "family": "notice",
+        "state": "dismissible",
+        "storyId": "elements-sknotice--dismissible",
+        "visualTestId": "desktop-v2/notice/dismissible",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-dismissible-chromium-linux.png"
+      },
+      {
+        "family": "page-header",
+        "state": "default-dark",
+        "storyId": "elements-skpageheader--default",
+        "visualTestId": "desktop-v2/page-header/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "page-header",
+        "state": "light-mode",
+        "storyId": "elements-skpageheader--light-mode",
+        "visualTestId": "desktop-v2/page-header/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "page-header",
+        "state": "responsive-narrow",
+        "storyId": "elements-skpageheader--narrow-reflow",
+        "visualTestId": "desktop-v2/page-header/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "page-header",
+        "state": "compact",
+        "storyId": "elements-skpageheader--compact",
+        "visualTestId": "desktop-v2/page-header/compact",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-compact-chromium-linux.png"
+      },
+      {
+        "family": "page-header",
+        "state": "sticky",
+        "storyId": "elements-skpageheader--default-sticky",
+        "visualTestId": "desktop-v2/page-header/sticky",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-sticky-chromium-linux.png"
+      },
+      {
+        "family": "personal-rail",
+        "state": "default-dark",
+        "storyId": "elements-skpersonalrail--default",
+        "visualTestId": "desktop-v2/personal-rail/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-personal-rail-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "personal-rail",
+        "state": "light-mode",
+        "storyId": "elements-skpersonalrail--light-mode",
+        "visualTestId": "desktop-v2/personal-rail/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-personal-rail-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "personal-rail",
+        "state": "responsive-narrow",
+        "storyId": "elements-skpersonalrail--long-labels",
+        "visualTestId": "desktop-v2/personal-rail/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-personal-rail-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "pill-tag",
+        "state": "default-dark",
+        "storyId": "elements-skpilltag--default",
+        "visualTestId": "desktop-v2/pill-tag/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "pill-tag",
+        "state": "light-mode",
+        "storyId": "elements-skpilltag--light-mode",
+        "visualTestId": "desktop-v2/pill-tag/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "pill-tag",
+        "state": "responsive-narrow",
+        "storyId": "elements-skpilltag--long-label",
+        "visualTestId": "desktop-v2/pill-tag/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "pill-tag",
+        "state": "variants",
+        "storyId": "elements-skpilltag--all-variants",
+        "visualTestId": "desktop-v2/pill-tag/variants",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-variants-chromium-linux.png"
+      },
+      {
+        "family": "progress",
+        "state": "default-dark",
+        "storyId": "primitives-skprogress-html--default",
+        "visualTestId": "desktop-v2/progress/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-progress-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "progress",
+        "state": "light-mode",
+        "storyId": "primitives-skprogress-html--light-mode",
+        "visualTestId": "desktop-v2/progress/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-progress-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "progress",
+        "state": "responsive-narrow",
+        "storyId": "primitives-skprogress-html--narrow",
+        "visualTestId": "desktop-v2/progress/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-progress-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "progress",
+        "state": "indeterminate",
+        "storyId": "primitives-skprogress-html--indeterminate",
+        "visualTestId": "desktop-v2/progress/indeterminate",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-progress-indeterminate-chromium-linux.png"
+      },
+      {
+        "family": "segmented-choice",
+        "state": "default-dark",
+        "storyId": "components-sksegmentedchoice-html--default",
+        "visualTestId": "desktop-v2/segmented-choice/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "segmented-choice",
+        "state": "light-mode",
+        "storyId": "components-sksegmentedchoice-html--light-mode",
+        "visualTestId": "desktop-v2/segmented-choice/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "segmented-choice",
+        "state": "responsive-narrow",
+        "storyId": "components-sksegmentedchoice-html--narrow",
+        "visualTestId": "desktop-v2/segmented-choice/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "segmented-choice",
+        "state": "hover",
+        "storyId": "components-sksegmentedchoice-html--default",
+        "visualTestId": "desktop-v2/segmented-choice/hover",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-hover-chromium-linux.png"
+      },
+      {
+        "family": "segmented-choice",
+        "state": "focus",
+        "storyId": "components-sksegmentedchoice-html--default",
+        "visualTestId": "desktop-v2/segmented-choice/focus",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-focus-chromium-linux.png"
+      },
+      {
+        "family": "segmented-choice",
+        "state": "active",
+        "storyId": "components-sksegmentedchoice-html--default",
+        "visualTestId": "desktop-v2/segmented-choice/active",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-active-chromium-linux.png"
+      },
+      {
+        "family": "segmented-choice",
+        "state": "disabled",
+        "storyId": "components-sksegmentedchoice-html--one-disabled",
+        "visualTestId": "desktop-v2/segmented-choice/disabled",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-disabled-chromium-linux.png"
+      },
+      {
+        "family": "segmented-choice",
+        "state": "selected",
+        "storyId": "components-sksegmentedchoice-html--second-selected",
+        "visualTestId": "desktop-v2/segmented-choice/selected",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-selected-chromium-linux.png"
+      },
+      {
+        "family": "status-indicator",
+        "state": "default-dark",
+        "storyId": "elements-skstatusindicator--default",
+        "visualTestId": "desktop-v2/status-indicator/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "status-indicator",
+        "state": "light-mode",
+        "storyId": "elements-skstatusindicator--light-mode",
+        "visualTestId": "desktop-v2/status-indicator/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "status-indicator",
+        "state": "responsive-narrow",
+        "storyId": "elements-skstatusindicator--long-text",
+        "visualTestId": "desktop-v2/status-indicator/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "status-indicator",
+        "state": "all-tones",
+        "storyId": "elements-skstatusindicator--all-tones",
+        "visualTestId": "desktop-v2/status-indicator/all-tones",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-all-tones-chromium-linux.png"
+      },
+      {
+        "family": "status-indicator",
+        "state": "pulsing",
+        "storyId": "elements-skstatusindicator--pulsing-states",
+        "visualTestId": "desktop-v2/status-indicator/pulsing",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-pulsing-chromium-linux.png"
+      },
+      {
+        "family": "workflow-board",
+        "state": "default-dark",
+        "storyId": "primitives-skworkflowboard-html--populated",
+        "visualTestId": "desktop-v2/workflow-board/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "workflow-board",
+        "state": "light-mode",
+        "storyId": "primitives-skworkflowboard-html--light-mode",
+        "visualTestId": "desktop-v2/workflow-board/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "workflow-board",
+        "state": "responsive-narrow",
+        "storyId": "primitives-skworkflowboard-html--single-lane-narrow",
+        "visualTestId": "desktop-v2/workflow-board/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "workflow-board",
+        "state": "focus",
+        "storyId": "primitives-skworkflowboard-html--populated",
+        "visualTestId": "desktop-v2/workflow-board/focus",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-focus-chromium-linux.png"
+      },
+      {
+        "family": "workflow-board",
+        "state": "empty",
+        "storyId": "primitives-skworkflowboard-html--all-empty",
+        "visualTestId": "desktop-v2/workflow-board/empty",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-empty-chromium-linux.png"
+      },
+      {
+        "family": "workflow-lane",
+        "state": "default-dark",
+        "storyId": "primitives-skworkflowlane-html--default",
+        "visualTestId": "desktop-v2/workflow-lane/default-dark",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-lane-default-dark-chromium-linux.png"
+      },
+      {
+        "family": "workflow-lane",
+        "state": "light-mode",
+        "storyId": "primitives-skworkflowlane-html--light-mode",
+        "visualTestId": "desktop-v2/workflow-lane/light-mode",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-lane-light-mode-chromium-linux.png"
+      },
+      {
+        "family": "workflow-lane",
+        "state": "responsive-narrow",
+        "storyId": "primitives-skworkflowlane-html--default",
+        "visualTestId": "desktop-v2/workflow-lane/responsive-narrow",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-lane-responsive-narrow-chromium-linux.png"
+      },
+      {
+        "family": "workflow-lane",
+        "state": "empty",
+        "storyId": "primitives-skworkflowlane-html--empty",
+        "visualTestId": "desktop-v2/workflow-lane/empty",
+        "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-lane-empty-chromium-linux.png"
+      }
+    ]
+  },
+  "completeSuiteInventory": {
+    "testIdsEnumerated": 456,
+    "tests": [
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/action-row/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/action-row/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/action-row/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/action-row/hover"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/action-row/focus"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/action-row/active"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/action-row/selected"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/app-shell/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/app-shell/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/app-shell/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/app-shell/focus"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/app-shell/compact-open"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/app-shell/compact-closed"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/button/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/button/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/button/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/button/hover"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/button/focus"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/button/active"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/button/disabled"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/card/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/card/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/card/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/card/hover"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/context-sidebar/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/context-sidebar/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/context-sidebar/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/data-table/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/data-table/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/data-table/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/data-table/hover"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/data-table/focus"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/data-table/sticky-header"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/disclosure/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/disclosure/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/disclosure/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/disclosure/focus"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/disclosure/open"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/empty-state/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/empty-state/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/empty-state/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/empty-state/with-action"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/empty-state/without-action"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/event-timeline/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/event-timeline/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/event-timeline/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/event-timeline/compact"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/facts/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/facts/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/facts/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/facts/compact"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/form-select/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/form-select/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/form-select/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/form-select/focus"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/form-select/disabled"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/form-select/invalid"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/metric/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/metric/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/metric/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/metric/compact"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/nav-pill/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/nav-pill/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/nav-pill/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/nav-pill/hover"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/nav-pill/focus"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/nav-pill/active"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/notice/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/notice/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/notice/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/notice/focus"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/notice/dismissible"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/page-header/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/page-header/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/page-header/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/page-header/compact"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/page-header/sticky"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/personal-rail/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/personal-rail/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/personal-rail/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/pill-tag/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/pill-tag/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/pill-tag/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/pill-tag/variants"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/progress/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/progress/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/progress/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/progress/indeterminate"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/segmented-choice/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/segmented-choice/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/segmented-choice/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/segmented-choice/hover"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/segmented-choice/focus"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/segmented-choice/active"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/segmented-choice/disabled"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/segmented-choice/selected"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/status-indicator/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/status-indicator/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/status-indicator/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/status-indicator/all-tones"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/status-indicator/pulsing"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/workflow-board/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/workflow-board/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/workflow-board/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/workflow-board/focus"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/workflow-board/empty"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/workflow-lane/default-dark"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/workflow-lane/light-mode"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/workflow-lane/responsive-narrow"
+      },
+      {
+        "location": "visual.spec.ts:141:7",
+        "testId": "desktop-v2/workflow-lane/empty"
+      },
+      {
+        "location": "visual.spec.ts:219:5",
+        "testId": "SK-stub HTML default — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:226:5",
+        "testId": "SK-feature-card HTML default — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:233:5",
+        "testId": "SK-progress HTML default dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:240:5",
+        "testId": "SK-progress HTML light mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:247:5",
+        "testId": "SK-progress HTML forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:262:5",
+        "testId": "SK-progress HTML indeterminate (reduced motion) — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:278:5",
+        "testId": "SK-event-timeline same fixture default and compact — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:292:5",
+        "testId": "SK-event-timeline compact narrow — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:301:5",
+        "testId": "SK-event-timeline compact light — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:309:5",
+        "testId": "SK-event-timeline compact forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:329:5",
+        "testId": "SK-copy-field default dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:334:5",
+        "testId": "SK-copy-field light mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:339:5",
+        "testId": "SK-copy-field long wrapping — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:344:5",
+        "testId": "SK-copy-field narrow — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:349:5",
+        "testId": "SK-copy-field focus — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:355:5",
+        "testId": "SK-copy-field disabled empty — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:361:5",
+        "testId": "SK-copy-field manual fallback — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:367:5",
+        "testId": "SK-copy-field failure — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:373:5",
+        "testId": "SK-copy-field forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:401:7",
+        "testId": "SK-workflow-board populated — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:401:7",
+        "testId": "SK-workflow-board fitting — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:401:7",
+        "testId": "SK-workflow-board all-empty — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:401:7",
+        "testId": "SK-workflow-board one-empty-lane — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:401:7",
+        "testId": "SK-workflow-board fifty-items — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:401:7",
+        "testId": "SK-workflow-board long-labels-and-items — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:401:7",
+        "testId": "SK-workflow-board single-lane-narrow — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:401:7",
+        "testId": "SK-workflow-board light-mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:407:5",
+        "testId": "SK-workflow-board forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:416:5",
+        "testId": "SK-ribbon-card HTML with ribbon — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:556:5",
+        "testId": "SK-team-overview shell desktop dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:565:5",
+        "testId": "SK-team-overview shell desktop light — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:574:5",
+        "testId": "SK-team-overview shell narrow — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:588:7",
+        "testId": "SK-app-shell sk-app-shell-rail-preserving-1024-dark.png — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:588:7",
+        "testId": "SK-app-shell sk-app-shell-rail-preserving-1024-light.png — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:588:7",
+        "testId": "SK-app-shell sk-app-shell-rail-preserving-390-dark.png — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:597:5",
+        "testId": "SK-app-shell rail-preserving forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:607:7",
+        "testId": "SK-icon button focus dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:607:7",
+        "testId": "SK-icon button focus light — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:620:5",
+        "testId": "SK-transition-matrix approved dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:625:5",
+        "testId": "SK-transition-matrix light — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:630:5",
+        "testId": "SK-transition-matrix selectable rest and hover — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:639:5",
+        "testId": "SK-transition-matrix keyboard focus and pressed — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:651:5",
+        "testId": "SK-transition-matrix pointer active — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:664:5",
+        "testId": "SK-transition-matrix non-selectable analogue — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:671:5",
+        "testId": "SK-transition-matrix narrow scrolled ownership — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:680:5",
+        "testId": "SK-section-header long content — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:691:5",
+        "testId": "SK-section-header light mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:699:5",
+        "testId": "SK-status-indicator all tones — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:707:5",
+        "testId": "SK-status-indicator light mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:715:5",
+        "testId": "SK-entity-marker meaningful and decorative modes — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:727:5",
+        "testId": "SK-action-row default and light — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:739:5",
+        "testId": "SK-action-row route and flush states — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:753:5",
+        "testId": "SK-action-row forced-colors selected comparison — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:764:5",
+        "testId": "SK-action-row long content at 320px — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:770:5",
+        "testId": "SK-action-row selectable rest, hover, focus and pressed — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:783:5",
+        "testId": "SK-action-row pointer active — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:794:5",
+        "testId": "SK-action-row selected and non-selectable analogues — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:815:5",
+        "testId": "SK-action-row HTML default and light — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:822:5",
+        "testId": "SK-action-row HTML card, flush, route and current states — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:835:5",
+        "testId": "SK-action-row HTML forced-colors comparison — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:846:5",
+        "testId": "SK-action-row HTML long content at 360px — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:855:5",
+        "testId": "compact work-item extensions T10 dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:864:5",
+        "testId": "compact work-item extensions T10 light — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:873:5",
+        "testId": "compact work-item extensions narrow long card — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:888:5",
+        "testId": "compact work-item extensions marker axis matrix — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:899:5",
+        "testId": "compact work-item extensions portrait and landscape crop — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:935:5",
+        "testId": "SK-entity-marker bordered vs unbordered outer box — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:946:5",
+        "testId": "compact work-item extensions pulse off/on reduced-motion fallback — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:958:5",
+        "testId": "compact work-item extensions inline short and long dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:976:5",
+        "testId": "compact work-item extensions inline light — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:986:5",
+        "testId": "compact work-item extensions inline forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1013:5",
+        "testId": "SK-metric default dark and light — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:1020:5",
+        "testId": "SK-metric compact and long content — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:1028:5",
+        "testId": "SK-evidence-chain approved composition and light — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:1037:5",
+        "testId": "SK-evidence-chain two and six stages — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:1044:5",
+        "testId": "SK-evidence-chain narrow — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1050:5",
+        "testId": "SK-bar-chart approved dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1055:5",
+        "testId": "SK-bar-chart approved light — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1060:5",
+        "testId": "SK-bar-chart narrow scrolled ownership — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1069:5",
+        "testId": "SK-bar-chart zero and empty states — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:1076:5",
+        "testId": "SK-bar-chart selectable states — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1112:7",
+        "testId": "SK-form-select default — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1112:7",
+        "testId": "SK-form-select light-mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1112:7",
+        "testId": "SK-form-select compact — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1112:7",
+        "testId": "SK-form-select required-invalid — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1112:7",
+        "testId": "SK-form-select narrow — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1137:5",
+        "testId": "SK-form-select forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1152:5",
+        "testId": "SK-form-select light invalid — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1197:7",
+        "testId": "SK-input form-input-default — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1197:7",
+        "testId": "SK-input light-mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1197:7",
+        "testId": "SK-input form-input-error — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1207:5",
+        "testId": "SK-input light error — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1212:5",
+        "testId": "SK-input narrow — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1236:5",
+        "testId": "SK-input forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1266:7",
+        "testId": "SK-form-input default — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1266:7",
+        "testId": "SK-form-input light-mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1266:7",
+        "testId": "SK-form-input error — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1275:5",
+        "testId": "SK-form-input light error — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1283:5",
+        "testId": "SK-form-input narrow — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1306:5",
+        "testId": "SK-form-input forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1334:5",
+        "testId": "SK-form-textarea light error — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1389:7",
+        "testId": "SK-checkbox-choice-group default-dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1389:7",
+        "testId": "SK-checkbox-choice-group light-mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1389:7",
+        "testId": "SK-checkbox-choice-group k-3-detailed-lane-filters — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1389:7",
+        "testId": "SK-checkbox-choice-group narrow — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1389:7",
+        "testId": "SK-checkbox-choice-group long-content — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1389:7",
+        "testId": "SK-checkbox-choice-group disabled-choices — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1406:5",
+        "testId": "SK-checkbox-choice-group focus — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1417:5",
+        "testId": "SK-checkbox-choice-group forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1455:7",
+        "testId": "SK-radio-choice-group default-dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1455:7",
+        "testId": "SK-radio-choice-group light-mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1455:7",
+        "testId": "SK-radio-choice-group two-choice — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1455:7",
+        "testId": "SK-radio-choice-group required-invalid — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1455:7",
+        "testId": "SK-radio-choice-group disabled-option — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1455:7",
+        "testId": "SK-radio-choice-group disabled-group — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1455:7",
+        "testId": "SK-radio-choice-group narrow — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1455:7",
+        "testId": "SK-radio-choice-group long-content — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1455:7",
+        "testId": "SK-radio-choice-group rtl — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1472:5",
+        "testId": "SK-radio-choice-group focus — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1483:5",
+        "testId": "SK-radio-choice-group forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1508:5",
+        "testId": "SK-segmented-choice selected — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1516:5",
+        "testId": "SK-segmented-choice unselected — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1524:5",
+        "testId": "SK-segmented-choice hover — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1533:5",
+        "testId": "SK-segmented-choice active — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1550:5",
+        "testId": "SK-segmented-choice disabled — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1558:5",
+        "testId": "SK-segmented-choice focus — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1568:5",
+        "testId": "SK-segmented-choice long content — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1576:5",
+        "testId": "SK-segmented-choice dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1584:5",
+        "testId": "SK-segmented-choice light — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1592:5",
+        "testId": "SK-segmented-choice forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1638:7",
+        "testId": "SK-context-nav default — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1638:7",
+        "testId": "SK-context-nav current-nested — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1638:7",
+        "testId": "SK-context-nav long-labels — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1638:7",
+        "testId": "SK-context-nav light-mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1638:7",
+        "testId": "SK-context-nav unavailable-mixed — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1638:7",
+        "testId": "SK-context-nav unavailable-long — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1638:7",
+        "testId": "SK-context-nav unavailable-light-mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1644:5",
+        "testId": "SK-context-nav forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1654:5",
+        "testId": "SK-context-nav unavailable forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1686:7",
+        "testId": "SK-public-header default — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1686:7",
+        "testId": "SK-public-header light-mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1716:7",
+        "testId": "SK-section-nav default — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1716:7",
+        "testId": "SK-section-nav light-mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1716:7",
+        "testId": "SK-section-nav long-labels — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1716:7",
+        "testId": "SK-section-nav many-routes — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1728:5",
+        "testId": "SK-section-nav forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1792:7",
+        "testId": "Team overview team-overview-approved-dark-1280.png — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:1792:7",
+        "testId": "Team overview team-overview-approved-dark-1440.png — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:1792:7",
+        "testId": "Team overview team-overview-light-1440.png — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:1792:7",
+        "testId": "Team overview team-overview-narrow-390.png — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:1792:7",
+        "testId": "Team overview team-overview-scale-50-wps.png — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:1792:7",
+        "testId": "Team overview team-overview-controlled-interactions.png — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:1792:7",
+        "testId": "Team overview team-overview-empty-partial-data.png — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:1809:7",
+        "testId": "Team overview rail-identity — focused baseline"
+      },
+      {
+        "location": "visual.spec.ts:1809:7",
+        "testId": "Team overview delivery-evidence — focused baseline"
+      },
+      {
+        "location": "visual.spec.ts:1809:7",
+        "testId": "Team overview return-chart — focused baseline"
+      },
+      {
+        "location": "visual.spec.ts:1809:7",
+        "testId": "Team overview flow-matrix — focused baseline"
+      },
+      {
+        "location": "visual.spec.ts:1834:5",
+        "testId": "SK-check-bullet active forced colors retains visible, distinct complete and pending state"
+      },
+      {
+        "location": "visual.spec.ts:1945:7",
+        "testId": "Work package detail sk-breadcrumbs-default-dark.png — targeted visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1945:7",
+        "testId": "Work package detail sk-breadcrumbs-light.png — targeted visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1945:7",
+        "testId": "Work package detail sk-breadcrumbs-long-narrow.png — targeted visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1945:7",
+        "testId": "Work package detail sk-prose-prompt-dark.png — targeted visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1945:7",
+        "testId": "Work package detail sk-prose-light.png — targeted visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1945:7",
+        "testId": "Work package detail sk-prose-long-code-narrow.png — targeted visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1945:7",
+        "testId": "Work package detail sk-event-timeline-default-dark.png — targeted visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1945:7",
+        "testId": "Work package detail sk-event-timeline-light.png — targeted visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1945:7",
+        "testId": "Work package detail sk-event-timeline-twenty-events.png — targeted visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1945:7",
+        "testId": "Work package detail sk-check-bullet-state-mixed.png — targeted visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1945:7",
+        "testId": "Work package detail sk-check-bullet-state-light.png — targeted visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:1945:7",
+        "testId": "Work package detail sk-check-bullet-state-long-narrow.png — targeted visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2003:7",
+        "testId": "Work Package pattern work-package-overview-dark-1280.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2003:7",
+        "testId": "Work Package pattern work-package-overview-light-1280.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2003:7",
+        "testId": "Work Package pattern work-package-overview-narrow-390.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2003:7",
+        "testId": "Work Package pattern work-package-overview-empty-lanes.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2003:7",
+        "testId": "Work Package pattern work-package-overview-scale-50.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2003:7",
+        "testId": "Work Package pattern work-package-detail-dark-1280.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2003:7",
+        "testId": "Work Package pattern work-package-detail-light-1280.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2003:7",
+        "testId": "Work Package pattern work-package-detail-narrow-390.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2031:7",
+        "testId": "Work Package pattern work-package-overview-progress.png — focused route state"
+      },
+      {
+        "location": "visual.spec.ts:2031:7",
+        "testId": "Work Package pattern work-package-overview-board-overflow.png — focused route state"
+      },
+      {
+        "location": "visual.spec.ts:2031:7",
+        "testId": "Work Package pattern work-package-overview-live-claim.png — focused route state"
+      },
+      {
+        "location": "visual.spec.ts:2031:7",
+        "testId": "Work Package pattern work-package-overview-stale-claim.png — focused route state"
+      },
+      {
+        "location": "visual.spec.ts:2031:7",
+        "testId": "Work Package pattern work-package-overview-snapshot-notice.png — focused route state"
+      },
+      {
+        "location": "visual.spec.ts:2031:7",
+        "testId": "Work Package pattern work-package-detail-checklist-states.png — focused route state"
+      },
+      {
+        "location": "visual.spec.ts:2031:7",
+        "testId": "Work Package pattern work-package-detail-history-connector.png — focused route state"
+      },
+      {
+        "location": "visual.spec.ts:2031:7",
+        "testId": "Work Package pattern work-package-detail-no-subtasks.png — focused route state"
+      },
+      {
+        "location": "visual.spec.ts:2031:7",
+        "testId": "Work Package pattern work-package-detail-absent-prompt.png — focused route state"
+      },
+      {
+        "location": "visual.spec.ts:2031:7",
+        "testId": "Work Package pattern work-package-detail-history-unavailable.png — focused route state"
+      },
+      {
+        "location": "visual.spec.ts:2031:7",
+        "testId": "Work Package pattern work-package-detail-long-code.png — focused route state"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-m1-desktop-dark.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-m2-responsive-390.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-m2-drawer-open-390.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-m3-loading.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-m4-unavailable.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-m5-snapshot-notice.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-m6a-artifacts-present.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-m6b-artifacts-absent.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-m7a-ops-present.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-m7b-ops-absent.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-m8-truth-regions.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-light.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2093:7",
+        "testId": "Mission Reading sk-mission-reading-long-390.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2108:7",
+        "testId": "Mission Reading threshold 859px — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2108:7",
+        "testId": "Mission Reading threshold 860px — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2108:7",
+        "testId": "Mission Reading threshold 861px — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2118:5",
+        "testId": "Mission Reading forced colors unavailable entry — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2138:5",
+        "testId": "Mission Reading long content CSS zoom stress — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2181:7",
+        "testId": "Mission Kanban default — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2181:7",
+        "testId": "Mission Kanban k-2-narrow-contained — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2181:7",
+        "testId": "Mission Kanban k-3-detailed-lane-filters — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2181:7",
+        "testId": "Mission Kanban k-4-snapshot-behind-log — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2181:7",
+        "testId": "Mission Kanban k-5-observed-not-yet-pushed — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2181:7",
+        "testId": "Mission Kanban k-6-stable-empty-board — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2181:7",
+        "testId": "Mission Kanban light-mode — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2181:7",
+        "testId": "Mission Kanban long-content — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2181:7",
+        "testId": "Mission Kanban forced-colors — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2181:7",
+        "testId": "Mission Kanban reduced-motion — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2243:7",
+        "testId": "Mission Kanban ten-lane mission-kanban-ten-lane-k1-populated-1440 — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2243:7",
+        "testId": "Mission Kanban ten-lane mission-kanban-ten-lane-k2-narrow-390 — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2243:7",
+        "testId": "Mission Kanban ten-lane mission-kanban-ten-lane-k3-filtered-lanes — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2243:7",
+        "testId": "Mission Kanban ten-lane mission-kanban-ten-lane-k3-forced-colors — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2243:7",
+        "testId": "Mission Kanban ten-lane mission-kanban-ten-lane-k4-snapshot-behind-log — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2243:7",
+        "testId": "Mission Kanban ten-lane mission-kanban-ten-lane-k5-unverified-overlay — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2243:7",
+        "testId": "Mission Kanban ten-lane mission-kanban-ten-lane-k6-empty-lanes — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2243:7",
+        "testId": "Mission Kanban ten-lane mission-kanban-ten-lane-light-mode — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2243:7",
+        "testId": "Mission Kanban ten-lane mission-kanban-ten-lane-long-content-390 — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2243:7",
+        "testId": "Mission Kanban ten-lane mission-kanban-ten-lane-forced-colors — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2243:7",
+        "testId": "Mission Kanban ten-lane mission-kanban-ten-lane-reduced-motion — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2243:7",
+        "testId": "Mission Kanban ten-lane mission-kanban-ten-lane-rtl — full pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-d1-desktop-dark.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-d2-closed-390.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-d2-open-390.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-d4-cross-branch.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-d5-not-spec-kitty.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-d6-snapshot-behind-log.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-d7-indexing.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-d8-no-missions.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-light.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-long-390.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-progress-thresholds.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-layout-threshold-860.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-layout-threshold-861.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2323:7",
+        "testId": "Repository Dossier sk-repository-dossier-tracker-destinations.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:2340:5",
+        "testId": "Repository Dossier active forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2353:5",
+        "testId": "Repository Dossier reduced motion indexing — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2378:7",
+        "testId": "Repository Dossier 200% CSS zoom stress — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2378:7",
+        "testId": "Repository Dossier 400% CSS zoom stress — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2486:7",
+        "testId": "Work Explorer work-explorer-w1-lane-dark.png — full composition baseline"
+      },
+      {
+        "location": "visual.spec.ts:2486:7",
+        "testId": "Work Explorer work-explorer-w2-person-dark.png — full composition baseline"
+      },
+      {
+        "location": "visual.spec.ts:2486:7",
+        "testId": "Work Explorer work-explorer-w3-type-dark.png — full composition baseline"
+      },
+      {
+        "location": "visual.spec.ts:2486:7",
+        "testId": "Work Explorer work-explorer-w4-rail-1024.png — full composition baseline"
+      },
+      {
+        "location": "visual.spec.ts:2486:7",
+        "testId": "Work Explorer work-explorer-w5-light.png — full composition baseline"
+      },
+      {
+        "location": "visual.spec.ts:2486:7",
+        "testId": "Work Explorer work-explorer-w6-filtered-empty.png — full composition baseline"
+      },
+      {
+        "location": "visual.spec.ts:2486:7",
+        "testId": "Work Explorer work-explorer-w7-no-work.png — full composition baseline"
+      },
+      {
+        "location": "visual.spec.ts:2486:7",
+        "testId": "Work Explorer work-explorer-w8-degraded.png — full composition baseline"
+      },
+      {
+        "location": "visual.spec.ts:2486:7",
+        "testId": "Work Explorer work-explorer-w9-loading.png — full composition baseline"
+      },
+      {
+        "location": "visual.spec.ts:2486:7",
+        "testId": "Work Explorer work-explorer-w10-no-repositories.png — full composition baseline"
+      },
+      {
+        "location": "visual.spec.ts:2502:7",
+        "testId": "Work Explorer rail-preserving 1099px threshold — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2502:7",
+        "testId": "Work Explorer rail-preserving 1100px threshold — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2502:7",
+        "testId": "Work Explorer rail-preserving 1101px threshold — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2520:5",
+        "testId": "Work Explorer controlled collection and blocked exception — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2547:5",
+        "testId": "Work Explorer focused native route and active filters — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2585:5",
+        "testId": "Work Explorer W4 controlled drawer open and dismissed — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:2609:5",
+        "testId": "Work Explorer compact timeline and delayed context — visual baselines"
+      },
+      {
+        "location": "visual.spec.ts:2622:5",
+        "testId": "Work Explorer loading stays static under reduced motion — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2639:5",
+        "testId": "Work Explorer long supplied labels remain contained — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2666:5",
+        "testId": "Work Explorer effective 200 percent CSS zoom stress — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2683:5",
+        "testId": "Work Explorer short viewport keeps focused work unobscured — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2725:5",
+        "testId": "SK-button busy default — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2734:5",
+        "testId": "SK-button busy reduced motion — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2744:5",
+        "testId": "SK-button busy forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2768:5",
+        "testId": "SK-boundary-page HTML form-card default dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2776:5",
+        "testId": "SK-boundary-page HTML form-card light mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2784:5",
+        "testId": "SK-boundary-page HTML terminal-card default dark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2792:5",
+        "testId": "SK-boundary-page HTML without mark — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2800:5",
+        "testId": "SK-boundary-page HTML without footnote — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2808:5",
+        "testId": "SK-boundary-page HTML with footnote — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2816:5",
+        "testId": "SK-boundary-page HTML forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2825:5",
+        "testId": "SK-boundary-page HTML narrow 320 — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2845:5",
+        "testId": "SK-button danger-secondary dark default — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2856:5",
+        "testId": "SK-button danger-secondary light mode — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:2935:7",
+        "testId": "CLI Auth sk-cli-auth-code-entry-dark.png — pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2935:7",
+        "testId": "CLI Auth sk-cli-auth-code-entry-light.png — pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2935:7",
+        "testId": "CLI Auth sk-cli-auth-code-entry-390.png — pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2935:7",
+        "testId": "CLI Auth sk-cli-auth-authorization-decision-dark.png — pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2935:7",
+        "testId": "CLI Auth sk-cli-auth-authorization-decision-light.png — pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2935:7",
+        "testId": "CLI Auth sk-cli-auth-authorization-decision-390.png — pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2935:7",
+        "testId": "CLI Auth sk-cli-auth-terminal-success-dark.png — pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2935:7",
+        "testId": "CLI Auth sk-cli-auth-terminal-success-light.png — pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2935:7",
+        "testId": "CLI Auth sk-cli-auth-terminal-success-390.png — pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2935:7",
+        "testId": "CLI Auth sk-cli-auth-terminal-error-with-action-dark.png — pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2935:7",
+        "testId": "CLI Auth sk-cli-auth-terminal-error-with-action-light.png — pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2935:7",
+        "testId": "CLI Auth sk-cli-auth-terminal-error-with-action-390.png — pattern baseline"
+      },
+      {
+        "location": "visual.spec.ts:2949:7",
+        "testId": "CLI Auth sk-cli-auth-code-entry-forced-colors.png — forced colors baseline"
+      },
+      {
+        "location": "visual.spec.ts:2949:7",
+        "testId": "CLI Auth sk-cli-auth-authorization-decision-forced-colors.png — forced colors baseline"
+      },
+      {
+        "location": "visual.spec.ts:3001:7",
+        "testId": "CLI Auth sk-cli-auth-code-entry-zoom-200.png — 200% zoom (halved viewport, deviceScaleFactor 2) crosses the pattern's own breakpoint"
+      },
+      {
+        "location": "visual.spec.ts:3001:7",
+        "testId": "CLI Auth sk-cli-auth-authorization-decision-zoom-200.png — 200% zoom (halved viewport, deviceScaleFactor 2) crosses the pattern's own breakpoint"
+      },
+      {
+        "location": "visual.spec.ts:3099:7",
+        "testId": "Connectors c-1-setup-admin-empty — desktop baseline"
+      },
+      {
+        "location": "visual.spec.ts:3099:7",
+        "testId": "Connectors c-2-operating-admin — desktop baseline"
+      },
+      {
+        "location": "visual.spec.ts:3099:7",
+        "testId": "Connectors c-3-handoff-installation-waiting — desktop baseline"
+      },
+      {
+        "location": "visual.spec.ts:3099:7",
+        "testId": "Connectors c-4-github-app-failure-resolved-team — desktop baseline"
+      },
+      {
+        "location": "visual.spec.ts:3099:7",
+        "testId": "Connectors c-5-gitlab-group-populated — desktop baseline"
+      },
+      {
+        "location": "visual.spec.ts:3099:7",
+        "testId": "Connectors c-6-installation-admin-active — desktop baseline"
+      },
+      {
+        "location": "visual.spec.ts:3099:7",
+        "testId": "Connectors c-7-workspace-scope-populated — desktop baseline"
+      },
+      {
+        "location": "visual.spec.ts:3099:7",
+        "testId": "Connectors c-8-project-routing-populated — desktop baseline"
+      },
+      {
+        "location": "visual.spec.ts:3099:7",
+        "testId": "Connectors c-9-a-team-accounts-admin-unhealthy — desktop baseline"
+      },
+      {
+        "location": "visual.spec.ts:3099:7",
+        "testId": "Connectors c-9-b-slack-channel-populated — desktop baseline"
+      },
+      {
+        "location": "visual.spec.ts:3120:7",
+        "testId": "Connectors c-1-setup-admin-empty — narrow 390px baseline"
+      },
+      {
+        "location": "visual.spec.ts:3120:7",
+        "testId": "Connectors c-2-operating-admin — narrow 390px baseline"
+      },
+      {
+        "location": "visual.spec.ts:3120:7",
+        "testId": "Connectors c-3-handoff-installation-waiting — narrow 390px baseline"
+      },
+      {
+        "location": "visual.spec.ts:3120:7",
+        "testId": "Connectors c-4-github-app-failure-resolved-team — narrow 390px baseline"
+      },
+      {
+        "location": "visual.spec.ts:3120:7",
+        "testId": "Connectors c-5-gitlab-group-populated — narrow 390px baseline"
+      },
+      {
+        "location": "visual.spec.ts:3120:7",
+        "testId": "Connectors c-6-installation-admin-active — narrow 390px baseline"
+      },
+      {
+        "location": "visual.spec.ts:3120:7",
+        "testId": "Connectors c-7-workspace-scope-populated — narrow 390px baseline"
+      },
+      {
+        "location": "visual.spec.ts:3120:7",
+        "testId": "Connectors c-8-project-routing-populated — narrow 390px baseline"
+      },
+      {
+        "location": "visual.spec.ts:3120:7",
+        "testId": "Connectors c-9-a-team-accounts-admin-unhealthy — narrow 390px baseline"
+      },
+      {
+        "location": "visual.spec.ts:3120:7",
+        "testId": "Connectors c-9-b-slack-channel-populated — narrow 390px baseline"
+      },
+      {
+        "location": "visual.spec.ts:3127:5",
+        "testId": "Connectors C5 validation — role/error-state baseline"
+      },
+      {
+        "location": "visual.spec.ts:3136:5",
+        "testId": "Connectors C6 needs_reauth — danger health baseline"
+      },
+      {
+        "location": "visual.spec.ts:3145:5",
+        "testId": "Connectors C8 hard-purge confirm dialog — baseline"
+      },
+      {
+        "location": "visual.spec.ts:3155:5",
+        "testId": "Connectors C7 local table overflow at 390px — no document-level horizontal scroll"
+      },
+      {
+        "location": "visual.spec.ts:3170:5",
+        "testId": "Connectors LightMode — required system proof baseline"
+      },
+      {
+        "location": "visual.spec.ts:3179:5",
+        "testId": "Connectors forced colors — C6 danger health baseline"
+      },
+      {
+        "location": "visual.spec.ts:3191:5",
+        "testId": "Connectors reduced motion — C3 handoff waiting baseline"
+      },
+      {
+        "location": "visual.spec.ts:3201:5",
+        "testId": "Connectors RTL — C2 operating index baseline"
+      },
+      {
+        "location": "visual.spec.ts:3230:5",
+        "testId": "Connectors 200% CSS zoom stress — C8 project routing baseline, no document-level horizontal overflow"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-landing.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-entry-boundary.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-submitted-validation.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-recovery-sent.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-terminal-inactive.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-legal-published.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-legal-unavailable.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-email-management.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-password-change.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-password-set.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-light-mode.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-legal-light-mode.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-account-light-mode.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-rtl.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-narrow-390.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-short-viewport.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3316:7",
+        "testId": "Account Front Door sk-account-front-door-long-strings.png — full route baseline"
+      },
+      {
+        "location": "visual.spec.ts:3329:5",
+        "testId": "Account Front Door forced colors — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:3356:5",
+        "testId": "Account Front Door 200% CSS zoom stress — visual baseline"
+      },
+      {
+        "location": "visual.spec.ts:3379:5",
+        "testId": "Account Front Door reduced motion — visual baseline"
+      }
+    ],
+    "committedChromiumSnapshotsAtS": 485,
+    "snapshots": [
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-active-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-hover-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-selected-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-compact-closed-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-compact-open-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-active-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-disabled-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-hover-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-hover-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-context-sidebar-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-context-sidebar-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-context-sidebar-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-hover-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-sticky-header-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-open-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-with-action-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-without-action-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-event-timeline-compact-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-event-timeline-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-event-timeline-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-event-timeline-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-facts-compact-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-facts-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-facts-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-facts-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-disabled-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-invalid-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-metric-compact-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-metric-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-metric-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-metric-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-active-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-hover-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-dismissible-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-compact-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-sticky-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-personal-rail-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-personal-rail-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-personal-rail-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-variants-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-progress-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-progress-indeterminate-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-progress-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-progress-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-active-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-disabled-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-hover-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-selected-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-all-tones-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-pulsing-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-empty-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-lane-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-lane-empty-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-lane-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-lane-responsive-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-k1-populated-desktop-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-k2-narrow-contained-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-k3-detailed-lane-filters-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-k4-snapshot-behind-log-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-k5-observed-not-yet-pushed-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-k6-stable-empty-board-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-long-content-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-reduced-motion-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-k1-populated-1440-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-k2-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-k3-filtered-lanes-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-k3-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-k4-snapshot-behind-log-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-k5-unverified-overlay-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-k6-empty-lanes-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-long-content-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-reduced-motion-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-rtl-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-account-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-email-management-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-entry-boundary-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-landing-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-legal-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-legal-published-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-legal-unavailable-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-long-strings-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-password-change-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-password-set-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-recovery-sent-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-reduced-motion-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-rtl-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-short-viewport-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-submitted-validation-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-terminal-inactive-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-account-front-door-zoom-200-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-button-flush-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-html-card-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-html-current-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-html-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-html-flush-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-html-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-html-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-html-long-content-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-html-route-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-html-route-current-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-long-content-320-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-non-selectable-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-route-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-route-flush-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-route-flush-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-route-selected-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-selectable-focus-visible-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-selectable-hover-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-selectable-keyboard-pressed-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-selectable-pointer-active-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-selectable-rest-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-selected-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-selected-flush-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-action-row-unknown-presentation-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-app-shell-rail-preserving-1024-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-app-shell-rail-preserving-1024-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-app-shell-rail-preserving-390-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-app-shell-rail-preserving-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-bar-chart-approved-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-bar-chart-approved-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-bar-chart-empty-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-bar-chart-narrow-scrolled-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-bar-chart-selectable-states-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-bar-chart-zero-values-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-boundary-page-html-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-boundary-page-html-form-card-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-boundary-page-html-form-card-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-boundary-page-html-narrow-320-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-boundary-page-html-terminal-card-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-boundary-page-html-with-footnote-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-boundary-page-html-without-footnote-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-boundary-page-html-without-mark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-breadcrumbs-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-breadcrumbs-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-breadcrumbs-long-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-button-busy-default-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-button-busy-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-button-busy-reduced-motion-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-button-danger-secondary-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-button-danger-secondary-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-check-bullet-state-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-check-bullet-state-long-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-check-bullet-state-mixed-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-checkbox-choice-group-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-checkbox-choice-group-disabled-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-checkbox-choice-group-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-checkbox-choice-group-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-checkbox-choice-group-k3-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-checkbox-choice-group-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-checkbox-choice-group-long-content-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-checkbox-choice-group-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-authorization-decision-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-authorization-decision-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-authorization-decision-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-authorization-decision-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-authorization-decision-zoom-200-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-code-entry-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-code-entry-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-code-entry-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-code-entry-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-code-entry-zoom-200-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-terminal-error-with-action-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-terminal-error-with-action-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-terminal-error-with-action-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-terminal-success-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-terminal-success-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-terminal-success-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-compact-work-item-extensions-inline-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-compact-work-item-extensions-inline-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-compact-work-item-extensions-inline-long-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-compact-work-item-extensions-inline-short-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-compact-work-item-extensions-marker-axis-matrix-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-compact-work-item-extensions-marker-image-crop-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-compact-work-item-extensions-narrow-long-card-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-compact-work-item-extensions-pulse-reduced-motion-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-compact-work-item-extensions-t10-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-compact-work-item-extensions-t10-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c1-setup-desktop-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c1-setup-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c2-operating-desktop-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c2-operating-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c3-handoff-desktop-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c3-handoff-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c4-github-app-failure-desktop-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c4-github-app-failure-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c5-gitlab-group-desktop-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c5-gitlab-group-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c5-validation-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c6-health-needs-reauth-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c6-installation-desktop-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c6-installation-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c7-narrow-table-overflow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c7-workspace-scope-desktop-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c7-workspace-scope-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c8-project-routing-desktop-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c8-project-routing-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c8-purge-confirm-dialog-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c9a-team-accounts-desktop-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c9a-team-accounts-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c9b-slack-channel-desktop-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-c9b-slack-channel-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-light-mode-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-reduced-motion-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-rtl-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-connectors-zoom-200-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-context-nav-current-nested-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-context-nav-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-context-nav-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-context-nav-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-context-nav-long-labels-240-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-context-nav-unavailable-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-context-nav-unavailable-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-context-nav-unavailable-long-240-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-context-nav-unavailable-mixed-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-copy-field-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-copy-field-disabled-empty-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-copy-field-failure-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-copy-field-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-copy-field-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-copy-field-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-copy-field-long-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-copy-field-manual-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-copy-field-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-entity-marker-bordered-outer-box-comparison-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-entity-marker-decorative-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-entity-marker-meaningful-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-event-timeline-compact-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-event-timeline-compact-fixture-default-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-event-timeline-compact-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-event-timeline-compact-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-event-timeline-compact-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-event-timeline-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-event-timeline-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-event-timeline-twenty-events-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-evidence-chain-approved-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-evidence-chain-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-evidence-chain-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-evidence-chain-six-stages-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-evidence-chain-two-stages-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-feature-card-html-default-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-input-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-input-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-input-invalid-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-input-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-input-light-error-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-input-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-select-compact-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-select-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-select-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-select-invalid-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-select-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-select-light-invalid-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-select-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-textarea-light-error-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-icon-button-focus-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-icon-button-focus-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-input-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-input-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-input-invalid-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-input-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-input-light-error-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-input-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-metric-compact-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-metric-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-metric-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-metric-long-content-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-forced-colors-unavailable-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-long-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-long-css-zoom-stress-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-m1-desktop-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-m2-drawer-open-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-m2-responsive-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-m3-loading-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-m4-unavailable-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-m5-snapshot-notice-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-m6a-artifacts-present-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-m6b-artifacts-absent-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-m7a-ops-present-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-m7b-ops-absent-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-m8-truth-regions-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-threshold-859-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-threshold-860-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-threshold-861-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-progress-html-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-progress-html-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-progress-html-indeterminate-reduced-motion-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-progress-html-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-prose-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-prose-long-code-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-prose-prompt-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-public-header-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-public-header-two-actions-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-radio-choice-group-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-radio-choice-group-disabled-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-radio-choice-group-disabled-group-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-radio-choice-group-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-radio-choice-group-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-radio-choice-group-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-radio-choice-group-long-content-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-radio-choice-group-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-radio-choice-group-required-invalid-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-radio-choice-group-rtl-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-radio-choice-group-two-choice-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-d1-desktop-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-d2-closed-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-d2-open-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-d4-cross-branch-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-d5-not-spec-kitty-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-d6-snapshot-behind-log-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-d7-indexing-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-d8-no-missions-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-layout-threshold-860-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-layout-threshold-861-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-long-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-progress-thresholds-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-reduced-motion-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-tracker-destinations-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-zoom-200-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-zoom-400-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-ribbon-card-html-with-ribbon-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-section-header-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-section-header-long-content-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-section-nav-default-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-section-nav-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-section-nav-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-section-nav-long-labels-240-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-section-nav-many-routes-240-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-segmented-choice-active-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-segmented-choice-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-segmented-choice-disabled-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-segmented-choice-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-segmented-choice-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-segmented-choice-hover-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-segmented-choice-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-segmented-choice-long-content-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-segmented-choice-selected-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-segmented-choice-unselected-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-status-indicator-all-tones-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-status-indicator-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-stub-html-default-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-team-overview-shell-desktop-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-team-overview-shell-desktop-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-team-overview-shell-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-transition-matrix-approved-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-transition-matrix-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-transition-matrix-narrow-scrolled-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-transition-matrix-non-selectable-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-transition-matrix-selectable-focus-visible-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-transition-matrix-selectable-hover-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-transition-matrix-selectable-keyboard-pressed-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-transition-matrix-selectable-pointer-active-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-transition-matrix-selectable-rest-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-workflow-board-all-empty-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-workflow-board-fifty-items-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-workflow-board-fitting-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-workflow-board-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-workflow-board-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-workflow-board-long-labels-and-items-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-workflow-board-one-empty-lane-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-workflow-board-populated-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-workflow-board-single-lane-narrow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-approved-dark-1280-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-approved-dark-1440-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-controlled-interactions-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-delivery-evidence-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-empty-partial-data-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-flow-matrix-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-light-1440-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-rail-identity-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-return-chart-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-scale-50-wps-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-active-filters-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-blocked-forced-colors-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-collection-closed-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-collection-open-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-css-zoom-200-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-delayed-activity-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-focused-route-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-loading-reduced-motion-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-long-content-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-short-viewport-focus-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-threshold-1099-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-threshold-1100-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-threshold-1101-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-w1-lane-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-w10-no-repositories-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-w2-person-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-w3-type-dark-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-w4-drawer-dismissed-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-w4-drawer-open-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-w4-rail-1024-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-w5-light-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-w6-filtered-empty-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-w7-no-work-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-w8-degraded-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-explorer-w9-loading-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-detail-absent-prompt-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-detail-checklist-states-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-detail-dark-1280-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-detail-history-connector-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-detail-history-unavailable-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-detail-light-1280-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-detail-long-code-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-detail-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-detail-no-subtasks-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-overview-board-overflow-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-overview-dark-1280-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-overview-empty-lanes-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-overview-light-1280-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-overview-live-claim-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-overview-narrow-390-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-overview-progress-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-overview-scale-50-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-overview-snapshot-notice-chromium-linux.png",
+      "apps/storybook/src/tests/visual.spec.ts-snapshots/work-package-overview-stale-claim-chromium-linux.png"
+    ]
+  },
+  "mappingScope": "The 110 Desktop V2 contract states are mapped exactly from the frozen source contract to story ID, Playwright test ID, and committed snapshot path. The complete 456-test ID list and 485-snapshot file inventory are retained here. This report does not claim a one-to-one full-suite pairing for the remaining 346 tests; those pairings are outside the Desktop V2 contract map and remain an evidence-completeness gap for FR-006."
+}

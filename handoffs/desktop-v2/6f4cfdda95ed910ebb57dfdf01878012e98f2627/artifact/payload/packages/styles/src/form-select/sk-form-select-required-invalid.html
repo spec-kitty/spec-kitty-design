@@ -1,0 +1,11 @@
+<!-- Authored native required-empty selector with same-root error help. -->
+<form class="sk-form-field sk-form-field--error">
+  <label class="sk-form-field__label" for="required-lane">Lane</label>
+  <select class="sk-form-select" id="required-lane" name="lane" required aria-describedby="required-lane-error">
+    <option value="" selected>Choose a lane</option>
+    <option value="planned">Planned</option>
+    <option value="in-progress">In progress</option>
+    <option value="done">Done</option>
+  </select>
+  <span class="sk-form-field__description" id="required-lane-error">Choose a lane before continuing.</span>
+</form>

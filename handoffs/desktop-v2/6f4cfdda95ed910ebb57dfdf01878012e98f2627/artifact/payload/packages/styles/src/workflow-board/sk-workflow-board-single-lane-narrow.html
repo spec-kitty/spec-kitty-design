@@ -1,0 +1,27 @@
+<!-- @spec-kitty/styles — sk-workflow-board (consumer-selected single lane) -->
+<!-- The supplied lane fits at 320px/360px, so no region/name/tabindex triad. -->
+<div class="sk-workflow-board">
+  <h2>Work Packages — selected lane</h2>
+  <div class="sk-workflow-board__scroller">
+    <section
+      class="sk-workflow-lane"
+      aria-labelledby="workflow-board-single-lane-title"
+    >
+      <header class="sk-workflow-lane__header">
+        <h3
+          class="sk-workflow-lane__title"
+          id="workflow-board-single-lane-title"
+        >
+          In review
+        </h3>
+        <span class="sk-workflow-lane__count" aria-label="2 work packages"
+          >2</span
+        >
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Review public component contract</li>
+        <li>Verify browser evidence</li>
+      </ol>
+    </section>
+  </div>
+</div>

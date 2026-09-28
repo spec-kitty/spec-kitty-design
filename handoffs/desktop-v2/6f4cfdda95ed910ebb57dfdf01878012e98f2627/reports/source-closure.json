@@ -1,0 +1,38 @@
+{
+  "sourceSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+  "sourceContract": {
+    "sourcePath": "contracts/desktop-v2/source-contract.json",
+    "gitMode": "100644",
+    "gitBlob": "68f73b9c5ed36b4798015bb8e066c7e269bbc6e8",
+    "sha256": "9292b88ee68ea0a54cbf91194709167f4b0c6e24866ce23a8ecc8b5cfeee9681",
+    "sizeBytes": 124790,
+    "payloadMapping": "artifact/contract/source-contract.json"
+  },
+  "contractCheck": {
+    "command": "node scripts/check-desktop-v2-contract.mjs",
+    "result": "pass",
+    "families": 22,
+    "requiredStates": 110,
+    "familiesWithStylesCssPublicEntry": 22,
+    "familiesWithElementExportPublicEntry": 12,
+    "storyIdsResolved": 110,
+    "visualTestIdsResolved": 110,
+    "committedSnapshotPathsResolved": 110,
+    "message": "Desktop V2 contract valid: 22 families, 110 independently required states, generated stories and visual snapshot paths verified.",
+    "log": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36457894235/job/109048912004"
+  },
+  "payloadBlobMap": {
+    "path": "source-blob-map.tsv",
+    "payloadEntries": 180,
+    "allEntriesRegularGitBlobsAtS": true,
+    "columns": [
+      "artifactPath",
+      "sourcePath",
+      "gitMode",
+      "gitBlob",
+      "sha256",
+      "sizeBytes"
+    ]
+  },
+  "sourceContractIsIndependent": true
+}

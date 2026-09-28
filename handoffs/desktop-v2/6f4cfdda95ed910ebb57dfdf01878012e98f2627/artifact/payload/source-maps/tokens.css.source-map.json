@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+  "sourcePath": "packages/tokens/src/tokens.css",
+  "sourceSizeBytes": 50137,
+  "sourceSha256": "9ed7110831b5a41253d6852ba1ac8d3240ebd0d3115cab36dc0c986caffbd069",
+  "outputPath": "packages/tokens/src/tokens.css",
+  "outputSizeBytes": 49485,
+  "outputSha256": "66ac097673a032f46a96d6aa80a4a3fdf0d3f00eafb52fe3c4cd169f05dea817",
+  "transformation": "remove-unresolved-font-face-rules",
+  "removedRules": [
+    {
+      "family": "Swansea",
+      "sourceLineStart": 503,
+      "sourceLineEnd": 503,
+      "sourceSha256": "871a8565355e828ad22cf61d16261e21962314d21708fd24fd631db5ca6311b5",
+      "fontAssetPaths": [
+        "packages/tokens/src/fonts/Swansea-q3pd.ttf"
+      ]
+    },
+    {
+      "family": "Swansea",
+      "sourceLineStart": 504,
+      "sourceLineEnd": 504,
+      "sourceSha256": "65ff63c4b88228ec35d6ac3bdd57ee248cc2ce76fb392dd48f5da57f16fe3adc",
+      "fontAssetPaths": [
+        "packages/tokens/src/fonts/SwanseaItalic-AwqD.ttf"
+      ]
+    },
+    {
+      "family": "Swansea",
+      "sourceLineStart": 505,
+      "sourceLineEnd": 505,
+      "sourceSha256": "7fc507be54ba994635dfe2055da847cbdfdbb3291da8716ddf560a17702222a5",
+      "fontAssetPaths": [
+        "packages/tokens/src/fonts/SwanseaBold-D0ox.ttf"
+      ]
+    },
+    {
+      "family": "Swansea",
+      "sourceLineStart": 506,
+      "sourceLineEnd": 506,
+      "sourceSha256": "4398fc156a8cbae55ad9a11e32186b420f20e0012375b45b5d321eeddb1e1d50",
+      "fontAssetPaths": [
+        "packages/tokens/src/fonts/SwanseaBoldItalic-p3Dv.ttf"
+      ]
+    }
+  ],
+  "excludedFontAssets": [
+    {
+      "family": "Swansea",
+      "sourcePath": "packages/tokens/src/fonts/Swansea-q3pd.ttf"
+    },
+    {
+      "family": "Swansea",
+      "sourcePath": "packages/tokens/src/fonts/SwanseaBold-D0ox.ttf"
+    },
+    {
+      "family": "Swansea",
+      "sourcePath": "packages/tokens/src/fonts/SwanseaBoldItalic-p3Dv.ttf"
+    },
+    {
+      "family": "Swansea",
+      "sourcePath": "packages/tokens/src/fonts/SwanseaItalic-AwqD.ttf"
+    }
+  ],
+  "includedFontAssets": [
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSky-JKwK.woff2"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyBlack-GYXA.woff2"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyBlackOblique-j37y.woff2"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyBold-zemL.woff2"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyBoldOblique-5zmv.woff2"
+    },
+    {
+      "family": "Falling Sky Boldplus",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyBoldplus-6GZ1.otf"
+    },
+    {
+      "family": "Falling Sky Boldplus",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyBoldplusOblique-yxmV.otf"
+    },
+    {
+      "family": "Falling Sky Condensed",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyCondensed-9qm2.otf"
+    },
+    {
+      "family": "Falling Sky Condensed",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyCondensedOblique-leLw.otf"
+    },
+    {
+      "family": "Falling Sky Condensed Outline",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyCondensedOutline-n5XO.otf"
+    },
+    {
+      "family": "Falling Sky Condensed Outline",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyCondensedOutlineOblique-1qZv.otf"
+    },
+    {
+      "family": "Falling Sky Extended",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyExtended-RLdE.otf"
+    },
+    {
+      "family": "Falling Sky Extended",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyExtendedOblique-BnYw.otf"
+    },
+    {
+      "family": "Falling Sky Extended Outline",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyExtendedOutline-8qjn.otf"
+    },
+    {
+      "family": "Falling Sky Extended Outline",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyExtendedOutlineOblique-YBO2.otf"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyExtrabold-redB.woff2"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyExtraboldOblique-MwdP.woff2"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyLight-K2EX.woff2"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyLightOblique-2q3o.woff2"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyMedium-ved9.woff2"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyMediumOblique-leLD.woff2"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyOblique-n5XV.woff2"
+    },
+    {
+      "family": "Falling Sky Outline",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyOutline-1qZ0.otf"
+    },
+    {
+      "family": "Falling Sky Outline",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyOutlineOblique-RLdV.otf"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkySemibold-Bn7B.woff2"
+    },
+    {
+      "family": "Falling Sky",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkySemiboldOblique-8q7M.woff2"
+    },
+    {
+      "family": "Inter",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-400-normal.woff2"
+    },
+    {
+      "family": "Inter",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-500-normal.woff2"
+    },
+    {
+      "family": "Inter",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-600-normal.woff2"
+    },
+    {
+      "family": "Inter",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-700-normal.woff2"
+    },
+    {
+      "family": "Inter",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-800-normal.woff2"
+    },
+    {
+      "family": "Inter",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-400-normal.woff2"
+    },
+    {
+      "family": "Inter",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-500-normal.woff2"
+    },
+    {
+      "family": "Inter",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-600-normal.woff2"
+    },
+    {
+      "family": "Inter",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-700-normal.woff2"
+    },
+    {
+      "family": "Inter",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-800-normal.woff2"
+    }
+  ],
+  "licenseEvidence": [
+    {
+      "family": "Falling Sky",
+      "spdx": "OFL-1.1",
+      "evidenceMarker": "Falling Sky is OFL 1.1",
+      "sourcePath": "packages/tokens/src/tokens.css"
+    },
+    {
+      "family": "Falling Sky Boldplus",
+      "spdx": "OFL-1.1",
+      "evidenceMarker": "Falling Sky is OFL 1.1",
+      "sourcePath": "packages/tokens/src/tokens.css"
+    },
+    {
+      "family": "Falling Sky Condensed",
+      "spdx": "OFL-1.1",
+      "evidenceMarker": "Falling Sky is OFL 1.1",
+      "sourcePath": "packages/tokens/src/tokens.css"
+    },
+    {
+      "family": "Falling Sky Condensed Outline",
+      "spdx": "OFL-1.1",
+      "evidenceMarker": "Falling Sky is OFL 1.1",
+      "sourcePath": "packages/tokens/src/tokens.css"
+    },
+    {
+      "family": "Falling Sky Extended",
+      "spdx": "OFL-1.1",
+      "evidenceMarker": "Falling Sky is OFL 1.1",
+      "sourcePath": "packages/tokens/src/tokens.css"
+    },
+    {
+      "family": "Falling Sky Extended Outline",
+      "spdx": "OFL-1.1",
+      "evidenceMarker": "Falling Sky is OFL 1.1",
+      "sourcePath": "packages/tokens/src/tokens.css"
+    },
+    {
+      "family": "Falling Sky Outline",
+      "spdx": "OFL-1.1",
+      "evidenceMarker": "Falling Sky is OFL 1.1",
+      "sourcePath": "packages/tokens/src/tokens.css"
+    }
+  ]
+}

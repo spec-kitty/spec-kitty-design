@@ -1,0 +1,458 @@
+Listing tests:
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/action-row/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/action-row/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/action-row/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/action-row/hover
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/action-row/focus
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/action-row/active
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/action-row/selected
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/app-shell/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/app-shell/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/app-shell/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/app-shell/focus
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/app-shell/compact-open
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/app-shell/compact-closed
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/button/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/button/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/button/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/button/hover
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/button/focus
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/button/active
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/button/disabled
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/card/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/card/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/card/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/card/hover
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/context-sidebar/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/context-sidebar/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/context-sidebar/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/data-table/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/data-table/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/data-table/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/data-table/hover
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/data-table/focus
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/data-table/sticky-header
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/disclosure/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/disclosure/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/disclosure/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/disclosure/focus
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/disclosure/open
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/empty-state/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/empty-state/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/empty-state/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/empty-state/with-action
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/empty-state/without-action
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/event-timeline/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/event-timeline/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/event-timeline/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/event-timeline/compact
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/facts/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/facts/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/facts/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/facts/compact
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/form-select/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/form-select/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/form-select/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/form-select/focus
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/form-select/disabled
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/form-select/invalid
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/metric/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/metric/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/metric/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/metric/compact
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/nav-pill/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/nav-pill/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/nav-pill/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/nav-pill/hover
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/nav-pill/focus
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/nav-pill/active
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/notice/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/notice/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/notice/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/notice/focus
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/notice/dismissible
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/page-header/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/page-header/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/page-header/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/page-header/compact
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/page-header/sticky
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/personal-rail/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/personal-rail/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/personal-rail/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/pill-tag/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/pill-tag/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/pill-tag/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/pill-tag/variants
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/progress/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/progress/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/progress/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/progress/indeterminate
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/segmented-choice/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/segmented-choice/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/segmented-choice/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/segmented-choice/hover
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/segmented-choice/focus
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/segmented-choice/active
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/segmented-choice/disabled
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/segmented-choice/selected
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/status-indicator/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/status-indicator/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/status-indicator/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/status-indicator/all-tones
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/status-indicator/pulsing
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/workflow-board/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/workflow-board/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/workflow-board/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/workflow-board/focus
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/workflow-board/empty
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/workflow-lane/default-dark
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/workflow-lane/light-mode
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/workflow-lane/responsive-narrow
+  [chromium] › visual.spec.ts:141:7 › desktop-v2/workflow-lane/empty
+  [chromium] › visual.spec.ts:219:5 › SK-stub HTML default — visual baseline
+  [chromium] › visual.spec.ts:226:5 › SK-feature-card HTML default — visual baseline
+  [chromium] › visual.spec.ts:233:5 › SK-progress HTML default dark — visual baseline
+  [chromium] › visual.spec.ts:240:5 › SK-progress HTML light mode — visual baseline
+  [chromium] › visual.spec.ts:247:5 › SK-progress HTML forced colors — visual baseline
+  [chromium] › visual.spec.ts:262:5 › SK-progress HTML indeterminate (reduced motion) — visual baseline
+  [chromium] › visual.spec.ts:278:5 › SK-event-timeline same fixture default and compact — visual baselines
+  [chromium] › visual.spec.ts:292:5 › SK-event-timeline compact narrow — visual baseline
+  [chromium] › visual.spec.ts:301:5 › SK-event-timeline compact light — visual baseline
+  [chromium] › visual.spec.ts:309:5 › SK-event-timeline compact forced colors — visual baseline
+  [chromium] › visual.spec.ts:329:5 › SK-copy-field default dark — visual baseline
+  [chromium] › visual.spec.ts:334:5 › SK-copy-field light mode — visual baseline
+  [chromium] › visual.spec.ts:339:5 › SK-copy-field long wrapping — visual baseline
+  [chromium] › visual.spec.ts:344:5 › SK-copy-field narrow — visual baseline
+  [chromium] › visual.spec.ts:349:5 › SK-copy-field focus — visual baseline
+  [chromium] › visual.spec.ts:355:5 › SK-copy-field disabled empty — visual baseline
+  [chromium] › visual.spec.ts:361:5 › SK-copy-field manual fallback — visual baseline
+  [chromium] › visual.spec.ts:367:5 › SK-copy-field failure — visual baseline
+  [chromium] › visual.spec.ts:373:5 › SK-copy-field forced colors — visual baseline
+  [chromium] › visual.spec.ts:401:7 › SK-workflow-board populated — visual baseline
+  [chromium] › visual.spec.ts:401:7 › SK-workflow-board fitting — visual baseline
+  [chromium] › visual.spec.ts:401:7 › SK-workflow-board all-empty — visual baseline
+  [chromium] › visual.spec.ts:401:7 › SK-workflow-board one-empty-lane — visual baseline
+  [chromium] › visual.spec.ts:401:7 › SK-workflow-board fifty-items — visual baseline
+  [chromium] › visual.spec.ts:401:7 › SK-workflow-board long-labels-and-items — visual baseline
+  [chromium] › visual.spec.ts:401:7 › SK-workflow-board single-lane-narrow — visual baseline
+  [chromium] › visual.spec.ts:401:7 › SK-workflow-board light-mode — visual baseline
+  [chromium] › visual.spec.ts:407:5 › SK-workflow-board forced colors — visual baseline
+  [chromium] › visual.spec.ts:416:5 › SK-ribbon-card HTML with ribbon — visual baseline
+  [chromium] › visual.spec.ts:556:5 › SK-team-overview shell desktop dark — visual baseline
+  [chromium] › visual.spec.ts:565:5 › SK-team-overview shell desktop light — visual baseline
+  [chromium] › visual.spec.ts:574:5 › SK-team-overview shell narrow — visual baseline
+  [chromium] › visual.spec.ts:588:7 › SK-app-shell sk-app-shell-rail-preserving-1024-dark.png — visual baseline
+  [chromium] › visual.spec.ts:588:7 › SK-app-shell sk-app-shell-rail-preserving-1024-light.png — visual baseline
+  [chromium] › visual.spec.ts:588:7 › SK-app-shell sk-app-shell-rail-preserving-390-dark.png — visual baseline
+  [chromium] › visual.spec.ts:597:5 › SK-app-shell rail-preserving forced colors — visual baseline
+  [chromium] › visual.spec.ts:607:7 › SK-icon button focus dark — visual baseline
+  [chromium] › visual.spec.ts:607:7 › SK-icon button focus light — visual baseline
+  [chromium] › visual.spec.ts:620:5 › SK-transition-matrix approved dark — visual baseline
+  [chromium] › visual.spec.ts:625:5 › SK-transition-matrix light — visual baseline
+  [chromium] › visual.spec.ts:630:5 › SK-transition-matrix selectable rest and hover — visual baselines
+  [chromium] › visual.spec.ts:639:5 › SK-transition-matrix keyboard focus and pressed — visual baselines
+  [chromium] › visual.spec.ts:651:5 › SK-transition-matrix pointer active — visual baseline
+  [chromium] › visual.spec.ts:664:5 › SK-transition-matrix non-selectable analogue — visual baseline
+  [chromium] › visual.spec.ts:671:5 › SK-transition-matrix narrow scrolled ownership — visual baseline
+  [chromium] › visual.spec.ts:680:5 › SK-section-header long content — visual baseline
+  [chromium] › visual.spec.ts:691:5 › SK-section-header light mode — visual baseline
+  [chromium] › visual.spec.ts:699:5 › SK-status-indicator all tones — visual baseline
+  [chromium] › visual.spec.ts:707:5 › SK-status-indicator light mode — visual baseline
+  [chromium] › visual.spec.ts:715:5 › SK-entity-marker meaningful and decorative modes — visual baselines
+  [chromium] › visual.spec.ts:727:5 › SK-action-row default and light — visual baselines
+  [chromium] › visual.spec.ts:739:5 › SK-action-row route and flush states — visual baselines
+  [chromium] › visual.spec.ts:753:5 › SK-action-row forced-colors selected comparison — visual baseline
+  [chromium] › visual.spec.ts:764:5 › SK-action-row long content at 320px — visual baseline
+  [chromium] › visual.spec.ts:770:5 › SK-action-row selectable rest, hover, focus and pressed — visual baselines
+  [chromium] › visual.spec.ts:783:5 › SK-action-row pointer active — visual baseline
+  [chromium] › visual.spec.ts:794:5 › SK-action-row selected and non-selectable analogues — visual baselines
+  [chromium] › visual.spec.ts:815:5 › SK-action-row HTML default and light — visual baselines
+  [chromium] › visual.spec.ts:822:5 › SK-action-row HTML card, flush, route and current states — visual baselines
+  [chromium] › visual.spec.ts:835:5 › SK-action-row HTML forced-colors comparison — visual baseline
+  [chromium] › visual.spec.ts:846:5 › SK-action-row HTML long content at 360px — visual baseline
+  [chromium] › visual.spec.ts:855:5 › compact work-item extensions T10 dark — visual baseline
+  [chromium] › visual.spec.ts:864:5 › compact work-item extensions T10 light — visual baseline
+  [chromium] › visual.spec.ts:873:5 › compact work-item extensions narrow long card — visual baseline
+  [chromium] › visual.spec.ts:888:5 › compact work-item extensions marker axis matrix — visual baseline
+  [chromium] › visual.spec.ts:899:5 › compact work-item extensions portrait and landscape crop — visual baseline
+  [chromium] › visual.spec.ts:935:5 › SK-entity-marker bordered vs unbordered outer box — visual baseline
+  [chromium] › visual.spec.ts:946:5 › compact work-item extensions pulse off/on reduced-motion fallback — visual baseline
+  [chromium] › visual.spec.ts:958:5 › compact work-item extensions inline short and long dark — visual baseline
+  [chromium] › visual.spec.ts:976:5 › compact work-item extensions inline light — visual baseline
+  [chromium] › visual.spec.ts:986:5 › compact work-item extensions inline forced colors — visual baseline
+  [chromium] › visual.spec.ts:1013:5 › SK-metric default dark and light — visual baselines
+  [chromium] › visual.spec.ts:1020:5 › SK-metric compact and long content — visual baselines
+  [chromium] › visual.spec.ts:1028:5 › SK-evidence-chain approved composition and light — visual baselines
+  [chromium] › visual.spec.ts:1037:5 › SK-evidence-chain two and six stages — visual baselines
+  [chromium] › visual.spec.ts:1044:5 › SK-evidence-chain narrow — visual baseline
+  [chromium] › visual.spec.ts:1050:5 › SK-bar-chart approved dark — visual baseline
+  [chromium] › visual.spec.ts:1055:5 › SK-bar-chart approved light — visual baseline
+  [chromium] › visual.spec.ts:1060:5 › SK-bar-chart narrow scrolled ownership — visual baseline
+  [chromium] › visual.spec.ts:1069:5 › SK-bar-chart zero and empty states — visual baselines
+  [chromium] › visual.spec.ts:1076:5 › SK-bar-chart selectable states — visual baseline
+  [chromium] › visual.spec.ts:1112:7 › SK-form-select default — visual baseline
+  [chromium] › visual.spec.ts:1112:7 › SK-form-select light-mode — visual baseline
+  [chromium] › visual.spec.ts:1112:7 › SK-form-select compact — visual baseline
+  [chromium] › visual.spec.ts:1112:7 › SK-form-select required-invalid — visual baseline
+  [chromium] › visual.spec.ts:1112:7 › SK-form-select narrow — visual baseline
+  [chromium] › visual.spec.ts:1137:5 › SK-form-select forced colors — visual baseline
+  [chromium] › visual.spec.ts:1152:5 › SK-form-select light invalid — visual baseline
+  [chromium] › visual.spec.ts:1197:7 › SK-input form-input-default — visual baseline
+  [chromium] › visual.spec.ts:1197:7 › SK-input light-mode — visual baseline
+  [chromium] › visual.spec.ts:1197:7 › SK-input form-input-error — visual baseline
+  [chromium] › visual.spec.ts:1207:5 › SK-input light error — visual baseline
+  [chromium] › visual.spec.ts:1212:5 › SK-input narrow — visual baseline
+  [chromium] › visual.spec.ts:1236:5 › SK-input forced colors — visual baseline
+  [chromium] › visual.spec.ts:1266:7 › SK-form-input default — visual baseline
+  [chromium] › visual.spec.ts:1266:7 › SK-form-input light-mode — visual baseline
+  [chromium] › visual.spec.ts:1266:7 › SK-form-input error — visual baseline
+  [chromium] › visual.spec.ts:1275:5 › SK-form-input light error — visual baseline
+  [chromium] › visual.spec.ts:1283:5 › SK-form-input narrow — visual baseline
+  [chromium] › visual.spec.ts:1306:5 › SK-form-input forced colors — visual baseline
+  [chromium] › visual.spec.ts:1334:5 › SK-form-textarea light error — visual baseline
+  [chromium] › visual.spec.ts:1389:7 › SK-checkbox-choice-group default-dark — visual baseline
+  [chromium] › visual.spec.ts:1389:7 › SK-checkbox-choice-group light-mode — visual baseline
+  [chromium] › visual.spec.ts:1389:7 › SK-checkbox-choice-group k-3-detailed-lane-filters — visual baseline
+  [chromium] › visual.spec.ts:1389:7 › SK-checkbox-choice-group narrow — visual baseline
+  [chromium] › visual.spec.ts:1389:7 › SK-checkbox-choice-group long-content — visual baseline
+  [chromium] › visual.spec.ts:1389:7 › SK-checkbox-choice-group disabled-choices — visual baseline
+  [chromium] › visual.spec.ts:1406:5 › SK-checkbox-choice-group focus — visual baseline
+  [chromium] › visual.spec.ts:1417:5 › SK-checkbox-choice-group forced colors — visual baseline
+  [chromium] › visual.spec.ts:1455:7 › SK-radio-choice-group default-dark — visual baseline
+  [chromium] › visual.spec.ts:1455:7 › SK-radio-choice-group light-mode — visual baseline
+  [chromium] › visual.spec.ts:1455:7 › SK-radio-choice-group two-choice — visual baseline
+  [chromium] › visual.spec.ts:1455:7 › SK-radio-choice-group required-invalid — visual baseline
+  [chromium] › visual.spec.ts:1455:7 › SK-radio-choice-group disabled-option — visual baseline
+  [chromium] › visual.spec.ts:1455:7 › SK-radio-choice-group disabled-group — visual baseline
+  [chromium] › visual.spec.ts:1455:7 › SK-radio-choice-group narrow — visual baseline
+  [chromium] › visual.spec.ts:1455:7 › SK-radio-choice-group long-content — visual baseline
+  [chromium] › visual.spec.ts:1455:7 › SK-radio-choice-group rtl — visual baseline
+  [chromium] › visual.spec.ts:1472:5 › SK-radio-choice-group focus — visual baseline
+  [chromium] › visual.spec.ts:1483:5 › SK-radio-choice-group forced colors — visual baseline
+  [chromium] › visual.spec.ts:1508:5 › SK-segmented-choice selected — visual baseline
+  [chromium] › visual.spec.ts:1516:5 › SK-segmented-choice unselected — visual baseline
+  [chromium] › visual.spec.ts:1524:5 › SK-segmented-choice hover — visual baseline
+  [chromium] › visual.spec.ts:1533:5 › SK-segmented-choice active — visual baseline
+  [chromium] › visual.spec.ts:1550:5 › SK-segmented-choice disabled — visual baseline
+  [chromium] › visual.spec.ts:1558:5 › SK-segmented-choice focus — visual baseline
+  [chromium] › visual.spec.ts:1568:5 › SK-segmented-choice long content — visual baseline
+  [chromium] › visual.spec.ts:1576:5 › SK-segmented-choice dark — visual baseline
+  [chromium] › visual.spec.ts:1584:5 › SK-segmented-choice light — visual baseline
+  [chromium] › visual.spec.ts:1592:5 › SK-segmented-choice forced colors — visual baseline
+  [chromium] › visual.spec.ts:1638:7 › SK-context-nav default — visual baseline
+  [chromium] › visual.spec.ts:1638:7 › SK-context-nav current-nested — visual baseline
+  [chromium] › visual.spec.ts:1638:7 › SK-context-nav long-labels — visual baseline
+  [chromium] › visual.spec.ts:1638:7 › SK-context-nav light-mode — visual baseline
+  [chromium] › visual.spec.ts:1638:7 › SK-context-nav unavailable-mixed — visual baseline
+  [chromium] › visual.spec.ts:1638:7 › SK-context-nav unavailable-long — visual baseline
+  [chromium] › visual.spec.ts:1638:7 › SK-context-nav unavailable-light-mode — visual baseline
+  [chromium] › visual.spec.ts:1644:5 › SK-context-nav forced colors — visual baseline
+  [chromium] › visual.spec.ts:1654:5 › SK-context-nav unavailable forced colors — visual baseline
+  [chromium] › visual.spec.ts:1686:7 › SK-public-header default — visual baseline
+  [chromium] › visual.spec.ts:1686:7 › SK-public-header light-mode — visual baseline
+  [chromium] › visual.spec.ts:1716:7 › SK-section-nav default — visual baseline
+  [chromium] › visual.spec.ts:1716:7 › SK-section-nav light-mode — visual baseline
+  [chromium] › visual.spec.ts:1716:7 › SK-section-nav long-labels — visual baseline
+  [chromium] › visual.spec.ts:1716:7 › SK-section-nav many-routes — visual baseline
+  [chromium] › visual.spec.ts:1728:5 › SK-section-nav forced colors — visual baseline
+  [chromium] › visual.spec.ts:1792:7 › Team overview team-overview-approved-dark-1280.png — full pattern baseline
+  [chromium] › visual.spec.ts:1792:7 › Team overview team-overview-approved-dark-1440.png — full pattern baseline
+  [chromium] › visual.spec.ts:1792:7 › Team overview team-overview-light-1440.png — full pattern baseline
+  [chromium] › visual.spec.ts:1792:7 › Team overview team-overview-narrow-390.png — full pattern baseline
+  [chromium] › visual.spec.ts:1792:7 › Team overview team-overview-scale-50-wps.png — full pattern baseline
+  [chromium] › visual.spec.ts:1792:7 › Team overview team-overview-controlled-interactions.png — full pattern baseline
+  [chromium] › visual.spec.ts:1792:7 › Team overview team-overview-empty-partial-data.png — full pattern baseline
+  [chromium] › visual.spec.ts:1809:7 › Team overview rail-identity — focused baseline
+  [chromium] › visual.spec.ts:1809:7 › Team overview delivery-evidence — focused baseline
+  [chromium] › visual.spec.ts:1809:7 › Team overview return-chart — focused baseline
+  [chromium] › visual.spec.ts:1809:7 › Team overview flow-matrix — focused baseline
+  [chromium] › visual.spec.ts:1834:5 › SK-check-bullet active forced colors retains visible, distinct complete and pending state
+  [chromium] › visual.spec.ts:1945:7 › Work package detail sk-breadcrumbs-default-dark.png — targeted visual baseline
+  [chromium] › visual.spec.ts:1945:7 › Work package detail sk-breadcrumbs-light.png — targeted visual baseline
+  [chromium] › visual.spec.ts:1945:7 › Work package detail sk-breadcrumbs-long-narrow.png — targeted visual baseline
+  [chromium] › visual.spec.ts:1945:7 › Work package detail sk-prose-prompt-dark.png — targeted visual baseline
+  [chromium] › visual.spec.ts:1945:7 › Work package detail sk-prose-light.png — targeted visual baseline
+  [chromium] › visual.spec.ts:1945:7 › Work package detail sk-prose-long-code-narrow.png — targeted visual baseline
+  [chromium] › visual.spec.ts:1945:7 › Work package detail sk-event-timeline-default-dark.png — targeted visual baseline
+  [chromium] › visual.spec.ts:1945:7 › Work package detail sk-event-timeline-light.png — targeted visual baseline
+  [chromium] › visual.spec.ts:1945:7 › Work package detail sk-event-timeline-twenty-events.png — targeted visual baseline
+  [chromium] › visual.spec.ts:1945:7 › Work package detail sk-check-bullet-state-mixed.png — targeted visual baseline
+  [chromium] › visual.spec.ts:1945:7 › Work package detail sk-check-bullet-state-light.png — targeted visual baseline
+  [chromium] › visual.spec.ts:1945:7 › Work package detail sk-check-bullet-state-long-narrow.png — targeted visual baseline
+  [chromium] › visual.spec.ts:2003:7 › Work Package pattern work-package-overview-dark-1280.png — full route baseline
+  [chromium] › visual.spec.ts:2003:7 › Work Package pattern work-package-overview-light-1280.png — full route baseline
+  [chromium] › visual.spec.ts:2003:7 › Work Package pattern work-package-overview-narrow-390.png — full route baseline
+  [chromium] › visual.spec.ts:2003:7 › Work Package pattern work-package-overview-empty-lanes.png — full route baseline
+  [chromium] › visual.spec.ts:2003:7 › Work Package pattern work-package-overview-scale-50.png — full route baseline
+  [chromium] › visual.spec.ts:2003:7 › Work Package pattern work-package-detail-dark-1280.png — full route baseline
+  [chromium] › visual.spec.ts:2003:7 › Work Package pattern work-package-detail-light-1280.png — full route baseline
+  [chromium] › visual.spec.ts:2003:7 › Work Package pattern work-package-detail-narrow-390.png — full route baseline
+  [chromium] › visual.spec.ts:2031:7 › Work Package pattern work-package-overview-progress.png — focused route state
+  [chromium] › visual.spec.ts:2031:7 › Work Package pattern work-package-overview-board-overflow.png — focused route state
+  [chromium] › visual.spec.ts:2031:7 › Work Package pattern work-package-overview-live-claim.png — focused route state
+  [chromium] › visual.spec.ts:2031:7 › Work Package pattern work-package-overview-stale-claim.png — focused route state
+  [chromium] › visual.spec.ts:2031:7 › Work Package pattern work-package-overview-snapshot-notice.png — focused route state
+  [chromium] › visual.spec.ts:2031:7 › Work Package pattern work-package-detail-checklist-states.png — focused route state
+  [chromium] › visual.spec.ts:2031:7 › Work Package pattern work-package-detail-history-connector.png — focused route state
+  [chromium] › visual.spec.ts:2031:7 › Work Package pattern work-package-detail-no-subtasks.png — focused route state
+  [chromium] › visual.spec.ts:2031:7 › Work Package pattern work-package-detail-absent-prompt.png — focused route state
+  [chromium] › visual.spec.ts:2031:7 › Work Package pattern work-package-detail-history-unavailable.png — focused route state
+  [chromium] › visual.spec.ts:2031:7 › Work Package pattern work-package-detail-long-code.png — focused route state
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-m1-desktop-dark.png — full route baseline
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-m2-responsive-390.png — full route baseline
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-m2-drawer-open-390.png — full route baseline
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-m3-loading.png — full route baseline
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-m4-unavailable.png — full route baseline
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-m5-snapshot-notice.png — full route baseline
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-m6a-artifacts-present.png — full route baseline
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-m6b-artifacts-absent.png — full route baseline
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-m7a-ops-present.png — full route baseline
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-m7b-ops-absent.png — full route baseline
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-m8-truth-regions.png — full route baseline
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-light.png — full route baseline
+  [chromium] › visual.spec.ts:2093:7 › Mission Reading sk-mission-reading-long-390.png — full route baseline
+  [chromium] › visual.spec.ts:2108:7 › Mission Reading threshold 859px — visual baseline
+  [chromium] › visual.spec.ts:2108:7 › Mission Reading threshold 860px — visual baseline
+  [chromium] › visual.spec.ts:2108:7 › Mission Reading threshold 861px — visual baseline
+  [chromium] › visual.spec.ts:2118:5 › Mission Reading forced colors unavailable entry — visual baseline
+  [chromium] › visual.spec.ts:2138:5 › Mission Reading long content CSS zoom stress — visual baseline
+  [chromium] › visual.spec.ts:2181:7 › Mission Kanban default — full pattern baseline
+  [chromium] › visual.spec.ts:2181:7 › Mission Kanban k-2-narrow-contained — full pattern baseline
+  [chromium] › visual.spec.ts:2181:7 › Mission Kanban k-3-detailed-lane-filters — full pattern baseline
+  [chromium] › visual.spec.ts:2181:7 › Mission Kanban k-4-snapshot-behind-log — full pattern baseline
+  [chromium] › visual.spec.ts:2181:7 › Mission Kanban k-5-observed-not-yet-pushed — full pattern baseline
+  [chromium] › visual.spec.ts:2181:7 › Mission Kanban k-6-stable-empty-board — full pattern baseline
+  [chromium] › visual.spec.ts:2181:7 › Mission Kanban light-mode — full pattern baseline
+  [chromium] › visual.spec.ts:2181:7 › Mission Kanban long-content — full pattern baseline
+  [chromium] › visual.spec.ts:2181:7 › Mission Kanban forced-colors — full pattern baseline
+  [chromium] › visual.spec.ts:2181:7 › Mission Kanban reduced-motion — full pattern baseline
+  [chromium] › visual.spec.ts:2243:7 › Mission Kanban ten-lane mission-kanban-ten-lane-k1-populated-1440 — full pattern baseline
+  [chromium] › visual.spec.ts:2243:7 › Mission Kanban ten-lane mission-kanban-ten-lane-k2-narrow-390 — full pattern baseline
+  [chromium] › visual.spec.ts:2243:7 › Mission Kanban ten-lane mission-kanban-ten-lane-k3-filtered-lanes — full pattern baseline
+  [chromium] › visual.spec.ts:2243:7 › Mission Kanban ten-lane mission-kanban-ten-lane-k3-forced-colors — full pattern baseline
+  [chromium] › visual.spec.ts:2243:7 › Mission Kanban ten-lane mission-kanban-ten-lane-k4-snapshot-behind-log — full pattern baseline
+  [chromium] › visual.spec.ts:2243:7 › Mission Kanban ten-lane mission-kanban-ten-lane-k5-unverified-overlay — full pattern baseline
+  [chromium] › visual.spec.ts:2243:7 › Mission Kanban ten-lane mission-kanban-ten-lane-k6-empty-lanes — full pattern baseline
+  [chromium] › visual.spec.ts:2243:7 › Mission Kanban ten-lane mission-kanban-ten-lane-light-mode — full pattern baseline
+  [chromium] › visual.spec.ts:2243:7 › Mission Kanban ten-lane mission-kanban-ten-lane-long-content-390 — full pattern baseline
+  [chromium] › visual.spec.ts:2243:7 › Mission Kanban ten-lane mission-kanban-ten-lane-forced-colors — full pattern baseline
+  [chromium] › visual.spec.ts:2243:7 › Mission Kanban ten-lane mission-kanban-ten-lane-reduced-motion — full pattern baseline
+  [chromium] › visual.spec.ts:2243:7 › Mission Kanban ten-lane mission-kanban-ten-lane-rtl — full pattern baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-d1-desktop-dark.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-d2-closed-390.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-d2-open-390.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-d4-cross-branch.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-d5-not-spec-kitty.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-d6-snapshot-behind-log.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-d7-indexing.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-d8-no-missions.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-light.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-long-390.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-progress-thresholds.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-layout-threshold-860.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-layout-threshold-861.png — full route baseline
+  [chromium] › visual.spec.ts:2323:7 › Repository Dossier sk-repository-dossier-tracker-destinations.png — full route baseline
+  [chromium] › visual.spec.ts:2340:5 › Repository Dossier active forced colors — visual baseline
+  [chromium] › visual.spec.ts:2353:5 › Repository Dossier reduced motion indexing — visual baseline
+  [chromium] › visual.spec.ts:2378:7 › Repository Dossier 200% CSS zoom stress — visual baseline
+  [chromium] › visual.spec.ts:2378:7 › Repository Dossier 400% CSS zoom stress — visual baseline
+  [chromium] › visual.spec.ts:2486:7 › Work Explorer work-explorer-w1-lane-dark.png — full composition baseline
+  [chromium] › visual.spec.ts:2486:7 › Work Explorer work-explorer-w2-person-dark.png — full composition baseline
+  [chromium] › visual.spec.ts:2486:7 › Work Explorer work-explorer-w3-type-dark.png — full composition baseline
+  [chromium] › visual.spec.ts:2486:7 › Work Explorer work-explorer-w4-rail-1024.png — full composition baseline
+  [chromium] › visual.spec.ts:2486:7 › Work Explorer work-explorer-w5-light.png — full composition baseline
+  [chromium] › visual.spec.ts:2486:7 › Work Explorer work-explorer-w6-filtered-empty.png — full composition baseline
+  [chromium] › visual.spec.ts:2486:7 › Work Explorer work-explorer-w7-no-work.png — full composition baseline
+  [chromium] › visual.spec.ts:2486:7 › Work Explorer work-explorer-w8-degraded.png — full composition baseline
+  [chromium] › visual.spec.ts:2486:7 › Work Explorer work-explorer-w9-loading.png — full composition baseline
+  [chromium] › visual.spec.ts:2486:7 › Work Explorer work-explorer-w10-no-repositories.png — full composition baseline
+  [chromium] › visual.spec.ts:2502:7 › Work Explorer rail-preserving 1099px threshold — visual baseline
+  [chromium] › visual.spec.ts:2502:7 › Work Explorer rail-preserving 1100px threshold — visual baseline
+  [chromium] › visual.spec.ts:2502:7 › Work Explorer rail-preserving 1101px threshold — visual baseline
+  [chromium] › visual.spec.ts:2520:5 › Work Explorer controlled collection and blocked exception — visual baseline
+  [chromium] › visual.spec.ts:2547:5 › Work Explorer focused native route and active filters — visual baseline
+  [chromium] › visual.spec.ts:2585:5 › Work Explorer W4 controlled drawer open and dismissed — visual baselines
+  [chromium] › visual.spec.ts:2609:5 › Work Explorer compact timeline and delayed context — visual baselines
+  [chromium] › visual.spec.ts:2622:5 › Work Explorer loading stays static under reduced motion — visual baseline
+  [chromium] › visual.spec.ts:2639:5 › Work Explorer long supplied labels remain contained — visual baseline
+  [chromium] › visual.spec.ts:2666:5 › Work Explorer effective 200 percent CSS zoom stress — visual baseline
+  [chromium] › visual.spec.ts:2683:5 › Work Explorer short viewport keeps focused work unobscured — visual baseline
+  [chromium] › visual.spec.ts:2725:5 › SK-button busy default — visual baseline
+  [chromium] › visual.spec.ts:2734:5 › SK-button busy reduced motion — visual baseline
+  [chromium] › visual.spec.ts:2744:5 › SK-button busy forced colors — visual baseline
+  [chromium] › visual.spec.ts:2768:5 › SK-boundary-page HTML form-card default dark — visual baseline
+  [chromium] › visual.spec.ts:2776:5 › SK-boundary-page HTML form-card light mode — visual baseline
+  [chromium] › visual.spec.ts:2784:5 › SK-boundary-page HTML terminal-card default dark — visual baseline
+  [chromium] › visual.spec.ts:2792:5 › SK-boundary-page HTML without mark — visual baseline
+  [chromium] › visual.spec.ts:2800:5 › SK-boundary-page HTML without footnote — visual baseline
+  [chromium] › visual.spec.ts:2808:5 › SK-boundary-page HTML with footnote — visual baseline
+  [chromium] › visual.spec.ts:2816:5 › SK-boundary-page HTML forced colors — visual baseline
+  [chromium] › visual.spec.ts:2825:5 › SK-boundary-page HTML narrow 320 — visual baseline
+  [chromium] › visual.spec.ts:2845:5 › SK-button danger-secondary dark default — visual baseline
+  [chromium] › visual.spec.ts:2856:5 › SK-button danger-secondary light mode — visual baseline
+  [chromium] › visual.spec.ts:2935:7 › CLI Auth sk-cli-auth-code-entry-dark.png — pattern baseline
+  [chromium] › visual.spec.ts:2935:7 › CLI Auth sk-cli-auth-code-entry-light.png — pattern baseline
+  [chromium] › visual.spec.ts:2935:7 › CLI Auth sk-cli-auth-code-entry-390.png — pattern baseline
+  [chromium] › visual.spec.ts:2935:7 › CLI Auth sk-cli-auth-authorization-decision-dark.png — pattern baseline
+  [chromium] › visual.spec.ts:2935:7 › CLI Auth sk-cli-auth-authorization-decision-light.png — pattern baseline
+  [chromium] › visual.spec.ts:2935:7 › CLI Auth sk-cli-auth-authorization-decision-390.png — pattern baseline
+  [chromium] › visual.spec.ts:2935:7 › CLI Auth sk-cli-auth-terminal-success-dark.png — pattern baseline
+  [chromium] › visual.spec.ts:2935:7 › CLI Auth sk-cli-auth-terminal-success-light.png — pattern baseline
+  [chromium] › visual.spec.ts:2935:7 › CLI Auth sk-cli-auth-terminal-success-390.png — pattern baseline
+  [chromium] › visual.spec.ts:2935:7 › CLI Auth sk-cli-auth-terminal-error-with-action-dark.png — pattern baseline
+  [chromium] › visual.spec.ts:2935:7 › CLI Auth sk-cli-auth-terminal-error-with-action-light.png — pattern baseline
+  [chromium] › visual.spec.ts:2935:7 › CLI Auth sk-cli-auth-terminal-error-with-action-390.png — pattern baseline
+  [chromium] › visual.spec.ts:2949:7 › CLI Auth sk-cli-auth-code-entry-forced-colors.png — forced colors baseline
+  [chromium] › visual.spec.ts:2949:7 › CLI Auth sk-cli-auth-authorization-decision-forced-colors.png — forced colors baseline
+  [chromium] › visual.spec.ts:3001:7 › CLI Auth sk-cli-auth-code-entry-zoom-200.png — 200% zoom (halved viewport, deviceScaleFactor 2) crosses the pattern's own breakpoint
+  [chromium] › visual.spec.ts:3001:7 › CLI Auth sk-cli-auth-authorization-decision-zoom-200.png — 200% zoom (halved viewport, deviceScaleFactor 2) crosses the pattern's own breakpoint
+  [chromium] › visual.spec.ts:3099:7 › Connectors c-1-setup-admin-empty — desktop baseline
+  [chromium] › visual.spec.ts:3099:7 › Connectors c-2-operating-admin — desktop baseline
+  [chromium] › visual.spec.ts:3099:7 › Connectors c-3-handoff-installation-waiting — desktop baseline
+  [chromium] › visual.spec.ts:3099:7 › Connectors c-4-github-app-failure-resolved-team — desktop baseline
+  [chromium] › visual.spec.ts:3099:7 › Connectors c-5-gitlab-group-populated — desktop baseline
+  [chromium] › visual.spec.ts:3099:7 › Connectors c-6-installation-admin-active — desktop baseline
+  [chromium] › visual.spec.ts:3099:7 › Connectors c-7-workspace-scope-populated — desktop baseline
+  [chromium] › visual.spec.ts:3099:7 › Connectors c-8-project-routing-populated — desktop baseline
+  [chromium] › visual.spec.ts:3099:7 › Connectors c-9-a-team-accounts-admin-unhealthy — desktop baseline
+  [chromium] › visual.spec.ts:3099:7 › Connectors c-9-b-slack-channel-populated — desktop baseline
+  [chromium] › visual.spec.ts:3120:7 › Connectors c-1-setup-admin-empty — narrow 390px baseline
+  [chromium] › visual.spec.ts:3120:7 › Connectors c-2-operating-admin — narrow 390px baseline
+  [chromium] › visual.spec.ts:3120:7 › Connectors c-3-handoff-installation-waiting — narrow 390px baseline
+  [chromium] › visual.spec.ts:3120:7 › Connectors c-4-github-app-failure-resolved-team — narrow 390px baseline
+  [chromium] › visual.spec.ts:3120:7 › Connectors c-5-gitlab-group-populated — narrow 390px baseline
+  [chromium] › visual.spec.ts:3120:7 › Connectors c-6-installation-admin-active — narrow 390px baseline
+  [chromium] › visual.spec.ts:3120:7 › Connectors c-7-workspace-scope-populated — narrow 390px baseline
+  [chromium] › visual.spec.ts:3120:7 › Connectors c-8-project-routing-populated — narrow 390px baseline
+  [chromium] › visual.spec.ts:3120:7 › Connectors c-9-a-team-accounts-admin-unhealthy — narrow 390px baseline
+  [chromium] › visual.spec.ts:3120:7 › Connectors c-9-b-slack-channel-populated — narrow 390px baseline
+  [chromium] › visual.spec.ts:3127:5 › Connectors C5 validation — role/error-state baseline
+  [chromium] › visual.spec.ts:3136:5 › Connectors C6 needs_reauth — danger health baseline
+  [chromium] › visual.spec.ts:3145:5 › Connectors C8 hard-purge confirm dialog — baseline
+  [chromium] › visual.spec.ts:3155:5 › Connectors C7 local table overflow at 390px — no document-level horizontal scroll
+  [chromium] › visual.spec.ts:3170:5 › Connectors LightMode — required system proof baseline
+  [chromium] › visual.spec.ts:3179:5 › Connectors forced colors — C6 danger health baseline
+  [chromium] › visual.spec.ts:3191:5 › Connectors reduced motion — C3 handoff waiting baseline
+  [chromium] › visual.spec.ts:3201:5 › Connectors RTL — C2 operating index baseline
+  [chromium] › visual.spec.ts:3230:5 › Connectors 200% CSS zoom stress — C8 project routing baseline, no document-level horizontal overflow
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-landing.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-entry-boundary.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-submitted-validation.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-recovery-sent.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-terminal-inactive.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-legal-published.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-legal-unavailable.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-email-management.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-password-change.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-password-set.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-light-mode.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-legal-light-mode.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-account-light-mode.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-rtl.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-narrow-390.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-short-viewport.png — full route baseline
+  [chromium] › visual.spec.ts:3316:7 › Account Front Door sk-account-front-door-long-strings.png — full route baseline
+  [chromium] › visual.spec.ts:3329:5 › Account Front Door forced colors — visual baseline
+  [chromium] › visual.spec.ts:3356:5 › Account Front Door 200% CSS zoom stress — visual baseline
+  [chromium] › visual.spec.ts:3379:5 › Account Front Door reduced motion — visual baseline
+Total: 456 tests in 1 file

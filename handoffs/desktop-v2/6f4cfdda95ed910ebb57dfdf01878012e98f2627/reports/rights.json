@@ -1,0 +1,51 @@
+{
+  "sourceSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+  "result": "retained artifact has cleared rights closure; unchanged full token stylesheet remains blocked",
+  "payloadFiles": 180,
+  "pathProvenanceAndRights": {
+    "manifest": "../artifact/manifest.json",
+    "perFileGitBlobAndSha256Map": "source-blob-map.tsv",
+    "manifestFilesFields": [
+      "path",
+      "sourcePath",
+      "roles",
+      "familyIds",
+      "sha256",
+      "licenseRefs"
+    ],
+    "licenseEvidenceField": "artifact/manifest.json#licenses"
+  },
+  "retainedPayloadSummary": {
+    "repositoryMitRightsReferences": 143,
+    "clearedOflFontAssets": 36,
+    "sourceMapEntries": 1,
+    "licenseEvidenceFiles": 2,
+    "licenseRecords": 9,
+    "allRetainedFilesHaveLicenseReferences": true
+  },
+  "scopedTokenStylesheet": {
+    "artifactPath": "artifact/payload/packages/tokens/src/tokens.css",
+    "sourcePath": "packages/tokens/src/tokens.css",
+    "sourceSha256": "9ed7110831b5a41253d6852ba1ac8d3240ebd0d3115cab36dc0c986caffbd069",
+    "sourceMapPath": "artifact/payload/source-maps/tokens.css.source-map.json",
+    "sourceMapSha256": "6bed6f36c8c5fc04be1374a0fb53c195e2baf1dfb615c631b15da34fd6ba58b0",
+    "transformation": "remove-unresolved-font-face-rules",
+    "scopedOutputSha256": "66ac097673a032f46a96d6aa80a4a3fdf0d3f00eafb52fe3c4cd169f05dea817",
+    "includedClearedFontAssets": 36,
+    "excludedUnresolvedFontAssets": [
+      "packages/tokens/src/fonts/Swansea-q3pd.ttf",
+      "packages/tokens/src/fonts/SwanseaItalic-AwqD.ttf",
+      "packages/tokens/src/fonts/SwanseaBold-D0ox.ttf",
+      "packages/tokens/src/fonts/SwanseaBoldItalic-p3Dv.ttf"
+    ],
+    "fullTokenExport": {
+      "status": "blocked",
+      "reason": "Swansea font redistribution terms are unresolved; the unchanged full tokens.css was not exported."
+    }
+  },
+  "evidence": {
+    "contractRightsCheck": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36457894235/job/109048912004",
+    "focusedRightsTest": "tests/node/desktop-v2-contract.test.ts — rights closure preserves Swansea restriction, scoped token provenance, and Falling Sky OFL evidence",
+    "focusedTestResult": "26 passed in the exact-S contract/export test command"
+  }
+}

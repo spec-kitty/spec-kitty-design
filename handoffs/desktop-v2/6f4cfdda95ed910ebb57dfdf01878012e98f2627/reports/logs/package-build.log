@@ -1,0 +1,95 @@
+
+ NX   The following projects do not have a configuration for any of the provided targets ("build")
+
+- react
+
+
+ NX   Running target build for 3 projects and 1 task they depend on:
+
+- tokens
+- styles
+- elements
+
+
+
+> nx run tokens:build  [existing outputs match the cache, left as is]
+
+> node scripts/build-tokens-css.mjs && rm -rf packages/tokens/dist/fonts packages/tokens/dist/assets && mkdir -p packages/tokens/dist/fonts packages/tokens/dist/assets && cp -r packages/tokens/src/fonts/. packages/tokens/dist/fonts/ && cp -r packages/tokens/assets/. packages/tokens/dist/assets/
+
+build-tokens-css: packages/tokens/src/tokens.css -> packages/tokens/dist/tokens.css
+
+> nx run styles:build  [existing outputs match the cache, left as is]
+
+(node:891246) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "styles"...
+Done compiling TypeScript files for project "styles".
+
+> nx run elements:css
+
+> node scripts/build-elements-css.mjs
+
+build-elements-css: packages/styles/src/action-row/sk-action-row.css -> packages/elements/src/action-row/sk-action-row.css.js
+build-elements-css: packages/styles/src/app-shell/sk-app-shell.css -> packages/elements/src/app-shell/sk-app-shell.css.js
+build-elements-css: packages/styles/src/bar-chart/sk-bar-chart.css -> packages/elements/src/bar-chart/sk-bar-chart.css.js
+build-elements-css: packages/styles/src/blog-card/sk-blog-card.css -> packages/elements/src/blog-card/sk-blog-card.css.js
+build-elements-css: packages/styles/src/button/sk-button.css -> packages/elements/src/button/sk-button.css.js
+build-elements-css: packages/styles/src/card/sk-card.css -> packages/elements/src/card/sk-card.css.js
+build-elements-css: packages/styles/src/check-bullet/sk-check-bullet.css -> packages/elements/src/check-bullet/sk-check-bullet.css.js
+build-elements-css: packages/styles/src/confirm-dialog/sk-confirm-dialog.css -> packages/elements/src/confirm-dialog/sk-confirm-dialog.css.js
+build-elements-css: packages/styles/src/context-sidebar/sk-context-sidebar.css -> packages/elements/src/context-sidebar/sk-context-sidebar.css.js
+build-elements-css: packages/styles/src/copy-field/sk-copy-field.css -> packages/elements/src/copy-field/sk-copy-field.css.js
+build-elements-css: packages/styles/src/entity-marker/sk-entity-marker.css -> packages/elements/src/entity-marker/sk-entity-marker.css.js
+build-elements-css: packages/styles/src/evidence-chain/sk-evidence-chain.css -> packages/elements/src/evidence-chain/sk-evidence-chain.css.js
+build-elements-css: packages/styles/src/feature-card/sk-feature-card.css -> packages/elements/src/feature-card/sk-feature-card.css.js
+build-elements-css: packages/styles/src/form-input/sk-form-input.css -> packages/elements/src/form-input/sk-form-input.css.js
+build-elements-css: packages/styles/src/form-textarea/sk-form-textarea.css -> packages/elements/src/form-textarea/sk-form-textarea.css.js
+build-elements-css: packages/styles/src/grid/sk-grid.css -> packages/elements/src/grid/sk-grid.css.js
+build-elements-css: packages/styles/src/metric/sk-metric.css -> packages/elements/src/metric/sk-metric.css.js
+build-elements-css: packages/styles/src/nav-pill/sk-nav-pill.css + packages/styles/src/nav-pill/sk-nav-pill-drawer.css -> packages/elements/src/nav-pill/sk-nav-pill.css.js
+build-elements-css: packages/styles/src/notice/sk-notice.css -> packages/elements/src/notice/sk-notice.css.js
+build-elements-css: packages/styles/src/page-header/sk-page-header.css -> packages/elements/src/page-header/sk-page-header.css.js
+build-elements-css: packages/styles/src/personal-rail/sk-personal-rail.css -> packages/elements/src/personal-rail/sk-personal-rail.css.js
+build-elements-css: packages/styles/src/pill-tag/sk-pill-tag.css -> packages/elements/src/pill-tag/sk-pill-tag.css.js
+build-elements-css: packages/styles/src/ribbon-card/sk-ribbon-card.css -> packages/elements/src/ribbon-card/sk-ribbon-card.css.js
+build-elements-css: packages/styles/src/section-banner/sk-section-banner.css -> packages/elements/src/section-banner/sk-section-banner.css.js
+build-elements-css: packages/styles/src/section-header/sk-section-header.css -> packages/elements/src/section-header/sk-section-header.css.js
+build-elements-css: packages/styles/src/site-footer/sk-site-footer.css -> packages/elements/src/site-footer/sk-site-footer.css.js
+build-elements-css: packages/styles/src/status-indicator/sk-status-indicator.css -> packages/elements/src/status-indicator/sk-status-indicator.css.js
+build-elements-css: packages/styles/src/stub/sk-stub.css -> packages/elements/src/stub/sk-stub.css.js
+build-elements-css: packages/styles/src/theme-toggle/sk-theme-toggle.css -> packages/elements/src/theme-toggle/sk-theme-toggle.css.js
+build-elements-css: packages/styles/src/time-series-chart/sk-time-series-chart.css -> packages/elements/src/time-series-chart/sk-time-series-chart.css.js
+build-elements-css: packages/styles/src/transition-matrix/sk-transition-matrix.css -> packages/elements/src/transition-matrix/sk-transition-matrix.css.js
+
+> nx run elements:build  [existing outputs match the cache, left as is]
+
+> node scripts/build-theme-bootstrap.mjs
+
+build-theme-bootstrap: packages/elements/src/theme-bootstrap.ts -> packages/elements/theme-bootstrap.js
+> tsc -p packages/elements/tsconfig.lib.json --emitDeclarationOnly --outDir packages/elements/dist
+
+> esbuild packages/elements/src/theme-toggle/theme-preference.ts --bundle --format=esm --outfile=packages/elements/dist/theme-toggle/theme-preference.js
+
+
+  packages/elements/dist/theme-toggle/theme-preference.js  1.2kb
+
+⚡ Done in 10ms
+> esbuild packages/elements/src/index.ts --bundle --format=esm --external:lit --outfile=packages/elements/dist/index.js
+
+
+  packages/elements/dist/index.js  250.0kb
+
+⚡ Done in 15ms
+> esbuild packages/elements/src/elements.ts --bundle --format=iife --outfile=packages/elements/dist/elements.js
+
+
+  packages/elements/dist/elements.js  268.4kb
+
+⚡ Done in 17ms
+
+
+
+ NX   Successfully ran target build for 3 projects and 1 task they depend on
+
+Nx read the output from the cache instead of running the command for 3 out of 4 tasks.
+

@@ -1,0 +1,228 @@
+
+> spec-kitty-design@0.0.0 quality:all
+> npm run quality:lint && npm run quality:stylelint && npm run quality:htmlhint
+
+
+> spec-kitty-design@0.0.0 quality:lint
+> nx run-many --target=lint --all
+
+
+ NX   Running target lint for 8 projects:
+
+- elements-behaviour-fixture
+- react-consumer-fixture
+- vite-consumer-fixture
+- vue-consumer-fixture
+- elements
+- styles
+- tokens
+- react
+
+
+
+> nx run tokens:lint  [existing outputs match the cache, left as is]
+
+> stylelint --allow-empty-input 'packages/tokens/src/**/*.css'
+
+(node:872778) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> nx run styles:lint  [existing outputs match the cache, left as is]
+
+(node:872779) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+
+Linting "styles"...
+
+✔ All files pass linting
+
+
+> nx run elements:lint  [existing outputs match the cache, left as is]
+
+(node:872780) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+
+Linting "elements"...
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/packages/elements/src/card/sk-card.stories.ts[24m[0m
+[0m  [2m47:71[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/packages/elements/src/form-control-base.ts[24m[0m
+[0m  [2m83:21[22m  [33mwarning[39m  Variable Assigned to Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m84:14[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m85:7[22m   [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/packages/elements/src/form-input/sk-form-input.ts[24m[0m
+[0m  [2m360:11[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m360:38[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m427:35[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/packages/elements/src/notice/sk-notice.stories.ts[24m[0m
+[0m   [2m25:94[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m156:24[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m157:53[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/packages/elements/src/notice/sk-notice.ts[24m[0m
+[0m  [2m295:47[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m302:32[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/packages/elements/src/page-header/sk-page-header.ts[24m[0m
+[0m  [2m24:39[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/packages/elements/src/patterns/account-front-door.stories.ts[24m[0m
+[0m  [2m242:26[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/packages/elements/src/patterns/mission-kanban.stories.ts[24m[0m
+[0m  [2m677:64[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/packages/elements/src/pill-tag/sk-pill-tag.stories.ts[24m[0m
+[0m  [2m75:36[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/packages/elements/src/time-series-chart/sk-time-series-chart.ts[24m[0m
+[0m  [2m231:9[22m   [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m239:28[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m240:25[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m372:19[22m  [33mwarning[39m  Variable Assigned to Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m434:15[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m435:85[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m475:23[22m  [33mwarning[39m  Variable Assigned to Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/packages/elements/src/transition-matrix/sk-transition-matrix.ts[24m[0m
+[0m   [2m68:21[22m  [33mwarning[39m  Variable Assigned to Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m193:84[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m246:21[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m248:45[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[33m[1m✖ 27 problems (0 errors, 27 warnings)[22m[39m[0m
+[0m[33m[1m[22m[39m[0m
+✖ 27 problems (0 errors, 27 warnings)
+
+
+> nx run react:lint  [existing outputs match the cache, left as is]
+
+(node:872896) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+
+Linting "react"...
+
+✔ All files pass linting
+
+
+> nx run elements-behaviour-fixture:lint  [existing outputs match the cache, left as is]
+
+(node:873020) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+
+Linting "elements-behaviour-fixture"...
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/fixtures/elements-behaviour/src/sk-action-row.test.ts[24m[0m
+[0m  [2m1080:7[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/fixtures/elements-behaviour/src/sk-bar-chart.test.ts[24m[0m
+[0m  [2m436:7[22m   [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m437:14[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/fixtures/elements-behaviour/src/sk-behaviour-fixture.ts[24m[0m
+[0m  [2m118:21[22m  [33mwarning[39m  Variable Assigned to Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m119:14[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m120:7[22m   [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/fixtures/elements-behaviour/src/sk-button.test.ts[24m[0m
+[0m  [2m468:5[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts[24m[0m
+[0m  [2m155:12[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/fixtures/elements-behaviour/src/sk-evidence-chain.test.ts[24m[0m
+[0m   [2m95:49[22m  [33mwarning[39m  Generic Object Injection Sink        [2msecurity/detect-object-injection[22m[0m
+[0m  [2m101:55[22m  [33mwarning[39m  Generic Object Injection Sink        [2msecurity/detect-object-injection[22m[0m
+[0m  [2m121:48[22m  [33mwarning[39m  Function Call Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m124:55[22m  [33mwarning[39m  Generic Object Injection Sink        [2msecurity/detect-object-injection[22m[0m
+[0m  [2m141:34[22m  [33mwarning[39m  Generic Object Injection Sink        [2msecurity/detect-object-injection[22m[0m
+[0m  [2m142:41[22m  [33mwarning[39m  Generic Object Injection Sink        [2msecurity/detect-object-injection[22m[0m
+[0m  [2m143:39[22m  [33mwarning[39m  Generic Object Injection Sink        [2msecurity/detect-object-injection[22m[0m
+[0m  [2m144:33[22m  [33mwarning[39m  Generic Object Injection Sink        [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/fixtures/elements-behaviour/src/sk-form-input.test.ts[24m[0m
+[0m   [2m85:47[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m471:5[22m   [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/fixtures/elements-behaviour/src/sk-notice.test.ts[24m[0m
+[0m  [2m573:7[22m   [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m576:20[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/fixtures/elements-behaviour/src/sk-page-header.test.ts[24m[0m
+[0m  [2m769:20[22m  [33mwarning[39m  Variable Assigned to Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m814:34[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m818:18[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m833:50[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m857:20[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m862:5[22m   [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m915:47[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/fixtures/elements-behaviour/src/sk-site-footer.test.ts[24m[0m
+[0m  [2m443:14[22m  [33mwarning[39m  Function Call Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m443:67[22m  [33mwarning[39m  Function Call Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/tmp/d1-stage-b-wp01.t4u3xU/s-worktree/fixtures/elements-behaviour/src/sk-time-series-chart.test.ts[24m[0m
+[0m  [2m101:3[22m   [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m373:7[22m   [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m374:14[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[33m[1m✖ 32 problems (0 errors, 32 warnings)[22m[39m[0m
+[0m[33m[1m[22m[39m[0m
+✖ 32 problems (0 errors, 32 warnings)
+
+
+> nx run react-consumer-fixture:lint  [existing outputs match the cache, left as is]
+
+(node:873053) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+
+Linting "react-consumer-fixture"...
+
+✔ All files pass linting
+
+
+> nx run vue-consumer-fixture:lint  [existing outputs match the cache, left as is]
+
+(node:873246) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+
+Linting "vue-consumer-fixture"...
+
+✔ All files pass linting
+
+
+> nx run vite-consumer-fixture:lint  [existing outputs match the cache, left as is]
+
+(node:873203) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+
+Linting "vite-consumer-fixture"...
+
+✔ All files pass linting
+
+
+
+
+ NX   Successfully ran target lint for 8 projects
+
+Nx read the output from the cache instead of running the command for 8 out of 8 tasks.
+
+
+> spec-kitty-design@0.0.0 quality:stylelint
+> stylelint --allow-empty-input 'packages/**/*.css' 'packages/**/*.scss'
+
+
+> spec-kitty-design@0.0.0 quality:htmlhint
+> htmlhint 'packages/styles/src/**/*.html' 'apps/demo/**/*.html' 'audit/*.html'
+
+
+   Config loaded: /tmp/d1-stage-b-wp01.t4u3xU/s-worktree/.htmlhintrc
+
+   Config loaded: /tmp/d1-stage-b-wp01.t4u3xU/s-worktree/.htmlhintrc
+
+   Config loaded: /tmp/d1-stage-b-wp01.t4u3xU/s-worktree/.htmlhintrc
+
+Scanned 163 files, no errors found (45 ms).

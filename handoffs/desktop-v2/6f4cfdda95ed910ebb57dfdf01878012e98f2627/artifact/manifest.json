@@ -1,0 +1,2734 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+  "contract": {
+    "path": "contract/source-contract.json",
+    "sourcePath": "contracts/desktop-v2/source-contract.json",
+    "sizeBytes": 124790,
+    "sha256": "9292b88ee68ea0a54cbf91194709167f4b0c6e24866ce23a8ecc8b5cfeee9681",
+    "licenseRefs": [
+      "license:repository-mit"
+    ]
+  },
+  "files": [
+    {
+      "path": "LICENSE",
+      "sourcePath": "LICENSE",
+      "roles": [
+        "license-evidence"
+      ],
+      "familyIds": [],
+      "sizeBytes": 1060,
+      "sha256": "2510b446bc1f0cf9702453075d20cd88631e20e5642658edb7325d9c1eb534f7",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/action-row/sk-action-row.markup.ts",
+      "sourcePath": "packages/elements/src/action-row/sk-action-row.markup.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "action-row"
+      ],
+      "sizeBytes": 14230,
+      "sha256": "ee845a216fe278a2261b5f11536aeb406c3de1481ac4fa80d595897e93c23e84",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/action-row/sk-action-row.stories.ts",
+      "sourcePath": "packages/elements/src/action-row/sk-action-row.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "action-row"
+      ],
+      "sizeBytes": 10696,
+      "sha256": "c67ba9965a0f050610592cabebb4e4289c8338774ff233b202f6439772faba25",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/action-row/sk-action-row.ts",
+      "sourcePath": "packages/elements/src/action-row/sk-action-row.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "action-row"
+      ],
+      "sizeBytes": 8201,
+      "sha256": "33cb8e3e63778bc08d20f90c5fc762b62e314bee4f10e5a1f179e7ea3e47f627",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/app-shell/sk-app-shell.stories.ts",
+      "sourcePath": "packages/elements/src/app-shell/sk-app-shell.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "app-shell"
+      ],
+      "sizeBytes": 10113,
+      "sha256": "fd7ab875467de41c57f85c94b3a0ce462ccf9e268f557ca912a408d0995b2d43",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "sourcePath": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "app-shell"
+      ],
+      "sizeBytes": 14218,
+      "sha256": "ff04403f99ae88b0faf37804f2374b3841040c4f5033b18ac4f634499bed9c70",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/button/sk-button.markup.ts",
+      "sourcePath": "packages/elements/src/button/sk-button.markup.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "button"
+      ],
+      "sizeBytes": 10107,
+      "sha256": "3c5b27a5a52685eba05748b28f13b707ce0d6d510acf7f3f36872e78bce53985",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/button/sk-button.stories.ts",
+      "sourcePath": "packages/elements/src/button/sk-button.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "button"
+      ],
+      "sizeBytes": 9809,
+      "sha256": "137d74b3bebbaaee66d3ce3962f4cb3bda4e9f776729a51cfa8a3d8364f93ef8",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/button/sk-button.ts",
+      "sourcePath": "packages/elements/src/button/sk-button.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "button"
+      ],
+      "sizeBytes": 6210,
+      "sha256": "3cb9235c9fceffc96139157a6d6d614e24df44084d2ae41ac58a56959e66ddbd",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/card/sk-card.markup.ts",
+      "sourcePath": "packages/elements/src/card/sk-card.markup.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "card"
+      ],
+      "sizeBytes": 10997,
+      "sha256": "316c51a67eb4454229f7102bc24823e4e4f318ae63e517e230884a0626e7a871",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/card/sk-card.stories.ts",
+      "sourcePath": "packages/elements/src/card/sk-card.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "card"
+      ],
+      "sizeBytes": 12744,
+      "sha256": "431c2790b88d130672841ea7a25ac83a471bd36a0801b108ec06fc8013b099ee",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/card/sk-card.ts",
+      "sourcePath": "packages/elements/src/card/sk-card.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "card"
+      ],
+      "sizeBytes": 4795,
+      "sha256": "f5902e24aac4f2b575385dda61556d82e8eed0ff9f7ec91fc1f5ee5d8f00d13b",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/context-sidebar/sk-context-sidebar.stories.ts",
+      "sourcePath": "packages/elements/src/context-sidebar/sk-context-sidebar.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "context-sidebar"
+      ],
+      "sizeBytes": 2327,
+      "sha256": "f6ebc878879e2d95e4ba5944c2a0dc68e323422d3c13ad13fdd58c273a6f6189",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+      "sourcePath": "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "context-sidebar"
+      ],
+      "sizeBytes": 1528,
+      "sha256": "7a2edc87e9ece26f1113bd7f2910d6cb61718cf6e76f7401269d9d21c0a1afa0",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/metric/sk-metric.stories.ts",
+      "sourcePath": "packages/elements/src/metric/sk-metric.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "metric"
+      ],
+      "sizeBytes": 1810,
+      "sha256": "67b59142c057f2946ba6b15c14b6159d430c2619b08894298ff861e459a36ee1",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/metric/sk-metric.ts",
+      "sourcePath": "packages/elements/src/metric/sk-metric.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "metric"
+      ],
+      "sizeBytes": 3700,
+      "sha256": "3425ce36c246744b97ff8316484907667c6c50227ba455ec1c617ab92923580c",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/nav-pill/sk-nav-pill.stories.ts",
+      "sourcePath": "packages/elements/src/nav-pill/sk-nav-pill.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "nav-pill"
+      ],
+      "sizeBytes": 1952,
+      "sha256": "4dc60ce7fa14902e0695de275114663714cb964a4c2e5e954c53aaeb3e9ea829",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "sourcePath": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "nav-pill"
+      ],
+      "sizeBytes": 7903,
+      "sha256": "878cd727621582468444ca35b0dad2e5451b74ae3dc4219c5ffa4f885b19a59a",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/notice/sk-notice.stories.ts",
+      "sourcePath": "packages/elements/src/notice/sk-notice.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "notice"
+      ],
+      "sizeBytes": 17283,
+      "sha256": "7f83d3b280958c06a2caaa3de03ec8edd3398760215873082979a99aa389d03b",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/notice/sk-notice.ts",
+      "sourcePath": "packages/elements/src/notice/sk-notice.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "notice"
+      ],
+      "sizeBytes": 18023,
+      "sha256": "3c6a98cfb760a8deaf5f1280a74811c47b5e9aba571a0deb660f341d857b2fc8",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/page-header/sk-page-header.stories.ts",
+      "sourcePath": "packages/elements/src/page-header/sk-page-header.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "page-header"
+      ],
+      "sizeBytes": 14851,
+      "sha256": "744bba9eeeb03df223123355ed91221ef6e45fc762b41e9dbb917001231020af",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/page-header/sk-page-header.ts",
+      "sourcePath": "packages/elements/src/page-header/sk-page-header.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "page-header"
+      ],
+      "sizeBytes": 8364,
+      "sha256": "5d589bf9e6e96d216d5130a518b3008d54d538071fc97c237186e539e34eba1d",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/personal-rail/sk-personal-rail.stories.ts",
+      "sourcePath": "packages/elements/src/personal-rail/sk-personal-rail.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "personal-rail"
+      ],
+      "sizeBytes": 2469,
+      "sha256": "810e573f6fd5fd2efa6f57ad69699e7dd2ded5b18ac1aba418e10e54c65eaa5b",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/personal-rail/sk-personal-rail.ts",
+      "sourcePath": "packages/elements/src/personal-rail/sk-personal-rail.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "personal-rail"
+      ],
+      "sizeBytes": 2096,
+      "sha256": "e238855b97c3fb564790c9dbdef9debbdc74a1c31aaa8d816f189579fd1d0755",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/pill-tag/sk-pill-tag.markup.ts",
+      "sourcePath": "packages/elements/src/pill-tag/sk-pill-tag.markup.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "pill-tag"
+      ],
+      "sizeBytes": 8864,
+      "sha256": "d314286650f99c0dca24e1adca646d2fb7bb99f6ad5b758639583d244952804f",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/pill-tag/sk-pill-tag.stories.ts",
+      "sourcePath": "packages/elements/src/pill-tag/sk-pill-tag.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "pill-tag"
+      ],
+      "sizeBytes": 10457,
+      "sha256": "a851044f420515e1e2d0751ee6ecd6f4caf73d86574be29bf4f914d7170d5073",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/pill-tag/sk-pill-tag.ts",
+      "sourcePath": "packages/elements/src/pill-tag/sk-pill-tag.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "pill-tag"
+      ],
+      "sizeBytes": 2257,
+      "sha256": "fbcbed82489c6bdb149fbd13b0f1c0e5b595b6052fb08f3ba7d34e619688be62",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/status-indicator/sk-status-indicator.stories.ts",
+      "sourcePath": "packages/elements/src/status-indicator/sk-status-indicator.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "status-indicator"
+      ],
+      "sizeBytes": 3577,
+      "sha256": "1e94d40f0b04e55a5b222f71c4940a7aec816e0fca0ca8d2ecb00d185f2ad91d",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+      "sourcePath": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "status-indicator"
+      ],
+      "sizeBytes": 3760,
+      "sha256": "a7f9e5877617483e53310b2ada4ebfc2c8f11fdcae02131c2a92392d0c3739b2",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/action-row/sk-action-row-html.stories.ts",
+      "sourcePath": "packages/styles/src/action-row/sk-action-row-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "action-row"
+      ],
+      "sizeBytes": 14070,
+      "sha256": "d84874e0f425595c2d8fe5e54408859730d71fbd9abbaba36f110846b4fe32fc",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/action-row/sk-action-row.css",
+      "sourcePath": "packages/styles/src/action-row/sk-action-row.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "action-row"
+      ],
+      "sizeBytes": 12353,
+      "sha256": "1017b506fc17909d974df09c0a92344ba1a714eb06194af40376bff8c7b84812",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/action-row/static/sk-action-row.static.css",
+      "sourcePath": "packages/styles/src/action-row/static/sk-action-row.static.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "action-row"
+      ],
+      "sizeBytes": 10231,
+      "sha256": "0a80216d0dbdea862f697bd4780b8bf7dc162d77e5121111b5080e27893c492d",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/app-shell/sk-app-shell.css",
+      "sourcePath": "packages/styles/src/app-shell/sk-app-shell.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "app-shell"
+      ],
+      "sizeBytes": 8002,
+      "sha256": "0e313ed32677c07d0b7640dcb0dbea6f8b25800af63f4bf88f7fde28fecbe123",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/app-shell/static/sk-app-shell.static.css",
+      "sourcePath": "packages/styles/src/app-shell/static/sk-app-shell.static.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "app-shell"
+      ],
+      "sizeBytes": 7933,
+      "sha256": "be29b8cf8f562da085de53faec89086c8af48b613e76a584a52ce7983baa5bc1",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/button/sk-button-html.stories.ts",
+      "sourcePath": "packages/styles/src/button/sk-button-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "button"
+      ],
+      "sizeBytes": 6080,
+      "sha256": "635548a3441bb7db2530d33db7627f59398b88de533b9780806ad486f4c9722d",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/button/sk-button.css",
+      "sourcePath": "packages/styles/src/button/sk-button.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "button"
+      ],
+      "sizeBytes": 17418,
+      "sha256": "51d180c8af87ea8e4f226a36abf7a005bceef0f6ae2f834e6da1df3530db902b",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/card/sk-card-html.stories.ts",
+      "sourcePath": "packages/styles/src/card/sk-card-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "card"
+      ],
+      "sizeBytes": 7508,
+      "sha256": "81cece352884a476a09814b903cd9c0350e7d6917588b4a6e006291834c51add",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/card/sk-card.css",
+      "sourcePath": "packages/styles/src/card/sk-card.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "card"
+      ],
+      "sizeBytes": 12109,
+      "sha256": "7c39b077865569f7865473eff448b74780526509c9f28fb2538599fe163590c6",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/context-sidebar/sk-context-sidebar.css",
+      "sourcePath": "packages/styles/src/context-sidebar/sk-context-sidebar.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "context-sidebar"
+      ],
+      "sizeBytes": 3221,
+      "sha256": "75da415d3578391b91348d6ab93d784356054b220b3f5d8b8218015827b0b182",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/data-table/sk-data-table-default.html",
+      "sourcePath": "packages/styles/src/data-table/sk-data-table-default.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "data-table"
+      ],
+      "sizeBytes": 1573,
+      "sha256": "39ab1948df9393d299ad7d5aed1535746a08f01a65d6eeb78d838d279b419dda",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/data-table/sk-data-table-html.stories.ts",
+      "sourcePath": "packages/styles/src/data-table/sk-data-table-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "data-table"
+      ],
+      "sizeBytes": 4443,
+      "sha256": "ca7941bfd9ac5f7c015c71c76b8e36161adaa5639f01b48f67d3f55bd18757f2",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/data-table/sk-data-table-narrow-scrollable.html",
+      "sourcePath": "packages/styles/src/data-table/sk-data-table-narrow-scrollable.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "data-table"
+      ],
+      "sizeBytes": 2137,
+      "sha256": "17b269a3b9c6298edbc4719eb9be7e783a3b3118b6145e3a64d3073715059317",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/data-table/sk-data-table-sticky-header.html",
+      "sourcePath": "packages/styles/src/data-table/sk-data-table-sticky-header.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "data-table"
+      ],
+      "sizeBytes": 1888,
+      "sha256": "bd6cbd4d21350b739dbc4c0583791e4608d3556880d405036d523b1e8a5809c5",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/data-table/sk-data-table.css",
+      "sourcePath": "packages/styles/src/data-table/sk-data-table.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "data-table"
+      ],
+      "sizeBytes": 12959,
+      "sha256": "5e600a5407fed2193c2464610c99a5477509bc05be5182d35a814209a45abc44",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/disclosure/sk-disclosure-closed.html",
+      "sourcePath": "packages/styles/src/disclosure/sk-disclosure-closed.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "disclosure"
+      ],
+      "sizeBytes": 388,
+      "sha256": "396277fe49113165b52c8ea2358a598461dceacb1b914c7180e781b55a316fa3",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/disclosure/sk-disclosure-html.stories.ts",
+      "sourcePath": "packages/styles/src/disclosure/sk-disclosure-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "disclosure"
+      ],
+      "sizeBytes": 2170,
+      "sha256": "d59ccef1bd14ec5b71e58dfbb7baea0292c52caf7120cd73da04329cdfbf1fd3",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/disclosure/sk-disclosure-long-body.html",
+      "sourcePath": "packages/styles/src/disclosure/sk-disclosure-long-body.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "disclosure"
+      ],
+      "sizeBytes": 1131,
+      "sha256": "2c4a54aed2d2e4e109829df72fa8e0fc49d9b46b5df62fc027c78a764b4f13e1",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/disclosure/sk-disclosure-nested.html",
+      "sourcePath": "packages/styles/src/disclosure/sk-disclosure-nested.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "disclosure"
+      ],
+      "sizeBytes": 789,
+      "sha256": "43f0d52d1f517875958cd6af539ca16c4a831474ab4c1462cbf419e6a81885ae",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/disclosure/sk-disclosure-open.html",
+      "sourcePath": "packages/styles/src/disclosure/sk-disclosure-open.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "disclosure"
+      ],
+      "sizeBytes": 310,
+      "sha256": "4f6ad49d0c8eb9ef54935d7dec4b7baca66e0ec1ff785dac0d8a2b9a5fbddae1",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/disclosure/sk-disclosure.css",
+      "sourcePath": "packages/styles/src/disclosure/sk-disclosure.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "disclosure"
+      ],
+      "sizeBytes": 5015,
+      "sha256": "ba170f07cf63189fcd3cc5ccb767bd471186004ab4febb4076c8bda940f05d33",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/empty-state/sk-empty-state-html.stories.ts",
+      "sourcePath": "packages/styles/src/empty-state/sk-empty-state-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "empty-state"
+      ],
+      "sizeBytes": 1912,
+      "sha256": "59b96f7a7a8c404a3d075ed8590e145ad4748eb80a0af715de3080edf837097d",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/empty-state/sk-empty-state-inline.html",
+      "sourcePath": "packages/styles/src/empty-state/sk-empty-state-inline.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "empty-state"
+      ],
+      "sizeBytes": 229,
+      "sha256": "719149b02b545c0749f98bd550e24f62fc4eff1bd531c4dc4e7196e46adc5022",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/empty-state/sk-empty-state-with-action.html",
+      "sourcePath": "packages/styles/src/empty-state/sk-empty-state-with-action.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "empty-state"
+      ],
+      "sizeBytes": 507,
+      "sha256": "fc2f1439effab56526a440de7e059ab8618cc78631dbfa6824333a035730b93c",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/empty-state/sk-empty-state-without-action.html",
+      "sourcePath": "packages/styles/src/empty-state/sk-empty-state-without-action.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "empty-state"
+      ],
+      "sizeBytes": 240,
+      "sha256": "aa0c5326eb48d9fcde0d8dfdd056f77db132a8db9611b861d27546e9533590ed",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/empty-state/sk-empty-state.css",
+      "sourcePath": "packages/styles/src/empty-state/sk-empty-state.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "empty-state"
+      ],
+      "sizeBytes": 996,
+      "sha256": "4da89fe0b944657533ae3ae7d03f9fdf7c0b02bbafbfac8a84b89f5a778f0726",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-compact-default.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-compact-default.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 1043,
+      "sha256": "49cadfcfdc33117e12cdb10540931bb2028ee8f8c34871dfd72ea0e3638c99a1",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-compact-degraded.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-compact-degraded.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 668,
+      "sha256": "66d3025a3ac428b394a05f81b9d9edc15c587d3b772c18caa34abf9d0cb3ccf4",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-compact-forced-colors.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-compact-forced-colors.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 883,
+      "sha256": "41d85a6b51b0ed7b642ddfcd234fa11e31f165d3e8b29ae09e8fdb49189fe275",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-compact-leading-marker.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-compact-leading-marker.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 1458,
+      "sha256": "d915a42abb4250b9a3495b72290462b43196af656759e93550d7995c51d08b1c",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-compact-linked.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-compact-linked.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 706,
+      "sha256": "4867cc351aa33c134a0e152e1a3f5a2dd80ee0c9f423d59a567edf727a29f78c",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-compact-long-content.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-compact-long-content.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 1092,
+      "sha256": "f83a283d99cf207da5d05d17e7cbf328932b1ac873ecb20c1a298b6b8a104d1b",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-compact-narrow.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-compact-narrow.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 771,
+      "sha256": "fbe3526594bf7c5949cc9ea5a3cc4fd79514331d4ab29259748fc422b69cd043",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-compact-one-event.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-compact-one-event.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 374,
+      "sha256": "1ca9441217e8c2d86f43d405cea8feb47304452a9a8ad48d805e52953157dc92",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-compact-twenty-events.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-compact-twenty-events.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 4934,
+      "sha256": "5b9dc6ed0ca225a6090ea38358d780abe4b361f35e6400f5ea0f11ce87413f42",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-forced-colors.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-forced-colors.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 572,
+      "sha256": "ed388db07a1dd63564434f292a2d2f46a4add1903df8578ea40cacbf211fa7a9",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-html.stories.ts",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 3363,
+      "sha256": "f241087b03c62d65f2f05b689f9e4702fd7392be46019b017670ba2c2ac112e8",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-long-transition.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-long-transition.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 959,
+      "sha256": "b8049bc47b3a6f4b88b1383beaa9bf5816958fc1b0b0ffe8b8cadae9fc8dc453",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-narrow.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-narrow.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 868,
+      "sha256": "17463dadc53030ba01ed846734f5de8fe3dece022b79482582f52268800255cf",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-one-event.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-one-event.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 331,
+      "sha256": "57951a154eeecfcd245af8832cf4cc6057a667203494259d537dea3911749e1c",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-twenty-events.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-twenty-events.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 5019,
+      "sha256": "dd295924b24ec452070fbc58a78daf75b8eb56c7bcc9efacebd7eb0a94b1aeb0",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-two-events.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-two-events.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 667,
+      "sha256": "955cb8c27de0b0c99e099b603fed2af00318e6b823bdb1c665fb2e2ffb747820",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-unavailable-retention.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-unavailable-retention.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 369,
+      "sha256": "16a35df1c615a1f4a591cca0166ff3b2bc602a6cc0ec697ec972f3dd85b8e486",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline-verified-marker.html",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-verified-marker.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 673,
+      "sha256": "0193a3bd2c76f6dadbcc22ce30c196c5a3beafe7231cb9c15fa05e2746fcdd23",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/event-timeline/sk-event-timeline.css",
+      "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "event-timeline"
+      ],
+      "sizeBytes": 4259,
+      "sha256": "476e400034a413a7d4e4831fc1c4d8792da13b2a3e3483379e3a9fbc331ea9ae",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/facts/sk-facts-compact.html",
+      "sourcePath": "packages/styles/src/facts/sk-facts-compact.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "facts"
+      ],
+      "sizeBytes": 372,
+      "sha256": "327f9c77620794756c178581bbc5929591cc9c03a46bc4b5e7369bcb23f0c72b",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/facts/sk-facts-empty-value.html",
+      "sourcePath": "packages/styles/src/facts/sk-facts-empty-value.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "facts"
+      ],
+      "sizeBytes": 550,
+      "sha256": "168c7f21ad2acb059507c391b0e243a56ad20f56733f4235751464fab1612659",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/facts/sk-facts-html.stories.ts",
+      "sourcePath": "packages/styles/src/facts/sk-facts-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "facts"
+      ],
+      "sizeBytes": 1062,
+      "sha256": "7dd35ed275e8a248f11c3b9f00e619a0eb06f479a70a667d30d3ea63ea6cd04e",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/facts/sk-facts-long-value.html",
+      "sourcePath": "packages/styles/src/facts/sk-facts-long-value.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "facts"
+      ],
+      "sizeBytes": 791,
+      "sha256": "c1190cfed948681d996573e79f9691f00b7a556dd12c8e89445e813ccba5b193",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/facts/sk-facts-two-col.html",
+      "sourcePath": "packages/styles/src/facts/sk-facts-two-col.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "facts"
+      ],
+      "sizeBytes": 367,
+      "sha256": "0b00af24651d864946f3f6d06d42f6eaaa2d2466fbe34ad16ae84155c0ae801e",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/facts/sk-facts.css",
+      "sourcePath": "packages/styles/src/facts/sk-facts.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "facts"
+      ],
+      "sizeBytes": 1747,
+      "sha256": "c59e085957d27c004a8bb931f01e627ba1617e9b4c6932c69d9d89878ae50d14",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/facts/sk-facts.html",
+      "sourcePath": "packages/styles/src/facts/sk-facts.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "facts"
+      ],
+      "sizeBytes": 418,
+      "sha256": "5474f16e119762ac15191cc7e0aaa931b54c2f7ff6ca9bb5252b6a0e267204eb",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/form-select/sk-form-select-compact.html",
+      "sourcePath": "packages/styles/src/form-select/sk-form-select-compact.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "form-select"
+      ],
+      "sizeBytes": 421,
+      "sha256": "015b950d5eee905230e1a42e33e5c0c093e22db7f3a750bc8ddcd65ea2a7a5e6",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/form-select/sk-form-select-disabled.html",
+      "sourcePath": "packages/styles/src/form-select/sk-form-select-disabled.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "form-select"
+      ],
+      "sizeBytes": 473,
+      "sha256": "0dfc93ee2b6022ba08d6433f8f1671cfc530a1e6a30de557bc6f6205be2a37b0",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/form-select/sk-form-select-html.stories.ts",
+      "sourcePath": "packages/styles/src/form-select/sk-form-select-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "form-select"
+      ],
+      "sizeBytes": 2610,
+      "sha256": "d9fc142e8eaf072c2db89ce33d824b24779bf069bd81a6a0c7b22e71549bd7e1",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/form-select/sk-form-select-long-options.html",
+      "sourcePath": "packages/styles/src/form-select/sk-form-select-long-options.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "form-select"
+      ],
+      "sizeBytes": 416,
+      "sha256": "0a575e2b00ef2413284b38cabb8801c1151d689378eec507df106087810f9ad6",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/form-select/sk-form-select-optgroups.html",
+      "sourcePath": "packages/styles/src/form-select/sk-form-select-optgroups.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "form-select"
+      ],
+      "sizeBytes": 571,
+      "sha256": "d02f09cb19a2898c8b9acd4c662410063ce2acf31ad3b9d340c345ae06e00d26",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/form-select/sk-form-select-required-invalid.html",
+      "sourcePath": "packages/styles/src/form-select/sk-form-select-required-invalid.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "form-select"
+      ],
+      "sizeBytes": 628,
+      "sha256": "aed61067db671314403a9fd8bc857e082097a61a5564fe72227e23dcd16692e7",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/form-select/sk-form-select-t10-lane.html",
+      "sourcePath": "packages/styles/src/form-select/sk-form-select-t10-lane.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "form-select"
+      ],
+      "sizeBytes": 601,
+      "sha256": "57668a27609641105b4998b69150597987c4da9d3f831ee1d2a8431b89022e18",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/form-select/sk-form-select-t12-filters.html",
+      "sourcePath": "packages/styles/src/form-select/sk-form-select-t12-filters.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "form-select"
+      ],
+      "sizeBytes": 928,
+      "sha256": "ebd774bf1c76e344efaeea3fc13e63d48dfe1f435249562fe6e4038cf3048935",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/form-select/sk-form-select.css",
+      "sourcePath": "packages/styles/src/form-select/sk-form-select.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "form-select"
+      ],
+      "sizeBytes": 1280,
+      "sha256": "e1c4fd2b741be0a2220389f50c5aa0f78aba84c9a26bcfa2ee32bc38d7347634",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/metric/sk-metric.css",
+      "sourcePath": "packages/styles/src/metric/sk-metric.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "metric"
+      ],
+      "sizeBytes": 5414,
+      "sha256": "113b5c0a9361d1cdc6f98bbebc2f62b2a08c7f3dee940b960dac2b80b7fb0262",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/nav-pill/sk-nav-pill-drawer.css",
+      "sourcePath": "packages/styles/src/nav-pill/sk-nav-pill-drawer.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "nav-pill"
+      ],
+      "sizeBytes": 8501,
+      "sha256": "2ee6af697e91aa9d14d0decfc4cd998727964d3374ff1ef98cd9ba86a7cfb7bb",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/nav-pill/sk-nav-pill.css",
+      "sourcePath": "packages/styles/src/nav-pill/sk-nav-pill.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "nav-pill"
+      ],
+      "sizeBytes": 5471,
+      "sha256": "0331f2fbfc9a93ac5eace6f880e52fe60b078dead4b8f8a3600f4a85dc469a16",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/nav-pill/sk-nav-pill.stories.ts",
+      "sourcePath": "packages/styles/src/nav-pill/sk-nav-pill.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "nav-pill"
+      ],
+      "sizeBytes": 6205,
+      "sha256": "c118be10fb2f05853df7068ca6a2675419f6d805c5ddffeea60afe6d770cd843",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/notice/sk-notice.css",
+      "sourcePath": "packages/styles/src/notice/sk-notice.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "notice"
+      ],
+      "sizeBytes": 15058,
+      "sha256": "b49bde2fef415e34654421e2b3913d17ccd19206fbd62d580f36d455d727a15f",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/page-header/sk-page-header.css",
+      "sourcePath": "packages/styles/src/page-header/sk-page-header.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "page-header"
+      ],
+      "sizeBytes": 19168,
+      "sha256": "56937af52c3fd2a895e7e643bdaace964e286471b9e7cf81c9d3bc82148cd488",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/page-header/static/sk-page-header.static.css",
+      "sourcePath": "packages/styles/src/page-header/static/sk-page-header.static.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "page-header"
+      ],
+      "sizeBytes": 7764,
+      "sha256": "c1cfe42b5e5c6e383212c4dda90a1a0b1d5852928694b93f77f918ae174256b1",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/personal-rail/sk-personal-rail.css",
+      "sourcePath": "packages/styles/src/personal-rail/sk-personal-rail.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "personal-rail"
+      ],
+      "sizeBytes": 3022,
+      "sha256": "968842b150f4fb49d7bf13a97c357782d0262e669b31bda3d43bb69278ace5cb",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/pill-tag/sk-pill-tag.css",
+      "sourcePath": "packages/styles/src/pill-tag/sk-pill-tag.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "pill-tag"
+      ],
+      "sizeBytes": 8888,
+      "sha256": "fad6d47c8795730c8f9e93d1107746d3533be2d1a25527b3be1163e6e19fda74",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/pill-tag/sk-pill-tag.stories.ts",
+      "sourcePath": "packages/styles/src/pill-tag/sk-pill-tag.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "pill-tag"
+      ],
+      "sizeBytes": 5823,
+      "sha256": "e0f0e8312d63f0cb06379c09fbcabefb4f5272dd01d505a9f3345c8a99f0b3cf",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-compact.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-compact.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 375,
+      "sha256": "346a8ee6d5ecc33bb7ad4cb1388e59f6dc9cf6ca31902dabb12487516b795b9c",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-complete.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-complete.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 322,
+      "sha256": "a85bb979121011bd9cc3128f622b87c22e57c439007645d2c267a0a097799b4e",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-forced-colors.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-forced-colors.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 384,
+      "sha256": "4af49d5c2df1782ed5efc5d9ac5405ce250c0f397f04a0a92814638373cbe8ab",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-html.stories.ts",
+      "sourcePath": "packages/styles/src/progress/sk-progress-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 3390,
+      "sha256": "095209c1b518b065d6061030ac0147ec439ff07fdb11c95f81f93b18c311b290",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-indeterminate-compact.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-indeterminate-compact.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 347,
+      "sha256": "3c511984715e667b54f669225dda44a35fb7c073d2ec2e11b88d2013a7ba9c62",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-indeterminate-forced-colors.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-indeterminate-forced-colors.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 347,
+      "sha256": "bb78ae840e863e4291768ec9f846f671ae4b37af614aa3a58569381dd276e457",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-indeterminate-long-label.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-indeterminate-long-label.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 429,
+      "sha256": "74506f9b6024d3a9f238085b5eac9177ea667311c3f698909fa217194fe5b3f0",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-indeterminate-narrow.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-indeterminate-narrow.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 343,
+      "sha256": "757e392146915d3835727079e77d1b5eaba51053616b66fcc6b6496e6c104b92",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-indeterminate-with-meta.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-indeterminate-with-meta.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 388,
+      "sha256": "181d2e0c4b8734543fa8213cd77cc6ef544393797c49de6cce007a95d8bf41c6",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-indeterminate.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-indeterminate.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 320,
+      "sha256": "ccc1c90973638618a866db78fd7059e3eea18b8c0798f62d0b20f3ec55d39ae8",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-large-total.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-large-total.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 379,
+      "sha256": "ad1f8da38035f204ad5f36275f0972ab6ff49313fcecabcb9b4272ab6f36125e",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-long-label.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-long-label.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 443,
+      "sha256": "fa6c2652a807f62f93a41edd8860428661f96225afd39f398c6e81654f3e6de3",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-narrow.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-narrow.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 371,
+      "sha256": "ff10b06aa053e41fc59877bc26827b59c5909c76433e638d8afef4a9beedbe70",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-t10.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-t10.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 343,
+      "sha256": "bd0061aca44d25d06526b4724c353bfef0b804f33432c2b342acdefed95874e2",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress-zero.html",
+      "sourcePath": "packages/styles/src/progress/sk-progress-zero.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 306,
+      "sha256": "c61470314a9502900344a3f26f6f35e374b3dd2308f7767e847f4c6e3d2a77c0",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/progress/sk-progress.css",
+      "sourcePath": "packages/styles/src/progress/sk-progress.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "progress"
+      ],
+      "sizeBytes": 16350,
+      "sha256": "9af2457be987574f14a137bff070a50efa13497de3cec744bb614d3dc0698d95",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/segmented-choice/sk-segmented-choice-all-disabled.html",
+      "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-all-disabled.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "segmented-choice"
+      ],
+      "sizeBytes": 408,
+      "sha256": "cc25078f1d538eee96b69c07e57f199094738a4d071bcf9a37c7f733c673e14b",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/segmented-choice/sk-segmented-choice-default.html",
+      "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-default.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "segmented-choice"
+      ],
+      "sizeBytes": 369,
+      "sha256": "b54b2549c0f5f39160eadad824f85846667e883903b2149967af504666803d4d",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/segmented-choice/sk-segmented-choice-five-items.html",
+      "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-five-items.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "segmented-choice"
+      ],
+      "sizeBytes": 545,
+      "sha256": "4e56d995a3e532b38c5bbe358dd85947f124fcfe621c129e09d17d3addb622f3",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts",
+      "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "segmented-choice"
+      ],
+      "sizeBytes": 2680,
+      "sha256": "dff6ecb3a1479b2afaa19b03ea114077d9252fb28c7783747d8254647846b2bd",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/segmented-choice/sk-segmented-choice-long-labels.html",
+      "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-long-labels.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "segmented-choice"
+      ],
+      "sizeBytes": 426,
+      "sha256": "339fb3ed7d3c7a984feb4cca6e68efc721ecdfb0159bd027a0c2a18cc3b8a17d",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/segmented-choice/sk-segmented-choice-no-selection.html",
+      "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-no-selection.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "segmented-choice"
+      ],
+      "sizeBytes": 370,
+      "sha256": "b16499197e2d9c62aee680343ef44aa0eec27ef217327330d4819a0ff275b64a",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/segmented-choice/sk-segmented-choice-one-disabled.html",
+      "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-one-disabled.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "segmented-choice"
+      ],
+      "sizeBytes": 378,
+      "sha256": "a800a114c315c02c2d591327ee94887d5640b1de1dcee7c70a9f281c2c89ab39",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/segmented-choice/sk-segmented-choice-second-selected.html",
+      "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-second-selected.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "segmented-choice"
+      ],
+      "sizeBytes": 369,
+      "sha256": "4cc84999d730d9200a3d81d1e8a00384acf24fe543a9bf18d0a12e7e1fdcad8e",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/segmented-choice/sk-segmented-choice-third-selected.html",
+      "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-third-selected.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "segmented-choice"
+      ],
+      "sizeBytes": 369,
+      "sha256": "8c830a1d91e8035f67047b0e78d631008fbc466fca1eb32bee4d29a4e67b10a5",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/segmented-choice/sk-segmented-choice-two-items.html",
+      "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-two-items.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "segmented-choice"
+      ],
+      "sizeBytes": 267,
+      "sha256": "ce4432f4fb2417a8875aa2fedb030d76e8cc5eabe94c91cc7f0df3c5659f9ebb",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/segmented-choice/sk-segmented-choice.css",
+      "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "segmented-choice"
+      ],
+      "sizeBytes": 2799,
+      "sha256": "627f4c510ad5326f5dda0c4c31c42add33e97f442862ddad2581753226383159",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/status-indicator/sk-status-indicator.css",
+      "sourcePath": "packages/styles/src/status-indicator/sk-status-indicator.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "status-indicator"
+      ],
+      "sizeBytes": 2936,
+      "sha256": "272bb9079b25a2304b57c2fca3a958e5d9c4dd6fd4fbd6d1cc9cfd7bc19362fc",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-board/sk-workflow-board-all-empty.html",
+      "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-all-empty.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-board"
+      ],
+      "sizeBytes": 3747,
+      "sha256": "e779586d1110f7b8f6de3d24e8ab86f9a3474fe40e20722ee55c7ac6bd58fe0a",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-board/sk-workflow-board-fifty-items.html",
+      "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-fifty-items.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-board"
+      ],
+      "sizeBytes": 2359,
+      "sha256": "279df468c26f36b16c6a697b9c98edf2fda3bad5b3744cdfe4d87b65c8614d3f",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-board/sk-workflow-board-fitting.html",
+      "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-fitting.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-board"
+      ],
+      "sizeBytes": 3047,
+      "sha256": "2b70a23049c8c397d406201ed949a1b7ca98f54c8442a03ef625239d703b9d7b",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-board/sk-workflow-board-html.stories.ts",
+      "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-board"
+      ],
+      "sizeBytes": 3027,
+      "sha256": "9872453d4fdb97b298fa583a4c384157351dd044e24ca57ca7fae997625894c7",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-board/sk-workflow-board-long-labels-and-items.html",
+      "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-long-labels-and-items.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-board"
+      ],
+      "sizeBytes": 2235,
+      "sha256": "eab91baa6880e2a2abd1b4f1af1022c53c3677ba1f51b76c583d0ce69cda3081",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-board/sk-workflow-board-one-empty-lane.html",
+      "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-one-empty-lane.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-board"
+      ],
+      "sizeBytes": 3222,
+      "sha256": "54992ed89f1a35cab15ca9e076b8fe262329739476cc07166c992f2b65ab92b4",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-board/sk-workflow-board-populated.html",
+      "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-populated.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-board"
+      ],
+      "sizeBytes": 3265,
+      "sha256": "f82a5d7d222d5aab0da908a2eb8b3a3abf3bfa114781164a6da47b0ce8d94dae",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-board/sk-workflow-board-single-lane-narrow.html",
+      "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-single-lane-narrow.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-board"
+      ],
+      "sizeBytes": 880,
+      "sha256": "05c0ab7bd8e4e2bf7d38987835e947a17081b24ab07cdd417b1204d1ff6d20f2",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-board/sk-workflow-board.css",
+      "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-board"
+      ],
+      "sizeBytes": 1193,
+      "sha256": "289339d33dba58ca968f3a44c63304765b218dfca82e0cac2d107087bdf8a33a",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-lane/sk-workflow-lane-default.html",
+      "sourcePath": "packages/styles/src/workflow-lane/sk-workflow-lane-default.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-lane"
+      ],
+      "sizeBytes": 616,
+      "sha256": "fdfad94b89053eb844c1dcc8122d419ada31dee703a700e0c270d87a5ee06a3f",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-lane/sk-workflow-lane-empty.html",
+      "sourcePath": "packages/styles/src/workflow-lane/sk-workflow-lane-empty.html",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-lane"
+      ],
+      "sizeBytes": 710,
+      "sha256": "b08183fe87f2e9194d1eff6f1b839a53577d4da4a98ee2867a4178138987b0db",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-lane/sk-workflow-lane-html.stories.ts",
+      "sourcePath": "packages/styles/src/workflow-lane/sk-workflow-lane-html.stories.ts",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-lane"
+      ],
+      "sizeBytes": 837,
+      "sha256": "848e8c6125c32eaeed43945c116a0a72e5d473f3e4ed974ca92f54b709ba4e4c",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/styles/src/workflow-lane/sk-workflow-lane.css",
+      "sourcePath": "packages/styles/src/workflow-lane/sk-workflow-lane.css",
+      "roles": [
+        "primitive-source"
+      ],
+      "familyIds": [
+        "workflow-lane"
+      ],
+      "sizeBytes": 1884,
+      "sha256": "7bb2b418a23777f90023262ce0049b92f557ff8dfdd93ef08528ad0f4583cd1a",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSky-JKwK.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSky-JKwK.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 50280,
+      "sha256": "ba4179b33f6f0a1b5a0eda10239e17b219857d6eefa9032b33617c6f9b3e7771",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyBlack-GYXA.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyBlack-GYXA.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 57584,
+      "sha256": "495176a1de9148f0801917e1495250793cacb6df89b394089ef47b0112371e63",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyBlackOblique-j37y.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyBlackOblique-j37y.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 56184,
+      "sha256": "eea507aaaf7f5f7b1bf49c92eab3e819afc044741e44a1422021bd50ef01271a",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyBold-zemL.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyBold-zemL.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 59976,
+      "sha256": "10285c25520a1791510305034dfd597661200acebf683fa54efad11a136f1a4f",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyBoldOblique-5zmv.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyBoldOblique-5zmv.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 56376,
+      "sha256": "63c4593d410241973b4ad34bf103a971902ea5f5dcb1f0f240e6326e77a55b7c",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyBoldplus-6GZ1.otf",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyBoldplus-6GZ1.otf",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 143556,
+      "sha256": "b67dc811f597ba65238097f0fdc01a431cadab2c6517aab2945e8add2ca95ae7",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky-boldplus"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyBoldplusOblique-yxmV.otf",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyBoldplusOblique-yxmV.otf",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 141488,
+      "sha256": "adb9272c13e9ec9e0edac991dac24519a1571bd7b19b5be3630496c58ae1e53a",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky-boldplus"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyCondensed-9qm2.otf",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyCondensed-9qm2.otf",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 127288,
+      "sha256": "3e74be9a18429ae7edbc9b4f008e6e0cadca60b1e38d70465a5582a79c41918c",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky-condensed"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyCondensedOblique-leLw.otf",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyCondensedOblique-leLw.otf",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 125992,
+      "sha256": "2e80f12f225960aa9ef31b19a19e4e29d3c8a7ebcb5a58e8ef1cff53abe2969d",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky-condensed"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyCondensedOutline-n5XO.otf",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyCondensedOutline-n5XO.otf",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 227268,
+      "sha256": "53ef885ed448f5392e36dbdefee6b9793acc05af81f638afa695d7c875fbf302",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky-condensed-outline"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyCondensedOutlineOblique-1qZv.otf",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyCondensedOutlineOblique-1qZv.otf",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 226164,
+      "sha256": "c1bc93a12439f08f3298c28f4b3d397f15ed345a55bb7149ba064a5e6f3e1a5d",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky-condensed-outline"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyExtended-RLdE.otf",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyExtended-RLdE.otf",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 129928,
+      "sha256": "736a8f9f252cc0833ad339de1ee3b0a0770856c12bbf7bab4ad3ee54416690f4",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky-extended"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyExtendedOblique-BnYw.otf",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyExtendedOblique-BnYw.otf",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 127016,
+      "sha256": "523414555e4f5f9d2123aa68eaf498e47d034fbcc30fefd4b984cb1ceca4b98a",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky-extended"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyExtendedOutline-8qjn.otf",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyExtendedOutline-8qjn.otf",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 230304,
+      "sha256": "ee98dddbccb55b2e209769d1032f77e3917d7553a22f35f0a07ebb88a32fecd7",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky-extended-outline"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyExtendedOutlineOblique-YBO2.otf",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyExtendedOutlineOblique-YBO2.otf",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 228160,
+      "sha256": "91749dac80fd463301ca78577081b5374eb90cbde5f9d8534c4bead0d72b5dca",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky-extended-outline"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyExtrabold-redB.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyExtrabold-redB.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 63620,
+      "sha256": "5fb3d0d2d178c95e9eade3a3031909864d63b86963b9a7412206f2d4de4745ee",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyExtraboldOblique-MwdP.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyExtraboldOblique-MwdP.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 61956,
+      "sha256": "7a69a6b402f25b03149e529e00bd7ac00511aa759d8f58f96a71d3ded7d72e0c",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyLight-K2EX.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyLight-K2EX.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 58732,
+      "sha256": "cef479fd0be2692345e757947e865aeac9aba4f8f2255cd1078acec61b3b4604",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyLightOblique-2q3o.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyLightOblique-2q3o.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 57456,
+      "sha256": "98af8d9af1295457617956833cb1bfb767ab80bd7ea9751bc73535f98c0f433b",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyMedium-ved9.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyMedium-ved9.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 58968,
+      "sha256": "19d6e5bf6cc35abcef111865a2658ad4f05ae03e7e23965fd65af421ef33cfb8",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyMediumOblique-leLD.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyMediumOblique-leLD.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 57500,
+      "sha256": "abab84f9c9d0350ea86a8021ee96e1b3aab9fb6317b45e7b7612083ee282d634",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyOblique-n5XV.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyOblique-n5XV.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 49156,
+      "sha256": "4e5b4dc49e7a48152e93348733aaa942a0bf1053e322573f464555c94c31b665",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyOutline-1qZ0.otf",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyOutline-1qZ0.otf",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 215036,
+      "sha256": "7e992d54cd17bad97cb09d6ac0dafdc8ff41363a7acb247f9a72d01831ece07b",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky-outline"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkyOutlineOblique-RLdV.otf",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkyOutlineOblique-RLdV.otf",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 214012,
+      "sha256": "0573927234a76e87fbd0035a3a0bd80237bafddd017d6f306810b200fc19d8d6",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky-outline"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkySemibold-Bn7B.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkySemibold-Bn7B.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 60312,
+      "sha256": "e05fc94a6ae8c492bd66294200a291fadb68bb64e33bbb34f05e22157da9bfc9",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/FallingSkySemiboldOblique-8q7M.woff2",
+      "sourcePath": "packages/tokens/src/fonts/FallingSkySemiboldOblique-8q7M.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 59644,
+      "sha256": "8cbf4418f24d0413d4e6f3b757790dd3dae3982f44c6fb87140c701675e9e869",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/Inter-OFL.txt",
+      "sourcePath": "packages/tokens/src/fonts/Inter-OFL.txt",
+      "roles": [
+        "license-evidence"
+      ],
+      "familyIds": [],
+      "sizeBytes": 4477,
+      "sha256": "3b0a5fca3d17942cde889069889dedbbbd075e9b599968c82a95f4d944e9b345",
+      "licenseRefs": [
+        "license:ofl-1-1:inter"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/inter-latin-400-normal.woff2",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-400-normal.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 23664,
+      "sha256": "8909904ab6c872eb994093482a88a28eca2cd95912d7b6fecd72103b0dc07edc",
+      "licenseRefs": [
+        "license:ofl-1-1:inter"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/inter-latin-500-normal.woff2",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-500-normal.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 24272,
+      "sha256": "f3779f1efccc4bdcdf9c0a02ab95bf6bd092ed09c48c08cedc725889edd1d19f",
+      "licenseRefs": [
+        "license:ofl-1-1:inter"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/inter-latin-600-normal.woff2",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-600-normal.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 24452,
+      "sha256": "f9a06e79cd3a2a20951c0f0e28f66dd0e6d3fda73911d640a2125c8fcb78f21a",
+      "licenseRefs": [
+        "license:ofl-1-1:inter"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/inter-latin-700-normal.woff2",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-700-normal.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 24356,
+      "sha256": "6f56409fd3d64bb85f7d070bce20749db2d66b6d63cec586cc22d1c761be2491",
+      "licenseRefs": [
+        "license:ofl-1-1:inter"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/inter-latin-800-normal.woff2",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-800-normal.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 24400,
+      "sha256": "a7d0a50f15d389cad679238466bdb5fc9787aa0715719064ce25abaff042820d",
+      "licenseRefs": [
+        "license:ofl-1-1:inter"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/inter-latin-ext-400-normal.woff2",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-400-normal.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 35000,
+      "sha256": "6744a7f509ebc6ab220a6cd4ea77e898adf014f03d88dcda5d45d8a9feefb4e9",
+      "licenseRefs": [
+        "license:ofl-1-1:inter"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/inter-latin-ext-500-normal.woff2",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-500-normal.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 36024,
+      "sha256": "2c6fbc42d315528beb06c1096df45487bf4186c4b78b8111d12c9c951f8acca2",
+      "licenseRefs": [
+        "license:ofl-1-1:inter"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/inter-latin-ext-600-normal.woff2",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-600-normal.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 36260,
+      "sha256": "e4bdf67b0cd15ca9e184509275be95db942195d3cc2b17f6a0452f2adf75d0bf",
+      "licenseRefs": [
+        "license:ofl-1-1:inter"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/inter-latin-ext-700-normal.woff2",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-700-normal.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 36244,
+      "sha256": "143f9504f1377012aa3e39c90c4354ef429cb0494b9ac0e1437f1a81e5412236",
+      "licenseRefs": [
+        "license:ofl-1-1:inter"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/fonts/inter-latin-ext-800-normal.woff2",
+      "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-800-normal.woff2",
+      "roles": [
+        "font-asset"
+      ],
+      "familyIds": [],
+      "sizeBytes": 36128,
+      "sha256": "eade55593308b9e4916dd7f47826929ce3e40cad85a2b338d56e5fd1e7bf8e5e",
+      "licenseRefs": [
+        "license:ofl-1-1:inter"
+      ]
+    },
+    {
+      "path": "packages/tokens/src/tokens.css",
+      "sourcePath": "packages/tokens/src/tokens.css",
+      "roles": [
+        "token-stylesheet"
+      ],
+      "familyIds": [],
+      "sizeBytes": 49485,
+      "sha256": "66ac097673a032f46a96d6aa80a4a3fdf0d3f00eafb52fe3c4cd169f05dea817",
+      "licenseRefs": [
+        "license:ofl-1-1:falling-sky",
+        "license:ofl-1-1:falling-sky-boldplus",
+        "license:ofl-1-1:falling-sky-condensed",
+        "license:ofl-1-1:falling-sky-condensed-outline",
+        "license:ofl-1-1:falling-sky-extended",
+        "license:ofl-1-1:falling-sky-extended-outline",
+        "license:ofl-1-1:falling-sky-outline",
+        "license:ofl-1-1:inter",
+        "license:repository-mit"
+      ],
+      "derivation": "scoped-token-css",
+      "sourceMapPath": "payload/source-maps/tokens.css.source-map.json"
+    },
+    {
+      "path": "source-maps/tokens.css.source-map.json",
+      "sourcePath": "packages/tokens/src/tokens.css",
+      "roles": [
+        "source-map"
+      ],
+      "familyIds": [],
+      "sizeBytes": 7958,
+      "sha256": "6bed6f36c8c5fc04be1374a0fb53c195e2baf1dfb615c631b15da34fd6ba58b0",
+      "licenseRefs": [
+        "license:repository-mit"
+      ]
+    }
+  ],
+  "licenses": [
+    {
+      "id": "license:ofl-1-1:falling-sky",
+      "fontFamily": "Falling Sky",
+      "spdx": "OFL-1.1",
+      "basis": "embedded-font-license",
+      "evidencePaths": [
+        "payload/source-maps/tokens.css.source-map.json#licenseEvidence/Falling%20Sky"
+      ]
+    },
+    {
+      "id": "license:ofl-1-1:falling-sky-boldplus",
+      "fontFamily": "Falling Sky Boldplus",
+      "spdx": "OFL-1.1",
+      "basis": "embedded-font-license",
+      "evidencePaths": [
+        "payload/source-maps/tokens.css.source-map.json#licenseEvidence/Falling%20Sky%20Boldplus"
+      ]
+    },
+    {
+      "id": "license:ofl-1-1:falling-sky-condensed",
+      "fontFamily": "Falling Sky Condensed",
+      "spdx": "OFL-1.1",
+      "basis": "embedded-font-license",
+      "evidencePaths": [
+        "payload/source-maps/tokens.css.source-map.json#licenseEvidence/Falling%20Sky%20Condensed"
+      ]
+    },
+    {
+      "id": "license:ofl-1-1:falling-sky-condensed-outline",
+      "fontFamily": "Falling Sky Condensed Outline",
+      "spdx": "OFL-1.1",
+      "basis": "embedded-font-license",
+      "evidencePaths": [
+        "payload/source-maps/tokens.css.source-map.json#licenseEvidence/Falling%20Sky%20Condensed%20Outline"
+      ]
+    },
+    {
+      "id": "license:ofl-1-1:falling-sky-extended",
+      "fontFamily": "Falling Sky Extended",
+      "spdx": "OFL-1.1",
+      "basis": "embedded-font-license",
+      "evidencePaths": [
+        "payload/source-maps/tokens.css.source-map.json#licenseEvidence/Falling%20Sky%20Extended"
+      ]
+    },
+    {
+      "id": "license:ofl-1-1:falling-sky-extended-outline",
+      "fontFamily": "Falling Sky Extended Outline",
+      "spdx": "OFL-1.1",
+      "basis": "embedded-font-license",
+      "evidencePaths": [
+        "payload/source-maps/tokens.css.source-map.json#licenseEvidence/Falling%20Sky%20Extended%20Outline"
+      ]
+    },
+    {
+      "id": "license:ofl-1-1:falling-sky-outline",
+      "fontFamily": "Falling Sky Outline",
+      "spdx": "OFL-1.1",
+      "basis": "embedded-font-license",
+      "evidencePaths": [
+        "payload/source-maps/tokens.css.source-map.json#licenseEvidence/Falling%20Sky%20Outline"
+      ]
+    },
+    {
+      "id": "license:ofl-1-1:inter",
+      "fontFamily": "Inter",
+      "spdx": "OFL-1.1",
+      "basis": "license-file",
+      "evidencePaths": [
+        "payload/packages/tokens/src/fonts/Inter-OFL.txt"
+      ]
+    },
+    {
+      "id": "license:repository-mit",
+      "spdx": "MIT",
+      "basis": "repository-license",
+      "evidencePaths": [
+        "payload/LICENSE"
+      ]
+    }
+  ],
+  "scopedTokenStylesheet": {
+    "path": "payload/packages/tokens/src/tokens.css",
+    "sourceMapPath": "payload/source-maps/tokens.css.source-map.json",
+    "sourceSha256": "9ed7110831b5a41253d6852ba1ac8d3240ebd0d3115cab36dc0c986caffbd069"
+  },
+  "artifactDigestAlgorithm": "sha256-path-size-content-v1",
+  "artifactDigest": "26329fb7eecc0d19b662819b45de1eadd311656ce0838af8127e8df9cf8a5c59"
+}

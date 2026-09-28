@@ -1,0 +1,23 @@
+{
+  "branch": "develop",
+  "remote": "origin",
+  "remoteUrl": "https://github.com/spec-kitty/spec-kitty-design.git",
+  "remoteTip": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+  "remoteTipCheckedAt": "2026-09-28T18:33:06Z",
+  "sourceSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+  "sourceTree": "3008ba4f9ce636d26edc70f74bd69d6af382e059",
+  "tipEqualsSource": true,
+  "sourceReachableFromDevelop": true,
+  "reachabilityBasis": "The selected full SHA is the live origin/develop tip.",
+  "stageAPullRequest": {
+    "number": 488,
+    "state": "MERGED",
+    "base": "develop",
+    "mergedAt": "2026-09-28T17:24:24Z",
+    "mergeCommit": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+    "url": "https://github.com/spec-kitty/spec-kitty-design/pull/488"
+  },
+  "missionLaneBase": "3993ddf1cfda5d57b8943a003cc44412ab28e6bf",
+  "selectionMethod": "Fresh origin/develop tip query; not the mission lane head or a PR head.",
+  "result": "frozen"
+}
