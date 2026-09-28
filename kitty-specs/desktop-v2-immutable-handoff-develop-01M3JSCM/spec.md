@@ -1,6 +1,6 @@
 # Mission Specification: Desktop V2 primitive contract and immutable develop handoff
 
-**Mission Branch**: `develop` (owned checkout; WP branches target `develop`)  
+**Mission Branch**: `develop` (standalone mission checkout; WP branches target `develop`)  
 **Created**: 2026-09-28  
 **Status**: Draft  
 **Input**: [spec-kitty-design issue #470](https://github.com/spec-kitty/spec-kitty-design/issues/470), with the operator's `develop` target correction. Baseline: `origin/develop` at `c5ab89ea873b55575af8055f3cfba02089c43b13` before mission scaffolding.
@@ -47,7 +47,7 @@ As a reviewer, I can trace the handoff from frozen source SHA S through the chil
 
 1. Given source and exporter changes merged into `develop`, when S is frozen, then all required gate evidence names S and the source tree is unchanged through the handoff.
 2. Given child commit R, when ancestry is checked, then R's direct parent is S and R contains only the handoff record/export metadata permitted by the contract.
-3. Given the handoff PR merged, when its receipt is checked, then the actual merge commit on `develop` is recorded and its ancestry contains R. No unrelated train branch is promoted.
+3. Given the handoff PR merged, when its PR and Git history are checked, then the actual merge commit on `develop` is recorded in the PR's merge receipt and its ancestry contains R. No unrelated train branch is promoted.
 
 ### Edge cases
 
@@ -70,7 +70,7 @@ As a reviewer, I can trace the handoff from frozen source SHA S through the chil
 | FR-005 | Offline export and verify | As a Desktop maintainer, I need deterministic export and verification commands that work on a copied artifact without network or npm runtime dependency. | High | Open |
 | FR-006 | Contract drift failure | As a reviewer, I need verification to fail on changed/missing/extra files, altered contract fields, unresolved evidence, or stale source hashes with clear diagnostics. | High | Open |
 | FR-007 | Quality evidence | As a reviewer, I need repository-native lint, test, build, Storybook, axe, visual, and export outcomes tied to the same frozen source SHA S. | High | Open |
-| FR-008 | Freeze lineage | As a reviewer, I need the child handoff commit R directly descended from S and the final PR merge commit on `develop` recorded with a checkable relationship to R. | High | Open |
+| FR-008 | Freeze lineage | As a reviewer, I need the child handoff commit R directly descended from S and the final PR merge commit on `develop` checkable through the merged PR and Git history. | High | Open |
 | FR-009 | Consumer boundary | As a Desktop implementer, I need neutral selected navigation expressed as composition of existing tokens and the artifact file/presence tree left to Desktop as a domain adapter. | Medium | Open |
 
 ### Non-functional requirements
@@ -97,7 +97,7 @@ As a reviewer, I can trace the handoff from frozen source SHA S through the chil
 - **Source snapshot S**: full `develop` SHA whose source files, contract, and gate evidence are frozen.
 - **Primitive family contract**: family name, current source form, public entry, states, and evidence references.
 - **Exported file**: normalized relative path, byte length, content digest, role, and license evidence.
-- **Handoff record**: versioned manifest binding S, artifact digest, contract digest, evidence, R, and the later merge receipt.
+- **Handoff record**: versioned manifest binding S, artifact digest, contract digest, and evidence. R is the commit containing that record; its hash and the later merge commit are verified from Git and the merged PR, since a commit cannot include its own or a future hash.
 
 ## Success criteria
 

@@ -19,4 +19,4 @@ erDiagram
 - **LicenseEvidence**: SPDX identifier or explicit terms reference and source path; checked for every exported source/asset. Unknown rights are a failure, not an inferred MIT grant.
 - **StateEvidence**: per-family state and theme/viewport coverage mapped to a Storybook story ID plus axe result and visual evidence ID/path at S. Missing coverage is explicit and cannot count as a pass.
 - **GateEvidence**: command, result, source SHA, and evidence artifact for lint, test, build, Storybook, axe, visual, and export verification.
-- **HandoffRecord**: deterministic schema/version, source S, artifact digest and file list, contract digest, child commit R, and eventual PR merge commit on `develop` recorded after merge. The merge-commit field may be a separately appendable receipt because R cannot know its future merge SHA.
+- **HandoffRecord**: deterministic schema/version, source S, artifact digest and file list, contract digest, and evidence IDs. The containing child commit R and eventual PR merge commit on `develop` are verified from Git ancestry and the merged PR; neither hash can be embedded in R's own content.
