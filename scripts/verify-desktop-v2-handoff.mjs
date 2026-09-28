@@ -9,6 +9,9 @@ import { fileURLToPath } from 'node:url';
 
 const MANIFEST_SCHEMA_VERSION = 1;
 const ARTIFACT_DIGEST_ALGORITHM = 'sha256-path-size-content-v1';
+const SOURCE_CONTRACT_PATH = 'contracts/desktop-v2/source-contract.json';
+const ROOT_LICENSE_PATH = 'LICENSE';
+const TOKEN_SOURCE_MAP_PATH = 'source-maps/tokens.css.source-map.json';
 const EXPECTED_ARTIFACT_ENTRIES = ['contract', 'manifest.json', 'payload'];
 const EXPECTED_CONTRACT_ENTRIES = ['source-contract.json'];
 
@@ -121,6 +124,219 @@ function assertDigest(value, label) {
 function assertSourceSha(value, label) {
   if (typeof value !== 'string' || !/^[a-f0-9]{40}$/.test(value)) {
     throw new Error(`${label} must be a full 40-character lowercase Git SHA`);
+  }
+}
+
+function fontRightsFor(fontFamily, fontRights) {
+  return fontRights.find((entry) => entry.matchType === 'exact' && entry.match === fontFamily)
+    ?? fontRights.find((entry) => entry.matchType === 'prefix' && fontFamily.startsWith(entry.match));
+}
+
+function licenseIdForFont(fontFamily, spdx) {
+  const slug = fontFamily.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const licenseSlug = spdx.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return `license:${licenseSlug}:${slug}`;
+}
+
+function expectedApprovedLicenses(contract) {
+  if (!isRecord(contract.sharedAssets)
+    || !Array.isArray(contract.sharedAssets.fontAssets)
+    || !Array.isArray(contract.sharedAssets.fontRights)) {
+    throw new Error('pinned source contract does not declare font assets and rights');
+  }
+
+  const expected = new Map([['license:repository-mit', {
+    id: 'license:repository-mit',
+    spdx: 'MIT',
+    basis: 'repository-license',
+    evidencePaths: [`payload/${ROOT_LICENSE_PATH}`],
+  }]]);
+
+  for (const asset of contract.sharedAssets.fontAssets) {
+    if (!isRecord(asset) || typeof asset.family !== 'string') {
+      throw new Error('pinned source contract has an invalid font asset');
+    }
+    const rights = fontRightsFor(asset.family, contract.sharedAssets.fontRights);
+    if (!rights) throw new Error(`pinned source contract has no font rights for ${asset.family}`);
+    if (rights.status !== 'cleared') continue;
+    if (typeof rights.spdx !== 'string' || typeof rights.basis !== 'string' || !Array.isArray(rights.evidencePaths)) {
+      throw new Error(`pinned source contract has incomplete font rights for ${asset.family}`);
+    }
+
+    let evidencePaths;
+    if (rights.basis === 'license-file') {
+      evidencePaths = rights.evidencePaths.map((evidencePath) =>
+        `payload/${assertRelativePath(evidencePath, `license evidence path for ${asset.family}`)}`);
+    } else if (rights.basis === 'embedded-font-license') {
+      evidencePaths = [`payload/${TOKEN_SOURCE_MAP_PATH}#licenseEvidence/${encodeURIComponent(asset.family)}`];
+    } else {
+      throw new Error(`pinned source contract has unsupported font license basis for ${asset.family}: ${rights.basis}`);
+    }
+
+    const id = licenseIdForFont(asset.family, rights.spdx);
+    expected.set(id, {
+      id,
+      fontFamily: asset.family,
+      spdx: rights.spdx,
+      basis: rights.basis,
+      evidencePaths,
+    });
+  }
+
+  return [...expected.values()].sort((left, right) => compareStrings(left.id, right.id));
+}
+
+function expectedApprovedFileLicenseRefs(contract) {
+  if (!isRecord(contract.sharedAssets)
+    || !Array.isArray(contract.sharedAssets.fontAssets)
+    || !Array.isArray(contract.sharedAssets.fontRights)
+    || typeof contract.sharedAssets.tokenStylesheetPath !== 'string'
+    || !Array.isArray(contract.families)) {
+    throw new Error('pinned source contract has incomplete file provenance mappings');
+  }
+
+  const expected = new Map();
+  const add = (sourcePath, licenseRef) => {
+    const normalizedPath = assertRelativePath(sourcePath, `pinned source path for ${licenseRef}`);
+    if (!expected.has(normalizedPath)) expected.set(normalizedPath, new Set());
+    expected.get(normalizedPath).add(licenseRef);
+  };
+
+  add(ROOT_LICENSE_PATH, 'license:repository-mit');
+  for (const family of contract.families) {
+    if (!isRecord(family) || !isRecord(family.sourceRights)
+      || !Array.isArray(family.sourceRights.coveredPaths)
+      || !Array.isArray(family.sourceRights.evidencePaths)) {
+      throw new Error('pinned source contract has incomplete family source rights');
+    }
+    for (const sourcePath of family.sourceRights.coveredPaths) add(sourcePath, 'license:repository-mit');
+    for (const evidencePath of family.sourceRights.evidencePaths) add(evidencePath, 'license:repository-mit');
+  }
+
+  const tokenCssPath = assertRelativePath(contract.sharedAssets.tokenStylesheetPath, 'pinned token stylesheet path');
+  add(tokenCssPath, 'license:repository-mit');
+  let hasUnresolvedFontRights = false;
+  for (const asset of contract.sharedAssets.fontAssets) {
+    if (!isRecord(asset) || typeof asset.family !== 'string' || typeof asset.sourcePath !== 'string') {
+      throw new Error('pinned source contract has an invalid font asset');
+    }
+    const rights = fontRightsFor(asset.family, contract.sharedAssets.fontRights);
+    if (!rights) throw new Error(`pinned source contract has no font rights for ${asset.family}`);
+    if (rights.status !== 'cleared') {
+      hasUnresolvedFontRights = true;
+      continue;
+    }
+
+    const licenseRef = licenseIdForFont(asset.family, rights.spdx);
+    add(asset.sourcePath, licenseRef);
+    if (rights.basis === 'license-file') {
+      for (const evidencePath of rights.evidencePaths) add(evidencePath, licenseRef);
+    }
+    add(tokenCssPath, licenseRef);
+  }
+  if (hasUnresolvedFontRights) add(TOKEN_SOURCE_MAP_PATH, 'license:repository-mit');
+
+  return new Map([...expected].map(([sourcePath, licenseRefs]) => [
+    sourcePath,
+    [...licenseRefs].sort(compareStrings),
+  ]));
+}
+
+function validateApprovedScopedSourceMap(manifest, contract, artifactRoot) {
+  const tokenCssPath = contract.sharedAssets.tokenStylesheetPath;
+  const tokenCssFile = manifest.files.find((file) => file.path === tokenCssPath);
+  if (!tokenCssFile) throw new Error(`manifest token stylesheet is missing: ${tokenCssPath}`);
+
+  const hasUnresolvedFontRights = contract.sharedAssets.fontRights.some((rights) => rights.status !== 'cleared');
+  const sourceMapPath = `payload/${TOKEN_SOURCE_MAP_PATH}`;
+  const sourceMapFile = manifest.files.find((file) => file.path === TOKEN_SOURCE_MAP_PATH);
+  if (!hasUnresolvedFontRights) {
+    if (sourceMapFile || tokenCssFile.derivation !== undefined || tokenCssFile.sourceMapPath !== undefined
+      || manifest.scopedTokenStylesheet !== undefined) {
+      throw new Error('manifest declares scoped token provenance absent from the pinned source contract');
+    }
+    return;
+  }
+
+  if (tokenCssFile.derivation !== 'scoped-token-css' || tokenCssFile.sourceMapPath !== sourceMapPath) {
+    throw new Error(`manifest token stylesheet derivation or source map mismatch for ${tokenCssPath}`);
+  }
+  if (!sourceMapFile) throw new Error(`manifest token stylesheet source map is missing: ${TOKEN_SOURCE_MAP_PATH}`);
+  const scoped = manifest.scopedTokenStylesheet;
+  if (!isRecord(scoped) || scoped.path !== `payload/${tokenCssPath}` || scoped.sourceMapPath !== sourceMapPath) {
+    throw new Error('manifest scoped token stylesheet paths do not match the pinned source contract');
+  }
+
+  const sourceMapBytes = requireRegularFile(artifactRoot, sourceMapPath, 'token stylesheet source map');
+  const sourceMap = parseJson(sourceMapBytes, 'token stylesheet source map');
+  if (!isRecord(sourceMap) || sourceMap.schemaVersion !== 1
+    || sourceMap.sourceSha !== manifest.sourceSha
+    || sourceMap.sourcePath !== tokenCssPath
+    || sourceMap.outputPath !== tokenCssPath) {
+    throw new Error('token stylesheet source map provenance does not match the pinned source contract');
+  }
+  assertDigest(sourceMap.sourceSha256, 'token stylesheet source digest in source map');
+  assertDigest(sourceMap.outputSha256, 'token stylesheet output digest in source map');
+  if (scoped.sourceSha256 !== sourceMap.sourceSha256) {
+    throw new Error('manifest scoped token source digest does not match its source map');
+  }
+  if (sourceMap.outputSha256 !== tokenCssFile.sha256 || sourceMap.outputSizeBytes !== tokenCssFile.sizeBytes) {
+    throw new Error('token stylesheet output metadata does not match its source map');
+  }
+}
+
+function validateApprovedSourceBindings(manifest, contract, artifactRoot) {
+  if (manifest.contract.sourcePath !== SOURCE_CONTRACT_PATH) {
+    throw new Error(`manifest source contract provenance mismatch: expected ${SOURCE_CONTRACT_PATH}, got ${manifest.contract.sourcePath}`);
+  }
+  if (manifest.contract.licenseRefs.length !== 1 || manifest.contract.licenseRefs[0] !== 'license:repository-mit') {
+    throw new Error('manifest source contract license references do not match the repository MIT license');
+  }
+
+  const expectedLicenses = expectedApprovedLicenses(contract);
+  const expectedFileLicenseRefs = expectedApprovedFileLicenseRefs(contract);
+  const tokenCssPath = contract.sharedAssets.tokenStylesheetPath;
+  for (const file of manifest.files) {
+    const expectedSourcePath = file.path === TOKEN_SOURCE_MAP_PATH ? tokenCssPath : file.path;
+    if (!expectedFileLicenseRefs.has(file.path)) {
+      throw new Error(`manifest payload path has no pinned source contract mapping: ${file.path}`);
+    }
+    if (file.sourcePath !== expectedSourcePath) {
+      throw new Error(`manifest source path mismatch for ${file.path}: pinned source contract expects ${expectedSourcePath}, got ${file.sourcePath}`);
+    }
+    const expectedLicenseRefs = expectedFileLicenseRefs.get(file.path);
+    if (file.licenseRefs.length !== expectedLicenseRefs.length
+      || file.licenseRefs.some((licenseRef, index) => licenseRef !== expectedLicenseRefs[index])) {
+      throw new Error(`manifest license references do not match the pinned source contract for ${file.path}`);
+    }
+    if (file.path !== tokenCssPath && (file.derivation !== undefined || file.sourceMapPath !== undefined)) {
+      throw new Error(`manifest declares unexpected source derivation metadata for ${file.path}`);
+    }
+  }
+  validateApprovedScopedSourceMap(manifest, contract, artifactRoot);
+
+  if (manifest.licenses.length !== expectedLicenses.length) {
+    throw new Error(`manifest license rights do not match the pinned source contract: expected ${expectedLicenses.length}, got ${manifest.licenses.length}`);
+  }
+  for (let index = 0; index < expectedLicenses.length; index += 1) {
+    const expected = expectedLicenses[index];
+    const actual = manifest.licenses[index];
+    if (actual.id !== expected.id) {
+      throw new Error(`manifest license rights do not match the pinned source contract: expected ${expected.id}, got ${actual.id}`);
+    }
+    if (actual.spdx !== expected.spdx) {
+      throw new Error(`manifest license SPDX mismatch for ${expected.id}: source contract expects ${expected.spdx}, manifest has ${actual.spdx}`);
+    }
+    if (actual.basis !== expected.basis) {
+      throw new Error(`manifest license rights basis mismatch for ${expected.id}: source contract expects ${expected.basis}, manifest has ${actual.basis}`);
+    }
+    if (actual.fontFamily !== expected.fontFamily) {
+      throw new Error(`manifest license rights font family mismatch for ${expected.id}`);
+    }
+    if (actual.evidencePaths.length !== expected.evidencePaths.length
+      || actual.evidencePaths.some((evidencePath, pathIndex) => evidencePath !== expected.evidencePaths[pathIndex])) {
+      throw new Error(`manifest license rights evidence mismatch for ${expected.id}`);
+    }
   }
 }
 
@@ -364,6 +580,7 @@ export function verifyDesktopV2Handoff({
     if (manifest.artifactDigest !== expectedArtifactDigest) {
       throw new Error(`approved artifact digest mismatch: expected ${expectedArtifactDigest}, manifest names ${manifest.artifactDigest}`);
     }
+    validateApprovedSourceBindings(manifest, contract, absoluteArtifactPath);
   }
 
   return {

@@ -31,17 +31,33 @@ let fixtureIndex = 0;
 
 interface ExportedFile {
   path: string;
+  sourcePath: string;
   sizeBytes: number;
   sha256: string;
   licenseRefs: string[];
   sourceMapPath?: string;
 }
 
+interface ExportedLicense {
+  id: string;
+  spdx: string;
+  basis: string;
+  fontFamily?: string;
+  evidencePaths: string[];
+}
+
 interface HandoffManifest {
   schemaVersion: number;
   sourceSha: string;
-  contract: { path: string; sourcePath: string; sizeBytes: number; sha256: string };
+  contract: {
+    path: string;
+    sourcePath: string;
+    sizeBytes: number;
+    sha256: string;
+    licenseRefs: string[];
+  };
   files: ExportedFile[];
+  licenses: ExportedLicense[];
   artifactDigest: string;
   artifactDigestAlgorithm: string;
 }
@@ -366,6 +382,99 @@ describe('Desktop V2 offline handoff', () => {
       expectedSourceSha: fixture.sourceSha,
       expectedArtifactDigest: originalDigest,
     })).toThrow(/button\.css|artifact digest/i);
+  });
+
+  it('approved-source mode rejects a manifest contract source path outside the canonical source location', () => {
+    const fixture = createFixture();
+    const outputPath = join(temporaryRoot, 'tampered-contract-origin');
+    exportDesktopV2Handoff({ repoRoot: fixture.root, sourceSha: fixture.sourceSha, outputPath });
+    const manifest = manifestAt(outputPath);
+    const independentlyPinnedDigest = manifest.artifactDigest;
+    manifest.contract.sourcePath = 'contracts/desktop-v2/missing-source-contract.json';
+    writeManifest(outputPath, manifest);
+
+    expect(() => verifyDesktopV2Handoff({
+      artifactPath: outputPath,
+      mode: 'approved-source',
+      expectedSourceSha: fixture.sourceSha,
+      expectedArtifactDigest: independentlyPinnedDigest,
+    })).toThrow(/source contract.*(canonical|provenance)|canonical.*source contract/i);
+  });
+
+  it('approved-source mode rejects manifest license rights that disagree with the pinned contract', () => {
+    const fixture = createFixture();
+    const outputPath = join(temporaryRoot, 'tampered-license-rights');
+    exportDesktopV2Handoff({ repoRoot: fixture.root, sourceSha: fixture.sourceSha, outputPath });
+    const manifest = manifestAt(outputPath);
+    const independentlyPinnedDigest = manifest.artifactDigest;
+    const interLicense = manifest.licenses.find((license) => license.id === 'license:ofl-1-1:inter');
+    expect(interLicense).toBeDefined();
+    interLicense!.spdx = 'MIT';
+    writeManifest(outputPath, manifest);
+
+    expect(() => verifyDesktopV2Handoff({
+      artifactPath: outputPath,
+      mode: 'approved-source',
+      expectedSourceSha: fixture.sourceSha,
+      expectedArtifactDigest: independentlyPinnedDigest,
+    })).toThrow(/license.*(SPDX|rights)|SPDX.*license/i);
+  });
+
+  it('approved-source mode rejects a payload source path that disagrees with its pinned origin', () => {
+    const fixture = createFixture();
+    const outputPath = join(temporaryRoot, 'tampered-file-origin');
+    exportDesktopV2Handoff({ repoRoot: fixture.root, sourceSha: fixture.sourceSha, outputPath });
+    const manifest = manifestAt(outputPath);
+    const independentlyPinnedDigest = manifest.artifactDigest;
+    const sourceFile = manifest.files.find((file) => file.path === familySourcePath);
+    expect(sourceFile).toBeDefined();
+    sourceFile!.sourcePath = tokenCssPath;
+    writeManifest(outputPath, manifest);
+
+    expect(() => verifyDesktopV2Handoff({
+      artifactPath: outputPath,
+      mode: 'approved-source',
+      expectedSourceSha: fixture.sourceSha,
+      expectedArtifactDigest: independentlyPinnedDigest,
+    })).toThrow(/source path.*(mismatch|pinned|contract)|pinned.*source path/i);
+  });
+
+  it('approved-source mode rejects file license references that disagree with the pinned source contract', () => {
+    const fixture = createFixture();
+    const outputPath = join(temporaryRoot, 'tampered-file-license-reference');
+    exportDesktopV2Handoff({ repoRoot: fixture.root, sourceSha: fixture.sourceSha, outputPath });
+    const manifest = manifestAt(outputPath);
+    const independentlyPinnedDigest = manifest.artifactDigest;
+    const sourceFile = manifest.files.find((file) => file.path === familySourcePath);
+    expect(sourceFile).toBeDefined();
+    sourceFile!.licenseRefs = ['license:ofl-1-1:inter'];
+    writeManifest(outputPath, manifest);
+
+    expect(() => verifyDesktopV2Handoff({
+      artifactPath: outputPath,
+      mode: 'approved-source',
+      expectedSourceSha: fixture.sourceSha,
+      expectedArtifactDigest: independentlyPinnedDigest,
+    })).toThrow(/license references.*source contract|source contract.*license references/i);
+  });
+
+  it('approved-source mode rejects a scoped stylesheet source-map substitution', () => {
+    const fixture = createFixture();
+    const outputPath = join(temporaryRoot, 'tampered-token-source-map-reference');
+    exportDesktopV2Handoff({ repoRoot: fixture.root, sourceSha: fixture.sourceSha, outputPath });
+    const manifest = manifestAt(outputPath);
+    const independentlyPinnedDigest = manifest.artifactDigest;
+    const tokenStylesheet = manifest.files.find((file) => file.path === tokenCssPath);
+    expect(tokenStylesheet).toBeDefined();
+    tokenStylesheet!.sourceMapPath = `payload/${tokenCssPath}`;
+    writeManifest(outputPath, manifest);
+
+    expect(() => verifyDesktopV2Handoff({
+      artifactPath: outputPath,
+      mode: 'approved-source',
+      expectedSourceSha: fixture.sourceSha,
+      expectedArtifactDigest: independentlyPinnedDigest,
+    })).toThrow(/token stylesheet.*(derivation|source map).*mismatch/i);
   });
 
   it('coordinated rehash is only internally consistent and fails independent pins', () => {
