@@ -1,0 +1,3286 @@
+{
+  "schemaVersion": 1,
+  "visualEvidence": {
+    "runnerPath": "apps/storybook/src/tests/visual.spec.ts",
+    "testIdFormat": "desktop-v2/{family}/{state}",
+    "snapshotPathFormat": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-{family}-{state}-chromium-linux.png"
+  },
+  "sharedAssets": {
+    "tokenStylesheetPath": "packages/tokens/src/tokens.css",
+    "fontAssets": [
+  {
+    "family": "Inter",
+    "sourcePath": "packages/tokens/src/fonts/inter-latin-400-normal.woff2"
+  },
+  {
+    "family": "Inter",
+    "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-400-normal.woff2"
+  },
+  {
+    "family": "Inter",
+    "sourcePath": "packages/tokens/src/fonts/inter-latin-500-normal.woff2"
+  },
+  {
+    "family": "Inter",
+    "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-500-normal.woff2"
+  },
+  {
+    "family": "Inter",
+    "sourcePath": "packages/tokens/src/fonts/inter-latin-600-normal.woff2"
+  },
+  {
+    "family": "Inter",
+    "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-600-normal.woff2"
+  },
+  {
+    "family": "Inter",
+    "sourcePath": "packages/tokens/src/fonts/inter-latin-700-normal.woff2"
+  },
+  {
+    "family": "Inter",
+    "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-700-normal.woff2"
+  },
+  {
+    "family": "Inter",
+    "sourcePath": "packages/tokens/src/fonts/inter-latin-800-normal.woff2"
+  },
+  {
+    "family": "Inter",
+    "sourcePath": "packages/tokens/src/fonts/inter-latin-ext-800-normal.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyLight-K2EX.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSky-JKwK.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyMedium-ved9.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkySemibold-Bn7B.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyBold-zemL.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyExtrabold-redB.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyBlack-GYXA.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyLightOblique-2q3o.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyOblique-n5XV.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyMediumOblique-leLD.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkySemiboldOblique-8q7M.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyBoldOblique-5zmv.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyExtraboldOblique-MwdP.woff2"
+  },
+  {
+    "family": "Falling Sky",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyBlackOblique-j37y.woff2"
+  },
+  {
+    "family": "Falling Sky Boldplus",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyBoldplus-6GZ1.otf"
+  },
+  {
+    "family": "Falling Sky Boldplus",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyBoldplusOblique-yxmV.otf"
+  },
+  {
+    "family": "Falling Sky Condensed",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyCondensed-9qm2.otf"
+  },
+  {
+    "family": "Falling Sky Condensed",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyCondensedOblique-leLw.otf"
+  },
+  {
+    "family": "Falling Sky Condensed Outline",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyCondensedOutline-n5XO.otf"
+  },
+  {
+    "family": "Falling Sky Condensed Outline",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyCondensedOutlineOblique-1qZv.otf"
+  },
+  {
+    "family": "Falling Sky Extended",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyExtended-RLdE.otf"
+  },
+  {
+    "family": "Falling Sky Extended",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyExtendedOblique-BnYw.otf"
+  },
+  {
+    "family": "Falling Sky Extended Outline",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyExtendedOutline-8qjn.otf"
+  },
+  {
+    "family": "Falling Sky Extended Outline",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyExtendedOutlineOblique-YBO2.otf"
+  },
+  {
+    "family": "Falling Sky Outline",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyOutline-1qZ0.otf"
+  },
+  {
+    "family": "Falling Sky Outline",
+    "sourcePath": "packages/tokens/src/fonts/FallingSkyOutlineOblique-RLdV.otf"
+  },
+  {
+    "family": "Swansea",
+    "sourcePath": "packages/tokens/src/fonts/Swansea-q3pd.ttf"
+  },
+  {
+    "family": "Swansea",
+    "sourcePath": "packages/tokens/src/fonts/SwanseaItalic-AwqD.ttf"
+  },
+  {
+    "family": "Swansea",
+    "sourcePath": "packages/tokens/src/fonts/SwanseaBold-D0ox.ttf"
+  },
+  {
+    "family": "Swansea",
+    "sourcePath": "packages/tokens/src/fonts/SwanseaBoldItalic-p3Dv.ttf"
+  }
+    ],
+    "fontRights": [
+      {
+        "match": "Inter",
+        "matchType": "exact",
+        "status": "cleared",
+        "spdx": "OFL-1.1",
+        "basis": "license-file",
+        "evidencePaths": [
+          "packages/tokens/src/fonts/Inter-OFL.txt"
+        ]
+      },
+      {
+        "match": "Falling Sky",
+        "matchType": "exact",
+        "status": "cleared",
+        "spdx": "OFL-1.1",
+        "basis": "embedded-font-license",
+        "evidencePaths": [
+          "packages/tokens/src/tokens.css"
+        ]
+      },
+      {
+        "match": "Falling Sky ",
+        "matchType": "prefix",
+        "status": "cleared",
+        "spdx": "OFL-1.1",
+        "basis": "embedded-font-license",
+        "evidencePaths": [
+          "packages/tokens/src/tokens.css"
+        ]
+      },
+      {
+        "match": "Swansea",
+        "matchType": "exact",
+        "status": "unresolved",
+        "basis": "unresolved",
+        "evidencePaths": [
+          "packages/tokens/src/tokens.css"
+        ]
+      }
+    ],
+    "fullTokenExport": {
+      "status": "blocked",
+      "reason": "Swansea font redistribution terms are unresolved; do not export the unchanged full tokens.css until rights are proven."
+    }
+  },
+  "families": [
+    {
+      "id": "action-row",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/action-row/sk-action-row.markup.ts",
+          "packages/elements/src/action-row/sk-action-row.stories.ts",
+          "packages/elements/src/action-row/sk-action-row.ts",
+          "packages/styles/src/action-row/sk-action-row-html.stories.ts",
+          "packages/styles/src/action-row/sk-action-row.css",
+          "packages/styles/src/action-row/static/sk-action-row.static.css"
+        ]
+      },
+      "form": "element-backed",
+      "selector": "sk-action-row",
+      "paths": {
+        "stylesCss": "packages/styles/src/action-row/sk-action-row.css",
+        "additionalStylesCss": [
+          "packages/styles/src/action-row/static/sk-action-row.static.css"
+        ],
+        "elementTs": "packages/elements/src/action-row/sk-action-row.ts",
+        "elementMarkupTs": "packages/elements/src/action-row/sk-action-row.markup.ts",
+        "staticMarkup": [],
+        "storySources": [
+          "packages/elements/src/action-row/sk-action-row.stories.ts",
+          "packages/styles/src/action-row/sk-action-row-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/action-row/sk-action-row.css",
+        "elementExport": "SkActionRow"
+      },
+      "tokenClosure": [
+        "--sk-border-default",
+        "--sk-border-strong",
+        "--sk-border-width-1",
+        "--sk-border-width-2",
+        "--sk-color-accent",
+        "--sk-fg-body",
+        "--sk-fg-default",
+        "--sk-fg-muted",
+        "--sk-font-display",
+        "--sk-font-mono",
+        "--sk-font-sans",
+        "--sk-motion-duration-fast",
+        "--sk-motion-ease-out",
+        "--sk-radius-md",
+        "--sk-space-1",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-space-5",
+        "--sk-space-9",
+        "--sk-surface-card",
+        "--sk-surface-muted",
+        "--sk-surface-pill",
+        "--sk-text-base",
+        "--sk-text-xs",
+        "--sk-weight-semibold"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/elements/src/action-row/sk-action-row.stories.ts",
+            "storyId": "elements-skactionrow--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/action-row/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/elements/src/action-row/sk-action-row.stories.ts",
+            "storyId": "elements-skactionrow--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/action-row/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/elements/src/action-row/sk-action-row.stories.ts",
+            "storyId": "elements-skactionrow--long-content",
+            "exportName": "LongContent"
+          },
+          "visualTestId": "desktop-v2/action-row/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "hover",
+          "story": {
+            "sourcePath": "packages/elements/src/action-row/sk-action-row.stories.ts",
+            "storyId": "elements-skactionrow--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/action-row/hover",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-hover-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "hover",
+            "selector": "sk-action-row .sk-action-row__trigger"
+          }
+        },
+        {
+          "id": "focus",
+          "story": {
+            "sourcePath": "packages/elements/src/action-row/sk-action-row.stories.ts",
+            "storyId": "elements-skactionrow--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/action-row/focus",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-focus-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "focus",
+            "selector": "sk-action-row .sk-action-row__trigger"
+          }
+        },
+        {
+          "id": "active",
+          "story": {
+            "sourcePath": "packages/elements/src/action-row/sk-action-row.stories.ts",
+            "storyId": "elements-skactionrow--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/action-row/active",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-active-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "active",
+            "selector": "sk-action-row .sk-action-row__trigger"
+          }
+        },
+        {
+          "id": "selected",
+          "story": {
+            "sourcePath": "packages/elements/src/action-row/sk-action-row.stories.ts",
+            "storyId": "elements-skactionrow--selected",
+            "exportName": "Selected"
+          },
+          "visualTestId": "desktop-v2/action-row/selected",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-action-row-selected-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "disabled": "Action-row activation is carried by native links/buttons supplied as content; the family itself has no disabled style or host state."
+      }
+    },
+    {
+      "id": "app-shell",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/app-shell/sk-app-shell.stories.ts",
+          "packages/elements/src/app-shell/sk-app-shell.ts",
+          "packages/styles/src/app-shell/sk-app-shell.css",
+          "packages/styles/src/app-shell/static/sk-app-shell.static.css"
+        ]
+      },
+      "form": "element-backed",
+      "selector": "sk-app-shell",
+      "paths": {
+        "stylesCss": "packages/styles/src/app-shell/sk-app-shell.css",
+        "additionalStylesCss": [
+          "packages/styles/src/app-shell/static/sk-app-shell.static.css"
+        ],
+        "elementTs": "packages/elements/src/app-shell/sk-app-shell.ts",
+        "elementMarkupTs": null,
+        "staticMarkup": [],
+        "storySources": [
+          "packages/elements/src/app-shell/sk-app-shell.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/app-shell/sk-app-shell.css",
+        "elementExport": "SkAppShell"
+      },
+      "tokenClosure": [
+        "--sk-border-default",
+        "--sk-border-focus",
+        "--sk-border-strong",
+        "--sk-border-width-1",
+        "--sk-border-width-2",
+        "--sk-layout-context-sidebar-width",
+        "--sk-layout-personal-rail-width",
+        "--sk-space-12",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-surface-card"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/elements/src/app-shell/sk-app-shell.stories.ts",
+            "storyId": "elements-skappshell--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/app-shell/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/elements/src/app-shell/sk-app-shell.stories.ts",
+            "storyId": "elements-skappshell--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/app-shell/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/elements/src/app-shell/sk-app-shell.stories.ts",
+            "storyId": "elements-skappshell--narrow",
+            "exportName": "Narrow"
+          },
+          "visualTestId": "desktop-v2/app-shell/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "focus",
+          "story": {
+            "sourcePath": "packages/elements/src/app-shell/sk-app-shell.stories.ts",
+            "storyId": "elements-skappshell--compact-open",
+            "exportName": "CompactOpen"
+          },
+          "visualTestId": "desktop-v2/app-shell/focus",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-focus-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "focus",
+            "selector": "sk-app-shell button"
+          }
+        },
+        {
+          "id": "compact-open",
+          "story": {
+            "sourcePath": "packages/elements/src/app-shell/sk-app-shell.stories.ts",
+            "storyId": "elements-skappshell--compact-open",
+            "exportName": "CompactOpen"
+          },
+          "visualTestId": "desktop-v2/app-shell/compact-open",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-compact-open-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "compact-closed",
+          "story": {
+            "sourcePath": "packages/elements/src/app-shell/sk-app-shell.stories.ts",
+            "storyId": "elements-skappshell--compact-closed",
+            "exportName": "CompactClosed"
+          },
+          "visualTestId": "desktop-v2/app-shell/compact-closed",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-app-shell-compact-closed-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "The shell has no authored :hover selector; child controls own their hover treatment.",
+        "active": "The shell has no authored :active selector; child controls own their pressed treatment.",
+        "disabled": "The shell has no disabled state or disabled styling."
+      }
+    },
+    {
+      "id": "button",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/button/sk-button.markup.ts",
+          "packages/elements/src/button/sk-button.stories.ts",
+          "packages/elements/src/button/sk-button.ts",
+          "packages/styles/src/button/sk-button-html.stories.ts",
+          "packages/styles/src/button/sk-button.css"
+        ]
+      },
+      "form": "element-backed",
+      "selector": "sk-button",
+      "paths": {
+        "stylesCss": "packages/styles/src/button/sk-button.css",
+        "additionalStylesCss": [],
+        "elementTs": "packages/elements/src/button/sk-button.ts",
+        "elementMarkupTs": "packages/elements/src/button/sk-button.markup.ts",
+        "staticMarkup": [],
+        "storySources": [
+          "packages/elements/src/button/sk-button.stories.ts",
+          "packages/styles/src/button/sk-button-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/button/sk-button.css",
+        "elementExport": "SkButton"
+      },
+      "tokenClosure": [
+        "--sk-border-default",
+        "--sk-border-focus",
+        "--sk-border-strong",
+        "--sk-border-width-2",
+        "--sk-color-yellow",
+        "--sk-fg-default",
+        "--sk-fg-muted",
+        "--sk-fg-on-primary",
+        "--sk-font-sans",
+        "--sk-motion-duration-fast",
+        "--sk-motion-duration-slow",
+        "--sk-motion-ease-out",
+        "--sk-on-status-danger",
+        "--sk-radius-pill",
+        "--sk-shadow-glow-primary",
+        "--sk-space-1",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-space-5",
+        "--sk-space-7",
+        "--sk-space-8",
+        "--sk-status-danger",
+        "--sk-text-base",
+        "--sk-text-sm",
+        "--sk-weight-medium"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/elements/src/button/sk-button.stories.ts",
+            "storyId": "elements-skbutton--primary",
+            "exportName": "Primary"
+          },
+          "visualTestId": "desktop-v2/button/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/elements/src/button/sk-button.stories.ts",
+            "storyId": "elements-skbutton--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/button/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-light-mode-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 8 },
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/elements/src/button/sk-button.stories.ts",
+            "storyId": "elements-skbutton--primary",
+            "exportName": "Primary"
+          },
+          "visualTestId": "desktop-v2/button/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "hover",
+          "story": {
+            "sourcePath": "packages/elements/src/button/sk-button.stories.ts",
+            "storyId": "elements-skbutton--primary",
+            "exportName": "Primary"
+          },
+          "visualTestId": "desktop-v2/button/hover",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-hover-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "hover",
+            "selector": "sk-button button"
+          }
+        },
+        {
+          "id": "focus",
+          "story": {
+            "sourcePath": "packages/elements/src/button/sk-button.stories.ts",
+            "storyId": "elements-skbutton--primary",
+            "exportName": "Primary"
+          },
+          "visualTestId": "desktop-v2/button/focus",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-focus-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "focus",
+            "selector": "sk-button button"
+          }
+        },
+        {
+          "id": "active",
+          "story": {
+            "sourcePath": "packages/elements/src/button/sk-button.stories.ts",
+            "storyId": "elements-skbutton--primary",
+            "exportName": "Primary"
+          },
+          "visualTestId": "desktop-v2/button/active",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-active-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "active",
+            "selector": "sk-button button"
+          }
+        },
+        {
+          "id": "disabled",
+          "story": {
+            "sourcePath": "packages/elements/src/button/sk-button.stories.ts",
+            "storyId": "elements-skbutton--disabled",
+            "exportName": "Disabled"
+          },
+          "visualTestId": "desktop-v2/button/disabled",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-disabled-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "disabled",
+            "selector": "sk-button button"
+          }
+        }
+      ],
+      "nonApplicableStates": {}
+    },
+    {
+      "id": "card",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/card/sk-card.markup.ts",
+          "packages/elements/src/card/sk-card.stories.ts",
+          "packages/elements/src/card/sk-card.ts",
+          "packages/styles/src/card/sk-card-html.stories.ts",
+          "packages/styles/src/card/sk-card.css"
+        ]
+      },
+      "form": "element-backed",
+      "selector": "sk-card",
+      "paths": {
+        "stylesCss": "packages/styles/src/card/sk-card.css",
+        "additionalStylesCss": [],
+        "elementTs": "packages/elements/src/card/sk-card.ts",
+        "elementMarkupTs": "packages/elements/src/card/sk-card.markup.ts",
+        "staticMarkup": [],
+        "storySources": [
+          "packages/elements/src/card/sk-card.stories.ts",
+          "packages/styles/src/card/sk-card-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/card/sk-card.css",
+        "elementExport": "SkCard"
+      },
+      "tokenClosure": [
+        "--sk-border-default",
+        "--sk-border-tint-lilac",
+        "--sk-border-tint-sky",
+        "--sk-border-width-4",
+        "--sk-color-blue",
+        "--sk-color-purple",
+        "--sk-fg-body",
+        "--sk-motion-duration-fast",
+        "--sk-motion-ease-out",
+        "--sk-on-status-attention",
+        "--sk-on-status-danger",
+        "--sk-on-status-info",
+        "--sk-on-status-neutral",
+        "--sk-on-status-recovery",
+        "--sk-on-status-success",
+        "--sk-radius-lg",
+        "--sk-space-7",
+        "--sk-status-attention",
+        "--sk-status-danger",
+        "--sk-status-info",
+        "--sk-status-neutral",
+        "--sk-status-recovery",
+        "--sk-status-success",
+        "--sk-surface-card",
+        "--sk-surface-input",
+        "--sk-surface-tint-lilac",
+        "--sk-surface-tint-sky"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/elements/src/card/sk-card.stories.ts",
+            "storyId": "elements-skcard--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/card/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/elements/src/card/sk-card.stories.ts",
+            "storyId": "elements-skcard--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/card/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-light-mode-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 8 },
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/elements/src/card/sk-card.stories.ts",
+            "storyId": "elements-skcard--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/card/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "hover",
+          "story": {
+            "sourcePath": "packages/elements/src/card/sk-card.stories.ts",
+            "storyId": "elements-skcard--status-info",
+            "exportName": "StatusInfo"
+          },
+          "visualTestId": "desktop-v2/card/hover",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-hover-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "hover",
+            "selector": "sk-card .sk-card--status-info"
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "focus": "Cards do not create focusable controls; focus styling is owned by a composed link or action.",
+        "active": "Cards have hover emphasis but no authored pressed (:active) treatment.",
+        "disabled": "Cards have no disabled state or disabled styling."
+      }
+    },
+    {
+      "id": "context-sidebar",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/context-sidebar/sk-context-sidebar.stories.ts",
+          "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+          "packages/styles/src/context-sidebar/sk-context-sidebar.css"
+        ]
+      },
+      "form": "element-backed",
+      "selector": "sk-context-sidebar",
+      "paths": {
+        "stylesCss": "packages/styles/src/context-sidebar/sk-context-sidebar.css",
+        "additionalStylesCss": [],
+        "elementTs": "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+        "elementMarkupTs": null,
+        "staticMarkup": [],
+        "storySources": [
+          "packages/elements/src/context-sidebar/sk-context-sidebar.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/context-sidebar/sk-context-sidebar.css",
+        "elementExport": "SkContextSidebar"
+      },
+      "tokenClosure": [
+        "--sk-border-default",
+        "--sk-border-width-1",
+        "--sk-fg-body",
+        "--sk-font-sans",
+        "--sk-space-4",
+        "--sk-surface-card"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/elements/src/context-sidebar/sk-context-sidebar.stories.ts",
+            "storyId": "elements-skcontextsidebar--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/context-sidebar/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-context-sidebar-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/elements/src/context-sidebar/sk-context-sidebar.stories.ts",
+            "storyId": "elements-skcontextsidebar--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/context-sidebar/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-context-sidebar-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/elements/src/context-sidebar/sk-context-sidebar.stories.ts",
+            "storyId": "elements-skcontextsidebar--long-labels",
+            "exportName": "LongLabels"
+          },
+          "visualTestId": "desktop-v2/context-sidebar/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-context-sidebar-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "The sidebar has no authored :hover selector; navigation item interaction belongs to composed controls.",
+        "focus": "The sidebar has no authored focus selector; focus styling belongs to composed links.",
+        "active": "The sidebar has no authored :active selector.",
+        "disabled": "The sidebar has no disabled state or disabled styling."
+      }
+    },
+    {
+      "id": "data-table",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/data-table/sk-data-table-default.html",
+          "packages/styles/src/data-table/sk-data-table-html.stories.ts",
+          "packages/styles/src/data-table/sk-data-table-narrow-scrollable.html",
+          "packages/styles/src/data-table/sk-data-table-sticky-header.html",
+          "packages/styles/src/data-table/sk-data-table.css"
+        ]
+      },
+      "form": "styles-only",
+      "selector": ".sk-data-table",
+      "paths": {
+        "stylesCss": "packages/styles/src/data-table/sk-data-table.css",
+        "additionalStylesCss": [],
+        "elementTs": null,
+        "elementMarkupTs": null,
+        "staticMarkup": [
+          "packages/styles/src/data-table/sk-data-table-default.html",
+          "packages/styles/src/data-table/sk-data-table-narrow-scrollable.html",
+          "packages/styles/src/data-table/sk-data-table-sticky-header.html"
+        ],
+        "storySources": [
+          "packages/styles/src/data-table/sk-data-table-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/data-table/sk-data-table.css",
+        "elementExport": null
+      },
+      "tokenClosure": [
+        "--sk-border-default",
+        "--sk-border-focus",
+        "--sk-border-strong",
+        "--sk-fg-default",
+        "--sk-fg-muted",
+        "--sk-font-sans",
+        "--sk-radius-md",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-surface-card",
+        "--sk-surface-muted",
+        "--sk-text-sm",
+        "--sk-text-xs",
+        "--sk-weight-medium"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/styles/src/data-table/sk-data-table-html.stories.ts",
+            "storyId": "primitives-skdatatable-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/data-table/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/styles/src/data-table/sk-data-table-html.stories.ts",
+            "storyId": "primitives-skdatatable-html--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/data-table/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/styles/src/data-table/sk-data-table-html.stories.ts",
+            "storyId": "primitives-skdatatable-html--narrow-scrollable",
+            "exportName": "NarrowScrollable"
+          },
+          "visualTestId": "desktop-v2/data-table/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "hover",
+          "story": {
+            "sourcePath": "packages/styles/src/data-table/sk-data-table-html.stories.ts",
+            "storyId": "primitives-skdatatable-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/data-table/hover",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-hover-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "hover",
+            "selector": ".sk-data-table tbody tr"
+          }
+        },
+        {
+          "id": "focus",
+          "story": {
+            "sourcePath": "packages/styles/src/data-table/sk-data-table-html.stories.ts",
+            "storyId": "primitives-skdatatable-html--sticky-header",
+            "exportName": "StickyHeader"
+          },
+          "visualTestId": "desktop-v2/data-table/focus",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-focus-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "focus",
+            "selector": ".sk-data-table__scroller"
+          }
+        },
+        {
+          "id": "sticky-header",
+          "story": {
+            "sourcePath": "packages/styles/src/data-table/sk-data-table-html.stories.ts",
+            "storyId": "primitives-skdatatable-html--sticky-header",
+            "exportName": "StickyHeader"
+          },
+          "visualTestId": "desktop-v2/data-table/sticky-header",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-data-table-sticky-header-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "active": "The table has row hover and scroller focus affordances, but no authored pressed (:active) state.",
+        "disabled": "The table has no disabled state or disabled styling."
+      }
+    },
+    {
+      "id": "disclosure",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/disclosure/sk-disclosure-closed.html",
+          "packages/styles/src/disclosure/sk-disclosure-html.stories.ts",
+          "packages/styles/src/disclosure/sk-disclosure-long-body.html",
+          "packages/styles/src/disclosure/sk-disclosure-nested.html",
+          "packages/styles/src/disclosure/sk-disclosure-open.html",
+          "packages/styles/src/disclosure/sk-disclosure.css"
+        ]
+      },
+      "form": "styles-only",
+      "selector": ".sk-disclosure",
+      "paths": {
+        "stylesCss": "packages/styles/src/disclosure/sk-disclosure.css",
+        "additionalStylesCss": [],
+        "elementTs": null,
+        "elementMarkupTs": null,
+        "staticMarkup": [
+          "packages/styles/src/disclosure/sk-disclosure-closed.html",
+          "packages/styles/src/disclosure/sk-disclosure-long-body.html",
+          "packages/styles/src/disclosure/sk-disclosure-nested.html",
+          "packages/styles/src/disclosure/sk-disclosure-open.html"
+        ],
+        "storySources": [
+          "packages/styles/src/disclosure/sk-disclosure-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/disclosure/sk-disclosure.css",
+        "elementExport": null
+      },
+      "tokenClosure": [
+        "--sk-border-default",
+        "--sk-border-focus",
+        "--sk-fg-body",
+        "--sk-fg-default",
+        "--sk-fg-muted",
+        "--sk-font-sans",
+        "--sk-motion-duration-fast",
+        "--sk-motion-ease-out",
+        "--sk-radius-md",
+        "--sk-radius-sm",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-surface-card",
+        "--sk-text-base",
+        "--sk-text-sm",
+        "--sk-weight-medium"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/styles/src/disclosure/sk-disclosure-html.stories.ts",
+            "storyId": "primitives-skdisclosure-html--closed",
+            "exportName": "Closed"
+          },
+          "visualTestId": "desktop-v2/disclosure/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/styles/src/disclosure/sk-disclosure-html.stories.ts",
+            "storyId": "primitives-skdisclosure-html--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/disclosure/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/styles/src/disclosure/sk-disclosure-html.stories.ts",
+            "storyId": "primitives-skdisclosure-html--long-body",
+            "exportName": "LongBody"
+          },
+          "visualTestId": "desktop-v2/disclosure/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "focus",
+          "story": {
+            "sourcePath": "packages/styles/src/disclosure/sk-disclosure-html.stories.ts",
+            "storyId": "primitives-skdisclosure-html--closed",
+            "exportName": "Closed"
+          },
+          "visualTestId": "desktop-v2/disclosure/focus",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-focus-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "focus",
+            "selector": ".sk-disclosure summary"
+          }
+        },
+        {
+          "id": "open",
+          "story": {
+            "sourcePath": "packages/styles/src/disclosure/sk-disclosure-html.stories.ts",
+            "storyId": "primitives-skdisclosure-html--open",
+            "exportName": "Open"
+          },
+          "visualTestId": "desktop-v2/disclosure/open",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-disclosure-open-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "The disclosure has a focus-visible summary affordance but no authored hover styling.",
+        "active": "The disclosure has no authored pressed (:active) state.",
+        "disabled": "Native disclosure has no component-level disabled state or styling."
+      }
+    },
+    {
+      "id": "empty-state",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/empty-state/sk-empty-state-html.stories.ts",
+          "packages/styles/src/empty-state/sk-empty-state-inline.html",
+          "packages/styles/src/empty-state/sk-empty-state-with-action.html",
+          "packages/styles/src/empty-state/sk-empty-state-without-action.html",
+          "packages/styles/src/empty-state/sk-empty-state.css"
+        ]
+      },
+      "form": "styles-only",
+      "selector": ".sk-empty-state",
+      "paths": {
+        "stylesCss": "packages/styles/src/empty-state/sk-empty-state.css",
+        "additionalStylesCss": [],
+        "elementTs": null,
+        "elementMarkupTs": null,
+        "staticMarkup": [
+          "packages/styles/src/empty-state/sk-empty-state-inline.html",
+          "packages/styles/src/empty-state/sk-empty-state-with-action.html",
+          "packages/styles/src/empty-state/sk-empty-state-without-action.html"
+        ],
+        "storySources": [
+          "packages/styles/src/empty-state/sk-empty-state-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/empty-state/sk-empty-state.css",
+        "elementExport": null
+      },
+      "tokenClosure": [
+        "--sk-fg-default",
+        "--sk-fg-muted",
+        "--sk-font-sans",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-space-6",
+        "--sk-space-9",
+        "--sk-text-lg",
+        "--sk-text-sm",
+        "--sk-weight-semibold"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/styles/src/empty-state/sk-empty-state-html.stories.ts",
+            "storyId": "primitives-skemptystate-html--without-action",
+            "exportName": "WithoutAction"
+          },
+          "visualTestId": "desktop-v2/empty-state/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/styles/src/empty-state/sk-empty-state-html.stories.ts",
+            "storyId": "primitives-skemptystate-html--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/empty-state/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/styles/src/empty-state/sk-empty-state-html.stories.ts",
+            "storyId": "primitives-skemptystate-html--inline-long-narrow",
+            "exportName": "InlineLongNarrow"
+          },
+          "visualTestId": "desktop-v2/empty-state/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "with-action",
+          "story": {
+            "sourcePath": "packages/styles/src/empty-state/sk-empty-state-html.stories.ts",
+            "storyId": "primitives-skemptystate-html--with-action",
+            "exportName": "WithAction"
+          },
+          "visualTestId": "desktop-v2/empty-state/with-action",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-with-action-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "without-action",
+          "story": {
+            "sourcePath": "packages/styles/src/empty-state/sk-empty-state-html.stories.ts",
+            "storyId": "primitives-skemptystate-html--without-action",
+            "exportName": "WithoutAction"
+          },
+          "visualTestId": "desktop-v2/empty-state/without-action",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-empty-state-without-action-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "The family provides composition/layout only; optional action controls use their own component states.",
+        "focus": "The family provides composition/layout only; optional action controls own focus styling.",
+        "active": "The family provides composition/layout only; optional action controls own pressed styling.",
+        "disabled": "The family has no disabled state; optional actions own disabled semantics."
+      }
+    },
+    {
+      "id": "event-timeline",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-default.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-degraded.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-forced-colors.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-leading-marker.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-linked.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-long-content.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-narrow.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-one-event.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-twenty-events.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-forced-colors.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-html.stories.ts",
+          "packages/styles/src/event-timeline/sk-event-timeline-long-transition.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-narrow.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-one-event.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-twenty-events.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-two-events.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-unavailable-retention.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-verified-marker.html",
+          "packages/styles/src/event-timeline/sk-event-timeline.css"
+        ]
+      },
+      "form": "styles-only",
+      "selector": ".sk-event-timeline",
+      "paths": {
+        "stylesCss": "packages/styles/src/event-timeline/sk-event-timeline.css",
+        "additionalStylesCss": [],
+        "elementTs": null,
+        "elementMarkupTs": null,
+        "staticMarkup": [
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-default.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-degraded.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-forced-colors.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-leading-marker.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-linked.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-long-content.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-narrow.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-one-event.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-twenty-events.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-forced-colors.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-long-transition.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-narrow.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-one-event.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-twenty-events.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-two-events.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-unavailable-retention.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-verified-marker.html"
+        ],
+        "storySources": [
+          "packages/styles/src/event-timeline/sk-event-timeline-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/event-timeline/sk-event-timeline.css",
+        "elementExport": null
+      },
+      "tokenClosure": [
+        "--sk-border-strong",
+        "--sk-border-width-1",
+        "--sk-border-width-2",
+        "--sk-fg-body",
+        "--sk-fg-default",
+        "--sk-fg-muted",
+        "--sk-font-sans",
+        "--sk-on-tint-mint",
+        "--sk-on-tint-sky",
+        "--sk-radius-pill",
+        "--sk-space-1",
+        "--sk-space-12",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-space-5",
+        "--sk-space-6",
+        "--sk-space-7",
+        "--sk-surface-page",
+        "--sk-text-base",
+        "--sk-text-sm",
+        "--sk-weight-medium",
+        "--sk-weight-semibold"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-html.stories.ts",
+            "storyId": "primitives-skeventtimeline-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/event-timeline/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-event-timeline-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-html.stories.ts",
+            "storyId": "primitives-skeventtimeline-html--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/event-timeline/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-event-timeline-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-html.stories.ts",
+            "storyId": "primitives-skeventtimeline-html--narrow",
+            "exportName": "Narrow"
+          },
+          "visualTestId": "desktop-v2/event-timeline/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-event-timeline-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "compact",
+          "story": {
+            "sourcePath": "packages/styles/src/event-timeline/sk-event-timeline-html.stories.ts",
+            "storyId": "primitives-skeventtimeline-html--compact-default",
+            "exportName": "CompactDefault"
+          },
+          "visualTestId": "desktop-v2/event-timeline/compact",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-event-timeline-compact-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "The timeline is a display-only event sequence with no authored hover treatment.",
+        "focus": "The timeline has no focusable family control or authored focus treatment.",
+        "active": "The timeline has no interactive pressed state.",
+        "disabled": "The timeline has no disabled state or disabled styling."
+      }
+    },
+    {
+      "id": "facts",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/facts/sk-facts-compact.html",
+          "packages/styles/src/facts/sk-facts-empty-value.html",
+          "packages/styles/src/facts/sk-facts-html.stories.ts",
+          "packages/styles/src/facts/sk-facts-long-value.html",
+          "packages/styles/src/facts/sk-facts-two-col.html",
+          "packages/styles/src/facts/sk-facts.css",
+          "packages/styles/src/facts/sk-facts.html"
+        ]
+      },
+      "form": "styles-only",
+      "selector": ".sk-facts",
+      "paths": {
+        "stylesCss": "packages/styles/src/facts/sk-facts.css",
+        "additionalStylesCss": [],
+        "elementTs": null,
+        "elementMarkupTs": null,
+        "staticMarkup": [
+          "packages/styles/src/facts/sk-facts-compact.html",
+          "packages/styles/src/facts/sk-facts-empty-value.html",
+          "packages/styles/src/facts/sk-facts-long-value.html",
+          "packages/styles/src/facts/sk-facts-two-col.html",
+          "packages/styles/src/facts/sk-facts.html"
+        ],
+        "storySources": [
+          "packages/styles/src/facts/sk-facts-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/facts/sk-facts.css",
+        "elementExport": null
+      },
+      "tokenClosure": [
+        "--sk-fg-default",
+        "--sk-fg-muted",
+        "--sk-font-sans",
+        "--sk-space-1",
+        "--sk-space-2",
+        "--sk-space-4",
+        "--sk-text-base",
+        "--sk-text-sm",
+        "--sk-weight-medium"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/styles/src/facts/sk-facts-html.stories.ts",
+            "storyId": "primitives-skfacts-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/facts/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-facts-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/styles/src/facts/sk-facts-html.stories.ts",
+            "storyId": "primitives-skfacts-html--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/facts/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-facts-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/styles/src/facts/sk-facts-html.stories.ts",
+            "storyId": "primitives-skfacts-html--long-value",
+            "exportName": "LongValue"
+          },
+          "visualTestId": "desktop-v2/facts/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-facts-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "compact",
+          "story": {
+            "sourcePath": "packages/styles/src/facts/sk-facts-html.stories.ts",
+            "storyId": "primitives-skfacts-html--compact",
+            "exportName": "Compact"
+          },
+          "visualTestId": "desktop-v2/facts/compact",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-facts-compact-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "Facts are a display-only definition list with no authored hover treatment.",
+        "focus": "Facts expose no family-owned focusable control.",
+        "active": "Facts expose no interactive pressed state.",
+        "disabled": "Facts have no disabled state or disabled styling."
+      }
+    },
+    {
+      "id": "form-select",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/form-select/sk-form-select-compact.html",
+          "packages/styles/src/form-select/sk-form-select-disabled.html",
+          "packages/styles/src/form-select/sk-form-select-html.stories.ts",
+          "packages/styles/src/form-select/sk-form-select-long-options.html",
+          "packages/styles/src/form-select/sk-form-select-optgroups.html",
+          "packages/styles/src/form-select/sk-form-select-required-invalid.html",
+          "packages/styles/src/form-select/sk-form-select-t10-lane.html",
+          "packages/styles/src/form-select/sk-form-select-t12-filters.html",
+          "packages/styles/src/form-select/sk-form-select.css"
+        ]
+      },
+      "form": "styles-only",
+      "selector": ".sk-form-select",
+      "paths": {
+        "stylesCss": "packages/styles/src/form-select/sk-form-select.css",
+        "additionalStylesCss": [],
+        "elementTs": null,
+        "elementMarkupTs": null,
+        "staticMarkup": [
+          "packages/styles/src/form-select/sk-form-select-compact.html",
+          "packages/styles/src/form-select/sk-form-select-disabled.html",
+          "packages/styles/src/form-select/sk-form-select-long-options.html",
+          "packages/styles/src/form-select/sk-form-select-optgroups.html",
+          "packages/styles/src/form-select/sk-form-select-required-invalid.html",
+          "packages/styles/src/form-select/sk-form-select-t10-lane.html",
+          "packages/styles/src/form-select/sk-form-select-t12-filters.html"
+        ],
+        "storySources": [
+          "packages/styles/src/form-select/sk-form-select-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/form-select/sk-form-select.css",
+        "elementExport": null
+      },
+      "tokenClosure": [
+        "--sk-border-control-invalid",
+        "--sk-border-default",
+        "--sk-border-focus",
+        "--sk-border-width-1",
+        "--sk-border-width-2",
+        "--sk-fg-default",
+        "--sk-font-sans",
+        "--sk-radius-sm",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-surface-input",
+        "--sk-text-base",
+        "--sk-text-sm",
+        "--sk-weight-normal"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/styles/src/form-select/sk-form-select-html.stories.ts",
+            "storyId": "form-skformselect-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/form-select/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/styles/src/form-select/sk-form-select-html.stories.ts",
+            "storyId": "form-skformselect-html--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/form-select/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/styles/src/form-select/sk-form-select-html.stories.ts",
+            "storyId": "form-skformselect-html--narrow",
+            "exportName": "Narrow"
+          },
+          "visualTestId": "desktop-v2/form-select/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "focus",
+          "story": {
+            "sourcePath": "packages/styles/src/form-select/sk-form-select-html.stories.ts",
+            "storyId": "form-skformselect-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/form-select/focus",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-focus-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "focus",
+            "selector": "select.sk-form-select"
+          }
+        },
+        {
+          "id": "disabled",
+          "story": {
+            "sourcePath": "packages/styles/src/form-select/sk-form-select-html.stories.ts",
+            "storyId": "form-skformselect-html--disabled",
+            "exportName": "Disabled"
+          },
+          "visualTestId": "desktop-v2/form-select/disabled",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-disabled-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "disabled",
+            "selector": "select.sk-form-select"
+          }
+        },
+        {
+          "id": "invalid",
+          "story": {
+            "sourcePath": "packages/styles/src/form-select/sk-form-select-html.stories.ts",
+            "storyId": "form-skformselect-html--required-invalid",
+            "exportName": "RequiredInvalid"
+          },
+          "visualTestId": "desktop-v2/form-select/invalid",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-form-select-invalid-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "The source defines no custom :hover treatment; native select hover rendering is browser-owned.",
+        "active": "The source defines no custom :active treatment; native select pressed rendering is browser-owned."
+      }
+    },
+    {
+      "id": "metric",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/metric/sk-metric.stories.ts",
+          "packages/elements/src/metric/sk-metric.ts",
+          "packages/styles/src/metric/sk-metric.css"
+        ]
+      },
+      "form": "element-backed",
+      "selector": "sk-metric",
+      "paths": {
+        "stylesCss": "packages/styles/src/metric/sk-metric.css",
+        "additionalStylesCss": [],
+        "elementTs": "packages/elements/src/metric/sk-metric.ts",
+        "elementMarkupTs": null,
+        "staticMarkup": [],
+        "storySources": [
+          "packages/elements/src/metric/sk-metric.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/metric/sk-metric.css",
+        "elementExport": "SkMetric"
+      },
+      "tokenClosure": [
+        "--sk-fg-default",
+        "--sk-fg-muted",
+        "--sk-font-mono",
+        "--sk-font-sans",
+        "--sk-on-tint-butter",
+        "--sk-on-tint-mint",
+        "--sk-on-tint-sky",
+        "--sk-space-1",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-text-2xl",
+        "--sk-text-sm",
+        "--sk-text-xl",
+        "--sk-text-xs",
+        "--sk-weight-bold",
+        "--sk-weight-medium"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/elements/src/metric/sk-metric.stories.ts",
+            "storyId": "elements-skmetric--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/metric/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-metric-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/elements/src/metric/sk-metric.stories.ts",
+            "storyId": "elements-skmetric--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/metric/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-metric-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/elements/src/metric/sk-metric.stories.ts",
+            "storyId": "elements-skmetric--long-content",
+            "exportName": "LongContent"
+          },
+          "visualTestId": "desktop-v2/metric/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-metric-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "compact",
+          "story": {
+            "sourcePath": "packages/elements/src/metric/sk-metric.stories.ts",
+            "storyId": "elements-skmetric--compact",
+            "exportName": "Compact"
+          },
+          "visualTestId": "desktop-v2/metric/compact",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-metric-compact-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "Metrics are display-only and have no authored hover treatment.",
+        "focus": "Metrics expose no family-owned focusable control.",
+        "active": "Metrics expose no interactive pressed state.",
+        "disabled": "Metrics have no disabled state or disabled styling."
+      }
+    },
+    {
+      "id": "nav-pill",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/nav-pill/sk-nav-pill.stories.ts",
+          "packages/elements/src/nav-pill/sk-nav-pill.ts",
+          "packages/styles/src/nav-pill/sk-nav-pill-drawer.css",
+          "packages/styles/src/nav-pill/sk-nav-pill.css",
+          "packages/styles/src/nav-pill/sk-nav-pill.stories.ts"
+        ]
+      },
+      "form": "element-backed",
+      "selector": ".sk-nav-pill",
+      "paths": {
+        "stylesCss": "packages/styles/src/nav-pill/sk-nav-pill.css",
+        "additionalStylesCss": [
+          "packages/styles/src/nav-pill/sk-nav-pill-drawer.css"
+        ],
+        "elementTs": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+        "elementMarkupTs": null,
+        "staticMarkup": [],
+        "storySources": [
+          "packages/elements/src/nav-pill/sk-nav-pill.stories.ts",
+          "packages/styles/src/nav-pill/sk-nav-pill.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/nav-pill/sk-nav-pill.css",
+        "elementExport": "SkNavPill"
+      },
+      "tokenClosure": [
+        "--sk-bg-pill",
+        "--sk-border-default",
+        "--sk-border-focus",
+        "--sk-border-strong",
+        "--sk-border-width-1",
+        "--sk-border-width-2",
+        "--sk-color-accent",
+        "--sk-color-accent-fg",
+        "--sk-color-yellow",
+        "--sk-color-yellow-alpha-15",
+        "--sk-color-yellow-alpha-35",
+        "--sk-color-yellow-alpha-60",
+        "--sk-fg-default",
+        "--sk-fg-muted",
+        "--sk-font-sans",
+        "--sk-motion-duration-base",
+        "--sk-motion-duration-fast",
+        "--sk-motion-ease-out",
+        "--sk-radius-md",
+        "--sk-radius-pill",
+        "--sk-radius-sm",
+        "--sk-shadow-glow-primary",
+        "--sk-space-1",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-surface-card",
+        "--sk-surface-input",
+        "--sk-text-sm",
+        "--sk-weight-normal",
+        "--sk-weight-semibold"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/elements/src/nav-pill/sk-nav-pill.stories.ts",
+            "storyId": "elements-sknavpill--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/nav-pill/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/styles/src/nav-pill/sk-nav-pill.stories.ts",
+            "storyId": "navigation-sknavpill-html--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/nav-pill/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/styles/src/nav-pill/sk-nav-pill.stories.ts",
+            "storyId": "navigation-sknavpill-html--mobile",
+            "exportName": "Mobile"
+          },
+          "visualTestId": "desktop-v2/nav-pill/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "hover",
+          "story": {
+            "sourcePath": "packages/elements/src/nav-pill/sk-nav-pill.stories.ts",
+            "storyId": "elements-sknavpill--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/nav-pill/hover",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-hover-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "hover",
+            "selector": ".sk-nav-pill__item"
+          }
+        },
+        {
+          "id": "focus",
+          "story": {
+            "sourcePath": "packages/elements/src/nav-pill/sk-nav-pill.stories.ts",
+            "storyId": "elements-sknavpill--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/nav-pill/focus",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-focus-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "focus",
+            "selector": ".sk-nav-pill__item"
+          }
+        },
+        {
+          "id": "active",
+          "story": {
+            "sourcePath": "packages/styles/src/nav-pill/sk-nav-pill.stories.ts",
+            "storyId": "navigation-sknavpill-html--active-item",
+            "exportName": "ActiveItem"
+          },
+          "visualTestId": "desktop-v2/nav-pill/active",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-nav-pill-active-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "story-state",
+            "selector": null
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "disabled": "Navigation links are supplied content; the family does not define a disabled item state."
+      }
+    },
+    {
+      "id": "notice",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/notice/sk-notice.stories.ts",
+          "packages/elements/src/notice/sk-notice.ts",
+          "packages/styles/src/notice/sk-notice.css"
+        ]
+      },
+      "form": "element-backed",
+      "selector": "sk-notice",
+      "paths": {
+        "stylesCss": "packages/styles/src/notice/sk-notice.css",
+        "additionalStylesCss": [],
+        "elementTs": "packages/elements/src/notice/sk-notice.ts",
+        "elementMarkupTs": null,
+        "staticMarkup": [],
+        "storySources": [
+          "packages/elements/src/notice/sk-notice.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/notice/sk-notice.css",
+        "elementExport": "SkNotice"
+      },
+      "tokenClosure": [
+        "--sk-border-default",
+        "--sk-border-focus",
+        "--sk-border-strong",
+        "--sk-border-width-1",
+        "--sk-border-width-2",
+        "--sk-border-width-4",
+        "--sk-fg-body",
+        "--sk-font-sans",
+        "--sk-motion-duration-fast",
+        "--sk-motion-ease-out",
+        "--sk-on-status-attention",
+        "--sk-on-status-danger",
+        "--sk-on-status-info",
+        "--sk-on-status-neutral",
+        "--sk-on-status-recovery",
+        "--sk-on-status-success",
+        "--sk-radius-md",
+        "--sk-radius-sm",
+        "--sk-space-1",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-status-attention",
+        "--sk-status-danger",
+        "--sk-status-info",
+        "--sk-status-neutral",
+        "--sk-status-recovery",
+        "--sk-status-success",
+        "--sk-surface-card",
+        "--sk-text-base",
+        "--sk-text-lg",
+        "--sk-weight-semibold"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/elements/src/notice/sk-notice.stories.ts",
+            "storyId": "elements-sknotice--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/notice/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/elements/src/notice/sk-notice.stories.ts",
+            "storyId": "elements-sknotice--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/notice/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-light-mode-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 6 },
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/elements/src/notice/sk-notice.stories.ts",
+            "storyId": "elements-sknotice--long-message",
+            "exportName": "LongMessage"
+          },
+          "visualTestId": "desktop-v2/notice/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "focus",
+          "story": {
+            "sourcePath": "packages/elements/src/notice/sk-notice.stories.ts",
+            "storyId": "elements-sknotice--dismissible",
+            "exportName": "Dismissible"
+          },
+          "visualTestId": "desktop-v2/notice/focus",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-focus-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 2 },
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "focus",
+            "selector": "sk-notice button"
+          }
+        },
+        {
+          "id": "dismissible",
+          "story": {
+            "sourcePath": "packages/elements/src/notice/sk-notice.stories.ts",
+            "storyId": "elements-sknotice--dismissible",
+            "exportName": "Dismissible"
+          },
+          "visualTestId": "desktop-v2/notice/dismissible",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-dismissible-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 2 },
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "The notice has no authored :hover treatment; its dismiss control has a focus treatment only.",
+        "active": "The notice has no authored :active treatment.",
+        "disabled": "The dismiss control has no component-level disabled state."
+      }
+    },
+    {
+      "id": "page-header",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/page-header/sk-page-header.stories.ts",
+          "packages/elements/src/page-header/sk-page-header.ts",
+          "packages/styles/src/page-header/sk-page-header.css",
+          "packages/styles/src/page-header/static/sk-page-header.static.css"
+        ]
+      },
+      "form": "element-backed",
+      "selector": "sk-page-header",
+      "paths": {
+        "stylesCss": "packages/styles/src/page-header/sk-page-header.css",
+        "additionalStylesCss": [
+          "packages/styles/src/page-header/static/sk-page-header.static.css"
+        ],
+        "elementTs": "packages/elements/src/page-header/sk-page-header.ts",
+        "elementMarkupTs": null,
+        "staticMarkup": [],
+        "storySources": [
+          "packages/elements/src/page-header/sk-page-header.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/page-header/sk-page-header.css",
+        "elementExport": "SkPageHeader"
+      },
+      "tokenClosure": [
+        "--sk-border-width-1",
+        "--sk-fg-body",
+        "--sk-font-sans",
+        "--sk-layout-page-header-compact-height",
+        "--sk-layout-page-header-sticky-layer",
+        "--sk-layout-page-header-sticky-offset",
+        "--sk-motion-duration-fast",
+        "--sk-motion-ease-out",
+        "--sk-shadow-elev",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-space-6",
+        "--sk-surface-page"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/elements/src/page-header/sk-page-header.stories.ts",
+            "storyId": "elements-skpageheader--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/page-header/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/elements/src/page-header/sk-page-header.stories.ts",
+            "storyId": "elements-skpageheader--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/page-header/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/elements/src/page-header/sk-page-header.stories.ts",
+            "storyId": "elements-skpageheader--narrow-reflow",
+            "exportName": "NarrowReflow"
+          },
+          "visualTestId": "desktop-v2/page-header/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "compact",
+          "story": {
+            "sourcePath": "packages/elements/src/page-header/sk-page-header.stories.ts",
+            "storyId": "elements-skpageheader--compact",
+            "exportName": "Compact"
+          },
+          "visualTestId": "desktop-v2/page-header/compact",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-compact-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "sticky",
+          "story": {
+            "sourcePath": "packages/elements/src/page-header/sk-page-header.stories.ts",
+            "storyId": "elements-skpageheader--default-sticky",
+            "exportName": "DefaultSticky"
+          },
+          "visualTestId": "desktop-v2/page-header/sticky",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-page-header-sticky-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "The page header has no authored hover state; composed controls own their interaction styles.",
+        "focus": "The page header has no authored focus state; composed controls own focus styling.",
+        "active": "The page header has no authored pressed state.",
+        "disabled": "The page header has no disabled state."
+      }
+    },
+    {
+      "id": "personal-rail",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/personal-rail/sk-personal-rail.stories.ts",
+          "packages/elements/src/personal-rail/sk-personal-rail.ts",
+          "packages/styles/src/personal-rail/sk-personal-rail.css"
+        ]
+      },
+      "form": "element-backed",
+      "selector": "sk-personal-rail",
+      "paths": {
+        "stylesCss": "packages/styles/src/personal-rail/sk-personal-rail.css",
+        "additionalStylesCss": [],
+        "elementTs": "packages/elements/src/personal-rail/sk-personal-rail.ts",
+        "elementMarkupTs": null,
+        "staticMarkup": [],
+        "storySources": [
+          "packages/elements/src/personal-rail/sk-personal-rail.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/personal-rail/sk-personal-rail.css",
+        "elementExport": "SkPersonalRail"
+      },
+      "tokenClosure": [
+        "--sk-border-default",
+        "--sk-border-width-1",
+        "--sk-fg-body",
+        "--sk-font-sans",
+        "--sk-space-2",
+        "--sk-space-8",
+        "--sk-surface-card"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/elements/src/personal-rail/sk-personal-rail.stories.ts",
+            "storyId": "elements-skpersonalrail--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/personal-rail/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-personal-rail-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/elements/src/personal-rail/sk-personal-rail.stories.ts",
+            "storyId": "elements-skpersonalrail--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/personal-rail/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-personal-rail-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/elements/src/personal-rail/sk-personal-rail.stories.ts",
+            "storyId": "elements-skpersonalrail--long-labels",
+            "exportName": "LongLabels"
+          },
+          "visualTestId": "desktop-v2/personal-rail/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-personal-rail-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "The rail has no authored hover selector; navigation controls own their hover styles.",
+        "focus": "The rail has no authored focus selector; navigation controls own focus styles.",
+        "active": "The rail has no authored pressed state.",
+        "disabled": "The rail has no disabled state."
+      }
+    },
+    {
+      "id": "pill-tag",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/pill-tag/sk-pill-tag.markup.ts",
+          "packages/elements/src/pill-tag/sk-pill-tag.stories.ts",
+          "packages/elements/src/pill-tag/sk-pill-tag.ts",
+          "packages/styles/src/pill-tag/sk-pill-tag.css",
+          "packages/styles/src/pill-tag/sk-pill-tag.stories.ts"
+        ]
+      },
+      "form": "element-backed",
+      "selector": "sk-pill-tag",
+      "paths": {
+        "stylesCss": "packages/styles/src/pill-tag/sk-pill-tag.css",
+        "additionalStylesCss": [],
+        "elementTs": "packages/elements/src/pill-tag/sk-pill-tag.ts",
+        "elementMarkupTs": "packages/elements/src/pill-tag/sk-pill-tag.markup.ts",
+        "staticMarkup": [],
+        "storySources": [
+          "packages/elements/src/pill-tag/sk-pill-tag.stories.ts",
+          "packages/styles/src/pill-tag/sk-pill-tag.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/pill-tag/sk-pill-tag.css",
+        "elementExport": "SkPillTag"
+      },
+      "tokenClosure": [
+        "--sk-bg-pill",
+        "--sk-border-width-2",
+        "--sk-fg-muted",
+        "--sk-font-sans",
+        "--sk-on-status-attention",
+        "--sk-on-status-danger",
+        "--sk-on-status-info",
+        "--sk-on-status-neutral",
+        "--sk-on-status-recovery",
+        "--sk-on-status-success",
+        "--sk-on-tint-butter",
+        "--sk-on-tint-lilac",
+        "--sk-on-tint-mint",
+        "--sk-on-tint-sky",
+        "--sk-radius-pill",
+        "--sk-radius-sm",
+        "--sk-space-1",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-status-attention",
+        "--sk-status-danger",
+        "--sk-status-info",
+        "--sk-status-neutral",
+        "--sk-status-recovery",
+        "--sk-status-success",
+        "--sk-surface-tint-butter",
+        "--sk-surface-tint-lilac",
+        "--sk-surface-tint-mint",
+        "--sk-surface-tint-sky",
+        "--sk-text-sm",
+        "--sk-text-xs",
+        "--sk-weight-medium"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/elements/src/pill-tag/sk-pill-tag.stories.ts",
+            "storyId": "elements-skpilltag--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/pill-tag/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/elements/src/pill-tag/sk-pill-tag.stories.ts",
+            "storyId": "elements-skpilltag--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/pill-tag/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-light-mode-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 6 },
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/elements/src/pill-tag/sk-pill-tag.stories.ts",
+            "storyId": "elements-skpilltag--long-label",
+            "exportName": "LongLabel"
+          },
+          "visualTestId": "desktop-v2/pill-tag/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "variants",
+          "story": {
+            "sourcePath": "packages/elements/src/pill-tag/sk-pill-tag.stories.ts",
+            "storyId": "elements-skpilltag--all-variants",
+            "exportName": "AllVariants"
+          },
+          "visualTestId": "desktop-v2/pill-tag/variants",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-variants-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 5 },
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "Pill tags are display-only labels with no authored hover treatment.",
+        "focus": "Pill tags expose no family-owned focusable control.",
+        "active": "Pill tags expose no interactive pressed state.",
+        "disabled": "Pill tags have no disabled state or disabled styling."
+      }
+    },
+    {
+      "id": "progress",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/progress/sk-progress-compact.html",
+          "packages/styles/src/progress/sk-progress-complete.html",
+          "packages/styles/src/progress/sk-progress-forced-colors.html",
+          "packages/styles/src/progress/sk-progress-html.stories.ts",
+          "packages/styles/src/progress/sk-progress-indeterminate-compact.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-forced-colors.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-long-label.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-narrow.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-with-meta.html",
+          "packages/styles/src/progress/sk-progress-indeterminate.html",
+          "packages/styles/src/progress/sk-progress-large-total.html",
+          "packages/styles/src/progress/sk-progress-long-label.html",
+          "packages/styles/src/progress/sk-progress-narrow.html",
+          "packages/styles/src/progress/sk-progress-t10.html",
+          "packages/styles/src/progress/sk-progress-zero.html",
+          "packages/styles/src/progress/sk-progress.css"
+        ]
+      },
+      "form": "styles-only",
+      "selector": ".sk-progress",
+      "paths": {
+        "stylesCss": "packages/styles/src/progress/sk-progress.css",
+        "additionalStylesCss": [],
+        "elementTs": null,
+        "elementMarkupTs": null,
+        "staticMarkup": [
+          "packages/styles/src/progress/sk-progress-compact.html",
+          "packages/styles/src/progress/sk-progress-complete.html",
+          "packages/styles/src/progress/sk-progress-forced-colors.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-compact.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-forced-colors.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-long-label.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-narrow.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-with-meta.html",
+          "packages/styles/src/progress/sk-progress-indeterminate.html",
+          "packages/styles/src/progress/sk-progress-large-total.html",
+          "packages/styles/src/progress/sk-progress-long-label.html",
+          "packages/styles/src/progress/sk-progress-narrow.html",
+          "packages/styles/src/progress/sk-progress-t10.html",
+          "packages/styles/src/progress/sk-progress-zero.html"
+        ],
+        "storySources": [
+          "packages/styles/src/progress/sk-progress-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/progress/sk-progress.css",
+        "elementExport": null
+      },
+      "tokenClosure": [
+        "--sk-border-default",
+        "--sk-color-yellow",
+        "--sk-fg-default",
+        "--sk-fg-muted",
+        "--sk-font-mono",
+        "--sk-font-sans",
+        "--sk-motion-duration-slow",
+        "--sk-motion-ease-in-out",
+        "--sk-radius-pill",
+        "--sk-space-1",
+        "--sk-space-2",
+        "--sk-surface-input",
+        "--sk-text-sm",
+        "--sk-text-xs"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/styles/src/progress/sk-progress-html.stories.ts",
+            "storyId": "primitives-skprogress-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/progress/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-progress-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/styles/src/progress/sk-progress-html.stories.ts",
+            "storyId": "primitives-skprogress-html--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/progress/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-progress-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/styles/src/progress/sk-progress-html.stories.ts",
+            "storyId": "primitives-skprogress-html--narrow",
+            "exportName": "Narrow"
+          },
+          "visualTestId": "desktop-v2/progress/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-progress-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "indeterminate",
+          "story": {
+            "sourcePath": "packages/styles/src/progress/sk-progress-html.stories.ts",
+            "storyId": "primitives-skprogress-html--indeterminate",
+            "exportName": "Indeterminate"
+          },
+          "visualTestId": "desktop-v2/progress/indeterminate",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-progress-indeterminate-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "Progress indicators are display-only and have no authored hover treatment.",
+        "focus": "Progress indicators expose no family-owned focusable control.",
+        "active": "Progress indicators expose no interactive pressed state.",
+        "disabled": "Progress indicators have no disabled state or disabled styling."
+      }
+    },
+    {
+      "id": "segmented-choice",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/segmented-choice/sk-segmented-choice-all-disabled.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-default.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-five-items.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-long-labels.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-no-selection.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-one-disabled.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-second-selected.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-third-selected.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-two-items.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice.css"
+        ]
+      },
+      "form": "styles-only",
+      "selector": ".sk-segmented-choice",
+      "paths": {
+        "stylesCss": "packages/styles/src/segmented-choice/sk-segmented-choice.css",
+        "additionalStylesCss": [],
+        "elementTs": null,
+        "elementMarkupTs": null,
+        "staticMarkup": [
+          "packages/styles/src/segmented-choice/sk-segmented-choice-all-disabled.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-default.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-five-items.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-long-labels.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-no-selection.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-one-disabled.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-second-selected.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-third-selected.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-two-items.html"
+        ],
+        "storySources": [
+          "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/segmented-choice/sk-segmented-choice.css",
+        "elementExport": null
+      },
+      "tokenClosure": [
+        "--sk-bg-pill",
+        "--sk-border-default",
+        "--sk-border-focus",
+        "--sk-border-strong",
+        "--sk-border-width-1",
+        "--sk-border-width-2",
+        "--sk-border-width-4",
+        "--sk-fg-body",
+        "--sk-fg-muted",
+        "--sk-font-sans",
+        "--sk-radius-sm",
+        "--sk-space-1",
+        "--sk-space-10",
+        "--sk-space-2",
+        "--sk-space-4",
+        "--sk-space-5",
+        "--sk-surface-input",
+        "--sk-surface-muted",
+        "--sk-text-sm",
+        "--sk-weight-medium",
+        "--sk-weight-normal",
+        "--sk-weight-semibold"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts",
+            "storyId": "components-sksegmentedchoice-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/segmented-choice/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts",
+            "storyId": "components-sksegmentedchoice-html--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/segmented-choice/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts",
+            "storyId": "components-sksegmentedchoice-html--narrow",
+            "exportName": "Narrow"
+          },
+          "visualTestId": "desktop-v2/segmented-choice/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "hover",
+          "story": {
+            "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts",
+            "storyId": "components-sksegmentedchoice-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/segmented-choice/hover",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-hover-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "hover",
+            "selector": ".sk-segmented-choice__item:not(:disabled)"
+          }
+        },
+        {
+          "id": "focus",
+          "story": {
+            "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts",
+            "storyId": "components-sksegmentedchoice-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/segmented-choice/focus",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-focus-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "focus",
+            "selector": ".sk-segmented-choice__item:not(:disabled)"
+          }
+        },
+        {
+          "id": "active",
+          "story": {
+            "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts",
+            "storyId": "components-sksegmentedchoice-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/segmented-choice/active",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-active-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "active",
+            "selector": ".sk-segmented-choice__item:not(:disabled)"
+          }
+        },
+        {
+          "id": "disabled",
+          "story": {
+            "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts",
+            "storyId": "components-sksegmentedchoice-html--one-disabled",
+            "exportName": "OneDisabled"
+          },
+          "visualTestId": "desktop-v2/segmented-choice/disabled",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-disabled-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "disabled",
+            "selector": ".sk-segmented-choice__item:disabled"
+          }
+        },
+        {
+          "id": "selected",
+          "story": {
+            "sourcePath": "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts",
+            "storyId": "components-sksegmentedchoice-html--second-selected",
+            "exportName": "SecondSelected"
+          },
+          "visualTestId": "desktop-v2/segmented-choice/selected",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-segmented-choice-selected-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {}
+    },
+    {
+      "id": "status-indicator",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/status-indicator/sk-status-indicator.stories.ts",
+          "packages/elements/src/status-indicator/sk-status-indicator.ts",
+          "packages/styles/src/status-indicator/sk-status-indicator.css"
+        ]
+      },
+      "form": "element-backed",
+      "selector": "sk-status-indicator",
+      "paths": {
+        "stylesCss": "packages/styles/src/status-indicator/sk-status-indicator.css",
+        "additionalStylesCss": [],
+        "elementTs": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+        "elementMarkupTs": null,
+        "staticMarkup": [],
+        "storySources": [
+          "packages/elements/src/status-indicator/sk-status-indicator.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/status-indicator/sk-status-indicator.css",
+        "elementExport": "SkStatusIndicator"
+      },
+      "tokenClosure": [
+        "--sk-border-width-1",
+        "--sk-border-width-2",
+        "--sk-fg-body",
+        "--sk-fg-muted",
+        "--sk-font-sans",
+        "--sk-motion-duration-slow",
+        "--sk-motion-ease-in-out",
+        "--sk-on-tint-butter",
+        "--sk-on-tint-lilac",
+        "--sk-on-tint-mint",
+        "--sk-on-tint-rose",
+        "--sk-on-tint-sky",
+        "--sk-space-1",
+        "--sk-space-2",
+        "--sk-text-sm"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/elements/src/status-indicator/sk-status-indicator.stories.ts",
+            "storyId": "elements-skstatusindicator--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/status-indicator/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/elements/src/status-indicator/sk-status-indicator.stories.ts",
+            "storyId": "elements-skstatusindicator--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/status-indicator/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-light-mode-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 6 },
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/elements/src/status-indicator/sk-status-indicator.stories.ts",
+            "storyId": "elements-skstatusindicator--long-text",
+            "exportName": "LongText"
+          },
+          "visualTestId": "desktop-v2/status-indicator/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "all-tones",
+          "story": {
+            "sourcePath": "packages/elements/src/status-indicator/sk-status-indicator.stories.ts",
+            "storyId": "elements-skstatusindicator--all-tones",
+            "exportName": "AllTones"
+          },
+          "visualTestId": "desktop-v2/status-indicator/all-tones",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-all-tones-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 6 },
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "pulsing",
+          "story": {
+            "sourcePath": "packages/elements/src/status-indicator/sk-status-indicator.stories.ts",
+            "storyId": "elements-skstatusindicator--pulsing-states",
+            "exportName": "PulsingStates"
+          },
+          "visualTestId": "desktop-v2/status-indicator/pulsing",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-pulsing-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 3 },
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "Status indicators are display-only and have no authored hover treatment.",
+        "focus": "Status indicators expose no family-owned focusable control.",
+        "active": "Status indicators expose no interactive pressed state.",
+        "disabled": "Status indicators have no disabled state or disabled styling."
+      }
+    },
+    {
+      "id": "workflow-board",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/workflow-board/sk-workflow-board-all-empty.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-fifty-items.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-fitting.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-html.stories.ts",
+          "packages/styles/src/workflow-board/sk-workflow-board-long-labels-and-items.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-one-empty-lane.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-populated.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-single-lane-narrow.html",
+          "packages/styles/src/workflow-board/sk-workflow-board.css"
+        ]
+      },
+      "form": "styles-only",
+      "selector": ".sk-workflow-board",
+      "paths": {
+        "stylesCss": "packages/styles/src/workflow-board/sk-workflow-board.css",
+        "additionalStylesCss": [],
+        "elementTs": null,
+        "elementMarkupTs": null,
+        "staticMarkup": [
+          "packages/styles/src/workflow-board/sk-workflow-board-all-empty.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-fifty-items.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-fitting.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-long-labels-and-items.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-one-empty-lane.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-populated.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-single-lane-narrow.html"
+        ],
+        "storySources": [
+          "packages/styles/src/workflow-board/sk-workflow-board-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/workflow-board/sk-workflow-board.css",
+        "elementExport": null
+      },
+      "tokenClosure": [
+        "--sk-border-focus",
+        "--sk-border-width-2",
+        "--sk-border-width-4",
+        "--sk-fg-body",
+        "--sk-font-sans",
+        "--sk-layout-workflow-lane-min-inline-size",
+        "--sk-radius-md",
+        "--sk-space-1",
+        "--sk-space-3",
+        "--sk-space-4"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-html.stories.ts",
+            "storyId": "primitives-skworkflowboard-html--populated",
+            "exportName": "Populated"
+          },
+          "visualTestId": "desktop-v2/workflow-board/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-html.stories.ts",
+            "storyId": "primitives-skworkflowboard-html--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/workflow-board/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-html.stories.ts",
+            "storyId": "primitives-skworkflowboard-html--single-lane-narrow",
+            "exportName": "SingleLaneNarrow"
+          },
+          "visualTestId": "desktop-v2/workflow-board/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "focus",
+          "story": {
+            "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-html.stories.ts",
+            "storyId": "primitives-skworkflowboard-html--populated",
+            "exportName": "Populated"
+          },
+          "visualTestId": "desktop-v2/workflow-board/focus",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-focus-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "interaction": {
+            "type": "focus",
+            "selector": ".sk-workflow-board__scroller"
+          }
+        },
+        {
+          "id": "empty",
+          "story": {
+            "sourcePath": "packages/styles/src/workflow-board/sk-workflow-board-html.stories.ts",
+            "storyId": "primitives-skworkflowboard-html--all-empty",
+            "exportName": "AllEmpty"
+          },
+          "visualTestId": "desktop-v2/workflow-board/empty",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-board-empty-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "The board provides horizontal overflow focus but no authored hover treatment.",
+        "active": "The board has no authored pressed (:active) state.",
+        "disabled": "The board has no disabled state or disabled styling."
+      }
+    },
+    {
+      "id": "workflow-lane",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/workflow-lane/sk-workflow-lane-default.html",
+          "packages/styles/src/workflow-lane/sk-workflow-lane-empty.html",
+          "packages/styles/src/workflow-lane/sk-workflow-lane-html.stories.ts",
+          "packages/styles/src/workflow-lane/sk-workflow-lane.css"
+        ]
+      },
+      "form": "styles-only",
+      "selector": ".sk-workflow-lane",
+      "paths": {
+        "stylesCss": "packages/styles/src/workflow-lane/sk-workflow-lane.css",
+        "additionalStylesCss": [],
+        "elementTs": null,
+        "elementMarkupTs": null,
+        "staticMarkup": [
+          "packages/styles/src/workflow-lane/sk-workflow-lane-default.html",
+          "packages/styles/src/workflow-lane/sk-workflow-lane-empty.html"
+        ],
+        "storySources": [
+          "packages/styles/src/workflow-lane/sk-workflow-lane-html.stories.ts"
+        ]
+      },
+      "publicEntries": {
+        "stylesCss": "@spec-kitty/styles/workflow-lane/sk-workflow-lane.css",
+        "elementExport": null
+      },
+      "tokenClosure": [
+        "--sk-border-default",
+        "--sk-border-width-1",
+        "--sk-fg-body",
+        "--sk-fg-default",
+        "--sk-font-mono",
+        "--sk-font-sans",
+        "--sk-layout-workflow-lane-min-inline-size",
+        "--sk-radius-md",
+        "--sk-radius-pill",
+        "--sk-space-1",
+        "--sk-space-2",
+        "--sk-space-3",
+        "--sk-space-4",
+        "--sk-space-6",
+        "--sk-surface-card",
+        "--sk-surface-pill",
+        "--sk-text-base",
+        "--sk-text-sm",
+        "--sk-text-xs",
+        "--sk-weight-medium",
+        "--sk-weight-semibold"
+      ],
+      "requiredStates": [
+        {
+          "id": "default-dark",
+          "story": {
+            "sourcePath": "packages/styles/src/workflow-lane/sk-workflow-lane-html.stories.ts",
+            "storyId": "primitives-skworkflowlane-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/workflow-lane/default-dark",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-lane-default-dark-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "light-mode",
+          "story": {
+            "sourcePath": "packages/styles/src/workflow-lane/sk-workflow-lane-html.stories.ts",
+            "storyId": "primitives-skworkflowlane-html--light-mode",
+            "exportName": "LightMode"
+          },
+          "visualTestId": "desktop-v2/workflow-lane/light-mode",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-lane-light-mode-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "id": "responsive-narrow",
+          "story": {
+            "sourcePath": "packages/styles/src/workflow-lane/sk-workflow-lane-html.stories.ts",
+            "storyId": "primitives-skworkflowlane-html--default",
+            "exportName": "Default"
+          },
+          "visualTestId": "desktop-v2/workflow-lane/responsive-narrow",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-lane-responsive-narrow-chromium-linux.png",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        {
+          "id": "empty",
+          "story": {
+            "sourcePath": "packages/styles/src/workflow-lane/sk-workflow-lane-html.stories.ts",
+            "storyId": "primitives-skworkflowlane-html--empty",
+            "exportName": "Empty"
+          },
+          "visualTestId": "desktop-v2/workflow-lane/empty",
+          "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-workflow-lane-empty-chromium-linux.png",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ],
+      "nonApplicableStates": {
+        "hover": "Workflow lanes are layout containers and have no authored hover treatment.",
+        "focus": "Workflow lanes expose no family-owned focusable control.",
+        "active": "Workflow lanes expose no interactive pressed state.",
+        "disabled": "Workflow lanes have no disabled state or disabled styling."
+      }
+    }
+  ]
+}

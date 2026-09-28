@@ -1,0 +1,49 @@
+{
+  "sourceSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+  "firstExport": "/tmp/d1-stage-b-wp01.t4u3xU/export-a",
+  "secondExport": "/tmp/d1-stage-b-wp01.t4u3xU/export-b",
+  "retainedArtifact": "handoffs/desktop-v2/6f4cfdda95ed910ebb57dfdf01878012e98f2627/artifact/",
+  "preservedComparisonCopy": "/tmp/d1-stage-b-wp01.t4u3xU/export-a",
+  "exportCommands": [
+    "node scripts/export-desktop-v2-handoff.mjs --source-sha 6f4cfdda95ed910ebb57dfdf01878012e98f2627 --output /tmp/d1-stage-b-wp01.t4u3xU/export-a",
+    "node scripts/export-desktop-v2-handoff.mjs --source-sha 6f4cfdda95ed910ebb57dfdf01878012e98f2627 --output /tmp/d1-stage-b-wp01.t4u3xU/export-b"
+  ],
+  "loggedReproductionPair": {
+    "commands": [
+      "node scripts/export-desktop-v2-handoff.mjs --source-sha 6f4cfdda95ed910ebb57dfdf01878012e98f2627 --output /tmp/d1-stage-b-wp01.t4u3xU/export-c",
+      "node scripts/export-desktop-v2-handoff.mjs --source-sha 6f4cfdda95ed910ebb57dfdf01878012e98f2627 --output /tmp/d1-stage-b-wp01.t4u3xU/export-d"
+    ],
+    "rawOutputLogs": [
+      "reports/logs/export-c.log",
+      "reports/logs/export-d.log"
+    ],
+    "eachReportedPayloadFiles": 180,
+    "eachReportedArtifactDigest": "26329fb7eecc0d19b662819b45de1eadd311656ce0838af8127e8df9cf8a5c59",
+    "comparisons": [
+      {"command": "diff -qr /tmp/d1-stage-b-wp01.t4u3xU/export-c /tmp/d1-stage-b-wp01.t4u3xU/export-d", "exitCode": 0, "result": "no differences"},
+      {"command": "diff -qr /tmp/d1-stage-b-wp01.t4u3xU/export-a /tmp/d1-stage-b-wp01.t4u3xU/export-c", "exitCode": 0, "result": "no differences"},
+      {"command": "diff -qr /tmp/d1-stage-b-wp01.t4u3xU/export-a /tmp/d1-stage-b-wp01.t4u3xU/export-d", "exitCode": 0, "result": "no differences"}
+    ]
+  },
+  "byteComparison": {
+    "command": "diff -qr /tmp/d1-stage-b-wp01.t4u3xU/export-a /tmp/d1-stage-b-wp01.t4u3xU/export-b",
+    "exitCode": 0,
+    "output": "no differences",
+    "regularFilesCompared": 182,
+    "payloadFiles": 180,
+    "normalizedFileListSha256": "22d49d8557e4f1d20737405c4209a5ddff514fd58d4df8ab025149990aaaf0ff"
+  },
+  "strictArtifactRootEntries": [
+    "contract",
+    "manifest.json",
+    "payload"
+  ],
+  "artifactDigestAlgorithm": "sha256-path-size-content-v1",
+  "artifactDigest": "26329fb7eecc0d19b662819b45de1eadd311656ce0838af8127e8df9cf8a5c59",
+  "independentPins": {
+    "sourceSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+    "artifactDigest": "26329fb7eecc0d19b662819b45de1eadd311656ce0838af8127e8df9cf8a5c59",
+    "capturedFrom": "stdout of the first fresh exporter invocation, outside the detached artifact",
+    "recordedOutsideArtifactAt": "reports/export-comparison.json"
+  }
+}

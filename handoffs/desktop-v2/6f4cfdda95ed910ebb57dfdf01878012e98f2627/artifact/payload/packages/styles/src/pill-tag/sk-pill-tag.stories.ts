@@ -1,0 +1,141 @@
+import './sk-pill-tag.css';
+import type { Meta, StoryObj } from '@storybook/web-components';
+import {
+  SkPillTagHTML,
+  SkPillTagGreenHTML,
+  SkPillTagPurpleHTML,
+  SkPillTagBreakingHTML,
+  SkPillTagYellowHTML,
+  SkPillTagEyebrowHTML,
+  SkPillTagStatusNeutralHTML,
+  SkPillTagStatusInfoHTML,
+  SkPillTagStatusSuccessHTML,
+  SkPillTagStatusAttentionHTML,
+  SkPillTagStatusDangerHTML,
+  SkPillTagStatusRecoveryHTML,
+} from './index';
+
+/**
+ * Renders from the GENERATED exports (ADR-10 §3).
+ *
+ * Until #79 this file imported `SkTagHTML(label, variant)` and `SkEyebrowPillHTML(label)` —
+ * hand-written builder FUNCTIONS in the styles layer, over two class families that shared a
+ * directory. The markup is now authored once in
+ * `packages/elements/src/pill-tag/sk-pill-tag.markup.ts` and generated from there, and the
+ * eyebrow is a shape modifier of the same component rather than a second one.
+ *
+ * `label()` THROWS when the marker is absent, because `String.replace` with a string pattern
+ * returns its input UNCHANGED on no match — renaming the placeholder would otherwise render
+ * every tag as "Label" with no error.
+ */
+const MARKER = '>Label<';
+
+const label = (markup: string, text: string) => {
+  if (!markup.includes(MARKER)) {
+    throw new Error(
+      `sk-pill-tag story: generated markup no longer contains ${JSON.stringify(MARKER)} — ` +
+        `label() would have silently returned it unchanged. Update MARKER alongside ` +
+        `pillTagStaticHtml()'s default content.`,
+    );
+  }
+  return markup.replace(MARKER, `>${text}<`);
+};
+
+const meta: Meta = {
+  // `(HTML)` IS NOT DECORATION. Every styles-layer story carries it, including the
+  // Primitives/SkCheckBullet (HTML) added by this same batch, and `Elements/SkPillTag` exists
+  // separately — without the marker the two are indistinguishable in the sidebar, which is
+  // exactly the distinction using-components.md tells a reader decides how they consume it.
+  // An earlier revision of this retitle dropped it; two lenses flagged that.
+  title: 'Primitives/SkPillTag (HTML)',
+  tags: ['autodocs'],
+  parameters: {
+    a11y: { disable: false },
+    docs: {
+      description: {
+        component:
+          'Static label primitive. Colour is the `variant` axis and size is the `shape` axis, so a tinted eyebrow is expressible. Non-interactive: no Hover/Focus/Active/Disabled states; the colour variant IS the state.',
+      },
+    },
+  },
+};
+
+export default meta;
+type Story = StoryObj;
+
+export const Default: Story = { render: () => label(SkPillTagHTML, 'v1.0.0') };
+export const Green: Story = { render: () => label(SkPillTagGreenHTML, 'SemVer') };
+export const Purple: Story = { render: () => label(SkPillTagPurpleHTML, 'Skills Pack') };
+export const Breaking: Story = { render: () => label(SkPillTagBreakingHTML, 'Breaking') };
+export const Yellow: Story = { render: () => label(SkPillTagYellowHTML, 'Schema Gate') };
+
+export const AllVariants: Story = {
+  render: () => `
+    <div style="display:flex; gap:var(--sk-space-3); align-items:center; flex-wrap:wrap;">
+      ${label(SkPillTagHTML, 'v1.0.0')}
+      ${label(SkPillTagBreakingHTML, 'Breaking')}
+      ${label(SkPillTagGreenHTML, 'SemVer')}
+      ${label(SkPillTagPurpleHTML, 'Skills Pack')}
+      ${label(SkPillTagYellowHTML, 'Schema Gate')}
+    </div>
+  `,
+};
+
+/**
+ * The eyebrow shape — larger, square-cornered, used as a lead-in above a headline.
+ *
+ * It was `.sk-eyebrow-pill`, a standalone class in this component's own stylesheet that
+ * restated the base rule almost verbatim. #79 folded it into `--eyebrow`, so it now composes
+ * with the colour variants rather than duplicating the base.
+ */
+export const Eyebrow: Story = {
+  render: () => `
+    <div style="display:flex; flex-direction:column; gap:var(--sk-space-3); align-items:flex-start;">
+      ${label(SkPillTagEyebrowHTML, 'For software teams adopting agentic coding')}
+      ${label(SkPillTagEyebrowHTML, 'Open-source CLI quickstart')}
+    </div>
+  `,
+};
+
+/**
+ * The status axis on the NO-JAVASCRIPT path (#302), from the NEWLY GENERATED
+ * `SkPillTagStatus<Tone>HTML` exports — never hand-written markup, mirroring `sk-card`'s own
+ * static status story (`packages/styles/src/card/sk-card-html.stories.ts`). Same six modifiers
+ * the element reflects, from the same generated exports: one authored source behind both
+ * consumption paths.
+ *
+ * No claim is made here about composing into `sk-metric`'s `::part(tag)` annotation — that
+ * `::part()` gap is #314's, not this mission's (C-006/FR-009).
+ */
+const STATUS_FORMS: readonly (readonly [string, string])[] = [
+  [SkPillTagStatusNeutralHTML, 'Not started'],
+  [SkPillTagStatusInfoHTML, 'In review'],
+  [SkPillTagStatusSuccessHTML, 'Active'],
+  [SkPillTagStatusAttentionHTML, 'Needs attention'],
+  [SkPillTagStatusDangerHTML, 'Revoked'],
+  [SkPillTagStatusRecoveryHTML, 'Recovering'],
+];
+
+const statusRow = (light = false) => `
+  <div${light ? ' class="sk-light"' : ''} style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: flex; gap: var(--sk-space-3); flex-wrap: wrap;">
+    ${STATUS_FORMS.map(([markup, body]) => label(markup, body)).join('')}
+  </div>
+`;
+
+export const Statuses: Story = {
+  render: () => statusRow(),
+};
+
+/** `class="sk-light"`, NOT `data-theme="light"` — the attribute form activates nothing (#93). */
+export const LightMode: Story = {
+  parameters: { backgrounds: { default: 'sk-light' } },
+  render: () => `
+    <div class="sk-light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display:flex; gap:var(--sk-space-3); flex-wrap:wrap;">
+      ${label(SkPillTagHTML, 'v1.0.0')}
+      ${label(SkPillTagGreenHTML, 'SemVer')}
+      ${label(SkPillTagPurpleHTML, 'Skills Pack')}
+      ${label(SkPillTagYellowHTML, 'Schema Gate')}
+    </div>
+    ${statusRow(true)}
+  `,
+};

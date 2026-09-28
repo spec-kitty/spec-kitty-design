@@ -1,0 +1,103 @@
+<!-- @spec-kitty/styles — sk-workflow-board (five-lane fitting control) -->
+<!-- At the declared wide viewport this board fits, so the scroller deliberately
+     has no role, accessible-name attribute, or tabindex. -->
+<div class="sk-workflow-board">
+  <h2>Work Packages — wide fitting control</h2>
+  <div class="sk-workflow-board__scroller">
+    <section
+      class="sk-workflow-lane"
+      aria-labelledby="workflow-board-fitting-planned-title"
+    >
+      <header class="sk-workflow-lane__header">
+        <h3
+          class="sk-workflow-lane__title"
+          id="workflow-board-fitting-planned-title"
+        >
+          Planned
+        </h3>
+        <span class="sk-workflow-lane__count" aria-label="1 work package"
+          >1</span
+        >
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Define acceptance evidence</li>
+      </ol>
+    </section>
+    <section
+      class="sk-workflow-lane"
+      aria-labelledby="workflow-board-fitting-doing-title"
+    >
+      <header class="sk-workflow-lane__header">
+        <h3
+          class="sk-workflow-lane__title"
+          id="workflow-board-fitting-doing-title"
+        >
+          Doing
+        </h3>
+        <span class="sk-workflow-lane__count" aria-label="1 work package"
+          >1</span
+        >
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Author native fixtures</li>
+      </ol>
+    </section>
+    <section
+      class="sk-workflow-lane"
+      aria-labelledby="workflow-board-fitting-review-title"
+    >
+      <header class="sk-workflow-lane__header">
+        <h3
+          class="sk-workflow-lane__title"
+          id="workflow-board-fitting-review-title"
+        >
+          In review
+        </h3>
+        <span class="sk-workflow-lane__count" aria-label="1 work package"
+          >1</span
+        >
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Inspect accessibility output</li>
+      </ol>
+    </section>
+    <section
+      class="sk-workflow-lane"
+      aria-labelledby="workflow-board-fitting-approved-title"
+    >
+      <header class="sk-workflow-lane__header">
+        <h3
+          class="sk-workflow-lane__title"
+          id="workflow-board-fitting-approved-title"
+        >
+          Approved
+        </h3>
+        <span class="sk-workflow-lane__count" aria-label="1 work package"
+          >1</span
+        >
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Confirm generated exports</li>
+      </ol>
+    </section>
+    <section
+      class="sk-workflow-lane"
+      aria-labelledby="workflow-board-fitting-done-title"
+    >
+      <header class="sk-workflow-lane__header">
+        <h3
+          class="sk-workflow-lane__title"
+          id="workflow-board-fitting-done-title"
+        >
+          Done
+        </h3>
+        <span class="sk-workflow-lane__count" aria-label="1 work package"
+          >1</span
+        >
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Record implementation research</li>
+      </ol>
+    </section>
+  </div>
+</div>

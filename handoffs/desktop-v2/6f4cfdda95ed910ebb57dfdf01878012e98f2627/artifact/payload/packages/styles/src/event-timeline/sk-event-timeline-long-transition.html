@@ -1,0 +1,25 @@
+<!-- @spec-kitty/styles — long transition and metadata remain attached -->
+<ol class="sk-event-timeline">
+  <li class="sk-event-timeline__item">
+    <p class="sk-event-timeline__summary">
+      1. A deliberately long consumer-authored transition summary wraps without
+      moving its actor, timestamp, or supporting detail into another event
+    </p>
+    <p class="sk-event-timeline__metadata">
+      <span>Consumer-supplied actor with a long name</span
+      ><time datetime="2026-09-07T11:45:00Z"
+        >Consumer-formatted time at 11:45 UTC</time
+      >
+    </p>
+    <p class="sk-event-timeline__content">
+      Optional supporting content stays inside this list item.
+    </p>
+  </li>
+  <li class="sk-event-timeline__item">
+    <p class="sk-event-timeline__summary">2. Next transition</p>
+    <p class="sk-event-timeline__metadata">
+      <span>Another actor</span
+      ><time datetime="2026-09-07T12:00:00Z">12:00 UTC</time>
+    </p>
+  </li>
+</ol>

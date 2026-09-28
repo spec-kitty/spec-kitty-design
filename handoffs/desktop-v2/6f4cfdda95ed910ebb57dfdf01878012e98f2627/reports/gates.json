@@ -1,0 +1,151 @@
+{
+  "sourceSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+  "ciRun": {
+    "id": 36457894235,
+    "workflow": "CI Quality",
+    "event": "push",
+    "branch": "develop",
+    "headSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+    "conclusion": "success",
+    "url": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36457894235"
+  },
+  "gates": [
+    {
+      "category": "lint",
+      "command": "npm run quality:all",
+      "testedSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+      "execution": "clean detached S worktree at /tmp/d1-stage-b-wp01.t4u3xU/s-worktree",
+      "exitCode": 0,
+      "result": "Nx lint succeeded for 8 projects; stylelint succeeded; HTMLHint scanned 163 files with no errors. ESLint reported existing warnings but zero errors.",
+      "positiveCounts": {
+        "lintProjects": 8,
+        "htmlFiles": 163,
+        "errors": 0,
+        "warnings": 59
+      },
+      "outputPath": "reports/logs/quality-all.log"
+    },
+    {
+      "category": "tests",
+      "commands": [
+        "npm test",
+        "npx vitest run --project node --reporter=default tests/node/desktop-v2-contract.test.ts tests/node/desktop-v2-handoff.test.ts"
+      ],
+      "testedSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+      "fullSuite": {
+        "actualCiCommand": "npm test (vitest run)",
+        "log": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36457894235/job/109048811195",
+        "exitCode": 0,
+        "testFilesPassed": 108,
+        "testsPassed": 1532,
+        "suiteFloor": {
+          "node": 136,
+          "chromium": 698,
+          "webkit": 698,
+          "skipped": 0
+        }
+      },
+      "focusedContractAndExportTests": {
+        "actualCommand": "npx vitest run --project node --reporter=default tests/node/desktop-v2-contract.test.ts tests/node/desktop-v2-handoff.test.ts",
+        "execution": "clean detached S worktree",
+        "exitCode": 0,
+        "testFilesPassed": 2,
+        "testsPassed": 26,
+        "outputPath": "reports/logs/focused-contract-handoff-vitest.log"
+      },
+      "outputPath": {
+        "fullSuite": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36457894235/job/109048811195",
+        "focusedContractAndExportTests": "reports/logs/focused-contract-handoff-vitest.log"
+      }
+    },
+    {
+      "category": "package-build",
+      "command": "npx nx run-many --target=build --projects=tokens,styles,elements,react",
+      "testedSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+      "execution": "clean detached S worktree",
+      "exitCode": 0,
+      "result": "Nx successfully built tokens, styles and elements, including the elements CSS dependency. React has no build target because its generated src is the package artifact; generated React wrapper consistency is checked by the exact-S lint CI run.",
+      "positiveCounts": {
+        "buildProjects": 3,
+        "reactBuildTarget": false
+      },
+      "ciLog": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36457894235/job/109048811157",
+      "outputPath": "reports/logs/package-build.log"
+    },
+    {
+      "category": "storybook",
+      "command": "npx nx run storybook:storybook:build",
+      "testedSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+      "execution": "clean detached S worktree",
+      "exitCode": 0,
+      "result": "Storybook build completed successfully. The exact-S CI helper also passed its Storybook target and the contract check for 22 families/110 states.",
+      "contractCheck": "node scripts/check-desktop-v2-contract.mjs",
+      "ciLog": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36457894235/job/109048912004",
+      "outputPath": "reports/logs/storybook-build.log"
+    },
+    {
+      "category": "axe",
+      "command": "node scripts/run-axe-storybook.js",
+      "testedSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+      "execution": "exact-S CI",
+      "exitCode": 0,
+      "storiesTested": 810,
+      "storyOutcomes": {
+        "passed": 810,
+        "failed": 0,
+        "unloaded": 0,
+        "renderWaitSatisfied": 810,
+        "renderWaitTimedOut": 0,
+        "wcag21AaViolations": 0
+      },
+      "historicalCount": 810,
+      "delta": 0,
+      "ciLog": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36457894235/job/109049374667",
+      "rawCiLogArchive": "GitHub Actions job log at ciLog",
+      "perStoryOutcomes": "reports/axe-story-results.tsv"
+    },
+    {
+      "category": "visual",
+      "command": "PW_INCLUDE_VISUAL=1 npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium",
+      "testedSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+      "execution": "exact-S CI",
+      "exitCode": 0,
+      "testsEnumerated": 456,
+      "testsPassed": 456,
+      "testsFailed": 0,
+      "testsSkipped": 0,
+      "historicalCount": 456,
+      "delta": 0,
+      "ciLog": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36457894235/job/109049374784",
+      "snapshotMapping": "reports/visual-mapping.json",
+      "testInventoryLog": "reports/logs/visual-inventory-list.log",
+      "mappingCompleteness": {
+        "desktopV2ContractStatesMapped": 110,
+        "fullSuiteTestIdsEnumerated": 456,
+        "committedSnapshotsInventoried": 485,
+        "fullSuiteTestToSnapshotPairingComplete": false,
+        "gap": "The remaining 346 non-Desktop-V2 test-to-snapshot pairings are not claimed; FR-006 evidence completeness remains open for reviewer disposition."
+      }
+    },
+    {
+      "category": "export",
+      "commands": [
+        "node scripts/export-desktop-v2-handoff.mjs --source-sha 6f4cfdda95ed910ebb57dfdf01878012e98f2627 --output /tmp/d1-stage-b-wp01.t4u3xU/export-a",
+        "node scripts/export-desktop-v2-handoff.mjs --source-sha 6f4cfdda95ed910ebb57dfdf01878012e98f2627 --output /tmp/d1-stage-b-wp01.t4u3xU/export-b"
+      ],
+      "testedSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+      "exitCode": 0,
+      "payloadFiles": 180,
+      "artifactDigest": "26329fb7eecc0d19b662819b45de1eadd311656ce0838af8127e8df9cf8a5c59",
+      "byteComparisonExitCode": 0,
+      "rawOutputLogs": [
+        "reports/logs/export-c.log",
+        "reports/logs/export-d.log"
+      ],
+      "detachedOfflineVerification": "reports/offline-verification.json",
+      "focusedNegativeProbes": "26 exact-S contract/export tests passed",
+      "outputPath": "reports/export-comparison.json"
+    }
+  ],
+  "boundary": "All results here are S-bound. Full-suite visual test-to-snapshot pairing is incomplete as stated in the visual gate record. This report contains no PR-head H result, squad verdict, native acceptance verdict, or claim of K1/K2 compatibility."
+}

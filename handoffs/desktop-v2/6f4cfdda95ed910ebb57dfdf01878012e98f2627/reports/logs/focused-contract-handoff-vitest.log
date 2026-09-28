@@ -1,0 +1,12 @@
+
+ RUN  v4.1.11 /tmp/d1-stage-b-wp01.t4u3xU/s-worktree
+
+ ✓ |node| tests/node/desktop-v2-contract.test.ts (10 tests) 906ms
+     ✓ rights closure preserves Swansea restriction, scoped token provenance, and Falling Sky OFL evidence  688ms
+ ✓ |node| tests/node/desktop-v2-handoff.test.ts (16 tests) 970ms
+
+ Test Files  2 passed (2)
+      Tests  26 passed (26)
+   Start at  20:48:45
+   Duration  1.20s (transform 155ms, setup 0ms, import 189ms, tests 1.88s, environment 0ms)
+

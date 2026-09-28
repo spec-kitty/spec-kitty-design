@@ -1,0 +1,50 @@
+{
+  "sourceSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+  "sourceArtifactDigest": "26329fb7eecc0d19b662819b45de1eadd311656ce0838af8127e8df9cf8a5c59",
+  "detachedArtifactRoot": "/tmp/d1-stage-b-wp01.t4u3xU/detached/artifact",
+  "copiedInput": "only the export artifact root; no sibling reports or producer checkout files",
+  "verifierCopy": "/tmp/d1-stage-b-wp01.t4u3xU/verifier.mjs",
+  "checkoutHidden": true,
+  "networkDisabled": {
+    "tool": "bubblewrap",
+    "flag": "--unshare-net",
+    "mounts": [
+      "--ro-bind / /",
+      "--tmpfs /home/jeroennouws/dev/spec-kitty-design-missions",
+      "--dev-bind /dev /dev",
+      "--proc /proc",
+      "--chdir /tmp"
+    ]
+  },
+  "internalVerification": {
+    "command": "bwrap --unshare-net --ro-bind / / --tmpfs /home/jeroennouws/dev/spec-kitty-design-missions --dev-bind /dev /dev --proc /proc --chdir /tmp node /tmp/d1-stage-b-wp01.t4u3xU/verifier.mjs --artifact /tmp/d1-stage-b-wp01.t4u3xU/detached/artifact --mode internal",
+    "exitCode": 0,
+    "result": "Verified internal-integrity-only: 180 payload files"
+  },
+  "approvedSourceVerification": {
+    "command": "bwrap --unshare-net --ro-bind / / --tmpfs /home/jeroennouws/dev/spec-kitty-design-missions --dev-bind /dev /dev --proc /proc --chdir /tmp node /tmp/d1-stage-b-wp01.t4u3xU/verifier.mjs --artifact /tmp/d1-stage-b-wp01.t4u3xU/detached/artifact --mode approved-source --expected-source-sha 6f4cfdda95ed910ebb57dfdf01878012e98f2627 --expected-artifact-digest 26329fb7eecc0d19b662819b45de1eadd311656ce0838af8127e8df9cf8a5c59",
+    "exitCode": 0,
+    "result": "Verified independently-pinned-source: 180 payload files",
+    "pinSource": "literal S and digest captured from first exporter stdout and stored in this sibling report, not read from the copied artifact"
+  },
+  "negativeProbes": {
+    "evidenceCommand": "npx vitest run --project node --reporter=default tests/node/desktop-v2-contract.test.ts tests/node/desktop-v2-handoff.test.ts",
+    "testedSha": "6f4cfdda95ed910ebb57dfdf01878012e98f2627",
+    "exitCode": 0,
+    "testsPassed": 26,
+    "ordinaryTamper": {
+      "test": "tamper matrix rejects ordinary payload changes in internal and pinned modes by path",
+      "adverseFixtureRejected": true
+    },
+    "coordinatedRehash": {
+      "test": "coordinated rehash is only internally consistent and fails independent pins",
+      "adverseFixtureRejected": true,
+      "internalConsistencyAloneIsInsufficient": true
+    },
+    "pathAndRightsProbes": [
+      "missing, extra, duplicate, case-colliding, traversing and symlinked payload paths",
+      "unresolved redistribution rights and unsafe source paths",
+      "source-contract origin, license, source-path, file-role, family-id and scoped token source-map substitutions"
+    ]
+  }
+}

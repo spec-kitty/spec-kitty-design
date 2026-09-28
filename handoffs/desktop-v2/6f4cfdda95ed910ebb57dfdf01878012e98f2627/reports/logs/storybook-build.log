@@ -1,0 +1,493 @@
+
+ NX   Running target storybook:build for project storybook and 5 tasks it depends on:
+
+
+
+> nx run tokens:build  [existing outputs match the cache, left as is]
+
+
+> nx run styles:build  [existing outputs match the cache, left as is]
+
+
+> nx run elements:css
+
+> node scripts/build-elements-css.mjs
+
+build-elements-css: packages/styles/src/action-row/sk-action-row.css -> packages/elements/src/action-row/sk-action-row.css.js
+build-elements-css: packages/styles/src/app-shell/sk-app-shell.css -> packages/elements/src/app-shell/sk-app-shell.css.js
+build-elements-css: packages/styles/src/bar-chart/sk-bar-chart.css -> packages/elements/src/bar-chart/sk-bar-chart.css.js
+build-elements-css: packages/styles/src/blog-card/sk-blog-card.css -> packages/elements/src/blog-card/sk-blog-card.css.js
+build-elements-css: packages/styles/src/button/sk-button.css -> packages/elements/src/button/sk-button.css.js
+build-elements-css: packages/styles/src/card/sk-card.css -> packages/elements/src/card/sk-card.css.js
+build-elements-css: packages/styles/src/check-bullet/sk-check-bullet.css -> packages/elements/src/check-bullet/sk-check-bullet.css.js
+build-elements-css: packages/styles/src/confirm-dialog/sk-confirm-dialog.css -> packages/elements/src/confirm-dialog/sk-confirm-dialog.css.js
+build-elements-css: packages/styles/src/context-sidebar/sk-context-sidebar.css -> packages/elements/src/context-sidebar/sk-context-sidebar.css.js
+build-elements-css: packages/styles/src/copy-field/sk-copy-field.css -> packages/elements/src/copy-field/sk-copy-field.css.js
+build-elements-css: packages/styles/src/entity-marker/sk-entity-marker.css -> packages/elements/src/entity-marker/sk-entity-marker.css.js
+build-elements-css: packages/styles/src/evidence-chain/sk-evidence-chain.css -> packages/elements/src/evidence-chain/sk-evidence-chain.css.js
+build-elements-css: packages/styles/src/feature-card/sk-feature-card.css -> packages/elements/src/feature-card/sk-feature-card.css.js
+build-elements-css: packages/styles/src/form-input/sk-form-input.css -> packages/elements/src/form-input/sk-form-input.css.js
+build-elements-css: packages/styles/src/form-textarea/sk-form-textarea.css -> packages/elements/src/form-textarea/sk-form-textarea.css.js
+build-elements-css: packages/styles/src/grid/sk-grid.css -> packages/elements/src/grid/sk-grid.css.js
+build-elements-css: packages/styles/src/metric/sk-metric.css -> packages/elements/src/metric/sk-metric.css.js
+build-elements-css: packages/styles/src/nav-pill/sk-nav-pill.css + packages/styles/src/nav-pill/sk-nav-pill-drawer.css -> packages/elements/src/nav-pill/sk-nav-pill.css.js
+build-elements-css: packages/styles/src/notice/sk-notice.css -> packages/elements/src/notice/sk-notice.css.js
+build-elements-css: packages/styles/src/page-header/sk-page-header.css -> packages/elements/src/page-header/sk-page-header.css.js
+build-elements-css: packages/styles/src/personal-rail/sk-personal-rail.css -> packages/elements/src/personal-rail/sk-personal-rail.css.js
+build-elements-css: packages/styles/src/pill-tag/sk-pill-tag.css -> packages/elements/src/pill-tag/sk-pill-tag.css.js
+build-elements-css: packages/styles/src/ribbon-card/sk-ribbon-card.css -> packages/elements/src/ribbon-card/sk-ribbon-card.css.js
+build-elements-css: packages/styles/src/section-banner/sk-section-banner.css -> packages/elements/src/section-banner/sk-section-banner.css.js
+build-elements-css: packages/styles/src/section-header/sk-section-header.css -> packages/elements/src/section-header/sk-section-header.css.js
+build-elements-css: packages/styles/src/site-footer/sk-site-footer.css -> packages/elements/src/site-footer/sk-site-footer.css.js
+build-elements-css: packages/styles/src/status-indicator/sk-status-indicator.css -> packages/elements/src/status-indicator/sk-status-indicator.css.js
+build-elements-css: packages/styles/src/stub/sk-stub.css -> packages/elements/src/stub/sk-stub.css.js
+build-elements-css: packages/styles/src/theme-toggle/sk-theme-toggle.css -> packages/elements/src/theme-toggle/sk-theme-toggle.css.js
+build-elements-css: packages/styles/src/time-series-chart/sk-time-series-chart.css -> packages/elements/src/time-series-chart/sk-time-series-chart.css.js
+build-elements-css: packages/styles/src/transition-matrix/sk-transition-matrix.css -> packages/elements/src/transition-matrix/sk-transition-matrix.css.js
+
+> nx run elements:build  [existing outputs match the cache, left as is]
+
+
+> nx run vite-consumer-fixture:build  [existing outputs match the cache, left as is]
+
+
+> nx run storybook:"storybook:build"  [existing outputs match the cache, left as is]
+
+> storybook build --config-dir apps/storybook/.storybook --output-dir apps/storybook/storybook-static
+
+(node:892793) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+┌  Building storybook v10.6.0
+│
+◇  Cleaning outputDir: apps/storybook/storybook-static
+│
+◇  Loading presets
+│
+◇  Building manager..
+│
+●  Building open services..
+│
+●  Building preview..
+│  Vite vite v7.3.6 building client environment for production...
+│
+●  Copying static files: packages/tokens/assets at
+│  apps/storybook/storybook-static/tokens-assets
+│
+●  Copying static files: packages/elements/dist at
+│  apps/storybook/storybook-static/elements-dist
+│  Vite transforming...
+│  Vite ✓ 433 modules transformed.
+│  Vite rendering chunks...
+│
+●  Copying static files: packages/tokens/dist at
+│  apps/storybook/storybook-static/tokens-dist
+│
+●  Copying static files: fixtures/vite-consumer/dist at
+│  apps/storybook/storybook-static/vite-consumer
+│  Vite computing gzip size...
+│  Vite storybook-static/iframe.html
+│  21.16 kB │ gzip:   6.26 kB
+│  Vite storybook-static/assets/inter-latin-400-normal-C38fXH4l.woff2
+│  23.66 kB
+│  Vite storybook-static/assets/inter-latin-500-normal-Cerq10X2.woff2
+│  24.27 kB
+│  Vite storybook-static/assets/inter-latin-700-normal-Yt3aPRUw.woff2
+│  24.36 kB
+│  Vite storybook-static/assets/inter-latin-800-normal-BYj_oED-.woff2
+│  24.40 kB
+│  Vite storybook-static/assets/inter-latin-600-normal-LgqL8muc.woff2
+│  24.45 kB
+│  Vite storybook-static/assets/inter-latin-ext-400-normal-C1nco2VV.woff2
+│  35.00 kB
+│  Vite storybook-static/assets/inter-latin-ext-500-normal-CV4jyFjo.woff2
+│  36.02 kB
+│  Vite storybook-static/assets/inter-latin-ext-800-normal-DZJjya6U.woff2
+│  36.13 kB
+│  Vite storybook-static/assets/inter-latin-ext-700-normal-Ca8adRJv.woff2
+│  36.24 kB
+│  Vite storybook-static/assets/inter-latin-ext-600-normal-D2bJ5OIk.woff2
+│  36.26 kB
+│  Vite storybook-static/assets/FallingSkyOblique-n5XV-I6a-SO6y.woff2
+│  49.16 kB
+│  Vite storybook-static/assets/FallingSky-JKwK-CY_4nyAm.woff2
+│  50.28 kB
+│  Vite storybook-static/assets/SwanseaBoldItalic-p3Dv-DMND5fGU.ttf
+│  51.68 kB
+│  Vite storybook-static/assets/SwanseaBold-D0ox-gtxHvXRo.ttf
+│  52.34 kB
+│  Vite storybook-static/assets/SwanseaItalic-AwqD-DWVSojzR.ttf
+│  53.29 kB
+│  Vite storybook-static/assets/Swansea-q3pd-C7tm08YK.ttf
+│  53.88 kB
+│  Vite
+│  storybook-static/assets/FallingSkyBlackOblique-j37y-C_ZseTD3.woff2
+│  56.18 kB
+│  Vite storybook-static/assets/FallingSkyBoldOblique-5zmv-BCuU7Hyl.woff2
+│  56.38 kB
+│  Vite
+│  storybook-static/assets/FallingSkyLightOblique-2q3o-CWx9Wtz5.woff2
+│  57.46 kB
+│  Vite
+│  storybook-static/assets/FallingSkyMediumOblique-leLD-Ao5HgxAt.woff2
+│  57.50 kB
+│  Vite storybook-static/assets/FallingSkyBlack-GYXA-CANM5KP_.woff2
+│  57.58 kB
+│  Vite storybook-static/assets/FallingSkyLight-K2EX-J0PJC6lX.woff2
+│  58.73 kB
+│  Vite storybook-static/assets/FallingSkyMedium-ved9-Bm3rKwMs.woff2
+│  58.97 kB
+│  Vite
+│  storybook-static/assets/FallingSkySemiboldOblique-8q7M-BPFagH-2.woff2
+│  59.64 kB
+│  Vite storybook-static/assets/FallingSkyBold-zemL-DHXM78Fe.woff2
+│  59.98 kB
+│  Vite storybook-static/assets/FallingSkySemibold-Bn7B-BUeeuqzM.woff2
+│  60.31 kB
+│  Vite
+│  storybook-static/assets/FallingSkyExtraboldOblique-MwdP-BGNk3vnv.woff2
+│  61.96 kB
+│  Vite storybook-static/assets/FallingSkyExtrabold-redB-ZK0rgkb3.woff2
+│  63.62 kB
+│  Vite
+│  storybook-static/assets/FallingSkyCondensedOblique-leLw-oR_KCfor.otf
+│  125.99 kB
+│  Vite
+│  storybook-static/assets/FallingSkyExtendedOblique-BnYw-Bie3C-eE.otf
+│  127.02 kB
+│  Vite storybook-static/assets/FallingSkyCondensed-9qm2-Bc3fON25.otf
+│  127.29 kB
+│  Vite storybook-static/assets/FallingSkyExtended-RLdE-TuneTAgV.otf
+│  129.93 kB
+│  Vite
+│  storybook-static/assets/FallingSkyBoldplusOblique-yxmV-Bm_-6PCL.otf
+│  141.49 kB
+│  Vite storybook-static/assets/FallingSkyBoldplus-6GZ1-Cnl4zZHT.otf
+│  143.56 kB
+│  Vite
+│  storybook-static/assets/FallingSkyOutlineOblique-RLdV-B2A55BeO.otf
+│  214.01 kB
+│  Vite storybook-static/assets/FallingSkyOutline-1qZ0-CIzBv6BI.otf
+│  215.04 kB
+│  Vite
+│  storybook-static/assets/FallingSkyCondensedOutlineOblique-1qZv-sVY2OQ5w.otf
+│  226.16 kB
+│  Vite
+│  storybook-static/assets/FallingSkyCondensedOutline-n5XO-CtTQJ2CE.otf
+│  227.27 kB
+│  Vite
+│  storybook-static/assets/FallingSkyExtendedOutlineOblique-YBO2-BgK9-IuF.otf
+│  228.16 kB
+│  Vite
+│  storybook-static/assets/FallingSkyExtendedOutline-8qjn-BrK5Y62j.otf
+│  230.30 kB
+│  Vite storybook-static/assets/sk-stub-html-BK78BVag.css
+│  0.31 kB │ gzip:   0.19 kB
+│  Vite storybook-static/assets/sk-grid-BwDHHPCT.css
+│  0.47 kB │ gzip:   0.19 kB
+│  Vite storybook-static/assets/sk-section-banner-html-BjAqgiAa.css
+│  0.66 kB │ gzip:   0.28 kB
+│  Vite storybook-static/assets/sk-check-bullet-html-BWV5IoTd.css
+│  0.74 kB │ gzip:   0.35 kB
+│  Vite storybook-static/assets/sk-feature-card-html--ZhX_SAD.css
+│  1.21 kB │ gzip:   0.44 kB
+│  Vite storybook-static/assets/sk-blog-card-BGk7mFdz.css
+│  1.46 kB │ gzip:   0.51 kB
+│  Vite storybook-static/assets/sk-pill-tag-C9Bqgrwq.css
+│  1.67 kB │ gzip:   0.45 kB
+│  Vite storybook-static/assets/sk-card-D4jHsqGK.css
+│  2.05 kB │ gzip:   0.42 kB
+│  Vite storybook-static/assets/sk-ribbon-card-html-D3nbmVYL.css
+│  2.17 kB │ gzip:   0.59 kB
+│  Vite storybook-static/assets/sk-site-footer-D_87-hox.css
+│  2.43 kB │ gzip:   0.73 kB
+│  Vite storybook-static/assets/sk-action-row-html-CQRNmF7g.css
+│  5.20 kB │ gzip:   1.19 kB
+│  Vite storybook-static/assets/sk-nav-pill-BpzPGJro.css
+│  5.69 kB │ gzip:   1.00 kB
+│  Vite storybook-static/assets/iframe-BK685yu4.css
+│  64.58 kB │ gzip:   9.01 kB
+│  Vite storybook-static/assets/status-tones-DaZcxmeo.js
+│  0.10 kB │ gzip:   0.11 kB
+│  Vite storybook-static/assets/_commonjsHelpers-CqkleIqs.js
+│  0.12 kB │ gzip:   0.13 kB
+│  Vite storybook-static/assets/formatter-L2YTDE3Q-C3_EhDKk.js
+│  0.25 kB │ gzip:   0.21 kB
+│  Vite storybook-static/assets/directive-CwRn8Fwj.js
+│  0.31 kB │ gzip:   0.24 kB
+│  Vite storybook-static/assets/index-Cj_h6yjf.js
+│  0.79 kB │ gzip:   0.21 kB
+│  Vite storybook-static/assets/index-BveyHwCv.js
+│  0.88 kB │ gzip:   0.24 kB
+│  Vite storybook-static/assets/form-control-base-DAoClMZ6.js
+│  0.92 kB │ gzip:   0.43 kB
+│  Vite storybook-static/assets/preload-helper-PPVm8Dsz.js
+│  1.23 kB │ gzip:   0.71 kB
+│  Vite storybook-static/assets/sk-card-CfOqmFR9.js
+│  1.25 kB │ gzip:   0.64 kB
+│  Vite storybook-static/assets/sk-grid-CuqfUd8K.js
+│  1.76 kB │ gzip:   0.78 kB
+│  Vite storybook-static/assets/sk-button-BkvaEzh3.js
+│  1.77 kB │ gzip:   0.82 kB
+│  Vite storybook-static/assets/sk-stub-html.stories-D9xHbKef.js
+│  1.78 kB │ gzip:   0.67 kB
+│  Vite storybook-static/assets/ref-BlsTa_Ju.js
+│  1.87 kB │ gzip:   0.89 kB
+│  Vite storybook-static/assets/sk-context-sidebar-CvfpskI_.js
+│  1.89 kB │ gzip:   0.73 kB
+│  Vite storybook-static/assets/sk-check-bullet-CyRf8zen.js
+│  1.96 kB │ gzip:   0.92 kB
+│  Vite storybook-static/assets/sk-workflow-lane-html.stories-w3BAj9vX.js
+│  2.26 kB │ gzip:   0.79 kB
+│  Vite storybook-static/assets/sk-stub.stories-IaGeOjDo.js
+│  2.38 kB │ gzip:   1.14 kB
+│  Vite storybook-static/assets/sk-card.css-CN8CvTkQ.js
+│  2.47 kB │ gzip:   0.55 kB
+│  Vite storybook-static/assets/sk-personal-rail-GbAqQv6L.js
+│  2.59 kB │ gzip:   0.85 kB
+│  Vite storybook-static/assets/sk-nav-pill.stories-Db5yeNtp.js
+│  2.62 kB │ gzip:   1.17 kB
+│  Vite storybook-static/assets/sk-section-header-C3x6AnFN.js
+│  2.94 kB │ gzip:   1.07 kB
+│  Vite storybook-static/assets/sk-context-sidebar.stories-D2_YzylD.js
+│  3.18 kB │ gzip:   1.06 kB
+│  Vite storybook-static/assets/sk-skip-link-html.stories-FtHsJdpl.js
+│  3.22 kB │ gzip:   1.49 kB
+│  Vite storybook-static/assets/sk-metric-CHvsMcsX.js
+│  3.36 kB │ gzip:   1.18 kB
+│  Vite storybook-static/assets/sk-facts-html.stories-CkaNKLOK.js
+│  3.40 kB │ gzip:   0.92 kB
+│  Vite storybook-static/assets/sk-empty-state-html.stories-R5k50c_6.js
+│  3.43 kB │ gzip:   1.08 kB
+│  Vite storybook-static/assets/sk-personal-rail.stories-B0XRL3jx.js
+│  3.46 kB │ gzip:   1.08 kB
+│  Vite storybook-static/assets/sk-section-header.stories-Bhq3aIsP.js
+│  3.47 kB │ gzip:   1.12 kB
+│  Vite storybook-static/assets/sk-pill-tag-2Cv8wHjW.js
+│  3.63 kB │ gzip:   1.17 kB
+│  Vite storybook-static/assets/sk-status-indicator-Ddgoqbez.js
+│  3.72 kB │ gzip:   1.34 kB
+│  Vite storybook-static/assets/sk-metric.stories-BWJXs7tX.js
+│  3.75 kB │ gzip:   0.95 kB
+│  Vite storybook-static/assets/sk-check-bullet-html.stories-5SVf5Q9d.js
+│  4.24 kB │ gzip:   1.22 kB
+│  Vite storybook-static/assets/sk-grid.stories-qPrKNalB.js
+│  4.40 kB │ gzip:   1.37 kB
+│  Vite storybook-static/assets/sk-theme-toggle.stories-C5SvJwuR.js
+│  4.45 kB │ gzip:   1.51 kB
+│  Vite storybook-static/assets/sk-button.markup-zkoyf-lW.js
+│  4.47 kB │ gzip:   1.35 kB
+│  Vite storybook-static/assets/sk-disclosure-html.stories-NBXuPUFX.js
+│  4.64 kB │ gzip:   1.79 kB
+│  Vite storybook-static/assets/sk-page-header-Bz_H68zC.js
+│  4.83 kB │ gzip:   1.38 kB
+│  Vite storybook-static/assets/sk-grid.stories-Btw5QNOS.js
+│  4.84 kB │ gzip:   1.66 kB
+│  Vite storybook-static/assets/sk-prose-html.stories-BCcpyzGf.js
+│  4.88 kB │ gzip:   1.70 kB
+│  Vite storybook-static/assets/sk-site-footer.stories-C9ch7KXK.js
+│  5.03 kB │ gzip:   1.72 kB
+│  Vite
+│  storybook-static/assets/sk-section-banner-html.stories-1JLKfXSY.js
+│  5.16 kB │ gzip:   1.59 kB
+│  Vite storybook-static/assets/sk-evidence-chain-D4LOagTQ.js
+│  5.36 kB │ gzip:   1.95 kB
+│  Vite storybook-static/assets/sk-pill-tag.stories-CzZIgx95.js
+│  5.41 kB │ gzip:   1.74 kB
+│  Vite storybook-static/assets/sk-breadcrumbs-html.stories-qsw7azPl.js
+│  5.59 kB │ gzip:   1.07 kB
+│  Vite storybook-static/assets/sk-evidence-chain.stories-KTmCCT4v.js
+│  5.60 kB │ gzip:   1.74 kB
+│  Vite storybook-static/assets/sk-site-footer-CW-gwrAk.js
+│  5.67 kB │ gzip:   1.80 kB
+│  Vite storybook-static/assets/sk-confirm-dialog-CaQ1aFLX.js
+│  5.74 kB │ gzip:   2.12 kB
+│  Vite storybook-static/assets/sk-copy-field-DXcR0jwv.js
+│  5.97 kB │ gzip:   2.35 kB
+│  Vite storybook-static/assets/sk-ribbon-card-html.stories-DDwOmucG.js
+│  6.06 kB │ gzip:   1.77 kB
+│  Vite storybook-static/assets/sk-status-indicator.stories-BUTJGVEs.js
+│  6.15 kB │ gzip:   1.47 kB
+│  Vite storybook-static/assets/sk-blog-card.stories-Cgqnk_yp.js
+│  6.19 kB │ gzip:   1.75 kB
+│  Vite storybook-static/assets/sk-notice-BPcOUcbn.js
+│  6.19 kB │ gzip:   2.11 kB
+│  Vite storybook-static/assets/sk-form-field-html.stories-d1yyW3Tt.js
+│  6.24 kB │ gzip:   1.44 kB
+│  Vite storybook-static/assets/getting-started-BEo6mSQx.js
+│  6.24 kB │ gzip:   2.04 kB
+│  Vite storybook-static/assets/sk-section-nav-html.stories-DTrXD1iM.js
+│  6.26 kB │ gzip:   1.61 kB
+│  Vite storybook-static/assets/sk-check-bullet.stories-D754JQeR.js
+│  6.42 kB │ gzip:   1.83 kB
+│  Vite storybook-static/assets/sk-section-banner.stories-DpssnIpD.js
+│  6.45 kB │ gzip:   1.85 kB
+│  Vite storybook-static/assets/sk-form-input-BGvyHgkS.js
+│  6.53 kB │ gzip:   2.29 kB
+│  Vite storybook-static/assets/sk-button-html.stories-Dzk6V1Ns.js
+│  6.86 kB │ gzip:   2.17 kB
+│  Vite storybook-static/assets/sk-card-html.stories-AdrbEeZe.js
+│  6.90 kB │ gzip:   2.03 kB
+│  Vite storybook-static/assets/sk-data-table-html.stories-XP8ryI9j.js
+│  7.06 kB │ gzip:   2.01 kB
+│  Vite storybook-static/assets/sk-bar-chart-BjP4NTds.js
+│  7.16 kB │ gzip:   2.46 kB
+│  Vite storybook-static/assets/sk-blog-card.stories-B-PaQ0Go.js
+│  7.58 kB │ gzip:   2.57 kB
+│  Vite
+│  storybook-static/assets/sk-segmented-choice-html.stories-Cq7SOnf0.js
+│  7.64 kB │ gzip:   1.41 kB
+│  Vite storybook-static/assets/sk-form-select-html.stories-BD1UChbe.js
+│  7.78 kB │ gzip:   1.90 kB
+│  Vite storybook-static/assets/sk-bar-chart.stories-CGHw00Rw.js
+│  7.83 kB │ gzip:   2.28 kB
+│  Vite storybook-static/assets/sk-nav-pill.stories-Wv6OQSCs.js
+│  8.01 kB │ gzip:   2.00 kB
+│  Vite storybook-static/assets/sk-form-input.stories-CNaYB4hE.js
+│  8.12 kB │ gzip:   2.27 kB
+│  Vite storybook-static/assets/sk-feature-card.stories-BHnutiRY.js
+│  8.12 kB │ gzip:   2.62 kB
+│  Vite storybook-static/assets/sk-ribbon-card.stories-Dz99oqJX.js
+│  8.67 kB │ gzip:   2.54 kB
+│  Vite storybook-static/assets/sk-public-header-html.stories-DIGDKmF1.js
+│  8.78 kB │ gzip:   1.94 kB
+│  Vite storybook-static/assets/sk-nav-pill-B1TBMv6j.js
+│  8.98 kB │ gzip:   2.25 kB
+│  Vite storybook-static/assets/sk-progress-html.stories-DQ6BsuZd.js
+│  9.32 kB │ gzip:   2.07 kB
+│  Vite
+│  storybook-static/assets/theme-story-environment.fixture-BBU-6i3b.js
+│  9.47 kB │ gzip:   3.43 kB
+│  Vite storybook-static/assets/sk-form-textarea.stories-D-W9lgo_.js
+│  9.75 kB │ gzip:   3.02 kB
+│  Vite storybook-static/assets/sk-boundary-page-html.stories-CrgmHXSf.js
+│  9.90 kB │ gzip:   2.41 kB
+│  Vite storybook-static/assets/sk-entity-marker.stories-Baa4r3LC.js
+│  10.00 kB │ gzip:   1.88 kB
+│  Vite storybook-static/assets/sk-app-shell-DK2zEbwx.js
+│  10.12 kB │ gzip:   3.06 kB
+│  Vite storybook-static/assets/sk-action-row-Dqvbch50.js
+│  10.19 kB │ gzip:   2.85 kB
+│  Vite storybook-static/assets/sk-transition-matrix.stories-D8Be0X8U.js
+│  10.59 kB │ gzip:   2.62 kB
+│  Vite storybook-static/assets/spacing-1_66W3Cj.js
+│  11.11 kB │ gzip:   2.13 kB
+│  Vite storybook-static/assets/sk-copy-field.stories-Dklm8f1J.js
+│  11.13 kB │ gzip:   3.25 kB
+│  Vite storybook-static/assets/sk-site-footer.stories-BDQFG2lz.js
+│  11.30 kB │ gzip:   2.99 kB
+│  Vite storybook-static/assets/sk-time-series-chart.stories-pvGjgIJ8.js
+│  12.01 kB │ gzip:   3.64 kB
+│  Vite storybook-static/assets/sk-feature-card-html.stories-D9Ys3G-e.js
+│  12.05 kB │ gzip:   2.43 kB
+│  Vite storybook-static/assets/cli-auth.stories-Cek9g0si.js
+│  12.28 kB │ gzip:   3.36 kB
+│  Vite storybook-static/assets/colours-COma9_dQ.js
+│  13.31 kB │ gzip:   1.85 kB
+│  Vite storybook-static/assets/sk-page-header.stories-CmAtleJe.js
+│  13.59 kB │ gzip:   3.47 kB
+│  Vite storybook-static/assets/brand-CJwIRSGb.js
+│  13.78 kB │ gzip:   2.72 kB
+│  Vite storybook-static/assets/sk-app-shell.stories-Bj-iGE9E.js
+│  13.79 kB │ gzip:   3.13 kB
+│  Vite
+│  storybook-static/assets/sk-checkbox-choice-group-html.stories-DKag9TQH.js
+│  14.01 kB │ gzip:   2.44 kB
+│  Vite storybook-static/assets/sk-confirm-dialog.stories-DAf3vDI0.js
+│  14.07 kB │ gzip:   4.02 kB
+│  Vite storybook-static/assets/operational-status.stories-DE77OS9F.js
+│  14.41 kB │ gzip:   4.44 kB
+│  Vite
+│  storybook-static/assets/sk-radio-choice-group-html.stories-CgGnA_kT.js
+│  14.94 kB │ gzip:   2.15 kB
+│  Vite storybook-static/assets/sk-collection-html.stories-UduAYyGx.js
+│  15.68 kB │ gzip:   2.51 kB
+│  Vite storybook-static/assets/sk-transition-matrix-zqpE3YxW.js
+│  15.78 kB │ gzip:   4.17 kB
+│  Vite storybook-static/assets/sk-pill-tag.stories-C0V6iGF6.js
+│  16.21 kB │ gzip:   4.31 kB
+│  Vite storybook-static/assets/sk-button.stories-fOBVw81G.js
+│  17.21 kB │ gzip:   3.81 kB
+│  Vite storybook-static/assets/sk-action-row.stories-DrYr34TU.js
+│  18.07 kB │ gzip:   3.55 kB
+│  Vite storybook-static/assets/sk-card.stories-BhpT23EP.js
+│  18.19 kB │ gzip:   5.24 kB
+│  Vite storybook-static/assets/sk-time-series-chart-DcJw-69k.js
+│  19.42 kB │ gzip:   5.20 kB
+│  Vite storybook-static/assets/sk-action-row-html.stories-B8JqgzDt.js
+│  20.09 kB │ gzip:   4.85 kB
+│  Vite storybook-static/assets/typography-BDjY1M0Z.js
+│  20.79 kB │ gzip:   3.25 kB
+│  Vite storybook-static/assets/sk-context-nav-html.stories-CvaIifGD.js
+│  21.33 kB │ gzip:   3.28 kB
+│  Vite
+│  storybook-static/assets/sk-workflow-board-html.stories-DKt_L1Hx.js
+│  22.45 kB │ gzip:   2.99 kB
+│  Vite storybook-static/assets/sk-notice.stories-OcsMakO-.js
+│  22.68 kB │ gzip:   7.02 kB
+│  Vite
+│  storybook-static/assets/sk-event-timeline-html.stories-CS8y15rx.js
+│  25.54 kB │ gzip:   3.26 kB
+│  Vite storybook-static/assets/work-package-views.stories-DXIsLO6D.js
+│  27.16 kB │ gzip:   7.50 kB
+│  Vite storybook-static/vite-inject-mocker-entry.js
+│  28.11 kB │ gzip:   9.82 kB
+│  Vite storybook-static/assets/matchers-JIUQ3HVY-N4FjKbka.js
+│  29.23 kB │ gzip:  10.05 kB
+│  Vite storybook-static/assets/Color-6AOWCN3U-BoePwSek.js
+│  30.14 kB │ gzip:  11.45 kB
+│  Vite storybook-static/assets/account-front-door.stories-CIlvodTz.js
+│  31.05 kB │ gzip:   7.36 kB
+│  Vite storybook-static/assets/mission-reading.stories-bHYVJYrx.js
+│  31.59 kB │ gzip:   7.68 kB
+│  Vite storybook-static/assets/WithTooltip-CDUNV5IS-BP78rnJI.js
+│  33.10 kB │ gzip:  11.66 kB
+│  Vite
+│  storybook-static/assets/mission-kanban-ten-lane.stories-C5MLsAsU.js
+│  35.73 kB │ gzip:   8.79 kB
+│  Vite storybook-static/assets/repository-dossier.stories-Iro9ZiOW.js
+│  36.73 kB │ gzip:   8.69 kB
+│  Vite storybook-static/assets/team-overview.stories-BI1hV3Dq.js
+│  38.01 kB │ gzip:   9.73 kB
+│  Vite storybook-static/assets/mission-kanban.stories-DJ1brRfI.js
+│  40.05 kB │ gzip:   8.92 kB
+│  Vite storybook-static/assets/connectors.stories-IcWRMj2P.js
+│  48.66 kB │ gzip:  11.55 kB
+│  Vite storybook-static/assets/work-explorer.stories-DOCbg18X.js
+│  51.33 kB │ gzip:  11.66 kB
+│  Vite storybook-static/assets/syntaxhighlighter-4REYKNEV-DOvmOfIT.js
+│  77.96 kB │ gzip:  27.27 kB
+│  Vite storybook-static/assets/DocsRenderer-JROSPFPF-DhKsgUxK.js
+│  182.17 kB │ gzip:  57.53 kB
+│  Vite storybook-static/assets/axe-DhiiCVSs.js
+│  600.43 kB │ gzip: 165.54 kB
+│  Vite storybook-static/assets/blocks-X3Ock2bg.js
+│  852.22 kB │ gzip: 272.99 kB
+│  Vite storybook-static/assets/iframe-Dhg4z8lR.js
+│  918.69 kB │ gzip: 261.22 kB
+│
+▲  Vite
+│  (!) Some chunks are larger than 500 kB after minification. Consider:
+│  - Using dynamic import() to code-split the application
+│  - Use build.rollupOptions.output.manualChunks to improve chunking:
+│  ]8;;https://rollupjs.org/configuration-options/#output-manualchunkshttps://rollupjs.org/configuration-options/#output-manualchunks]8;;
+│  - Adjust chunk size limit for this warning via
+│  build.chunkSizeWarningLimit.
+│  Vite ✓ built in 5.12s
+│
+●  Storybook collects completely anonymous usage telemetry. We use it to
+│  shape Storybook's roadmap and prioritize features. You can learn more,
+│  including how to opt out, at ]8;;https://storybook.js.org/telemetryhttps://storybook.js.org/telemetry]8;;
+│
+◇  Output directory:
+│  /tmp/d1-stage-b-wp01.t4u3xU/s-worktree/apps/storybook/storybook-static
+│
+└  Storybook build completed successfully
+
+
+
+
+ NX   Successfully ran target storybook:build for project storybook and 5 tasks it depends on
+
+Nx read the output from the cache instead of running the command for 5 out of 6 tasks.
+
