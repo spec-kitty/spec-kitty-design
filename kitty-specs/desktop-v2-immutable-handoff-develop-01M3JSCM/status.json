@@ -1,7 +1,7 @@
 {
-  "event_count": 1,
-  "last_event_id": "01M3JTM2S919XQT53813TKPNTH",
-  "materialized_at": "2026-09-28T01:38:41.577160+00:00",
+  "event_count": 2,
+  "last_event_id": "01M3JTM2W34GP2FYX6ZMWSXS5P",
+  "materialized_at": "2026-09-28T01:38:41.667028+00:00",
   "mission_number": "",
   "mission_slug": "desktop-v2-immutable-handoff-develop-01M3JSCM",
   "mission_type": "software-dev",
@@ -14,7 +14,7 @@
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 1
+    "planned": 2
   },
   "work_packages": {
     "WP01": {
@@ -23,6 +23,13 @@
       "lane": "planned",
       "last_event_id": "01M3JTM2S919XQT53813TKPNTH",
       "last_transition_at": "2026-09-28T01:38:41.577160+00:00"
+    },
+    "WP02": {
+      "actor": "finalize-tasks",
+      "force_count": 0,
+      "lane": "planned",
+      "last_event_id": "01M3JTM2W34GP2FYX6ZMWSXS5P",
+      "last_transition_at": "2026-09-28T01:38:41.667028+00:00"
     }
   }
 }
