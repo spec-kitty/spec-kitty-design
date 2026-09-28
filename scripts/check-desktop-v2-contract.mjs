@@ -82,6 +82,7 @@ const EXPECTED_FORMS = Object.freeze({
 const EXPECTED_VISUAL_SPEC = 'apps/storybook/src/tests/visual.spec.ts';
 const EXPECTED_SNAPSHOT_DIR = 'apps/storybook/src/tests/visual.spec.ts-snapshots';
 const EXPECTED_TOKEN_CSS = 'packages/tokens/src/tokens.css';
+const REPOSITORY_LICENSE_PATH = 'LICENSE';
 
 function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -157,6 +158,34 @@ function findFontRights(fontRights, familyName) {
     entry.match === familyName ||
     (entry.matchType === 'prefix' && familyName.startsWith(entry.match)),
   );
+}
+
+function validateFamilySourceRights(familyId, sourceRights, authoredPaths, context, errors) {
+  if (!isRecord(sourceRights)) {
+    errors.push(`${familyId} source rights must document the repository LICENSE and MIT basis`);
+    return;
+  }
+
+  if (sourceRights.status !== 'cleared' || sourceRights.spdx !== 'MIT' || sourceRights.basis !== 'repository-license') {
+    errors.push(`${familyId} source rights must be cleared under MIT via the repository LICENSE`);
+  }
+
+  const evidencePaths = Array.isArray(sourceRights.evidencePaths) ? [...sourceRights.evidencePaths].sort() : [];
+  if (JSON.stringify(evidencePaths) !== JSON.stringify([REPOSITORY_LICENSE_PATH])) {
+    errors.push(`${familyId} source rights must cite the root LICENSE evidence path`);
+  }
+  if (!context.repositoryLicenseIsMit) {
+    errors.push('repository LICENSE is missing or does not provide the MIT license basis');
+  }
+  for (const evidencePath of evidencePaths) {
+    if (!context.fileExists(evidencePath)) errors.push(`${familyId} source-rights evidence path is missing: ${evidencePath}`);
+  }
+
+  const expectedCoveredPaths = [...new Set(authoredPaths)].sort();
+  const coveredPaths = Array.isArray(sourceRights.coveredPaths) ? [...sourceRights.coveredPaths].sort() : [];
+  if (JSON.stringify(coveredPaths) !== JSON.stringify(expectedCoveredPaths)) {
+    errors.push(`${familyId} source rights coverage must map every inventoried authored source path`);
+  }
 }
 
 function validateSharedAssets(contract, context, errors) {
@@ -275,7 +304,17 @@ export function checkDesktopV2Contract(contract, options = {}) {
   const repoRoot = options.repoRoot ?? process.cwd();
   const fileExists = options.fileExists ?? ((relativePath) => existsSync(path.join(repoRoot, relativePath)));
   const errors = [];
-  const context = { repoRoot, fileExists, requireExportable: options.requireExportable === true };
+  const repositoryLicense = fileExists(REPOSITORY_LICENSE_PATH)
+    ? readText(repoRoot, REPOSITORY_LICENSE_PATH)
+    : '';
+  const repositoryLicenseIsMit = /^MIT License\b/m.test(repositoryLicense) &&
+    /Permission is hereby granted, free of charge, to any person obtaining a copy/i.test(repositoryLicense);
+  const context = {
+    repoRoot,
+    fileExists,
+    requireExportable: options.requireExportable === true,
+    repositoryLicenseIsMit,
+  };
 
   if (!isRecord(contract)) return ['contract root must be a JSON object'];
   const banned = collectBannedFields(contract);
@@ -423,6 +462,7 @@ export function checkDesktopV2Contract(contract, options = {}) {
       ...(family.paths.staticMarkup ?? []),
       ...(family.paths.storySources ?? []),
     ].filter((entry) => typeof entry === 'string');
+    validateFamilySourceRights(familyId, family.sourceRights, authoredPaths, context, errors);
     for (const sourcePath of authoredPaths) {
       if (!fileExists(sourcePath)) errors.push(`${familyId} source path is missing: ${sourcePath}`);
       if (sourcePath.startsWith('/') || sourcePath.split('/').includes('..')) {

@@ -20,6 +20,13 @@ const sourceContract = JSON.parse(readFileSync(contractPath, 'utf8')) as {
     }>;
     paths: { stylesCss: string };
     publicEntries: { stylesCss: string };
+    sourceRights?: {
+      status: string;
+      spdx: string;
+      basis?: string;
+      evidencePaths: string[];
+      coveredPaths: string[];
+    };
   }>;
 };
 
@@ -68,6 +75,20 @@ describe('Desktop V2 source contract', () => {
       relativePath === absentPath ? false : existsSync(resolve(repoRoot, relativePath));
 
     expect(check(sourceContract, { fileExists }).join('\n')).toMatch(/story.*missing|missing.*story/i);
+  });
+
+  it('probes removal of the family repository-MIT basis or LICENSE evidence path', () => {
+    const missingBasis = copyContract();
+    delete missingBasis.families[0].sourceRights?.basis;
+    expect(check(missingBasis).join('\n')).toMatch(/action-row.*source rights.*MIT.*repository LICENSE/i);
+
+    const missingEvidence = copyContract();
+    missingEvidence.families[0].sourceRights!.evidencePaths = [];
+    expect(check(missingEvidence).join('\n')).toMatch(/action-row.*source rights.*LICENSE/i);
+
+    const incompleteCoverage = copyContract();
+    incompleteCoverage.families[0].sourceRights!.coveredPaths.pop();
+    expect(check(incompleteCoverage).join('\n')).toMatch(/action-row.*source rights coverage.*authored/i);
   });
 
   it('rejects absent public/source paths and stale visual-test or snapshot mappings', () => {

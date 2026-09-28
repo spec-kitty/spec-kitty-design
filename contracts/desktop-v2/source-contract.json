@@ -218,6 +218,20 @@
   "families": [
     {
       "id": "action-row",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/action-row/sk-action-row.markup.ts",
+          "packages/elements/src/action-row/sk-action-row.stories.ts",
+          "packages/elements/src/action-row/sk-action-row.ts",
+          "packages/styles/src/action-row/sk-action-row-html.stories.ts",
+          "packages/styles/src/action-row/sk-action-row.css",
+          "packages/styles/src/action-row/static/sk-action-row.static.css"
+        ]
+      },
       "form": "element-backed",
       "selector": "sk-action-row",
       "paths": {
@@ -383,6 +397,18 @@
     },
     {
       "id": "app-shell",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/app-shell/sk-app-shell.stories.ts",
+          "packages/elements/src/app-shell/sk-app-shell.ts",
+          "packages/styles/src/app-shell/sk-app-shell.css",
+          "packages/styles/src/app-shell/static/sk-app-shell.static.css"
+        ]
+      },
       "form": "element-backed",
       "selector": "sk-app-shell",
       "paths": {
@@ -512,6 +538,19 @@
     },
     {
       "id": "button",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/button/sk-button.markup.ts",
+          "packages/elements/src/button/sk-button.stories.ts",
+          "packages/elements/src/button/sk-button.ts",
+          "packages/styles/src/button/sk-button-html.stories.ts",
+          "packages/styles/src/button/sk-button.css"
+        ]
+      },
       "form": "element-backed",
       "selector": "sk-button",
       "paths": {
@@ -677,6 +716,19 @@
     },
     {
       "id": "card",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/card/sk-card.markup.ts",
+          "packages/elements/src/card/sk-card.stories.ts",
+          "packages/elements/src/card/sk-card.ts",
+          "packages/styles/src/card/sk-card-html.stories.ts",
+          "packages/styles/src/card/sk-card.css"
+        ]
+      },
       "form": "element-backed",
       "selector": "sk-card",
       "paths": {
@@ -793,6 +845,17 @@
     },
     {
       "id": "context-sidebar",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/context-sidebar/sk-context-sidebar.stories.ts",
+          "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+          "packages/styles/src/context-sidebar/sk-context-sidebar.css"
+        ]
+      },
       "form": "element-backed",
       "selector": "sk-context-sidebar",
       "paths": {
@@ -870,6 +933,19 @@
     },
     {
       "id": "data-table",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/data-table/sk-data-table-default.html",
+          "packages/styles/src/data-table/sk-data-table-html.stories.ts",
+          "packages/styles/src/data-table/sk-data-table-narrow-scrollable.html",
+          "packages/styles/src/data-table/sk-data-table-sticky-header.html",
+          "packages/styles/src/data-table/sk-data-table.css"
+        ]
+      },
       "form": "styles-only",
       "selector": ".sk-data-table",
       "paths": {
@@ -1007,6 +1083,20 @@
     },
     {
       "id": "disclosure",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/disclosure/sk-disclosure-closed.html",
+          "packages/styles/src/disclosure/sk-disclosure-html.stories.ts",
+          "packages/styles/src/disclosure/sk-disclosure-long-body.html",
+          "packages/styles/src/disclosure/sk-disclosure-nested.html",
+          "packages/styles/src/disclosure/sk-disclosure-open.html",
+          "packages/styles/src/disclosure/sk-disclosure.css"
+        ]
+      },
       "form": "styles-only",
       "selector": ".sk-disclosure",
       "paths": {
@@ -1131,6 +1221,19 @@
     },
     {
       "id": "empty-state",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/empty-state/sk-empty-state-html.stories.ts",
+          "packages/styles/src/empty-state/sk-empty-state-inline.html",
+          "packages/styles/src/empty-state/sk-empty-state-with-action.html",
+          "packages/styles/src/empty-state/sk-empty-state-without-action.html",
+          "packages/styles/src/empty-state/sk-empty-state.css"
+        ]
+      },
       "form": "styles-only",
       "selector": ".sk-empty-state",
       "paths": {
@@ -1245,6 +1348,33 @@
     },
     {
       "id": "event-timeline",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-default.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-degraded.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-forced-colors.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-leading-marker.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-linked.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-long-content.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-narrow.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-one-event.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-compact-twenty-events.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-forced-colors.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-html.stories.ts",
+          "packages/styles/src/event-timeline/sk-event-timeline-long-transition.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-narrow.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-one-event.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-twenty-events.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-two-events.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-unavailable-retention.html",
+          "packages/styles/src/event-timeline/sk-event-timeline-verified-marker.html",
+          "packages/styles/src/event-timeline/sk-event-timeline.css"
+        ]
+      },
       "form": "styles-only",
       "selector": ".sk-event-timeline",
       "paths": {
@@ -1371,6 +1501,21 @@
     },
     {
       "id": "facts",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/facts/sk-facts-compact.html",
+          "packages/styles/src/facts/sk-facts-empty-value.html",
+          "packages/styles/src/facts/sk-facts-html.stories.ts",
+          "packages/styles/src/facts/sk-facts-long-value.html",
+          "packages/styles/src/facts/sk-facts-two-col.html",
+          "packages/styles/src/facts/sk-facts.css",
+          "packages/styles/src/facts/sk-facts.html"
+        ]
+      },
       "form": "styles-only",
       "selector": ".sk-facts",
       "paths": {
@@ -1471,6 +1616,23 @@
     },
     {
       "id": "form-select",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/form-select/sk-form-select-compact.html",
+          "packages/styles/src/form-select/sk-form-select-disabled.html",
+          "packages/styles/src/form-select/sk-form-select-html.stories.ts",
+          "packages/styles/src/form-select/sk-form-select-long-options.html",
+          "packages/styles/src/form-select/sk-form-select-optgroups.html",
+          "packages/styles/src/form-select/sk-form-select-required-invalid.html",
+          "packages/styles/src/form-select/sk-form-select-t10-lane.html",
+          "packages/styles/src/form-select/sk-form-select-t12-filters.html",
+          "packages/styles/src/form-select/sk-form-select.css"
+        ]
+      },
       "form": "styles-only",
       "selector": ".sk-form-select",
       "paths": {
@@ -1613,6 +1775,17 @@
     },
     {
       "id": "metric",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/metric/sk-metric.stories.ts",
+          "packages/elements/src/metric/sk-metric.ts",
+          "packages/styles/src/metric/sk-metric.css"
+        ]
+      },
       "form": "element-backed",
       "selector": "sk-metric",
       "paths": {
@@ -1715,6 +1888,19 @@
     },
     {
       "id": "nav-pill",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/nav-pill/sk-nav-pill.stories.ts",
+          "packages/elements/src/nav-pill/sk-nav-pill.ts",
+          "packages/styles/src/nav-pill/sk-nav-pill-drawer.css",
+          "packages/styles/src/nav-pill/sk-nav-pill.css",
+          "packages/styles/src/nav-pill/sk-nav-pill.stories.ts"
+        ]
+      },
       "form": "element-backed",
       "selector": ".sk-nav-pill",
       "paths": {
@@ -1871,6 +2057,17 @@
     },
     {
       "id": "notice",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/notice/sk-notice.stories.ts",
+          "packages/elements/src/notice/sk-notice.ts",
+          "packages/styles/src/notice/sk-notice.css"
+        ]
+      },
       "form": "element-backed",
       "selector": "sk-notice",
       "paths": {
@@ -2005,6 +2202,18 @@
     },
     {
       "id": "page-header",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/page-header/sk-page-header.stories.ts",
+          "packages/elements/src/page-header/sk-page-header.ts",
+          "packages/styles/src/page-header/sk-page-header.css",
+          "packages/styles/src/page-header/static/sk-page-header.static.css"
+        ]
+      },
       "form": "element-backed",
       "selector": "sk-page-header",
       "paths": {
@@ -2120,6 +2329,17 @@
     },
     {
       "id": "personal-rail",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/personal-rail/sk-personal-rail.stories.ts",
+          "packages/elements/src/personal-rail/sk-personal-rail.ts",
+          "packages/styles/src/personal-rail/sk-personal-rail.css"
+        ]
+      },
       "form": "element-backed",
       "selector": "sk-personal-rail",
       "paths": {
@@ -2198,6 +2418,19 @@
     },
     {
       "id": "pill-tag",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/pill-tag/sk-pill-tag.markup.ts",
+          "packages/elements/src/pill-tag/sk-pill-tag.stories.ts",
+          "packages/elements/src/pill-tag/sk-pill-tag.ts",
+          "packages/styles/src/pill-tag/sk-pill-tag.css",
+          "packages/styles/src/pill-tag/sk-pill-tag.stories.ts"
+        ]
+      },
       "form": "element-backed",
       "selector": "sk-pill-tag",
       "paths": {
@@ -2317,6 +2550,30 @@
     },
     {
       "id": "progress",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/progress/sk-progress-compact.html",
+          "packages/styles/src/progress/sk-progress-complete.html",
+          "packages/styles/src/progress/sk-progress-forced-colors.html",
+          "packages/styles/src/progress/sk-progress-html.stories.ts",
+          "packages/styles/src/progress/sk-progress-indeterminate-compact.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-forced-colors.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-long-label.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-narrow.html",
+          "packages/styles/src/progress/sk-progress-indeterminate-with-meta.html",
+          "packages/styles/src/progress/sk-progress-indeterminate.html",
+          "packages/styles/src/progress/sk-progress-large-total.html",
+          "packages/styles/src/progress/sk-progress-long-label.html",
+          "packages/styles/src/progress/sk-progress-narrow.html",
+          "packages/styles/src/progress/sk-progress-t10.html",
+          "packages/styles/src/progress/sk-progress-zero.html",
+          "packages/styles/src/progress/sk-progress.css"
+        ]
+      },
       "form": "styles-only",
       "selector": ".sk-progress",
       "paths": {
@@ -2431,6 +2688,25 @@
     },
     {
       "id": "segmented-choice",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/segmented-choice/sk-segmented-choice-all-disabled.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-default.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-five-items.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-long-labels.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-no-selection.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-one-disabled.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-second-selected.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-third-selected.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice-two-items.html",
+          "packages/styles/src/segmented-choice/sk-segmented-choice.css"
+        ]
+      },
       "form": "styles-only",
       "selector": ".sk-segmented-choice",
       "paths": {
@@ -2615,6 +2891,17 @@
     },
     {
       "id": "status-indicator",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/elements/src/status-indicator/sk-status-indicator.stories.ts",
+          "packages/elements/src/status-indicator/sk-status-indicator.ts",
+          "packages/styles/src/status-indicator/sk-status-indicator.css"
+        ]
+      },
       "form": "element-backed",
       "selector": "sk-status-indicator",
       "paths": {
@@ -2729,6 +3016,23 @@
     },
     {
       "id": "workflow-board",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/workflow-board/sk-workflow-board-all-empty.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-fifty-items.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-fitting.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-html.stories.ts",
+          "packages/styles/src/workflow-board/sk-workflow-board-long-labels-and-items.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-one-empty-lane.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-populated.html",
+          "packages/styles/src/workflow-board/sk-workflow-board-single-lane-narrow.html",
+          "packages/styles/src/workflow-board/sk-workflow-board.css"
+        ]
+      },
       "form": "styles-only",
       "selector": ".sk-workflow-board",
       "paths": {
@@ -2849,6 +3153,18 @@
     },
     {
       "id": "workflow-lane",
+      "sourceRights": {
+        "status": "cleared",
+        "spdx": "MIT",
+        "basis": "repository-license",
+        "evidencePaths": ["LICENSE"],
+        "coveredPaths": [
+          "packages/styles/src/workflow-lane/sk-workflow-lane-default.html",
+          "packages/styles/src/workflow-lane/sk-workflow-lane-empty.html",
+          "packages/styles/src/workflow-lane/sk-workflow-lane-html.stories.ts",
+          "packages/styles/src/workflow-lane/sk-workflow-lane.css"
+        ]
+      },
       "form": "styles-only",
       "selector": ".sk-workflow-lane",
       "paths": {
