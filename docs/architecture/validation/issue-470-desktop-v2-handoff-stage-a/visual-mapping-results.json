@@ -1,10 +1,12 @@
 {
   "schemaVersion": 1,
   "date": "2026-09-28",
-  "fullVisualRunHead": "f6873680ed3ff8f5ff5e939a5339e2ba436c6ce7",
-  "visualCiRun": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36400118254",
-  "visualCiJobId": 108856403060,
-  "contractMappingValidatedHead": "f6873680ed3ff8f5ff5e939a5339e2ba436c6ce7",
+  "testedHead": "0f2b46d1ec5ed69ae207f47675e47ef3a955692f",
+  "fullVisualRunHead": "0f2b46d1ec5ed69ae207f47675e47ef3a955692f",
+  "visualCiRun": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/36410886176",
+  "visualCiJobId": 108891170006,
+  "visualCiConclusion": "success",
+  "contractMappingValidatedHead": "0f2b46d1ec5ed69ae207f47675e47ef3a955692f",
   "contractMappingValidationCommand": "node scripts/check-desktop-v2-contract.mjs",
   "contractMappingValidationResult": "pass",
   "exactReviewedHeadEvidence": true,
@@ -21,6 +23,23 @@
   ],
   "visualTestIdFormat": "desktop-v2/{family}/{state}",
   "snapshotPathFormat": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-{family}-{state}-chromium-linux.png",
+  "aggregateCaptureCorrection": {
+    "ciCorrectedPngCount": 10,
+    "priorDesktopV2PngRefreshCount": 45,
+    "currentVisualRunValidatedAllPngs": true,
+    "states": [
+      { "familyId": "button", "stateId": "light-mode", "expectedMatchCount": 8 },
+      { "familyId": "card", "stateId": "light-mode", "expectedMatchCount": 8 },
+      { "familyId": "notice", "stateId": "light-mode", "expectedMatchCount": 6 },
+      { "familyId": "notice", "stateId": "focus", "expectedMatchCount": 2 },
+      { "familyId": "notice", "stateId": "dismissible", "expectedMatchCount": 2 },
+      { "familyId": "pill-tag", "stateId": "light-mode", "expectedMatchCount": 6 },
+      { "familyId": "pill-tag", "stateId": "variants", "expectedMatchCount": 5 },
+      { "familyId": "status-indicator", "stateId": "light-mode", "expectedMatchCount": 6 },
+      { "familyId": "status-indicator", "stateId": "all-tones", "expectedMatchCount": 6 },
+      { "familyId": "status-indicator", "stateId": "pulsing", "expectedMatchCount": 3 }
+    ]
+  },
   "contractMapping": [
     [
       "action-row",
