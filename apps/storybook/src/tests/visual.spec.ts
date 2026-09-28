@@ -3,6 +3,74 @@ import { test, expect, type Locator, type Page } from '@playwright/test';
 
 test.setTimeout(60000);
 
+type DesktopV2Interaction =
+  | { type: 'hover' | 'focus' | 'active' | 'disabled'; selector: string }
+  | { type: 'story-state'; selector: null };
+type DesktopV2State = {
+  story: { storyId: string };
+  visualTestId: string;
+  snapshotPath: string;
+  viewport: { width: number; height: number };
+  interaction?: DesktopV2Interaction;
+};
+type DesktopV2Family = { selector: string; requiredStates: DesktopV2State[] };
+
+const desktopV2Contract = JSON.parse(readFileSync('contracts/desktop-v2/source-contract.json', 'utf8')) as {
+  families: DesktopV2Family[];
+};
+
+const desktopV2Cases = desktopV2Contract.families.flatMap((family) =>
+  family.requiredStates.map((state) => ({ family, state })),
+);
+
+for (const { family, state } of desktopV2Cases) {
+  const visualTestId = state.visualTestId;
+  const snapshotName = state.snapshotPath.split('/').at(-1)!.replace(/-chromium-linux\.png$/, '.png');
+
+  test(visualTestId, async ({ page }) => {
+    await page.setViewportSize(state.viewport);
+    await page.goto(`/iframe.html?id=${state.story.storyId}&viewMode=story`);
+    const target = page.locator(family.selector).first();
+    await target.waitFor({ state: 'visible', timeout: 20000 });
+
+    let pointerIsDown = false;
+    try {
+      if (state.interaction) {
+        if (state.interaction.type !== 'story-state') {
+          const interactionTarget = page.locator(state.interaction.selector).first();
+          switch (state.interaction.type) {
+            case 'hover':
+              await interactionTarget.hover();
+              break;
+            case 'focus':
+              await interactionTarget.focus();
+              await expect(interactionTarget).toBeFocused();
+              break;
+            case 'active':
+              await interactionTarget.hover();
+              await page.mouse.down();
+              pointerIsDown = true;
+              break;
+            case 'disabled':
+              await expect(interactionTarget).toBeDisabled();
+              break;
+            default:
+              throw new Error(`Unsupported Desktop V2 interaction ${state.interaction.type}`);
+          }
+        }
+      }
+
+      await expect.soft(target).toHaveScreenshot(snapshotName, {
+        threshold: 0.02,
+        maxDiffPixelRatio: 0.02,
+        animations: 'disabled',
+      });
+    } finally {
+      if (pointerIsDown) await page.mouse.up();
+    }
+  });
+}
+
 // #69 re-baselined all three of these, and fixed two mechanisms that made the old
 // baselines meaningless.
 //
