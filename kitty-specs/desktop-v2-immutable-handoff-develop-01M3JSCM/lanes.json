@@ -17,12 +17,14 @@
         "packages/elements/src/**",
         "packages/styles/src/**",
         "packages/tokens/src/**",
-        "scripts/check-desktop-v2-contract.mjs"
+        "scripts/check-desktop-v2-contract.mjs",
+        "tests/node/desktop-v2-contract.test.ts"
       ],
       "predicted_surfaces": [
         "api",
         "app-shell",
-        "artifact-rendering"
+        "artifact-rendering",
+        "legacy-cleanup"
       ],
       "depends_on_lanes": [],
       "parallel_group": 0
@@ -48,8 +50,8 @@
       "parallel_group": 1
     }
   ],
-  "computed_at": "2026-09-28T01:40:08.711787+00:00",
+  "computed_at": "2026-09-28T02:03:11.967114+00:00",
   "computed_from": "dependency_graph+ownership",
   "planning_artifact_wps": [],
-  "planning_commit_sha": "2c9c12109073e48ff1f9a5fd7c871e0304aa3c8d"
+  "planning_commit_sha": "857a8b6b36be358502e2c31de6cc5de075cc02db"
 }
