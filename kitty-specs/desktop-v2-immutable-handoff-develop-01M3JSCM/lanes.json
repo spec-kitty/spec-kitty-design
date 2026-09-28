@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "mission_slug": "desktop-v2-immutable-handoff-develop-01M3JSCM",
+  "mission_id": "01M3JSCM11B46EMMZK5VQKZ9H9",
+  "mission_branch": "kitty/mission-desktop-v2-immutable-handoff-develop-01M3JSCM",
+  "target_branch": "develop",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/**",
+        "contracts/desktop-v2/**",
+        "packages/elements/src/**",
+        "packages/styles/src/**",
+        "packages/tokens/src/**",
+        "scripts/check-desktop-v2-contract.mjs",
+        "tests/node/desktop-v2-contract.test.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        ".github/workflows/ci-quality.yml",
+        "scripts/export-desktop-v2-handoff.mjs",
+        "scripts/verify-desktop-v2-handoff.mjs",
+        "tests/node/desktop-v2-handoff.test.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [
+        "lane-a"
+      ],
+      "parallel_group": 1
+    }
+  ],
+  "computed_at": "2026-09-28T02:03:11.967114+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "857a8b6b36be358502e2c31de6cc5de075cc02db"
+}
