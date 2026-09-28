@@ -32,6 +32,8 @@ let fixtureIndex = 0;
 interface ExportedFile {
   path: string;
   sourcePath: string;
+  roles: string[];
+  familyIds: string[];
   sizeBytes: number;
   sha256: string;
   licenseRefs: string[];
@@ -456,6 +458,44 @@ describe('Desktop V2 offline handoff', () => {
       expectedSourceSha: fixture.sourceSha,
       expectedArtifactDigest: independentlyPinnedDigest,
     })).toThrow(/license references.*source contract|source contract.*license references/i);
+  });
+
+  it('approved-source mode rejects file roles that disagree with the pinned source contract', () => {
+    const fixture = createFixture();
+    const outputPath = join(temporaryRoot, 'tampered-family-mapping');
+    exportDesktopV2Handoff({ repoRoot: fixture.root, sourceSha: fixture.sourceSha, outputPath });
+    const manifest = manifestAt(outputPath);
+    const independentlyPinnedDigest = manifest.artifactDigest;
+    const sourceFile = manifest.files.find((file) => file.path === familySourcePath);
+    expect(sourceFile).toBeDefined();
+    sourceFile!.roles = ['license-evidence'];
+    writeManifest(outputPath, manifest);
+
+    expect(() => verifyDesktopV2Handoff({
+      artifactPath: outputPath,
+      mode: 'approved-source',
+      expectedSourceSha: fixture.sourceSha,
+      expectedArtifactDigest: independentlyPinnedDigest,
+    })).toThrow(/manifest roles.*source contract/i);
+  });
+
+  it('approved-source mode rejects family ids that disagree with the pinned source contract', () => {
+    const fixture = createFixture();
+    const outputPath = join(temporaryRoot, 'tampered-family-id');
+    exportDesktopV2Handoff({ repoRoot: fixture.root, sourceSha: fixture.sourceSha, outputPath });
+    const manifest = manifestAt(outputPath);
+    const independentlyPinnedDigest = manifest.artifactDigest;
+    const sourceFile = manifest.files.find((file) => file.path === familySourcePath);
+    expect(sourceFile).toBeDefined();
+    sourceFile!.familyIds = ['fabricated-family'];
+    writeManifest(outputPath, manifest);
+
+    expect(() => verifyDesktopV2Handoff({
+      artifactPath: outputPath,
+      mode: 'approved-source',
+      expectedSourceSha: fixture.sourceSha,
+      expectedArtifactDigest: independentlyPinnedDigest,
+    })).toThrow(/manifest family ids.*source contract/i);
   });
 
   it('approved-source mode rejects a scoped stylesheet source-map substitution', () => {

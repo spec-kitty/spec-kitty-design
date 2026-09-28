@@ -186,7 +186,7 @@ function expectedApprovedLicenses(contract) {
   return [...expected.values()].sort((left, right) => compareStrings(left.id, right.id));
 }
 
-function expectedApprovedFileLicenseRefs(contract) {
+function expectedApprovedFileMetadata(contract) {
   if (!isRecord(contract.sharedAssets)
     || !Array.isArray(contract.sharedAssets.fontAssets)
     || !Array.isArray(contract.sharedAssets.fontRights)
@@ -196,25 +196,47 @@ function expectedApprovedFileLicenseRefs(contract) {
   }
 
   const expected = new Map();
-  const add = (sourcePath, licenseRef) => {
-    const normalizedPath = assertRelativePath(sourcePath, `pinned source path for ${licenseRef}`);
-    if (!expected.has(normalizedPath)) expected.set(normalizedPath, new Set());
-    expected.get(normalizedPath).add(licenseRef);
+  const add = (outputPath, sourcePath, { role, familyId, licenseRef }) => {
+    const normalizedOutputPath = assertRelativePath(outputPath, 'pinned payload path');
+    const normalizedSourcePath = assertRelativePath(sourcePath, `pinned source path for ${normalizedOutputPath}`);
+    let record = expected.get(normalizedOutputPath);
+    if (!record) {
+      record = {
+        sourcePath: normalizedSourcePath,
+        roles: new Set(),
+        familyIds: new Set(),
+        licenseRefs: new Set(),
+      };
+      expected.set(normalizedOutputPath, record);
+    } else if (record.sourcePath !== normalizedSourcePath) {
+      throw new Error(`pinned source contract maps ${normalizedOutputPath} to multiple source paths`);
+    }
+    if (role) record.roles.add(role);
+    if (familyId) record.familyIds.add(familyId);
+    if (licenseRef) record.licenseRefs.add(licenseRef);
   };
 
-  add(ROOT_LICENSE_PATH, 'license:repository-mit');
+  add(ROOT_LICENSE_PATH, ROOT_LICENSE_PATH, { role: 'license-evidence', licenseRef: 'license:repository-mit' });
   for (const family of contract.families) {
-    if (!isRecord(family) || !isRecord(family.sourceRights)
+    if (!isRecord(family) || typeof family.id !== 'string' || !isRecord(family.sourceRights)
       || !Array.isArray(family.sourceRights.coveredPaths)
       || !Array.isArray(family.sourceRights.evidencePaths)) {
       throw new Error('pinned source contract has incomplete family source rights');
     }
-    for (const sourcePath of family.sourceRights.coveredPaths) add(sourcePath, 'license:repository-mit');
-    for (const evidencePath of family.sourceRights.evidencePaths) add(evidencePath, 'license:repository-mit');
+    for (const sourcePath of family.sourceRights.coveredPaths) {
+      add(sourcePath, sourcePath, {
+        role: 'primitive-source',
+        familyId: family.id,
+        licenseRef: 'license:repository-mit',
+      });
+    }
+    for (const evidencePath of family.sourceRights.evidencePaths) {
+      add(evidencePath, evidencePath, { role: 'license-evidence', licenseRef: 'license:repository-mit' });
+    }
   }
 
   const tokenCssPath = assertRelativePath(contract.sharedAssets.tokenStylesheetPath, 'pinned token stylesheet path');
-  add(tokenCssPath, 'license:repository-mit');
+  add(tokenCssPath, tokenCssPath, { role: 'token-stylesheet', licenseRef: 'license:repository-mit' });
   let hasUnresolvedFontRights = false;
   for (const asset of contract.sharedAssets.fontAssets) {
     if (!isRecord(asset) || typeof asset.family !== 'string' || typeof asset.sourcePath !== 'string') {
@@ -228,17 +250,26 @@ function expectedApprovedFileLicenseRefs(contract) {
     }
 
     const licenseRef = licenseIdForFont(asset.family, rights.spdx);
-    add(asset.sourcePath, licenseRef);
+    add(asset.sourcePath, asset.sourcePath, { role: 'font-asset', licenseRef });
     if (rights.basis === 'license-file') {
-      for (const evidencePath of rights.evidencePaths) add(evidencePath, licenseRef);
+      for (const evidencePath of rights.evidencePaths) {
+        add(evidencePath, evidencePath, { role: 'license-evidence', licenseRef });
+      }
     }
-    add(tokenCssPath, licenseRef);
+    add(tokenCssPath, tokenCssPath, { role: 'token-stylesheet', licenseRef });
   }
-  if (hasUnresolvedFontRights) add(TOKEN_SOURCE_MAP_PATH, 'license:repository-mit');
+  if (hasUnresolvedFontRights) {
+    add(TOKEN_SOURCE_MAP_PATH, tokenCssPath, { role: 'source-map', licenseRef: 'license:repository-mit' });
+  }
 
-  return new Map([...expected].map(([sourcePath, licenseRefs]) => [
-    sourcePath,
-    [...licenseRefs].sort(compareStrings),
+  return new Map([...expected].map(([outputPath, record]) => [
+    outputPath,
+    {
+      sourcePath: record.sourcePath,
+      roles: [...record.roles].sort(compareStrings),
+      familyIds: [...record.familyIds].sort(compareStrings),
+      licenseRefs: [...record.licenseRefs].sort(compareStrings),
+    },
   ]));
 }
 
@@ -294,19 +325,26 @@ function validateApprovedSourceBindings(manifest, contract, artifactRoot) {
   }
 
   const expectedLicenses = expectedApprovedLicenses(contract);
-  const expectedFileLicenseRefs = expectedApprovedFileLicenseRefs(contract);
+  const expectedFileMetadata = expectedApprovedFileMetadata(contract);
   const tokenCssPath = contract.sharedAssets.tokenStylesheetPath;
   for (const file of manifest.files) {
-    const expectedSourcePath = file.path === TOKEN_SOURCE_MAP_PATH ? tokenCssPath : file.path;
-    if (!expectedFileLicenseRefs.has(file.path)) {
+    const expected = expectedFileMetadata.get(file.path);
+    if (!expected) {
       throw new Error(`manifest payload path has no pinned source contract mapping: ${file.path}`);
     }
-    if (file.sourcePath !== expectedSourcePath) {
-      throw new Error(`manifest source path mismatch for ${file.path}: pinned source contract expects ${expectedSourcePath}, got ${file.sourcePath}`);
+    if (file.sourcePath !== expected.sourcePath) {
+      throw new Error(`manifest source path mismatch for ${file.path}: pinned source contract expects ${expected.sourcePath}, got ${file.sourcePath}`);
     }
-    const expectedLicenseRefs = expectedFileLicenseRefs.get(file.path);
-    if (file.licenseRefs.length !== expectedLicenseRefs.length
-      || file.licenseRefs.some((licenseRef, index) => licenseRef !== expectedLicenseRefs[index])) {
+    if (file.roles.length !== expected.roles.length
+      || file.roles.some((role, index) => role !== expected.roles[index])) {
+      throw new Error(`manifest roles do not match the pinned source contract for ${file.path}`);
+    }
+    if (file.familyIds.length !== expected.familyIds.length
+      || file.familyIds.some((familyId, index) => familyId !== expected.familyIds[index])) {
+      throw new Error(`manifest family ids do not match the pinned source contract for ${file.path}`);
+    }
+    if (file.licenseRefs.length !== expected.licenseRefs.length
+      || file.licenseRefs.some((licenseRef, index) => licenseRef !== expected.licenseRefs[index])) {
       throw new Error(`manifest license references do not match the pinned source contract for ${file.path}`);
     }
     if (file.path !== tokenCssPath && (file.derivation !== undefined || file.sourceMapPath !== undefined)) {
