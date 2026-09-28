@@ -5,6 +5,7 @@ import {
   checkDesktopV2Contract,
   REQUIRED_FAMILIES,
   REQUIRED_STATES,
+  REQUIRED_VISUAL_CAPTURE_COUNTS,
 } from '../../scripts/check-desktop-v2-contract.mjs';
 
 const repoRoot = process.cwd();
@@ -17,6 +18,7 @@ const sourceContract = JSON.parse(readFileSync(contractPath, 'utf8')) as {
       story: { sourcePath: string; storyId: string; exportName: string };
       visualTestId: string;
       snapshotPath: string;
+      visualCapture?: { expectedMatchCount: number };
     }>;
     paths: { stylesCss: string };
     publicEntries: { stylesCss: string };
@@ -66,6 +68,28 @@ describe('Desktop V2 source contract', () => {
     button!.requiredStates = button!.requiredStates.filter((state) => state.id !== 'disabled');
 
     expect(check(mutated).join('\n')).toMatch(/button.*required state.*disabled/i);
+  });
+
+  it('requires explicit selector counts for aggregate visual states', () => {
+    for (const [familyId, states] of Object.entries(REQUIRED_VISUAL_CAPTURE_COUNTS)) {
+      for (const [stateId, expectedMatchCount] of Object.entries(states)) {
+        const family = sourceContract.families.find((entry) => entry.id === familyId);
+        const state = family?.requiredStates.find((entry) => entry.id === stateId);
+        expect(state?.visualCapture).toEqual({ expectedMatchCount });
+
+        const missing = copyContract();
+        const missingState = missing.families.find((entry) => entry.id === familyId)!
+          .requiredStates.find((entry) => entry.id === stateId)!;
+        delete missingState.visualCapture;
+        expect(check(missing).join('\n')).toMatch(new RegExp(`${familyId}/${stateId}.*visual capture`));
+
+        const wrong = copyContract();
+        const wrongState = wrong.families.find((entry) => entry.id === familyId)!
+          .requiredStates.find((entry) => entry.id === stateId)!;
+        wrongState.visualCapture = { expectedMatchCount: expectedMatchCount - 1 };
+        expect(check(wrong).join('\n')).toMatch(new RegExp(`${familyId}/${stateId}.*visual capture`));
+      }
+    }
   });
 
   it('probes deletion of a mapped Storybook story', () => {

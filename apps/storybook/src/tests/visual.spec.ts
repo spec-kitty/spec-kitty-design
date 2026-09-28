@@ -7,13 +7,15 @@ type DesktopV2Interaction =
   | { type: 'hover' | 'focus' | 'active' | 'disabled'; selector: string }
   | { type: 'story-state'; selector: null };
 type DesktopV2State = {
+  id: string;
   story: { storyId: string };
   visualTestId: string;
   snapshotPath: string;
   viewport: { width: number; height: number };
+  visualCapture?: { expectedMatchCount: number };
   interaction?: DesktopV2Interaction;
 };
-type DesktopV2Family = { selector: string; requiredStates: DesktopV2State[] };
+type DesktopV2Family = { id: string; selector: string; requiredStates: DesktopV2State[] };
 
 const desktopV2Contract = JSON.parse(readFileSync('contracts/desktop-v2/source-contract.json', 'utf8')) as {
   families: DesktopV2Family[];
@@ -23,6 +25,112 @@ const desktopV2Cases = desktopV2Contract.families.flatMap((family) =>
   family.requiredStates.map((state) => ({ family, state })),
 );
 
+async function assertDesktopV2AggregateContent(
+  familyId: string,
+  stateId: string,
+  targets: Locator,
+): Promise<void> {
+  if (familyId === 'pill-tag' && stateId === 'variants') {
+    const variants = await targets.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('variant')));
+    expect(variants).toEqual([null, 'breaking', 'green', 'purple', 'yellow']);
+  }
+
+  if (familyId === 'status-indicator' && stateId === 'all-tones') {
+    const tones = await targets.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('tone')));
+    expect(tones).toEqual(['neutral', 'info', 'success', 'attention', 'danger', 'recovery']);
+  }
+
+  if (familyId === 'status-indicator' && stateId === 'pulsing') {
+    const states = await targets.evaluateAll((nodes) => nodes.map((node) => ({
+      tone: node.getAttribute('tone'),
+      pulsing: node.hasAttribute('pulsing'),
+      marker: node.querySelector('[slot="marker"]') !== null,
+    })));
+    expect(states).toEqual([
+      { tone: 'success', pulsing: false, marker: true },
+      { tone: 'success', pulsing: true, marker: true },
+      { tone: 'attention', pulsing: true, marker: false },
+    ]);
+  }
+
+  if (familyId === 'notice' && (stateId === 'focus' || stateId === 'dismissible')) {
+    const notices = await targets.evaluateAll((nodes) => nodes.map((node) => ({
+      tone: node.getAttribute('tone'),
+      announce: node.getAttribute('announce'),
+      dismissible: node.hasAttribute('dismissible'),
+      dismissLabel: node.getAttribute('dismiss-label'),
+    })));
+    expect(notices).toEqual([
+      {
+        tone: 'danger',
+        announce: 'assertive',
+        dismissible: true,
+        dismissLabel: 'Dismiss the deploy failure notice',
+      },
+      {
+        tone: 'attention',
+        announce: 'off',
+        dismissible: true,
+        dismissLabel: 'Dismiss the review notice',
+      },
+    ]);
+  }
+}
+
+async function screenshotDesktopV2Targets(
+  page: Page,
+  targets: Locator,
+  expectedMatchCount: number,
+  snapshotName: string,
+): Promise<void> {
+  const screenshotOptions = {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    animations: 'disabled' as const,
+  };
+
+  if (expectedMatchCount === 1) {
+    await expect.soft(targets).toHaveScreenshot(snapshotName, screenshotOptions);
+    return;
+  }
+
+  const viewport = page.viewportSize();
+  if (!viewport) throw new Error('Desktop V2 aggregate capture requires a fixed viewport');
+  const pageSize = await page.evaluate(() => ({
+    width: document.documentElement.scrollWidth,
+    height: document.documentElement.scrollHeight,
+  }));
+
+  const boxes = await Promise.all(
+    Array.from({ length: expectedMatchCount }, (_, index) => targets.nth(index).boundingBox()),
+  );
+  if (boxes.some((box) => box === null)) {
+    throw new Error(`Desktop V2 aggregate capture ${snapshotName} contains a non-visible target`);
+  }
+  const visibleBoxes = boxes.filter((box): box is NonNullable<typeof box> => box !== null);
+  const minX = Math.min(...visibleBoxes.map((box) => box.x));
+  const minY = Math.min(...visibleBoxes.map((box) => box.y));
+  const maxX = Math.max(...visibleBoxes.map((box) => box.x + box.width));
+  const maxY = Math.max(...visibleBoxes.map((box) => box.y + box.height));
+  if (minX < 0 || minY < 0 || maxX > pageSize.width || maxY > pageSize.height) {
+    throw new Error(`Desktop V2 aggregate targets for ${snapshotName} extend beyond the rendered page`);
+  }
+
+  // Playwright's page clip is expressed in CSS pixels. The full-page surface lets a tall
+  // aggregate fit without changing its declared viewport; the output remains clipped to the
+  // union of component boxes, with room for focus rings and shadows.
+  const padding = 12;
+  const x = Math.max(0, Math.floor(minX - padding));
+  const y = Math.max(0, Math.floor(minY - padding));
+  const right = Math.min(pageSize.width, Math.ceil(maxX + padding));
+  const bottom = Math.min(pageSize.height, Math.ceil(maxY + padding));
+  await expect.soft(page).toHaveScreenshot(snapshotName, {
+    ...screenshotOptions,
+    fullPage: true,
+    clip: { x, y, width: right - x, height: bottom - y },
+  });
+}
+
 for (const { family, state } of desktopV2Cases) {
   const visualTestId = state.visualTestId;
   const snapshotName = state.snapshotPath.split('/').at(-1)!.replace(/-chromium-linux\.png$/, '.png');
@@ -30,8 +138,11 @@ for (const { family, state } of desktopV2Cases) {
   test(visualTestId, async ({ page }) => {
     await page.setViewportSize(state.viewport);
     await page.goto(`/iframe.html?id=${state.story.storyId}&viewMode=story`);
-    const target = page.locator(family.selector).first();
-    await target.waitFor({ state: 'visible', timeout: 20000 });
+    const target = page.locator(family.selector);
+    await target.first().waitFor({ state: 'visible', timeout: 20000 });
+    const expectedMatchCount = state.visualCapture?.expectedMatchCount ?? 1;
+    await expect(target).toHaveCount(expectedMatchCount);
+    await assertDesktopV2AggregateContent(family.id, state.id, target);
 
     let pointerIsDown = false;
     try {
@@ -60,11 +171,10 @@ for (const { family, state } of desktopV2Cases) {
         }
       }
 
-      await expect.soft(target).toHaveScreenshot(snapshotName, {
-        threshold: 0.02,
-        maxDiffPixelRatio: 0.02,
-        animations: 'disabled',
-      });
+      // Interactions may change story state (or dismiss/remove a target); keep the aggregate
+      // complete at capture time as well as at initial render.
+      await expect(target).toHaveCount(expectedMatchCount);
+      await screenshotDesktopV2Targets(page, target, expectedMatchCount, snapshotName);
     } finally {
       if (pointerIsDown) await page.mouse.up();
     }

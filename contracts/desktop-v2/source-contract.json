@@ -620,6 +620,7 @@
           },
           "visualTestId": "desktop-v2/button/light-mode",
           "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-button-light-mode-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 8 },
           "viewport": {
             "width": 1280,
             "height": 900
@@ -799,6 +800,7 @@
           },
           "visualTestId": "desktop-v2/card/light-mode",
           "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-card-light-mode-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 8 },
           "viewport": {
             "width": 1280,
             "height": 900
@@ -2142,6 +2144,7 @@
           },
           "visualTestId": "desktop-v2/notice/light-mode",
           "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-light-mode-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 6 },
           "viewport": {
             "width": 1280,
             "height": 900
@@ -2170,6 +2173,7 @@
           },
           "visualTestId": "desktop-v2/notice/focus",
           "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-focus-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 2 },
           "viewport": {
             "width": 1280,
             "height": 900
@@ -2188,6 +2192,7 @@
           },
           "visualTestId": "desktop-v2/notice/dismissible",
           "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-notice-dismissible-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 2 },
           "viewport": {
             "width": 1280,
             "height": 900
@@ -2507,6 +2512,7 @@
           },
           "visualTestId": "desktop-v2/pill-tag/light-mode",
           "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-light-mode-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 6 },
           "viewport": {
             "width": 1280,
             "height": 900
@@ -2535,6 +2541,7 @@
           },
           "visualTestId": "desktop-v2/pill-tag/variants",
           "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-pill-tag-variants-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 5 },
           "viewport": {
             "width": 1280,
             "height": 900
@@ -2959,6 +2966,7 @@
           },
           "visualTestId": "desktop-v2/status-indicator/light-mode",
           "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-light-mode-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 6 },
           "viewport": {
             "width": 1280,
             "height": 900
@@ -2987,6 +2995,7 @@
           },
           "visualTestId": "desktop-v2/status-indicator/all-tones",
           "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-all-tones-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 6 },
           "viewport": {
             "width": 1280,
             "height": 900
@@ -3001,6 +3010,7 @@
           },
           "visualTestId": "desktop-v2/status-indicator/pulsing",
           "snapshotPath": "apps/storybook/src/tests/visual.spec.ts-snapshots/desktop-v2-status-indicator-pulsing-chromium-linux.png",
+          "visualCapture": { "expectedMatchCount": 3 },
           "viewport": {
             "width": 1280,
             "height": 900
