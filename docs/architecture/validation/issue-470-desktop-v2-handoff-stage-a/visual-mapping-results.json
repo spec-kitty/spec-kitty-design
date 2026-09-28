@@ -1,7 +1,10 @@
 {
   "schemaVersion": 1,
   "date": "2026-09-28",
-  "checkoutHead": "78b672c2bc99248d6a5f66f1273b406fe18e8f47",
+  "focusedVisualRunHead": "78b672c2bc99248d6a5f66f1273b406fe18e8f47",
+  "contractMappingValidatedHead": "2d9f25371be02ed6608eba8c8386e0a9ba6a5237",
+  "contractMappingValidationCommand": "node scripts/check-desktop-v2-contract.mjs",
+  "contractMappingValidationResult": "pass",
   "exactReviewedHeadEvidence": false,
   "command": "PW_INCLUDE_VISUAL=1 npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium --grep 'desktop-v2/'",
   "totalContractStates": 110,
