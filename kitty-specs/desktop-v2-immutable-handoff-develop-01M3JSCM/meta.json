@@ -1,4 +1,19 @@
 {
+  "accept_commit": "504e7ea69081f1f8c8b2f0fa23ebde16aceb4f7a",
+  "acceptance_history": [
+    {
+      "accept_commit": "504e7ea69081f1f8c8b2f0fa23ebde16aceb4f7a",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-28T16:33:15.471216+00:00",
+      "accepted_by": "codex-orchestrator",
+      "accepted_from_commit": "58f0708090b041c36f4da19a03a82ec719889d0c"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-28T16:33:15.471216+00:00",
+  "accepted_by": "codex-orchestrator",
+  "accepted_from_commit": "58f0708090b041c36f4da19a03a82ec719889d0c",
+  "baseline_merge_commit": "c5ab89ea873b55575af8055f3cfba02089c43b13",
   "created_at": "2026-09-28T01:17:08.520688+00:00",
   "flattened": false,
   "friendly_name": "desktop v2 immutable handoff develop",
@@ -10,6 +25,7 @@
   "purpose_context": "This mission advances desktop v2 immutable handoff develop on develop so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "desktop v2 immutable handoff develop",
   "slug": "desktop-v2-immutable-handoff-develop-01M3JSCM",
+  "status_phase": "1",
   "target_branch": "develop",
   "topology": "lanes",
   "vcs": "git",
