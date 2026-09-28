@@ -104,4 +104,4 @@ As a reviewer, I can see that the contract and tooling are ready to bind a futur
 - **SC-001**: A machine check finds exactly 22 family entries and zero unresolved required source, state, rights, accessibility, or visual references.
 - **SC-002**: Two same-S exports are byte-identical; a clean copied export verifies offline, while changed/missing/extra/path-substituted files and contract drift each fail with a named mismatch.
 - **SC-003**: All seven repository-native gate categories (lint, test, build, Storybook, axe, visual, export) pass on the reviewed mission PR head with recorded commands and evidence paths.
-- **SC-004**: The mission PR lands on `develop` through the branch's permitted rebase-only path; a separately scoped handoff mission is queued to freeze post-merge S and produce the final artifact.
+- **SC-004**: The finalized task set has exactly two WPs and explicitly hands off final S selection, gate repetition, and the immutable artifact to a later mission whose prerequisite is this mission's PR landing on `develop`.
