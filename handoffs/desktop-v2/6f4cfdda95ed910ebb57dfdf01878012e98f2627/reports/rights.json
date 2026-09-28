@@ -13,7 +13,7 @@
       "sha256",
       "licenseRefs"
     ],
-    "licenseEvidenceField": "artifact/manifest.json#licenses"
+    "licenseEvidenceField": "../artifact/manifest.json#licenses"
   },
   "retainedPayloadSummary": {
     "repositoryMitRightsReferences": 143,

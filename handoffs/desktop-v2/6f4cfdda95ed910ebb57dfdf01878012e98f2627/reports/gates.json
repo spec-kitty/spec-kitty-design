@@ -123,8 +123,13 @@
         "desktopV2ContractStatesMapped": 110,
         "fullSuiteTestIdsEnumerated": 456,
         "committedSnapshotsInventoried": 485,
-        "fullSuiteTestToSnapshotPairingComplete": false,
-        "gap": "The remaining 346 non-Desktop-V2 test-to-snapshot pairings are not claimed; FR-006 evidence completeness remains open for reviewer disposition."
+        "fullSuiteTestRowsMapped": 456,
+        "fullSuiteTestsWithSnapshotAssertionsMapped": 455,
+        "fullSuiteTestsWithoutSnapshotAssertion": 1,
+        "snapshotAssertionsMapped": 485,
+        "snapshotFilesMapped": 485,
+        "fullSuiteTestToSnapshotPairingComplete": true,
+        "gap": "No test IDs or committed snapshot files remain unaccounted for. The one snapshot-free forced-colors test is explicitly documented in visual-mapping.json with its source-grounded DOM-assertion rationale."
       }
     },
     {
