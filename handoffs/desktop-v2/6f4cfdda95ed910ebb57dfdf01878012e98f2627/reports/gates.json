@@ -152,5 +152,5 @@
       "outputPath": "reports/export-comparison.json"
     }
   ],
-  "boundary": "All results here are S-bound. Full-suite visual test-to-snapshot pairing is incomplete as stated in the visual gate record. This report contains no PR-head H result, squad verdict, native acceptance verdict, or claim of K1/K2 compatibility."
+  "boundary": "All results here are S-bound. The full-suite visual map accounts for all 456 test IDs and 485 committed snapshot files; one forced-colors DOM-only test has no screenshot assertion and is explicitly recorded with an empty snapshot association. This report contains no PR-head H result, squad verdict, native acceptance verdict, or claim of K1/K2 compatibility."
 }
