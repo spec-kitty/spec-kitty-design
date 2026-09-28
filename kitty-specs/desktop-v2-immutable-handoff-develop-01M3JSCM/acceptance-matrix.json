@@ -2,97 +2,97 @@
   "mission_slug": "desktop-v2-immutable-handoff-develop-01M3JSCM",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
       "description": "Stage A must verify exactly the 22 issue-listed primitive families, each with its actual source form and a real public consumer entry; missing or extra families fail.",
       "proof_type": "automated_test",
-      "evidence": "Provisional: source contract checker covers exactly 22 Desktop primitive families and public entries; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
-      "pass_fail": "pending",
-      "verified_by": "codex-program-orchestrator",
-      "verified_at": "2026-09-28T14:34:05.791608+00:00",
-      "notes": "Outstanding: lane evidence is provisional. Confirm the exact 22-family set, actual source forms, and public entries at the consolidated PR head; keep pending until that evidence is reviewed."
+      "evidence": "Historical evidence from pre-acceptance reviewed candidate 937351750be7de04d06aeecc3e390dbce3dd1c68: candidate CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36446919179 recorded SUCCESS; candidate post-source seven-gate/per-story report https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874214556; checker validated exactly 22 source families, actual forms and public entries; focused contract tests in candidate test job 109012094366 passed; matching-candidate architecture review https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874257151. Final-head post-source gates/review are recorded externally on PR #488 after the final head exists.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-28T16:30:37.927433+00:00",
+      "notes": "Resolved for Stage A: the 22-family inventory, actual source forms, and public entries were confirmed in pre-acceptance candidate review. Final-head post-source gates and review are recorded externally on PR #488 after the final head exists."
     },
     {
       "criterion_id": "FR-002",
       "description": "Stage A must independently declare each family's required states, themes, and responsive modes, map each state to a live story, visual test, and committed snapshot, and fail on missing or stale entries.",
       "proof_type": "automated_test",
-      "evidence": "Provisional: required-state mapping and story to visual-test to snapshot closure; focused deletion probes passed locally 4/4, CI visual 456/456; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
-      "pass_fail": "pending",
-      "verified_by": "codex-program-orchestrator",
-      "verified_at": "2026-09-28T14:34:07.783394+00:00",
-      "notes": "Outstanding: focused deletion probes and lane visual evidence are provisional. Confirm the independent state inventory, story-to-visual-test-to-snapshot closure, and deletion failures at the consolidated PR head; keep pending until reviewed."
+      "evidence": "Historical evidence from pre-acceptance reviewed candidate 937351750be7de04d06aeecc3e390dbce3dd1c68: candidate CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36446919179 recorded SUCCESS; candidate report https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874214556; matching-candidate squad review https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874257151. The 110 required family/state/story/visual/snapshot mappings equalled the candidate contract and historical mapping sidecar; candidate visual 456/456 and axe 810/810 were recorded; deletion probes in the candidate test job passed. Historical sidecar testedHead was not the candidate SHA. Final-head post-source gates/review are recorded externally on PR #488 after the final head exists.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-28T16:31:01.839766+00:00",
+      "notes": "Resolved for Stage A: the independent state inventory, story-to-visual-test-to-snapshot closure, and deletion failures were confirmed in pre-acceptance candidate review. Final-head post-source gates and review are recorded externally on PR #488 after the final head exists."
     },
     {
       "criterion_id": "FR-003",
       "description": "Stage A must account for transitive source, token, and font assets with redistribution evidence; reject unchanged full tokens.css while Swansea rights are unresolved, allow only a checked source-mapped scoped derivative, and recognize Falling Sky OFL evidence.",
       "proof_type": "automated_test",
-      "evidence": "Provisional: Swansea full CSS rejection and scoped derivative rights closure; focused Swansea probe passed locally 1/1; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
-      "pass_fail": "pending",
-      "verified_by": "codex-program-orchestrator",
-      "verified_at": "2026-09-28T14:34:09.415604+00:00",
-      "notes": "Outstanding: the lane rights probe is provisional. Confirm rights closure, Swansea full-CSS rejection and scoped-derivative provenance, and Falling Sky OFL handling at the consolidated PR head; keep pending until reviewed."
+      "evidence": "Historical evidence from pre-acceptance reviewed candidate 937351750be7de04d06aeecc3e390dbce3dd1c68: candidate CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36446919179 recorded SUCCESS; candidate report https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874214556; matching-candidate squad review https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874257151. Contract tests checked source/asset rights closure and MIT/OFL evidence; unchanged full Swansea tokens.css remained blocked, and the scoped source-mapped derivative was exported; candidate test job 109012094366 and Storybook checker job 109012184840 passed. Final-head post-source gates/review are recorded externally on PR #488 after the final head exists.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-28T16:31:03.542672+00:00",
+      "notes": "Resolved for Stage A: rights closure, rejection of unchanged full Swansea CSS, scoped-derivative provenance, and Falling Sky OFL handling were confirmed in pre-acceptance candidate review. Final-head post-source gates and review are recorded externally on PR #488 after the final head exists."
     },
     {
       "criterion_id": "FR-004",
       "description": "Stage A must export committed Git blob bytes for the selected full source SHA and emit a post-source manifest with normalized paths, byte lengths, per-file SHA-256 values, the full source SHA, and a canonical artifact digest.",
       "proof_type": "automated_test",
-      "evidence": "Source d416eb6d335b9cce63bfacaa5bda56902db6009d: two committed-byte exports each 180 files; diff -qr exit 0; independent payload digest 323ed95bd953c2a309ed9ed4eedf3642c1d26c74d948963b368e87994e8cb3eb; CI https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710. Pending consolidated PR-head provenance.",
-      "pass_fail": "pending",
+      "evidence": "Historical evidence from pre-acceptance reviewed candidate 937351750be7de04d06aeecc3e390dbce3dd1c68: candidate CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36446919179 recorded SUCCESS; candidate report https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874214556; matching-candidate squad review https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874257151. Candidate Storybook job 109012184840 exported committed Git blobs from that SHA as 180 normalized files with per-file hashes and a manifest; recorded artifact digest ef351a2a1eebea4c9a3b24414d82d23b0434af199cf8f0af2d0b0d483b2ac330. PR-event synthetic merge SHA/digest were excluded. Final-head post-source gates/review are recorded externally on PR #488 after the final head exists.",
+      "pass_fail": "pass",
       "verified_by": "codex-orchestrator",
-      "verified_at": "2026-09-28T13:20:52.962769+00:00",
-      "notes": "Outstanding: the recorded lane export is provisional. Verify committed-blob provenance and manifest contents at the consolidated PR head; acceptance remains pending until that head-specific evidence is reviewed."
+      "verified_at": "2026-09-28T16:31:05.175745+00:00",
+      "notes": "Resolved for Stage A: committed-blob provenance and manifest contents were confirmed for the pre-acceptance reviewed candidate. Final-head post-source gates and review are recorded externally on PR #488 after the final head exists."
     },
     {
       "criterion_id": "FR-005",
       "description": "Stage A must produce byte-identical exports from the same committed SHA and verify a detached copy offline in internal-integrity and independently pinned approved-source modes, without network or npm runtime access.",
       "proof_type": "automated_test",
-      "evidence": "Source d416eb6d335b9cce63bfacaa5bda56902db6009d: repeat exports byte-identical; detached copy internal-integrity and independently pinned approved-source verification both exit 0 for 180 files, digest 323ed95bd953c2a309ed9ed4eedf3642c1d26c74d948963b368e87994e8cb3eb. Pending consolidated PR-head copy.",
-      "pass_fail": "pending",
+      "evidence": "Historical evidence from pre-acceptance reviewed candidate 937351750be7de04d06aeecc3e390dbce3dd1c68: candidate CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36446919179 recorded SUCCESS; candidate report https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874214556; matching-candidate squad review https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874257151. Two 180-file candidate exports had identical trees (diff -qr exit 0); a detached copy outside Git checkout passed internal and independently pinned approved-source verification with that candidate SHA and digest ef351a2a1eebea4c9a3b24414d82d23b0434af199cf8f0af2d0b0d483b2ac330, exit 0, without npm/network runtime. Final-head post-source gates/review are recorded externally on PR #488 after the final head exists.",
+      "pass_fail": "pass",
       "verified_by": "codex-orchestrator",
-      "verified_at": "2026-09-28T13:20:54.613296+00:00",
-      "notes": "Outstanding: the recorded repeat-export and detached-copy results are provisional. Confirm both offline verifier modes at the consolidated PR head; keep pending until that evidence is reviewed."
+      "verified_at": "2026-09-28T16:31:06.820449+00:00",
+      "notes": "Resolved for Stage A: repeat-export determinism and both offline verifier modes for a detached copy were confirmed in pre-acceptance candidate review. Final-head post-source gates and review are recorded externally on PR #488 after the final head exists."
     },
     {
       "criterion_id": "FR-006",
       "description": "Stage A must name failures for changed, missing, extra, or path-substituted artifact files; dirty or mid-export worktree changes cannot alter the committed-blob payload, and coordinated rehash must fail when independently pinned SHA and digest are supplied.",
       "proof_type": "automated_test",
-      "evidence": "Provisional: tamper matrix and coordinated-rehash rejection checked in lane-b; focused coordinated-rehash probe passed locally 1/1; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
-      "pass_fail": "pending",
-      "verified_by": "codex-program-orchestrator",
-      "verified_at": "2026-09-28T14:34:11.029993+00:00",
-      "notes": "Outstanding: lane tamper and coordinated-rehash probes are provisional. Confirm the failure matrix and independently pinned rejection at the consolidated PR head; keep pending until reviewed."
+      "evidence": "Historical evidence from pre-acceptance reviewed candidate 937351750be7de04d06aeecc3e390dbce3dd1c68: candidate CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36446919179 recorded SUCCESS; candidate report https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874214556; matching-candidate squad review https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874257151. Handoff tests recorded 16/16 within a 1532-test run; tamper/path/extra/missing and coordinated rehash probes were registered; committed-blob dirty/mid-export probes left bytes unchanged; independent pins rejected coordinated rehash. Six negative invariants were recorded confirmed_absent, including the corrected zero-visual probe via sanctioned CLI commit 7ad767cc. Final-head post-source gates/review are recorded externally on PR #488 after the final head exists.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-28T16:31:08.469519+00:00",
+      "notes": "Resolved for Stage A: the tamper and coordinated-rehash failure matrix, including independently pinned rejection, was confirmed in pre-acceptance candidate review. Final-head post-source gates and review are recorded externally on PR #488 after the final head exists."
     },
     {
       "criterion_id": "FR-007",
       "description": "Stage A must record lint, test, build, Storybook, axe, visual, and export results at the consolidated PR head, including positive visual test count and per-story axe plus visual-mapping evidence outside the source contract; Stage B repeats gates at S.",
       "proof_type": "automated_test",
-      "evidence": "Lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d CI Quality https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710: SUCCESS; Node/Chromium/WebKit 1532 passed, 0 skipped; Playwright 2777 passed, 147 skipped, 1 retried WebKit internal-error flake; axe 810 stories/0 violations; visual 456/456. Pending consolidated PR-head gates. Local same-head Chromium on this machine: 206 passed and 250 screenshot mismatches out of 456; this conflicts with exact-head CI and is not counted as a local pass. Cause not established.",
-      "pass_fail": "pending",
-      "verified_by": "codex-program-orchestrator",
-      "verified_at": "2026-09-28T15:10:21.350735+00:00",
-      "notes": "Outstanding: current lane CI is not consolidated PR-head evidence. The local Chromium run has 250 screenshot mismatches and its cause is unknown, so it is not counted as a pass; capture and review all seven gates and reports at the consolidated PR head. Keep pending."
+      "evidence": "Historical evidence from pre-acceptance reviewed candidate 937351750be7de04d06aeecc3e390dbce3dd1c68: candidate CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36446919179 recorded SUCCESS; candidate report https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874214556; matching-candidate squad review https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874257151. Seven candidate gate categories were recorded as passing: lint/commitlint (dispatch lint plus PR-event run 36446909608), test 1532/1532, release/build and Storybook, axe 810/810 zero violations, visual 456/456 positive with all 110 mappings, export 180 identical/pinned; cross-browser Playwright recorded 2778 passed/147 skipped. Candidate raw 810 IDs matched the historical sidecar set; contract/visual/snapshot blobs were unchanged. Local workstation Chromium had recorded 206 passes and 250 snapshot mismatches of unknown cause; this is not claimed as a local pass, and candidate CI was the recorded gate evidence. Final-head post-source gates/review are recorded externally on PR #488 after the final head exists.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-28T16:31:10.149097+00:00",
+      "notes": "Resolved for Stage A: the seven required gate categories, positive visual test count, per-story axe results, and visual mappings were recorded for the pre-acceptance candidate. The earlier local Chromium run recorded 206 passes and 250 screenshot mismatches of unknown cause; it is not claimed as a local pass. Final-head post-source gates and review are recorded externally on PR #488 after the final head exists."
     },
     {
       "criterion_id": "FR-008",
       "description": "Stage A must keep the source contract independent of its own SHA and results, bind the post-source manifest to a full committed SHA, and support a separate post-source evidence report. Stage B creates S-labelled reports after stable S is selected.",
       "proof_type": "automated_test",
-      "evidence": "Provisional: source contract has no self SHA/results, manifest binds committed SHA, Stage-B S-labelled report still not produced; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
-      "pass_fail": "pending",
-      "verified_by": "codex-program-orchestrator",
-      "verified_at": "2026-09-28T14:34:12.621052+00:00",
-      "notes": "Outstanding for Stage A: confirm contract, manifest, and separate report capability at the consolidated PR head. The S-labelled report is intentionally deferred to Stage B after S exists; its absence is not a Stage-A acceptance gap. Keep pending until Stage-A evidence is reviewed."
+      "evidence": "Historical evidence from pre-acceptance reviewed candidate 937351750be7de04d06aeecc3e390dbce3dd1c68: candidate CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36446919179 recorded SUCCESS; candidate report https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874214556; matching-candidate squad review https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874257151. The candidate source contract contained no self SHA, own digest, timestamp, or gate results; its manifest bound the full candidate SHA and artifact digest ef351a2a1eebea4c9a3b24414d82d23b0434af199cf8f0af2d0b0d483b2ac330. Post-source evidence was separate; stable post-merge S-labelled artifact/report remain expressly deferred to Stage B. Final-head post-source gates/review are recorded externally on PR #488 after the final head exists.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-28T16:31:11.795649+00:00",
+      "notes": "Resolved for Stage A: the SHA-independent source contract, full-SHA manifest binding, and separate post-source evidence were confirmed in pre-acceptance candidate review. Stable S selection and the S-labelled handoff artifact/report are explicitly deferred to Stage B after S exists. Final-head post-source gates and review are recorded externally on PR #488 after the final head exists."
     },
     {
       "criterion_id": "FR-009",
       "description": "Stage A must express selected navigation by composing existing neutral primitives and tokens, and keep Desktop-specific artifact or file-tree structure outside generic primitives.",
       "proof_type": "automated_test",
-      "evidence": "Provisional: consumer-boundary contract test checks neutral selected-nav styling and excludes named Desktop domain tree surfaces; D1 lane-b d416eb6d335b9cce63bfacaa5bda56902db6009d; exact-head CI Quality run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36423448710 SUCCESS. Acceptance plan/matrix amendment and consolidated PR-head gate remain pending.",
-      "pass_fail": "pending",
-      "verified_by": "codex-program-orchestrator",
-      "verified_at": "2026-09-28T14:34:14.203653+00:00",
-      "notes": "Outstanding: the lane consumer-boundary check is provisional. Confirm neutral selected-navigation composition and absence of a generic Desktop domain tree at the consolidated PR head; keep pending until reviewed."
+      "evidence": "Historical evidence from pre-acceptance reviewed candidate 937351750be7de04d06aeecc3e390dbce3dd1c68: candidate CI run https://github.com/spec-kitty/spec-kitty-design/actions/runs/36446919179 recorded SUCCESS; candidate report https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874214556; matching-candidate squad review https://github.com/spec-kitty/spec-kitty-design/pull/488#issuecomment-5874257151. The contract/style checker and matching-candidate architect review confirmed selected navigation composed neutral primitives/tokens without Desktop-specific artifact or file-tree logic in generic primitive source; no primitive source files changed in that PR. Final-head post-source gates/review are recorded externally on PR #488 after the final head exists.",
+      "pass_fail": "pass",
+      "verified_by": "codex-orchestrator",
+      "verified_at": "2026-09-28T16:31:13.441407+00:00",
+      "notes": "Resolved for Stage A: neutral selected-navigation composition and the absence of a generic Desktop domain tree were confirmed in pre-acceptance candidate review. Final-head post-source gates and review are recorded externally on PR #488 after the final head exists."
     }
   ],
   "negative_invariants": [
@@ -140,9 +140,9 @@
       "invariant_id": "NEG-D1-ZERO-VISUAL-TESTS",
       "description": "The visual gate must execute a positive number of mapped Chromium visual tests; a zero-test run is not a pass",
       "verification_method": "custom_command",
-      "verification_command": "test \"$(gh run view 36423448710 -R spec-kitty/spec-kitty-design --json headSha,conclusion --jq '.headSha + \" \" + .conclusion')\" = \"d416eb6d335b9cce63bfacaa5bda56902db6009d success\" && test \"$(gh run view 36423448710 -R spec-kitty/spec-kitty-design --json jobs --jq '.jobs[] | select(.name==\"visual-regression\") | .conclusion')\" = \"success\" && gh run view --job 108932073381 -R spec-kitty/spec-kitty-design --log | rg -o '456 passed'",
+      "verification_command": "cd .worktrees/desktop-v2-immutable-handoff-develop-01M3JSCM-lane-b && d1_probe_output=$(PW_INCLUDE_VISUAL=1 ./node_modules/.bin/playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium --grep __d1_zero_visual_probe_no_match__ 2>&1); d1_probe_rc=$?; test \"$d1_probe_rc\" -eq 1 && printf '%s\\n' \"$d1_probe_output\" | rg -q 'Error: No tests found' && printf 'zero-test visual run rejected with exit 1 and No tests found\\n'",
       "result": "confirmed_absent",
-      "evidence": "Command exited 0: 456 passed"
+      "evidence": "Command exited 0: zero-test visual run rejected with exit 1 and No tests found"
     }
   ]
 }

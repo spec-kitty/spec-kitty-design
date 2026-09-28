@@ -1,15 +1,15 @@
 {
   "rows": {
     "#470": {
-      "evidence_ref": "WP01 source contract and evidence reviewed at 932756693c82cf9e9d313574f7ab2f604e347019 and 78b672c2bc99248d6a5f66f1273b406fe18e8f47; WP02 deterministic exporter/verifier remains planned; issue #470 remains open through separate post-merge Stage-B immutable handoff mission.",
+      "evidence_ref": "Stage A WP01 (source contract and evidence) and WP02 (deterministic exporter/verifier) are done. Issue #470 remains OPEN. Follow-up mission: \"Desktop V2 Stage B — freeze stable develop SHA and commit immutable offline handoff\"; it repeats the required gates at stable source SHA S and commits the S-labelled immutable artifact and evidence report. No follow-up issue number has been assigned.",
       "fr": null,
       "nfr": null,
       "repo": null,
       "sc": null,
       "scope": null,
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "in-mission",
+      "title": "Desktop V2 application-primitives consumer contract and immutable train handoff",
+      "verdict": "deferred-with-followup",
       "wp": "WP02"
     }
   },

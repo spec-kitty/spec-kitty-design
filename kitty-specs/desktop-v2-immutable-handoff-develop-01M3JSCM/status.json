@@ -1,16 +1,16 @@
 {
-  "event_count": 17,
-  "last_event_id": "01M3KYS1ENKER5P7YMZ4ARW2KY",
-  "materialized_at": "2026-09-28T12:10:32.790008+00:00",
+  "event_count": 19,
+  "last_event_id": "01M3MDTWBMGYMHNWMVQBK988Z0",
+  "materialized_at": "2026-09-28T16:33:41.748289+00:00",
   "mission_number": "",
   "mission_slug": "desktop-v2-immutable-handoff-develop-01M3JSCM",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 2,
+    "approved": 0,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
-    "done": 0,
+    "done": 2,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
@@ -18,14 +18,14 @@
   },
   "work_packages": {
     "WP01": {
-      "actor": "user",
+      "actor": "merge",
       "agent": "codex",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
-      "lane": "approved",
-      "last_event_id": "01M3K3GZX34WXQV1J23MQNCX5K",
-      "last_transition_at": "2026-09-28T04:14:17.507368+00:00",
+      "lane": "done",
+      "last_event_id": "01M3MDTTTC019ZRC236VZ2S32Z",
+      "last_transition_at": "2026-09-28T16:33:40.172598+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Ready for review: commit ce24a13f9e99eb22a372eeb8cde58b403ff9a5b4 adds exact 22-family/110-state source contract, deletion probes, mappings, rights closure, and 110 local Chromium snapshots. Vitest 814/814, focused WP01 visuals 110/110, and axe 810/810 pass. Full visual spec is 251/456: 205 pre-existing non-WP01 snapshot failures; observed local/CI raster-size drift, no unrelated baselines updated, and CI equivalence is not claimed. Swansea keeps full tokens.css export fail-closed. External per-state evidence: tmp/finding/desktop-v2-wp01-evidence.md.",
@@ -47,17 +47,20 @@
         "T002": "done",
         "T003": "done",
         "T004": "done"
-      }
+      },
+      "tracker_refs": [
+        "#470"
+      ]
     },
     "WP02": {
-      "actor": "user",
+      "actor": "merge",
       "agent": "reviewer-renata",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "approved",
-      "last_event_id": "01M3KYS1ENKER5P7YMZ4ARW2KY",
-      "last_transition_at": "2026-09-28T12:10:32.790008+00:00",
+      "lane": "done",
+      "last_event_id": "01M3MDTWBMGYMHNWMVQBK988Z0",
+      "last_transition_at": "2026-09-28T16:33:41.748289+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "WP02 source and post-source evidence verified at CI run 36416436998 (head 070f7bf7); submit for independent aggregate review",
@@ -78,7 +81,10 @@
         "T006": "done",
         "T007": "done",
         "T008": "done"
-      }
+      },
+      "tracker_refs": [
+        "#470"
+      ]
     }
   }
 }
