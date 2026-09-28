@@ -255,7 +255,13 @@ describe('Desktop V2 offline handoff', () => {
     expect(manifest.files.some((file) => file.path === swanseaFontPath)).toBe(false);
     const tokenRecord = manifest.files.find((file) => file.path === tokenCssPath);
     expect(tokenRecord?.sourceMapPath).toBeTruthy();
-    expect(readFileSync(join(first, tokenRecord!.sourceMapPath!), 'utf8')).toContain('Swansea');
+    const tokenSourceMap = JSON.parse(
+      readFileSync(join(first, tokenRecord!.sourceMapPath!), 'utf8'),
+    ) as { transformation: string; removedRules: unknown[] };
+    expect(tokenSourceMap.transformation).toBe(
+      tokenSourceMap.removedRules.length > 0 ? 'remove-unresolved-font-face-rules' : 'identity',
+    );
+    expect(tokenSourceMap.removedRules).toHaveLength(1);
 
     const copied = join(temporaryRoot, 'detached-copy');
     cpSync(first, copied, { recursive: true });

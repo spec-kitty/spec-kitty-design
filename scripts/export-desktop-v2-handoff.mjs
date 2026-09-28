@@ -366,7 +366,7 @@ function scopedTokenStylesheet(sourceBytes, sourcePath, sourceSha, unresolvedFam
     outputPath: sourcePath,
     outputSizeBytes: outputBytes.length,
     outputSha256: sha256(outputBytes),
-    transformation: unresolved.length ? 'remove-unresolved-font-face-rules' : 'identity',
+    transformation: removedRules.length ? 'remove-unresolved-font-face-rules' : 'identity',
     removedRules: removedRules.map((rule) => ({
       family: rule.family,
       sourceLineStart: rule.lineStart,
