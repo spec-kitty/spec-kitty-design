@@ -54,6 +54,17 @@ export const REQUIRED_STATES = Object.freeze({
   'workflow-lane': ['default-dark', 'light-mode', 'responsive-narrow', 'empty'],
 });
 
+// Aggregate stories are one required visual state but intentionally contain several family
+// instances. Keep these counts independent of observed Storybook output so deleting an example
+// cannot silently shrink the screenshot and still satisfy the source contract.
+export const REQUIRED_VISUAL_CAPTURE_COUNTS = Object.freeze({
+  button: { 'light-mode': 8 },
+  card: { 'light-mode': 8 },
+  notice: { 'light-mode': 6, focus: 2, dismissible: 2 },
+  'pill-tag': { 'light-mode': 6, variants: 5 },
+  'status-indicator': { 'light-mode': 6, 'all-tones': 6, pulsing: 3 },
+});
+
 const INTERACTION_AXES = ['hover', 'focus', 'active', 'disabled'];
 const EXPECTED_FORMS = Object.freeze({
   'action-row': 'element-backed',
@@ -530,6 +541,14 @@ export function checkDesktopV2Contract(contract, options = {}) {
       const expectedSnapshot = expectedSnapshotPath(familyId, state.id);
       if (state.snapshotPath !== expectedSnapshot || !fileExists(state.snapshotPath)) {
         errors.push(`${familyId}/${state.id} snapshot is stale or missing: ${state.snapshotPath ?? '(missing)'}`);
+      }
+      const expectedMatchCount = REQUIRED_VISUAL_CAPTURE_COUNTS[familyId]?.[state.id];
+      if (expectedMatchCount === undefined) {
+        if (state.visualCapture !== undefined) {
+          errors.push(`${familyId}/${state.id} has an unexpected multi-element visual capture declaration`);
+        }
+      } else if (!isRecord(state.visualCapture) || state.visualCapture.expectedMatchCount !== expectedMatchCount) {
+        errors.push(`${familyId}/${state.id} visual capture must declare ${expectedMatchCount} matching elements`);
       }
       if (!state.viewport || !Number.isInteger(state.viewport.width) || !Number.isInteger(state.viewport.height)) {
         errors.push(`${familyId}/${state.id} must declare a concrete visual-test viewport`);

@@ -75,6 +75,7 @@ jobs:
               # packages/<anything>/ matches no filter, storybook-build skips, and
               # a11y/visual/playwright skip on `needs` with the gate accepting all
               # four as legitimate. The nx input set is the honest spec.
+              - 'contracts/desktop-v2/**'
               - 'packages/**'
               - 'apps/storybook/**'
               # The demo pages are part of this surface: storybook-build is what
@@ -516,6 +517,19 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: "[ENFORCED] Storybook build (NFR-009 <= 180 s)"
         run: node scripts/build-storybook-with-budget.mjs
+      - name: "[ENFORCED] Desktop V2 contract resolves built Storybook stories"
+        run: node scripts/check-desktop-v2-contract.mjs
+      - name: "[ENFORCED] Desktop V2 export is repeatable and verifies offline"
+        run: |
+          set -euo pipefail
+          source_sha="$(git rev-parse HEAD)"
+          output_root="$(mktemp -d "${RUNNER_TEMP}/desktop-v2-handoff.XXXXXX")"
+          first_export="${output_root}/first"
+          second_export="${output_root}/second"
+          node scripts/export-desktop-v2-handoff.mjs --source-sha "${source_sha}" --output "${first_export}"
+          node scripts/export-desktop-v2-handoff.mjs --source-sha "${source_sha}" --output "${second_export}"
+          diff -r "${first_export}" "${second_export}"
+          (cd "${output_root}" && node "${GITHUB_WORKSPACE}/scripts/verify-desktop-v2-handoff.mjs" --artifact "${first_export}" --mode internal)
       # Runs before the upload so the artifact the downstream jobs consume matches
       # what the deploy actually publishes — the demo pages included. That is what
       # lets nav-pill-behaviour.spec.ts drive the package's runtime JS through the
