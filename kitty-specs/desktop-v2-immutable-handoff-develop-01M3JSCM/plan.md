@@ -43,7 +43,7 @@ flowchart LR
     G --> I
 ```
 
-The contract records each family's actual source form, public entry, independently required states, and required-state→story→visual-test→snapshot mapping. It has no SHA, self-hash, timestamp, or test-result fields: it is part of the source at S and cannot describe S itself. The exporter reads committed Git blob bytes at the selected SHA rather than untrusted working-tree bytes, rejects dirty included paths, and checks again around export so a mid-export mutation cannot go unnoticed. It emits a schema-versioned manifest after that source commit with full source SHA, file role/path/size/SHA-256, license reference, and canonical payload/contract digest. The manifest does not hash itself. A separate after-source evidence report holds gate commands, tested SHA, per-story axe results, visual test/snapshot results, and positive test count.
+The contract records each family's actual source form, public entry, independently required states, and required-state→story→visual-test→snapshot mapping. It has no SHA, self-hash, timestamp, or test-result fields: it is part of the source at S and cannot describe S itself. The exporter reads committed Git blob bytes at the selected SHA, so dirty included paths and mid-export working-tree mutations cannot alter the exported payload. It emits a schema-versioned manifest after that source commit with full source SHA, file role/path/size/SHA-256, license reference, and canonical payload/contract digest. The manifest does not hash itself. A separate after-source evidence report holds gate commands, tested SHA, per-story axe results, visual test/snapshot results, and positive test count.
 
 The copied verifier has two honest modes. Internal mode checks manifest and payload consistency but cannot distinguish coordinated replacement of manifest, contract, and files. Approved-source mode requires the caller to supply an independently pinned expected source SHA and artifact digest; a coordinated rehash that passes internal mode fails there. Neither mode needs network or PKI.
 
@@ -71,7 +71,7 @@ WP02 depends on WP01's approved source contract, not a separate WP01 merge to `d
 | Gate | Command or evidence source | Acceptance |
 |---|---|---|
 | Lint | `npm run quality:all` | Exit 0 on the mission PR head. |
-| Tests | `npm test` plus focused contract/export tests | Exit 0; required-state/story deletion, dirty/mid-export source, and coordinated rehash probes fail as designed. |
+| Tests | `npm test` plus focused contract/export tests | Exit 0; required-state/story deletion probes fail, dirty or mid-export edits leave committed-blob bytes unchanged, and independently pinned coordinated-rehash probes fail. |
 | Package build | `npx nx run-many --target=build --projects=tokens,styles,elements,react` | Exit 0; generated output remains consistent with authored source. |
 | Storybook | `npx nx run storybook:storybook:build` | Exit 0 and all contract story IDs resolve in `index.json`. |
 | Axe | `node scripts/run-axe-storybook.js` | Zero WCAG 2.1 AA violations and zero unloaded stories; persist per-story outcomes in post-source evidence. |
@@ -100,7 +100,7 @@ The acceptance matrix contains nine FR criteria and six registered negative inva
 |---|---|
 | Missing family/state/story cannot be green | `npx vitest run --project node --reporter=default tests/node/desktop-v2-contract.test.ts -t 'deletion probes'`; fixture deletions must make the checker exit nonzero. |
 | Unlicensed full Swansea CSS cannot export | `npx vitest run --project node --reporter=default tests/node/desktop-v2-contract.test.ts -t 'Swansea full CSS rejection'`; unchanged full-token closure must fail, while source-mapped omission passes. |
-| Dirty or mid-export source cannot silently change payload | `npx vitest run --project node --reporter=default tests/node/desktop-v2-handoff.test.ts -t 'source race rejection'`; both mutations are detected or immutable blob bytes remain identical with explicit dirty rejection. |
+| Dirty or mid-export source cannot silently change payload | `npx vitest run --project node --reporter=default tests/node/desktop-v2-handoff.test.ts -t 'committed blob provenance'`; `npx vitest run --project node --reporter=default tests/node/desktop-v2-handoff.test.ts -t 'source race rejection'`; dirty and mid-export working-tree edits must leave the selected committed-blob bytes unchanged. |
 | Coordinated rehash cannot impersonate approved source | `npx vitest run --project node --reporter=default tests/node/desktop-v2-handoff.test.ts -t 'coordinated rehash'`; internal mode's limited result is documented and independently pinned mode fails. |
 | Zero visual tests cannot satisfy the visual gate | `PW_INCLUDE_VISUAL=1 npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium`; parsed executed count must exceed zero. |
 | Contract-only change cannot skip relevant CI | `npx vitest run --project node --reporter=default tests/node/desktop-v2-handoff.test.ts -t 'components CI filter'`; the existing filter includes `contracts/desktop-v2/**`, or exact-head manual seven-gate evidence is supplied. |
@@ -111,7 +111,7 @@ The acceptance matrix contains nine FR criteria and six registered negative inva
 - **Stale evidence:** required states are independent of observed stories; deleting a story or visual test fails. Actual axe/visual results carry the tested SHA in a post-source sidecar and are renewed when source changes.
 - **Self-reference:** source contract has no SHA/own hash/gate result. Digest the canonical payload/contract list in a later manifest; generate S-labelled evidence only after S.
 - **Verifier trust:** internal consistency cannot establish approved-source authenticity. The caller must pin expected source SHA and artifact digest independently; test a coordinated manifest/contract/payload rewrite that internal mode accepts and pinned mode rejects.
-- **Source races:** read committed blobs and reject dirty included paths before/after export; test a dirty file and a mid-export mutation so neither can silently change approved bytes.
+- **Source races:** read committed blobs at the selected SHA; dirty included files and mid-export working-tree edits cannot change exported bytes. Test both cases against the committed-byte payload.
 - **Nonportable files:** reject symlinks, traversals, absolute paths, duplicates, case collisions and host-dependent timestamps/order; test on an artifact copied outside the Git tree.
 - **Protected target:** `develop` permits rebase merge only. Use the actual branch ruleset, not the old run prompt's stale squash example or a two-parent merge assumption.
 - **Old train history:** old D1 branch and lane output may inform selective source edits but must not be merged or cherry-picked wholesale. The final source comes from current `develop`.
