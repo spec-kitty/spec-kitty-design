@@ -153,9 +153,11 @@ jobs:
         env:
           PW_INCLUDE_VISUAL: '1'
           PLAYWRIGHT_JSON_OUTPUT_FILE: ../evidence/playwright-visual.json
+          PLAYWRIGHT_HTML_OUTPUT_DIR: ../evidence/playwright-html
+          PLAYWRIGHT_HTML_OPEN: never
         run: |
           set +e
-          npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium --reporter=json \
+          npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium --reporter=json,html \
             > ../evidence/playwright-visual.stdout.log 2> ../evidence/playwright-visual.stderr.log
           visual_status=$?
           node scripts/run-axe-storybook.js \
@@ -196,6 +198,12 @@ jobs:
           const identity = fs.existsSync('../evidence/identity.txt')
             ? fs.readFileSync('../evidence/identity.txt', 'utf8')
             : '';
+          try {
+            const htmlReport = fs.readFileSync('../evidence/playwright-html/index.html', 'utf8');
+            if (!htmlReport.trim()) fail('Playwright HTML report is empty');
+          } catch (error) {
+            fail(`Playwright HTML report could not be read: ${error.message}`);
+          }
 
           const status = (name) => identity.match(new RegExp(`^${name}=([^\\n]+)$`, 'm'))?.[1];
           for (const name of ['visual_exit_code', 'axe_exit_code']) {
