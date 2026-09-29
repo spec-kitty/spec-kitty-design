@@ -1,0 +1,110 @@
+name: Exact H visual and axe evidence
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - .github/workflows/d1-exact-h-evidence.yml
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  capture:
+    name: Capture evidence against immutable H
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Initialize evidence identity
+        env:
+          EXPECTED_SOURCE_SHA: e6438f2b6ec417de836eaefe6fc470f0b7ae9019
+          STORYBOOK_RUN_ID: '36475303527'
+          STORYBOOK_ARTIFACT_ID: '10993920851'
+          STORYBOOK_ARTIFACT_DIGEST: sha256:02a9ca83ef973699296bd25b41ca5de9279b09c0bfd9b2aee6f7d48fd877059f
+        run: |
+          mkdir -p evidence
+          {
+            printf 'workflow=%s\n' "$GITHUB_WORKFLOW"
+            printf 'workflow_ref=%s\n' "$GITHUB_WORKFLOW_REF"
+            printf 'workflow_sha=%s\n' "$GITHUB_SHA"
+            printf 'event=%s\n' "$GITHUB_EVENT_NAME"
+            printf 'run_id=%s\n' "$GITHUB_RUN_ID"
+            printf 'run_attempt=%s\n' "$GITHUB_RUN_ATTEMPT"
+            printf 'expected_source_sha=%s\n' "$EXPECTED_SOURCE_SHA"
+            printf 'storybook_run_id=%s\n' "$STORYBOOK_RUN_ID"
+            printf 'storybook_artifact_id=%s\n' "$STORYBOOK_ARTIFACT_ID"
+            printf 'storybook_artifact_digest=%s\n' "$STORYBOOK_ARTIFACT_DIGEST"
+          } > evidence/identity.txt
+
+      - name: Checkout exact source H
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+        with:
+          repository: spec-kitty/spec-kitty-design
+          ref: e6438f2b6ec417de836eaefe6fc470f0b7ae9019
+          path: source
+          fetch-depth: 1
+
+      - name: Assert checked out source is H
+        working-directory: source
+        env:
+          EXPECTED_SOURCE_SHA: e6438f2b6ec417de836eaefe6fc470f0b7ae9019
+        run: |
+          actual_source_sha="$(git rev-parse HEAD)"
+          printf 'actual_source_sha=%s\n' "$actual_source_sha" | tee -a ../evidence/identity.txt
+          test "$actual_source_sha" = "$EXPECTED_SOURCE_SHA"
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+
+      - name: Install locked dependencies
+        working-directory: source
+        run: npm ci --ignore-scripts
+
+      - name: Reuse Storybook built from H
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # actions/download-artifact v8.0.1
+        with:
+          artifact-ids: '10993920851'
+          github-token: ${{ github.token }}
+          repository: spec-kitty/spec-kitty-design
+          run-id: 36475303527
+          path: source/apps/storybook/storybook-static
+
+      - name: Install pinned Chromium and system dependencies
+        working-directory: source
+        run: npx playwright install --with-deps chromium
+
+      - name: Run visual and axe gates, preserving both outcomes
+        working-directory: source
+        env:
+          PW_INCLUDE_VISUAL: '1'
+        run: |
+          set +e
+          npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium --reporter=json \
+            > ../evidence/playwright-visual.json 2> ../evidence/playwright-visual.stderr.log
+          visual_status=$?
+          node scripts/run-axe-storybook.js \
+            > ../evidence/axe-storybook.log 2>&1
+          axe_status=$?
+          set -e
+
+          {
+            printf 'visual_exit_code=%s\n' "$visual_status"
+            printf 'axe_exit_code=%s\n' "$axe_status"
+          } >> ../evidence/identity.txt
+
+          if [ "$visual_status" -ne 0 ] || [ "$axe_status" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Upload exact-H evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
+        with:
+          name: exact-h-visual-axe-evidence
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 30
