@@ -1,6 +1,8 @@
 name: Exact H visual and axe evidence
 
 on:
+  pull_request:
+    branches: [develop]
   push:
     branches: [develop]
     paths:
@@ -64,14 +66,81 @@ jobs:
         working-directory: source
         run: npm ci --ignore-scripts
 
-      - name: Reuse Storybook built from H
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # actions/download-artifact v8.0.1
-        with:
-          artifact-ids: '10993920851'
-          github-token: ${{ github.token }}
-          repository: spec-kitty/spec-kitty-design
-          run-id: 36475303527
-          path: source/apps/storybook/storybook-static
+      - name: Verify pinned Storybook run and artifact metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SOURCE_SHA: e6438f2b6ec417de836eaefe6fc470f0b7ae9019
+          STORYBOOK_RUN_ID: '36475303527'
+          STORYBOOK_ARTIFACT_ID: '10993920851'
+          STORYBOOK_ARTIFACT_NAME: storybook-static
+          STORYBOOK_ARTIFACT_DIGEST: sha256:02a9ca83ef973699296bd25b41ca5de9279b09c0bfd9b2aee6f7d48fd877059f
+        run: |
+          set -euo pipefail
+          api='https://api.github.com/repos/spec-kitty/spec-kitty-design'
+          headers=(-H 'Accept: application/vnd.github+json' -H "Authorization: Bearer $GH_TOKEN" -H 'X-GitHub-Api-Version: 2022-11-28')
+          artifact_json="$(curl --fail --silent --show-error "${headers[@]}" "$api/actions/artifacts/$STORYBOOK_ARTIFACT_ID")"
+          run_json="$(curl --fail --silent --show-error "${headers[@]}" "$api/actions/runs/$STORYBOOK_RUN_ID")"
+
+          jq -e \
+            --arg id "$STORYBOOK_ARTIFACT_ID" \
+            --arg name "$STORYBOOK_ARTIFACT_NAME" \
+            --arg digest "$STORYBOOK_ARTIFACT_DIGEST" \
+            --arg run "$STORYBOOK_RUN_ID" \
+            --arg sha "$EXPECTED_SOURCE_SHA" \
+            '(.id == ($id | tonumber)) and
+             (.name == $name) and
+             (.digest == $digest) and
+             (.expired == false) and
+             (.workflow_run.id == ($run | tonumber)) and
+             (.workflow_run.head_sha == $sha)' \
+            <<<"$artifact_json" >/dev/null
+
+          jq -e \
+            --arg run "$STORYBOOK_RUN_ID" \
+            --arg sha "$EXPECTED_SOURCE_SHA" \
+            '(.id == ($run | tonumber)) and
+             (.head_sha == $sha) and
+             (.conclusion == "success")' \
+            <<<"$run_json" >/dev/null
+
+          {
+            printf 'storybook_artifact_metadata_verified=true\n'
+            printf 'storybook_artifact_name=%s\n' "$(jq -r '.name' <<<"$artifact_json")"
+            printf 'storybook_artifact_expired=%s\n' "$(jq -r '.expired' <<<"$artifact_json")"
+            printf 'storybook_artifact_run_head_sha=%s\n' "$(jq -r '.workflow_run.head_sha' <<<"$artifact_json")"
+            printf 'storybook_run_conclusion=%s\n' "$(jq -r '.conclusion' <<<"$run_json")"
+          } >> evidence/identity.txt
+
+      - name: Download and verify pinned Storybook archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STORYBOOK_ARTIFACT_ID: '10993920851'
+          STORYBOOK_ARTIFACT_DIGEST: sha256:02a9ca83ef973699296bd25b41ca5de9279b09c0bfd9b2aee6f7d48fd877059f
+        run: |
+          set -euo pipefail
+          archive='evidence/storybook-static.zip'
+          curl --fail --location --silent --show-error \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/spec-kitty/spec-kitty-design/actions/artifacts/$STORYBOOK_ARTIFACT_ID/zip" \
+            --output "$archive"
+
+          actual_digest="sha256:$(sha256sum "$archive" | cut -d ' ' -f 1)"
+          printf 'storybook_archive_digest=%s\n' "$actual_digest" >> evidence/identity.txt
+          if [ "$actual_digest" != "$STORYBOOK_ARTIFACT_DIGEST" ]; then
+            printf '::error::Downloaded Storybook archive digest mismatch: expected %s, got %s\n' \
+              "$STORYBOOK_ARTIFACT_DIGEST" "$actual_digest"
+            exit 1
+          fi
+
+          mkdir -p source/apps/storybook/storybook-static
+          unzip -q "$archive" -d source/apps/storybook/storybook-static
+          test -f source/apps/storybook/storybook-static/index.json
+
+      - name: Check Desktop V2 contract against exact source H
+        working-directory: source
+        run: node scripts/check-desktop-v2-contract.mjs
 
       - name: Install pinned Chromium and system dependencies
         working-directory: source
@@ -100,11 +169,158 @@ jobs:
             exit 1
           fi
 
+      - name: Assert visual and axe evidence coverage
+        if: always()
+        working-directory: source
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+
+          const problems = [];
+          const fail = (message) => problems.push(message);
+          const readJson = (filename, label) => {
+            try {
+              return JSON.parse(fs.readFileSync(filename, 'utf8'));
+            } catch (error) {
+              fail(`${label} could not be read as JSON: ${error.message}`);
+              return null;
+            }
+          };
+
+          const contract = readJson('contracts/desktop-v2/source-contract.json', 'Desktop V2 contract');
+          const storybook = readJson('apps/storybook/storybook-static/index.json', 'Storybook index');
+          const visual = readJson('../evidence/playwright-visual.json', 'Playwright JSON report');
+          const identity = fs.existsSync('../evidence/identity.txt')
+            ? fs.readFileSync('../evidence/identity.txt', 'utf8')
+            : '';
+
+          const status = (name) => identity.match(new RegExp(`^${name}=([^\\n]+)$`, 'm'))?.[1];
+          for (const name of ['visual_exit_code', 'axe_exit_code']) {
+            if (status(name) !== '0') fail(`${name} must be 0; got ${status(name) ?? '(missing)'}`);
+          }
+
+          const requiredVisualIds = [];
+          const requiredStoryIds = [];
+          if (contract && Array.isArray(contract.families)) {
+            for (const family of contract.families) {
+              for (const state of family.requiredStates ?? []) {
+                requiredVisualIds.push(state.visualTestId);
+                requiredStoryIds.push(state.story?.storyId);
+              }
+            }
+          } else {
+            fail('Desktop V2 contract has no families array');
+          }
+          if (requiredVisualIds.some((id) => typeof id !== 'string') ||
+              requiredStoryIds.some((id) => typeof id !== 'string')) {
+            fail('Desktop V2 required states must all declare visualTestId and story.storyId');
+          }
+          if (new Set(requiredVisualIds).size !== requiredVisualIds.length) {
+            fail('Desktop V2 visual test IDs are not unique');
+          }
+          let storyIds = [];
+          if (storybook && storybook.entries && typeof storybook.entries === 'object' && !Array.isArray(storybook.entries)) {
+            const entries = Object.values(storybook.entries)
+              .filter((entry) => entry && (entry.type === 'story' || !entry.type) && entry.id);
+            storyIds = entries.map((entry) => entry.id);
+            if (new Set(storyIds).size !== storyIds.length) {
+              fail('Built Storybook index contains duplicate story IDs');
+            }
+          } else {
+            fail('Built Storybook index has no entries object');
+          }
+
+          const visualStats = visual?.stats;
+          const visualTests = [];
+          const visitSuites = (suite) => {
+            if (!suite || typeof suite !== 'object') return;
+            for (const spec of suite.specs ?? []) {
+              for (const test of spec.tests ?? []) {
+                visualTests.push({ ...test, title: spec.title });
+              }
+            }
+            for (const child of suite.suites ?? []) visitSuites(child);
+          };
+          for (const suite of visual?.suites ?? []) visitSuites(suite);
+
+          if (!visualStats) {
+            fail('Playwright report has no stats object');
+          } else {
+            for (const key of ['skipped', 'unexpected', 'flaky']) {
+              if (visualStats[key] !== 0) fail(`Playwright ${key} count must be 0; got ${visualStats[key]}`);
+            }
+            if (visualStats.expected !== 456) {
+              fail(`Playwright expected/passed count must be 456; got ${visualStats.expected}`);
+            }
+          }
+          if (visualTests.length !== 456) {
+            fail(`Playwright report must contain exactly 456 tests; got ${visualTests.length}`);
+          }
+          const passedVisualIds = new Set();
+          let invalidVisualTestCount = 0;
+          const invalidVisualExamples = [];
+          for (const test of visualTests) {
+            const results = test?.results;
+            if (test?.expectedStatus !== 'passed' || test?.status !== 'expected' ||
+                !Array.isArray(results) || results.length !== 1 || results[0]?.status !== 'passed') {
+              invalidVisualTestCount += 1;
+              if (invalidVisualExamples.length < 10) invalidVisualExamples.push(test?.title ?? '(untitled)');
+            }
+            if (typeof test?.title === 'string') passedVisualIds.add(test.title);
+          }
+          if (invalidVisualTestCount) {
+            fail(`${invalidVisualTestCount} Playwright tests did not pass exactly once without retries; examples: ${invalidVisualExamples.join(', ')}`);
+          }
+          const missingVisualIds = requiredVisualIds.filter((id) => !passedVisualIds.has(id));
+          if (missingVisualIds.length) {
+            fail(`${missingVisualIds.length} required Desktop V2 visual tests did not pass; examples: ${missingVisualIds.slice(0, 10).join(', ')}`);
+          }
+
+          let axeLog = '';
+          try {
+            axeLog = fs.readFileSync('../evidence/axe-storybook.log', 'utf8');
+          } catch (error) {
+            fail(`Axe log could not be read: ${error.message}`);
+          }
+          if (axeLog.split(/\r?\n/).some((line) => line.startsWith('❌'))) {
+            fail('Axe log contains one or more failure lines');
+          }
+          const passedStoryIds = axeLog.split(/\r?\n/)
+            .map((line) => line.match(/^✅ (\S+)$/)?.[1])
+            .filter(Boolean);
+          if (passedStoryIds.length !== 810) {
+            fail(`Axe log must contain exactly 810 per-story success IDs; got ${passedStoryIds.length}`);
+          }
+          if (new Set(passedStoryIds).size !== passedStoryIds.length) {
+            fail('Axe log contains duplicate successful story IDs');
+          }
+          const passedStorySet = new Set(passedStoryIds);
+          const builtStorySet = new Set(storyIds);
+          const missingAxe = storyIds.filter((id) => !passedStorySet.has(id));
+          const unexpectedAxe = passedStoryIds.filter((id) => !builtStorySet.has(id));
+          if (missingAxe.length || unexpectedAxe.length || passedStoryIds.length !== storyIds.length) {
+            fail(`Axe success IDs do not exactly match Storybook index IDs (missing ${missingAxe.length}, unexpected ${unexpectedAxe.length}, index ${storyIds.length})`);
+          }
+          const missingContractStories = [...new Set(requiredStoryIds)].filter((id) => !passedStorySet.has(id));
+          if (missingContractStories.length) {
+            fail(`${missingContractStories.length} required Desktop V2 Storybook stories were not axe-assessed successfully; examples: ${missingContractStories.slice(0, 10).join(', ')}`);
+          }
+
+          if (problems.length) {
+            for (const problem of problems) console.error(`❌ ${problem}`);
+            process.exitCode = 1;
+          } else {
+            console.log('Visual and axe evidence coverage verified: 456 passed visual tests and 810 unique Storybook stories passed axe.');
+          }
+          NODE
+
       - name: Upload exact-H evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         with:
           name: exact-h-visual-axe-evidence
-          path: evidence/
+          path: |
+            evidence/
+            source/test-results/
           if-no-files-found: error
           retention-days: 30
