@@ -3,6 +3,8 @@ name: Exact H visual and axe evidence
 on:
   pull_request:
     branches: [develop]
+    paths:
+      - .github/workflows/d1-exact-h-evidence.yml
   push:
     branches: [develop]
     paths:
