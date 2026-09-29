@@ -152,10 +152,11 @@ jobs:
         working-directory: source
         env:
           PW_INCLUDE_VISUAL: '1'
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ../evidence/playwright-visual.json
         run: |
           set +e
           npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium --reporter=json \
-            > ../evidence/playwright-visual.json 2> ../evidence/playwright-visual.stderr.log
+            > ../evidence/playwright-visual.stdout.log 2> ../evidence/playwright-visual.stderr.log
           visual_status=$?
           node scripts/run-axe-storybook.js \
             > ../evidence/axe-storybook.log 2>&1
