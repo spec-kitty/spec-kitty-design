@@ -62,7 +62,7 @@
     "micromark": "4.0.2",
     "micromark-extension-mdxjs": "3.0.0",
     "nx": "^22.7.1",
-    "playwright": "1.62.1",
+    "playwright": "1.63.0",
     "postcss": "8.5.23",
     "postcss-selector-parser": "7.1.5",
     "postcss-value-parser": "4.2.0",
