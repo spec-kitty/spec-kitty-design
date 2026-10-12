@@ -6,6 +6,6 @@
   "description": "ADR-8 confirmation #4 (#81). Proves what a Vue 3 consumer actually needs to use the elements — measured in a real Vue render, not asserted. Vue lives here and only here, mirroring NFR-003's rule for React.",
   "devDependencies": {
     "@spec-kitty/elements": "*",
-    "vue": "3.5.42"
+    "vue": "3.5.43"
   }
 }
